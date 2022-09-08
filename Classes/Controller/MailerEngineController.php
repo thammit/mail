@@ -28,7 +28,7 @@ class MailerEngineController extends AbstractController
      *
      * @var string
      */
-    protected $moduleName = 'DirectMailNavFrame_MailerEngine';
+    protected $moduleName = 'MailNavFrame_Status';
 
     protected function initMailerEngine(ServerRequestInterface $request): void
     {

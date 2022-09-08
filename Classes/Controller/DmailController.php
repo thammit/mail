@@ -21,6 +21,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
+use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -71,7 +72,7 @@ class DmailController extends AbstractController
      *
      * @var string
      */
-    protected string $moduleName = 'DirectMailNavFrame_DirectMail';
+    protected string $moduleName = 'MailNavFrame_Mail';
 
     protected function initDmail(ServerRequestInterface $request): void
     {
@@ -560,7 +561,7 @@ class DmailController extends AbstractController
                     $plainIcon = $this->iconFactory->getIcon('directmail-dmail-preview-text', Icon::SIZE_SMALL, $langIconOverlay);
                     $createIcon = $this->iconFactory->getIcon('directmail-dmail-new', Icon::SIZE_SMALL, $langIconOverlay);
 
-                    $attributes = \TYPO3\CMS\Backend\Routing\PreviewUriBuilder::create($row['uid'], '')
+                    $attributes = PreviewUriBuilder::create($row['uid'], '')
                         ->withRootLine(BackendUtility::BEgetRootLine($row['uid']))
                         //->withSection('')
                         ->withAdditionalQueryParameters($htmlParams)
@@ -575,7 +576,7 @@ class DmailController extends AbstractController
 
                     $previewHTMLLink .= '<a ' . $serializedAttributes . '>' . $htmlIcon . '</a>';
 
-                    $attributes = \TYPO3\CMS\Backend\Routing\PreviewUriBuilder::create($row['uid'], '')
+                    $attributes = PreviewUriBuilder::create($row['uid'], '')
                         ->withRootLine(BackendUtility::BEgetRootLine($row['uid']))
                         //->withSection('')
                         ->withAdditionalQueryParameters($plainParams)
@@ -592,18 +593,11 @@ class DmailController extends AbstractController
                     $createLink .= '<a href="' . $createDmailLink . $createLangParam . '" title="' . htmlentities($this->getLanguageService()->getLL('nl_create') . $langTitle) . '">' . $createIcon . '</a>';
                 }
 
-                switch ($this->params['sendOptions'] ?? 0) {
-                    case 1:
-                        $previewLink = $previewTextLink;
-                        break;
-                    case 2:
-                        $previewLink = $previewHTMLLink;
-                        break;
-                    case 3:
-                        // also as default
-                    default:
-                        $previewLink = $previewHTMLLink . '&nbsp;&nbsp;' . $previewTextLink;
-                }
+                $previewLink = match ($this->params['sendOptions'] ?? 0) {
+                    1 => $previewTextLink,
+                    2 => $previewHTMLLink,
+                    default => $previewHTMLLink . '&nbsp;&nbsp;' . $previewTextLink,
+                };
 
                 $params = [
                     'edit' => [
@@ -634,6 +628,8 @@ class DmailController extends AbstractController
      *
      * @param $pageUid
      * @return array
+     * @throws DBALException
+     * @throws Exception
      */
     protected function getAvailablePageLanguages($pageUid): array
     {
@@ -701,6 +697,9 @@ class DmailController extends AbstractController
      * List all direct mail, which have not been sent (first step)
      *
      * @return array config for form lists of all existing dmail records
+     * @throws DBALException
+     * @throws Exception
+     * @throws RouteNotFoundException
      */
     protected function getConfigFormDMail(): array
     {
@@ -843,6 +842,7 @@ class DmailController extends AbstractController
      * @param int $uid Uid of the record
      *
      * @return string link with the trash icon
+     * @throws RouteNotFoundException
      */
     protected function deleteLink(int $uid)
     {
