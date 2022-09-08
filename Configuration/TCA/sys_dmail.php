@@ -7,7 +7,7 @@ return [
         'prependAtCopy' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.prependAtCopy',
         'title' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail',
         'delete' => 'deleted',
-        'iconfile' => 'EXT:mail/Resources/Public/Icons/mail.gif',
+        'iconfile' => 'EXT:mail/Resources/Public/Icons/mail.svg',
         'type' => 'type',
         'useColumnsForDefaultValues' => 'from_email,from_name,replyto_email,replyto_name,organisation,priority,encoding,charset,sendOptions,type',
         'languageField' => 'sys_language_uid',
