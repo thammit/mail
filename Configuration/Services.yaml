@@ -1,0 +1,27 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  MEDIAESSENZ\Mail\:
+    resource: '../Classes/*'
+
+  MEDIAESSENZ\Mail\Controller\AbstractController:
+      public: true
+
+  MEDIAESSENZ\Mail\Command\InvokeMailerEngineCommand:
+    tags:
+      - name: 'console.command'
+        command: 'mail:invoke-mailer-engine'
+        description: 'Invoke Mailer Engine of EXT:mail'
+  MEDIAESSENZ\Mail\Command\DirectmailCommand:
+    tags:
+      - name: 'console.command'
+        command: 'mail:mailing-queue'
+        description: 'This command invokes dmailer in order to process queued messages.'
+  MEDIAESSENZ\Mail\Command\AnalyzeBounceMailCommand:
+    tags:
+      - name: 'console.command'
+        command: 'mail:analyze-bounce-mail'
+        description: 'This command will get bounce mail from the configured mailbox.'

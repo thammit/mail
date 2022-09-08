@@ -11,6 +11,11 @@
     "support": {
         "issues": "https://gitlab.typo3-webagentur.com/mediaessenz/mail/issues"
     },
+    "require": {
+        "typo3/cms-core": "^11.5",
+        "friendsoftypo3/tt-address": "^5.3 || ^6.0",
+        "tedivm/fetch": "^0.7"
+    },
     "extra": {
         "typo3/cms": {
             "extension-key": "mail"
