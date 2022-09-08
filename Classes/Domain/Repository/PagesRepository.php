@@ -3,14 +3,22 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-class PagesRepository extends MainRepository
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use PDO;
+
+class PagesRepository extends AbstractRepository
 {
     protected string $table = 'pages';
 
     /**
-     * @return array|bool
+     * @param int $pid
+     * @param string $permsClause
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectPagesForDmail(int $pid, string $permsClause) //: array|bool 
+    public function selectPagesForDmail(int $pid, string $permsClause): array
     {
         // Here the list of subpages, news, is rendered
         $queryBuilder = $this->getQueryBuilder($this->table);
@@ -20,7 +28,7 @@ class PagesRepository extends MainRepository
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
                 ),
                 $queryBuilder->expr()->eq('l10n_parent', 0), // Exclude translated page records from list
                 $permsClause
@@ -43,29 +51,36 @@ class PagesRepository extends MainRepository
             )
             ->orderBy('sorting')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $pageUid
+     * @param int $langUid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectPageByL10nAndSysLanguageUid(int $pageUid, int $langUid) //: array|bool 
+    public function selectPageByL10nAndSysLanguageUid(int $pageUid, int $langUid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
         return $queryBuilder
             ->select('sys_language_uid')
             ->from($this->table)
-            ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, \PDO::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, \PDO::PARAM_INT)))
+            ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, PDO::PARAM_INT)))
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param string $permsClause
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSubfolders(string $permsClause) //: array|bool 
+    public function selectSubfolders(string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -81,32 +96,33 @@ class PagesRepository extends MainRepository
             )
             ->orderBy('uid')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
      * @return array|bool
+     * @throws Exception
+     * @throws DBALException
      */
-    public function selectTitleTranslatedPage(int $pageUid, int $langUid) //: array|bool 
+    public function selectTitleTranslatedPage(int $pageUid, int $langUid): bool|array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
         return $queryBuilder
             ->select('title')
             ->from('pages')
-            ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, \PDO::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, \PDO::PARAM_INT)))
+            ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, PDO::PARAM_INT)))
             ->execute()
-            ->fetch();
+            ->fetchAssociative();
     }
 
     /**
-     *
      * @param int $pageUid
      * @param string $tsConf
      * @return int
      */
-    public function updatePageTSconfig(int $pageUid, string $tsConf)
+    public function updatePageTSconfig(int $pageUid, string $tsConf): int
     {
         $connection = $this->getConnection($this->table);
         return $connection->update(

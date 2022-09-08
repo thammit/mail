@@ -3,17 +3,24 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use PDO;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class TtAddressRepository extends MainRepository
+class TtAddressRepository extends AbstractRepository
 {
     protected string $table = 'tt_address';
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @param string $permsClause
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectTtAddressByUid(int $uid, string $permsClause) //: array|bool 
+    public function selectTtAddressByUid(int $uid, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -32,13 +39,17 @@ class TtAddressRepository extends MainRepository
 //         debug($queryBuilder->getSQL());
 //         debug($queryBuilder->getParameters());
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $pid
+     * @param string $recordUnique
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectTtAddressByPid(int $pid, string $recordUnique) //: array|bool
+    public function selectTtAddressByPid(int $pid, string $recordUnique): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
         // only add deleteClause
@@ -57,17 +68,21 @@ class TtAddressRepository extends MainRepository
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
                 )
             )
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param string $intList
+     * @param string $permsClause
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectTtAddressForTestmail(string $intList, string $permsClause) //: array|bool
+    public function selectTtAddressForTestmail(string $intList, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -83,13 +98,17 @@ class TtAddressRepository extends MainRepository
             ->add('where', $this->table . '.uid IN (' . $intList . ')' .
                 ' AND ' . $permsClause)
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $ttAddressUid
+     * @param string $permsClause
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectTtAddressForSendMailTest(int $ttAddressUid, string $permsClause) //: array|bool
+    public function selectTtAddressForSendMailTest(int $ttAddressUid, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -103,17 +122,17 @@ class TtAddressRepository extends MainRepository
                 $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier('a.pid'))
             )
             ->where(
-                $queryBuilder->expr()->eq('a.uid', $queryBuilder->createNamedParameter($ttAddressUid, \PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('a.uid', $queryBuilder->createNamedParameter($ttAddressUid, PDO::PARAM_INT))
             )
             ->andWhere($permsClause)
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @throws DBALException
      */
-    public function deleteRowsByPid(int $pid) //: array|bool
+    public function deleteRowsByPid(int $pid): int|\Doctrine\DBAL\Result
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -122,7 +141,7 @@ class TtAddressRepository extends MainRepository
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
                 )
             )
             ->execute();

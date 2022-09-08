@@ -6,12 +6,13 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\MailSelect;
+use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class TempRepository extends MainRepository
+class TempRepository extends AbstractRepository
 {
 
     /**
@@ -167,7 +168,7 @@ class TempRepository extends MainRepository
                             ->add('INSTR( CONCAT(\',\',fe_users.usergroup,\',\'),CONCAT(\',\',fe_groups.uid ,\',\') )')
                             ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
                             ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
-                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($groupUid, \PDO::PARAM_INT)))
+                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
                             ->add(
                                 $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter(''))
                             )
@@ -193,7 +194,7 @@ class TempRepository extends MainRepository
                             ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
                             ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
-                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($groupUid, \PDO::PARAM_INT)))
+                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
                             ->add(
                                 $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter(''))
                             )
@@ -267,10 +268,10 @@ class TempRepository extends MainRepository
                 )
                 ->andWhere(
                     $queryBuilder->expr()->andX()
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, \PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group.deleted', $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('sys_dmail_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
                         ->add($addWhere)
                 )
                 ->orderBy($switchTable . '.uid')
@@ -294,10 +295,10 @@ class TempRepository extends MainRepository
                 )
                 ->andWhere(
                     $queryBuilder->expr()->andX()
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, \PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group.deleted', $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('sys_dmail_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
                         ->add($addWhere)
                 )
                 ->orderBy($switchTable . '.uid')
@@ -328,7 +329,7 @@ class TempRepository extends MainRepository
                 )
                 ->andWhere(
                     $queryBuilder->expr()->andX()
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($uid, \PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('sys_dmail_group_mm.uid_foreign')))
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                 )
@@ -424,7 +425,7 @@ class TempRepository extends MainRepository
                     $queryBuilder->quoteIdentifier($groupTable . '.uid')
                 )
             )
-            ->andWhere('INSTR( CONCAT(\',\',fe_groups.subgroup,\',\'),\',' . intval($groupId) . ',\' )')
+            ->andWhere('INSTR( CONCAT(\',\',fe_groups.subgroup,\',\'),\',' . $groupId . ',\' )')
             ->execute();
         $groupArr = [];
 
@@ -447,7 +448,7 @@ class TempRepository extends MainRepository
      * @param array $group The direct_mail group record
      *
      * @return array The resulting query.
-     * @throws Exception
+     * @throws Exception|\Doctrine\DBAL\Driver\Exception
      */
     public function getSpecialQueryIdList(MailSelect &$queryGenerator, string $table, array $group): array
     {
@@ -460,7 +461,7 @@ class TempRepository extends MainRepository
             $select = $queryGenerator->getSelectQuery();
             /** @var Connection $connection */
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-            $recipients = $connection->executeQuery($select)->fetchAll();
+            $recipients = $connection->executeQuery($select)->fetchAllAssociative();
 
             foreach ($recipients as $recipient) {
                 $outArr[] = $recipient['uid'];
@@ -474,12 +475,12 @@ class TempRepository extends MainRepository
      *
      * @param string $list Comma-separated ID
      * @param array $parsedGroups Groups ID, which is already parsed
-     * @param string $perms_clause Permission clause (Where)
+     * @param string $permsClause Permission clause (Where)
      *
      * @return array the new Group IDs
      * @throws DBALException
      */
-    public function getMailGroups(string $list, array $parsedGroups, $permsClause): array
+    public function getMailGroups(string $list, array $parsedGroups, string $permsClause): array
     {
         $groupIdList = GeneralUtility::intExplode(',', $list);
         $groups = [];

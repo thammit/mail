@@ -3,14 +3,21 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-class FeUsersRepository extends MainRepository
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+
+class FeUsersRepository extends AbstractRepository
 {
     protected string $table = 'fe_users';
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @param string $permsClause
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectFeUsersByUid(int $uid, string $permsClause) //: array|bool 
+    public function selectFeUsersByUid(int $uid, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -26,9 +33,7 @@ class FeUsersRepository extends MainRepository
             ->add('where', $this->table . '.uid = ' . intval($uid) .
                 ' AND ' . $permsClause . ' AND pages.deleted = 0')
 
-//         debug($queryBuilder->getSQL());
-//         debug($queryBuilder->getParameters());
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 }

@@ -3,17 +3,24 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use PDO;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class SysDmailRepository extends MainRepository
+class SysDmailRepository extends AbstractRepository
 {
     protected string $table = 'sys_dmail';
 
     /**
+     * @param int $sys_dmail_uid
+     * @param int $pid
      * @return array|bool
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSysDmailById(int $sys_dmail_uid, int $pid) //: array|bool 
+    public function selectSysDmailById(int $sys_dmail_uid, int $pid): array|bool
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
         $queryBuilder
@@ -23,19 +30,22 @@ class SysDmailRepository extends MainRepository
         return $queryBuilder->select('*')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($sys_dmail_uid, \PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($sys_dmail_uid, PDO::PARAM_INT))
             )
             //debug($queryBuilder->getSQL());
             //debug($queryBuilder->getParameters());
             ->execute()
-            ->fetch();
+            ->fetchAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $pid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSysDmailsByPid(int $pid) //: array|bool 
+    public function selectSysDmailsByPid(int $pid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
         $queryBuilder
@@ -52,9 +62,12 @@ class SysDmailRepository extends MainRepository
     }
 
     /**
-     * @return array|bool
+     * @param int $id
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectForPageInfo(int $id) //: array|bool 
+    public function selectForPageInfo(int $id): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
         $queryBuilder
@@ -79,13 +92,18 @@ class SysDmailRepository extends MainRepository
             ->orderBy('sys_dmail.scheduled', 'DESC')
             ->addOrderBy('sys_dmail.scheduled_begin', 'DESC')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $id
+     * @param string $sOrder
+     * @param string $ascDesc
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectForMkeListDMail(int $id, string $sOrder, string $ascDesc) //: array|bool 
+    public function selectForMkeListDMail(int $id, string $sOrder, string $ascDesc): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -100,11 +118,15 @@ class SysDmailRepository extends MainRepository
                 ' AND scheduled=0 AND issent=0')
             ->orderBy($sOrder, $ascDesc)
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
+     * @param int $uid
+     * @param string $charset
+     * @param string $mailContent
      * @return int
+     * @throws DBALException
      */
     public function updateSysDmail(int $uid, string $charset, string $mailContent): int
     {
@@ -113,7 +135,7 @@ class SysDmailRepository extends MainRepository
         return $queryBuilder
             ->update($this->table)
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, \PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
             )
             ->set('issent', 0)
             ->set('charset', $charset)
@@ -128,7 +150,7 @@ class SysDmailRepository extends MainRepository
      * @param array $updateData
      * @return int
      */
-    public function updateSysDmailRecord(int $uid, array $updateData)
+    public function updateSysDmailRecord(int $uid, array $updateData): int
     {
         $connection = $this->getConnection($this->table);
         return $connection->update(

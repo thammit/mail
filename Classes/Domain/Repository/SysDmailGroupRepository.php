@@ -3,17 +3,24 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use PDO;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class SysDmailGroupRepository extends MainRepository
+class SysDmailGroupRepository extends AbstractRepository
 {
     protected string $table = 'sys_dmail_group';
 
     /**
-     * @return array|bool
+     * @param int $pid
+     * @param string $defaultSortBy
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSysDmailGroupByPid(int $pid, string $defaultSortBy) //: array|bool 
+    public function selectSysDmailGroupByPid(int $pid, string $defaultSortBy): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
         $queryBuilder
@@ -24,7 +31,7 @@ class SysDmailGroupRepository extends MainRepository
         return $queryBuilder->select('uid', 'pid', 'title', 'description', 'type')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
             )
             ->orderBy(
                 preg_replace(
@@ -33,20 +40,25 @@ class SysDmailGroupRepository extends MainRepository
                 )
             )
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $pid
+     * @param int $sysLanguageUid
+     * @param string $defaultSortBy
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSysDmailGroupForFinalMail(int $pid, int $sysLanguageUid, string $defaultSortBy) //: array|bool
+    public function selectSysDmailGroupForFinalMail(int $pid, int $sysLanguageUid, string $defaultSortBy): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
         return $queryBuilder->select('uid', 'pid', 'title')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
             )
             ->andWhere(
                 $queryBuilder->expr()->in(
@@ -61,13 +73,17 @@ class SysDmailGroupRepository extends MainRepository
                 )
             )
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param string $intList
+     * @param string $permsClause
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSysDmailGroupForTestmail(string $intList, string $permsClause) //: array|bool
+    public function selectSysDmailGroupForTestmail(string $intList, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
         $queryBuilder
@@ -87,6 +103,6 @@ class SysDmailGroupRepository extends MainRepository
             ->add('where', $this->table . '.uid IN (' . $intList . ')' .
                 ' AND ' . $permsClause)
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 }

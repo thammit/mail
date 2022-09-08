@@ -3,16 +3,21 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use PDO;
 
-class SysDmailMaillogRepository extends MainRepository
+class SysDmailMaillogRepository extends AbstractRepository
 {
     protected string $table = 'sys_dmail_maillog';
 
     /**
-     * @return array|bool
+     * @param int $mid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function countSysDmailMaillogAllByMid(int $mid) //: array|bool 
+    public function countSysDmailMaillogAllByMid(int $mid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -23,13 +28,16 @@ class SysDmailMaillogRepository extends MainRepository
             ->add('where', 'mid=' . $mid . ' AND response_type=0')
             ->groupBy('html_sent')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $mid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function countSysDmailMaillogHtmlByMid(int $mid) //: array|bool 
+    public function countSysDmailMaillogHtmlByMid(int $mid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -41,13 +49,16 @@ class SysDmailMaillogRepository extends MainRepository
             ->addGroupBy('rtbl')
             ->orderBy('COUNT(*)')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $mid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function countSysDmailMaillogPlainByMid(int $mid) //: array|bool 
+    public function countSysDmailMaillogPlainByMid(int $mid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -59,13 +70,16 @@ class SysDmailMaillogRepository extends MainRepository
             ->addGroupBy('rtbl')
             ->orderBy('COUNT(*)')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $mid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function countSysDmailMaillogPingByMid(int $mid) //: array|bool 
+    public function countSysDmailMaillogPingByMid(int $mid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -77,29 +91,35 @@ class SysDmailMaillogRepository extends MainRepository
             ->addGroupBy('rtbl')
             ->orderBy('COUNT(*)')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $responseType
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectByResponseType(int $responseType) //: array|bool 
+    public function selectByResponseType(int $responseType): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
         return $queryBuilder
             ->select('uid', 'tstamp')
             ->from($this->table)
-            ->where($queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, \PDO::PARAM_INT)))
+            ->where($queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, PDO::PARAM_INT)))
             ->orderBy('tstamp', 'DESC')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function countSysDmailMaillogs(int $uid) //: array|bool 
+    public function countSysDmailMaillogs(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -109,13 +129,16 @@ class SysDmailMaillogRepository extends MainRepository
                 ' AND response_type = 0' .
                 ' AND html_sent > 0')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function countSysDmailMaillogsResponseTypeByMid(int $uid) //: array|bool 
+    public function countSysDmailMaillogsResponseTypeByMid(int $uid): array
     {
         $responseTypes = [];
         $queryBuilder = $this->getQueryBuilder($this->table);
@@ -135,9 +158,12 @@ class SysDmailMaillogRepository extends MainRepository
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSysDmailMaillogsCompactView(int $uid) //: array|bool 
+    public function selectSysDmailMaillogsCompactView(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -147,7 +173,7 @@ class SysDmailMaillogRepository extends MainRepository
                 ' AND response_type = 0')
             ->orderBy('rid', 'ASC')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
@@ -155,6 +181,8 @@ class SysDmailMaillogRepository extends MainRepository
      * @param int $uid
      * @param int $responseType : 1 for html, 2 for plain
      * @return array
+     * @throws Exception
+     * @throws DBALException
      */
     public function selectMostPopularLinks(int $uid, int $responseType = 1): array
     {
@@ -177,9 +205,10 @@ class SysDmailMaillogRepository extends MainRepository
     }
 
     /**
-     * @return array|bool
+     * @throws Exception
+     * @throws DBALException
      */
-    public function countReturnCode(int $uid, int $responseType = -127) //: array|bool 
+    public function countReturnCode(int $uid, int $responseType = -127): array
     {
         $returnCodes = [];
         $queryBuilder = $this->getQueryBuilder($this->table);
@@ -201,9 +230,12 @@ class SysDmailMaillogRepository extends MainRepository
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectStatTempTableContent(int $uid) //: array|bool 
+    public function selectStatTempTableContent(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -214,13 +246,16 @@ class SysDmailMaillogRepository extends MainRepository
             ->addOrderBy('rid')
             ->addOrderBy('tstamp')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function findAllReturnedMail(int $uid) //: array|bool 
+    public function findAllReturnedMail(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -229,13 +264,16 @@ class SysDmailMaillogRepository extends MainRepository
             ->add('where', 'mid=' . intval($uid) .
                 ' AND response_type=-127')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function findUnknownRecipient(int $uid) //: array|bool 
+    public function findUnknownRecipient(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -245,13 +283,16 @@ class SysDmailMaillogRepository extends MainRepository
                 ' AND response_type=-127' .
                 ' AND (return_code=550 OR return_code=553)')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function findMailboxFull(int $uid) //: array|bool 
+    public function findMailboxFull(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -261,13 +302,16 @@ class SysDmailMaillogRepository extends MainRepository
                 ' AND response_type=-127' .
                 ' AND return_code=551')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function findBadHost(int $uid) //: array|bool 
+    public function findBadHost(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -277,13 +321,16 @@ class SysDmailMaillogRepository extends MainRepository
                 ' AND response_type=-127' .
                 ' AND return_code=552')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function findBadHeader(int $uid) //: array|bool 
+    public function findBadHeader(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -293,13 +340,16 @@ class SysDmailMaillogRepository extends MainRepository
                 ' AND response_type=-127' .
                 ' AND return_code=554')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function findUnknownReasons(int $uid) //: array|bool 
+    public function findUnknownReasons(int $uid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -309,32 +359,37 @@ class SysDmailMaillogRepository extends MainRepository
                 ' AND response_type=-127' .
                 ' AND return_code=-1')
             ->execute()
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 
     /**
-     * @return array|bool
+     * @param int $rid
+     * @param string $rtbl
+     * @param int $mid
+     * @return bool|array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectForAnalyzeBounceMail(int $rid, string $rtbl, int $mid) //: array|bool 
+    public function selectForAnalyzeBounceMail(int $rid, string $rtbl, int $mid): bool|array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
-        $row = $queryBuilder
+        return $queryBuilder
             ->select('uid', 'email')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->andX(
                     $queryBuilder->expr()->eq(
                         'rid',
-                        $queryBuilder->createNamedParameter((int)$rid, \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$rid, PDO::PARAM_INT)
                     ),
                     $queryBuilder->expr()->eq(
                         'rtbl',
-                        $queryBuilder->createNamedParameter($rtbl, \PDO::PARAM_STR)
+                        $queryBuilder->createNamedParameter($rtbl, PDO::PARAM_STR)
                     ),
                     $queryBuilder->expr()->eq(
                         'mid',
-                        $queryBuilder->createNamedParameter((int)$mid, \PDO::PARAM_INT)
+                        $queryBuilder->createNamedParameter((int)$mid, PDO::PARAM_INT)
                     ),
                     $queryBuilder->expr()->eq('response_type', 0)
                 )

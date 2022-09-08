@@ -3,16 +3,21 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use PDO;
 
-class SysDmailCategoryRepository extends MainRepository
+class SysDmailCategoryRepository extends AbstractRepository
 {
     protected string $table = 'sys_dmail_category';
 
     /**
-     * @return array|bool
+     * @param int $pid
+     * @return array
+     * @throws DBALException
+     * @throws Exception
      */
-    public function selectSysDmailCategoryByPid(int $pid) //: array|bool
+    public function selectSysDmailCategoryByPid(int $pid): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
         return $queryBuilder
@@ -21,12 +26,10 @@ class SysDmailCategoryRepository extends MainRepository
             ->where(
                 $queryBuilder->expr()->in(
                     'pid',
-                    $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
                 )
             )
             ->execute()
-//         debug($queryBuilder->getSQL());
-//         debug($queryBuilder->getParameters());
-            ->fetchAll();
+            ->fetchAllAssociative();
     }
 }
