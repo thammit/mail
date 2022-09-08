@@ -1,0 +1,24 @@
+{
+    "name": "mediaessenz/mail",
+    "description": "Newsletter System for TYPO3",
+    "type": "typo3-cms-extension",
+    "keywords": [
+        "TYPO3 CMS",
+        "plugin"
+    ],
+    "homepage": "https://www.typo3-webagentur.com",
+    "license": "GPL-2.0-or-later",
+    "support": {
+        "issues": "https://gitlab.typo3-webagentur.com/mediaessenz/mail/issues"
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "mail"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "MEDIAESSENZ\\Mail\\": "Classes/"
+        }
+    }
+}
