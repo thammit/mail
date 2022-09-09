@@ -205,7 +205,7 @@ class MailerEngineController extends AbstractController
         // Invoke engine
         if ($enableTrigger) {
             $moduleUrl = $this->buildUriFromRoute(
-                'DirectMailNavFrame_MailerEngine',
+                'MailNavFrame_Status',
                 [
                     'id' => $this->id,
                     'invokeMailerEngine' => 1,
