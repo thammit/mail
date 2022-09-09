@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use FoT3\Rdct\Redirects;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Service\MailerService;
+use PDO;
 use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -18,6 +19,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageRendererResolver;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
@@ -143,30 +145,30 @@ class MailUtility
         $glue = (str_contains($urlBase, '?')) ? '&' : '?';
 
         // Compile the mail
-        /* @var $htmlmail MailerService */
-        $htmlmail = GeneralUtility::makeInstance(MailerService::class);
+        /* @var $mailerService MailerService */
+        $mailerService = GeneralUtility::makeInstance(MailerService::class);
         if ($params['enable_jump_url']) {
-            $htmlmail->setJumpUrlPrefix($urlBase . $glue .
+            $mailerService->setJumpUrlPrefix($urlBase . $glue .
                 'mid=###SYS_MAIL_ID###' .
                 (intval($params['jumpurl_tracking_privacy']) ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
                 '&aC=###SYS_AUTHCODE###' .
                 '&jumpurl=');
-            $htmlmail->setJumpUrlUseId(true);
+            $mailerService->setJumpUrlUseId(true);
         }
         if ($params['enable_mailto_jump_url']) {
-            $htmlmail->setJumpUrlUseMailto(true);
+            $mailerService->setJumpUrlUseMailto(true);
         }
 
-        $htmlmail->start();
-        $htmlmail->setCharset($row['charset']);
-        $htmlmail->setIncludeMedia((bool)$row['includeMedia']);
+        $mailerService->start();
+        $mailerService->setCharset($row['charset']);
+        $mailerService->setIncludeMedia((bool)$row['includeMedia']);
 
         if ($plainTextUrl) {
             $mailContent = GeneralUtility::getURL(self::addUserPass($plainTextUrl, $params));
-            $htmlmail->addPlainContent($mailContent);
-            if (!$mailContent || !$htmlmail->getPlainContent()) {
+            $mailerService->addPlainContent($mailContent);
+            if (!$mailContent || !$mailerService->getPlainContent()) {
                 $errorMsg[] = $lang->getLL('dmail_no_plain_content');
-            } else if (!str_contains($htmlmail->getPlainContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
+            } else if (!str_contains($mailerService->getPlainContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
                 $warningMsg[] = $lang->getLL('dmail_no_plain_boundaries');
             }
         }
@@ -174,37 +176,37 @@ class MailUtility
         // fetch the HTML url
         if ($htmlUrl) {
             // Username and password is added in htmlmail object
-            $success = $htmlmail->addHTML(self::addUserPass($htmlUrl, $params));
+            $success = $mailerService->addHTML(self::addUserPass($htmlUrl, $params));
             // If type = 1, we have an external page.
             if ($row['type'] == 1) {
                 // Try to auto-detect the charset of the message
                 $matches = [];
-                $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', ($htmlmail->getMailPart('html_content') ?? ''), $matches);
+                $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', ($mailerService->getMailPart('html_content') ?? ''), $matches);
                 if ($res == 1) {
-                    $htmlmail->setCharset($matches[1]);
+                    $mailerService->setCharset($matches[1]);
                 } else if (isset($params['direct_mail_charset'])) {
-                    $htmlmail->setCharset($params['direct_mail_charset']);
+                    $mailerService->setCharset($params['direct_mail_charset']);
                 } else {
-                    $htmlmail->setCharset('iso-8859-1');
+                    $mailerService->setCharset('iso-8859-1');
                 }
             }
-            if (self::extractFramesInfo($htmlmail->getHtmlContent(), $htmlmail->getHtmlPath())) {
+            if (self::extractFramesInfo($mailerService->getHtmlContent(), $mailerService->getHtmlPath())) {
                 $errorMsg[] = $lang->getLL('dmail_frames_not allowed');
-            } else if (!$success || !$htmlmail->getHtmlContent()) {
+            } else if (!$success || !$mailerService->getHtmlContent()) {
                 $errorMsg[] = $lang->getLL('dmail_no_html_content');
-            } else if (!str_contains($htmlmail->getHtmlContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
+            } else if (!str_contains($mailerService->getHtmlContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
                 $warningMsg[] = $lang->getLL('dmail_no_html_boundaries');
             }
         }
 
         if (!count($errorMsg)) {
             // Update the record:
-            $htmlmail->setMailPart('messageid', $htmlmail->getMessageId());
-            $mailContent = base64_encode(serialize($htmlmail->getMailParts()));
+            $mailerService->setMailPart('messageid', $mailerService->getMessageId());
+            $mailContent = base64_encode(serialize($mailerService->getMailParts()));
 
             $updateData = [
                 'issent' => 0,
-                'charset' => $htmlmail->getCharset(),
+                'charset' => $mailerService->getCharset(),
                 'mailContent' => $mailContent,
                 'renderedSize' => strlen($mailContent),
                 'long_link_rdct_url' => $urlBase,
@@ -811,6 +813,147 @@ class MailUtility
                 $mailerService->getHtmlContent()
             ));
         }
+    }
+
+    /**
+     * Removes html comments when outside script and style pairs
+     *
+     * @param string $content The email content
+     *
+     * @return string HTML content without comments
+     */
+    public static function removeHtmlComments(string $content): string
+    {
+        $content = preg_replace('/\/\*<!\[CDATA\[\*\/[\t\v\n\r\f]*<!--/', '/*<![CDATA[*/', $content);
+        $content = preg_replace('/[\t\v\n\r\f]*<!(?:--[^\[<>][\s\S]*?--\s*)?>[\t\v\n\r\f]*/', '', $content);
+        return preg_replace('/\/\*<!\[CDATA\[\*\//', '/*<![CDATA[*/<!--', $content);
+    }
+
+    /**
+     * Add action to sys_dmail_maillog table
+     *
+     * @param int $mid Newsletter ID
+     * @param string $rid Recipient ID
+     * @param int $size Size of the sent email
+     * @param int $parseTime Parse time of the email
+     * @param int $html Set if HTML email is sent
+     * @param string $email Recipient's email
+     *
+     * @return int
+     * @throws DBALException
+     */
+    public static function addToMailLog(int $mid, string $rid, int $size, int $parseTime, int $html, string $email): int
+    {
+        [$rtbl, $rid] = explode('_', $rid);
+
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
+        $queryBuilder
+            ->insert('sys_dmail_maillog')
+            ->values([
+                'mid' => $mid,
+                'rtbl' => $rtbl,
+                'rid' => $rid,
+                'email' => $email,
+                'tstamp' => time(),
+                'url' => '',
+                'size' => $size,
+                'parsetime' => $parseTime,
+                'html_sent' => $html,
+            ])
+            ->execute();
+
+        return (int)$queryBuilder->getConnection()->lastInsertId('sys_dmail_maillog');
+    }
+
+    /**
+     * Get comma separated list of recipient ids, which has been sent
+     *
+     * @param int $mailUid Newsletter ID. UID of the sys_dmail record
+     * @param string $table Recipient table
+     *
+     * @return string        list of sent recipients
+     * @throws DBALException
+     * @throws Exception
+     */
+    public static function getSentMails(int $mailUid, string $table): string
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
+        $statement = $queryBuilder
+            ->select('rid')
+            ->from('sys_dmail_maillog')
+            ->where($queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($table)))
+            ->andWhere($queryBuilder->expr()->eq('response_type', '0'))
+            ->execute();
+
+        $list = '';
+
+        while (($row = $statement->fetchAssociative())) {
+            $list .= $row['rid'] . ',';
+        }
+
+        return rtrim($list, ',');
+    }
+
+    /**
+     * Find out, if an email has been sent to a recipient
+     *
+     * @param int $mailUid Newsletter ID. UID of the sys_dmail record
+     * @param int $recipientUid Recipient UID
+     * @param string $table Recipient table
+     *
+     * @return bool Number of found records
+     * @throws DBALException
+     */
+    public static function isMailSendToRecipient(int $mailUid, int $recipientUid, string $table): bool
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
+
+        $statement = $queryBuilder
+            ->select('uid')
+            ->from('sys_dmail_maillog')
+            ->where($queryBuilder->expr()->eq('rid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($table)))
+            ->andWhere($queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('response_type', '0'))
+            ->execute();
+
+        return (bool)$statement->rowCount();
+    }
+
+    /**
+     * Get the list of categories ids subscribed to by recipient $uid from table $table
+     *
+     * @param string $table Tablename of the recipient
+     * @param int $uid Uid of the recipient
+     *
+     * @return string        list of categories
+     * @throws DBALException
+     * @throws Exception
+     */
+    public static function getListOfRecipientCategories(string $table, int $uid): string
+    {
+        if ($table === 'PLAINLIST') {
+            return '';
+        }
+
+        $relationTable = $GLOBALS['TCA'][$table]['columns']['module_sys_dmail_category']['config']['MM'];
+
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $statement = $queryBuilder
+            ->select($relationTable . '.uid_foreign')
+            ->from($relationTable, $relationTable)
+            ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_local = ' . $table . '.uid')
+            ->where($queryBuilder->expr()->eq($relationTable . '.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
+            ->execute();
+
+        $list = '';
+        while ($row = $statement->fetchAssociative()) {
+            $list .= $row['uid_foreign'] . ',';
+        }
+
+        return rtrim($list, ',');
     }
 
     /**
