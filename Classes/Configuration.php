@@ -16,7 +16,7 @@ final class Configuration
     public static function registerHooks(): void
     {
         // Register hook for simulating a user group
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['determineId-PreProcessing']['mail'] = \MEDIAESSENZ\Mail\Hooks\SimulateFrontendUserGroupHook::class;
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['determineId-PreProcessing']['mail'] = \MEDIAESSENZ\Mail\Hooks\SimulateFrontendUserGroupHook::class . '->__invoke';
     }
 
     public static function addPageTSConfig(): void
@@ -35,11 +35,11 @@ final class Configuration
         ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
         ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail_group', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmailg.xlf');
         ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail_category', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmailcat.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_DirectMailNavFrame_DirectMail', 'EXT:mail/Resources/Private/Language/locallang_csh_DirectMail.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_DirectMailNavFrame_RecipientList', 'EXT:mail/Resources/Private/Language/locallang_csh_RecipientList.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_DirectMailNavFrame_Statistics', 'EXT:mail/Resources/Private/Language/locallang_csh_Statistics.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_DirectMailNavFrame_MailerEngine', 'EXT:mail/Resources/Private/Language/locallang_csh_MailerEngine.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_DirectMailNavFrame_Configuration', 'EXT:mail/Resources/Private/Language/locallang_csh_Configuration.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Mail', 'EXT:mail/Resources/Private/Language/locallang_csh_DirectMail.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_RecipientList', 'EXT:mail/Resources/Private/Language/locallang_csh_RecipientList.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Statistics', 'EXT:mail/Resources/Private/Language/locallang_csh_Statistics.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Status', 'EXT:mail/Resources/Private/Language/locallang_csh_MailerEngine.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Configuration', 'EXT:mail/Resources/Private/Language/locallang_csh_Configuration.xlf');
     }
 
     public static function registerBackendModules(): void
