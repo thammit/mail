@@ -116,9 +116,9 @@ abstract class AbstractController
     protected function configureTemplatePaths(string $templateName): StandaloneView
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateRootPaths(['EXT:direct_mail/Resources/Private/Templates/']);
-        $view->setPartialRootPaths(['EXT:direct_mail/Resources/Private/Partials/']);
-        $view->setLayoutRootPaths(['EXT:direct_mail/Resources/Private/Layouts/']);
+        $view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
+        $view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
+        $view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
         $view->setTemplate($templateName);
         return $view;
     }
