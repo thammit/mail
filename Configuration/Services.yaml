@@ -7,7 +7,7 @@ services:
   MEDIAESSENZ\Mail\:
     resource: '../Classes/*'
 
-  MEDIAESSENZ\Mail\Controller\AbstractController:
+  MEDIAESSENZ\Mail\Service\MailerService:
       public: true
 
   MEDIAESSENZ\Mail\Command\InvokeMailerEngineCommand:
@@ -15,11 +15,11 @@ services:
       - name: 'console.command'
         command: 'mail:invoke-mailer-engine'
         description: 'Invoke Mailer Engine of EXT:mail'
-  MEDIAESSENZ\Mail\Command\DirectmailCommand:
+  MEDIAESSENZ\Mail\Command\MailCommand:
     tags:
       - name: 'console.command'
         command: 'mail:mailing-queue'
-        description: 'This command invokes dmailer in order to process queued messages.'
+        description: 'This command invokes mail in order to process queued messages.'
   MEDIAESSENZ\Mail\Command\AnalyzeBounceMailCommand:
     tags:
       - name: 'console.command'

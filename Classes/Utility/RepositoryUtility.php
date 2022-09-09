@@ -66,7 +66,7 @@ class RepositoryUtility
     {
         if ($row['uid'] > 0 && $row['pid'] > 0) {
             if ($GLOBALS['TCA'][$table] && $GLOBALS['TCA'][$table]['ctrl']['languageField'] && $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField']) {
-                if (!$GLOBALS['TCA'][$table]['ctrl']['transOrigPointerTable']) {
+                if (!isset($GLOBALS['TCA'][$table]['ctrl']['transOrigPointerTable'])) {
                     // Will try to overlay a record only
                     // if the sys_language_content value is larger that zero.
                     if ($sys_language_content > 0) {

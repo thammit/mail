@@ -16,7 +16,7 @@ class RegistryUtility
      */
     public function createAndGetAccessToken(): string
     {
-        /* @var \TYPO3\CMS\Core\Registry $registry */
+        /* @var Registry $registry */
         $registry = GeneralUtility::makeInstance(Registry::class);
         $accessToken = GeneralUtility::makeInstance(Random::class)->generateRandomHexString(32);
         $registry->set('tx_directmail', 'accessToken', $accessToken);
@@ -33,15 +33,11 @@ class RegistryUtility
      */
     public function validateAndRemoveAccessToken(string $accessToken): bool
     {
-        /* @var \TYPO3\CMS\Core\Registry $registry */
+        /* @var Registry $registry */
         $registry = GeneralUtility::makeInstance(Registry::class);
         $registeredAccessToken = $registry->get('tx_directmail', 'accessToken');
-        if (!empty($registeredAccessToken) && $registeredAccessToken === $accessToken) {
-            $registry->remove('tx_directmail', 'accessToken');
-            return true;
-        }
-
         $registry->remove('tx_directmail', 'accessToken');
-        return false;
+
+        return !empty($registeredAccessToken) && $registeredAccessToken === $accessToken;
     }
 }

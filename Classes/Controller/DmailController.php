@@ -7,6 +7,7 @@ use DirectMailTeam\DirectMail\Dmailer;
 use DirectMailTeam\DirectMail\MailSelect;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\MailUtility;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
@@ -264,7 +265,7 @@ class DmailController extends AbstractController
                         $row = BackendUtility::getRecord('sys_dmail', $newUid);
                         // fetch the data
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = MailUtility::fetchUrlContentsForDirectMailRecord($row, $this->params);
+                            $fetchMessage = MailUtility::fetchUrlContentsForMailRecord($row, $this->params);
                             $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
                         }
 
@@ -288,7 +289,7 @@ class DmailController extends AbstractController
                         $row = BackendUtility::getRecord('sys_dmail', $newUid);
                         // fetch the data
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = MailUtility::fetchUrlContentsForDirectMailRecord($row, $this->params);
+                            $fetchMessage = MailUtility::fetchUrlContentsForMailRecord($row, $this->params);
                             $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
                         }
 
@@ -337,7 +338,7 @@ class DmailController extends AbstractController
                         }
                     } else {
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = MailUtility::fetchUrlContentsForDirectMailRecord($row, $this->params);
+                            $fetchMessage = MailUtility::fetchUrlContentsForMailRecord($row, $this->params);
                             $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
                         }
 
@@ -378,7 +379,7 @@ class DmailController extends AbstractController
                 $data['navigation']['next'] = true;
 
                 $indata = GeneralUtility::_GP('indata');
-                $temp = $this->makeCategoriesForm($row, $indata);
+                $temp = $this->makeCategoriesForm($row, $indata ?? []);
                 $data['cats']['output'] = $temp['output'];;
                 $data['cats']['catsForm'] = $temp['theOutput'];
 
@@ -899,31 +900,30 @@ class DmailController extends AbstractController
         $erg = ['errorTitle' => '', 'errorText' => '', 'warningTitle' => '', 'warningText' => ''];
 
         // Compile the mail
-        /* @var $htmlmail Dmailer */
-        $htmlmail = GeneralUtility::makeInstance(Dmailer::class);
-        $htmlmail->nonCron = 1;
+        /* @var $htmlmail MailerService */
+        $htmlmail = GeneralUtility::makeInstance(MailerService::class);
         $htmlmail->start();
-        $htmlmail->charset = $row['charset'];
-        $htmlmail->addPlain($message);
+        $htmlmail->setCharset($row['charset']);
+        $htmlmail->addPlainContent($message);
 
-        if (!$message || !$htmlmail->theParts['plain']['content']) {
+        if (!$message || !$htmlmail->getPlainContent()) {
             $erg['errorTitle'] = $this->getLanguageService()->getLL('dmail_error');
             $erg['errorText'] = $this->getLanguageService()->getLL('dmail_no_plain_content');
-        } else if (!str_contains(base64_decode($htmlmail->theParts['plain']['content']), '<!--DMAILER_SECTION_BOUNDARY')) {
+        } else if (!str_contains(base64_decode($htmlmail->getPlainContent()), '<!--DMAILER_SECTION_BOUNDARY')) {
             $erg['warningTitle'] = $this->getLanguageService()->getLL('dmail_warning');
             $erg['warningText'] = $this->getLanguageService()->getLL('dmail_no_plain_boundaries');
         }
 
-        // add attachment is removed. since it will be add during sending
+        // add attachment is removed. since it will be added during sending
 
         if (!$erg['errorTitle']) {
             // Update the record:
-            $htmlmail->theParts['messageid'] = $htmlmail->messageid;
-            $mailContent = base64_encode(serialize($htmlmail->theParts));
+            $htmlmail->setMailPart('messageid', $htmlmail->getMessageId());
+            $mailContent = base64_encode(serialize($htmlmail->getMailParts()));
 
             GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmail(
-                intval($this->sys_dmail_uid),
-                $htmlmail->charset, $mailContent
+                $this->sys_dmail_uid,
+                $htmlmail->getCharset(), $mailContent
             );
         }
 
@@ -1109,14 +1109,15 @@ class DmailController extends AbstractController
      *
      * @param array $row Directmal DB record
      *
+     * @throws DBALException
+     * @throws Exception
      * @todo    remove htmlmail. sending test mail
      */
     protected function sendMail(array $row): void
     {
         // Preparing mailer
-        /* @var $htmlmail Dmailer */
-        $htmlmail = GeneralUtility::makeInstance(Dmailer::class);
-        $htmlmail->nonCron = 1;
+        /* @var $htmlmail MailerService */
+        $htmlmail = GeneralUtility::makeInstance(MailerService::class);
         $htmlmail->start();
         $htmlmail->dmailer_prepare($row);
         $sentFlag = false;
@@ -1125,7 +1126,7 @@ class DmailController extends AbstractController
         if ($this->mailingMode_simple) {
             // step 4, sending simple test emails
             // setting Testmail flag
-            $htmlmail->testmail = $this->params['testmail'] ?? false;
+            $htmlmail->setTestMail($this->params['testmail'] ?? false);
 
             // Fixing addresses:
             $addresses = GeneralUtility::_GP('SET');
@@ -1160,7 +1161,7 @@ class DmailController extends AbstractController
         } else if ($this->cmd == 'send_mail_test') {
             // step 4, sending test personalized test emails
             // setting Testmail flag
-            $htmlmail->testmail = $this->params['testmail'];
+            $htmlmail->setTestMail((bool)$this->params['testmail'] ?? false);
 
             if ($this->tt_address_uid) {
                 // personalized to tt_address
@@ -1168,7 +1169,7 @@ class DmailController extends AbstractController
 
                 if (!empty($res)) {
                     foreach ($res as $recipRow) {
-                        $recipRow = Dmailer::convertFields($recipRow);
+                        $recipRow = MailUtility::convertFields($recipRow);
                         $recipRow['sys_dmail_categories_list'] = $htmlmail->getListOfRecipentCategories('tt_address', $recipRow['uid']);
                         $htmlmail->dmailer_sendAdvanced($recipRow, 't');
                         $sentFlag = true;
@@ -1199,7 +1200,9 @@ class DmailController extends AbstractController
                 $sendFlag += $this->sendTestMailToTable($idLists, 'tt_address', $htmlmail);
                 $sendFlag += $this->sendTestMailToTable($idLists, 'fe_users', $htmlmail);
                 $sendFlag += $this->sendTestMailToTable($idLists, 'PLAINLIST', $htmlmail);
-                $sendFlag += $this->sendTestMailToTable($idLists, $this->userTable, $htmlmail);
+                if ($this->userTable) {
+                    $sendFlag += $this->sendTestMailToTable($idLists, $this->userTable, $htmlmail);
+                }
                 $message = $this->createFlashMessage(
                     sprintf($this->getLanguageService()->getLL('send_was_sent_to_number'), $sendFlag),
                     $this->getLanguageService()->getLL('send_sending'),
@@ -1283,24 +1286,24 @@ class DmailController extends AbstractController
      *
      * @param array $idLists List of recipient ID
      * @param string $table Table name
-     * @param Dmailer $htmlmail Object of the dmailer script
+     * @param MailerService $htmlmail
      *
      * @return int Total of sent mail
      * @throws DBALException
      * @throws Exception
      * @todo: remove htmlmail. sending mails to table
      */
-    protected function sendTestMailToTable(array $idLists, string $table, Dmailer $htmlmail): int
+    protected function sendTestMailToTable(array $idLists, string $table, MailerService $htmlmail): int
     {
         $sentFlag = 0;
-        if (is_array($idLists[$table])) {
+        if (isset($idLists[$table]) && is_array($idLists[$table])) {
             if ($table != 'PLAINLIST') {
                 $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$table], $table, '*');
             } else {
                 $rows = $idLists['PLAINLIST'];
             }
             foreach ($rows as $rec) {
-                $recipRow = $htmlmail->convertFields($rec);
+                $recipRow = MailUtility::convertFields($rec);
                 $recipRow['sys_dmail_categories_list'] = $htmlmail->getListOfRecipentCategories($table, $recipRow['uid']);
                 $kc = substr($table, 0, 1);
                 $returnCode = $htmlmail->dmailer_sendAdvanced($recipRow, $kc == 'p' ? 'P' : $kc);
@@ -1757,7 +1760,7 @@ class DmailController extends AbstractController
         ];
         $theOutput = '';
 
-        if (is_array($indata['categories'])) {
+        if (isset($indata['categories']) && is_array($indata['categories'])) {
             $data = [];
             foreach ($indata['categories'] as $recUid => $recValues) {
                 $enabled = [];
@@ -1776,7 +1779,7 @@ class DmailController extends AbstractController
 
             // remove cache
             $dataHandler->clear_cacheCmd($this->pages_uid);
-            $theOutput = MailUtility::fetchUrlContentsForDirectMailRecord($row, $this->params);
+            $theOutput = MailUtility::fetchUrlContentsForMailRecord($row, $this->params);
         }
 
         // @TODO Perhaps we should here check if TV is installed and fetch content from that instead of the old Columns...

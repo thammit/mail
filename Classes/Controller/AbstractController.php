@@ -98,7 +98,7 @@ abstract class AbstractController
         $this->params = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
         $this->implodedParams = GeneralUtility::makeInstance(TsUtility::class)->implodeTSParams($this->params);
 
-        if ($this->params['userTable'] ?? false && isset($GLOBALS['TCA'][$this->params['userTable']]) && is_array($GLOBALS['TCA'][$this->params['userTable']])) {
+        if (array_key_exists('userTable', $this->params) && isset($GLOBALS['TCA'][$this->params['userTable']]) && is_array($GLOBALS['TCA'][$this->params['userTable']])) {
             $this->userTable = $this->params['userTable'];
             $this->allowedTables[] = $this->userTable;
         }

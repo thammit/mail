@@ -3,24 +3,31 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use MEDIAESSENZ\Mail\Repository\SysDmailRepository;
-use MEDIAESSENZ\Mail\Utility\RegistryUtility;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use FoT3\Rdct\Redirects;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
+use MEDIAESSENZ\Mail\Service\MailerService;
+use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Tree\View\PageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageRendererResolver;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
-use TYPO3\CMS\Core\Error\Http\ServiceUnavailableException;
-use TYPO3\CMS\Core\Http\ImmediateResponseException;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 class MailUtility
@@ -40,7 +47,7 @@ class MailUtility
         $tree->makeHTML = 0;
         $tree->setRecs = 0;
         $getLevels = 10000;
-        $tree->getTree($id, $getLevels, '');
+        $tree->getTree($id, $getLevels);
 
         return $tree->ids;
     }
@@ -68,9 +75,7 @@ class MailUtility
          *        ],
          * ];
          */
-        $plainlist = array_map('unserialize', array_unique(array_map('serialize', $plainlist)));
-
-        return $plainlist;
+        return array_map('unserialize', array_unique(array_map('serialize', $plainlist)));
     }
 
     /**
@@ -122,49 +127,46 @@ class MailUtility
      * @param bool $returnArray Return error or warning message as array instead of string
      *
      * @return array|string Error or warning message during fetching the content
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public static function fetchUrlContentsForDirectMailRecord(array $row, array $params, bool $returnArray = false): array|string
+    public static function fetchUrlContentsForMailRecord(array $row, array $params, bool $returnArray = false): array|string
     {
         $lang = self::getLanguageService();
         $theOutput = '';
         $errorMsg = [];
         $warningMsg = [];
-        $urls = self::getFullUrlsForDirectMailRecord($row);
+        $urls = self::getFullUrlsForMailRecord($row);
         $plainTextUrl = $urls['plainTextUrl'];
         $htmlUrl = $urls['htmlUrl'];
         $urlBase = $urls['baseUrl'];
-
-        // Make sure long_link_rdct_url is consistent with baseUrl.
-        $row['long_link_rdct_url'] = $urlBase;
-
-        $glue = (strpos($urlBase, '?') !== false) ? '&' : '?';
+        $glue = (str_contains($urlBase, '?')) ? '&' : '?';
 
         // Compile the mail
-        /* @var $htmlmail Dmailer */
-        $htmlmail = GeneralUtility::makeInstance(Dmailer::class);
+        /* @var $htmlmail MailerService */
+        $htmlmail = GeneralUtility::makeInstance(MailerService::class);
         if ($params['enable_jump_url']) {
-            $htmlmail->jumperURL_prefix = $urlBase . $glue .
+            $htmlmail->setJumpUrlPrefix($urlBase . $glue .
                 'mid=###SYS_MAIL_ID###' .
                 (intval($params['jumpurl_tracking_privacy']) ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
                 '&aC=###SYS_AUTHCODE###' .
-                '&jumpurl=';
-            $htmlmail->jumperURL_useId = 1;
+                '&jumpurl=');
+            $htmlmail->setJumpUrlUseId(true);
         }
         if ($params['enable_mailto_jump_url']) {
-            $htmlmail->jumperURL_useMailto = 1;
+            $htmlmail->setJumpUrlUseMailto(true);
         }
 
         $htmlmail->start();
-        $htmlmail->charset = $row['charset'];
-        $htmlmail->simulateUsergroup = $params['simulate_usergroup'] ?? false;
-        $htmlmail->includeMedia = $row['includeMedia'];
+        $htmlmail->setCharset($row['charset']);
+        $htmlmail->setIncludeMedia((bool)$row['includeMedia']);
 
         if ($plainTextUrl) {
             $mailContent = GeneralUtility::getURL(self::addUserPass($plainTextUrl, $params));
-            $htmlmail->addPlain($mailContent);
-            if (!$mailContent || !$htmlmail->theParts['plain']['content']) {
+            $htmlmail->addPlainContent($mailContent);
+            if (!$mailContent || !$htmlmail->getPlainContent()) {
                 $errorMsg[] = $lang->getLL('dmail_no_plain_content');
-            } else if (!strstr($htmlmail->theParts['plain']['content'], '<!--DMAILER_SECTION_BOUNDARY')) {
+            } else if (!str_contains($htmlmail->getPlainContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
                 $warningMsg[] = $lang->getLL('dmail_no_plain_boundaries');
             }
         }
@@ -177,38 +179,38 @@ class MailUtility
             if ($row['type'] == 1) {
                 // Try to auto-detect the charset of the message
                 $matches = [];
-                $res = preg_match('/<meta[\s]+http-equiv="Content-Type"[\s]+content="text\/html;[\s]+charset=([^"]+)"/m', ($htmlmail->theParts['html_content'] ?? ''), $matches);
+                $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', ($htmlmail->getMailPart('html_content') ?? ''), $matches);
                 if ($res == 1) {
-                    $htmlmail->charset = $matches[1];
+                    $htmlmail->setCharset($matches[1]);
                 } else if (isset($params['direct_mail_charset'])) {
-                    $htmlmail->charset = $params['direct_mail_charset'];
+                    $htmlmail->setCharset($params['direct_mail_charset']);
                 } else {
-                    $htmlmail->charset = 'iso-8859-1';
+                    $htmlmail->setCharset('iso-8859-1');
                 }
             }
-            if ($htmlmail->extractFramesInfo()) {
+            if (self::extractFramesInfo($htmlmail->getHtmlContent(), $htmlmail->getHtmlPath())) {
                 $errorMsg[] = $lang->getLL('dmail_frames_not allowed');
-            } else if (!$success || !$htmlmail->theParts['html']['content']) {
+            } else if (!$success || !$htmlmail->getHtmlContent()) {
                 $errorMsg[] = $lang->getLL('dmail_no_html_content');
-            } else if (!strstr($htmlmail->theParts['html']['content'], '<!--DMAILER_SECTION_BOUNDARY')) {
+            } else if (!str_contains($htmlmail->getHtmlContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
                 $warningMsg[] = $lang->getLL('dmail_no_html_boundaries');
             }
         }
 
         if (!count($errorMsg)) {
             // Update the record:
-            $htmlmail->theParts['messageid'] = $htmlmail->messageid;
-            $mailContent = base64_encode(serialize($htmlmail->theParts));
+            $htmlmail->setMailPart('messageid', $htmlmail->getMessageId());
+            $mailContent = base64_encode(serialize($htmlmail->getMailParts()));
 
             $updateData = [
                 'issent' => 0,
-                'charset' => $htmlmail->charset,
+                'charset' => $htmlmail->getCharset(),
                 'mailContent' => $mailContent,
                 'renderedSize' => strlen($mailContent),
                 'long_link_rdct_url' => $urlBase,
             ];
 
-            $done = GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$row['uid'], $updateData);
+            GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$row['uid'], $updateData);
 
             if (count($warningMsg)) {
                 foreach ($warningMsg as $warning) {
@@ -263,11 +265,11 @@ class MailUtility
         $user = $params['http_username'] ?? '';
         $pass = $params['http_password'] ?? '';
         $matches = [];
-        if ($user && $pass && preg_match('/^(?:http)s?:\/\//', $url, $matches)) {
+        if ($user && $pass && preg_match('/^https?:\/\//', $url, $matches)) {
             $url = $matches[0] . $user . ':' . $pass . '@' . substr($url, strlen($matches[0]));
         }
         if (($params['simulate_usergroup'] ?? false) && MathUtility::canBeInterpretedAsInteger($params['simulate_usergroup'])) {
-            $glue = (strpos($url, '?') !== false) ? '&' : '?';
+            $glue = (str_contains($url, '?')) ? '&' : '?';
             $url = $url . $glue . 'dmail_fe_group=' . (int)$params['simulate_usergroup'] . '&access_token=' . GeneralUtility::makeInstance(RegistryUtility::class)->createAndGetAccessToken();
         }
         return $url;
@@ -280,7 +282,7 @@ class MailUtility
      *
      * @return array $result Url_plain and url_html in an array
      */
-    public static function getFullUrlsForDirectMailRecord(array $row): array
+    public static function getFullUrlsForMailRecord(array $row): array
     {
         $cObj = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         // Finding the domain to use
@@ -301,13 +303,13 @@ class MailUtility
                 $result['plainTextUrl'] = $row['plainParams'];
                 break;
             default:
-                $params = substr($row['HTMLParams'], 0, 1) == '&' ? substr($row['HTMLParams'], 1) : $row['HTMLParams'];
+                $params = str_starts_with($row['HTMLParams'], '&') ? substr($row['HTMLParams'], 1) : $row['HTMLParams'];
                 $result['htmlUrl'] = $cObj->typolink_URL([
                     'parameter' => 't3://page?uid=' . (int)$row['page'] . '&' . $params,
                     'forceAbsoluteUrl' => true,
                     'linkAccessRestrictedPages' => true,
                 ]);
-                $params = substr($row['plainParams'], 0, 1) == '&' ? substr($row['plainParams'], 1) : $row['plainParams'];
+                $params = str_starts_with($row['plainParams'], '&') ? substr($row['plainParams'], 1) : $row['plainParams'];
                 $result['plainTextUrl'] = $cObj->typolink_URL([
                     'parameter' => 't3://page?uid=' . (int)$row['page'] . '&' . $params,
                     'forceAbsoluteUrl' => true,
@@ -345,11 +347,11 @@ class MailUtility
     /**
      * Get the configured charset.
      *
-     * This method used to initialize the TSFE object to get the charset on a per page basis. Now it just evaluates the
+     * This method used to initialize the TSFE object to get the charset on a per-page basis. Now it just evaluates the
      * configured charset of the instance
      *
-     * @throws ImmediateResponseException
-     * @throws ServiceUnavailableException
+     * @return string
+     * @throws InvalidConfigurationTypeException
      */
     public static function getCharacterSet(): string
     {
@@ -394,26 +396,19 @@ class MailUtility
      */
     public static function substUrlsInPlainText(string $message, string $urlmode = '76', string $index_script_url = ''): string
     {
-        switch ((string)$urlmode) {
-            case '':
-                $lengthLimit = false;
-                break;
-            case 'all':
-                $lengthLimit = 0;
-                break;
-            case '76':
-
-            default:
-                $lengthLimit = (int)$urlmode;
-        }
+        $lengthLimit = match ($urlmode) {
+            '' => false,
+            'all' => 0,
+            default => (int)$urlmode,
+        };
         if ($lengthLimit === false) {
             // No processing
             $messageSubstituted = $message;
         } else {
             $messageSubstituted = preg_replace_callback(
-                '/(http|https):\\/\\/.+(?=[\\]\\.\\?]*([\\! \'"()<>]+|$))/iU',
+                '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
                 function (array $matches) use ($lengthLimit, $index_script_url) {
-                    $redirects = GeneralUtility::makeInstance(\FoT3\Rdct\Redirects::class);
+                    $redirects = GeneralUtility::makeInstance(Redirects::class);
                     return $redirects->makeRedirectUrl($matches[0], $lengthLimit, $index_script_url);
                 },
                 $message
@@ -430,11 +425,7 @@ class MailUtility
      */
     public static function getAttachments(int $dmailUid): array
     {
-        /** @var FileRepository $fileRepository */
-        $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
-        $fileObjects = $fileRepository->findByRelation('sys_dmail', 'attachment', $dmailUid);
-
-        return $fileObjects;
+        return GeneralUtility::makeInstance(FileRepository::class)->findByRelation('sys_dmail', 'attachment', $dmailUid);
     }
 
     /**
@@ -452,11 +443,15 @@ class MailUtility
         return 'window.location.href=' . GeneralUtility::quoteJSvalue((string)$uriBuilder->buildUriFromRoute('record_edit', $params)) . '; return false;';
     }
 
+    /**
+     * @throws DBALException
+     * @throws Exception
+     */
     public static function getRecordOverlay(string $table, array $row, int $sys_language_content, string $OLmode = ''): array
     {
         if ($row['uid'] > 0 && $row['pid'] > 0) {
             if ($GLOBALS['TCA'][$table] && $GLOBALS['TCA'][$table]['ctrl']['languageField'] && $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField']) {
-                if (!$GLOBALS['TCA'][$table]['ctrl']['transOrigPointerTable']) {
+                if (!isset($GLOBALS['TCA'][$table]['ctrl']['transOrigPointerTable'])) {
                     // Will try to overlay a record only
                     // if the sys_language_content value is larger that zero.
                     if ($sys_language_content > 0) {
@@ -467,11 +462,11 @@ class MailUtility
                             $olrow = $queryBuilder->select('*')
                                 ->from($table)
                                 ->add('where', 'pid=' . intval($row['pid']) .
-                                    ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['languageField'] . '=' . intval($sys_language_content) .
+                                    ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['languageField'] . '=' . $sys_language_content .
                                     ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] . '=' . intval($row['uid']))
                                 ->setMaxResults(1)/* LIMIT 1*/
                                 ->execute()
-                                ->fetch();
+                                ->fetchAssociative();
 
                             // Merge record content by traversing all fields:
                             if (is_array($olrow)) {
@@ -505,5 +500,327 @@ class MailUtility
         }
 
         return $row;
+    }
+
+    /**
+     * Get the fully-qualified domain name of the host
+     * Copy from TYPO3 v9.5, will be removed in TYPO3 v10.0
+     *
+     * @param bool $requestHost Use request host (when not in CLI mode).
+     * @return string The fully-qualified host name.
+     */
+    public static function getHostname(bool $requestHost = true): string
+    {
+        $host = '';
+        // If not called from the command-line, resolve on getIndpEnv()
+        if ($requestHost && !Environment::isCli()) {
+            $host = GeneralUtility::getIndpEnv('HTTP_HOST');
+        }
+        if (!$host) {
+            // will fail for PHP 4.1 and 4.2
+            $host = @php_uname('n');
+            // 'n' is ignored in broken installations
+            if (strpos($host, ' ')) {
+                $host = '';
+            }
+        }
+        // We have not found a FQDN yet
+        if ($host && !str_contains($host, '.')) {
+            $ip = gethostbyname($host);
+            // We got an IP address
+            if ($ip != $host) {
+                $fqdn = gethostbyaddr($ip);
+                if ($ip != $fqdn) {
+                    $host = $fqdn;
+                }
+            }
+        }
+        if (!$host) {
+            $host = 'localhost.localdomain';
+        }
+        return $host;
+    }
+
+    /**
+     * Converting array key.
+     * fe_user and tt_address are using different fieldname for the same information
+     *
+     * @param array $recipRow Recipient's data array
+     *
+     * @return array Fixed recipient's data array
+     */
+    public static function convertFields(array $recipRow): array
+    {
+        // Compensation for the fact that fe_users has the field 'telephone' instead of 'phone'
+        if ($recipRow['telephone'] ?? false) {
+            $recipRow['phone'] = $recipRow['telephone'];
+        }
+
+        // Firstname must be more than 1 character
+        $recipRow['firstname'] = trim(strtok(trim($recipRow['name']), ' '));
+        if (strlen($recipRow['firstname']) < 2 || preg_match('|[^[:alnum:]]$|', $recipRow['firstname'])) {
+            $recipRow['firstname'] = $recipRow['name'];
+        }
+        if (!trim($recipRow['firstname'])) {
+            $recipRow['firstname'] = $recipRow['email'];
+        }
+        return $recipRow;
+    }
+
+    /**
+     * Creates an address object ready to be used with the symonfy mailer
+     *
+     * @param string $email
+     * @param string|NULL $name
+     * @return Address
+     */
+    public static function createRecipient(string $email, string $name = null): Address
+    {
+        if (!empty($name)) {
+            $recipient = new Address($email, $name);
+        } else {
+            $recipient = new Address($email);
+        }
+
+        return $recipient;
+    }
+
+    /**
+     * Gets the unixtime as milliseconds.
+     *
+     * @return int The unixtime as milliseconds
+     */
+    public static function getMilliseconds(): int
+    {
+        return (int)round(microtime(true) * 1000);
+    }
+
+    /**
+     * Returns the absolute address of a link. This is based on
+     * $this->theParts["html"]["path"] being the root-address
+     *
+     * @param string $ref Address to use
+     * @param string $path
+     * @return string The absolute address
+     */
+    public static function absRef(string $ref, string $path): string
+    {
+        $ref = trim($ref);
+        $info = parse_url($ref);
+        if ($info['scheme'] ?? false) {
+            // if ref is an url
+            // do nothing
+        } else if (preg_match('/^\//', $ref)) {
+            // if ref is an absolute link
+            $addr = parse_url($path);
+            $ref = $addr['scheme'] . '://' . $addr['host'] . (($addr['port'] ?? false) ? ':' . $addr['port'] : '') . $ref;
+        } else {
+            // If the reference is relative, the path is added,
+            // in order for us to fetch the content
+            if (str_ends_with($path, '/')) {
+                // if the last char is a /, then prepend the ref
+                $ref = $path . $ref;
+            } else {
+                // if the last char not a /, then assume it's an absolute
+                $addr = parse_url($path);
+                $ref = $addr['scheme'] . '://' . $addr['host'] . ($addr['port'] ? ':' . $addr['port'] : '') . '/' . $ref;
+            }
+        }
+
+        return $ref;
+    }
+
+    /**
+     * This function analyzes an HTML tag
+     * If an attribute is empty (like OPTION) the value of that key is just empty.
+     * Check it with is_set();
+     *
+     * @param string $tag Tag is either like this "<TAG OPTION ATTRIB=VALUE>" or
+     *                 this " OPTION ATTRIB=VALUE>" which means you can omit the tag-name
+     * @param boolean $removeQuotes When TRUE (default) quotes around a value will get removed
+     *
+     * @return array array with attributes as keys in lower-case
+     */
+    public static function get_tag_attributes(string $tag, bool $removeQuotes = true): array
+    {
+        $attributes = [];
+        $tag = ltrim(preg_replace('/^<[^ ]*/', '', trim($tag)));
+        $tagLen = strlen($tag);
+        $safetyCounter = 100;
+        // Find attribute
+        while ($tag) {
+            $value = '';
+            $reg = preg_split('/[[:space:]=>]/', $tag, 2);
+            $attrib = $reg[0];
+
+            $tag = ltrim(substr($tag, strlen($attrib), $tagLen));
+            if (str_starts_with($tag, '=')) {
+                $tag = ltrim(substr($tag, 1, $tagLen));
+                if (str_starts_with($tag, '"') && $removeQuotes) {
+                    // Quotes around the value
+                    $reg = explode('"', substr($tag, 1, $tagLen), 2);
+                    $tag = ltrim($reg[1]);
+                    $value = $reg[0];
+                } else {
+                    // No quotes around value
+                    preg_match('/^([^[:space:]>]*)(.*)/', $tag, $reg);
+                    $value = trim($reg[1]);
+                    $tag = ltrim($reg[2]);
+                    if (str_starts_with($tag, '>')) {
+                        $tag = '';
+                    }
+                }
+            }
+            $attributes[strtolower($attrib)] = $value;
+            $safetyCounter--;
+            if ($safetyCounter < 0) {
+                break;
+            }
+        }
+        return $attributes;
+    }
+
+    /**
+     * Creates a regular expression out of a list of tags
+     *
+     * @param array|string $tags Array the list of tags
+     *        (either as array or string if it is one tag)
+     *
+     * @return string the regular expression
+     */
+    public static function tag_regex(array|string $tags): string
+    {
+        $tags = (!is_array($tags) ? [$tags] : $tags);
+        $regexp = '/';
+        $c = count($tags);
+        foreach ($tags as $tag) {
+            $c--;
+            $regexp .= '<' . $tag . '[[:space:]]' . (($c) ? '|' : '');
+        }
+        return $regexp . '/i';
+    }
+
+    /**
+     * Extracts all media-links from $this->theParts["html"]["content"]
+     *
+     * @return    array    two-dimensional array with information about each frame
+     */
+    public static function extractFramesInfo(string $content, string $path): array
+    {
+        $htmlCode = $content;
+        $info = [];
+        if (strpos(' ' . $htmlCode, '<frame ')) {
+            $attribRegex = MailUtility::tag_regex('frame');
+            // Splits the document by the beginning of the above tags
+            $codepieces = preg_split($attribRegex, $htmlCode, 1000000);
+            $pieces = count($codepieces);
+            for ($i = 1; $i < $pieces; $i++) {
+                preg_match('/[^>]*/', $codepieces[$i], $reg);
+                // Fetches the attributes for the tag
+                $attributes = MailUtility::get_tag_attributes($reg[0]);
+                $frame = [];
+                $frame['src'] = $attributes['src'];
+                $frame['name'] = $attributes['name'];
+                $frame['absRef'] = MailUtility::absRef($frame['src'], $path);
+                $info[] = $frame;
+            }
+        }
+        return $info;
+    }
+
+    /**
+     * This substitutes the http:// urls in plain text with links
+     *
+     * @param MailerService $mailerService
+     * @return void The changed content
+     */
+    public static function substHTTPurlsInPlainText(MailerService $mailerService): void
+    {
+        $jumpUrlPrefix = $mailerService->getJumpUrlPrefix();
+        if (empty($jumpUrlPrefix)) {
+            return;
+        }
+
+        $jumpUrlUseId = $mailerService->getJumpUrlUseId();
+        $content = $mailerService->getPlainContent();
+
+        $jumpUrlCounter = 1;
+        $plainLinkIds = [];
+        $contentWithReplacedUrls = preg_replace_callback(
+            '/https?:\/\/\S+/',
+            function ($urlMatches) use ($jumpUrlPrefix, $jumpUrlUseId, &$jumpUrlCounter, &$plainLinkIds) {
+                $url = $urlMatches[0];
+                if (str_contains($url, '&no_jumpurl=1')) {
+                    // A link parameter "&no_jumpurl=1" allows to disable jumpurl for plain text links
+                    $url = str_replace('&no_jumpurl=1', '', $url);
+                } else if ($jumpUrlUseId) {
+                    $plainLinkIds[$jumpUrlCounter] = $url;
+                    $url = $jumpUrlPrefix . '-' . $jumpUrlCounter;
+                    $jumpUrlCounter++;
+                } else {
+                    $url = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($url));
+                }
+                return $url;
+            },
+            $content
+        );
+
+        $mailerService->setPlainLinkIds($plainLinkIds);
+        $mailerService->setPlainContent($contentWithReplacedUrls);
+    }
+
+    /**
+     * substitutes hrefs in $this->theParts["html"]["content"]
+     *
+     * @param MailerService $mailerService
+     * @return void
+     */
+    public static function substHREFsInHTML(MailerService $mailerService): void
+    {
+        if (empty($mailerService->getHtmlHrefs())) {
+            return;
+        }
+        $hrefs = $mailerService->getHtmlHrefs();
+        $jumpUrlPrefix = $mailerService->getJumpUrlPrefix();
+        $jumpUrlUseId = $mailerService->getJumpUrlUseId();
+        $jumpUrlUseMailto = $mailerService->getJumpUrlUseMailto();
+
+        foreach ($hrefs as $urlId => $val) {
+            if (isset($val['no_jumpurl'])) {
+                // A tag attribute "no_jumpurl=1" allows to disable jumpurl for custom links
+                $substVal = $val['absRef'];
+            } else if ($jumpUrlPrefix && ($val['tag'] != 'form') && (!str_contains($val['ref'], 'mailto:'))) {
+                // Form elements cannot use jumpurl!
+                if ($jumpUrlUseId) {
+                    $substVal = $jumpUrlPrefix . $urlId;
+                } else {
+                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
+                }
+            } else if (strstr($val['ref'], 'mailto:') && $jumpUrlUseMailto) {
+                if ($jumpUrlUseId) {
+                    $substVal = $jumpUrlPrefix . $urlId;
+                } else {
+                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
+                }
+            } else {
+                $substVal = $val['absRef'];
+            }
+            $mailerService->setHtmlContent(str_replace(
+                $val['subst_str'],
+                $val['quotes'] . $substVal . $val['quotes'],
+                $mailerService->getHtmlContent()
+            ));
+        }
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     */
+    public static function getExtensionConfiguration(string $path = ''): string
+    {
+        return GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('mail', $path);
     }
 }
