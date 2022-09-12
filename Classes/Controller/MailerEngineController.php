@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use DirectMailTeam\DirectMail\Dmailer;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
@@ -186,7 +189,9 @@ class MailerEngineController extends AbstractController
      * TODO: Should really only show some entries, or provide a browsing interface.
      *
      * @return array|string List of the mailing status
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
+     * @throws DBALException
+     * @throws Exception
+     * @throws RouteNotFoundException
      */
     public function mailerengine(): array|string
     {
@@ -294,9 +299,7 @@ class MailerEngineController extends AbstractController
      */
     public function invokeMEngine()
     {
-        // TODO: remove htmlmail
-        /* @var $htmlmail Dmailer */
-        $htmlmail = GeneralUtility::makeInstance(Dmailer::class);
+        $htmlmail = GeneralUtility::makeInstance(MailerService::class);
         $htmlmail->nonCron = 1;
         $htmlmail->start();
         $htmlmail->runcron();

@@ -3,12 +3,9 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use DirectMailTeam\DirectMail\MailSelect;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use MEDIAESSENZ\Mail\Service\MailerService;
-use MEDIAESSENZ\Mail\Utility\CsvUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
@@ -16,6 +13,9 @@ use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
+use MEDIAESSENZ\Mail\Service\MailerService;
+use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -1672,7 +1672,7 @@ class DmailController extends AbstractController
                         }
                         if ($table) {
                             // initialize the query generator
-                            $queryGenerator = GeneralUtility::makeInstance(MailSelect::class);
+                            $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
                             $idLists[$table] = GeneralUtility::makeInstance(TempRepository::class)->getSpecialQueryIdList($queryGenerator, $table, $mailGroup);
                         }
                         break;

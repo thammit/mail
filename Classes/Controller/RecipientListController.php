@@ -3,10 +3,14 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use DirectMailTeam\DirectMail\Importer;
-use DirectMailTeam\DirectMail\MailSelect;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Database\QueryGenerator;
+use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
+use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Utility\CsvUtility as MailCsvUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
@@ -18,11 +22,6 @@ use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\CsvUtility;
-use DirectMailTeam\DirectMail\DirectMailUtility;
-use DirectMailTeam\DirectMail\Repository\SysDmailGroupRepository;
-use DirectMailTeam\DirectMail\Repository\FeUsersRepository;
-use DirectMailTeam\DirectMail\Repository\TempRepository;
-use DirectMailTeam\DirectMail\Repository\TtAddressRepository;
 
 class RecipientListController extends AbstractController
 {
@@ -73,7 +72,7 @@ class RecipientListController extends AbstractController
         $this->indata = $parsedBody['indata'] ?? $queryParams['indata'] ?? [];
         $this->submit = (bool)($parsedBody['submit'] ?? $queryParams['submit'] ?? false);
 
-        $this->queryGenerator = GeneralUtility::makeInstance(MailSelect::class);
+        $this->queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
     }
 
     public function indexAction(ServerRequestInterface $request): ResponseInterface
@@ -143,10 +142,10 @@ class RecipientListController extends AbstractController
                 $type = 2;
                 break;
             case 'displayImport':
-                /* @var $importer Importer */
-                $importer = GeneralUtility::makeInstance(Importer::class);
-                $importer->init($this);
-                $theOutput = $importer->displayImport();
+                /* @var $importService ImportService */
+                $importService = GeneralUtility::makeInstance(ImportService::class);
+                $importService->init($this);
+                $theOutput = $importService->displayImport();
                 $type = 3;
                 break;
             default:
@@ -200,7 +199,7 @@ class RecipientListController extends AbstractController
             ];
         }
 
-        $data['editOnClickLink'] = DirectMailUtility::getEditOnClickLink([
+        $data['editOnClickLink'] = MailerUtility::getEditOnClickLink([
             'edit' => [
                 'sys_dmail_group' => [
                     $this->id => 'new',

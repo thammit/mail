@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use DirectMailTeam\DirectMail\Utility\TsUtility;
+use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -95,7 +95,7 @@ abstract class AbstractController
 
         // get the config from pageTS
         $this->params = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
-        $this->implodedParams = GeneralUtility::makeInstance(TsUtility::class)->implodeTSParams($this->params);
+        $this->implodedParams = GeneralUtility::makeInstance(TypoScriptUtility::class)->implodeTSParams($this->params);
 
         if (array_key_exists('userTable', $this->params) && isset($GLOBALS['TCA'][$this->params['userTable']]) && is_array($GLOBALS['TCA'][$this->params['userTable']])) {
             $this->userTable = $this->params['userTable'];

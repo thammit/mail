@@ -5,7 +5,7 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
-use MEDIAESSENZ\Mail\MailSelect;
+use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -443,14 +443,14 @@ class TempRepository extends AbstractRepository
      * Construct the array of uid's from $table selected
      * by special query of mail group of such type
      *
-     * @param MailSelect $queryGenerator The query generator object
+     * @param QueryGenerator $queryGenerator The query generator object
      * @param string $table The table to select from
      * @param array $group The direct_mail group record
      *
      * @return array The resulting query.
      * @throws Exception|\Doctrine\DBAL\Driver\Exception
      */
-    public function getSpecialQueryIdList(MailSelect &$queryGenerator, string $table, array $group): array
+    public function getSpecialQueryIdList(QueryGenerator &$queryGenerator, string $table, array $group): array
     {
         $outArr = [];
         if ($group['query']) {

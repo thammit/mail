@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use DirectMailTeam\DirectMail\DirectMailUtility;
-use DirectMailTeam\DirectMail\Utility\TsUtility;
+use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -95,7 +94,7 @@ class ConfigurationController extends AbstractController
     {
         if ($this->getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
             if (is_array($this->pageTS) && count($this->pageTS)) {
-                GeneralUtility::makeInstance(TsUtility::class)->updatePagesTSconfig($this->id, $this->pageTS, $this->TSconfPrefix);
+                GeneralUtility::makeInstance(TypoScriptUtility::class)->updatePagesTSconfig($this->id, $this->pageTS, $this->TSconfPrefix);
                 header('Location: ' . GeneralUtility::locationHeaderUrl($this->requestUri));
             }
         }

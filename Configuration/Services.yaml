@@ -8,16 +8,16 @@ services:
     resource: '../Classes/*'
 
   MEDIAESSENZ\Mail\Mail\Mailer:
-      public: true
+    public: true
 
   MEDIAESSENZ\Mail\Service\MailerService:
-      public: true
+    public: true
 
   MEDIAESSENZ\Mail\Command\SpoolSendCommand:
-      tags:
-          - name: 'console.command'
-            command: 'mail:spool:send'
-            description: 'This command invokes mail in order to process queued messages.'
+    tags:
+      - name: 'console.command'
+        command: 'mail:spool:send'
+        description: 'This command invokes mail in order to process queued messages.'
 
   MEDIAESSENZ\Mail\Command\InvokeMailerEngineCommand:
     tags:
