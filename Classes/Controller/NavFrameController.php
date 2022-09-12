@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
@@ -25,9 +27,14 @@ class NavFrameController extends AbstractController
      */
     protected $doHighlight;
 
+    /**
+     * @throws Exception
+     * @throws DBALException
+     * @throws RouteNotFoundException
+     */
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
-        $currentModule = (string)($request->getQueryParams()['currentModule'] ?? $request->getParsedBody()['currentModule'] ?? 'DirectMailNavFrame_Configuration');
+        $currentModule = (string)($request->getQueryParams()['currentModule'] ?? $request->getParsedBody()['currentModule'] ?? 'MailNavFrame_Configuration');
         /** @var UriBuilder $uriBuilder */
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $currentSubScript = $uriBuilder->buildUriFromRoute($currentModule);
@@ -147,8 +154,6 @@ class NavFrameController extends AbstractController
                 )
             )
             ->orderBy('title')
-//             debug($statement->getSQL());
-//             debug($statement->getParameters());
             ->execute();
 
         return $statement;

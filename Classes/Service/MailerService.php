@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Mail\MailMessage;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
@@ -17,7 +18,6 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
@@ -67,9 +67,26 @@ class MailerService implements LoggerAwareInterface
     protected string $jumpUrlPrefix = '';
     protected bool $jumpUrlUseMailto = false;
     protected bool $jumpUrlUseId = false;
+    protected string $siteIdentifier = '';
 
     public function __construct(protected CharsetConverter $charsetConverter)
     {
+    }
+
+    /**
+     * @return string
+     */
+    public function getSiteIdentifier(): string
+    {
+        return $this->siteIdentifier;
+    }
+
+    /**
+     * @param string $siteIdentifier
+     */
+    public function setSiteIdentifier(string $siteIdentifier): void
+    {
+        $this->siteIdentifier = $siteIdentifier;
     }
 
     public function setMailPart($part, $value): void
@@ -708,9 +725,11 @@ class MailerService implements LoggerAwareInterface
         if ($this->notificationJob === true) {
             $fromName = $this->charsetConverter->conv($this->fromName, $this->charset, $this->backendCharset) ?? '';
             $mail = GeneralUtility::makeInstance(MailMessage::class);
-            $mail->setTo($this->fromEmail, $fromName);
-            $mail->setFrom($this->fromEmail, $fromName);
-            $mail->setSubject($subject);
+            $mail
+                ->setSiteIdentifier($this->siteIdentifier)
+                ->setTo($this->fromEmail, $fromName)
+                ->setFrom($this->fromEmail, $fromName)
+                ->setSubject($subject);
 
             if ($this->replyToEmail !== '') {
                 $mail->setReplyTo($this->replyToEmail);
@@ -854,14 +873,14 @@ class MailerService implements LoggerAwareInterface
      *
      * @param string|Address $recipient The recipient to send the mail to
      * @param array|null $recipientData Recipient's data array
-     *
-     * @return    void
+     * @return void
      */
     protected function sendMailToRecipient(Address|string $recipient, array $recipientData = null): void
     {
         /** @var MailMessage $mailer */
         $mailer = GeneralUtility::makeInstance(MailMessage::class);
         $mailer
+            ->setSiteIdentifier($this->siteIdentifier)
             ->from(new Address($this->fromEmail, $this->fromName))
             ->to($recipient)
             ->subject($this->subject)

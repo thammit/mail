@@ -8,7 +8,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
-use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Environment;
@@ -24,6 +23,7 @@ use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
@@ -33,18 +33,12 @@ abstract class AbstractController
     protected ModuleTemplate $moduleTemplate;
     protected IconFactory $iconFactory;
     protected PageRenderer $pageRenderer;
-
-    /**
-     * @var StandaloneView
-     */
-    protected $view;
-
+    protected StandaloneView $view;
     protected int $id = 0;
     protected string $cmd = '';
     protected int $sys_dmail_uid = 0;
     protected string $pages_uid = '';
-
-    protected $params = [];
+    protected array $params = [];
 
     /**
      * A WHERE clause for selection records from the pages table based on read-permissions of the current backend user.
@@ -53,15 +47,15 @@ abstract class AbstractController
      * @var string
      */
     protected string $perms_clause = '';
-
     protected array $implodedParams = [];
-    protected $userTable;
-    protected $allowedTables = [];
+    protected string $userTable = '';
+    protected array $allowedTables = [];
     protected int $sys_language_uid = 0;
     protected array $pageinfo = [];
     protected bool $access = false;
-
-    protected $messageQueue;
+    protected FlashMessageQueue $messageQueue;
+    protected SiteFinder $siteFinder;
+    protected string $siteIdentifier;
 
     /**
      * Constructor Method
@@ -69,11 +63,14 @@ abstract class AbstractController
     public function __construct(
         ModuleTemplate $moduleTemplate = null,
         IconFactory    $iconFactory = null,
-        PageRenderer   $pageRenderer = null)
+        PageRenderer   $pageRenderer = null,
+        SiteFinder     $siteFinder = null
+    )
     {
         $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
         $this->iconFactory = $iconFactory ?? GeneralUtility::makeInstance(IconFactory::class);
         $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
+        $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
 
         $this->getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
         $this->getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
@@ -88,6 +85,8 @@ abstract class AbstractController
         $this->cmd = (string)($parsedBody['cmd'] ?? $queryParams['cmd'] ?? '');
         $this->pages_uid = (string)($parsedBody['pages_uid'] ?? $queryParams['pages_uid'] ?? '');
         $this->sys_dmail_uid = (int)($parsedBody['sys_dmail_uid'] ?? $queryParams['sys_dmail_uid'] ?? 0);
+
+        $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
 
         $this->perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
         $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->perms_clause);

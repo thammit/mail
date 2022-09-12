@@ -44,7 +44,6 @@ class DmailController extends AbstractController
 {
     protected $cshTable;
     protected string $error = '';
-
     protected int $currentStep = 1;
 
     /**
@@ -52,12 +51,9 @@ class DmailController extends AbstractController
      * @var integer
      */
     protected int $uid = 0;
-
     protected bool $backButtonPressed = false;
-
     protected string $currentCMD = '';
     protected bool $fetchAtOnce = false;
-
     protected array $quickmail = [];
     protected int $createMailFrom_UID = 0;
     protected string $createMailFrom_URL = '';
@@ -67,8 +63,7 @@ class DmailController extends AbstractController
     protected array $mailgroup_uid = [];
     protected bool $mailingMode_simple = false;
     protected int $tt_address_uid = 0;
-
-    protected $requestUri = '';
+    protected string $requestUri = '';
 
     /**
      * The name of the module
@@ -77,8 +72,10 @@ class DmailController extends AbstractController
      */
     protected string $moduleName = 'MailNavFrame_Mail';
 
-    protected function initDmail(ServerRequestInterface $request): void
+    protected function init(ServerRequestInterface $request): void
     {
+        parent::init($request);
+
         $queryParams = $request->getQueryParams();
         $parsedBody = $request->getParsedBody();
 
@@ -119,7 +116,6 @@ class DmailController extends AbstractController
         $this->view = $this->configureTemplatePaths($currentModule);
 
         $this->init($request);
-        $this->initDmail($request);
 
         // get the config from pageTS
         $this->params['pid'] = intval($this->id);
@@ -510,6 +506,8 @@ class DmailController extends AbstractController
      * Makes box for internal page. (first step)
      *
      * @return array config for form list of internal pages
+     * @throws DBALException
+     * @throws Exception
      * @throws RouteNotFoundException
      */
     protected function getConfigFormInternal(): array
@@ -758,6 +756,7 @@ class DmailController extends AbstractController
      * @param array $indata Quickmail data (quickmail content, etc.)
      *
      * @return array|string error or warning message produced during the process
+     * @throws DBALException
      * @throws SiteNotFoundException
      */
     protected function createDMailQuick(array $indata): array|string
@@ -915,6 +914,7 @@ class DmailController extends AbstractController
         // Compile the mail
         /* @var $mailerService MailerService */
         $mailerService = GeneralUtility::makeInstance(MailerService::class);
+        $mailerService->setSiteIdentifier($this->siteIdentifier);
         $mailerService->start();
         $mailerService->setCharset($row['charset']);
         $mailerService->addPlainContent($message);
@@ -1120,17 +1120,17 @@ class DmailController extends AbstractController
      * if it's a test mail, then will be sent directly.
      * if mass-send mail, only update the DB record. the dmailer script will send it.
      *
-     * @param array $row Directmal DB record
+     * @param array $row mail DB record
      *
      * @throws DBALException
      * @throws Exception
-     * @todo    remove htmlmail. sending test mail
      */
     protected function sendMail(array $row): void
     {
         // Preparing mailer
         /* @var $mailerService MailerService */
         $mailerService = GeneralUtility::makeInstance(MailerService::class);
+        $mailerService->setSiteIdentifier($this->siteIdentifier);
         $mailerService->start();
         $mailerService->prepare($row);
         $sentFlag = false;
@@ -1139,11 +1139,11 @@ class DmailController extends AbstractController
         if ($this->mailingMode_simple) {
             // step 4, sending simple test emails
             // setting Testmail flag
-            $mailerService->setTestMail($this->params['testmail'] ?? false);
+            $mailerService->setTestMail((bool)($this->params['testmail'] ?? false));
 
             // Fixing addresses:
             $addresses = GeneralUtility::_GP('SET');
-            $addressList = $addresses['dmail_test_email'] ? $addresses['dmail_test_email'] : $this->MOD_SETTINGS['dmail_test_email'];
+            $addressList = $addresses['dmail_test_email'] ?: $this->MOD_SETTINGS['dmail_test_email'];
             $addresses = preg_split('|[' . LF . ',;]|', $addressList ?? '');
 
             foreach ($addresses as $key => $val) {
@@ -1174,7 +1174,7 @@ class DmailController extends AbstractController
         } else if ($this->cmd == 'send_mail_test') {
             // step 4, sending test personalized test emails
             // setting Testmail flag
-            $mailerService->setTestMail((bool)$this->params['testmail'] ?? false);
+            $mailerService->setTestMail((bool)($this->params['testmail'] ?? false));
 
             if ($this->tt_address_uid) {
                 // personalized to tt_address

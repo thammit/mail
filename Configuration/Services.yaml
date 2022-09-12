@@ -13,16 +13,18 @@ services:
   MEDIAESSENZ\Mail\Service\MailerService:
       public: true
 
+  MEDIAESSENZ\Mail\Command\SpoolSendCommand:
+      tags:
+          - name: 'console.command'
+            command: 'mail:spool:send'
+            description: 'This command invokes mail in order to process queued messages.'
+
   MEDIAESSENZ\Mail\Command\InvokeMailerEngineCommand:
     tags:
       - name: 'console.command'
         command: 'mail:invoke-mailer-engine'
         description: 'Invoke Mailer Engine of EXT:mail'
-  MEDIAESSENZ\Mail\Command\SpoolSendCommand:
-    tags:
-      - name: 'console.command'
-        command: 'mail:spool:send'
-        description: 'This command invokes mail in order to process queued messages.'
+
   MEDIAESSENZ\Mail\Command\AnalyzeBounceMailCommand:
     tags:
       - name: 'console.command'

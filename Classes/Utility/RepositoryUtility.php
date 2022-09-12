@@ -39,8 +39,8 @@ class RepositoryUtility
                     ->add('where', 'sys_dmail_category.pid IN (' . str_replace(',', "','", $queryBuilder->createNamedParameter($pidList)) . ')' .
                         ' AND l18n_parent=0')
                     ->execute();
-                while ($rowCat = $res->fetch()) {
-                    if ($localizedRowCat = self::getRecordOverlay('sys_dmail_category', $rowCat, $sysLanguageUid, '')) {
+                while ($rowCat = $res->fetchAssociative()) {
+                    if ($localizedRowCat = self::getRecordOverlay('sys_dmail_category', $rowCat, $sysLanguageUid)) {
                         $categories[$localizedRowCat['uid']] = htmlspecialchars($localizedRowCat['category']);
                     }
                 }
@@ -56,51 +56,46 @@ class RepositoryUtility
      *
      * @param string $table Table name
      * @param array $row Record to overlay. Must contain uid, pid and languageField
-     * @param int $sys_language_content Language ID of the content
-     * @param string $OLmode Overlay mode. If "hideNonTranslated" then records without translation will not be returned un-translated but unset (and return value is false)
+     * @param int $sysLanguageUid Language Uid of the content
      *
      * @return array Returns the input record, possibly overlaid with a translation. But if $OLmode is "hideNonTranslated" then it will return false if no translation is found.
      * @throws Exception|DBALException
      */
-    public static function getRecordOverlay(string $table, array $row, int $sys_language_content, string $OLmode = ''): array
+    public static function getRecordOverlay(string $table, array $row, int $sysLanguageUid): array
     {
         if ($row['uid'] > 0 && $row['pid'] > 0) {
             if ($GLOBALS['TCA'][$table] && $GLOBALS['TCA'][$table]['ctrl']['languageField'] && $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField']) {
                 if (!isset($GLOBALS['TCA'][$table]['ctrl']['transOrigPointerTable'])) {
                     // Will try to overlay a record only
                     // if the sys_language_content value is larger that zero.
-                    if ($sys_language_content > 0) {
+                    if ($sysLanguageUid > 0) {
                         // Must be default language or [All], otherwise no overlaying:
                         if ($row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] <= 0) {
                             // Select overlay record:
                             $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-                            $olrow = $queryBuilder->select('*')
+                            $overlayRow = $queryBuilder->select('*')
                                 ->from($table)
                                 ->add('where', 'pid=' . intval($row['pid']) .
-                                    ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['languageField'] . '=' . $sys_language_content .
+                                    ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['languageField'] . '=' . $sysLanguageUid .
                                     ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] . '=' . intval($row['uid']))
                                 ->setMaxResults(1)/* LIMIT 1*/
                                 ->execute()
                                 ->fetchAssociative();
 
                             // Merge record content by traversing all fields:
-                            if (is_array($olrow)) {
+                            if (is_array($overlayRow)) {
                                 foreach ($row as $fN => $fV) {
-                                    if ($fN != 'uid' && $fN != 'pid' && isset($olrow[$fN])) {
-                                        if ($GLOBALS['TCA'][$table]['l10n_mode'][$fN] != 'exclude' && ($GLOBALS['TCA'][$table]['l10n_mode'][$fN] != 'mergeIfNotBlank' || strcmp(trim($olrow[$fN]), ''))) {
-                                            $row[$fN] = $olrow[$fN];
+                                    if ($fN != 'uid' && $fN != 'pid' && isset($overlayRow[$fN])) {
+                                        if ($GLOBALS['TCA'][$table]['l10n_mode'][$fN] != 'exclude' && ($GLOBALS['TCA'][$table]['l10n_mode'][$fN] != 'mergeIfNotBlank' || strcmp(trim($overlayRow[$fN]), ''))) {
+                                            $row[$fN] = $overlayRow[$fN];
                                         }
                                     }
                                 }
-                            } else if ($OLmode === 'hideNonTranslated' && $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] == 0) {
-                                // Unset, if non-translated records should be hidden.
-                                // ONLY done if the source record really is default language and not [All] in which case it is allowed.
-                                unset($row);
                             }
 
                             // Otherwise, check if sys_language_content is different from the value of the record
                             // that means a japanese site might try to display french content.
-                        } else if ($sys_language_content != $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']]) {
+                        } else if ($sysLanguageUid != $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']]) {
                             unset($row);
                         }
                     } else {

@@ -31,7 +31,7 @@ class RecipientListController extends AbstractController
      *
      * @var string
      */
-    protected $moduleName = '';
+    protected string $moduleName = '';
 
     protected int $group_uid = 0;
     protected string $lCmd = '';
@@ -46,10 +46,10 @@ class RecipientListController extends AbstractController
     protected string $table = '';
     protected array $indata = [];
 
-    protected $requestHostOnly = '';
-    protected $requestUri = '';
-    protected $httpReferer = '';
-    protected $allowedTables = ['tt_address', 'fe_users'];
+    protected string $requestHostOnly = '';
+    protected string $requestUri = '';
+    protected string $httpReferer = '';
+    protected array $allowedTables = ['tt_address', 'fe_users'];
 
     private bool $submit = false;
 

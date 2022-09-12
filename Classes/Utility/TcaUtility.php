@@ -5,7 +5,8 @@ namespace MEDIAESSENZ\Mail\Utility;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use TYPO3\CMS\Core\Database\ConnectionPool;
+use MEDIAESSENZ\Mail\Domain\Repository\SysLanguageRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -18,57 +19,38 @@ class TcaUtility
      */
     public static function getLocalizedCategories(array &$params): void
     {
-        global $LANG;
-        $uid = 0;
-        $config = $params['config'];
-        $table = $config['itemsProcFunc_config']['table'];
+        $sys_language_uid = 0;
+        $languageService = MailerUtility::getLanguageService();
+        //initialize backend user language
+        $lang = $languageService->lang == 'default' ? 'en' : $languageService->lang;
 
-        // initialize backend user language
-        if ($LANG->lang && ExtensionManagementUtility::isLoaded('static_info_tables')) {
+        if ($lang && ExtensionManagementUtility::isLoaded('static_info_tables')) {
             $sysPage = GeneralUtility::makeInstance(PageRepository::class);
-
-            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-                ->getQueryBuilderForTable('sys_language');
-            $res = $queryBuilder
-                ->select('sys_language.uid')
-                ->from('sys_language')
-                ->leftJoin(
-                    'sys_language',
-                    'static_languages',
-                    'static_languages',
-                    $queryBuilder->expr()->eq('sys_language.language_isocode', $queryBuilder->quoteIdentifier('static_languages.lg_typo3'))
-                )
-                ->where(
-                    $queryBuilder->expr()->eq('static_languages.lg_typo3', $queryBuilder->createNamedParameter($GLOBALS['LANG']->lang .
-                        $sysPage->enableFields('sys_language') .
-                        $sysPage->enableFields('static_languages')))
-                )
-                ->execute()
-                ->fetchAllAssociative();
-            foreach ($res as $row) {
-                $uid = $row['uid'];
+            $rows = GeneralUtility::makeInstance(SysLanguageRepository::class)->selectSysLanguageForSelectCategories(
+                $lang,
+                $sysPage->enableFields('sys_language'),
+                $sysPage->enableFields('static_languages')
+            );
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $sys_language_uid = (int)$row['uid'];
+                }
             }
-
         }
 
         if (is_array($params['items']) && !empty($params['items'])) {
+            $table = (string)$params['config']['itemsProcFunc_config']['table'];
+            $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
+
             foreach ($params['items'] as $k => $item) {
-                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-                    ->getQueryBuilderForTable($table);
-                $res = $queryBuilder
-                    ->select('*')
-                    ->from($table)
-                    ->where(
-                        $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter(intval($item[1])))
-                    )
-                    ->execute()
-                    ->fetchAllAssociative();
-                foreach ($res as $rowCat) {
-                    if (($localizedRowCat = MailerUtility::getRecordOverlay($table, $rowCat, $uid, ''))) {
-                        $params['items'][$k][0] = $localizedRowCat['category'];
+                $rows = $tempRepository->selectRowsByUid($table, intval($item[1]));
+                if ($rows) {
+                    foreach ($rows as $rowCat) {
+                        if ($localizedRowCat = $tempRepository->getRecordOverlay($table, $rowCat, $sys_language_uid)) {
+                            $params['items'][$k][0] = $localizedRowCat['category'];
+                        }
                     }
                 }
-
             }
         }
     }

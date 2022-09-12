@@ -479,6 +479,7 @@ class TempRepository extends AbstractRepository
      *
      * @return array the new Group IDs
      * @throws DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function getMailGroups(string $list, array $parsedGroups, string $permsClause): array
     {
@@ -502,7 +503,7 @@ class TempRepository extends AbstractRepository
                 ' AND ' . $permsClause)
             ->execute();
 
-        while ($row = $res->fetch()) {
+        while ($row = $res->fetchAssociative()) {
             if ($row['type'] == 4) {
                 // Other mail group...
                 if (!in_array($row['uid'], $parsedGroups)) {
@@ -516,4 +517,26 @@ class TempRepository extends AbstractRepository
         }
         return $groups;
     }
+
+    /**
+     * @param string $table
+     * @param int $uid
+     * @return array
+     * @throws DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     */
+    public function selectRowsByUid(string $table, int $uid): array
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+
+        return $queryBuilder
+            ->select('*')
+            ->from($table)
+            ->where(
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid))
+            )
+            ->execute()
+            ->fetchAllAssociative();
+    }
+
 }
