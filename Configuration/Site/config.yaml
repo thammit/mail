@@ -1,0 +1,19 @@
+mail:
+    transport: sendmail
+    transport_smtp_server: 'localhost:25'
+    transport_smtp_encrypt: false
+    transport_smtp_username:
+    transport_smtp_password:
+    transport_smtp_domain:
+    transport_sendmail_command:
+    transport_mbox_file:
+    transport_spool_type: file
+    transport_spool_filepath: 'uploads/tx_mailspool/'
+    dsn:
+    validators:
+        - Egulias\EmailValidator\Validation\RFCValidation
+    defaultMailFromAddress:
+    defaultMailFromName:
+    defaultMailReplyToAddress:
+    defaultMailReplyToName:
+    format: both

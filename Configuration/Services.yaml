@@ -7,6 +7,9 @@ services:
   MEDIAESSENZ\Mail\:
     resource: '../Classes/*'
 
+  MEDIAESSENZ\Mail\Mail\Mailer:
+      public: true
+
   MEDIAESSENZ\Mail\Service\MailerService:
       public: true
 
@@ -15,10 +18,10 @@ services:
       - name: 'console.command'
         command: 'mail:invoke-mailer-engine'
         description: 'Invoke Mailer Engine of EXT:mail'
-  MEDIAESSENZ\Mail\Command\MailCommand:
+  MEDIAESSENZ\Mail\Command\SpoolSendCommand:
     tags:
       - name: 'console.command'
-        command: 'mail:mailing-queue'
+        command: 'mail:spool:send'
         description: 'This command invokes mail in order to process queued messages.'
   MEDIAESSENZ\Mail\Command\AnalyzeBounceMailCommand:
     tags:

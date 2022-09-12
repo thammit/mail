@@ -8,7 +8,7 @@ use DirectMailTeam\DirectMail\MailSelect;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Utility\CsvUtility as MailCsvUtility;
-use MEDIAESSENZ\Mail\Utility\MailUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -251,7 +251,7 @@ class RecipientListController extends AbstractController
                                     $info['fromPages'][] = $pageinfo;
                                     $pageIdArray[] = $pageUid;
                                     if ($mailGroup['recursive']) {
-                                        $pageIdArray = array_merge($pageIdArray, MailUtility::getRecursiveSelect($pageUid, $this->perms_clause));
+                                        $pageIdArray = array_merge($pageIdArray, MailerUtility::getRecursiveSelect($pageUid, $this->perms_clause));
                                     }
                                 }
                             }
@@ -293,9 +293,9 @@ class RecipientListController extends AbstractController
                             $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
                             $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($mailGroup['list']), $this->fieldList);
                         } else {
-                            $recipients = MailUtility::rearrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
+                            $recipients = MailerUtility::rearrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
                         }
-                        $idLists['PLAINLIST'] = MailUtility::cleanPlainList($recipients);
+                        $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($recipients);
                         break;
                     case 2:
                         // Static MM list
@@ -344,7 +344,7 @@ class RecipientListController extends AbstractController
                             $idLists[$this->userTable] = array_unique($idLists[$this->userTable]);
                         }
                         if (is_array($idLists['PLAINLIST'])) {
-                            $idLists['PLAINLIST'] = MailUtility::cleanPlainList($idLists['PLAINLIST']);
+                            $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($idLists['PLAINLIST']);
                         }
                         break;
                     default:
@@ -389,7 +389,7 @@ class RecipientListController extends AbstractController
         $str = '';
         // check if the user has the right to modify the table
         if ($this->getBackendUser()->check('tables_modify', $table)) {
-            $editOnClickLink = MailUtility::getEditOnClickLink([
+            $editOnClickLink = MailerUtility::getEditOnClickLink([
                 'edit' => [
                     $table => [
                         $uid => 'edit',
@@ -769,7 +769,7 @@ class RecipientListController extends AbstractController
 
             $categories = implode(',', $categoriesArray);
 
-            $editOnClickLink = MailUtility::getEditOnClickLink([
+            $editOnClickLink = MailerUtility::getEditOnClickLink([
                 'edit' => [
                     $this->table => [
                         $row['uid'] => 'edit',

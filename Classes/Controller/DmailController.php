@@ -8,7 +8,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
-use MEDIAESSENZ\Mail\Utility\MailUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
@@ -277,7 +277,7 @@ class DmailController extends AbstractController
                         $mailData = BackendUtility::getRecord('sys_dmail', $newUid);
                         // fetch the data
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = MailUtility::fetchUrlContentsForMailRecord($mailData, $this->params);
+                            $fetchMessage = MailerUtility::fetchUrlContentsForMailRecord($mailData, $this->params);
                             $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
                         }
 
@@ -301,7 +301,7 @@ class DmailController extends AbstractController
                         $mailData = BackendUtility::getRecord('sys_dmail', $newUid);
                         // fetch the data
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = MailUtility::fetchUrlContentsForMailRecord($mailData, $this->params);
+                            $fetchMessage = MailerUtility::fetchUrlContentsForMailRecord($mailData, $this->params);
                             $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
                         }
 
@@ -350,7 +350,7 @@ class DmailController extends AbstractController
                         }
                     } else {
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = MailUtility::fetchUrlContentsForMailRecord($mailData, $this->params);
+                            $fetchMessage = MailerUtility::fetchUrlContentsForMailRecord($mailData, $this->params);
                             $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
                         }
 
@@ -628,7 +628,7 @@ class DmailController extends AbstractController
                     'title' => htmlspecialchars($row['title']),
                     'createDmailLink' => $createDmailLink,
                     'createLink' => $createLink,
-                    'editOnClickLink' => MailUtility::getEditOnClickLink($params),
+                    'editOnClickLink' => MailerUtility::getEditOnClickLink($params),
                     'iconActionsOpen' => $iconActionsOpen,
                     'previewLink' => $previewLink,
                 ];
@@ -809,7 +809,7 @@ class DmailController extends AbstractController
             // link in the mail
             $message = '<!--DMAILER_SECTION_BOUNDARY_-->' . $indata['message'] . '<!--DMAILER_SECTION_BOUNDARY_END-->';
             if (trim($this->params['use_rdct'])) {
-                $message = MailUtility::substUrlsInPlainText(
+                $message = MailerUtility::substUrlsInPlainText(
                     $message,
                     $this->params['long_link_mode'] ? 'all' : '76',
                     $this->getUrlBase((int)$this->params['pid'])
@@ -966,7 +966,7 @@ class DmailController extends AbstractController
                     ]
                 );
 
-                $editParams = MailUtility::getEditOnClickLink([
+                $editParams = MailerUtility::getEditOnClickLink([
                     'edit' => [
                         'sys_dmail' => [
                             $mailData['uid'] => 'edit',
@@ -988,14 +988,14 @@ class DmailController extends AbstractController
             'sendOptions', 'includeMedia', 'flowedFormat', 'sys_language_uid', 'plainParams', 'HTMLParams', 'encoding', 'charset', 'issent', 'renderedsize'];
         foreach ($nameArr as $name) {
             $trs[] = [
-                'title' => MailUtility::fName($name),
+                'title' => MailerUtility::fName($name),
                 'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('sys_dmail', $name, ($mailData[$name] ?? false))),
             ];
         }
 
         // attachments need to be fetched manually as BackendUtility::getProcessedValue can't do that
         $fileNames = [];
-        $attachments = MailUtility::getAttachments($mailData['uid'] ?? 0);
+        $attachments = MailerUtility::getAttachments($mailData['uid'] ?? 0);
         /** @var FileReference $attachment */
         if (count($attachments)) {
             foreach ($attachments as $attachment) {
@@ -1004,14 +1004,14 @@ class DmailController extends AbstractController
         }
 
         $trs[] = [
-            'title' => MailUtility::fName('attachment'),
+            'title' => MailerUtility::fName('attachment'),
             'value' => implode(', ', $fileNames),
         ];
 
         return [
             'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $mailData, Icon::SIZE_SMALL),
             'title' => htmlspecialchars($mailData['subject'] ?? ''),
-            'theadTitle1' => MailUtility::fName('subject'),
+            'theadTitle1' => MailerUtility::fName('subject'),
             'theadTitle2' => GeneralUtility::fixed_lgd_cs(htmlspecialchars($mailData['subject'] ?? ''), 60),
             'trs' => $trs,
             'out' => $content,
@@ -1182,8 +1182,8 @@ class DmailController extends AbstractController
 
                 if (!empty($res)) {
                     foreach ($res as $recipRow) {
-                        $recipRow = MailUtility::convertFields($recipRow);
-                        $recipRow['sys_dmail_categories_list'] = MailUtility::getListOfRecipientCategories('tt_address', $recipRow['uid']);
+                        $recipRow = MailerUtility::convertFields($recipRow);
+                        $recipRow['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories('tt_address', $recipRow['uid']);
                         $mailerService->sendAdvanced($recipRow, 't');
                         $sentFlag = true;
 
@@ -1316,8 +1316,8 @@ class DmailController extends AbstractController
                 $rows = $idLists['PLAINLIST'];
             }
             foreach ($rows as $rec) {
-                $recipRow = MailUtility::convertFields($rec);
-                $recipRow['sys_dmail_categories_list'] = MailUtility::getListOfRecipientCategories($table, $recipRow['uid']);
+                $recipRow = MailerUtility::convertFields($rec);
+                $recipRow['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories($table, $recipRow['uid']);
                 $kc = substr($table, 0, 1);
                 $returnCode = $mailerService->sendAdvanced($recipRow, $kc == 'p' ? 'P' : $kc);
                 if ($returnCode) {
@@ -1368,7 +1368,7 @@ class DmailController extends AbstractController
                             'returnUrl' => $requestUri,
                         ];
 
-                        $editOnClick = MailUtility::getEditOnClickLink($params);
+                        $editOnClick = MailerUtility::getEditOnClickLink($params);
                         $editLink = '<td><a href="#" onClick="' . $editOnClick . '" title="' . $this->getLanguageService()->getLL('dmail_edit') . '">' .
                             $iconActionsOpen .
                             '</a></td>';
@@ -1432,7 +1432,7 @@ class DmailController extends AbstractController
             }
         }
 
-        // Mail groups        
+        // Mail groups
         $groups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupForFinalMail(
             $this->id,
             (int)$direct_mail_row['sys_language_uid'],
@@ -1541,7 +1541,7 @@ class DmailController extends AbstractController
         }
 
         if (is_array($idLists['PLAINLIST'] ?? false)) {
-            $idLists['PLAINLIST'] = MailUtility::cleanPlainList($idLists['PLAINLIST']);
+            $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($idLists['PLAINLIST']);
         }
 
         /**
@@ -1603,7 +1603,7 @@ class DmailController extends AbstractController
                                 if (is_array($pageinfo)) {
                                     $pageIdArray[] = $pageUid;
                                     if ($mailGroup['recursive']) {
-                                        $pageIdArray = array_merge($pageIdArray, MailUtility::getRecursiveSelect($pageUid, $this->perms_clause));
+                                        $pageIdArray = array_merge($pageIdArray, MailerUtility::getRecursiveSelect($pageUid, $this->perms_clause));
                                     }
                                 }
                             }
@@ -1644,9 +1644,9 @@ class DmailController extends AbstractController
                             $dmCsvUtility = GeneralUtility::makeInstance(CsvUtility::class);
                             $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($mailGroup['list']));
                         } else {
-                            $recipients = MailUtility::rearrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
+                            $recipients = MailerUtility::rearrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
                         }
-                        $idLists['PLAINLIST'] = MailUtility::cleanPlainList($recipients);
+                        $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($recipients);
                         break;
                     case 2:
                         // Static MM list
@@ -1794,7 +1794,7 @@ class DmailController extends AbstractController
 
             // remove cache
             $dataHandler->clear_cacheCmd($this->pages_uid);
-            $theOutput = MailUtility::fetchUrlContentsForMailRecord($row, $this->params);
+            $theOutput = MailerUtility::fetchUrlContentsForMailRecord($row, $this->params);
         }
 
         // @TODO Perhaps we should here check if TV is installed and fetch content from that instead of the old Columns...
@@ -1943,7 +1943,7 @@ class DmailController extends AbstractController
         if ($pageRecord['doktype']) {
             $newRecord['subject'] = $pageRecord['title'];
             $newRecord['page'] = $pageRecord['uid'];
-            $newRecord['charset'] = MailUtility::getCharacterSet();
+            $newRecord['charset'] = MailerUtility::getCharacterSet();
         }
 
         // save to database

@@ -32,7 +32,7 @@ use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
-class MailUtility
+class MailerUtility
 {
     /**
      * Get the ID of page in a tree
@@ -712,18 +712,18 @@ class MailUtility
         $htmlCode = $content;
         $info = [];
         if (strpos(' ' . $htmlCode, '<frame ')) {
-            $attribRegex = MailUtility::tag_regex('frame');
+            $attribRegex = MailerUtility::tag_regex('frame');
             // Splits the document by the beginning of the above tags
             $codepieces = preg_split($attribRegex, $htmlCode, 1000000);
             $pieces = count($codepieces);
             for ($i = 1; $i < $pieces; $i++) {
                 preg_match('/[^>]*/', $codepieces[$i], $reg);
                 // Fetches the attributes for the tag
-                $attributes = MailUtility::get_tag_attributes($reg[0]);
+                $attributes = MailerUtility::get_tag_attributes($reg[0]);
                 $frame = [];
                 $frame['src'] = $attributes['src'];
                 $frame['name'] = $attributes['name'];
-                $frame['absRef'] = MailUtility::absRef($frame['src'], $path);
+                $frame['absRef'] = MailerUtility::absRef($frame['src'], $path);
                 $info[] = $frame;
             }
         }

@@ -64,7 +64,7 @@ class TcaUtility
                     ->execute()
                     ->fetchAllAssociative();
                 foreach ($res as $rowCat) {
-                    if (($localizedRowCat = MailUtility::getRecordOverlay($table, $rowCat, $uid, ''))) {
+                    if (($localizedRowCat = MailerUtility::getRecordOverlay($table, $rowCat, $uid, ''))) {
                         $params['items'][$k][0] = $localizedRowCat['category'];
                     }
                 }

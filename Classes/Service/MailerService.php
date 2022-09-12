@@ -5,7 +5,7 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use MEDIAESSENZ\Mail\Utility\MailUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -184,7 +184,7 @@ class MailerService implements LoggerAwareInterface
     public function addPlainContent(string $content): void
     {
         $this->setPlainContent($content);
-        MailUtility::substHTTPurlsInPlainText($this);
+        MailerUtility::substHTTPurlsInPlainText($this);
     }
 
     public function setPlainLinkIds($array): void
@@ -243,7 +243,7 @@ class MailerService implements LoggerAwareInterface
     {
 
         // Sets the message id
-        $host = MailUtility::getHostname();
+        $host = MailerUtility::getHostname();
         if (!$host || $host == '127.0.0.1' || $host == 'localhost' || $host == 'localhost.localdomain') {
             $host = ($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] ? preg_replace('/[^A-Za-z0-9_\-]/', '_', $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']) : 'localhost') . '.TYPO3';
         }
@@ -294,7 +294,7 @@ class MailerService implements LoggerAwareInterface
 
         $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset, $this->charset) : '');
 
-        $this->priority = MailUtility::intInRangeWrapper((int)$mailData['priority'], 1, 5);
+        $this->priority = MailerUtility::intInRangeWrapper((int)$mailData['priority'], 1, 5);
         $this->authCodeFieldList = ($mailData['authcode_fieldList'] ?: 'uid');
 
         $this->dmailer['sectionBoundary'] = '<!--DMAILER_SECTION_BOUNDARY';
@@ -310,7 +310,7 @@ class MailerService implements LoggerAwareInterface
 
             // Remove useless HTML comments
             if (substr($this->dmailer['boundaryParts_html'][$bKey][0], 1) == 'END') {
-                $this->dmailer['boundaryParts_html'][$bKey][1] = MailUtility::removeHtmlComments($this->dmailer['boundaryParts_html'][$bKey][1]);
+                $this->dmailer['boundaryParts_html'][$bKey][1] = MailerUtility::removeHtmlComments($this->dmailer['boundaryParts_html'][$bKey][1]);
             }
 
             // Now, analyzing which media files are used in this part of the mail:
@@ -467,7 +467,7 @@ class MailerService implements LoggerAwareInterface
                 if ($this->mailHasContent) {
                     $tempContent_Plain = $this->replaceMailMarkers($tempContent_Plain, $recipientData, $additionalMarkers);
                     if (trim($this->dmailer['sys_dmail_rec']['use_rdct']) || trim($this->dmailer['sys_dmail_rec']['long_link_mode'])) {
-                        $tempContent_Plain = MailUtility::substUrlsInPlainText($tempContent_Plain, $this->dmailer['sys_dmail_rec']['long_link_mode'] ? 'all' : '76', $this->dmailer['sys_dmail_rec']['long_link_rdct_url']);
+                        $tempContent_Plain = MailerUtility::substUrlsInPlainText($tempContent_Plain, $this->dmailer['sys_dmail_rec']['long_link_mode'] ? 'all' : '76', $this->dmailer['sys_dmail_rec']['long_link_rdct_url']);
                     }
                     $this->mailParts['plain']['content'] = $tempContent_Plain;
                     $returnCode |= 2;
@@ -483,7 +483,7 @@ class MailerService implements LoggerAwareInterface
                 $email = $recipientData['email'];
                 $name = $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset);
 
-                $recipient = MailUtility::createRecipient($email, $name);
+                $recipient = MailerUtility::createRecipient($email, $name);
             }
 
             if ($returnCode && !empty($recipient)) {
@@ -567,7 +567,7 @@ class MailerService implements LoggerAwareInterface
                     };
 
                     // Send mails
-                    $sendIds = MailUtility::getSentMails($mailUid, $tKey);
+                    $sendIds = MailerUtility::getSentMails($mailUid, $tKey);
                     if ($table == 'PLAINLIST') {
                         $sendIdsArr = explode(',', $sendIds);
                         foreach ($listArr as $kval => $recipientData) {
@@ -596,7 +596,7 @@ class MailerService implements LoggerAwareInterface
                                 ->execute();
 
                             while ($recipientData = $statement->fetchAssociative()) {
-                                $recipientData['sys_dmail_categories_list'] = MailUtility::getListOfRecipientCategories($table, $recipientData['uid']);
+                                $recipientData['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories($table, $recipientData['uid']);
 
                                 if ($c >= $this->sendPerCycle) {
                                     $returnVal = false;
@@ -611,7 +611,7 @@ class MailerService implements LoggerAwareInterface
                         }
                     }
 
-                    $this->logger->debug(MailUtility::getLanguageService()->getLL('dmailer_sending') . ' ' . $ct . ' ' . MailUtility::getLanguageService()->getLL('dmailer_sending_to_table') . ' ' . $table);
+                    $this->logger->debug(MailerUtility::getLanguageService()->getLL('dmailer_sending') . ' ' . $ct . ' ' . MailerUtility::getLanguageService()->getLL('dmailer_sending_to_table') . ' ' . $table);
                 }
             }
         }
@@ -632,18 +632,18 @@ class MailerService implements LoggerAwareInterface
      */
     protected function shipOfMail(int $mailUid, array $recipientData, string $tableKey): void
     {
-        if (MailUtility::isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $tableKey) === false) {
-            $pt = MailUtility::getMilliseconds();
-            $recipientData = MailUtility::convertFields($recipientData);
+        if (MailerUtility::isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $tableKey) === false) {
+            $pt = MailerUtility::getMilliseconds();
+            $recipientData = MailerUtility::convertFields($recipientData);
 
             // write to dmail_maillog table. if it can be written, continue with sending.
             // if not, stop the script and report error
             $rC = 0;
-            $logUid = MailUtility::addToMailLog($mailUid, $tableKey . '_' . $recipientData['uid'], strlen($this->message), MailUtility::getMilliseconds() - $pt, $rC, $recipientData['email']);
+            $logUid = MailerUtility::addToMailLog($mailUid, $tableKey . '_' . $recipientData['uid'], strlen($this->message), MailerUtility::getMilliseconds() - $pt, $rC, $recipientData['email']);
 
             if ($logUid) {
                 $rC = $this->sendAdvanced($recipientData, $tableKey);
-                $parseTime = MailUtility::getMilliseconds() - $pt;
+                $parseTime = MailerUtility::getMilliseconds() - $pt;
 
                 $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
                 $ok = $queryBuilder
@@ -692,12 +692,12 @@ class MailerService implements LoggerAwareInterface
 
         switch ($key) {
             case 'begin':
-                $subject = MailUtility::getLanguageService()->getLL('dmailer_mid') . ' ' . $mailUid . ' ' . MailUtility::getLanguageService()->getLL('dmailer_job_begin');
-                $message = MailUtility::getLanguageService()->getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s');
+                $subject = MailerUtility::getLanguageService()->getLL('dmailer_mid') . ' ' . $mailUid . ' ' . MailerUtility::getLanguageService()->getLL('dmailer_job_begin');
+                $message = MailerUtility::getLanguageService()->getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s');
                 break;
             case 'end':
-                $subject = MailUtility::getLanguageService()->getLL('dmailer_mid') . ' ' . $mailUid . ' ' . MailUtility::getLanguageService()->getLL('dmailer_job_end');
-                $message = MailUtility::getLanguageService()->getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s');
+                $subject = MailerUtility::getLanguageService()->getLL('dmailer_mid') . ' ' . $mailUid . ' ' . MailerUtility::getLanguageService()->getLL('dmailer_job_end');
+                $message = MailerUtility::getLanguageService()->getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s');
                 break;
             default:
                 // do nothing
@@ -728,22 +728,24 @@ class MailerService implements LoggerAwareInterface
      * @return void
      * @throws DBALException
      * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function runcron(): void
     {
-        $this->sendPerCycle = trim($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['sendPerCycle']) ? intval($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['sendPerCycle']) : 50;
+        $this->sendPerCycle = (int)(MailerUtility::getExtensionConfiguration('sendPerCycle') ?: 50);
         $this->notificationJob = (bool)($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['notificationJob']);
 
-        if (!is_object(MailUtility::getLanguageService())) {
+        if (!is_object(MailerUtility::getLanguageService())) {
             $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
             $language = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['cron_language'] ?: $this->backendUserLanguage;
-            MailUtility::getLanguageService()->init(trim($language));
+            MailerUtility::getLanguageService()->init(trim($language));
         }
 
         // always include locallang file
-        MailUtility::getLanguageService()->includeLLFile('EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf');
+        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
 
-        $pt = MailUtility::getMilliseconds();
+        $pt = MailerUtility::getMilliseconds();
 
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail');
         $queryBuilder
@@ -761,10 +763,10 @@ class MailerService implements LoggerAwareInterface
             ->orderBy('scheduled')
             ->execute();
 
-        $this->logger->debug(MailUtility::getLanguageService()->getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
+        $this->logger->debug(MailerUtility::getLanguageService()->getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
 
         if (($row = $statement->fetch())) {
-            $this->logger->debug(MailUtility::getLanguageService()->getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . MailUtility::getLanguageService()->getLL('dmailer_processed'));
+            $this->logger->debug(MailerUtility::getLanguageService()->getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . MailerUtility::getLanguageService()->getLL('dmailer_processed'));
             $this->prepare($row);
             $query_info = unserialize($row['query_info']);
 
@@ -792,11 +794,11 @@ class MailerService implements LoggerAwareInterface
                 $this->setBeginEnd((int)$row['uid'], 'end');
             }
         } else {
-            $this->logger->debug(MailUtility::getLanguageService()->getLL('dmailer_nothing_to_do'));
+            $this->logger->debug(MailerUtility::getLanguageService()->getLL('dmailer_nothing_to_do'));
         }
 
-        $parsetime = MailUtility::getMilliseconds() - $pt;
-        $this->logger->debug(MailUtility::getLanguageService()->getLL('dmailer_ending') . ' ' . $parsetime . ' ms');
+        $parsetime = MailerUtility::getMilliseconds() - $pt;
+        $this->logger->debug(MailerUtility::getLanguageService()->getLL('dmailer_ending') . ' ' . $parsetime . ' ms');
     }
 
     /**
@@ -838,7 +840,7 @@ class MailerService implements LoggerAwareInterface
 
         // handle FAL attachments
         if ((int)$this->dmailer['sys_dmail_rec']['attachment'] > 0) {
-            $files = MailUtility::getAttachments($this->dmailer['sys_dmail_rec']['uid']);
+            $files = MailerUtility::getAttachments($this->dmailer['sys_dmail_rec']['uid']);
             /** @var FileReference $file */
             foreach ($files as $file) {
                 $filePath = Environment::getPublicPath() . '/' . $file->getPublicUrl();
@@ -924,11 +926,11 @@ class MailerService implements LoggerAwareInterface
         if (!$status) {
             return false;
         }
-        if (MailUtility::extractFramesInfo($this->mailParts['html']['content'], $this->mailParts['html']['path'])) {
+        if (MailerUtility::extractFramesInfo($this->mailParts['html']['content'], $this->mailParts['html']['path'])) {
             return 'Document was a frameset. Stopped';
         }
         $this->extractHyperLinks();
-        MailUtility::substHREFsInHTML($this);
+        MailerUtility::substHREFsInHTML($this);
         return true;
     }
 
@@ -947,7 +949,7 @@ class MailerService implements LoggerAwareInterface
         $this->mailParts['html']['content'] = GeneralUtility::getURL($url);
         if ($this->mailParts['html']['content']) {
             $urlPart = parse_url($url);
-            if (MailUtility::getExtensionConfiguration('UseHttpToFetch')) {
+            if (MailerUtility::getExtensionConfiguration('UseHttpToFetch')) {
                 $urlPart['scheme'] = 'http';
             }
 
@@ -977,7 +979,7 @@ class MailerService implements LoggerAwareInterface
         $this->mailParts['html']['media'] = [];
 
         $htmlContent = $this->mailParts['html']['content'];
-        $attribRegex = MailUtility::tag_regex(['img', 'table', 'td', 'tr', 'body', 'iframe', 'script', 'input', 'embed']);
+        $attribRegex = MailerUtility::tag_regex(['img', 'table', 'td', 'tr', 'body', 'iframe', 'script', 'input', 'embed']);
         $imageList = '';
 
         // split the document by the beginning of the above tags
@@ -991,7 +993,7 @@ class MailerService implements LoggerAwareInterface
             $dummy = preg_match('/[^>]*/', $codeParts[$i], $reg);
 
             // Fetches the attributes for the tag
-            $attributes = MailUtility::get_tag_attributes($reg[0]);
+            $attributes = MailerUtility::get_tag_attributes($reg[0]);
             $imageData = [];
 
             // Finds the src or background attribute
@@ -1003,7 +1005,7 @@ class MailerService implements LoggerAwareInterface
                 $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
                 if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
                     $imageList .= '|' . $imageData['subst_str'] . '|';
-                    $imageData['absRef'] = MailUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
+                    $imageData['absRef'] = MailerUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
                     $imageData['tag'] = $tag;
                     $imageData['use_jumpurl'] = (isset($attributes['dmailerping']) && $attributes['dmailerping']) ? 1 : 0;
                     $imageData['do_not_embed'] = !empty($attributes['do_not_embed']);
@@ -1013,14 +1015,14 @@ class MailerService implements LoggerAwareInterface
         }
 
         // Extracting stylesheets
-        $attribRegex = MailUtility::tag_regex(['link']);
+        $attribRegex = MailerUtility::tag_regex(['link']);
         // Split the document by the beginning of the above tags
         $codeParts = preg_split($attribRegex, $htmlContent);
         $pieces = count($codeParts);
         for ($i = 1; $i < $pieces; $i++) {
             $dummy = preg_match('/[^>]*/', $codeParts[$i], $reg);
             // fetches the attributes for the tag
-            $attributes = MailUtility::get_tag_attributes($reg[0]);
+            $attributes = MailerUtility::get_tag_attributes($reg[0]);
             $imageData = [];
             if (strtolower($attributes['rel']) == 'stylesheet' && $attributes['href']) {
                 // Finds the src or background attribute
@@ -1031,7 +1033,7 @@ class MailerService implements LoggerAwareInterface
                 $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
                 if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
                     $imageList .= '|' . $imageData['subst_str'] . '|';
-                    $imageData['absRef'] = MailUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
+                    $imageData['absRef'] = MailerUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
                     $this->mailParts['html']['media'][] = $imageData;
                 }
             }
@@ -1059,7 +1061,7 @@ class MailerService implements LoggerAwareInterface
                 case 'jpg':
                     if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
                         $imageList .= '|' . $imageData['subst_str'] . '|';
-                        $imageData['absRef'] = MailUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
+                        $imageData['absRef'] = MailerUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
                         $this->mailParts['html']['media'][] = $imageData;
                     }
                     break;
@@ -1079,7 +1081,7 @@ class MailerService implements LoggerAwareInterface
         $linkList = '';
 
         $htmlContent = $this->mailParts['html']['content'];
-        $attribRegex = MailUtility::tag_regex(['a', 'form', 'area']);
+        $attribRegex = MailerUtility::tag_regex(['a', 'form', 'area']);
 
         // Splits the document by the beginning of the above tags
         $codeParts = preg_split($attribRegex, $htmlContent);
@@ -1092,7 +1094,7 @@ class MailerService implements LoggerAwareInterface
             preg_match('/[^>]*/', $codeParts[$i], $reg);
 
             // Fetches the attributes for the tag
-            $attributes = MailUtility::get_tag_attributes($reg[0], false);
+            $attributes = MailerUtility::get_tag_attributes($reg[0], false);
             $hrefData = [];
             $hrefData['ref'] = ($attributes['href'] ?? '') ?: ($attributes['action'] ?? '');
             $quotes = (str_starts_with($hrefData['ref'], '"')) ? '"' : '';
@@ -1104,7 +1106,7 @@ class MailerService implements LoggerAwareInterface
                 $hrefData['subst_str'] = $quotes . $hrefData['ref'] . $quotes;
                 if ($hrefData['ref'] && !str_starts_with(trim($hrefData['ref']), '#') && !str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
                     $linkList .= '|' . $hrefData['subst_str'] . '|';
-                    $hrefData['absRef'] = MailUtility::absRef($hrefData['ref'], $this->mailParts['html']['path']);
+                    $hrefData['absRef'] = MailerUtility::absRef($hrefData['ref'], $this->mailParts['html']['path']);
                     $hrefData['tag'] = $tag;
                     $hrefData['no_jumpurl'] = intval(trim(($attributes['no_jumpurl'] ?? ''), '"')) ? 1 : 0;
                     $this->mailParts['html']['hrefs'][] = $hrefData;
@@ -1123,7 +1125,7 @@ class MailerService implements LoggerAwareInterface
                 $hrefData['subst_str'] = $hrefData['quotes'] . $hrefData['ref'] . $hrefData['quotes'];
                 if (!str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
                     $linkList .= '|' . $hrefData['subst_str'] . '|';
-                    $hrefData['absRef'] = MailUtility::absRef($hrefData['ref'], $this->mailParts['html']['path']);
+                    $hrefData['absRef'] = MailerUtility::absRef($hrefData['ref'], $this->mailParts['html']['path']);
                     $this->mailParts['html']['hrefs'][] = $hrefData;
                 }
             }
