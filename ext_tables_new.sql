@@ -1,7 +1,4 @@
-#
-# Table structure for table 'cache_sys_dmail_stat'
-#
-CREATE TABLE cache_sys_dmail_stat (
+CREATE TABLE cache_tx_mail_stat (
   mid int(11) DEFAULT '0' NOT NULL,
   rid varchar(11) DEFAULT '0' NOT NULL,
   rtbl char(1) DEFAULT '' NOT NULL,
@@ -38,11 +35,7 @@ CREATE TABLE cache_sys_dmail_stat (
   KEY `mid` (mid)
 );
 
-
-#
-# Table structure for table 'sys_dmail'
-#
-CREATE TABLE sys_dmail (
+CREATE TABLE tx_mail_mail (
   uid int(11) unsigned NOT NULL auto_increment,
   pid int(11) unsigned DEFAULT '0' NOT NULL,
   tstamp int(11) unsigned DEFAULT '0' NOT NULL,
@@ -81,10 +74,7 @@ CREATE TABLE sys_dmail (
   PRIMARY KEY (uid)
 );
 
-#
-# Table structure for table 'sys_dmail_group'
-#
-CREATE TABLE sys_dmail_group (
+CREATE TABLE tx_mail_group (
   uid int(11) unsigned NOT NULL auto_increment,
   pid int(11) unsigned DEFAULT '0' NOT NULL,
   tstamp int(11) unsigned DEFAULT '0' NOT NULL,
@@ -106,10 +96,7 @@ CREATE TABLE sys_dmail_group (
   KEY parent (pid)
 );
 
-#
-# Table structure for table 'sys_dmail_group_mm'
-#
-CREATE TABLE sys_dmail_group_mm (
+CREATE TABLE tx_mail_group_mm (
   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
   tablenames varchar(30) DEFAULT '' NOT NULL,
@@ -118,10 +105,7 @@ CREATE TABLE sys_dmail_group_mm (
   KEY uid_foreign (uid_foreign)
 );
 
-#
-# Table structure for table 'sys_dmail_maillog'
-#
-CREATE TABLE sys_dmail_maillog (
+CREATE TABLE tx_mail_log (
   uid int(11) unsigned NOT NULL auto_increment,
   mid int(11) unsigned DEFAULT '0' NOT NULL,
   rid varchar(11) DEFAULT '0' NOT NULL,
@@ -141,10 +125,7 @@ CREATE TABLE sys_dmail_maillog (
   KEY `mid` (mid,response_type,rtbl,rid)
 );
 
-#
-# Table structure for table 'sys_dmail_category'
-#
-CREATE TABLE sys_dmail_category (
+CREATE TABLE tx_mail_category (
     uid int(11) unsigned NOT NULL auto_increment,
     pid int(11) unsigned DEFAULT '0' NOT NULL,
     tstamp int(11) unsigned DEFAULT '0' NOT NULL,
@@ -163,11 +144,7 @@ CREATE TABLE sys_dmail_category (
     KEY parent (pid)
 );
 
-#
-# Table structure for table 'sys_dmail_group_category_mm'
-#
-#
-CREATE TABLE sys_dmail_group_category_mm (
+CREATE TABLE tx_mail_group_category_mm (
   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
   tablenames varchar(30) DEFAULT '' NOT NULL,
@@ -176,11 +153,7 @@ CREATE TABLE sys_dmail_group_category_mm (
   KEY uid_foreign (uid_foreign)
 );
 
-#
-# Table structure for table 'sys_dmail_feuser_category_mm'
-#
-#
-CREATE TABLE sys_dmail_feuser_category_mm (
+CREATE TABLE tx_mail_feuser_category_mm (
   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
   tablenames varchar(30) DEFAULT '' NOT NULL,
@@ -189,11 +162,7 @@ CREATE TABLE sys_dmail_feuser_category_mm (
   KEY uid_foreign (uid_foreign)
 );
 
-#
-# Table structure for table 'sys_dmail_ttaddress_category_mm'
-#
-#
-CREATE TABLE sys_dmail_ttaddress_category_mm (
+CREATE TABLE tx_mail_ttaddress_category_mm (
   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
   tablenames varchar(30) DEFAULT '' NOT NULL,
@@ -202,11 +171,7 @@ CREATE TABLE sys_dmail_ttaddress_category_mm (
   KEY uid_foreign (uid_foreign)
 );
 
-#
-# Table structure for table 'sys_dmail_ttcontent_category_mm'
-#
-#
-CREATE TABLE sys_dmail_ttcontent_category_mm (
+CREATE TABLE tx_mail_ttcontent_category_mm (
   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
   tablenames varchar(30) DEFAULT '' NOT NULL,
@@ -220,16 +185,16 @@ CREATE TABLE sys_dmail_ttcontent_category_mm (
 # you should upgrade the tables to content these fields.
 
 CREATE TABLE fe_users (
-  module_sys_dmail_newsletter tinyint(3) unsigned DEFAULT '0' NOT NULL,
-  module_sys_dmail_category int(10) unsigned DEFAULT '0' NOT NULL,
-  module_sys_dmail_html tinyint(3) unsigned DEFAULT '0' NOT NULL
+  mail_newsletter tinyint(3) unsigned DEFAULT '0' NOT NULL,
+  mail_category int(10) unsigned DEFAULT '0' NOT NULL,
+  mail_html tinyint(3) unsigned DEFAULT '0' NOT NULL
 );
 
 CREATE TABLE tt_address (
-  module_sys_dmail_category int(10) unsigned DEFAULT '0' NOT NULL,
-  module_sys_dmail_html tinyint(3) unsigned DEFAULT '0' NOT NULL,
+  mail_category int(10) unsigned DEFAULT '0' NOT NULL,
+  mail_html tinyint(3) unsigned DEFAULT '0' NOT NULL,
 );
 
 CREATE TABLE tt_content (
-  module_sys_dmail_category int(10) unsigned DEFAULT '0' NOT NULL,
+  mail_category int(10) unsigned DEFAULT '0' NOT NULL,
 );

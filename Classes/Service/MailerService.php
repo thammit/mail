@@ -48,7 +48,7 @@ class MailerService implements LoggerAwareInterface
     protected bool $isPlain = false;
     protected bool $includeMedia = false;
     protected bool $flowedFormat = false;
-    protected string $backendUserLanguage = 'en';
+    protected string $backendUserLanguage = 'default';
     protected bool $isTestMail = false;
     protected string $charset = 'utf-8';
     protected string $messageId = '';
@@ -744,16 +744,18 @@ class MailerService implements LoggerAwareInterface
      * Called from the dmailerd script.
      * Look if there is newsletter to be sent and do the sending process. Otherwise, quit runtime
      *
+     * @param string $siteIdentifier
+     * @param int $maxMails
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function runcron(): void
+    public function runcron(string $siteIdentifier, int $maxMails): void
     {
         $this->sendPerCycle = (int)(MailerUtility::getExtensionConfiguration('sendPerCycle') ?: 50);
-        $this->notificationJob = (bool)($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['notificationJob']);
+        $this->notificationJob = (bool)MailerUtility::getExtensionConfiguration('notificationJob');
 
         if (!is_object(MailerUtility::getLanguageService())) {
             $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
@@ -784,7 +786,7 @@ class MailerService implements LoggerAwareInterface
 
         $this->logger->debug(MailerUtility::getLanguageService()->getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
 
-        if (($row = $statement->fetch())) {
+        if (($row = $statement->fetchAssociative())) {
             $this->logger->debug(MailerUtility::getLanguageService()->getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . MailerUtility::getLanguageService()->getLL('dmailer_processed'));
             $this->prepare($row);
             $query_info = unserialize($row['query_info']);

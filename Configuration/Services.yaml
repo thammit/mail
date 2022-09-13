@@ -17,16 +17,16 @@ services:
     tags:
       - name: 'console.command'
         command: 'mail:spool:send'
-        description: 'This command invokes mail in order to process queued messages.'
+        description: 'Process newsletter sending queue.'
 
-  MEDIAESSENZ\Mail\Command\InvokeMailerEngineCommand:
+  MEDIAESSENZ\Mail\Command\MassMailingCommand:
     tags:
       - name: 'console.command'
-        command: 'mail:invoke-mailer-engine'
-        description: 'Invoke Mailer Engine of EXT:mail'
+        command: 'mail:mass-mailing'
+        description: 'Add scheduled newsletters to sending queue.'
 
   MEDIAESSENZ\Mail\Command\AnalyzeBounceMailCommand:
     tags:
       - name: 'console.command'
         command: 'mail:analyze-bounce-mail'
-        description: 'This command will get bounce mail from the configured mailbox.'
+        description: 'Analyze bounced newsletters from a configured mailbox.'

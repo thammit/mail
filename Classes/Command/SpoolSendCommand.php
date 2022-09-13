@@ -3,6 +3,7 @@
 namespace MEDIAESSENZ\Mail\Command;
 
 use MEDIAESSENZ\Mail\Mail\Mailer;
+use MEDIAESSENZ\Mail\Service\MailerService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -41,7 +42,13 @@ class SpoolSendCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $siteIdentifier = $input->getOption('site-identifier');
-        $mailer = $this->getMailer($siteIdentifier);
+
+        $mailerService = GeneralUtility::makeInstance(MailerService::class);
+        $mailerService->start();
+        $mailerService->runcron();
+
+        $mailer = GeneralUtility::makeInstance(Mailer::class);
+        $mailer->init($siteIdentifier);
 
         $transport = $mailer->getTransport();
         if ($transport instanceof DelayedTransportInterface) {
@@ -62,19 +69,5 @@ class SpoolSendCommand extends Command
         $io->error('The Mailer Transport "transport_spool_type" is not set to "file" or "memory".');
 
         return Command::FAILURE;
-    }
-
-    /**
-     * Returns the mail mailer.
-     *
-     * @param string $siteIdentifier
-     * @return Mailer
-     * @throws Exception
-     */
-    protected function getMailer(string $siteIdentifier = ''): Mailer
-    {
-        $mailer = GeneralUtility::makeInstance(Mailer::class);
-        $mailer->init($siteIdentifier);
-        return $mailer;
     }
 }

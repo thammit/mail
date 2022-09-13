@@ -1,18 +1,21 @@
 <?php
+declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Command;
 
-use MEDIAESSENZ\Mail\Dmailer;
-use MEDIAESSENZ\Mail\Readmail;
-use MEDIAESSENZ\Mail\Repository\SysDmailMaillogRepository;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use Fetch\Message;
 use Fetch\Server;
+use MEDIAESSENZ\Mail\Utility\BounceMailUtility;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
@@ -23,9 +26,9 @@ class AnalyzeBounceMailCommand extends Command
 
     private LanguageService $languageService;
 
-    public function __construct(private LanguageServiceFactory $languageServiceFactory, private Context $context, string $name = null)
+    public function __construct(private readonly LanguageServiceFactory $languageServiceFactory, private readonly Context $context, string $name = null)
     {
-        $this->languageService = $languageServiceFactory->create('en');
+        $this->languageService = $this->languageServiceFactory->create('default');
         $this->languageService->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
         parent::__construct($name);
     }
@@ -79,6 +82,8 @@ class AnalyzeBounceMailCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
+     * @throws DBALException
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -158,39 +163,20 @@ class AnalyzeBounceMailCommand extends Command
      * Process the bounce mail
      * @param Message $message the message object
      * @return bool true if bounce mail can be parsed, else false
-     * @throws AspectNotFoundException
+     * @throws DBALException
+     * @throws Exception
      */
-    private function processBounceMail(Message $message)
+    private function processBounceMail(Message $message): bool
     {
-        /** @var Readmail $readMail */
-        $readMail = GeneralUtility::makeInstance(Readmail::class);
+        $midArray = BounceMailUtility::searchForHeaderData($message, 'X-TYPO3MID:');
 
-        // get attachment
-        $attachmentArray = $message->getAttachments();
-        $midArray = [];
-        if (is_array($attachmentArray)) {
-            // search in attachment
-            foreach ($attachmentArray as $attachment) {
-                $bouncedMail = $attachment->getData();
-                // Find mail id
-                $midArray = $readMail->find_XTypo3MID($bouncedMail);
-                if (false === empty($midArray)) {
-                    // if mid, rid and rtbl are found, then stop looping
-                    break;
-                }
-            }
-        } else {
-            // search in MessageBody (see rfc822-headers as Attachments placed )
-            $midArray = $readMail->find_XTypo3MID($message->getMessageBody());
-        }
-
-        if (empty($midArray)) {
+        if (!$midArray) {
             // no mid, rid and rtbl found - exit
             return false;
         }
 
         // Extract text content
-        $cp = $readMail->analyseReturnError($message->getMessageBody());
+        $cp = BounceMailUtility::analyseReturnError($message->getMessageBody());
 
         $row = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectForAnalyzeBounceMail($midArray['rid'], $midArray['rtbl'], $midArray['mid']);
 
@@ -200,27 +186,25 @@ class AnalyzeBounceMailCommand extends Command
             /** @var Connection $connection */
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableMaillog);
             try {
-                $midArray['email'] = $row['email'];
                 $insertFields = [
                     'tstamp' => $this->context->getPropertyFromAspect('date', 'timestamp'),
                     'response_type' => -127,
                     'mid' => (int)$midArray['mid'],
                     'rid' => (int)$midArray['rid'],
-                    'email' => $midArray['email'],
                     'rtbl' => $midArray['rtbl'],
+                    'email' => $row['email'],
                     'return_content' => serialize($cp),
                     'return_code' => (int)$cp['reason'],
                 ];
                 $connection->insert($tableMaillog, $insertFields);
-                $sql_insert_id = $connection->lastInsertId($tableMaillog);
-                return (bool)$sql_insert_id;
-            } catch (\Doctrine\DBAL\DBALException $e) {
-                // Log $e->getMessage();
-                return false;
+                $lastInsertId = $connection->lastInsertId($tableMaillog);
+
+                return (bool)$lastInsertId;
+            } catch (\Exception $e) {
             }
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
