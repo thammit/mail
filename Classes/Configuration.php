@@ -150,6 +150,6 @@ final class Configuration
             ]
         );
 
-        $GLOBALS['TBE_STYLES']['skins']['direct_mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/';
+        $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/';
     }
 }

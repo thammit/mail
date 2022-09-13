@@ -274,10 +274,10 @@ class StatisticsController extends AbstractController
 
         switch ($this->table) {
             case 'tt_address':
-                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressByUid($this->uid, $this->perms_clause);
+                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressByUid($this->uid, $this->backendUserPermissions);
                 break;
             case 'fe_users':
-                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->selectFeUsersByUid($this->uid, $this->perms_clause);
+                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->selectFeUsersByUid($this->uid, $this->backendUserPermissions);
                 break;
             default:
                 // do nothing

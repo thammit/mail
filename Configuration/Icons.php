@@ -3,7 +3,15 @@
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 
 return [
-    'mail-mail' => [
+    'app-pagetree-folder-contains-mails' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/app-pagetree-folder-contains-mails.svg'
+    ],
+    'mail-module' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/mail-module.svg'
+    ],
+    'mail-record' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/mail.svg'
     ],
@@ -15,10 +23,6 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/list.svg'
     ],
-    'mail-folder' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/folder.svg'
-    ],
     'mail-category' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/category.svg'
@@ -27,17 +31,13 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/group.svg'
     ],
-    'mail-page-modules-mail' => [
+    'mail-folder-mails-inactive' => [
         'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/page-modules-mail.svg'
+        'source' => 'EXT:mail/Resources/Public/Icons/files-folder-mails.svg'
     ],
-    'mail-page-modules-mail-inactive' => [
+    'mail-new-mail' => [
         'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/page-modules-mail-inactive.svg'
-    ],
-    'mail-new' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/new.svg'
+        'source' => 'EXT:mail/Resources/Public/Icons/new-mail.svg'
     ],
     'mail-preview-html' => [
         'provider' => SvgIconProvider::class,

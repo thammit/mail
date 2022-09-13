@@ -18,7 +18,7 @@ class PagesRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function selectPagesForDmail(int $pid, string $permsClause): array
+    public function findMailPages(int $pid, string $permsClause): array
     {
         // Here the list of subpages, news, is rendered
         $queryBuilder = $this->getQueryBuilder($this->table);

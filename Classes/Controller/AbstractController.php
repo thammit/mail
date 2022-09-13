@@ -46,7 +46,7 @@ abstract class AbstractController
      * @see init()
      * @var string
      */
-    protected string $perms_clause = '';
+    protected string $backendUserPermissions = '';
     protected array $implodedParams = [];
     protected string $userTable = '';
     protected array $allowedTables = [];
@@ -88,8 +88,8 @@ abstract class AbstractController
 
         $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
 
-        $this->perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
-        $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->perms_clause);
+        $this->backendUserPermissions = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
+        $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
 
         $this->access = is_array($this->pageinfo) ? true : false;
 

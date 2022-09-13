@@ -1,5 +1,5 @@
 <?php
-defined('TYPO3') || die();
+defined('TYPO3') or die();
 
 // tt_address modified
 $ttAddressCols = [

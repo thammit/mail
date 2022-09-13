@@ -3,7 +3,7 @@
 <f:section name="content">
 <f:flashMessages />
 <f:if condition="{show}">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
     <h1><f:translate key="{lll}stats_overview_header" /></h1>
 	<f:if condition="{data.dataPageInfo}">
 	    <f:then>
@@ -23,7 +23,7 @@
 </f:section>
 
 <f:section name="dataPageInfo">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
     <h3><f:translate key="{lll}stats_overview_choose" /></h3>
     <table border="0" cellpadding="0" cellspacing="0" class="table table-striped table-hover">
         <thead>
@@ -51,7 +51,7 @@
 </f:section>
 
 <f:section name="table">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
     <table class="table table-striped table-hover">
         <thead>
             <tr class="t3-row-header">
@@ -82,7 +82,7 @@
 </f:section>
 
 <f:section name="table4">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
     <table class="table table-striped table-hover">
         <thead>
             <tr class="t3-row-header">
@@ -116,15 +116,15 @@
 </f:section>
 
 <f:section name="dataStats">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
     <f:render section="compactView" arguments="{row:dataStats.compactView}" />
     <br />
-    
+
     <f:if condition="{dataStats.tables.1}">
         <h2><f:translate key="{lll}stats_general_information" /></h2>
         <f:render section="table" arguments="{table:dataStats.tables.1}" />
     </f:if>
-    
+
     <f:if condition="{dataStats.tables.2}">
         <br />
         <h2><f:translate key="{lll}stats_response" /></h2>
@@ -171,7 +171,7 @@
 		<f:variable name="stats_website_users_disabled" value="{f:translate(key: '{lll}stats_website_users_disabled')}" />
 
     	<f:comment>returnList</f:comment>
-    	
+
     	<f:if condition="{dataStats.tables.6.returnList.tt_address}">
     		<h3>{stats_emails}</h3>
     		<f:render arguments="{returnConfig: dataStats.tables.6.returnList.tt_address.returnConfig}" section="returnConfig" />
@@ -184,9 +184,9 @@
 			<h3>{stats_plainlist}</h3>
 			<ul><li><f:format.html>{dataStats.tables.6.returnList.PLAINLIST.PLAINLIST}</f:format.html></li></ul>
     	</f:if>
-    	
+
     	<f:comment>returnDisable</f:comment>
-    	
+
     	<f:if condition="{dataStats.tables.6.returnDisable.tt_address}">
 			<br />
 			{dataStats.tables.6.returnDisable.tt_address.counter}  {stats_emails_disabled}
@@ -195,18 +195,18 @@
 			<br />
 			{dataStats.tables.6.returnDisable.fe_users.counter} {stats_website_users_disabled}
     	</f:if>
-    	
+
     	<f:comment>returnCSV</f:comment>
-    	
+
 		<f:if condition="{dataStats.tables.6.returnCSV}">
 			<br />
 			<f:translate key="{lll}stats_emails_returned_list" />
 			<br />
 			<textarea style="width:460px;" rows="6" name="nothing"><f:format.html>{dataStats.tables.6.returnCSV.text}</f:format.html></textarea>
 		</f:if>
-		
+
 		<f:comment>unknownList</f:comment>
-		
+
 		<f:if condition="{dataStats.tables.6.unknownList.tt_address}">
 			<br />
 			{stats_emails}
@@ -223,9 +223,9 @@
 			<h3>{stats_plainlist}</h3>
 			<ul><li><f:format.html>{dataStats.tables.6.unknownList.PLAINLIST.PLAINLIST}</f:format.html></li></ul>
 		</f:if>
-		
+
 		<f:comment>unknownDisable</f:comment>
-		
+
 		<f:if condition="{dataStats.tables.6.unknownDisable.tt_address}">
 			<br />
 			{dataStats.tables.6.unknownDisable.tt_address.counter} {stats_emails_disabled}
@@ -234,18 +234,18 @@
 			<br />
 			{dataStats.tables.6.unknownDisable.fe_users.counter} {stats_website_users_disabled}
 		</f:if>
-		
+
 		<f:comment>unknownCSV</f:comment>
-		
+
 		<f:if condition="{dataStats.tables.6.unknownCSV}">
 			<br />
 			<f:translate key="{lll}stats_emails_returned_unknown_recipient_list" />
 			<br />
 			<textarea style="width:460px;" rows="6" name="nothing"><f:format.html>{dataStats.tables.6.unknownCSV.text}</f:format.html></textarea>
 		</f:if>
-		
+
 		<f:comment>fullList</f:comment>
-		
+
 		<f:if condition="{dataStats.tables.6.fullList.tt_address}">
 			<br />
 			{stats_emails}
@@ -263,9 +263,9 @@
 			{stats_plainlist}
 			<ul><li><f:format.html>{dataStats.tables.6.fullList.PLAINLIST.PLAINLIST}</f:format.html></li></ul>
 		</f:if>
-		
+
 		<f:comment>fullDisable</f:comment>
-		
+
     	<f:if condition="{dataStats.tables.6.fullDisable.tt_address}">
 			<br />
 			{dataStats.tables.6.fullDisable.tt_address.counter} {stats_emails_disabled}
@@ -305,7 +305,7 @@
 		</f:if>
 
 		<f:comment>badHostDisable</f:comment>
-		
+
     	<f:if condition="{dataStats.tables.6.badHostDisable.tt_address}">
 			<br />
 			{dataStats.tables.6.badHostDisable.tt_address.counter} {stats_emails_disabled}
@@ -314,9 +314,9 @@
 			<br />
 			{dataStats.tables.6.badHostDisable.fe_users.counter} {stats_website_users_disabled}
     	</f:if>
-    	
+
 		<f:comment>badHostCSV</f:comment>
-		
+
 		<f:if condition="{dataStats.tables.6.badHostCSV}">
 			<br />
 			<f:translate key="{lll}stats_emails_returned_bad_host_list" />
@@ -343,7 +343,7 @@
 			{stats_plainlist}
 			<ul><li><f:format.html>{dataStats.tables.6.badHeaderList.PLAINLIST.PLAINLIST}</f:format.html></li></ul>
 		</f:if>
-		
+
 		<f:comment>badHeaderDisable</f:comment>
 
     	<f:if condition="{dataStats.tables.6.badHeaderDisable.tt_address}">
@@ -363,7 +363,7 @@
 			<br />
 			<textarea style="width:460px;" rows="6" name="nothing"><f:format.html>{dataStats.tables.6.badHeaderCSV.text}</f:format.html></textarea>
 		</f:if>
-		
+
 		<f:comment>reasonUnknownList</f:comment>
 
 		<f:if condition="{dataStats.tables.6.reasonUnknownList.tt_address}">
@@ -383,9 +383,9 @@
 			{stats_plainlist}
 			<ul><li><f:format.html>{dataStats.tables.6.reasonUnknownList.PLAINLIST.PLAINLIST}</f:format.html></li></ul>
 		</f:if>
-		
+
 		<f:comment>reasonUnknownDisable</f:comment>
-		
+
 		<f:if condition="{dataStats.tables.6.reasonUnknownDisable.tt_address}">
 			<br />
 			{dataStats.tables.6.reasonUnknownDisable.tt_address.counter} {stats_emails_disabled}
@@ -394,7 +394,7 @@
 			<br />
 			{dataStats.tables.6.reasonUnknownDisable.fe_users.counter} {stats_website_users_disabled}
     	</f:if>
-    	
+
 		<f:comment>reasonUnknownCSV</f:comment>
 
 		<f:if condition="{dataStats.tables.6.reasonUnknownCSV}">
@@ -412,9 +412,9 @@
 </f:section>
 
 <f:section name="compactView">
-    <f:variable name="lll"  value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
-    <f:variable name="lll2" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_tca.xlf:" />
-    
+    <f:variable name="lll"  value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:" />
+
     <f:variable name="mailInfo"><f:translate key="{lll2}sys_dmail.priority" /> {row.priority};
 <f:translate key="{lll2}sys_dmail.transfer_encoding" /> {row.encoding};
 <f:translate key="{lll2}sys_dmail.charset" /> {row.charset}</f:variable>
@@ -464,7 +464,7 @@
 
 
 <f:section name="dataUserInfo">
-    <f:variable name="lll"  value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll"  value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
     <h3><f:translate key="{lll}subscriber_info" /></h3>
     <f:format.html>{dataUserInfo.icon}</f:format.html> {dataUserInfo.name} &lt;{dataUserInfo.email}&gt;
 

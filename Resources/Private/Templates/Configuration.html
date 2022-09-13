@@ -5,7 +5,7 @@
 <f:section name="content">
     <f:flashMessages />
     <f:if condition="{implodedParams -> f:count()}">
-        <h1><f:translate key="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:header_conf" /></h1>
+        <h1><f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:header_conf" /></h1>
         <f:form action="" method="post" name="dmailform" enctype="multipart/form-data">
             <f:render
                 arguments="{
@@ -61,7 +61,7 @@
                 }"
                 section="Panel"
             />
-            <button class="btn btn-default" type="submit" name="submit"><f:translate key="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:configure_update_configuration" /></button>
+            <button class="btn btn-default" type="submit" name="submit"><f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:configure_update_configuration" /></button>
         </f:form>
     </f:if>
 </f:section>
@@ -79,7 +79,7 @@
             <h4 class="panel-title">
                 <a role="button" data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse{index}" aria-expanded="true" aria-controls="collapse{index}" class="collapsed">
                     <span class="caret"></span>
-                    <f:translate key="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:{title}"/>
+                    <f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:{title}"/>
                 </a>
             </h4>
         </div>
@@ -99,9 +99,9 @@
 </f:section>
 
 <f:section name="box-1">
-    <f:variable name="lll"  value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
-    <f:variable name="lll2" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_tca.xlf:" />
-    <f:variable name="lll3" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:" />
+    <f:variable name="lll"  value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:" />
+    <f:variable name="lll3" value="LLL:EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:" />
 
     <strong><f:translate key="{lll2}sys_dmail.from_email" /></strong>
     <f:render section="help" /><f:translate key="{lll3}from_email.description" /><br><f:translate key="{lll3}from_email.details" /></span></a><br>
@@ -145,9 +145,9 @@
 </f:section>
 
 <f:section name="box-2">
-    <f:variable name="lll"  value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
-    <f:variable name="lll2" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_tca.xlf:" />
-    <f:variable name="lll3" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:" />
+    <f:variable name="lll"  value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:" />
+    <f:variable name="lll3" value="LLL:EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:" />
 
     <strong><f:translate key="{lll2}sys_dmail.sendOptions" /></strong>
     <f:render section="help" /><f:translate key="{lll3}sendOptions.description" /><br><f:translate key="{lll3}sendOptions.details" /></span></a><br>
@@ -173,8 +173,8 @@
 </f:section>
 
 <f:section name="box-3">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
-    <f:variable name="lll2" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_tca.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:" />
 
     <strong><f:translate key="{lll2}sys_dmail.HTMLParams" /></strong>
     <f:render section="help" /><f:translate key="{lll}configure_HTMLParams_description" /><br><f:translate key="{lll}configure_HTMLParams_details" /></span></a><br>
@@ -189,7 +189,7 @@
 </f:section>
 
 <f:section name="box-4">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
 
     <strong><f:translate key="{lll}configure_options_encoding" /></strong>
     <f:render section="help" /><f:translate key="{lll}configure_quickmail_encoding" /><f:translate key="{lll}configure_quickmail_encoding_description" /></span></a><br>
@@ -214,9 +214,9 @@
 </f:section>
 
 <f:section name="box-5">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
-    <f:variable name="lll2" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_tca.xlf:" />
-    <f:variable name="lll3" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:" />
+    <f:variable name="lll3" value="LLL:EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:" />
 
     <strong><f:translate key="{lll2}sys_dmail.use_rdct" /></strong>
     <f:render section="help" /><f:translate key="{lll3}use_rdct.description" /><br><f:translate key="{lll3}use_rdct.details" /><br><f:translate key="{lll}configure_options_links_rdct" /></span></a>
@@ -256,7 +256,7 @@
 </f:section>
 
 <f:section name="box-6">
-    <f:variable name="lll" value="LLL:EXT:direct_mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:" />
 
     <strong><f:translate key="{lll}configure_http_username" /></strong>
     <f:render section="help" /><f:translate key="{lll}configure_http_username_description" /><br><f:translate key="{lll}configure_http_username_details" /></span></a><br>

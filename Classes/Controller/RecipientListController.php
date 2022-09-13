@@ -245,12 +245,12 @@ class RecipientListController extends AbstractController
                         $pageIdArray = [];
                         foreach ($pages as $pageUid) {
                             if ($pageUid > 0) {
-                                $pageinfo = BackendUtility::readPageAccess($pageUid, $this->perms_clause);
+                                $pageinfo = BackendUtility::readPageAccess($pageUid, $this->backendUserPermissions);
                                 if (is_array($pageinfo)) {
                                     $info['fromPages'][] = $pageinfo;
                                     $pageIdArray[] = $pageUid;
                                     if ($mailGroup['recursive']) {
-                                        $pageIdArray = array_merge($pageIdArray, MailerUtility::getRecursiveSelect($pageUid, $this->perms_clause));
+                                        $pageIdArray = array_merge($pageIdArray, MailerUtility::getRecursiveSelect($pageUid, $this->backendUserPermissions));
                                     }
                                 }
                             }
@@ -323,7 +323,7 @@ class RecipientListController extends AbstractController
                         }
                         break;
                     case 4:
-                        $groups = array_unique(GeneralUtility::makeInstance(TempRepository::class)->getMailGroups($mailGroup['mail_groups'], [$mailGroup['uid']], $this->perms_clause));
+                        $groups = array_unique(GeneralUtility::makeInstance(TempRepository::class)->getMailGroups($mailGroup['mail_groups'], [$mailGroup['uid']], $this->backendUserPermissions));
 
                         foreach ($groups as $group) {
                             $collect = $this->cmd_compileMailGroup($group);
@@ -737,10 +737,10 @@ class RecipientListController extends AbstractController
         $rows = [];
         switch ($this->table) {
             case 'tt_address':
-                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressByUid($this->uid, $this->perms_clause);
+                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressByUid($this->uid, $this->backendUserPermissions);
                 break;
             case 'fe_users':
-                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->selectFeUsersByUid($this->uid, $this->perms_clause);
+                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->selectFeUsersByUid($this->uid, $this->backendUserPermissions);
                 break;
             default:
                 // do nothing

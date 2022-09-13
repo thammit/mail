@@ -97,13 +97,13 @@ class SysDmailRepository extends AbstractRepository
 
     /**
      * @param int $id
-     * @param string $sOrder
-     * @param string $ascDesc
+     * @param string $orderBy
+     * @param string $order
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function selectForMkeListDMail(int $id, string $sOrder, string $ascDesc): array
+    public function findMailsNotSentAndScheduled(int $id, string $orderBy, string $order): array
     {
         $queryBuilder = $this->getQueryBuilder($this->table);
 
@@ -114,9 +114,9 @@ class SysDmailRepository extends AbstractRepository
 
         return $queryBuilder->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type')
             ->from($this->table)
-            ->add('where', 'pid = ' . intval($id) .
+            ->add('where', 'pid = ' . $id .
                 ' AND scheduled=0 AND issent=0')
-            ->orderBy($sOrder, $ascDesc)
+            ->orderBy($orderBy, $order)
             ->execute()
             ->fetchAllAssociative();
     }
