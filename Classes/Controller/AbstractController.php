@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
@@ -15,6 +16,7 @@ use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
@@ -33,6 +35,8 @@ abstract class AbstractController
     protected ModuleTemplate $moduleTemplate;
     protected IconFactory $iconFactory;
     protected PageRenderer $pageRenderer;
+    protected SiteFinder $siteFinder;
+    protected MailerService $mailerService;
     protected StandaloneView $view;
     protected int $id = 0;
     protected string $cmd = '';
@@ -54,7 +58,6 @@ abstract class AbstractController
     protected array $pageinfo = [];
     protected bool $access = false;
     protected FlashMessageQueue $messageQueue;
-    protected SiteFinder $siteFinder;
     protected string $siteIdentifier;
 
     /**
@@ -64,14 +67,20 @@ abstract class AbstractController
         ModuleTemplate $moduleTemplate = null,
         IconFactory    $iconFactory = null,
         PageRenderer   $pageRenderer = null,
-        SiteFinder     $siteFinder = null
+        StandaloneView  $view = null,
+        SiteFinder     $siteFinder = null,
+        MailerService  $mailerService = null
     )
     {
         $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
         $this->iconFactory = $iconFactory ?? GeneralUtility::makeInstance(IconFactory::class);
         $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
         $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
-
+        $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
+        $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
+        $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
+        $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
+        $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
         $this->getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
         $this->getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
     }
@@ -86,7 +95,12 @@ abstract class AbstractController
         $this->pages_uid = (string)($parsedBody['pages_uid'] ?? $queryParams['pages_uid'] ?? '');
         $this->sys_dmail_uid = (int)($parsedBody['sys_dmail_uid'] ?? $queryParams['sys_dmail_uid'] ?? 0);
 
-        $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
+        try {
+            $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
+            $this->mailerService->setSiteIdentifier($this->siteIdentifier);
+        } catch (SiteNotFoundException $e) {
+            $this->siteIdentifier = '';
+        }
 
         $this->backendUserPermissions = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
         $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
@@ -105,21 +119,6 @@ abstract class AbstractController
         //$this->sys_language_uid = 0; //@TODO
 
         $this->messageQueue = $this->getMessageQueue();
-    }
-
-    /**
-     * Configure template paths for your backend module
-     * @param string $templateName
-     * @return StandaloneView
-     */
-    protected function configureTemplatePaths(string $templateName): StandaloneView
-    {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
-        $view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
-        $view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
-        $view->setTemplate($templateName);
-        return $view;
     }
 
     /**

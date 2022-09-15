@@ -3,7 +3,6 @@
 namespace MEDIAESSENZ\Mail\Command;
 
 use MEDIAESSENZ\Mail\Mail\Mailer;
-use MEDIAESSENZ\Mail\Service\MailerService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -42,10 +41,6 @@ class SpoolSendCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $siteIdentifier = $input->getOption('site-identifier');
-
-        $mailerService = GeneralUtility::makeInstance(MailerService::class);
-        $mailerService->start();
-        $mailerService->runcron();
 
         $mailer = GeneralUtility::makeInstance(Mailer::class);
         $mailer->init($siteIdentifier);

@@ -77,7 +77,7 @@ class RecipientListController extends AbstractController
 
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
-        $this->view = $this->configureTemplatePaths('RecipientList');
+        $this->view->setTemplate('RecipientList');
 
         $this->init($request);
         $this->initRecipientList($request);
@@ -109,7 +109,7 @@ class RecipientListController extends AbstractController
             }
         } else {
             // If no access or if ID == zero
-            $this->view = $this->configureTemplatePaths('NoAccess');
+            $this->view->setTemplate('NoAccess');
             $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
             $this->messageQueue->addMessage($message);
         }

@@ -5,11 +5,15 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use GuzzleHttp\Exception\RequestException;
+use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -18,6 +22,7 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
@@ -60,7 +65,6 @@ class MailerService implements LoggerAwareInterface
     protected string $replyToName = '';
     protected int $priority = 0;
     protected string $authCodeFieldList = '';
-    protected string $mediaList = '';
     protected string $backendCharset = 'utf-8';
     protected string $message = '';
     protected bool $notificationJob = false;
@@ -133,11 +137,6 @@ class MailerService implements LoggerAwareInterface
     public function setTestMail(bool $isTestMail): void
     {
         $this->isTestMail = $isTestMail;
-    }
-
-    public function getHtmlHrefs(): array
-    {
-        return $this->mailParts['html']['hrefs'];
     }
 
     public function getJumpUrlPrefix(): string
@@ -243,10 +242,26 @@ class MailerService implements LoggerAwareInterface
         return $this->mailParts['html']['content'];
     }
 
+    public function setHtmlPath(string $path): void
+    {
+        $this->mailParts['html']['path'] = $path;
+    }
+
     public function getHtmlPath(): string
     {
         return $this->mailParts['html']['path'];
     }
+
+    public function setHtmlHyperLinks(array $hrefs): void
+    {
+        $this->mailParts['html']['hrefs'] = $hrefs;
+    }
+
+    public function getHtmlHyperLinks(): array
+    {
+        return $this->mailParts['html']['hrefs'];
+    }
+
 
     /**
      * Initializing the MailMessage class and setting the first global variables. Write to log file if it's a cronjob
@@ -258,7 +273,6 @@ class MailerService implements LoggerAwareInterface
      */
     public function start(int $sendPerCycle = 50, string $backendUserLanguage = 'en'): void
     {
-
         // Sets the message id
         $host = MailerUtility::getHostname();
         if (!$host || $host == '127.0.0.1' || $host == 'localhost' || $host == 'localhost.localdomain') {
@@ -272,9 +286,113 @@ class MailerService implements LoggerAwareInterface
         // Mailer engine parameters
         $this->sendPerCycle = $sendPerCycle;
         $this->backendUserLanguage = $backendUserLanguage;
-        if (isset($this->nonCron) && !$this->nonCron) {
-            $this->logger->debug('Starting directmail cronjob');
+    }
+
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
+    public function assemble(array $row, array $params): string
+    {
+        $fetchPlainTextContent = MailerUtility::shouldFetchPlainText($row);
+        $fetchHtmlContent = MailerUtility::shouldFetchHtml($row);
+
+        if (!$fetchPlainTextContent && !$fetchHtmlContent) {
+            return MailerUtility::getRenderedFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_warning'), 'Nothing to do.', AbstractMessage::NOTICE);
         }
+
+        $this->start();
+        $this->setCharset($row['charset']);
+        $this->setIncludeMedia((bool)$row['includeMedia']);
+
+        $theOutput = '';
+        $errors = [];
+        $warnings = [];
+        $baseUrl = MailerUtility::getAbsoluteBaseUrlForMailPage((int)$row['page']);
+        $glue = str_contains($baseUrl, '?') ? '&' : '?';
+        if ($params['enable_jump_url'] ?? false) {
+            $this->setJumpUrlPrefix($baseUrl . $glue .
+                'mid=###SYS_MAIL_ID###' .
+                ($params['jumpurl_tracking_privacy'] ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
+                '&aC=###SYS_AUTHCODE###' .
+                '&jumpurl=');
+            $this->setJumpUrlUseId(true);
+        }
+        if ($params['enable_mailto_jump_url'] ?? false) {
+            $this->setJumpUrlUseMailto(true);
+        }
+
+        if ($fetchPlainTextContent) {
+            $plainTextUrl = (int)$row['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($row['plainParams']) : MailerUtility::getUrlForInternalPage($row['page'], $row['plainParams']);
+            $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $params);
+            try {
+                $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
+                if (!MailerUtility::contentContainsBoundaries($plainContent)) {
+                    $warnings[] = MailerUtility::getLanguageService()->getLL('dmail_no_plain_boundaries');
+                }
+                $this->setPlainContent($plainContent);
+            } catch (RequestException $exception) {
+                $errors[] = MailerUtility::getLanguageService()->getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase();
+            }
+        }
+
+        if ($fetchHtmlContent) {
+            $htmlUrl = (int)$row['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($row['HTMLParams']) : MailerUtility::getUrlForInternalPage($row['page'], $row['HTMLParams']);
+            $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $params);
+            try {
+                $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
+                if (MailerUtility::contentContainsFrameTag($htmlContent)) {
+                    $errorMsg[] = MailerUtility::getLanguageService()->getLL('dmail_frames_not allowed');
+                }
+                if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
+                    $warnings[] = MailerUtility::getLanguageService()->getLL('dmail_no_html_boundaries');
+                }
+                $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $baseUrl);
+                if ($htmlHyperLinks) {
+                    $this->setHtmlHyperLinks($htmlHyperLinks);
+                    $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $this->getHtmlHyperLinks(), $this->getJumpUrlPrefix(), $this->getJumpUrlUseId(), $this->getJumpUrlUseMailto());
+                }
+                $this->setHtmlContent($htmlContent);
+                if ($row['type'] == Constants::MAIL_TYPE_EXTERNAL) {
+                    // Try to auto-detect the charset of the message
+                    $matches = [];
+                    $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', ($this->getMailPart('html_content') ?? ''), $matches);
+                    if ($res === 1) {
+                        $this->setCharset($matches[1]);
+                    } else if (isset($params['direct_mail_charset'])) {
+                        $this->setCharset($params['direct_mail_charset']);
+                    } else {
+                        $this->setCharset('iso-8859-1');
+                    }
+                }
+            } catch (RequestException $exception) {
+                $errors[] = MailerUtility::getLanguageService()->getLL('dmail_no_html_content') . ' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase();
+            }
+        }
+
+        if (!count($errors)) {
+            // Update the record:
+            $this->setMailPart('messageid', $this->getMessageId());
+            $mailContent = base64_encode(serialize($this->getMailParts()));
+
+            $updateData = [
+                'issent' => 0,
+                'charset' => $this->getCharset(),
+                'mailContent' => $mailContent,
+                'renderedSize' => strlen($mailContent),
+                'long_link_rdct_url' => $baseUrl,
+            ];
+
+            GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$row['uid'], $updateData);
+
+            if (count($warnings)) {
+                $theOutput .= MailerUtility::getRenderedFlashMessages(MailerUtility::getLanguageService()->getLL('dmail_warning'), $warnings, AbstractMessage::WARNING);
+            }
+        } else {
+            $theOutput .= MailerUtility::getRenderedFlashMessages(MailerUtility::getLanguageService()->getLL('dmail_error'), $errors, AbstractMessage::ERROR);
+        }
+
+        return $theOutput;
     }
 
     /**
@@ -407,21 +525,27 @@ class MailerService implements LoggerAwareInterface
      * @param string $addressList list of recipient address, comma list of emails
      *
      * @return bool
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
      */
     public function sendSimple(string $addressList): bool
     {
-        if ($this->mailParts['html']['content'] ?? false) {
-            $this->mailParts['html']['content'] = $this->getBoundaryParts($this->dmailer['boundaryParts_html'], '-1');
-        } else {
-            $this->mailParts['html']['content'] = '';
-        }
+        $plainContent = '';
         if ($this->mailParts['plain']['content'] ?? false) {
-            $this->mailParts['plain']['content'] = $this->getBoundaryParts($this->dmailer['boundaryParts_plain'], '-1');
-        } else {
-            $this->mailParts['plain']['content'] = '';
+            [$contentParts] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain']);
+            $plainContent = implode('', $contentParts);
         }
+        $this->setPlainContent($plainContent);
+
+        $htmlContent = '';
+        if ($this->mailParts['html']['content'] ?? false) {
+            [$contentParts] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html']);
+            $htmlContent = implode('', $contentParts);
+        }
+        $this->setHtmlContent($htmlContent);
 
         $recipients = explode(',', $addressList);
+
         foreach ($recipients as $recipient) {
             $this->sendMailToRecipient($recipient);
         }
@@ -436,6 +560,8 @@ class MailerService implements LoggerAwareInterface
      * @param string $tableNameChar Table name, from which the recipient come from
      *
      * @return int Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
      */
     public function sendAdvanced(array $recipientData, string $tableNameChar): int
     {
@@ -466,11 +592,12 @@ class MailerService implements LoggerAwareInterface
                 $this->dmailer['messageID'] => $uniqMsgId,
             ];
 
-            $this->mediaList = '';
             $this->mailParts['html']['content'] = '';
             if ($this->isHtml && ($recipientData['module_sys_dmail_html'] || $tableNameChar == 'P')) {
-                $tempContent_HTML = $this->getBoundaryParts($this->dmailer['boundaryParts_html'], $recipientData['sys_dmail_categories_list']);
-                if ($this->mailHasContent) {
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html'], $recipientData['sys_dmail_categories_list']);
+                $tempContent_HTML = implode('', $contentParts);
+
+                if ($mailHasContent) {
                     $tempContent_HTML = $this->replaceMailMarkers($tempContent_HTML, $recipientData, $additionalMarkers);
                     $this->mailParts['html']['content'] = $tempContent_HTML;
                     $returnCode |= 1;
@@ -480,8 +607,10 @@ class MailerService implements LoggerAwareInterface
             // Plain
             $this->mailParts['plain']['content'] = '';
             if ($this->isPlain) {
-                $tempContent_Plain = $this->getBoundaryParts($this->dmailer['boundaryParts_plain'], $recipientData['sys_dmail_categories_list']);
-                if ($this->mailHasContent) {
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain'], $recipientData['sys_dmail_categories_list']);
+                $tempContent_Plain = implode('', $contentParts);
+
+                if ($mailHasContent) {
                     $tempContent_Plain = $this->replaceMailMarkers($tempContent_Plain, $recipientData, $additionalMarkers);
                     if (trim($this->dmailer['sys_dmail_rec']['use_rdct']) || trim($this->dmailer['sys_dmail_rec']['long_link_mode'])) {
                         $tempContent_Plain = MailerUtility::substUrlsInPlainText($tempContent_Plain, $this->dmailer['sys_dmail_rec']['long_link_mode'] ? 'all' : '76', $this->dmailer['sys_dmail_rec']['long_link_rdct_url']);
@@ -511,55 +640,6 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * This function checks which content elements are suppsed to be sent to the recipient.
-     * tslib_content inserts dmail boudary markers in the content specifying which elements are intended for which categories,
-     * this functions check if the recipeient is subscribing to any of these categories and
-     * filters out the elements that are inteded for categories not subscribed to.
-     *
-     * @param array $contentArray Array of content split by dmail boundary
-     * @param string $userCategories The list of categories the user is subscribing to.
-     *
-     * @return string        Content of the email, which the recipient subscribed
-     */
-    protected function getBoundaryParts(array $contentArray, string $userCategories): string
-    {
-        $returnVal = '';
-        $this->mailHasContent = false;
-        $boundaryMax = count($contentArray) - 1;
-        foreach ($contentArray as $blockKey => $contentPart) {
-            $key = substr($contentPart[0], 1);
-            $isSubscribed = false;
-            $contentPart['mediaList'] = $contentPart['mediaList'] ?? '';
-            if (!$key || (intval($userCategories) == -1)) {
-                $returnVal .= $contentPart[1];
-                $this->mediaList .= $contentPart['mediaList'];
-                if ($contentPart[1]) {
-                    $this->mailHasContent = true;
-                }
-            } else if ($key == 'END') {
-                $returnVal .= $contentPart[1];
-                $this->mediaList .= $contentPart['mediaList'];
-                // There is content, and it is not just the header and footer content, or it is the only content because we have no direct mail boundaries.
-                if (($contentPart[1] && !($blockKey == 0 || $blockKey == $boundaryMax)) || count($contentArray) == 1) {
-                    $this->mailHasContent = true;
-                }
-            } else {
-                foreach (explode(',', $key) as $group) {
-                    if (GeneralUtility::inList($userCategories, $group)) {
-                        $isSubscribed = true;
-                    }
-                }
-                if ($isSubscribed) {
-                    $returnVal .= $contentPart[1];
-                    $this->mediaList .= $contentPart['mediaList'];
-                    $this->mailHasContent = true;
-                }
-            }
-        }
-        return $returnVal;
-    }
-
-    /**
      * Mass send to recipient in the list
      *
      * @param array $recipientIds List of recipients' ID in the sys_dmail table
@@ -567,6 +647,8 @@ class MailerService implements LoggerAwareInterface
      * @return boolean
      * @throws DBALException
      * @throws Exception
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
      */
     protected function massSend(array $recipientIds, int $mailUid): bool
     {
@@ -644,8 +726,9 @@ class MailerService implements LoggerAwareInterface
      *
      * @return    void
      * @throws DBALException
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
      * @internal param string $tKey : table of the recipient
-     *
      */
     protected function shipOfMail(int $mailUid, array $recipientData, string $tableKey): void
     {
@@ -694,6 +777,8 @@ class MailerService implements LoggerAwareInterface
      *
      * @return void
      * @throws DBALException
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
      */
     protected function setBeginEnd(int $mailUid, string $key): void
     {
@@ -744,17 +829,16 @@ class MailerService implements LoggerAwareInterface
      * Called from the dmailerd script.
      * Look if there is newsletter to be sent and do the sending process. Otherwise, quit runtime
      *
-     * @param string $siteIdentifier
-     * @param int $maxMails
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
      */
-    public function runcron(string $siteIdentifier, int $maxMails): void
+    public function runcron(): void
     {
-        $this->sendPerCycle = (int)(MailerUtility::getExtensionConfiguration('sendPerCycle') ?: 50);
         $this->notificationJob = (bool)MailerUtility::getExtensionConfiguration('notificationJob');
 
         if (!is_object(MailerUtility::getLanguageService())) {
@@ -826,22 +910,22 @@ class MailerService implements LoggerAwareInterface
      * Set the content from $this->theParts['html'] or $this->theParts['plain'] to the mailbody
      *
      * @return void
-     * @var MailMessage $mailer Mailer Object
+     * @var MailMessage $mailMessage Mailer Message Object
      */
-    protected function setContent(MailMessage &$mailer): void
+    protected function setContent(MailMessage &$mailMessage): void
     {
         // todo: css??
         // iterate through the media array and embed them
         if ($this->includeMedia && !empty($this->mailParts['html']['content'])) {
             // extract all media path from the mail message
-            $this->extractMediaLinks();
+            $this->mailParts['html']['media'] = MailerUtility::extractMediaLinks($this->mailParts['html']['content'], $this->mailParts['html']['path']);
             foreach ($this->mailParts['html']['media'] as $media) {
                 // TODO: why are there table related tags here?
-                if (($media['tag'] === 'img' || $media['tag'] === 'table' || $media['tag'] === 'tr' || $media['tag'] === 'td') && !$media['use_jumpurl'] && !$media['do_not_embed']) {
+                if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && $media['tag'] === 'img') {
                     if (ini_get('allow_url_fopen')) {
-                        $mailer->embed(fopen($media['absRef'], 'r'), basename($media['absRef']));
+                        $mailMessage->embed(fopen($media['absRef'], 'r'), basename($media['absRef']));
                     } else {
-                        $mailer->embed(GeneralUtility::getUrl($media['absRef']), basename($media['absRef']));
+                        $mailMessage->embed(GeneralUtility::getUrl($media['absRef']), basename($media['absRef']));
                     }
                     $this->mailParts['html']['content'] = str_replace($media['subst_str'], 'cid:' . basename($media['absRef']), $this->mailParts['html']['content']);
                 }
@@ -852,11 +936,11 @@ class MailerService implements LoggerAwareInterface
 
         // set the html content
         if ($this->mailParts['html']['content']) {
-            $mailer->html($this->mailParts['html']['content']);
+            $mailMessage->html($this->mailParts['html']['content']);
         }
         // set the plain content as alt part
         if ($this->mailParts['plain']['content']) {
-            $mailer->text($this->mailParts['plain']['content']);
+            $mailMessage->text($this->mailParts['plain']['content']);
         }
 
         // handle FAL attachments
@@ -865,7 +949,7 @@ class MailerService implements LoggerAwareInterface
             /** @var FileReference $file */
             foreach ($files as $file) {
                 $filePath = Environment::getPublicPath() . '/' . $file->getPublicUrl();
-                $mailer->attachFromPath($filePath);
+                $mailMessage->attachFromPath($filePath);
             }
         }
     }
@@ -876,6 +960,8 @@ class MailerService implements LoggerAwareInterface
      * @param string|Address $recipient The recipient to send the mail to
      * @param array|null $recipientData Recipient's data array
      * @return void
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
      */
     protected function sendMailToRecipient(Address|string $recipient, array $recipientData = null): void
     {
@@ -930,235 +1016,4 @@ class MailerService implements LoggerAwareInterface
         unset($mailer);
     }
 
-
-    /**
-     * Add HTML to an email
-     *
-     * @param string $file String location of the HTML
-     *
-     * @return bool|string bool: HTML fetch status. string: if HTML is a frameset.
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     */
-    public function addHTML(string $file): bool|string
-    {
-        // Adds HTML and media, encodes it from a URL or file
-        $status = $this->fetchHTML($file);
-        if (!$status) {
-            return false;
-        }
-        if (MailerUtility::extractFramesInfo($this->mailParts['html']['content'], $this->mailParts['html']['path'])) {
-            return 'Document was a frameset. Stopped';
-        }
-        $this->extractHyperLinks();
-        MailerUtility::substHREFsInHTML($this);
-        return true;
-    }
-
-    /**
-     * Fetches the HTML-content from either url or local server file
-     *
-     * @param string $url Url of the html to fetch
-     *
-     * @return bool Whether the data was fetched or not
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     */
-    public function fetchHTML(string $url): bool
-    {
-        // Fetches the content of the page
-        $this->mailParts['html']['content'] = GeneralUtility::getURL($url);
-        if ($this->mailParts['html']['content']) {
-            $urlPart = parse_url($url);
-            if (MailerUtility::getExtensionConfiguration('UseHttpToFetch')) {
-                $urlPart['scheme'] = 'http';
-            }
-
-            $user = '';
-            if (!empty($urlPart['user'])) {
-                $user = $urlPart['user'];
-                if (!empty($urlPart['pass'])) {
-                    $user .= ':' . $urlPart['pass'];
-                }
-                $user .= '@';
-            }
-
-            $this->mailParts['html']['path'] = $urlPart['scheme'] . '://' . $user . $urlPart['host'] . GeneralUtility::getIndpEnv('TYPO3_SITE_PATH');
-
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Extracts all media-links from $this->theParts['html']['content']
-     *
-     * @return void
-     */
-    public function extractMediaLinks(): void
-    {
-        $this->mailParts['html']['media'] = [];
-
-        $htmlContent = $this->mailParts['html']['content'];
-        $attribRegex = MailerUtility::tag_regex(['img', 'table', 'td', 'tr', 'body', 'iframe', 'script', 'input', 'embed']);
-        $imageList = '';
-
-        // split the document by the beginning of the above tags
-        $codeParts = preg_split($attribRegex, $htmlContent);
-        $len = strlen($codeParts[0]);
-        $pieces = count($codeParts);
-        $reg = [];
-        for ($i = 1; $i < $pieces; $i++) {
-            $tag = strtolower(strtok(substr($htmlContent, $len + 1, 10), ' '));
-            $len += strlen($tag) + strlen($codeParts[$i]) + 2;
-            $dummy = preg_match('/[^>]*/', $codeParts[$i], $reg);
-
-            // Fetches the attributes for the tag
-            $attributes = MailerUtility::get_tag_attributes($reg[0]);
-            $imageData = [];
-
-            // Finds the src or background attribute
-            $imageData['ref'] = ($attributes['src'] ?? $attributes['background'] ?? '');
-            if ($imageData['ref']) {
-                // find out if the value had quotes around it
-                $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
-                // subst_str is the string to look for, when substituting lateron
-                $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-                if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
-                    $imageList .= '|' . $imageData['subst_str'] . '|';
-                    $imageData['absRef'] = MailerUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
-                    $imageData['tag'] = $tag;
-                    $imageData['use_jumpurl'] = (isset($attributes['dmailerping']) && $attributes['dmailerping']) ? 1 : 0;
-                    $imageData['do_not_embed'] = !empty($attributes['do_not_embed']);
-                    $this->mailParts['html']['media'][] = $imageData;
-                }
-            }
-        }
-
-        // Extracting stylesheets
-        $attribRegex = MailerUtility::tag_regex(['link']);
-        // Split the document by the beginning of the above tags
-        $codeParts = preg_split($attribRegex, $htmlContent);
-        $pieces = count($codeParts);
-        for ($i = 1; $i < $pieces; $i++) {
-            $dummy = preg_match('/[^>]*/', $codeParts[$i], $reg);
-            // fetches the attributes for the tag
-            $attributes = MailerUtility::get_tag_attributes($reg[0]);
-            $imageData = [];
-            if (strtolower($attributes['rel']) == 'stylesheet' && $attributes['href']) {
-                // Finds the src or background attribute
-                $imageData['ref'] = $attributes['href'];
-                // Finds out if the value had quotes around it
-                $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
-                // subst_str is the string to look for, when substituting lateron
-                $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-                if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
-                    $imageList .= '|' . $imageData['subst_str'] . '|';
-                    $imageData['absRef'] = MailerUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
-                    $this->mailParts['html']['media'][] = $imageData;
-                }
-            }
-        }
-
-        // fixes javascript rollovers
-        $codeParts = explode('.src', $htmlContent);
-        $pieces = count($codeParts);
-        $expr = '/^[^' . quotemeta('"') . quotemeta("'") . ']*/';
-        for ($i = 1; $i < $pieces; $i++) {
-            $temp = $codeParts[$i];
-            $temp = trim(str_replace('=', '', trim($temp)));
-            preg_match($expr, substr($temp, 1, strlen($temp)), $reg);
-            $imageData['ref'] = $reg[0];
-            $imageData['quotes'] = substr($temp, 0, 1);
-            // subst_str is the string to look for, when substituting lateron
-            $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-            $theInfo = GeneralUtility::split_fileref($imageData['ref']);
-
-            switch ($theInfo['fileext']) {
-                case 'gif':
-                    // do like jpg
-                case 'jpeg':
-                    // do like jpg
-                case 'jpg':
-                    if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
-                        $imageList .= '|' . $imageData['subst_str'] . '|';
-                        $imageData['absRef'] = MailerUtility::absRef($imageData['ref'], $this->mailParts['html']['path']);
-                        $this->mailParts['html']['media'][] = $imageData;
-                    }
-                    break;
-                default:
-                    // do nothing
-            }
-        }
-    }
-
-    /**
-     * Extracts all hyper-links from $this->theParts["html"]["content"]
-     *
-     * @return    void
-     */
-    public function extractHyperLinks(): void
-    {
-        $linkList = '';
-
-        $htmlContent = $this->mailParts['html']['content'];
-        $attribRegex = MailerUtility::tag_regex(['a', 'form', 'area']);
-
-        // Splits the document by the beginning of the above tags
-        $codeParts = preg_split($attribRegex, $htmlContent);
-        $len = strlen($codeParts[0]);
-        $pieces = count($codeParts);
-        $reg = [];
-        for ($i = 1; $i < $pieces; $i++) {
-            $tag = strtolower(strtok(substr($htmlContent, $len + 1, 10), ' '));
-            $len += strlen($tag) + strlen($codeParts[$i]) + 2;
-            preg_match('/[^>]*/', $codeParts[$i], $reg);
-
-            // Fetches the attributes for the tag
-            $attributes = MailerUtility::get_tag_attributes($reg[0], false);
-            $hrefData = [];
-            $hrefData['ref'] = ($attributes['href'] ?? '') ?: ($attributes['action'] ?? '');
-            $quotes = (str_starts_with($hrefData['ref'], '"')) ? '"' : '';
-            $hrefData['ref'] = trim($hrefData['ref'], '"');
-            if ($hrefData['ref']) {
-                // Finds out if the value had quotes around it
-                $hrefData['quotes'] = $quotes;
-                // subst_str is the string to look for when substituting later on
-                $hrefData['subst_str'] = $quotes . $hrefData['ref'] . $quotes;
-                if ($hrefData['ref'] && !str_starts_with(trim($hrefData['ref']), '#') && !str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
-                    $linkList .= '|' . $hrefData['subst_str'] . '|';
-                    $hrefData['absRef'] = MailerUtility::absRef($hrefData['ref'], $this->mailParts['html']['path']);
-                    $hrefData['tag'] = $tag;
-                    $hrefData['no_jumpurl'] = intval(trim(($attributes['no_jumpurl'] ?? ''), '"')) ? 1 : 0;
-                    $this->mailParts['html']['hrefs'][] = $hrefData;
-                }
-            }
-        }
-        // Extracts TYPO3 specific links made by the openPic() JS function
-        $codeParts = explode("onClick=\"openPic('", $htmlContent);
-        $pieces = count($codeParts);
-        for ($i = 1; $i < $pieces; $i++) {
-            $showpicArray = explode("'", $codeParts[$i]);
-            $hrefData['ref'] = $showpicArray[0];
-            if ($hrefData['ref']) {
-                $hrefData['quotes'] = "'";
-                // subst_str is the string to look for, when substituting lateron
-                $hrefData['subst_str'] = $hrefData['quotes'] . $hrefData['ref'] . $hrefData['quotes'];
-                if (!str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
-                    $linkList .= '|' . $hrefData['subst_str'] . '|';
-                    $hrefData['absRef'] = MailerUtility::absRef($hrefData['ref'], $this->mailParts['html']['path']);
-                    $this->mailParts['html']['hrefs'][] = $hrefData;
-                }
-            }
-        }
-
-        // substitute dmailerping URL
-        // get all media and search for use_jumpurl then add it to the hrefs array
-        $this->extractMediaLinks();
-        foreach ($this->mailParts['html']['media'] as $mediaData) {
-            if ($mediaData['use_jumpurl'] === 1) {
-                $this->mailParts['html']['hrefs'][$mediaData['ref']] = $mediaData;
-            }
-        }
-    }
 }

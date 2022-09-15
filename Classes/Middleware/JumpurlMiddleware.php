@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
  * @package    TYPO3
  * @subpackage    tx_mail
  */
-class JumpurlController implements MiddlewareInterface
+class JumpurlMiddleware implements MiddlewareInterface
 {
 
     public const RECIPIENT_TABLE_TTADDRESS = 'tt_address';

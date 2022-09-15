@@ -114,7 +114,7 @@ class StatisticsController extends AbstractController
 
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
-        $this->view = $this->configureTemplatePaths('Statistics');
+        $this->view->setTemplate('Statistics');
 
         $this->init($request);
         $this->initStatistics($request);
@@ -142,7 +142,7 @@ class StatisticsController extends AbstractController
             }
         } else {
             // If no access or if ID == zero
-            $this->view = $this->configureTemplatePaths('NoAccess');
+            $this->view->setTemplate('NoAccess');
             $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
             $this->messageQueue->addMessage($message);
         }

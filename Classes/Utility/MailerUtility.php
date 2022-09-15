@@ -6,6 +6,8 @@ namespace MEDIAESSENZ\Mail\Utility;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use FoT3\Rdct\Redirects;
+use GuzzleHttp\Exception\RequestException;
+use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use PDO;
@@ -20,6 +22,7 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageRendererResolver;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
@@ -110,7 +113,7 @@ class MailerUtility
      */
     public static function fName(string $name): string
     {
-        return stripslashes(self::getLanguageService()->sL(BackendUtility::getItemLabel('sys_dmail', $name)));
+        return stripslashes(static::getLanguageService()->sL(BackendUtility::getItemLabel('sys_dmail', $name)));
     }
 
     /**
@@ -122,134 +125,224 @@ class MailerUtility
     }
 
     /**
-     * Fetch content of a page (only internal and external page)
-     *
-     * @param array $row Directmail DB record
-     * @param array $params Any default parameters (usually the ones from pageTSconfig)
-     * @param bool $returnArray Return error or warning message as array instead of string
-     *
-     * @return array|string Error or warning message during fetching the content
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @param $url
+     * @return string|bool
+     * @throws RequestException $exception
      */
-    public static function fetchUrlContentsForMailRecord(array $row, array $params, bool $returnArray = false): array|string
+    public static function fetchContentFromUrl($url): string|bool
     {
-        $lang = self::getLanguageService();
-        $theOutput = '';
-        $errorMsg = [];
-        $warningMsg = [];
-        $urls = self::getFullUrlsForMailRecord($row);
-        $plainTextUrl = $urls['plainTextUrl'];
-        $htmlUrl = $urls['htmlUrl'];
-        $urlBase = $urls['baseUrl'];
-        $glue = (str_contains($urlBase, '?')) ? '&' : '?';
+        $requestFactory = GeneralUtility::makeInstance(RequestFactory::class);
+        $response = $requestFactory->request($url);
+        return $response->getBody()->getContents();
+    }
 
-        // Compile the mail
-        /* @var $mailerService MailerService */
-        $mailerService = GeneralUtility::makeInstance(MailerService::class);
-        if ($params['enable_jump_url']) {
-            $mailerService->setJumpUrlPrefix($urlBase . $glue .
-                'mid=###SYS_MAIL_ID###' .
-                (intval($params['jumpurl_tracking_privacy']) ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
-                '&aC=###SYS_AUTHCODE###' .
-                '&jumpurl=');
-            $mailerService->setJumpUrlUseId(true);
-        }
-        if ($params['enable_mailto_jump_url']) {
-            $mailerService->setJumpUrlUseMailto(true);
+    public static function contentContainsBoundaries($content): bool
+    {
+        return str_contains($content, '<!--DMAILER_SECTION_BOUNDARY');
+    }
+
+    public static function getRenderedFlashMessages(string $title, array $messages, int $severity): string
+    {
+        $renderedFlashMessages = '';
+        foreach ($messages as $message) {
+            $renderedFlashMessages .= static::getRenderedFlashMessage($title, $message, $severity);
         }
 
-        $mailerService->start();
-        $mailerService->setCharset($row['charset']);
-        $mailerService->setIncludeMedia((bool)$row['includeMedia']);
+        return $renderedFlashMessages;
+    }
 
-        if ($plainTextUrl) {
-            $mailContent = GeneralUtility::getURL(self::addUserPass($plainTextUrl, $params));
-            $mailerService->addPlainContent($mailContent);
-            if (!$mailContent || !$mailerService->getPlainContent()) {
-                $errorMsg[] = $lang->getLL('dmail_no_plain_content');
-            } else if (!str_contains($mailerService->getPlainContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
-                $warningMsg[] = $lang->getLL('dmail_no_plain_boundaries');
-            }
-        }
+    public static function getRenderedFlashMessage(string $title, string $message, int $severity): string
+    {
+        return GeneralUtility::makeInstance(FlashMessageRendererResolver::class)
+            ->resolve()
+            ->render([
+                GeneralUtility::makeInstance(
+                    FlashMessage::class,
+                    $message,
+                    $title,
+                    $severity
+                ),
+            ]);
+    }
 
-        // fetch the HTML url
-        if ($htmlUrl) {
-            // Username and password is added in htmlmail object
-            $success = $mailerService->addHTML(self::addUserPass($htmlUrl, $params));
-            // If type = 1, we have an external page.
-            if ($row['type'] == 1) {
-                // Try to auto-detect the charset of the message
-                $matches = [];
-                $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', ($mailerService->getMailPart('html_content') ?? ''), $matches);
-                if ($res == 1) {
-                    $mailerService->setCharset($matches[1]);
-                } else if (isset($params['direct_mail_charset'])) {
-                    $mailerService->setCharset($params['direct_mail_charset']);
-                } else {
-                    $mailerService->setCharset('iso-8859-1');
+    /**
+     * Extracts all media-links from given content
+     *
+     * @param string $content
+     * @param string $path
+     * @return array
+     */
+    public static function extractMediaLinks(string $content, string $path): array
+    {
+        $mediaLinks = [];
+
+        $attribRegex = static::tag_regex(['img', 'table', 'td', 'tr', 'body', 'iframe', 'script', 'input', 'embed']);
+        $imageList = '';
+
+        // split the document by the beginning of the above tags
+        $codeParts = preg_split($attribRegex, $content);
+        $len = strlen($codeParts[0]);
+        $pieces = count($codeParts);
+        $reg = [];
+        for ($i = 1; $i < $pieces; $i++) {
+            $tag = strtolower(strtok(substr($content, $len + 1, 10), ' '));
+            $len += strlen($tag) + strlen($codeParts[$i]) + 2;
+            preg_match('/[^>]*/', $codeParts[$i], $reg);
+
+            // Fetches the attributes for the tag
+            $attributes = static::get_tag_attributes($reg[0]);
+            $imageData = [];
+
+            // Finds the src or background attribute
+            $imageData['ref'] = ($attributes['src'] ?? $attributes['background'] ?? '');
+            if ($imageData['ref']) {
+                // find out if the value had quotes around it
+                $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
+                // subst_str is the string to look for, when substituting lateron
+                $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
+                if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
+                    $imageList .= '|' . $imageData['subst_str'] . '|';
+                    $imageData['absRef'] = static::absRef($imageData['ref'], $path);
+                    $imageData['tag'] = $tag;
+                    $imageData['use_jumpurl'] = (isset($attributes['dmailerping']) && $attributes['dmailerping']) ? 1 : 0;
+                    $imageData['do_not_embed'] = !empty($attributes['do_not_embed']);
+                    $mediaLinks[] = $imageData;
                 }
             }
-            if (self::extractFramesInfo($mailerService->getHtmlContent(), $mailerService->getHtmlPath())) {
-                $errorMsg[] = $lang->getLL('dmail_frames_not allowed');
-            } else if (!$success || !$mailerService->getHtmlContent()) {
-                $errorMsg[] = $lang->getLL('dmail_no_html_content');
-            } else if (!str_contains($mailerService->getHtmlContent(), '<!--DMAILER_SECTION_BOUNDARY')) {
-                $warningMsg[] = $lang->getLL('dmail_no_html_boundaries');
-            }
         }
 
-        if (!count($errorMsg)) {
-            // Update the record:
-            $mailerService->setMailPart('messageid', $mailerService->getMessageId());
-            $mailContent = base64_encode(serialize($mailerService->getMailParts()));
-
-            $updateData = [
-                'issent' => 0,
-                'charset' => $mailerService->getCharset(),
-                'mailContent' => $mailContent,
-                'renderedSize' => strlen($mailContent),
-                'long_link_rdct_url' => $urlBase,
-            ];
-
-            GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$row['uid'], $updateData);
-
-            if (count($warningMsg)) {
-                foreach ($warningMsg as $warning) {
-                    $theOutput .= GeneralUtility::makeInstance(FlashMessageRendererResolver::class)
-                        ->resolve()
-                        ->render([
-                            GeneralUtility::makeInstance(
-                                FlashMessage::class,
-                                $warning,
-                                $lang->getLL('dmail_warning'),
-                                AbstractMessage::WARNING
-                            ),
-                        ]);
+        // Extracting stylesheets
+        $attribRegex = static::tag_regex(['link']);
+        // Split the document by the beginning of the above tags
+        $codeParts = preg_split($attribRegex, $content);
+        $pieces = count($codeParts);
+        for ($i = 1; $i < $pieces; $i++) {
+            preg_match('/[^>]*/', $codeParts[$i], $reg);
+            // fetches the attributes for the tag
+            $attributes = static::get_tag_attributes($reg[0]);
+            $imageData = [];
+            if (strtolower($attributes['rel']) == 'stylesheet' && $attributes['href']) {
+                // Finds the src or background attribute
+                $imageData['ref'] = $attributes['href'];
+                // Finds out if the value had quotes around it
+                $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
+                // subst_str is the string to look for, when substituting lateron
+                $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
+                if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
+                    $imageList .= '|' . $imageData['subst_str'] . '|';
+                    $imageData['absRef'] = static::absRef($imageData['ref'], $path);
+                    $mediaLinks[] = $imageData;
                 }
             }
-        } else {
-            foreach ($errorMsg as $error) {
-                $theOutput .= GeneralUtility::makeInstance(FlashMessageRendererResolver::class)
-                    ->resolve()
-                    ->render([
-                        GeneralUtility::makeInstance(
-                            FlashMessage::class,
-                            $error,
-                            $lang->getLL('dmail_error'),
-                            AbstractMessage::ERROR
-                        ),
-                    ]);
+        }
+
+        // fixes javascript rollovers
+        $codeParts = explode('.src', $content);
+        $pieces = count($codeParts);
+        $expr = '/^[^' . quotemeta('"') . quotemeta("'") . ']*/';
+        for ($i = 1; $i < $pieces; $i++) {
+            $temp = $codeParts[$i];
+            $temp = trim(str_replace('=', '', trim($temp)));
+            preg_match($expr, substr($temp, 1, strlen($temp)), $reg);
+            $imageData['ref'] = $reg[0];
+            $imageData['quotes'] = substr($temp, 0, 1);
+            // subst_str is the string to look for, when substituting lateron
+            $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
+            $theInfo = GeneralUtility::split_fileref($imageData['ref']);
+
+            switch ($theInfo['fileext']) {
+                case 'gif':
+                    // do like jpg
+                case 'jpeg':
+                    // do like jpg
+                case 'jpg':
+                    if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
+                        $imageList .= '|' . $imageData['subst_str'] . '|';
+                        $imageData['absRef'] = static::absRef($imageData['ref'], $path);
+                        $mediaLinks[] = $imageData;
+                    }
+                    break;
+                default:
+                    // do nothing
             }
         }
-        if ($returnArray) {
-            return [
-                'errors' => $errorMsg,
-                'warnings' => $warningMsg,
-            ];
-        } else {
-            return $theOutput;
+
+        return $mediaLinks;
+    }
+
+    /**
+     * Extracts all hyper-links from given content
+     *
+     * @param string $content
+     * @param string $path
+     * @return array
+     */
+    public static function extractHyperLinks(string $content, string $path): array
+    {
+        $hyperLinks = [];
+        $linkList = '';
+
+        $attribRegex = static::tag_regex(['a', 'form', 'area']);
+
+        // Splits the document by the beginning of the above tags
+        $codeParts = preg_split($attribRegex, $content);
+        $len = strlen($codeParts[0]);
+        $pieces = count($codeParts);
+        $reg = [];
+        for ($i = 1; $i < $pieces; $i++) {
+            $tag = strtolower(strtok(substr($content, $len + 1, 10), ' '));
+            $len += strlen($tag) + strlen($codeParts[$i]) + 2;
+            preg_match('/[^>]*/', $codeParts[$i], $reg);
+
+            // Fetches the attributes for the tag
+            $attributes = static::get_tag_attributes($reg[0], false);
+            $hrefData = [];
+            $hrefData['ref'] = ($attributes['href'] ?? '') ?: ($attributes['action'] ?? '');
+            $quotes = (str_starts_with($hrefData['ref'], '"')) ? '"' : '';
+            $hrefData['ref'] = trim($hrefData['ref'], '"');
+            if ($hrefData['ref']) {
+                // Finds out if the value had quotes around it
+                $hrefData['quotes'] = $quotes;
+                // subst_str is the string to look for when substituting later on
+                $hrefData['subst_str'] = $quotes . $hrefData['ref'] . $quotes;
+                if ($hrefData['ref'] && !str_starts_with(trim($hrefData['ref']), '#') && !str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
+                    $linkList .= '|' . $hrefData['subst_str'] . '|';
+                    $hrefData['absRef'] = static::absRef($hrefData['ref'], $path);
+                    $hrefData['tag'] = $tag;
+                    $hrefData['no_jumpurl'] = intval(trim(($attributes['no_jumpurl'] ?? ''), '"')) ? 1 : 0;
+                    $hyperLinks[] = $hrefData;
+                }
+            }
         }
+        // Extracts TYPO3 specific links made by the openPic() JS function
+        $codeParts = explode("onClick=\"openPic('", $content);
+        $pieces = count($codeParts);
+        for ($i = 1; $i < $pieces; $i++) {
+            $showpicArray = explode("'", $codeParts[$i]);
+            $hrefData['ref'] = $showpicArray[0];
+            if ($hrefData['ref']) {
+                $hrefData['quotes'] = "'";
+                // subst_str is the string to look for, when substituting lateron
+                $hrefData['subst_str'] = $hrefData['quotes'] . $hrefData['ref'] . $hrefData['quotes'];
+                if (!str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
+                    $linkList .= '|' . $hrefData['subst_str'] . '|';
+                    $hrefData['absRef'] = static::absRef($hrefData['ref'], $path);
+                    $hyperLinks[] = $hrefData;
+                }
+            }
+        }
+
+        // substitute dmailerping URL
+        // get all media and search for use_jumpurl then add it to the hrefs array
+        $mediaLinks = static::extractMediaLinks($content, $path);
+
+        foreach ($mediaLinks as $mediaLink) {
+            if (isset($mediaLink['use_jumpurl']) && $mediaLink['use_jumpurl'] === 1) {
+                $hyperLinks[$mediaLink['ref']] = $mediaLink;
+            }
+        }
+
+        return $hyperLinks;
     }
 
 
@@ -262,88 +355,137 @@ class MailerUtility
      *
      * @return string The new URL with username and password
      */
-    protected static function addUserPass(string $url, array $params): string
+    public static function addUsernameAndPasswordToUrl(string $url, array $params): string
     {
-        $user = $params['http_username'] ?? '';
-        $pass = $params['http_password'] ?? '';
+        $username = $params['http_username'] ?? '';
+        $password = $params['http_password'] ?? '';
         $matches = [];
-        if ($user && $pass && preg_match('/^https?:\/\//', $url, $matches)) {
-            $url = $matches[0] . $user . ':' . $pass . '@' . substr($url, strlen($matches[0]));
+        if ($username && $password && preg_match('/^https?:\/\//', $url, $matches)) {
+            $url = $matches[0] . $username . ':' . $password . '@' . substr($url, strlen($matches[0]));
         }
         if (($params['simulate_usergroup'] ?? false) && MathUtility::canBeInterpretedAsInteger($params['simulate_usergroup'])) {
-            $glue = (str_contains($url, '?')) ? '&' : '?';
-            $url = $url . $glue . 'dmail_fe_group=' . (int)$params['simulate_usergroup'] . '&access_token=' . GeneralUtility::makeInstance(RegistryUtility::class)->createAndGetAccessToken();
+            $glue = str_contains($url, '?') ? '&' : '?';
+            $url .= $glue . 'dmail_fe_group=' . (int)$params['simulate_usergroup'] . '&access_token=' . RegistryUtility::createAndGetAccessToken();
         }
         return $url;
     }
 
-    /**
-     * Set up URL variables for this $row.
-     *
-     * @param array $row Directmail DB record
-     *
-     * @return array $result Url_plain and url_html in an array
-     */
-    public static function getFullUrlsForMailRecord(array $row): array
+    public static function getAbsoluteBaseUrlForMailPage(int $pageUid): string
     {
-        $cObj = GeneralUtility::makeInstance(ContentObjectRenderer::class);
+        $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         // Finding the domain to use
-        $result = [
-            'baseUrl' => $cObj->typolink_URL([
-                'parameter' => 't3://page?uid=' . (int)$row['page'],
-                'forceAbsoluteUrl' => true,
-                'linkAccessRestrictedPages' => true,
-            ]),
-            'htmlUrl' => '',
-            'plainTextUrl' => '',
+        return $contentObjectRenderer->typolink_URL([
+            'parameter' => 't3://page?uid=' . $pageUid,
+            'forceAbsoluteUrl' => true,
+            'linkAccessRestrictedPages' => true,
+        ]);
+    }
+
+    /**
+     * @param int $pageUid
+     * @param string $params
+     * @return string
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     */
+    public static function getUrlForInternalPage(int $pageUid, string $params): string
+    {
+        $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
+        $params = str_starts_with($params, '&') ? substr($params, 1) : $params;
+
+        return $contentObjectRenderer->typolink_URL([
+            'parameter' => 't3://page?uid=' . $pageUid . '&' . $params,
+            'forceAbsoluteUrl' => true,
+            'forceAbsoluteUrl.' => ['scheme' => static::getDefaultScheme()],
+            'linkAccessRestrictedPages' => true,
+        ]);
+    }
+
+    /**
+     * @param string $url
+     * @return string
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     */
+    public static function getUrlForExternalPage(string $url): string
+    {
+        return @parse_url($url, PHP_URL_SCHEME) ? $url : static::getDefaultScheme() . '://' . $url;
+    }
+
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
+    public static function getDefaultScheme(): string
+    {
+        return static::getExtensionConfiguration('UseHttpToFetch') ? 'http' : 'https';
+    }
+
+    /**
+     * @param array $config
+     * @return bool
+     */
+    public static function shouldFetchPlainText(array $config): bool
+    {
+        return ($config['sendOptions'] & 1) !== 0;
+    }
+
+    /**
+     * @param array $config
+     * @return bool
+     */
+    public static function shouldFetchHtml(array $config): bool
+    {
+        return ($config['sendOptions'] & 2) !== 0;
+    }
+
+    /**
+     * This function checks which content elements are supposed to be sent to the recipient.
+     * tslib_content inserts dmail boundary markers in the content specifying which elements are intended for which categories,
+     * this functions check if the recipient is subscribing to any of these categories and
+     * filters out the elements that are inteded for categories not subscribed to.
+     *
+     * @param array $contentArray Array of content split by dmail boundary
+     * @param string|null $userCategories The list of categories the user is subscribing to.
+     *
+     * @return array        Content of the email, which the recipient subscribed
+     */
+    public static function getBoundaryParts(array $contentArray, string $userCategories = null): array
+    {
+        $contentParts = [];
+        $mailHasContent = false;
+        $boundaryMax = count($contentArray) - 1;
+        foreach ($contentArray as $blockKey => $contentPart) {
+            $key = substr($contentPart[0], 1);
+            $isSubscribed = false;
+            $contentPart['mediaList'] = $contentPart['mediaList'] ?? '';
+            if (!$key || $userCategories === null) {
+                $contentParts[] = $contentPart[1];
+                if ($contentPart[1]) {
+                    $mailHasContent = true;
+                }
+            } else if ($key == 'END') {
+                $contentParts[] = $contentPart[1];
+                // There is content, and it is not just the header and footer content, or it is the only content because we have no direct mail boundaries.
+                if (($contentPart[1] && !($blockKey == 0 || $blockKey == $boundaryMax)) || count($contentArray) == 1) {
+                    $mailHasContent = true;
+                }
+            } else {
+                foreach (explode(',', $key) as $group) {
+                    if (GeneralUtility::inList($userCategories, $group)) {
+                        $isSubscribed = true;
+                    }
+                }
+                if ($isSubscribed) {
+                    $contentParts[] = $contentPart[1];
+                    $mailHasContent = true;
+                }
+            }
+        }
+        return [
+            $contentParts,
+            $mailHasContent
         ];
-
-        // Finding the url to fetch content from
-        switch ((string)$row['type']) {
-            case 1:
-                $result['htmlUrl'] = $row['HTMLParams'];
-                $result['plainTextUrl'] = $row['plainParams'];
-                break;
-            default:
-                $params = str_starts_with($row['HTMLParams'], '&') ? substr($row['HTMLParams'], 1) : $row['HTMLParams'];
-                $result['htmlUrl'] = $cObj->typolink_URL([
-                    'parameter' => 't3://page?uid=' . (int)$row['page'] . '&' . $params,
-                    'forceAbsoluteUrl' => true,
-                    'linkAccessRestrictedPages' => true,
-                ]);
-                $params = str_starts_with($row['plainParams'], '&') ? substr($row['plainParams'], 1) : $row['plainParams'];
-                $result['plainTextUrl'] = $cObj->typolink_URL([
-                    'parameter' => 't3://page?uid=' . (int)$row['page'] . '&' . $params,
-                    'forceAbsoluteUrl' => true,
-                    'linkAccessRestrictedPages' => true,
-                ]);
-        }
-
-        // plain
-        if ($result['plainTextUrl']) {
-            if (!($row['sendOptions'] & 1)) {
-                $result['plainTextUrl'] = '';
-            } else {
-                $urlParts = @parse_url($result['plainTextUrl']);
-                if (!$urlParts['scheme']) {
-                    $result['plainTextUrl'] = 'http://' . $result['plainTextUrl'];
-                }
-            }
-        }
-
-        // html
-        if ($result['htmlUrl']) {
-            if (!($row['sendOptions'] & 2)) {
-                $result['htmlUrl'] = '';
-            } else {
-                $urlParts = @parse_url($result['htmlUrl']);
-                if (!$urlParts['scheme']) {
-                    $result['htmlUrl'] = 'http://' . $result['htmlUrl'];
-                }
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -703,31 +845,14 @@ class MailerUtility
     }
 
     /**
-     * Extracts all media-links from $this->theParts["html"]["content"]
+     * Returns true if content contains frame tag
      *
-     * @return    array    two-dimensional array with information about each frame
+     * @param string $content
+     * @return bool
      */
-    public static function extractFramesInfo(string $content, string $path): array
+    public static function contentContainsFrameTag(string $content): bool
     {
-        $htmlCode = $content;
-        $info = [];
-        if (strpos(' ' . $htmlCode, '<frame ')) {
-            $attribRegex = MailerUtility::tag_regex('frame');
-            // Splits the document by the beginning of the above tags
-            $codepieces = preg_split($attribRegex, $htmlCode, 1000000);
-            $pieces = count($codepieces);
-            for ($i = 1; $i < $pieces; $i++) {
-                preg_match('/[^>]*/', $codepieces[$i], $reg);
-                // Fetches the attributes for the tag
-                $attributes = MailerUtility::get_tag_attributes($reg[0]);
-                $frame = [];
-                $frame['src'] = $attributes['src'];
-                $frame['name'] = $attributes['name'];
-                $frame['absRef'] = MailerUtility::absRef($frame['src'], $path);
-                $info[] = $frame;
-            }
-        }
-        return $info;
+        return str_contains($content, '<frame ');
     }
 
     /**
@@ -779,10 +904,10 @@ class MailerUtility
      */
     public static function substHREFsInHTML(MailerService $mailerService): void
     {
-        if (empty($mailerService->getHtmlHrefs())) {
+        if (empty($mailerService->getHtmlHyperLinks())) {
             return;
         }
-        $hrefs = $mailerService->getHtmlHrefs();
+        $hrefs = $mailerService->getHtmlHyperLinks();
         $jumpUrlPrefix = $mailerService->getJumpUrlPrefix();
         $jumpUrlUseId = $mailerService->getJumpUrlUseId();
         $jumpUrlUseMailto = $mailerService->getJumpUrlUseMailto();
@@ -813,6 +938,48 @@ class MailerUtility
                 $mailerService->getHtmlContent()
             ));
         }
+    }
+
+    /**
+     * replace hrefs in $content
+     *
+     * @param string $content
+     * @param array $hrefs
+     * @param string $jumpUrlPrefix
+     * @param bool $jumpUrlUseId
+     * @param bool $jumpUrlUseMailto
+     * @return string
+     */
+    public static function replaceHrefsInContent(string $content, array $hrefs, string $jumpUrlPrefix, bool $jumpUrlUseId, bool $jumpUrlUseMailto): string
+    {
+        foreach ($hrefs as $urlId => $val) {
+            if (isset($val['no_jumpurl'])) {
+                // A tag attribute "no_jumpurl=1" allows to disable jumpurl for custom links
+                $substVal = $val['absRef'];
+            } else if ($jumpUrlPrefix && ($val['tag'] != 'form') && (!str_contains($val['ref'], 'mailto:'))) {
+                // Form elements cannot use jumpurl!
+                if ($jumpUrlUseId) {
+                    $substVal = $jumpUrlPrefix . $urlId;
+                } else {
+                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
+                }
+            } else if (strstr($val['ref'], 'mailto:') && $jumpUrlUseMailto) {
+                if ($jumpUrlUseId) {
+                    $substVal = $jumpUrlPrefix . $urlId;
+                } else {
+                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
+                }
+            } else {
+                $substVal = $val['absRef'];
+            }
+            $content = str_replace(
+                $val['subst_str'],
+                $val['quotes'] . $substVal . $val['quotes'],
+                $content
+            );
+        }
+
+        return $content;
     }
 
     /**

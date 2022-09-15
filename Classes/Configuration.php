@@ -15,8 +15,8 @@ final class Configuration
 {
     public static function registerHooks(): void
     {
-        // Register hook for simulating a user group
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['determineId-PreProcessing']['mail'] = \MEDIAESSENZ\Mail\Hooks\SimulateFrontendUserGroupHook::class . '->__invoke';
+        // Register hook for simulating a user group -> now SimulateFrontendUserGroupMiddleware
+        // $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['determineId-PreProcessing']['mail'] = \MEDIAESSENZ\Mail\Hooks\SimulateFrontendUserGroupHook::class . '->__invoke';
     }
 
     public static function addPageTSConfig(): void

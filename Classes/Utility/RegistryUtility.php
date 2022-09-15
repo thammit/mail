@@ -14,7 +14,7 @@ class RegistryUtility
      *
      * @return string
      */
-    public function createAndGetAccessToken(): string
+    public static function createAndGetAccessToken(): string
     {
         /* @var Registry $registry */
         $registry = GeneralUtility::makeInstance(Registry::class);
@@ -31,7 +31,7 @@ class RegistryUtility
      *
      * @return bool
      */
-    public function validateAndRemoveAccessToken(string $accessToken): bool
+    public static function validateAndRemoveAccessToken(string $accessToken): bool
     {
         /* @var Registry $registry */
         $registry = GeneralUtility::makeInstance(Registry::class);

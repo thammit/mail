@@ -44,7 +44,7 @@ class MailerEngineController extends AbstractController
 
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
-        $this->view = $this->configureTemplatePaths('MailerEngine');
+        $this->view->setTemplate('MailerEngine');
 
         $this->init($request);
         $this->initMailerEngine($request);
@@ -83,7 +83,7 @@ class MailerEngineController extends AbstractController
             }
         } else {
             // If no access or if ID == zero
-            $this->view = $this->configureTemplatePaths('NoAccess');
+            $this->view->setTemplate('NoAccess');
             $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
             $this->messageQueue->addMessage($message);
         }
@@ -121,7 +121,7 @@ class MailerEngineController extends AbstractController
          * 	1 = ok
          * 	0 = check
          * 	-1 = cron stopped
-         * 
+         *
          * cron running or error (die function in dmailer_log)
          */
         if (file_exists($this->getDmailerLockFilePath())) {
@@ -299,10 +299,8 @@ class MailerEngineController extends AbstractController
      */
     public function invokeMEngine()
     {
-        $htmlmail = GeneralUtility::makeInstance(MailerService::class);
-        $htmlmail->nonCron = 1;
-        $htmlmail->start();
-        $htmlmail->runcron();
+        $this->mailerService->start();
+        $this->mailerService->runcron();
     }
 
     /**

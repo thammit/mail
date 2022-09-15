@@ -42,7 +42,7 @@ class SimulateFrontendUserGroupHook
     {
         $directMailFeGroup = (int)GeneralUtility::_GET('dmail_fe_group');
         $accessToken = (string)GeneralUtility::_GET('access_token');
-        if ($directMailFeGroup > 0 && GeneralUtility::makeInstance(RegistryUtility::class)->validateAndRemoveAccessToken($accessToken)) {
+        if ($directMailFeGroup > 0 && RegistryUtility::validateAndRemoveAccessToken($accessToken)) {
             if ($typoScriptFrontendController->fe_user->user) {
                 $typoScriptFrontendController->fe_user->user[$typoScriptFrontendController->usergroup_column] = $directMailFeGroup;
             } else {

@@ -20,7 +20,7 @@ class ConfigurationController extends AbstractController
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
         $currentModule = 'Configuration';
-        $this->view = $this->configureTemplatePaths($currentModule);
+        $this->view->setTemplate($currentModule);
 
         $this->init($request);
         $this->initConfiguration($request);
@@ -48,7 +48,7 @@ class ConfigurationController extends AbstractController
             }
         } else {
             // If no access or if ID == zero
-            $this->view = $this->configureTemplatePaths('NoAccess');
+            $this->view->setTemplate('NoAccess');
             $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
             $this->messageQueue->addMessage($message);
         }

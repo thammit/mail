@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
@@ -26,7 +27,7 @@ class MassMailingCommand extends Command
     {
         $this->setDescription('Sends planed mass mails from EXT:mail');
         $this->addOption('site-identifier', null, InputOption::VALUE_REQUIRED, 'The site identifier for mail settings.', '');
-        $this->addOption('message-limit', null, InputOption::VALUE_REQUIRED, 'The maximum number of messages to send.');
+        $this->addOption('send-per-cycle', null, InputOption::VALUE_REQUIRED, 'Send per cycle');
         $this->setHelp('Sends newsletters which are ready to send. Depend on how many newsletters are planned or left to get send out and the extension configuration for number of messages to be sent per cycle, this command will send the latest open newsletter queue, like the recommended scheduler task or BE module for invoking mailer engine will do.');
     }
 
@@ -65,8 +66,29 @@ class MassMailingCommand extends Command
          * @var $mailerService MailerService
          */
         $mailerService = GeneralUtility::makeInstance(MailerService::class);
-        $mailerService->start();
-        $mailerService->runcron((int)$input->getOption('site-identifier'), (int)$input->getOption('message-limit'));
+        $mailerService->setSiteIdentifier($input->getOption('site-identifier'));
+        $mailerService->start((int)$input->getOption('send-per-cycle'));
+        try {
+            $mailerService->runcron();
+        } catch (DBALException $e) {
+            $io->warning('DBALException: ' . $e->getMessage());
+            return Command::FAILURE;
+        } catch (Exception $e) {
+            $io->warning('Exception: ' . $e->getMessage());
+            return Command::FAILURE;
+        } catch (TransportExceptionInterface $e) {
+            $io->warning('TransportExceptionInterface: ' . $e->getMessage());
+            return Command::FAILURE;
+        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+            $io->warning('ExtensionConfigurationExtensionNotConfiguredException: ' . $e->getMessage());
+            return Command::FAILURE;
+        } catch (ExtensionConfigurationPathDoesNotExistException $e) {
+            $io->warning('ExtensionConfigurationPathDoesNotExistException: ' . $e->getMessage());
+            return Command::FAILURE;
+        } catch (\TYPO3\CMS\Core\Exception $e) {
+            $io->warning('TYPO3\CMS\Core\Exception: ' . $e->getMessage());
+            return Command::FAILURE;
+        }
 
         unlink($lockfile);
         return Command::SUCCESS;

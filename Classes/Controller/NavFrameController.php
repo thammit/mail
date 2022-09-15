@@ -43,7 +43,7 @@ class NavFrameController extends AbstractController
         $disableTitleHighlight = $this->getTSConfig()['options.']['pageTree.']['disableTitleHighlight'] ?? false;
         $this->doHighlight = !$disableTitleHighlight;
 
-        $this->view = $this->configureTemplatePaths('NavFrame');
+        $this->view->setTemplate('NavFrame');
 
         $rows = $this->getPages();
         $pages = [];
@@ -82,7 +82,7 @@ class NavFrameController extends AbstractController
         return ($currentModule ? 'top.currentSubScript=unescape("' . rawurlencode($currentSubScript) . '");' : '') . '
 			function jumpTo(params,linkObj,highLightID)	{
 				var theUrl = top.currentSubScript+"&"+params;
-            
+
 				if (top.condensedMode)	{
 					top.content.document.location=theUrl;
 				} else {
@@ -92,17 +92,17 @@ class NavFrameController extends AbstractController
 				' . ((!isset($GLOBALS['CLIENT']['FORMSTYLE']) || !$GLOBALS['CLIENT']['FORMSTYLE']) ? '' : 'if (linkObj) {linkObj.blur();}') . '
 				return false;
 			}
-            
+
             // Call this function, refresh_nav(), from another script in the backend if you want to refresh the navigation frame (eg. after having changed a page title or moved pages etc.)
 			// See t3lib_BEfunc::getSetUpdateSignal()
 			function refresh_nav() {
 				window.setTimeout("_refresh_nav();",0);
 			}
-            
+
 			function _refresh_nav()	{
 				document.location="' . htmlspecialchars(GeneralUtility::getIndpEnv('SCRIPT_NAME') . '?unique=' . time()) . '";
 			}
-            
+
 			// Highlighting rows in the page tree:
 			function hilight_row(frameSetModule,highLightID) {
 				// Remove old:
@@ -110,7 +110,7 @@ class NavFrameController extends AbstractController
 				if (theObj)	{
 					theObj.style.backgroundColor="";
 				}
-            
+
 				// Set new:
 				top.fsMod.navFrameHighlightedID[frameSetModule] = highLightID;
 				theObj = document.getElementById(highLightID);
