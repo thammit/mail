@@ -75,14 +75,14 @@
                                 <tr>
                                     <f:if condition="{row.separator}">
                                         <f:then>
-                                            <td colspan="3" style="background-color: {row.bgcolor}">{row.title}:
+                                            <td colspan="3">{row.title}:
                                                 <strong>
                                                     <f:format.html>{row.value}</f:format.html>
                                                 </strong></td>
                                         </f:then>
                                         <f:else>
                                             <td style="vertical-align: top; width: 75%">
-                                                <f:format.html>{row.icon}{row.header}</f:format.html>
+                                                <f:format.html>{row.icon} {row.header}</f:format.html>
                                                 [{row.CType}
                                                 <f:if condition="{row.list_type}">; {row.list_type}</f:if>
                                                 ]
@@ -114,7 +114,7 @@
                     </f:if>
                     <input type="hidden" name="pages_uid" value="{data.cats.output.pages_uid}">
                     <input type="hidden" name="cmd" value="{data.cats.output.cmd}"><br/>
-                    <input type="submit" name="update_cats" value="{data.cats.output.update_cats -> f:format.html()}">
+                    <input class="btn btn-default" type="submit" name="update_cats" value="{data.cats.output.update_cats -> f:format.html()}">
                 </f:if>
             </div>
             <input type="hidden" name="cmd" value="{data.cats.cmd}">
@@ -163,12 +163,12 @@
                 </h3>
                 <f:translate key="{lll}testmail_simple_msg"/>
                 <br/><br/>
-                <input style="width: 460px;" type="text" name="SET[dmail_test_email]"
-                       value="{data.test.testFormData.dmail_test_email}"/><br/><br/>
+                <input class="form-control mb-3" type="email" placeholder="Mail address" name="SET[dmail_test_email]"
+                       value="{data.test.testFormData.dmail_test_email}"/>
                 <input type="hidden" name="id" value="{data.test.testFormData.id}"/>
                 <input type="hidden" name="sys_dmail_uid" value="{data.test.testFormData.sys_dmail_uid}"/>
                 <input type="hidden" name="cmd" value="{data.test.testFormData.cmd}"/>
-                <input type="submit" name="mailingMode_simple" value="{f:translate(key: '{lll}dmail_send')}"/>
+                <input class="btn btn-default" type="submit" name="mailingMode_simple" value="{f:translate(key: '{lll}dmail_send')}"/>
             </div>
             <input type="hidden" name="cmd" value="{data.test.cmd}">
             <input type="hidden" name="sys_dmail_uid" value="{data.test.sys_dmail_uid}">
