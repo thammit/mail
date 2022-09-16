@@ -193,34 +193,11 @@ class MailerService implements LoggerAwareInterface
         $this->charset = $charset;
     }
 
-    /**
-     * Adds plain-text, replaces the HTTP urls in the plain text and then encodes it
-     *
-     * @param string $content The plain text content
-     *
-     * @return void
-     */
-    public function addPlainContent(string $content): void
-    {
-        if ($this->jumpUrlPrefix) {
-            [$content, $plainLinkIds] = MailerUtility::replaceUrlsInPlainText($content, $this->jumpUrlPrefix, $this->jumpUrlUseId);
-            $this->setPlainLinkIds($plainLinkIds);
-        }
-        $this->setPlainContent($content);
-    }
-
     public function setPlainLinkIds($array): void
     {
         $this->mailParts['plain']['link_ids'] = $array;
     }
 
-    /**
-     * Sets the plain-text part. No processing done.
-     *
-     * @param string $content The plain content
-     *
-     * @return    void
-     */
     public function setPlainContent(string $content): void
     {
         $this->mailParts['plain']['content'] = $content;
@@ -231,13 +208,6 @@ class MailerService implements LoggerAwareInterface
         return $this->mailParts['plain']['content'];
     }
 
-    /**
-     * Sets the HTML-part. No processing done.
-     *
-     * @param string $content The HTML content
-     *
-     * @return void
-     */
     public function setHtmlContent(string $content): void
     {
         $this->mailParts['html']['content'] = $content;
@@ -268,6 +238,21 @@ class MailerService implements LoggerAwareInterface
         return $this->mailParts['html']['hrefs'];
     }
 
+    /**
+     * Adds plain-text, replaces the HTTP urls in the plain text and then encodes it
+     *
+     * @param string $content The plain text content
+     *
+     * @return void
+     */
+    public function addPlainContent(string $content): void
+    {
+        if ($this->jumpUrlPrefix) {
+            [$content, $plainLinkIds] = MailerUtility::replaceUrlsInPlainText($content, $this->jumpUrlPrefix, $this->jumpUrlUseId);
+            $this->setPlainLinkIds($plainLinkIds);
+        }
+        $this->setPlainContent($content);
+    }
 
     /**
      * Initializing the MailMessage class and setting the first global variables. Write to log file if it's a cronjob
@@ -439,8 +424,8 @@ class MailerService implements LoggerAwareInterface
         $this->authCodeFieldList = ($mailData['authcode_fieldList'] ?: 'uid');
 
         $this->dmailer['sectionBoundary'] = '<!--DMAILER_SECTION_BOUNDARY';
-        $this->dmailer['html_content'] = $this->mailParts['html']['content'] ?? '';
-        $this->dmailer['plain_content'] = $this->mailParts['plain']['content'] ?? '';
+        $this->dmailer['html_content'] = $this->getHtmlContent() ?? '';
+        $this->dmailer['plain_content'] = $this->getPlainContent() ?? '';
         $this->dmailer['messageID'] = $this->messageId;
         $this->dmailer['sys_dmail_uid'] = $mailUid;
         $this->dmailer['sys_dmail_rec'] = $mailData;
@@ -469,8 +454,8 @@ class MailerService implements LoggerAwareInterface
             $this->dmailer['boundaryParts_plain'][$bKey] = explode('-->', $bContent, 2);
         }
 
-        $this->isHtml = (bool)($this->mailParts['html']['content'] ?? false);
-        $this->isPlain = (bool)($this->mailParts['plain']['content'] ?? false);
+        $this->isHtml = (bool)($this->getHtmlContent() ?? false);
+        $this->isPlain = (bool)($this->getPlainContent() ?? false);
         $this->includeMedia = (bool)$mailData['includeMedia'];
     }
 
@@ -539,14 +524,14 @@ class MailerService implements LoggerAwareInterface
     public function sendSimple(string $addressList): void
     {
         $plainContent = '';
-        if ($this->mailParts['plain']['content'] ?? false) {
+        if ($this->getPlainContent() ?? false) {
             [$contentParts] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain']);
             $plainContent = implode('', $contentParts);
         }
         $this->setPlainContent($plainContent);
 
         $htmlContent = '';
-        if ($this->mailParts['html']['content'] ?? false) {
+        if ($this->getHtmlContent() ?? false) {
             [$contentParts] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html']);
             $htmlContent = implode('', $contentParts);
         }
@@ -596,20 +581,20 @@ class MailerService implements LoggerAwareInterface
                 $this->dmailer['messageID'] => $uniqMsgId,
             ];
 
-            $this->mailParts['html']['content'] = '';
+            $this->setHtmlContent('');
             if ($this->isHtml && ($recipientData['module_sys_dmail_html'] || $tableNameChar == 'P')) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html'], $recipientData['sys_dmail_categories_list']);
                 $tempContent_HTML = implode('', $contentParts);
 
                 if ($mailHasContent) {
                     $tempContent_HTML = $this->replaceMailMarkers($tempContent_HTML, $recipientData, $additionalMarkers);
-                    $this->mailParts['html']['content'] = $tempContent_HTML;
+                    $this->setHtmlContent($tempContent_HTML);
                     $returnCode |= 1;
                 }
             }
 
             // Plain
-            $this->mailParts['plain']['content'] = '';
+            $this->setPlainContent('');
             if ($this->isPlain) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain'], $recipientData['sys_dmail_categories_list']);
                 $plainTextContent = implode('', $contentParts);
@@ -916,9 +901,9 @@ class MailerService implements LoggerAwareInterface
     {
         // todo: css??
         // iterate through the media array and embed them
-        if ($this->includeMedia && !empty($this->mailParts['html']['content'])) {
+        if ($this->includeMedia && !empty($this->getHtmlContent())) {
             // extract all media path from the mail message
-            $this->mailParts['html']['media'] = MailerUtility::extractMediaLinks($this->mailParts['html']['content'], $this->mailParts['html']['path']);
+            $this->mailParts['html']['media'] = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
             foreach ($this->mailParts['html']['media'] as $media) {
                 // TODO: why are there table related tags here?
                 if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && $media['tag'] === 'img') {
@@ -927,20 +912,20 @@ class MailerService implements LoggerAwareInterface
                     } else {
                         $mailMessage->embed(GeneralUtility::getUrl($media['absRef']), basename($media['absRef']));
                     }
-                    $this->mailParts['html']['content'] = str_replace($media['subst_str'], 'cid:' . basename($media['absRef']), $this->mailParts['html']['content']);
+                    $this->setHtmlContent(str_replace($media['subst_str'], 'cid:' . basename($media['absRef']), $this->getHtmlContent()));
                 }
             }
             // remove ` do_not_embed="1"` attributes
-            $this->mailParts['html']['content'] = str_replace(' do_not_embed="1"', '', $this->mailParts['html']['content']);
+            $this->setHtmlContent(str_replace(' do_not_embed="1"', '', $this->getHtmlContent()));
         }
 
         // set the html content
-        if ($this->mailParts['html']['content']) {
-            $mailMessage->html($this->mailParts['html']['content']);
+        if ($this->getHtmlContent()) {
+            $mailMessage->html($this->getHtmlContent());
         }
         // set the plain content as alt part
-        if ($this->mailParts['plain']['content']) {
-            $mailMessage->text($this->mailParts['plain']['content']);
+        if ($this->getPlainContent()) {
+            $mailMessage->text($this->getPlainContent());
         }
 
         // handle FAL attachments
