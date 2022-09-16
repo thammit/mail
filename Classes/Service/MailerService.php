@@ -63,7 +63,7 @@ class MailerService implements LoggerAwareInterface
     protected string $organisation = '';
     protected string $replyToEmail = '';
     protected string $replyToName = '';
-    protected int $priority = 0;
+    protected int $priority = 3;
     protected string $authCodeFieldList = '';
     protected string $backendCharset = 'utf-8';
     protected string $message = '';
