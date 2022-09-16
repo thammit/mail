@@ -26,6 +26,7 @@ use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
+use TYPO3\CMS\Core\Utility\MathUtility;
 
 class MailerService implements LoggerAwareInterface
 {
@@ -48,7 +49,6 @@ class MailerService implements LoggerAwareInterface
      */
     protected array $mailParts = [];
     protected int $sendPerCycle = 50;
-    protected bool $mailHasContent = false;
     protected bool $isHtml = false;
     protected bool $isPlain = false;
     protected bool $includeMedia = false;
@@ -199,8 +199,11 @@ class MailerService implements LoggerAwareInterface
      */
     public function addPlainContent(string $content): void
     {
+        if ($this->jumpUrlPrefix) {
+            [$content, $plainLinkIds] = MailerUtility::replaceUrlsInPlainText($content, $this->jumpUrlPrefix, $this->jumpUrlUseId);
+            $this->setPlainLinkIds($plainLinkIds);
+        }
         $this->setPlainContent($content);
-        MailerUtility::substHTTPurlsInPlainText($this);
     }
 
     public function setPlainLinkIds($array): void
@@ -280,7 +283,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         $idLeft = time() . '.' . uniqid();
-        $idRight = !empty($host) ? $host : 'symfony.generated';
+        $idRight = $host ?: 'symfony.generated';
         $this->messageId = $idLeft . '@' . $idRight;
 
         // Mailer engine parameters
@@ -342,7 +345,7 @@ class MailerService implements LoggerAwareInterface
             try {
                 $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
                 if (MailerUtility::contentContainsFrameTag($htmlContent)) {
-                    $errorMsg[] = MailerUtility::getLanguageService()->getLL('dmail_frames_not allowed');
+                    $errors[] = MailerUtility::getLanguageService()->getLL('dmail_frames_not allowed');
                 }
                 if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
                     $warnings[] = MailerUtility::getLanguageService()->getLL('dmail_no_html_boundaries');
@@ -429,7 +432,7 @@ class MailerService implements LoggerAwareInterface
 
         $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset, $this->charset) : '');
 
-        $this->priority = MailerUtility::intInRangeWrapper((int)$mailData['priority'], 1, 5);
+        $this->priority = MathUtility::forceIntegerInRange((int)$mailData['priority'], 1, 5);
         $this->authCodeFieldList = ($mailData['authcode_fieldList'] ?: 'uid');
 
         $this->dmailer['sectionBoundary'] = '<!--DMAILER_SECTION_BOUNDARY';
@@ -476,15 +479,17 @@ class MailerService implements LoggerAwareInterface
      * @param array $markers Existing markers that are mail-specific, not user-specific
      *
      * @return string Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     protected function replaceMailMarkers(string $content, array $recipient, array $markers): string
     {
         // replace %23%23%23 with ###, since typolink generated link with urlencode
         $content = str_replace('%23%23%23', '###', $content);
 
-        $rowFieldsArray = GeneralUtility::trimExplode(',', $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['defaultRecipFields']);
-        if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['addRecipFields']) {
-            $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['addRecipFields']));
+        $rowFieldsArray = GeneralUtility::trimExplode(',', MailerUtility::getExtensionConfiguration('defaultRecipFields'), true);
+        if ($addRecipientFields = MailerUtility::getExtensionConfiguration('addRecipFields')) {
+            $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields), true);
         }
 
         foreach ($rowFieldsArray as $substField) {
@@ -524,11 +529,11 @@ class MailerService implements LoggerAwareInterface
      *
      * @param string $addressList list of recipient address, comma list of emails
      *
-     * @return bool
+     * @return void
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function sendSimple(string $addressList): bool
+    public function sendSimple(string $addressList): void
     {
         $plainContent = '';
         if ($this->mailParts['plain']['content'] ?? false) {
@@ -549,8 +554,6 @@ class MailerService implements LoggerAwareInterface
         foreach ($recipients as $recipient) {
             $this->sendMailToRecipient($recipient);
         }
-
-        return true;
     }
 
     /**
@@ -608,14 +611,18 @@ class MailerService implements LoggerAwareInterface
             $this->mailParts['plain']['content'] = '';
             if ($this->isPlain) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain'], $recipientData['sys_dmail_categories_list']);
-                $tempContent_Plain = implode('', $contentParts);
+                $plainTextContent = implode('', $contentParts);
 
                 if ($mailHasContent) {
-                    $tempContent_Plain = $this->replaceMailMarkers($tempContent_Plain, $recipientData, $additionalMarkers);
+                    $plainTextContent = $this->replaceMailMarkers($plainTextContent, $recipientData, $additionalMarkers);
                     if (trim($this->dmailer['sys_dmail_rec']['use_rdct']) || trim($this->dmailer['sys_dmail_rec']['long_link_mode'])) {
-                        $tempContent_Plain = MailerUtility::substUrlsInPlainText($tempContent_Plain, $this->dmailer['sys_dmail_rec']['long_link_mode'] ? 'all' : '76', $this->dmailer['sys_dmail_rec']['long_link_rdct_url']);
+                        $plainTextContent = MailerUtility::shortUrlsInPlainText(
+                            $plainTextContent,
+                            $this->dmailer['sys_dmail_rec']['long_link_mode'] ? 0 : 76,
+                            $this->dmailer['sys_dmail_rec']['long_link_rdct_url']
+                        );
                     }
-                    $this->mailParts['plain']['content'] = $tempContent_Plain;
+                    $this->setPlainContent($plainTextContent);
                     $returnCode |= 2;
                 }
             }
@@ -623,19 +630,15 @@ class MailerService implements LoggerAwareInterface
             $this->TYPO3MID = $midRidId . '-' . md5($midRidId);
             $this->dmailer['sys_dmail_rec']['return_path'] = str_replace('###XID###', $midRidId, $this->dmailer['sys_dmail_rec']['return_path']);
 
-            // check if the email valids
-            $recipient = [];
-            if (GeneralUtility::validEmail($recipientData['email'])) {
-                $email = $recipientData['email'];
-                $name = $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset);
-
-                $recipient = MailerUtility::createRecipient($email, $name);
+            if ($returnCode && GeneralUtility::validEmail($recipientData['email'])) {
+                $this->sendMailToRecipient(
+                    new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
+                    $recipientData
+                );
             }
 
-            if ($returnCode && !empty($recipient)) {
-                $this->sendMailToRecipient($recipient, $recipientData);
-            }
         }
+
         return $returnCode;
     }
 
@@ -659,16 +662,15 @@ class MailerService implements LoggerAwareInterface
                 if (is_array($listArr)) {
                     $ct = 0;
                     // Find tKey
-                    $tKey = match ($table) {
+                    $recipientTable = match ($table) {
                         'tt_address', 'fe_users' => substr($table, 0, 1),
                         'PLAINLIST' => 'P',
                         default => 'u',
                     };
 
                     // Send mails
-                    $sendIds = MailerUtility::getSentMails($mailUid, $tKey);
+                    $sendIdsArr = MailerUtility::getSentMails($mailUid, $recipientTable);
                     if ($table == 'PLAINLIST') {
-                        $sendIdsArr = explode(',', $sendIds);
                         foreach ($listArr as $kval => $recipientData) {
                             $kval++;
                             if (!in_array($kval, $sendIdsArr)) {
@@ -677,7 +679,7 @@ class MailerService implements LoggerAwareInterface
                                     break;
                                 }
                                 $recipientData['uid'] = $kval;
-                                $this->shipOfMail($mailUid, $recipientData, $tKey);
+                                $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
                                 $ct++;
                                 $c++;
                             }
@@ -686,13 +688,16 @@ class MailerService implements LoggerAwareInterface
                         $idList = implode(',', $listArr);
                         if ($idList) {
                             $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-                            $statement = $queryBuilder
+                            $queryBuilder
                                 ->select('*')
                                 ->from($table)
                                 ->where($queryBuilder->expr()->in('uid', $idList))
-                                ->andWhere($queryBuilder->expr()->notIn('uid', ($sendIds ?: 0)))
-                                ->setMaxResults($this->sendPerCycle + 1)
-                                ->execute();
+                                ->setMaxResults($this->sendPerCycle + 1);
+                            if ($sendIdsArr) {
+                                $queryBuilder->addWhere($queryBuilder->expr()->notIn('uid', implode(',', $sendIdsArr)));
+                            }
+
+                            $statement = $queryBuilder->execute();
 
                             while ($recipientData = $statement->fetchAssociative()) {
                                 $recipientData['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories($table, $recipientData['uid']);
@@ -703,7 +708,7 @@ class MailerService implements LoggerAwareInterface
                                 }
 
                                 // We are NOT finished!
-                                $this->shipOfMail($mailUid, $recipientData, $tKey);
+                                $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
                                 $ct++;
                                 $c++;
                             }
@@ -722,7 +727,7 @@ class MailerService implements LoggerAwareInterface
      *
      * @param int $mailUid Newsletter ID. UID of the sys_dmail table
      * @param array $recipientData Recipient's data array
-     * @param string $tableKey Table name
+     * @param string $recipientTable Table name
      *
      * @return    void
      * @throws DBALException
@@ -730,19 +735,19 @@ class MailerService implements LoggerAwareInterface
      * @throws \TYPO3\CMS\Core\Exception
      * @internal param string $tKey : table of the recipient
      */
-    protected function shipOfMail(int $mailUid, array $recipientData, string $tableKey): void
+    protected function sendSingleMailAndAddLogEntry(int $mailUid, array $recipientData, string $recipientTable): void
     {
-        if (MailerUtility::isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $tableKey) === false) {
+        if (MailerUtility::isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $recipientTable) === false) {
             $pt = MailerUtility::getMilliseconds();
-            $recipientData = MailerUtility::convertFields($recipientData);
+            $recipientData = MailerUtility::normalizeAddress($recipientData);
 
             // write to dmail_maillog table. if it can be written, continue with sending.
             // if not, stop the script and report error
-            $rC = 0;
-            $logUid = MailerUtility::addToMailLog($mailUid, $tableKey . '_' . $recipientData['uid'], strlen($this->message), MailerUtility::getMilliseconds() - $pt, $rC, $recipientData['email']);
+            $returnCode = 0;
+            $logUid = MailerUtility::addToMailLog($mailUid, $recipientTable . '_' . $recipientData['uid'], strlen($this->message), MailerUtility::getMilliseconds() - $pt, $returnCode, $recipientData['email']);
 
             if ($logUid) {
-                $rC = $this->sendAdvanced($recipientData, $tableKey);
+                $returnCode = $this->sendAdvanced($recipientData, $recipientTable);
                 $parseTime = MailerUtility::getMilliseconds() - $pt;
 
                 $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
@@ -751,7 +756,7 @@ class MailerService implements LoggerAwareInterface
                     ->set('tstamp', time())
                     ->set('size', strlen($this->message))
                     ->set('parsetime', $parseTime)
-                    ->set('html_sent', $rC)
+                    ->set('html_sent', $returnCode)
                     ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($logUid, PDO::PARAM_INT)))
                     ->execute();
 
@@ -912,7 +917,7 @@ class MailerService implements LoggerAwareInterface
      * @return void
      * @var MailMessage $mailMessage Mailer Message Object
      */
-    protected function setContent(MailMessage &$mailMessage): void
+    protected function setContent(MailMessage $mailMessage): void
     {
         // todo: css??
         // iterate through the media array and embed them

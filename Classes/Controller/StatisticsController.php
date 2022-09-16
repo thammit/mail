@@ -1297,7 +1297,7 @@ class StatisticsController extends AbstractController
         } else {
             $page = BackendUtility::getRecord('pages', $row['page'], 'title');
             $dmailData = $row['page'] . ', ' . htmlspecialchars($page['title']);
-            $dmailInfo = MailerUtility::fName('plainParams') . ' ' . htmlspecialchars($row['plainParams'] . LF . MailerUtility::fName('HTMLParams') . $row['HTMLParams']) . '; ' . LF;
+            $dmailInfo = MailerUtility::getTranslatedLabelOfTcaField('plainParams') . ' ' . htmlspecialchars($row['plainParams'] . LF . MailerUtility::getTranslatedLabelOfTcaField('HTMLParams') . $row['HTMLParams']) . '; ' . LF;
         }
 
         $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectSysDmailMaillogsCompactView($row['uid']);
@@ -1477,15 +1477,15 @@ class StatisticsController extends AbstractController
             $recRec['links_last'] = empty($recRec['links']) ? 0 : intval(@max($recRec['links']));
             $recRec['links'] = count($recRec['links']);
 
-            $recRec['response_first'] = MailerUtility::intInRangeWrapper((int)((int)(empty($recRec['response']) ? 0 : @min($recRec['response'])) - $recRec['tstamp']), 0);
-            $recRec['response_last'] = MailerUtility::intInRangeWrapper((int)((int)(empty($recRec['response']) ? 0 : @max($recRec['response'])) - $recRec['tstamp']), 0);
+            $recRec['response_first'] = MathUtility::forceIntegerInRange((int)((int)(empty($recRec['response']) ? 0 : @min($recRec['response'])) - $recRec['tstamp']), 0);
+            $recRec['response_last'] = MathUtility::forceIntegerInRange((int)((int)(empty($recRec['response']) ? 0 : @max($recRec['response'])) - $recRec['tstamp']), 0);
             $recRec['response'] = count($recRec['response']);
 
-            $recRec['time_firstping'] = MailerUtility::intInRangeWrapper((int)($recRec['pings_first'] - $recRec['tstamp']), 0);
-            $recRec['time_lastping'] = MailerUtility::intInRangeWrapper((int)($recRec['pings_last'] - $recRec['tstamp']), 0);
+            $recRec['time_firstping'] = MathUtility::forceIntegerInRange((int)($recRec['pings_first'] - $recRec['tstamp']), 0);
+            $recRec['time_lastping'] = MathUtility::forceIntegerInRange((int)($recRec['pings_last'] - $recRec['tstamp']), 0);
 
-            $recRec['time_first_link'] = MailerUtility::intInRangeWrapper((int)($recRec['links_first'] - $recRec['tstamp']), 0);
-            $recRec['time_last_link'] = MailerUtility::intInRangeWrapper((int)($recRec['links_last'] - $recRec['tstamp']), 0);
+            $recRec['time_first_link'] = MathUtility::forceIntegerInRange((int)($recRec['links_first'] - $recRec['tstamp']), 0);
+            $recRec['time_last_link'] = MathUtility::forceIntegerInRange((int)($recRec['links_last'] - $recRec['tstamp']), 0);
 
             $connection = $this->getConnection('cache_sys_dmail_stat');
             $connection->insert(

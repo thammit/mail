@@ -817,9 +817,9 @@ class DmailController extends AbstractController
             // link in the mail
             $message = '<!--DMAILER_SECTION_BOUNDARY_-->' . $indata['message'] . '<!--DMAILER_SECTION_BOUNDARY_END-->';
             if (trim($this->params['use_rdct'])) {
-                $message = MailerUtility::substUrlsInPlainText(
+                $message = MailerUtility::shortUrlsInPlainText(
                     $message,
-                    $this->params['long_link_mode'] ? 'all' : '76',
+                    $this->params['long_link_mode'] ? 0 : 76,
                     $this->getUrlBase((int)$this->params['pid'])
                 );
             }
@@ -994,7 +994,7 @@ class DmailController extends AbstractController
             'sendOptions', 'includeMedia', 'flowedFormat', 'sys_language_uid', 'plainParams', 'HTMLParams', 'encoding', 'charset', 'issent', 'renderedsize'];
         foreach ($nameArr as $name) {
             $trs[] = [
-                'title' => MailerUtility::fName($name),
+                'title' => MailerUtility::getTranslatedLabelOfTcaField($name),
                 'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('sys_dmail', $name, ($mailData[$name] ?? false))),
             ];
         }
@@ -1010,14 +1010,14 @@ class DmailController extends AbstractController
         }
 
         $trs[] = [
-            'title' => MailerUtility::fName('attachment'),
+            'title' => MailerUtility::getTranslatedLabelOfTcaField('attachment'),
             'value' => implode(', ', $fileNames),
         ];
 
         return [
             'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $mailData, Icon::SIZE_SMALL),
             'title' => htmlspecialchars($mailData['subject'] ?? ''),
-            'theadTitle1' => MailerUtility::fName('subject'),
+            'theadTitle1' => MailerUtility::getTranslatedLabelOfTcaField('subject'),
             'theadTitle2' => GeneralUtility::fixed_lgd_cs(htmlspecialchars($mailData['subject'] ?? ''), 60),
             'trs' => $trs,
             'out' => $content,
@@ -1187,7 +1187,7 @@ class DmailController extends AbstractController
 
                 if (!empty($res)) {
                     foreach ($res as $recipRow) {
-                        $recipRow = MailerUtility::convertFields($recipRow);
+                        $recipRow = MailerUtility::normalizeAddress($recipRow);
                         $recipRow['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories('tt_address', $recipRow['uid']);
                         $this->mailerService->sendAdvanced($recipRow, 't');
                         $sentFlag = true;
@@ -1322,7 +1322,7 @@ class DmailController extends AbstractController
                 $rows = $idLists['PLAINLIST'];
             }
             foreach ($rows as $rec) {
-                $recipRow = MailerUtility::convertFields($rec);
+                $recipRow = MailerUtility::normalizeAddress($rec);
                 $recipRow['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories($table, $recipRow['uid']);
                 $kc = substr($table, 0, 1);
                 $returnCode = $this->mailerService->sendAdvanced($recipRow, $kc == 'p' ? 'P' : $kc);
@@ -1547,7 +1547,7 @@ class DmailController extends AbstractController
         }
 
         if (is_array($idLists['PLAINLIST'] ?? false)) {
-            $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($idLists['PLAINLIST']);
+            $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($idLists['PLAINLIST']);
         }
 
         /**
@@ -1650,9 +1650,9 @@ class DmailController extends AbstractController
                             $dmCsvUtility = GeneralUtility::makeInstance(CsvUtility::class);
                             $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($mailGroup['list']));
                         } else {
-                            $recipients = MailerUtility::rearrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
+                            $recipients = MailerUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
                         }
-                        $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($recipients);
+                        $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($recipients);
                         break;
                     case 2:
                         // Static MM list

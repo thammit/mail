@@ -13,7 +13,8 @@
     },
     "require": {
         "typo3/cms-core": "^11.5",
-        "friendsoftypo3/tt-address": "^5.3 || ^6.0",
+        "friendsoftypo3/tt-address": "^6.0",
+        "friendsoftypo3/rdct": "^2.1",
         "tedivm/fetch": "^0.7"
     },
     "extra": {

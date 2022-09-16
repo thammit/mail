@@ -292,9 +292,9 @@ class RecipientListController extends AbstractController
                             $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
                             $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($mailGroup['list']), $this->fieldList);
                         } else {
-                            $recipients = MailerUtility::rearrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
+                            $recipients = MailerUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
                         }
-                        $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($recipients);
+                        $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($recipients);
                         break;
                     case 2:
                         // Static MM list
@@ -343,7 +343,7 @@ class RecipientListController extends AbstractController
                             $idLists[$this->userTable] = array_unique($idLists[$this->userTable]);
                         }
                         if (is_array($idLists['PLAINLIST'])) {
-                            $idLists['PLAINLIST'] = MailerUtility::cleanPlainList($idLists['PLAINLIST']);
+                            $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($idLists['PLAINLIST']);
                         }
                         break;
                     default:

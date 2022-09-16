@@ -7,11 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use FoT3\Rdct\Redirects;
 use GuzzleHttp\Exception\RequestException;
-use MEDIAESSENZ\Mail\Constants;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
-use MEDIAESSENZ\Mail\Service\MailerService;
 use PDO;
-use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Tree\View\PageTreeView;
@@ -23,7 +19,6 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Http\RequestFactory;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageRendererResolver;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -64,7 +59,7 @@ class MailerUtility
      *
      * @return array Cleaned array
      */
-    public static function cleanPlainList(array $plainlist): array
+    public static function removeDuplicates(array $plainlist): array
     {
         /**
          * $plainlist is a multidimensional array.
@@ -90,30 +85,29 @@ class MailerUtility
      *
      * @return array a 2-dimensional array consisting email and name
      */
-    public static function rearrangePlainMails(array $plainMails): array
+    public static function reArrangePlainMails(array $plainMails): array
     {
         $out = [];
-        if (is_array($plainMails)) {
-            $c = 0;
-            foreach ($plainMails as $v) {
-                $out[$c]['email'] = trim($v);
-                $out[$c]['name'] = '';
-                $c++;
-            }
+        $c = 0;
+        foreach ($plainMails as $v) {
+            $out[$c]['email'] = trim($v);
+            $out[$c]['name'] = '';
+            $c++;
         }
         return $out;
     }
 
     /**
-     * Get locallang label
+     * Get translated label of table column
+     * default table: sys_dmail
      *
-     * @param string $name Locallang label index
-     *
+     * @param string $columnName
+     * @param string $table
      * @return string The label
      */
-    public static function fName(string $name): string
+    public static function getTranslatedLabelOfTcaField(string $columnName, string $table = 'sys_dmail'): string
     {
-        return stripslashes(static::getLanguageService()->sL(BackendUtility::getItemLabel('sys_dmail', $name)));
+        return stripslashes(static::getLanguageService()->sL(BackendUtility::getItemLabel($table, $columnName)));
     }
 
     /**
@@ -176,7 +170,7 @@ class MailerUtility
     {
         $mediaLinks = [];
 
-        $attribRegex = static::tag_regex(['img', 'table', 'td', 'tr', 'body', 'iframe', 'script', 'input', 'embed']);
+        $attribRegex = static::tagRegex(['img', 'table', 'td', 'tr', 'body', 'iframe', 'script', 'input', 'embed']);
         $imageList = '';
 
         // split the document by the beginning of the above tags
@@ -190,7 +184,7 @@ class MailerUtility
             preg_match('/[^>]*/', $codeParts[$i], $reg);
 
             // Fetches the attributes for the tag
-            $attributes = static::get_tag_attributes($reg[0]);
+            $attributes = static::getTagAttributes($reg[0]);
             $imageData = [];
 
             // Finds the src or background attribute
@@ -212,14 +206,14 @@ class MailerUtility
         }
 
         // Extracting stylesheets
-        $attribRegex = static::tag_regex(['link']);
+        $attribRegex = static::tagRegex(['link']);
         // Split the document by the beginning of the above tags
         $codeParts = preg_split($attribRegex, $content);
         $pieces = count($codeParts);
         for ($i = 1; $i < $pieces; $i++) {
             preg_match('/[^>]*/', $codeParts[$i], $reg);
             // fetches the attributes for the tag
-            $attributes = static::get_tag_attributes($reg[0]);
+            $attributes = static::getTagAttributes($reg[0]);
             $imageData = [];
             if (strtolower($attributes['rel']) == 'stylesheet' && $attributes['href']) {
                 // Finds the src or background attribute
@@ -282,7 +276,7 @@ class MailerUtility
         $hyperLinks = [];
         $linkList = '';
 
-        $attribRegex = static::tag_regex(['a', 'form', 'area']);
+        $attribRegex = static::tagRegex(['a', 'form', 'area']);
 
         // Splits the document by the beginning of the above tags
         $codeParts = preg_split($attribRegex, $content);
@@ -295,7 +289,7 @@ class MailerUtility
             preg_match('/[^>]*/', $codeParts[$i], $reg);
 
             // Fetches the attributes for the tag
-            $attributes = static::get_tag_attributes($reg[0], false);
+            $attributes = static::getTagAttributes($reg[0], false);
             $hrefData = [];
             $hrefData['ref'] = ($attributes['href'] ?? '') ?: ($attributes['action'] ?? '');
             $quotes = (str_starts_with($hrefData['ref'], '"')) ? '"' : '';
@@ -448,7 +442,7 @@ class MailerUtility
      * @param array $contentArray Array of content split by dmail boundary
      * @param string|null $userCategories The list of categories the user is subscribing to.
      *
-     * @return array        Content of the email, which the recipient subscribed
+     * @return array Content of the email, which the recipient subscribed
      */
     public static function getBoundaryParts(array $contentArray, string $userCategories = null): array
     {
@@ -464,27 +458,29 @@ class MailerUtility
                 if ($contentPart[1]) {
                     $mailHasContent = true;
                 }
-            } else if ($key == 'END') {
-                $contentParts[] = $contentPart[1];
-                // There is content, and it is not just the header and footer content, or it is the only content because we have no direct mail boundaries.
-                if (($contentPart[1] && !($blockKey == 0 || $blockKey == $boundaryMax)) || count($contentArray) == 1) {
-                    $mailHasContent = true;
-                }
             } else {
-                foreach (explode(',', $key) as $group) {
-                    if (GeneralUtility::inList($userCategories, $group)) {
-                        $isSubscribed = true;
-                    }
-                }
-                if ($isSubscribed) {
+                if ($key == 'END') {
                     $contentParts[] = $contentPart[1];
-                    $mailHasContent = true;
+                    // There is content, and it is not just the header and footer content, or it is the only content because we have no direct mail boundaries.
+                    if (($contentPart[1] && !($blockKey == 0 || $blockKey == $boundaryMax)) || count($contentArray) == 1) {
+                        $mailHasContent = true;
+                    }
+                } else {
+                    foreach (explode(',', $key) as $group) {
+                        if (GeneralUtility::inList($userCategories, $group)) {
+                            $isSubscribed = true;
+                        }
+                    }
+                    if ($isSubscribed) {
+                        $contentParts[] = $contentPart[1];
+                        $mailHasContent = true;
+                    }
                 }
             }
         }
         return [
             $contentParts,
-            $mailHasContent
+            $mailHasContent,
         ];
     }
 
@@ -509,21 +505,13 @@ class MailerUtility
 
         if ($settings['config.']['metaCharset']) {
             $characterSet = $settings['config.']['metaCharset'];
-        } else if ($GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset']) {
-            $characterSet = $GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset'];
+        } else {
+            if ($GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset']) {
+                $characterSet = $GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset'];
+            }
         }
 
         return mb_strtolower($characterSet);
-    }
-
-    /**
-     * Wrapper for the old t3lib_div::intInRange.
-     * Forces the integer $theInt into the boundaries of $min and $max.
-     * If the $theInt is 'FALSE' then the $zeroValue is applied.
-     */
-    public static function intInRangeWrapper(int $theInt, int $min, int $max = 2000000000, int $zeroValue = 0): int
-    {
-        return MathUtility::forceIntegerInRange($theInt, $min, $max, $zeroValue);
     }
 
     /**
@@ -532,33 +520,20 @@ class MailerUtility
      * This function is about preserving long links in messages.
      *
      * @param string $message Message content
-     * @param string $urlmode URL mode; "76" or "all
+     * @param int $lengthLimit Length limit; Default = 76 or 0 for all
      * @param string $index_script_url URL of index script (see makeRedirectUrl())
      * @return string Processed message content
-     * @see makeRedirectUrl()
-     * @deprecated since TYPO3 CMS 7, will be removed in TYPO3 CMS 8. Use mailer API instead
      */
-    public static function substUrlsInPlainText(string $message, string $urlmode = '76', string $index_script_url = ''): string
+    public static function shortUrlsInPlainText(string $message, int $lengthLimit = 76, string $index_script_url = ''): string
     {
-        $lengthLimit = match ($urlmode) {
-            '' => false,
-            'all' => 0,
-            default => (int)$urlmode,
-        };
-        if ($lengthLimit === false) {
-            // No processing
-            $messageSubstituted = $message;
-        } else {
-            $messageSubstituted = preg_replace_callback(
-                '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
-                function (array $matches) use ($lengthLimit, $index_script_url) {
-                    $redirects = GeneralUtility::makeInstance(Redirects::class);
-                    return $redirects->makeRedirectUrl($matches[0], $lengthLimit, $index_script_url);
-                },
-                $message
-            );
-        }
-        return $messageSubstituted;
+        return preg_replace_callback(
+            '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
+            function (array $matches) use ($lengthLimit, $index_script_url) {
+                $redirects = GeneralUtility::makeInstance(Redirects::class);
+                return $redirects->makeRedirectUrl($matches[0], $lengthLimit, $index_script_url);
+            },
+            $message
+        );
     }
 
     /**
@@ -588,10 +563,15 @@ class MailerUtility
     }
 
     /**
+     * @param string $table
+     * @param array $row
+     * @param int $sys_language_content
+     * @param string $overlayMode
+     * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public static function getRecordOverlay(string $table, array $row, int $sys_language_content, string $OLmode = ''): array
+    public static function getRecordOverlay(string $table, array $row, int $sys_language_content, string $overlayMode = ''): array
     {
         if ($row['uid'] > 0 && $row['pid'] > 0) {
             if ($GLOBALS['TCA'][$table] && $GLOBALS['TCA'][$table]['ctrl']['languageField'] && $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField']) {
@@ -603,7 +583,7 @@ class MailerUtility
                         if ($row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] <= 0) {
                             // Select overlay record:
                             $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-                            $olrow = $queryBuilder->select('*')
+                            $overlayRow = $queryBuilder->select('*')
                                 ->from($table)
                                 ->add('where', 'pid=' . intval($row['pid']) .
                                     ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['languageField'] . '=' . $sys_language_content .
@@ -613,24 +593,29 @@ class MailerUtility
                                 ->fetchAssociative();
 
                             // Merge record content by traversing all fields:
-                            if (is_array($olrow)) {
-                                foreach ($row as $fN => $fV) {
-                                    if ($fN != 'uid' && $fN != 'pid' && isset($olrow[$fN])) {
-                                        if ($GLOBALS['TCA'][$table]['l10n_mode'][$fN] != 'exclude' && ($GLOBALS['TCA'][$table]['l10n_mode'][$fN] != 'mergeIfNotBlank' || strcmp(trim($olrow[$fN]), ''))) {
-                                            $row[$fN] = $olrow[$fN];
+                            if (is_array($overlayRow)) {
+                                foreach ($row as $fieldName => $fieldValue) {
+                                    if ($fieldName != 'uid' && $fieldName != 'pid' && isset($overlayRow[$fieldName])) {
+                                        if ($GLOBALS['TCA'][$table]['l10n_mode'][$fieldName] != 'exclude' && ($GLOBALS['TCA'][$table]['l10n_mode'][$fieldName] != 'mergeIfNotBlank' || strcmp(trim($overlayRow[$fieldName]),
+                                                    ''))) {
+                                            $row[$fieldName] = $overlayRow[$fieldName];
                                         }
                                     }
                                 }
-                            } else if ($OLmode === 'hideNonTranslated' && $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] == 0) {
-                                // Unset, if non-translated records should be hidden.
-                                // ONLY done if the source record really is default language and not [All] in which case it is allowed.
-                                unset($row);
+                            } else {
+                                if ($overlayMode === 'hideNonTranslated' && $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] == 0) {
+                                    // Unset, if non-translated records should be hidden.
+                                    // ONLY done if the source record really is default language and not [All] in which case it is allowed.
+                                    unset($row);
+                                }
                             }
 
                             // Otherwise, check if sys_language_content is different from the value of the record
                             // that means a japanese site might try to display french content.
-                        } else if ($sys_language_content != $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']]) {
-                            unset($row);
+                        } else {
+                            if ($sys_language_content != $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']]) {
+                                unset($row);
+                            }
                         }
                     } else {
                         // When default language is displayed,
@@ -686,47 +671,29 @@ class MailerUtility
     }
 
     /**
-     * Converting array key.
-     * fe_user and tt_address are using different fieldname for the same information
+     * Normalize address
+     * fe_user and tt_address are using different field names for the same information
      *
-     * @param array $recipRow Recipient's data array
+     * @param array $recipientData Recipient's data array
      *
      * @return array Fixed recipient's data array
      */
-    public static function convertFields(array $recipRow): array
+    public static function normalizeAddress(array $recipientData): array
     {
         // Compensation for the fact that fe_users has the field 'telephone' instead of 'phone'
-        if ($recipRow['telephone'] ?? false) {
-            $recipRow['phone'] = $recipRow['telephone'];
+        if ($recipientData['telephone'] ?? false) {
+            $recipientData['phone'] = $recipientData['telephone'];
         }
 
         // Firstname must be more than 1 character
-        $recipRow['firstname'] = trim(strtok(trim($recipRow['name']), ' '));
-        if (strlen($recipRow['firstname']) < 2 || preg_match('|[^[:alnum:]]$|', $recipRow['firstname'])) {
-            $recipRow['firstname'] = $recipRow['name'];
+        $recipientData['firstname'] = trim(strtok(trim($recipientData['name']), ' '));
+        if (strlen($recipientData['firstname']) < 2 || preg_match('|[^[:alnum:]]$|', $recipientData['firstname'])) {
+            $recipientData['firstname'] = $recipientData['name'];
         }
-        if (!trim($recipRow['firstname'])) {
-            $recipRow['firstname'] = $recipRow['email'];
+        if (!trim($recipientData['firstname'])) {
+            $recipientData['firstname'] = $recipientData['email'];
         }
-        return $recipRow;
-    }
-
-    /**
-     * Creates an address object ready to be used with the symonfy mailer
-     *
-     * @param string $email
-     * @param string|NULL $name
-     * @return Address
-     */
-    public static function createRecipient(string $email, string $name = null): Address
-    {
-        if (!empty($name)) {
-            $recipient = new Address($email, $name);
-        } else {
-            $recipient = new Address($email);
-        }
-
-        return $recipient;
+        return $recipientData;
     }
 
     /**
@@ -752,9 +719,10 @@ class MailerUtility
         $ref = trim($ref);
         $info = parse_url($ref);
         if ($info['scheme'] ?? false) {
-            // if ref is an url
-            // do nothing
-        } else if (preg_match('/^\//', $ref)) {
+            return $ref;
+        }
+
+        if (preg_match('/^\//', $ref)) {
             // if ref is an absolute link
             $addr = parse_url($path);
             $ref = $addr['scheme'] . '://' . $addr['host'] . (($addr['port'] ?? false) ? ':' . $addr['port'] : '') . $ref;
@@ -785,7 +753,7 @@ class MailerUtility
      *
      * @return array array with attributes as keys in lower-case
      */
-    public static function get_tag_attributes(string $tag, bool $removeQuotes = true): array
+    public static function getTagAttributes(string $tag, bool $removeQuotes = true): array
     {
         $attributes = [];
         $tag = ltrim(preg_replace('/^<[^ ]*/', '', trim($tag)));
@@ -832,9 +800,9 @@ class MailerUtility
      *
      * @return string the regular expression
      */
-    public static function tag_regex(array|string $tags): string
+    public static function tagRegex(array|string $tags): string
     {
-        $tags = (!is_array($tags) ? [$tags] : $tags);
+        $tags = !is_array($tags) ? [$tags] : $tags;
         $regexp = '/';
         $c = count($tags);
         foreach ($tags as $tag) {
@@ -858,18 +826,16 @@ class MailerUtility
     /**
      * This substitutes the http:// urls in plain text with links
      *
-     * @param MailerService $mailerService
-     * @return void The changed content
+     * @param string $content
+     * @param string $jumpUrlPrefix
+     * @param bool $jumpUrlUseId
+     * @return array The changed content and plain link ids
      */
-    public static function substHTTPurlsInPlainText(MailerService $mailerService): void
+    public static function replaceUrlsInPlainText(string $content, string $jumpUrlPrefix, bool $jumpUrlUseId): array
     {
-        $jumpUrlPrefix = $mailerService->getJumpUrlPrefix();
         if (empty($jumpUrlPrefix)) {
-            return;
+            $content;
         }
-
-        $jumpUrlUseId = $mailerService->getJumpUrlUseId();
-        $content = $mailerService->getPlainContent();
 
         $jumpUrlCounter = 1;
         $plainLinkIds = [];
@@ -880,64 +846,24 @@ class MailerUtility
                 if (str_contains($url, '&no_jumpurl=1')) {
                     // A link parameter "&no_jumpurl=1" allows to disable jumpurl for plain text links
                     $url = str_replace('&no_jumpurl=1', '', $url);
-                } else if ($jumpUrlUseId) {
-                    $plainLinkIds[$jumpUrlCounter] = $url;
-                    $url = $jumpUrlPrefix . '-' . $jumpUrlCounter;
-                    $jumpUrlCounter++;
                 } else {
-                    $url = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($url));
+                    if ($jumpUrlUseId) {
+                        $plainLinkIds[$jumpUrlCounter] = $url;
+                        $url = $jumpUrlPrefix . '-' . $jumpUrlCounter;
+                        $jumpUrlCounter++;
+                    } else {
+                        $url = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($url));
+                    }
                 }
                 return $url;
             },
             $content
         );
 
-        $mailerService->setPlainLinkIds($plainLinkIds);
-        $mailerService->setPlainContent($contentWithReplacedUrls);
-    }
-
-    /**
-     * substitutes hrefs in $this->theParts["html"]["content"]
-     *
-     * @param MailerService $mailerService
-     * @return void
-     */
-    public static function substHREFsInHTML(MailerService $mailerService): void
-    {
-        if (empty($mailerService->getHtmlHyperLinks())) {
-            return;
-        }
-        $hrefs = $mailerService->getHtmlHyperLinks();
-        $jumpUrlPrefix = $mailerService->getJumpUrlPrefix();
-        $jumpUrlUseId = $mailerService->getJumpUrlUseId();
-        $jumpUrlUseMailto = $mailerService->getJumpUrlUseMailto();
-
-        foreach ($hrefs as $urlId => $val) {
-            if (isset($val['no_jumpurl'])) {
-                // A tag attribute "no_jumpurl=1" allows to disable jumpurl for custom links
-                $substVal = $val['absRef'];
-            } else if ($jumpUrlPrefix && ($val['tag'] != 'form') && (!str_contains($val['ref'], 'mailto:'))) {
-                // Form elements cannot use jumpurl!
-                if ($jumpUrlUseId) {
-                    $substVal = $jumpUrlPrefix . $urlId;
-                } else {
-                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
-                }
-            } else if (strstr($val['ref'], 'mailto:') && $jumpUrlUseMailto) {
-                if ($jumpUrlUseId) {
-                    $substVal = $jumpUrlPrefix . $urlId;
-                } else {
-                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
-                }
-            } else {
-                $substVal = $val['absRef'];
-            }
-            $mailerService->setHtmlContent(str_replace(
-                $val['subst_str'],
-                $val['quotes'] . $substVal . $val['quotes'],
-                $mailerService->getHtmlContent()
-            ));
-        }
+        return [
+            $contentWithReplacedUrls,
+            $plainLinkIds,
+        ];
     }
 
     /**
@@ -956,21 +882,25 @@ class MailerUtility
             if (isset($val['no_jumpurl'])) {
                 // A tag attribute "no_jumpurl=1" allows to disable jumpurl for custom links
                 $substVal = $val['absRef'];
-            } else if ($jumpUrlPrefix && ($val['tag'] != 'form') && (!str_contains($val['ref'], 'mailto:'))) {
-                // Form elements cannot use jumpurl!
-                if ($jumpUrlUseId) {
-                    $substVal = $jumpUrlPrefix . $urlId;
-                } else {
-                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
-                }
-            } else if (strstr($val['ref'], 'mailto:') && $jumpUrlUseMailto) {
-                if ($jumpUrlUseId) {
-                    $substVal = $jumpUrlPrefix . $urlId;
-                } else {
-                    $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
-                }
             } else {
-                $substVal = $val['absRef'];
+                if ($jumpUrlPrefix && ($val['tag'] != 'form') && (!str_contains($val['ref'], 'mailto:'))) {
+                    // Form elements cannot use jumpurl!
+                    if ($jumpUrlUseId) {
+                        $substVal = $jumpUrlPrefix . $urlId;
+                    } else {
+                        $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
+                    }
+                } else {
+                    if (strstr($val['ref'], 'mailto:') && $jumpUrlUseMailto) {
+                        if ($jumpUrlUseId) {
+                            $substVal = $jumpUrlPrefix . $urlId;
+                        } else {
+                            $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
+                        }
+                    } else {
+                        $substVal = $val['absRef'];
+                    }
+                }
             }
             $content = str_replace(
                 $val['subst_str'],
@@ -1038,11 +968,11 @@ class MailerUtility
      * @param int $mailUid Newsletter ID. UID of the sys_dmail record
      * @param string $table Recipient table
      *
-     * @return string        list of sent recipients
+     * @return array        list of rid sent recipients
      * @throws DBALException
      * @throws Exception
      */
-    public static function getSentMails(int $mailUid, string $table): string
+    public static function getSentMails(int $mailUid, string $table): array
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
         $statement = $queryBuilder
@@ -1053,13 +983,13 @@ class MailerUtility
             ->andWhere($queryBuilder->expr()->eq('response_type', '0'))
             ->execute();
 
-        $list = '';
+        $list = [];
 
         while (($row = $statement->fetchAssociative())) {
-            $list .= $row['rid'] . ',';
+            $list[] = $row['rid'];
         }
 
-        return rtrim($list, ',');
+        return $list;
     }
 
     /**
