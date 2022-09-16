@@ -205,7 +205,7 @@ class MailerService implements LoggerAwareInterface
 
     public function getPlainContent(): string
     {
-        return $this->mailParts['plain']['content'];
+        return $this->mailParts['plain']['content'] ?? '';
     }
 
     public function setHtmlContent(string $content): void
@@ -215,7 +215,7 @@ class MailerService implements LoggerAwareInterface
 
     public function getHtmlContent(): string
     {
-        return $this->mailParts['html']['content'];
+        return $this->mailParts['html']['content'] ?? '';
     }
 
     public function setHtmlPath(string $path): void
@@ -225,7 +225,7 @@ class MailerService implements LoggerAwareInterface
 
     public function getHtmlPath(): string
     {
-        return $this->mailParts['html']['path'];
+        return $this->mailParts['html']['path'] ?? '';
     }
 
     public function setHtmlHyperLinks(array $hrefs): void
@@ -235,7 +235,7 @@ class MailerService implements LoggerAwareInterface
 
     public function getHtmlHyperLinks(): array
     {
-        return $this->mailParts['html']['hrefs'];
+        return $this->mailParts['html']['hrefs'] ?? [];
     }
 
     /**

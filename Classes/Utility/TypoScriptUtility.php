@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use MEDIAESSENZ\Mail\Repository\PagesRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -55,7 +55,6 @@ class TypoScriptUtility
     public function updatePagesTSconfig(int $id, array $pageTs, string $tsConfPrefix, $impParams = '')
     {
         $done = false;
-        $id = intval($id);
         if (is_array($pageTs) && $id > 0) {
             if (!is_array($impParams)) {
                 $impParams = $this->implodeTSParams(BackendUtility::getPagesTSconfig($id));
@@ -72,7 +71,7 @@ class TypoScriptUtility
             if (count($set)) {
                 // Get page record and TS config lines
                 $pRec = BackendUtility::getRecord('pages', $id);
-                $tsLines = explode(LF, $pRec['TSconfig']);
+                $tsLines = explode(LF, $pRec['TSconfig'] ?? '');
                 $tsLines = array_reverse($tsLines);
                 // Reset the set of changes.
                 foreach ($set as $f => $v) {
@@ -94,7 +93,7 @@ class TypoScriptUtility
 
                 // store those changes
                 $tsConf = implode(LF, $tsLines);
-                $done = GeneralUtility::makeInstance(PagesRepository::class)->updatePageTSconfig((int)$id, $tsConf);
+                $done = GeneralUtility::makeInstance(PagesRepository::class)->updatePageTSconfig($id, $tsConf);
             }
         }
 

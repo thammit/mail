@@ -981,7 +981,7 @@ class DmailController extends AbstractController
                     'returnUrl' => $requestUri->__toString(),
                 ]);
 
-                $content = '<a href="#" onClick="' . $editParams . '">' . $iconActionsOpen . '<b> ' . $this->getLanguageService()->getLL('dmail_edit') . '</b></a>';
+                $content = '<a href="#" onClick="' . $editParams . '">' . $iconActionsOpen . '<strong> ' . $this->getLanguageService()->getLL('dmail_edit') . '</strong></a>';
             } else {
                 $content = $iconActionsOpen . ' (' . $this->getLanguageService()->getLL('dmail_noEdit_noPerms') . ')';
             }
@@ -1015,7 +1015,7 @@ class DmailController extends AbstractController
         ];
 
         return [
-            'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $mailData, Icon::SIZE_SMALL),
+            'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $mailData, Icon::SIZE_DEFAULT),
             'title' => htmlspecialchars($mailData['subject'] ?? ''),
             'theadTitle1' => MailerUtility::getTranslatedLabelOfTcaField('subject'),
             'theadTitle2' => GeneralUtility::fixed_lgd_cs(htmlspecialchars($mailData['subject'] ?? ''), 60),

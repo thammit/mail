@@ -503,10 +503,10 @@ class MailerUtility
 
         $characterSet = 'utf-8';
 
-        if ($settings['config.']['metaCharset']) {
+        if (isset($settings['config.']['metaCharset'])) {
             $characterSet = $settings['config.']['metaCharset'];
         } else {
-            if ($GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset']) {
+            if (isset($GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset'])) {
                 $characterSet = $GLOBALS['TYPO3_CONF_VARS']['BE']['forceCharset'];
             }
         }
