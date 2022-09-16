@@ -291,7 +291,7 @@ class MailerService implements LoggerAwareInterface
     /**
      * @param array $row
      * @param array $params
-     * @return bool return true if successfully
+     * @return bool returns true if an error occurred
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
@@ -301,7 +301,7 @@ class MailerService implements LoggerAwareInterface
         $fetchHtmlContent = MailerUtility::shouldFetchHtml($row);
 
         if (!$fetchPlainTextContent && !$fetchHtmlContent) {
-            MailerUtility::addInfoToFlashMessageQueue('Nothing to do.', '', $this->flashMessageQueueIdentifier);
+            MailerUtility::addInfoToFlashMessageQueue('', 'Nothing to do.', $this->flashMessageQueueIdentifier);
             return false;
         }
 
@@ -309,8 +309,8 @@ class MailerService implements LoggerAwareInterface
         $this->setCharset($row['charset']);
         $this->setIncludeMedia((bool)$row['includeMedia']);
 
-        $theOutput = '';
         $errors = false;
+        $errorTitle = MailerUtility::getLanguageService()->getLL('dmail_error');
         $baseUrl = MailerUtility::getAbsoluteBaseUrlForMailPage((int)$row['page']);
         $glue = str_contains($baseUrl, '?') ? '&' : '?';
         if ($params['enable_jump_url'] ?? false) {
@@ -331,12 +331,12 @@ class MailerService implements LoggerAwareInterface
             try {
                 $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
                 if (!MailerUtility::contentContainsBoundaries($plainContent)) {
-                    MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLanguageService()->getLL('dmail_no_plain_boundaries'), '', $this->flashMessageQueueIdentifier);
+                    MailerUtility::addWarningToFlashMessageQueue('', MailerUtility::getLanguageService()->getLL('dmail_no_plain_boundaries'), $this->flashMessageQueueIdentifier);
                 }
                 $this->setPlainContent($plainContent);
             } catch (RequestException $exception) {
                 $errors = true;
-                MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLanguageService()->getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(), '', $this->flashMessageQueueIdentifier);
+                MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLanguageService()->getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(), $errorTitle, $this->flashMessageQueueIdentifier);
             }
         }
 
@@ -347,10 +347,10 @@ class MailerService implements LoggerAwareInterface
                 $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
                 if (MailerUtility::contentContainsFrameTag($htmlContent)) {
                     $errors = true;
-                    MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLanguageService()->getLL('dmail_frames_not allowed'), '', $this->flashMessageQueueIdentifier);
+                    MailerUtility::addErrorToFlashMessageQueue('', MailerUtility::getLanguageService()->getLL('dmail_frames_not allowed'), $this->flashMessageQueueIdentifier);
                 }
                 if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
-                    MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLanguageService()->getLL('dmail_no_html_boundaries'), '', $this->flashMessageQueueIdentifier);
+                    MailerUtility::addWarningToFlashMessageQueue('', MailerUtility::getLanguageService()->getLL('dmail_no_html_boundaries'), $this->flashMessageQueueIdentifier);
                 }
                 $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $baseUrl);
                 if ($htmlHyperLinks) {
@@ -372,7 +372,7 @@ class MailerService implements LoggerAwareInterface
                 }
             } catch (RequestException $exception) {
                 $errors = true;
-                MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLanguageService()->getLL('dmail_no_html_content') . ' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(), '', $this->flashMessageQueueIdentifier);
+                MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLanguageService()->getLL('dmail_no_html_content') . ' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(), $errorTitle, $this->flashMessageQueueIdentifier);
             }
         }
 
@@ -392,7 +392,7 @@ class MailerService implements LoggerAwareInterface
             GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$row['uid'], $updateData);
         }
 
-        return !$errors;
+        return $errors;
     }
 
     /**

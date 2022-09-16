@@ -352,15 +352,12 @@ class DmailController extends AbstractController
                 $moduleData['navigation']['next'] = true;
                 $moduleData['navigation']['next_error'] = $fetchError;
 
-                if ($fetchMessage) {
-                    $moduleContent['flashmessages'] = $fetchMessage;
-                } else if (!$fetchError && $this->fetchAtOnce) {
-                    $message = MailerUtility::getFlashMessage(
+                if (!$fetchError && $this->fetchAtOnce) {
+                    $this->messageQueue->addMessage(MailerUtility::getFlashMessage(
                         '',
                         MailerUtility::getLanguageService()->getLL('dmail_wiz2_fetch_success'),
                         AbstractMessage::OK
-                    );
-                    $this->messageQueue->addMessage($message);
+                    ));
                 }
                 $moduleData['info']['table'] = is_array($mailData) ? $this->renderRecordDetailsTable($mailData) : '';
                 $moduleData['info']['sys_dmail_uid'] = $this->sys_dmail_uid;
@@ -755,9 +752,9 @@ class DmailController extends AbstractController
             'replyto_email' => $this->params['replyto_email'] ?? '',
             'replyto_name' => $this->params['replyto_name'] ?? '',
             'return_path' => $this->params['return_path'] ?? '',
-            'priority' => (int)$this->params['priority'],
-            'use_rdct' => (int)$this->params['use_rdct'],
-            'long_link_mode' => (int)$this->params['long_link_mode'],
+            'priority' => (int)($this->params['priority'] ?? 3),
+            'use_rdct' => (int)($this->params['use_rdct'] ?? 0),
+            'long_link_mode' => (int)($this->params['long_link_mode'] ?? 0),
             'organisation' => $this->params['organisation'] ?? '',
             'authcode_fieldList' => $this->params['authcode_fieldList'] ?? '',
             'plainParams' => '',
@@ -792,7 +789,7 @@ class DmailController extends AbstractController
             $row = BackendUtility::getRecord('sys_dmail', intval($this->sys_dmail_uid));
             // link in the mail
             $message = '<!--DMAILER_SECTION_BOUNDARY_-->' . $indata['message'] . '<!--DMAILER_SECTION_BOUNDARY_END-->';
-            if (trim($this->params['use_rdct'])) {
+            if ($this->params['use_rdct'] ?? false) {
                 $message = MailerUtility::shortUrlsInPlainText(
                     $message,
                     $this->params['long_link_mode'] ? 0 : 76,

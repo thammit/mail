@@ -158,24 +158,6 @@ class MailerUtility
         return str_contains($content, '<!--DMAILER_SECTION_BOUNDARY');
     }
 
-    public static function getRenderedFlashMessages(string $title, array $messages, int $severity): string
-    {
-        $renderedFlashMessages = '';
-        foreach ($messages as $message) {
-            $renderedFlashMessages .= static::getRenderedFlashMessage($title, $message, $severity);
-        }
-
-        return $renderedFlashMessages;
-    }
-
-    public static function addFlashMessagesToQueue(string $title, array $messages, int $severity, string $identifier = 'core.template.flashMessages'): void
-    {
-        $flashMessagesQueue = static::getFlashMessageQueue($identifier);
-        foreach ($messages as $message) {
-            $flashMessagesQueue->addMessage(static::getFlashMessage($message, $title, $severity));
-        }
-    }
-
     public static function addMessageToFlashMessageQueue(string $message, string $title, int $severity, string $identifier = 'core.template.flashMessages'): void
     {
         static::getFlashMessageQueue($identifier)->addMessage(static::getFlashMessage($message, $title, $severity));
@@ -204,20 +186,6 @@ class MailerUtility
     public static function getFlashMessageQueue(string $identifier = 'core.template.flashMessages'): FlashMessageQueue
     {
         return GeneralUtility::makeInstance(FlashMessageService::class)->getMessageQueueByIdentifier($identifier);
-    }
-
-
-    public static function getRenderedFlashMessage(string $title, string $message, int $severity): string
-    {
-        return GeneralUtility::makeInstance(FlashMessageRendererResolver::class)
-            ->resolve()
-            ->render([
-                static::getFlashMessage(
-                    $message,
-                    $title,
-                    $severity
-                ),
-            ]);
     }
 
     public static function getFlashMessage(string $message, string $title, int $severity, bool $storeInSession = false): FlashMessage

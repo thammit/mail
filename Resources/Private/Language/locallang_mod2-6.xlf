@@ -176,7 +176,7 @@
 				<source>Edit</source>
 			</trans-unit>
 			<trans-unit id="dmail_error" resname="dmail_error">
-				<source>An error was encountered.</source>
+				<source>An error has occurred</source>
 			</trans-unit>
 			<trans-unit id="dmail_folders" resname="dmail_folders">
 				<source>Available Direct Mail folders</source>
@@ -329,7 +329,7 @@
 				<source>Select a newsletter to continue sending:</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_new_newsletter" resname="dmail_wiz1_new_newsletter">
-				<source>New Newsletter</source>
+				<source>Step 1</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_quickmail" resname="dmail_wiz1_quickmail">
 				<source>Quickmail</source>
@@ -338,13 +338,13 @@
 				<source>New Quickmail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Select newsletter source:</source>
+				<source>Please select a newsletter source</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
 				<source>Detailed Information</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
-				<source>Page is successfully fetched.</source>
+				<source>The page was fetched successfully.</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz3_cats" resname="dmail_wiz3_cats">
 				<source>Categories</source>
