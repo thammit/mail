@@ -19,7 +19,7 @@ class SysDmailCategoryRepository extends AbstractRepository
      */
     public function selectSysDmailCategoryByPid(int $pid): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         return $queryBuilder
             ->select('*')
             ->from($this->table)

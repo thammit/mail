@@ -19,7 +19,7 @@ class SysDmailTtAddressCategoryMmRepository extends AbstractRepository
      */
     public function selectUidsByUidLocal(int $uidLocal): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select(

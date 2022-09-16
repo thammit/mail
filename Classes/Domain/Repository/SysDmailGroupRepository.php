@@ -22,7 +22,7 @@ class SysDmailGroupRepository extends AbstractRepository
      */
     public function selectSysDmailGroupByPid(int $pid, string $defaultSortBy): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
             ->getRestrictions()
             ->removeAll()
@@ -53,7 +53,7 @@ class SysDmailGroupRepository extends AbstractRepository
      */
     public function selectSysDmailGroupForFinalMail(int $pid, int $sysLanguageUid, string $defaultSortBy): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder->select('uid', 'pid', 'title')
             ->from($this->table)
@@ -85,7 +85,7 @@ class SysDmailGroupRepository extends AbstractRepository
      */
     public function selectSysDmailGroupForTestmail(string $intList, string $permsClause): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
             ->getRestrictions()
             ->removeAll()

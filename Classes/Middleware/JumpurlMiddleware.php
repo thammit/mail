@@ -4,6 +4,7 @@ namespace MEDIAESSENZ\Mail\Middleware;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -300,8 +301,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function validateAuthCode(string $submittedAuthCode): void
     {
-        // https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.3/Deprecation-94309-DeprecatedGeneralUtilitystdAuthCode.html
-        $authCodeToMatch = GeneralUtility::stdAuthCode( //@TODO
+        $authCodeToMatch = MailerUtility::stdAuthCode(
             $this->recipientRecord,
             ($this->directMailRecord['authcode_fieldList'] ?: 'uid')
         );

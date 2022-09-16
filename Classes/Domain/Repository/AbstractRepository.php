@@ -10,18 +10,20 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 abstract class AbstractRepository
 {
+    protected string $table = '';
+
     public function getConnectionPool(): ConnectionPool
     {
         return GeneralUtility::makeInstance(ConnectionPool::class);
     }
 
-    public function getConnection(string $table): Connection
+    public function getConnection(string $table = null): Connection
     {
-        return $this->getConnectionPool()->getConnectionForTable($table);
+        return $this->getConnectionPool()->getConnectionForTable($table ?? $this->table);
     }
 
-    public function getQueryBuilder(string $table): QueryBuilder
+    public function getQueryBuilder(string $table = null): QueryBuilder
     {
-        return $this->getConnectionPool()->getQueryBuilderForTable($table);
+        return $this->getConnectionPool()->getQueryBuilderForTable($table ?? $this->table);
     }
 }

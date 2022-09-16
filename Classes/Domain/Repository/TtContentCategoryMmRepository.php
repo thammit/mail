@@ -18,7 +18,7 @@ class TtContentCategoryMmRepository extends AbstractRepository
      */
     public function selectUidForeignByUid(int $uid): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select('uid_foreign')

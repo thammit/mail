@@ -20,7 +20,7 @@ class TtContentRepository extends AbstractRepository
      */
     public function selectTtContentByPidAndSysLanguageUid(int $pid, int $sysLanguageUid): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select('colPos', 'CType', 'list_type', 'uid', 'pid', 'header', 'bodytext', 'module_sys_dmail_category')

@@ -21,7 +21,7 @@ class PagesRepository extends AbstractRepository
     public function findMailPages(int $pid, string $permsClause): array
     {
         // Here the list of subpages, news, is rendered
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
             ->select('uid', 'doktype', 'title', 'abstract')
             ->from($this->table)
@@ -63,7 +63,7 @@ class PagesRepository extends AbstractRepository
      */
     public function selectPageByL10nAndSysLanguageUid(int $pageUid, int $langUid): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select('sys_language_uid')
@@ -82,7 +82,7 @@ class PagesRepository extends AbstractRepository
      */
     public function selectSubfolders(string $permsClause): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select('uid', 'title')
@@ -106,7 +106,7 @@ class PagesRepository extends AbstractRepository
      */
     public function selectTitleTranslatedPage(int $pageUid, int $langUid): bool|array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select('title')
@@ -124,7 +124,7 @@ class PagesRepository extends AbstractRepository
      */
     public function updatePageTSconfig(int $pageUid, string $tsConf): int
     {
-        $connection = $this->getConnection($this->table);
+        $connection = $this->getConnection();
         return $connection->update(
             $this->table,
             ['TSconfig' => $tsConf],

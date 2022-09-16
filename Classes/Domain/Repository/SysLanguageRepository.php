@@ -8,14 +8,14 @@ use Doctrine\DBAL\Driver\Exception;
 
 class SysLanguageRepository extends AbstractRepository {
     protected string $table = 'sys_language';
-    
+
     /**
      * @throws Exception
      * @throws DBALException
      */
     public function selectSysLanguageForSelectCategories(string $lang, $sys_language, $static_languages): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select('sys_language.uid')

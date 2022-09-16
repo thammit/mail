@@ -79,7 +79,7 @@ class StatisticsController extends AbstractController
 
         $table = (string)($parsedBody['table'] ?? $queryParams['table'] ?? '');
         if (in_array($table, $this->tables)) {
-            $this->table = (string)($table);
+            $this->table = $table;
         }
 
         $this->recalcCache = (bool)($parsedBody['recalcCache'] ?? $queryParams['recalcCache'] ?? false);
@@ -154,6 +154,11 @@ class StatisticsController extends AbstractController
         return new HtmlResponse($this->moduleTemplate->renderContent());
     }
 
+    /**
+     * @throws DBALException
+     * @throws Exception
+     * @throws RouteNotFoundException
+     */
     protected function moduleContent(): array
     {
         $theOutput = [];
@@ -188,7 +193,10 @@ class StatisticsController extends AbstractController
     /**
      * Shows the info of a page
      *
-     * @return string The infopage of the sent newsletters
+     * @return array|string The infopage of the sent newsletters
+     * @throws DBALException
+     * @throws Exception
+     * @throws RouteNotFoundException
      */
     protected function displayPageInfo(): array|string
     {
@@ -231,6 +239,7 @@ class StatisticsController extends AbstractController
      *
      * @return array|string HTML showing user's info and the categories
      * @throws DBALException
+     * @throws Exception
      * @throws RouteNotFoundException
      */
     protected function displayUserInfo(): array|string
@@ -261,7 +270,6 @@ class StatisticsController extends AbstractController
                     }
                     $data[$this->table][$this->uid]['module_sys_dmail_html'] = $this->indata['html'] ? 1 : 0;
 
-                    /* @var $dataHandler \TYPO3\CMS\Core\DataHandling\DataHandler */
                     $dataHandler = $this->getDataHandler();
                     $dataHandler->stripslashes_values = 0;
                     $dataHandler->start($data, []);
@@ -344,14 +352,17 @@ class StatisticsController extends AbstractController
      *
      * @param int $mailingId
      * @return array
+     * @throws DBALException
+     * @throws Exception
      */
     protected function mailResponsesGeneral(int $mailingId): array
     {
-        $table = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countSysDmailMaillogsResponseTypeByMid($mailingId);
+        $sysDmailMailLogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
+        $table = $sysDmailMailLogRepository->countSysDmailMaillogsResponseTypeByMid($mailingId);
         $table = $this->changekeyname($table, 'counter', 'COUNT(*)');
 
         // Plaintext/HTML
-        $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countSysDmailMaillogAllByMid($mailingId);
+        $res = $sysDmailMailLogRepository->countSysDmailMaillogAllByMid($mailingId);
 
         /* this function is called to change the key from 'COUNT(*)' to 'counter' */
         $res = $this->changekeyname($res, 'counter', 'COUNT(*)');
@@ -363,16 +374,13 @@ class StatisticsController extends AbstractController
         }
 
         // Unique responses, html
-        $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countSysDmailMaillogHtmlByMid($mailingId);
-        $uniqueHtmlResponses = count($res);//sql_num_rows($res);
+        $uniqueHtmlResponses = $sysDmailMailLogRepository->countSysDmailMaillogHtmlByMid($mailingId);
 
         // Unique responses, Plain
-        $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countSysDmailMaillogPlainByMid($mailingId);
-        $uniquePlainResponses = count($res); //sql_num_rows($res);
+        $uniquePlainResponses = $sysDmailMailLogRepository->countSysDmailMaillogPlainByMid($mailingId);
 
         // Unique responses, pings
-        $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countSysDmailMaillogPingByMid($mailingId);
-        $uniquePingResponses = count($res); //sql_num_rows($res);
+        $uniquePingResponses = $sysDmailMailLogRepository->countSysDmailMaillogPingByMid($mailingId);
 
         $totalSent = intval(($textHtml['1'] ?? 0) + ($textHtml['2'] ?? 0) + ($textHtml['3'] ?? 0));
         $htmlSent = intval(($textHtml['1'] ?? 0) + ($textHtml['3'] ?? 0));
@@ -406,7 +414,7 @@ class StatisticsController extends AbstractController
                         'stats_unique_responses',
                         $this->showWithPercent($uniqueHtmlResponses + $uniquePlainResponses, $totalSent),
                         $this->showWithPercent($uniqueHtmlResponses, $htmlSent),
-                        $this->showWithPercent($uniquePlainResponses, $plainSent ? $plainSent : $htmlSent),
+                        $this->showWithPercent($uniquePlainResponses, $plainSent ?: $htmlSent),
                     ],
                 ],
             ],
@@ -461,11 +469,11 @@ class StatisticsController extends AbstractController
         $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
 
         // Most popular links, html:
-        $htmlUrlsTable = $sysDmailMaillogRepository->selectMostPopularLinks($row['uid'], 1);
+        $htmlUrlsTable = $sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 1);
         $htmlUrlsTable = $this->changekeyname($htmlUrlsTable, 'counter', 'COUNT(*)');
 
         // Most popular links, plain:
-        $plainUrlsTable = $sysDmailMaillogRepository->selectMostPopularLinks($row['uid'], 2);
+        $plainUrlsTable = $sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 2);
         $plainUrlsTable = $this->changekeyname($plainUrlsTable, 'counter', 'COUNT(*)');
 
         // Find urls:

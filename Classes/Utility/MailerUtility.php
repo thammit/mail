@@ -927,43 +927,7 @@ class MailerUtility
     }
 
     /**
-     * Add action to sys_dmail_maillog table
-     *
-     * @param int $mid Newsletter ID
-     * @param string $rid Recipient ID
-     * @param int $size Size of the sent email
-     * @param int $parseTime Parse time of the email
-     * @param int $html Set if HTML email is sent
-     * @param string $email Recipient's email
-     *
-     * @return int
-     * @throws DBALException
-     */
-    public static function addToMailLog(int $mid, string $rid, int $size, int $parseTime, int $html, string $email): int
-    {
-        [$rtbl, $rid] = explode('_', $rid);
-
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
-        $queryBuilder
-            ->insert('sys_dmail_maillog')
-            ->values([
-                'mid' => $mid,
-                'rtbl' => $rtbl,
-                'rid' => $rid,
-                'email' => $email,
-                'tstamp' => time(),
-                'url' => '',
-                'size' => $size,
-                'parsetime' => $parseTime,
-                'html_sent' => $html,
-            ])
-            ->execute();
-
-        return (int)$queryBuilder->getConnection()->lastInsertId('sys_dmail_maillog');
-    }
-
-    /**
-     * Get comma separated list of recipient ids, which has been sent
+     * Get array of recipient ids, which has been sent
      *
      * @param int $mailUid Newsletter ID. UID of the sys_dmail record
      * @param string $table Recipient table
@@ -1051,6 +1015,34 @@ class MailerUtility
         }
 
         return rtrim($list, ',');
+    }
+
+    /**
+     * Standard authentication code (used in Direct Mail, checkJumpUrl and setfixed links computations)
+     *
+     * @param int|array $uid_or_record Uid (int) or record (array)
+     * @param string $fields List of fields from the record if that is given.
+     * @param int $codeLength Length of returned authentication code.
+     * @return string MD5 hash of 8 chars.
+     */
+    public static function stdAuthCode(int|array $uid_or_record, string $fields = '', int $codeLength = 8): string
+    {
+        if (is_array($uid_or_record)) {
+            $recCopy_temp = [];
+            if ($fields) {
+                $fieldArr = GeneralUtility::trimExplode(',', $fields, true);
+                foreach ($fieldArr as $k => $v) {
+                    $recCopy_temp[$k] = $uid_or_record[$v];
+                }
+            } else {
+                $recCopy_temp = $uid_or_record;
+            }
+            $preKey = implode('|', $recCopy_temp);
+        } else {
+            $preKey = $uid_or_record;
+        }
+        $authCode = $preKey . '||' . $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'];
+        return substr(md5($authCode), 0, $codeLength);
     }
 
     /**

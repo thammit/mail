@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
@@ -73,9 +74,11 @@ class MailerService implements LoggerAwareInterface
     protected bool $jumpUrlUseId = false;
     protected string $siteIdentifier = '';
 
-    public function __construct(protected CharsetConverter $charsetConverter)
-    {
-    }
+    public function __construct(
+        protected CharsetConverter $charsetConverter,
+        protected SysDmailMaillogRepository $sysDmailMaillogRepository
+    )
+    {}
 
     /**
      * @return string
@@ -581,9 +584,7 @@ class MailerService implements LoggerAwareInterface
         if ($recipientData['email']) {
             $midRidId = 'MID' . $this->dmailer['sys_dmail_uid'] . '_' . $tableNameChar . $recipientData['uid'];
             $uniqMsgId = md5(microtime()) . '_' . $midRidId;
-            // https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.3/Deprecation-94309-DeprecatedGeneralUtilitystdAuthCode.html
-            //@TODO
-            $authCode = GeneralUtility::stdAuthCode($recipientData, $this->authCodeFieldList);
+            $authCode = MailerUtility::stdAuthCode($recipientData, $this->authCodeFieldList);
 
             $additionalMarkers = [
                 // Put in the tablename of the userinformation
@@ -669,7 +670,7 @@ class MailerService implements LoggerAwareInterface
                     };
 
                     // Send mails
-                    $sendIdsArr = MailerUtility::getSentMails($mailUid, $recipientTable);
+                    $sendIdsArr = $this->sysDmailMaillogRepository->findSentMails($mailUid, $recipientTable);
                     if ($table == 'PLAINLIST') {
                         foreach ($listArr as $kval => $recipientData) {
                             $kval++;
@@ -733,7 +734,7 @@ class MailerService implements LoggerAwareInterface
      * @throws DBALException
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
-     * @internal param string $tKey : table of the recipient
+     * @throws \Exception
      */
     protected function sendSingleMailAndAddLogEntry(int $mailUid, array $recipientData, string $recipientTable): void
     {
@@ -744,32 +745,26 @@ class MailerService implements LoggerAwareInterface
             // write to dmail_maillog table. if it can be written, continue with sending.
             // if not, stop the script and report error
             $returnCode = 0;
-            $logUid = MailerUtility::addToMailLog($mailUid, $recipientTable . '_' . $recipientData['uid'], strlen($this->message), MailerUtility::getMilliseconds() - $pt, $returnCode, $recipientData['email']);
 
-            if ($logUid) {
-                $returnCode = $this->sendAdvanced($recipientData, $recipientTable);
-                $parseTime = MailerUtility::getMilliseconds() - $pt;
-
-                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
-                $ok = $queryBuilder
-                    ->update('sys_dmail_maillog')
-                    ->set('tstamp', time())
-                    ->set('size', strlen($this->message))
-                    ->set('parsetime', $parseTime)
-                    ->set('html_sent', $returnCode)
-                    ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($logUid, PDO::PARAM_INT)))
-                    ->execute();
-
-                if ($ok === false) {
-                    $message = 'Unable to update Log-Entry in table sys_dmail_maillog. Table full? Mass-Sending stopped. Delete each entries except the entries of active mailings (mid=' . $mailUid . ')';
-                    $this->logger->critical($message);
-                    die($message);
-                }
-            } else {
-                // stop the script if dummy log can't be made
+            // try to insert the mail to the mail log repository
+            try {
+                $logUid = $this->sysDmailMaillogRepository->insertRecord($mailUid, $recipientTable . '_' . $recipientData['uid'], strlen($this->message), MailerUtility::getMilliseconds() - $pt, $returnCode, $recipientData['email']);
+            } catch (DBALException $exception) {
                 $message = 'Unable to update Log-Entry in table sys_dmail_maillog. Table full? Mass-Sending stopped. Delete each entries except the entries of active mailings (mid=' . $mailUid . ')';
                 $this->logger->critical($message);
-                die($message);
+                throw new \Exception($message, 1663340700, $exception);
+            }
+
+            // Send mail to recipient
+            $returnCode = $this->sendAdvanced($recipientData, $recipientTable);
+
+            // try to store the sending return code
+            try {
+                $this->sysDmailMaillogRepository->updateRecord($logUid, strlen($this->message), MailerUtility::getMilliseconds() - $pt, $returnCode);
+            } catch (DBALException $exception) {
+                $message = 'Unable to update Log-Entry in table sys_dmail_maillog. Table full? Mass-Sending stopped. Delete each entries except the entries of active mailings (mid=' . $mailUid . ')';
+                $this->logger->critical($message);
+                throw new \Exception($message, 1663340700, $exception);
             }
         }
     }

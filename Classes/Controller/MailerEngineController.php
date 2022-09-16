@@ -125,7 +125,7 @@ class MailerEngineController extends AbstractController
          * cron running or error (die function in dmailer_log)
          */
         if (file_exists($this->getDmailerLockFilePath())) {
-            $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectByResponseType(0);
+            $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->findByResponseType(0);
             if (is_array($res)) {
                 foreach ($res as $lastSend) {
                     if (($lastSend['tstamp'] < time()) && ($lastSend['tstamp'] > $lastCronjobShouldBeNewThan)) {
@@ -231,7 +231,7 @@ class MailerEngineController extends AbstractController
                     'scheduled' => BackendUtility::datetime($row['scheduled']),
                     'scheduled_begin' => $row['scheduled_begin'] ? BackendUtility::datetime($row['scheduled_begin']) : '',
                     'scheduled_end' => $row['scheduled_end'] ? BackendUtility::datetime($row['scheduled_end']) : '',
-                    'sent' => $this->getSysDmailMaillogsCountres($row['uid']),
+                    'sent' => GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countByUid($row['uid']),
                     'delete' => $this->canDelete($row['uid']),
                 ];
             }
@@ -239,20 +239,6 @@ class MailerEngineController extends AbstractController
         unset($rows);
 
         return ['invoke' => $invoke, 'moduleUrl' => $moduleUrl, 'data' => $data];
-    }
-
-    private function getSysDmailMaillogsCountres(int $uid): int
-    {
-        $countres = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countSysDmailMaillogs($uid);
-        $count = 0;
-        //@TODO
-        if (is_array($countres)) {
-            foreach ($countres as $cRow) {
-                $count = (int)$cRow['COUNT(*)'];
-            }
-        }
-
-        return $count;
     }
 
     /**

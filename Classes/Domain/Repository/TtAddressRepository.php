@@ -22,7 +22,7 @@ class TtAddressRepository extends AbstractRepository
      */
     public function selectTtAddressByUid(int $uid, string $permsClause): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select($this->table . '.*')
@@ -33,11 +33,8 @@ class TtAddressRepository extends AbstractRepository
                 'pages',
                 $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier($this->table . '.pid'))
             )
-            ->add('where', $this->table . '.uid = ' . intval($uid) .
+            ->add('where', $this->table . '.uid = ' . $uid .
                 ' AND ' . $permsClause . ' AND pages.deleted = 0')
-
-//         debug($queryBuilder->getSQL());
-//         debug($queryBuilder->getParameters());
             ->execute()
             ->fetchAllAssociative();
     }
@@ -51,7 +48,7 @@ class TtAddressRepository extends AbstractRepository
      */
     public function selectTtAddressByPid(int $pid, string $recordUnique): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         // only add deleteClause
         //https://github.com/FriendsOfTYPO3/tt_address/blob/master/Configuration/TCA/tt_address.php
         $queryBuilder
@@ -84,7 +81,7 @@ class TtAddressRepository extends AbstractRepository
      */
     public function selectTtAddressForTestmail(string $intList, string $permsClause): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select($this->table . '.*')
@@ -110,7 +107,7 @@ class TtAddressRepository extends AbstractRepository
      */
     public function selectTtAddressForSendMailTest(int $ttAddressUid, string $permsClause): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select('a.*')
@@ -134,7 +131,7 @@ class TtAddressRepository extends AbstractRepository
      */
     public function deleteRowsByPid(int $pid): int|\Doctrine\DBAL\Result
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->delete($this->table)

@@ -22,7 +22,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function selectSysDmailById(int $sys_dmail_uid, int $pid): array|bool
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
             ->getRestrictions()
             ->removeAll()
@@ -47,7 +47,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function selectSysDmailsByPid(int $pid): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
             ->getRestrictions()
             ->removeAll()
@@ -69,7 +69,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function selectForPageInfo(int $id): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
             ->getRestrictions()
             ->removeAll()
@@ -105,7 +105,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function findMailsNotSentAndScheduled(int $id, string $orderBy, string $order): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         $queryBuilder
             ->getRestrictions()
@@ -130,7 +130,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function updateSysDmail(int $uid, string $charset, string $mailContent): int
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->update($this->table)
@@ -152,7 +152,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function updateSysDmailRecord(int $uid, array $updateData): int
     {
-        $connection = $this->getConnection($this->table);
+        $connection = $this->getConnection();
         return $connection->update(
             $this->table, // table
             $updateData, // value array

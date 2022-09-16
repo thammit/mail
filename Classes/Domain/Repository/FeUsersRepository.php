@@ -19,7 +19,7 @@ class FeUsersRepository extends AbstractRepository
      */
     public function selectFeUsersByUid(int $uid, string $permsClause): array
     {
-        $queryBuilder = $this->getQueryBuilder($this->table);
+        $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select($this->table . '.*')
