@@ -323,7 +323,7 @@
 				<source>Internal Pages</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_dmail" resname="dmail_wiz1_list_dmail">
-				<source>Direct Mail</source>
+				<source>Not yet sent newsletters</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_header" resname="dmail_wiz1_list_header">
 				<source>Select a newsletter to continue sending:</source>
