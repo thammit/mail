@@ -18,6 +18,7 @@ use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
@@ -119,7 +120,7 @@ class StatisticsController extends AbstractController
         $this->init($request);
         $this->initStatistics($request);
 
-        if (($this->id && $this->access) || ($this->isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
             $module = $this->getModulName();
 
             if ($module == 'dmail') {
@@ -133,17 +134,17 @@ class StatisticsController extends AbstractController
                         ]
                     );
                 } else if ($this->id != 0) {
-                    $message = $this->createFlashMessage($this->getLanguageService()->getLL('dmail_noRegular'), $this->getLanguageService()->getLL('dmail_newsletters'), 1, false);
+                    $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
             } else {
-                $message = $this->createFlashMessage($this->getLanguageService()->getLL('select_folder'), $this->getLanguageService()->getLL('header_stat'), 1, false);
+                $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_stat'), AbstractMessage::WARNING);
                 $this->messageQueue->addMessage($message);
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
+            $message = MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
@@ -224,12 +225,12 @@ class StatisticsController extends AbstractController
     {
         if (!empty($row['scheduled_begin'])) {
             if (!empty($row['scheduled_end'])) {
-                $sent = $this->getLanguageService()->getLL('stats_overview_sent');
+                $sent = MailerUtility::getLanguageService()->getLL('stats_overview_sent');
             } else {
-                $sent = $this->getLanguageService()->getLL('stats_overview_sending');
+                $sent = MailerUtility::getLanguageService()->getLL('stats_overview_sending');
             }
         } else {
-            $sent = $this->getLanguageService()->getLL('stats_overview_queuing');
+            $sent = MailerUtility::getLanguageService()->getLL('stats_overview_queuing');
         }
         return $sent;
     }

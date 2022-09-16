@@ -20,6 +20,7 @@ use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\CsvUtility;
 
@@ -81,9 +82,9 @@ class RecipientListController extends AbstractController
 
         $this->init($request);
         $this->initRecipientList($request);
-        $this->getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
+        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
 
-        if (($this->id && $this->access) || ($this->isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
             $module = $this->getModulName();
             $this->moduleName = (string)($request->getQueryParams()['currentModule'] ?? $request->getParsedBody()['currentModule'] ?? 'MailNavFrame_RecipientList');
 
@@ -100,17 +101,17 @@ class RecipientListController extends AbstractController
                         ]
                     );
                 } else if ($this->id != 0) {
-                    $message = $this->createFlashMessage($this->getLanguageService()->getLL('dmail_noRegular'), $this->getLanguageService()->getLL('dmail_newsletters'), 1, false);
+                    $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
             } else {
-                $message = $this->createFlashMessage($this->getLanguageService()->getLL('select_folder'), $this->getLanguageService()->getLL('header_recip'), 1, false);
+                $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_recip'), AbstractMessage::WARNING);
                 $this->messageQueue->addMessage($message);
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
+            $message = MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
@@ -387,7 +388,7 @@ class RecipientListController extends AbstractController
     {
         $str = '';
         // check if the user has the right to modify the table
-        if ($this->getBackendUser()->check('tables_modify', $table)) {
+        if (MailerUtility::getBackendUser()->check('tables_modify', $table)) {
             $editOnClickLink = MailerUtility::getEditOnClickLink([
                 'edit' => [
                     $table => [
@@ -396,7 +397,7 @@ class RecipientListController extends AbstractController
                 ],
                 'returnUrl' => $this->requestUri,
             ]);
-            $str = '<a href="#" onClick="' . $editOnClickLink . '" title="' . $this->getLanguageService()->getLL('dmail_edit') . '">' .
+            $str = '<a href="#" onClick="' . $editOnClickLink . '" title="' . MailerUtility::getLanguageService()->getLL('dmail_edit') . '">' .
                 $this->getIconActionsOpen() .
                 '</a>';
         }
@@ -471,18 +472,17 @@ class RecipientListController extends AbstractController
             if ($csvValue == 'PLAINLIST') {
                 $this->downloadCSV($idLists['PLAINLIST']);
             } else if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $csvValue)) {
-                if ($this->getBackendUser()->check('tables_select', $csvValue)) {
+                if (MailerUtility::getBackendUser()->check('tables_select', $csvValue)) {
                     $fields = $csvValue == 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
                     $fields .= ',tstamp';
 
                     $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$csvValue], $csvValue, $fields);
                     $this->downloadCSV($rows);
                 } else {
-                    $message = $this->createFlashMessage(
+                    $message = MailerUtility::getFlashMessage(
                         '',
-                        $this->getLanguageService()->getLL('mailgroup_table_disallowed_csv'),
-                        2,
-                        false
+                        MailerUtility::getLanguageService()->getLL('mailgroup_table_disallowed_csv'),
+                        AbstractMessage::ERROR
                     );
                     $this->messageQueue->addMessage($message);
                 }
@@ -561,7 +561,7 @@ class RecipientListController extends AbstractController
                 }
 
                 if (($group['type'] ?? false) == 3) {
-                    if ($this->getBackendUser()->check('tables_modify', 'sys_dmail_group')) {
+                    if (MailerUtility::getBackendUser()->check('tables_modify', 'sys_dmail_group')) {
                         $data['special'] = $this->specialQuery($group);
                     }
                 }

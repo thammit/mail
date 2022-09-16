@@ -40,7 +40,7 @@ class NavFrameController extends AbstractController
         $currentSubScript = $uriBuilder->buildUriFromRoute($currentModule);
 
         // Setting highlight mode:
-        $disableTitleHighlight = $this->getTSConfig()['options.']['pageTree.']['disableTitleHighlight'] ?? false;
+        $disableTitleHighlight = MailerUtility::getTSConfig()['options.']['pageTree.']['disableTitleHighlight'] ?? false;
         $this->doHighlight = !$disableTitleHighlight;
 
         $this->view->setTemplate('NavFrame');
@@ -48,7 +48,7 @@ class NavFrameController extends AbstractController
         $rows = $this->getPages();
         $pages = [];
         while (($row = $rows->fetchAssociative()) !== false) {
-            if (BackendUtility::readPageAccess($row['uid'], $this->getBackendUser()->getPagePermsClause(1))) {
+            if (BackendUtility::readPageAccess($row['uid'], MailerUtility::getBackendUser()->getPagePermsClause(1))) {
                 $icon = $this->iconFactory->getIconForRecord('pages', $row, Icon::SIZE_SMALL)->render();
                 $pages[] = ['icon' => $icon, 'page' => $row];
             }
@@ -172,7 +172,7 @@ class NavFrameController extends AbstractController
         $list = $buttonBar->makeLinkButton()
             ->setHref(GeneralUtility::linkThisScript(['unique' => uniqid('directmail_navframe')]))
             //->setHref(GeneralUtility::getIndpEnv('REQUEST_URI'))
-            ->setTitle($this->getLanguageService()->getLL('labels.reload'))
+            ->setTitle(MailerUtility::getLanguageService()->getLL('labels.reload'))
             ->setShowLabelText('Link')
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($list, ButtonBar::BUTTON_POSITION_RIGHT, 1);

@@ -13,7 +13,6 @@ use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
-use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
@@ -28,12 +27,11 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Error\Http\ServiceUnavailableException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\HtmlResponse;
-use TYPO3\CMS\Core\Http\ImmediateResponseException;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -43,7 +41,7 @@ use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
 
 class DmailController extends AbstractController
 {
-    protected $cshTable;
+    protected string $cshTable;
     protected string $error = '';
     protected int $currentStep = 1;
 
@@ -127,11 +125,11 @@ class DmailController extends AbstractController
         $this->init($request);
 
         // get the config from pageTS
-        $this->params['pid'] = intval($this->id);
+        $this->params['pid'] = $this->id;
 
         $this->cshTable = '_MOD_' . $this->moduleName;
 
-        if (($this->id && $this->access) || ($this->isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
             $module = $this->getModulName();
 
             if ($module == 'dmail') {
@@ -139,18 +137,15 @@ class DmailController extends AbstractController
                 if (($this->pageinfo['doktype'] ?? 0) == 254) {
                     $this->view->assignMultiple($this->getModuleContent());
                 } else if ($this->id != 0) {
-                    $message = $this->createFlashMessage($this->getLanguageService()->getLL('dmail_noRegular'), $this->getLanguageService()->getLL('dmail_newsletters'), 1, false);
-                    $this->messageQueue->addMessage($message);
+                    $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING));
                 }
             } else {
-                $message = $this->createFlashMessage($this->getLanguageService()->getLL('select_folder'), $this->getLanguageService()->getLL('header_directmail'), 1, false);
-                $this->messageQueue->addMessage($message);
+                $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_directmail'), AbstractMessage::WARNING));
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
-            $this->messageQueue->addMessage($message);
+            $this->messageQueue->addMessage(MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
         }
 
         /**
@@ -190,7 +185,7 @@ class DmailController extends AbstractController
         }
 
         $hideCategoryStep = false;
-        $tsconfig = $this->getTSConfig();
+        $tsconfig = MailerUtility::getTSConfig();
 
         if ((isset($tsconfig['tx_directmail.']['hideSteps']) &&
                 $tsconfig['tx_directmail.']['hideSteps'] === 'cat') || $isExternalDirectMailRecord) {
@@ -275,11 +270,10 @@ class DmailController extends AbstractController
                         $mailData = BackendUtility::getRecord('sys_dmail', $newUid);
                         // fetch the data
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = $this->mailerService->assemble($mailData, $this->params);
-                            $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
+                            $fetchError = $this->mailerService->assemble($mailData, $this->params);
                         }
 
-                        $moduleData['info']['internal']['cmd'] = $nextCmd ? $nextCmd : 'cats';
+                        $moduleData['info']['internal']['cmd'] = $nextCmd ?: 'cats';
                     } else {
                         // TODO: Error message - Error while adding the DB set
                     }
@@ -299,8 +293,7 @@ class DmailController extends AbstractController
                         $mailData = BackendUtility::getRecord('sys_dmail', $newUid);
                         // fetch the data
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = $this->mailerService->assemble($mailData, $this->params);
-                            $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
+                            $fetchError = $this->mailerService->assemble($mailData, $this->params);
                         }
 
                         $moduleData['info']['external']['cmd'] = 'send_test';
@@ -315,10 +308,10 @@ class DmailController extends AbstractController
                         $fetchError = false;
                     }
                     if ($temp['errorTitle']) {
-                        $this->messageQueue->addMessage($this->createFlashMessage($temp['errorText'], $temp['errorTitle'], 2, false));
+                        $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['errorText'], $temp['errorTitle'], AbstractMessage::ERROR));
                     }
                     if ($temp['warningTitle']) {
-                        $this->messageQueue->addMessage($this->createFlashMessage($temp['warningText'], $temp['warningTitle'], 1, false));
+                        $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['warningText'], $temp['warningTitle'], AbstractMessage::WARNING));
                     }
 
                     $mailData = BackendUtility::getRecord('sys_dmail', $this->sys_dmail_uid);
@@ -341,15 +334,14 @@ class DmailController extends AbstractController
                         $unserializedMailContent = unserialize(base64_decode($mailData['mailContent']));
                         $temp = $this->compileQuickMail($mailData, $unserializedMailContent['plain']['content'] ?? '', false);
                         if ($temp['errorTitle']) {
-                            $this->messageQueue->addMessage($this->createFlashMessage($temp['errorText'], $temp['errorTitle'], 2, false));
+                            $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['errorText'], $temp['errorTitle'], AbstractMessage::ERROR));
                         }
                         if ($temp['warningTitle']) {
-                            $this->messageQueue->addMessage($this->createFlashMessage($temp['warningText'], $temp['warningTitle'], 1, false));
+                            $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['warningText'], $temp['warningTitle'], AbstractMessage::WARNING));
                         }
                     } else {
                         if ($this->fetchAtOnce) {
-                            $fetchMessage = $this->mailerService->assemble($mailData, $this->params);
-                            $fetchError = !(!str_contains($fetchMessage, $this->getLanguageService()->getLL('dmail_error')));
+                            $fetchError = $this->mailerService->assemble($mailData, $this->params);
                         }
 
                         $moduleData['info']['dmail']['cmd'] = ($mailData['type'] == 0) ? $nextCmd : 'send_test';
@@ -363,11 +355,10 @@ class DmailController extends AbstractController
                 if ($fetchMessage) {
                     $moduleContent['flashmessages'] = $fetchMessage;
                 } else if (!$fetchError && $this->fetchAtOnce) {
-                    $message = $this->createFlashMessage(
+                    $message = MailerUtility::getFlashMessage(
                         '',
-                        $this->getLanguageService()->getLL('dmail_wiz2_fetch_success'),
-                        0,
-                        false
+                        MailerUtility::getLanguageService()->getLL('dmail_wiz2_fetch_success'),
+                        AbstractMessage::OK
                     );
                     $this->messageQueue->addMessage($message);
                 }
@@ -390,7 +381,7 @@ class DmailController extends AbstractController
 
                 $indata = GeneralUtility::_GP('indata');
                 $temp = $this->makeCategoriesForm($mailData, $indata ?? []);
-                $moduleData['cats']['output'] = $temp['output'];;
+                $moduleData['cats']['output'] = $temp['output'];
                 $moduleData['cats']['catsForm'] = $temp['theOutput'];
 
                 $moduleData['cats']['cmd'] = 'send_test';
@@ -440,11 +431,10 @@ class DmailController extends AbstractController
                         $this->sendMail($mailData);
                         break;
                     } else {
-                        $message = $this->createFlashMessage(
-                            $this->getLanguageService()->getLL('mod.no_recipients'),
+                        $message = MailerUtility::getFlashMessage(
+                            MailerUtility::getLanguageService()->getLL('mod.no_recipients'),
                             '',
-                            1,
-                            false
+                            AbstractMessage::WARNING
                         );
                         $this->messageQueue->addMessage($message);
                     }
@@ -522,20 +512,6 @@ class DmailController extends AbstractController
     }
 
     /**
-     * The icon for the source tab
-     *
-     * @param bool $expand State of the tab
-     *
-     * @return Icon
-     */
-    protected function getNewsletterTabIcon(bool $expand = false): Icon
-    {
-        // opened - closes
-        $icon = $expand ? 'apps-pagetree-expand' : 'apps-pagetree-collapse';
-        return $this->iconFactory->getIcon($icon, Icon::SIZE_SMALL);
-    }
-
-    /**
      * Get list of mail pages
      *
      * @return array
@@ -592,7 +568,7 @@ class DmailController extends AbstractController
                         'class' => 'btn btn-default',
                         'data-dispatch-action' => $attributes['dispatch-action'],
                         'data-dispatch-args' => $attributes['dispatch-args'],
-                        'title' => htmlentities($this->getLanguageService()->getLL('nl_viewPage_HTML') . $langTitle),
+                        'title' => htmlentities(MailerUtility::getLanguageService()->getLL('nl_viewPage_HTML') . $langTitle),
                     ], true);
 
                     $previewHTMLLink .= '<a ' . $serializedAttributes . '>' . $htmlIcon . '</a>';
@@ -608,11 +584,11 @@ class DmailController extends AbstractController
                         'class' => 'btn btn-default',
                         'data-dispatch-action' => $attributes['dispatch-action'],
                         'data-dispatch-args' => $attributes['dispatch-args'],
-                        'title' => htmlentities($this->getLanguageService()->getLL('nl_viewPage_TXT') . $langTitle),
+                        'title' => htmlentities(MailerUtility::getLanguageService()->getLL('nl_viewPage_TXT') . $langTitle),
                     ], true);
 
                     $previewTextLink .= '<a href="#" ' . $serializedAttributes . '>' . $plainIcon . '</a>';
-                    $createLink .= '<a href="' . $createDmailLink . $createLangParam . '" title="' . htmlentities($this->getLanguageService()->getLL('nl_create') . $langTitle) . '" class="btn btn-default">' . $createIcon . '</a>';
+                    $createLink .= '<a href="' . $createDmailLink . $createLangParam . '" title="' . htmlentities(MailerUtility::getLanguageService()->getLL('nl_create') . $langTitle) . '" class="btn btn-default">' . $createIcon . '</a>';
                 }
 
                 $previewLink = match ($this->params['sendOptions'] ?? 0) {
@@ -694,7 +670,7 @@ class DmailController extends AbstractController
         return [
             'title' => 'dmail_dovsk_crFromUrl',
             'cshItem' => BackendUtility::helpText($this->cshTable, 'create_directmail_from_url'),
-            'no_valid_url' => (bool)($this->error == 'no_valid_url'),
+            'no_valid_url' => $this->error == 'no_valid_url',
         ];
     }
 
@@ -707,8 +683,8 @@ class DmailController extends AbstractController
     {
         return [
             'id' => $this->id,
-            'senderName' => htmlspecialchars($this->quickmail['senderName'] ?? $this->getBackendUser()->user['realName']),
-            'senderMail' => htmlspecialchars($this->quickmail['senderEmail'] ?? $this->getBackendUser()->user['email']),
+            'senderName' => htmlspecialchars($this->quickmail['senderName'] ?? MailerUtility::getBackendUser()->user['realName']),
+            'senderMail' => htmlspecialchars($this->quickmail['senderEmail'] ?? MailerUtility::getBackendUser()->user['email']),
             'subject' => htmlspecialchars($this->quickmail['subject'] ?? ''),
             'message' => htmlspecialchars($this->quickmail['message'] ?? ''),
             'breakLines' => (bool)($this->quickmail['breakLines'] ?? false),
@@ -747,10 +723,10 @@ class DmailController extends AbstractController
                 'link' => $this->linkDMailRecord($row['uid']),
                 'linkText' => htmlspecialchars($row['subject'] ?: '_'),
                 'tstamp' => BackendUtility::date($row['tstamp']),
-                'issent' => ($row['issent'] ? $this->getLanguageService()->getLL('dmail_yes') : $this->getLanguageService()->getLL('dmail_no')),
+                'issent' => ($row['issent'] ? MailerUtility::getLanguageService()->getLL('dmail_yes') : MailerUtility::getLanguageService()->getLL('dmail_no')),
                 'renderedsize' => ($row['renderedsize'] ? GeneralUtility::formatSize($row['renderedsize']) : ''),
                 'attachment' => ($row['attachment'] ? $this->iconFactory->getIcon('mail-attachment', Icon::SIZE_SMALL) : ''),
-                'type' => ($row['type'] & 0x1 ? $this->getLanguageService()->getLL('nl_l_tUrl') : $this->getLanguageService()->getLL('nl_l_tPage')) . ($row['type'] & 0x2 ? ' (' . $this->getLanguageService()->getLL('nl_l_tDraft') . ')' : ''),
+                'type' => ($row['type'] & 0x1 ? MailerUtility::getLanguageService()->getLL('nl_l_tUrl') : MailerUtility::getLanguageService()->getLL('nl_l_tPage')) . ($row['type'] & 0x2 ? ' (' . MailerUtility::getLanguageService()->getLL('nl_l_tDraft') . ')' : ''),
                 'deleteLink' => $this->deleteLink($row['uid']),
             ];
         }
@@ -793,7 +769,7 @@ class DmailController extends AbstractController
         $dmail['sys_dmail']['NEW']['subject'] = $indata['subject'];
         $dmail['sys_dmail']['NEW']['type'] = 1;
         $dmail['sys_dmail']['NEW']['pid'] = $this->pageinfo['uid'];
-        $dmail['sys_dmail']['NEW']['charset'] = isset($this->params['quick_mail_charset']) ? $this->params['quick_mail_charset'] : 'utf-8';
+        $dmail['sys_dmail']['NEW']['charset'] = $this->params['quick_mail_charset'] ?? 'utf-8';
 
         // If params set, set default values:
         if (isset($this->params['includeMedia'])) {
@@ -912,11 +888,11 @@ class DmailController extends AbstractController
      * @param array $row The sys_dmail record
      * @param string $message Body of the mail
      *
-     * @return string
-     * @TODO: remove htmlmail, compiling mail
+     * @return array
      * @throws DBALException
+     * @TODO: remove htmlmail, compiling mail
      */
-    protected function compileQuickMail(array $row, string $message): array|string
+    protected function compileQuickMail(array $row, string $message): array
     {
         $erg = ['errorTitle' => '', 'errorText' => '', 'warningTitle' => '', 'warningText' => ''];
 
@@ -926,11 +902,11 @@ class DmailController extends AbstractController
         $this->mailerService->addPlainContent($message);
 
         if (!$message || !$this->mailerService->getPlainContent()) {
-            $erg['errorTitle'] = $this->getLanguageService()->getLL('dmail_error');
-            $erg['errorText'] = $this->getLanguageService()->getLL('dmail_no_plain_content');
+            $erg['errorTitle'] = MailerUtility::getLanguageService()->getLL('dmail_error');
+            $erg['errorText'] = MailerUtility::getLanguageService()->getLL('dmail_no_plain_content');
         } else if (!str_contains(base64_decode($this->mailerService->getPlainContent()), '<!--DMAILER_SECTION_BOUNDARY')) {
-            $erg['warningTitle'] = $this->getLanguageService()->getLL('dmail_warning');
-            $erg['warningText'] = $this->getLanguageService()->getLL('dmail_no_plain_boundaries');
+            $erg['warningTitle'] = MailerUtility::getLanguageService()->getLL('dmail_warning');
+            $erg['warningText'] = MailerUtility::getLanguageService()->getLL('dmail_no_plain_boundaries');
         }
 
         // add attachment is removed. since it will be added during sending
@@ -957,11 +933,11 @@ class DmailController extends AbstractController
      * @return array
      * @throws RouteNotFoundException If the named route doesn't exist
      */
-    protected function renderRecordDetailsTable(array $mailData)
+    protected function renderRecordDetailsTable(array $mailData): array
     {
         $iconActionsOpen = $this->getIconActionsOpen();
         if (isset($mailData['issent']) && !$mailData['issent']) {
-            if ($this->getBackendUser()->check('tables_modify', 'sys_dmail')) {
+            if (MailerUtility::getBackendUser()->check('tables_modify', 'sys_dmail')) {
                 $requestUri = $this->buildUriFromRoute(
                     $this->moduleName,
                     [
@@ -981,12 +957,12 @@ class DmailController extends AbstractController
                     'returnUrl' => $requestUri->__toString(),
                 ]);
 
-                $content = '<a href="#" onClick="' . $editParams . '">' . $iconActionsOpen . '<strong> ' . $this->getLanguageService()->getLL('dmail_edit') . '</strong></a>';
+                $content = '<a href="#" onClick="' . $editParams . '">' . $iconActionsOpen . '<strong> ' . MailerUtility::getLanguageService()->getLL('dmail_edit') . '</strong></a>';
             } else {
-                $content = $iconActionsOpen . ' (' . $this->getLanguageService()->getLL('dmail_noEdit_noPerms') . ')';
+                $content = $iconActionsOpen . ' (' . MailerUtility::getLanguageService()->getLL('dmail_noEdit_noPerms') . ')';
             }
         } else {
-            $content = $iconActionsOpen . '(' . $this->getLanguageService()->getLL('dmail_noEdit_isSent') . ')';
+            $content = $iconActionsOpen . '(' . MailerUtility::getLanguageService()->getLL('dmail_noEdit_isSent') . ')';
         }
 
         $trs = [];
@@ -1165,12 +1141,11 @@ class DmailController extends AbstractController
                 // Sending the same mail to lots of recipients
                 $this->mailerService->sendSimple($addressList);
                 $sentFlag = true;
-                $message = $this->createFlashMessage(
-                    $this->getLanguageService()->getLL('send_was_sent') . ' ' .
-                    $this->getLanguageService()->getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
-                    $this->getLanguageService()->getLL('send_sending'),
-                    0,
-                    false
+                $message = MailerUtility::getFlashMessage(
+                    MailerUtility::getLanguageService()->getLL('send_was_sent') . ' ' .
+                    MailerUtility::getLanguageService()->getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
+                    MailerUtility::getLanguageService()->getLL('send_sending'),
+                    AbstractMessage::OK
                 );
                 $this->messageQueue->addMessage($message);
 
@@ -1192,20 +1167,18 @@ class DmailController extends AbstractController
                         $this->mailerService->sendAdvanced($recipRow, 't');
                         $sentFlag = true;
 
-                        $message = $this->createFlashMessage(
-                            sprintf($this->getLanguageService()->getLL('send_was_sent_to_name'), $recipRow['name'] . ' <' . $recipRow['email'] . '>'),
-                            $this->getLanguageService()->getLL('send_sending'),
-                            0,
-                            false
+                        $message = MailerUtility::getFlashMessage(
+                            sprintf(MailerUtility::getLanguageService()->getLL('send_was_sent_to_name'), $recipRow['name'] . ' <' . $recipRow['email'] . '>'),
+                            MailerUtility::getLanguageService()->getLL('send_sending'),
+                            AbstractMessage::OK
                         );
                         $this->messageQueue->addMessage($message);
                     }
                 } else {
-                    $message = $this->createFlashMessage(
+                    $message = MailerUtility::getFlashMessage(
                         'Error: No valid recipient found to send test mail to. #1579209279',
-                        $this->getLanguageService()->getLL('send_sending'),
-                        2,
-                        false
+                        MailerUtility::getLanguageService()->getLL('send_sending'),
+                        AbstractMessage::ERROR
                     );
                     $this->messageQueue->addMessage($message);
                 }
@@ -1215,17 +1188,16 @@ class DmailController extends AbstractController
 
                 $idLists = $result['queryInfo']['id_lists'];
                 $sendFlag = 0;
-                $sendFlag += $this->sendTestMailToTable($idLists, 'tt_address', $this->mailerService);
-                $sendFlag += $this->sendTestMailToTable($idLists, 'fe_users', $this->mailerService);
-                $sendFlag += $this->sendTestMailToTable($idLists, 'PLAINLIST', $this->mailerService);
+                $sendFlag += $this->sendTestMailToTable($idLists, 'tt_address');
+                $sendFlag += $this->sendTestMailToTable($idLists, 'fe_users');
+                $sendFlag += $this->sendTestMailToTable($idLists, 'PLAINLIST');
                 if ($this->userTable) {
-                    $sendFlag += $this->sendTestMailToTable($idLists, $this->userTable, $this->mailerService);
+                    $sendFlag += $this->sendTestMailToTable($idLists, $this->userTable);
                 }
-                $message = $this->createFlashMessage(
-                    sprintf($this->getLanguageService()->getLL('send_was_sent_to_number'), $sendFlag),
-                    $this->getLanguageService()->getLL('send_sending'),
-                    0,
-                    false
+                $message = MailerUtility::getFlashMessage(
+                    sprintf(MailerUtility::getLanguageService()->getLL('send_was_sent_to_number'), $sendFlag),
+                    MailerUtility::getLanguageService()->getLL('send_sending'),
+                    AbstractMessage::OK
                 );
                 $this->messageQueue->addMessage($message);
             }
@@ -1263,11 +1235,11 @@ class DmailController extends AbstractController
                     }
 
                     $updateFields['scheduled'] = 0;
-                    $content = $this->getLanguageService()->getLL('send_draft_scheduler');
-                    $sectionTitle = $this->getLanguageService()->getLL('send_draft_saved');
+                    $content = MailerUtility::getLanguageService()->getLL('send_draft_scheduler');
+                    $sectionTitle = MailerUtility::getLanguageService()->getLL('send_draft_saved');
                 } else {
-                    $content = $this->getLanguageService()->getLL('send_was_scheduled_for') . ' ' . BackendUtility::datetime($distributionTime);
-                    $sectionTitle = $this->getLanguageService()->getLL('send_was_scheduled');
+                    $content = MailerUtility::getLanguageService()->getLL('send_was_scheduled_for') . ' ' . BackendUtility::datetime($distributionTime);
+                    $sectionTitle = MailerUtility::getLanguageService()->getLL('send_was_scheduled');
                 }
                 $sentFlag = true;
                 $connection = $this->getConnection('sys_dmail');
@@ -1277,11 +1249,10 @@ class DmailController extends AbstractController
                     ['uid' => $this->sys_dmail_uid] // where
                 );
 
-                $message = $this->createFlashMessage(
+                $message = MailerUtility::getFlashMessage(
                     $sectionTitle . ' ' . $content,
-                    $this->getLanguageService()->getLL('dmail_wiz5_sendmass'),
-                    0,
-                    false
+                    MailerUtility::getLanguageService()->getLL('dmail_wiz5_sendmass'),
+                    AbstractMessage::OK
                 );
                 $this->messageQueue->addMessage($message);
             }
@@ -1294,7 +1265,7 @@ class DmailController extends AbstractController
             $connection->update(
                 'sys_dmail', // table
                 ['issent' => 1],
-                ['uid' => intval($this->sys_dmail_uid)] // where
+                ['uid' => $this->sys_dmail_uid] // where
             );
         }
     }
@@ -1375,7 +1346,7 @@ class DmailController extends AbstractController
                         ];
 
                         $editOnClick = MailerUtility::getEditOnClickLink($params);
-                        $editLink = '<td><a href="#" onClick="' . $editOnClick . '" title="' . $this->getLanguageService()->getLL('dmail_edit') . '">' .
+                        $editLink = '<td><a href="#" onClick="' . $editOnClick . '" title="' . MailerUtility::getLanguageService()->getLL('dmail_edit') . '">' .
                             $iconActionsOpen .
                             '</a></td>';
                     }
@@ -1405,7 +1376,7 @@ class DmailController extends AbstractController
             }
         }
         if (count($lines)) {
-            $out = '<p>' . $this->getLanguageService()->getLL('dmail_number_records') . ' <strong>' . $count . '</strong></p><br />';
+            $out = '<p>' . MailerUtility::getLanguageService()->getLL('dmail_number_records') . ' <strong>' . $count . '</strong></p><br />';
             $out .= '<table border="0" cellspacing="1" cellpadding="0" class="table table-striped table-hover">' . implode(LF, $lines) . '</table>';
         }
         return $out;
@@ -1416,6 +1387,9 @@ class DmailController extends AbstractController
      *
      * @param array $direct_mail_row
      * @return    array        HTML
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function cmd_finalmail(array $direct_mail_row): array
     {
@@ -1472,11 +1446,10 @@ class DmailController extends AbstractController
         $groupInput = '';
         // added disabled. see hook
         if (count($opt) === 0) {
-            $message = $this->createFlashMessage(
-                $this->getLanguageService()->getLL('error.no_recipient_groups_found'),
+            $message = MailerUtility::getFlashMessage(
+                MailerUtility::getLanguageService()->getLL('error.no_recipient_groups_found'),
                 '',
-                2,
-                false
+                AbstractMessage::ERROR
             );
             $this->messageQueue->addMessage($message);
         } else if (count($opt) === 1) {
@@ -1508,6 +1481,9 @@ class DmailController extends AbstractController
      * @param array $groups List of selected group IDs
      *
      * @return array list of the recipient ID
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function cmd_compileMailGroup(array $groups): array
     {
@@ -1617,7 +1593,6 @@ class DmailController extends AbstractController
                         // Remove any duplicates
                         $pageIdArray = array_unique($pageIdArray);
                         $pidList = implode(',', $pageIdArray);
-                        $info['recursive'] = $mailGroup['recursive'];
 
                         // Make queries
                         if ($pidList) {
@@ -1739,7 +1714,7 @@ class DmailController extends AbstractController
                 $whichTables = 4;
             }
             $updateFields = [
-                'whichtables' => intval($whichTables),
+                'whichtables' => $whichTables,
                 'query' => $this->MOD_SETTINGS['queryConfig'],
             ];
 
@@ -1757,7 +1732,7 @@ class DmailController extends AbstractController
 
     /**
      * Show the categories table for user to categorize the directmail content
-     * TYPO3 content)
+     * TYPO3 content
      *
      * @param array $row The dmail row.
      * @param array $indata
@@ -1771,12 +1746,12 @@ class DmailController extends AbstractController
     public function makeCategoriesForm(array $row, array $indata): array|string
     {
         $output = [
-            'title' => $this->getLanguageService()->getLL('nl_cat'),
+            'title' => MailerUtility::getLanguageService()->getLL('nl_cat'),
             'subtitle' => '',
             'rowsFound' => false,
             'rows' => [],
             'pages_uid' => $this->pages_uid,
-            'update_cats' => $this->getLanguageService()->getLL('nl_l_update'),
+            'update_cats' => MailerUtility::getLanguageService()->getLL('nl_l_update'),
             'output' => '',
         ];
         $theOutput = '';
@@ -1800,7 +1775,7 @@ class DmailController extends AbstractController
 
             // remove cache
             $dataHandler->clear_cacheCmd($this->pages_uid);
-            $theOutput = $this->mailerService->assemble($row, $this->params);
+            $fetchError = $this->mailerService->assemble($row, $this->params);
         }
 
         // @TODO Perhaps we should here check if TV is installed and fetch content from that instead of the old Columns...
@@ -1809,9 +1784,8 @@ class DmailController extends AbstractController
             (int)$row['sys_language_uid']
         );
         if (empty($rows)) {
-            $output['subtitle'] = $this->getLanguageService()->getLL('nl_cat_msg1');
+            $output['subtitle'] = MailerUtility::getLanguageService()->getLL('nl_cat_msg1');
         } else {
-            //https://api.typo3.org/master/class_t_y_p_o3_1_1_c_m_s_1_1_backend_1_1_utility_1_1_backend_utility.html#a5522e461e5ce3b1b5c87ee7546af449d
             $output['subtitle'] = BackendUtility::cshItem($this->cshTable, 'assign_categories');
             $output['rowsFound'] = true;
 
@@ -1829,16 +1803,16 @@ class DmailController extends AbstractController
                     $output['rows'][] = [
                         'separator' => true,
                         'bgcolor' => '#f00',
-                        'title' => $this->getLanguageService()->getLL('nl_l_column'),
+                        'title' => MailerUtility::getLanguageService()->getLL('nl_l_column'),
                         'value' => BackendUtility::getProcessedValue('tt_content', 'colPos', $row['colPos']),
                     ];
                     $colPosVal = $row['colPos'];
                 }
 
-                $this->categories = RepositoryUtility::makeCategories('tt_content', $row, $this->sys_language_uid);
-                reset($this->categories);
+                $categories = RepositoryUtility::makeCategories('tt_content', $row, $this->sys_language_uid);
+                reset($categories);
                 $cboxes = [];
-                foreach ($this->categories as $pKey => $pVal) {
+                foreach ($categories as $pKey => $pVal) {
                     $cboxes[] = [
                         'pKey' => $pKey,
                         'checked' => GeneralUtility::inList($categoriesRow, $pKey),
@@ -1854,7 +1828,7 @@ class DmailController extends AbstractController
                     'list_type' => $row['list_type'],
                     'bodytext' => empty($row['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($row['bodytext']), 200),
                     'color' => $row['module_sys_dmail_category'] ? 'red' : 'green',
-                    'labelOnlyAll' => $row['module_sys_dmail_category'] ? $this->getLanguageService()->getLL('nl_l_ONLY') : $this->getLanguageService()->getLL('nl_l_ALL'),
+                    'labelOnlyAll' => $row['module_sys_dmail_category'] ? MailerUtility::getLanguageService()->getLL('nl_l_ONLY') : MailerUtility::getLanguageService()->getLL('nl_l_ALL'),
                     'checkboxes' => $cboxes,
                 ];
             }
@@ -1871,15 +1845,7 @@ class DmailController extends AbstractController
      */
     public function getLanguageParam(int $sysLanguageUid, array $params): string
     {
-        if (isset($params['langParams.'][$sysLanguageUid])) {
-            $param = $params['langParams.'][$sysLanguageUid];
-
-            // fallback: L == sys_language_uid
-        } else {
-            $param = '&L=' . $sysLanguageUid;
-        }
-
-        return $param;
+        return $params['langParams.'][$sysLanguageUid] ?? '&L=' . $sysLanguageUid;
     }
 
     /**
@@ -1914,8 +1880,8 @@ class DmailController extends AbstractController
             'organisation' => $parameters['organisation'] ?? '',
             'authcode_fieldList' => $parameters['authcode_fieldList'] ?? '',
             'sendOptions' => $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'],
-            'long_link_rdct_url' => $this->getUrlBase((int)$pageUid),
-            'sys_language_uid' => (int)$sysLanguageUid,
+            'long_link_rdct_url' => $this->getUrlBase($pageUid),
+            'sys_language_uid' => $sysLanguageUid,
             'attachment' => '',
             'mailContent' => '',
         ];

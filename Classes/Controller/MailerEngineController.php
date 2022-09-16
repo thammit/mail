@@ -8,12 +8,14 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class MailerEngineController extends AbstractController
@@ -49,7 +51,7 @@ class MailerEngineController extends AbstractController
         $this->init($request);
         $this->initMailerEngine($request);
 
-        if (($this->id && $this->access) || ($this->isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
             $module = $this->getModulName();
 
             if ($module == 'dmail') {
@@ -74,17 +76,17 @@ class MailerEngineController extends AbstractController
                         ]
                     );
                 } else if ($this->id != 0) {
-                    $message = $this->createFlashMessage($this->getLanguageService()->getLL('dmail_noRegular'), $this->getLanguageService()->getLL('dmail_newsletters'), 1, false);
+                    $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
             } else {
-                $message = $this->createFlashMessage($this->getLanguageService()->getLL('select_folder'), $this->getLanguageService()->getLL('header_mailer'), 1, false);
+                $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_mailer'), AbstractMessage::WARNING);
                 $this->messageQueue->addMessage($message);
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
+            $message = MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
@@ -108,7 +110,8 @@ class MailerEngineController extends AbstractController
         $error = '';
 
         // seconds
-        $cronInterval = $this->getValueFromTYPO3_CONF_VARS('cronInt') * 60;
+//        $cronInterval = MailerUtility::getExtensionConfiguration('cronInt') * 60;
+        $cronInterval = 60 * 60;
         $lastCronjobShouldBeNewThan = (time() - $cronInterval);
         $filename = $this->getDmailerLogFilePath();
         if (file_exists($filename)) {
@@ -150,33 +153,30 @@ class MailerEngineController extends AbstractController
             $mailerStatus = 1;
         }
 
-        $currentDate = ' / ' . $this->getLanguageService()->getLL('dmail_mailerengine_current_time') . ' ' . BackendUtility::datetime(time()) . '. ';
-        $lastRun = ' ' . $this->getLanguageService()->getLL('dmail_mailerengine_cron_lastrun') . ($lastExecutionTime ? BackendUtility::datetime($lastExecutionTime) : '-') . $currentDate;
+        $currentDate = ' / ' . MailerUtility::getLanguageService()->getLL('dmail_mailerengine_current_time') . ' ' . BackendUtility::datetime(time()) . '. ';
+        $lastRun = ' ' . MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_lastrun') . ($lastExecutionTime ? BackendUtility::datetime($lastExecutionTime) : '-') . $currentDate;
         switch ($mailerStatus) {
             case -1:
-                $message = $this->createFlashMessage(
-                    $this->getLanguageService()->getLL('dmail_mailerengine_cron_warning') . ': ' . ($error ? $error : $this->getLanguageService()->getLL('dmail_mailerengine_cron_warning_msg')) . $lastRun,
-                    $this->getLanguageService()->getLL('dmail_mailerengine_cron_status'),
-                    2,
-                    false
+                $message = MailerUtility::getFlashMessage(
+                    MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_warning') . ': ' . ($error ? $error : MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_warning_msg')) . $lastRun,
+                    MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_status'),
+                    AbstractMessage::ERROR
                 );
                 $this->messageQueue->addMessage($message);
                 break;
             case 0:
-                $message = $this->createFlashMessage(
-                    $this->getLanguageService()->getLL('dmail_mailerengine_cron_caution') . ': ' . $this->getLanguageService()->getLL('dmail_mailerengine_cron_caution_msg') . $lastRun,
-                    $this->getLanguageService()->getLL('dmail_mailerengine_cron_status'),
-                    1,
-                    false
+                $message = MailerUtility::getFlashMessage(
+                    MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_caution') . ': ' . MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_caution_msg') . $lastRun,
+                    MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_status'),
+                    AbstractMessage::WARNING
                 );
                 $this->messageQueue->addMessage($message);
                 break;
             case 1:
-                $message = $this->createFlashMessage(
-                    $this->getLanguageService()->getLL('dmail_mailerengine_cron_ok') . ': ' . $this->getLanguageService()->getLL('dmail_mailerengine_cron_ok_msg') . $lastRun,
-                    $this->getLanguageService()->getLL('dmail_mailerengine_cron_status'),
-                    0,
-                    false
+                $message = MailerUtility::getFlashMessage(
+                    MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_ok') . ': ' . MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_ok_msg') . $lastRun,
+                    MailerUtility::getLanguageService()->getLL('dmail_mailerengine_cron_status'),
+                    AbstractMessage::OK
                 );
                 $this->messageQueue->addMessage($message);
                 break;
@@ -203,7 +203,7 @@ class MailerEngineController extends AbstractController
 
         if ($enableTrigger && $this->invokeMailerEngine) {
             $this->invokeMEngine();
-            $message = $this->createFlashMessage('', $this->getLanguageService()->getLL('dmail_mailerengine_invoked'), -1, false);
+            $message = MailerUtility::getFlashMessage('', MailerUtility::getLanguageService()->getLL('dmail_mailerengine_invoked'), AbstractMessage::INFO);
             $this->messageQueue->addMessage($message);
         }
 

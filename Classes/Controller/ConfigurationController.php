@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ConfigurationController extends AbstractController
@@ -26,7 +28,7 @@ class ConfigurationController extends AbstractController
         $this->initConfiguration($request);
         $this->updatePageTS();
 
-        if (($this->id && $this->access) || ($this->isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
             $this->moduleTemplate->addJavaScriptCode($this->getJS($this->sys_dmail_uid));
 
             $module = $this->getModulName();
@@ -39,18 +41,15 @@ class ConfigurationController extends AbstractController
                         'implodedParams' => $this->implodedParams,
                     ]);
                 } else if ($this->id != 0) {
-                    $message = $this->createFlashMessage($this->getLanguageService()->getLL('dmail_noRegular'), $this->getLanguageService()->getLL('dmail_newsletters'), 1, false);
-                    $this->messageQueue->addMessage($message);
+                    $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING));
                 }
             } else {
-                $message = $this->createFlashMessage($this->getLanguageService()->getLL('select_folder'), $this->getLanguageService()->getLL('header_conf'), 1, false);
-                $this->messageQueue->addMessage($message);
+                $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_conf'), AbstractMessage::WARNING));
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $message = $this->createFlashMessage('If no access or if ID == zero', 'No Access', 1, false);
-            $this->messageQueue->addMessage($message);
+            $this->messageQueue->addMessage(MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
         }
 
         /**
@@ -92,7 +91,7 @@ class ConfigurationController extends AbstractController
      */
     protected function updatePageTS()
     {
-        if ($this->getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
+        if (MailerUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
             if (is_array($this->pageTS) && count($this->pageTS)) {
                 GeneralUtility::makeInstance(TypoScriptUtility::class)->updatePagesTSconfig($this->id, $this->pageTS, $this->TSconfPrefix);
                 header('Location: ' . GeneralUtility::locationHeaderUrl($this->requestUri));

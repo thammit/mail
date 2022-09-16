@@ -12,6 +12,7 @@ use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Tree\View\PageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -19,7 +20,10 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Http\RequestFactory;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageRendererResolver;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
@@ -119,6 +123,25 @@ class MailerUtility
     }
 
     /**
+     * Returns the Backend User
+     * @return BackendUserAuthentication
+     */
+    public static function getBackendUser()
+    {
+        return $GLOBALS['BE_USER'];
+    }
+
+    public static function isAdmin(): bool
+    {
+        return static::getBackendUser()->isAdmin();
+    }
+
+    public static function getTSConfig(): array
+    {
+        return static::getBackendUser()->getTSConfig();
+    }
+
+    /**
      * @param $url
      * @return string|bool
      * @throws RequestException $exception
@@ -145,18 +168,67 @@ class MailerUtility
         return $renderedFlashMessages;
     }
 
+    public static function addFlashMessagesToQueue(string $title, array $messages, int $severity, string $identifier = 'core.template.flashMessages'): void
+    {
+        $flashMessagesQueue = static::getFlashMessageQueue($identifier);
+        foreach ($messages as $message) {
+            $flashMessagesQueue->addMessage(static::getFlashMessage($message, $title, $severity));
+        }
+    }
+
+    public static function addMessageToFlashMessageQueue(string $message, string $title, int $severity, string $identifier = 'core.template.flashMessages'): void
+    {
+        static::getFlashMessageQueue($identifier)->addMessage(static::getFlashMessage($message, $title, $severity));
+    }
+
+    public static function addErrorToFlashMessageQueue(string $message, string $title = '', string $identifier = 'core.template.flashMessages'): void
+    {
+        static::addMessageToFlashMessageQueue($message, $title, AbstractMessage::ERROR, $identifier);
+    }
+
+    public static function addWarningToFlashMessageQueue(string $message, string $title = '', string $identifier = 'core.template.flashMessages'): void
+    {
+        static::addMessageToFlashMessageQueue($message, $title, AbstractMessage::WARNING, $identifier);
+    }
+
+    public static function addInfoToFlashMessageQueue(string $message, string $title = '', string $identifier = 'core.template.flashMessages'): void
+    {
+        static::addMessageToFlashMessageQueue($message, $title, AbstractMessage::INFO, $identifier);
+    }
+
+    public static function addOkToFlashMessageQueue(string $message, string $title = '', string $identifier = 'core.template.flashMessages'): void
+    {
+        static::addMessageToFlashMessageQueue($message, $title, AbstractMessage::OK, $identifier);
+    }
+
+    public static function getFlashMessageQueue(string $identifier = 'core.template.flashMessages'): FlashMessageQueue
+    {
+        return GeneralUtility::makeInstance(FlashMessageService::class)->getMessageQueueByIdentifier($identifier);
+    }
+
+
     public static function getRenderedFlashMessage(string $title, string $message, int $severity): string
     {
         return GeneralUtility::makeInstance(FlashMessageRendererResolver::class)
             ->resolve()
             ->render([
-                GeneralUtility::makeInstance(
-                    FlashMessage::class,
+                static::getFlashMessage(
                     $message,
                     $title,
                     $severity
                 ),
             ]);
+    }
+
+    public static function getFlashMessage(string $message, string $title, int $severity, bool $storeInSession = false): FlashMessage
+    {
+        return GeneralUtility::makeInstance(
+            FlashMessage::class,
+            $message,
+            $title,
+            $severity,
+            $storeInSession
+        );
     }
 
     /**
@@ -924,36 +996,6 @@ class MailerUtility
         $content = preg_replace('/\/\*<!\[CDATA\[\*\/[\t\v\n\r\f]*<!--/', '/*<![CDATA[*/', $content);
         $content = preg_replace('/[\t\v\n\r\f]*<!(?:--[^\[<>][\s\S]*?--\s*)?>[\t\v\n\r\f]*/', '', $content);
         return preg_replace('/\/\*<!\[CDATA\[\*\//', '/*<![CDATA[*/<!--', $content);
-    }
-
-    /**
-     * Get array of recipient ids, which has been sent
-     *
-     * @param int $mailUid Newsletter ID. UID of the sys_dmail record
-     * @param string $table Recipient table
-     *
-     * @return array        list of rid sent recipients
-     * @throws DBALException
-     * @throws Exception
-     */
-    public static function getSentMails(int $mailUid, string $table): array
-    {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
-        $statement = $queryBuilder
-            ->select('rid')
-            ->from('sys_dmail_maillog')
-            ->where($queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($table)))
-            ->andWhere($queryBuilder->expr()->eq('response_type', '0'))
-            ->execute();
-
-        $list = [];
-
-        while (($row = $statement->fetchAssociative())) {
-            $list[] = $row['rid'];
-        }
-
-        return $list;
     }
 
     /**

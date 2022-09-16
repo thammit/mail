@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use MEDIAESSENZ\Mail\Service\MailerService;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
@@ -81,8 +82,8 @@ abstract class AbstractController
         $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
         $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
         $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
-        $this->getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
-        $this->getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
+        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
+        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
     }
 
     protected function init(ServerRequestInterface $request): void
@@ -102,7 +103,7 @@ abstract class AbstractController
             $this->siteIdentifier = '';
         }
 
-        $this->backendUserPermissions = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
+        $this->backendUserPermissions = MailerUtility::getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
         $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
 
         $this->access = is_array($this->pageinfo) ? true : false;
@@ -118,37 +119,7 @@ abstract class AbstractController
         // initialize backend user language
         //$this->sys_language_uid = 0; //@TODO
 
-        $this->messageQueue = $this->getMessageQueue();
-    }
-
-    /**
-     *
-     * https://api.typo3.org/11.5/class_t_y_p_o3_1_1_c_m_s_1_1_core_1_1_messaging_1_1_abstract_message.html
-     * const    NOTICE = -2
-     * const    INFO = -1
-     * const    OK = 0
-     * const    WARNING = 1
-     * const    ERROR = 2
-     * @param string $messageText
-     * @param string $messageHeader
-     * @param int $messageType
-     * @param bool $storeInSession
-     * @return FlashMessage
-     */
-    protected function createFlashMessage(string $messageText, string $messageHeader = '', int $messageType = 0, bool $storeInSession = false): FlashMessage
-    {
-        return GeneralUtility::makeInstance(FlashMessage::class,
-            $messageText,
-            $messageHeader, // [optional] the header
-            $messageType, // [optional] the severity defaults to \TYPO3\CMS\Core\Messaging\FlashMessage::OK
-            $storeInSession // [optional] whether the message should be stored in the session or only in the \TYPO3\CMS\Core\Messaging\FlashMessageQueue object (default is false)
-        );
-    }
-
-    protected function getMessageQueue(): FlashMessageQueue
-    {
-        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-        return $flashMessageService->getMessageQueueByIdentifier();
+        $this->messageQueue = MailerUtility::getFlashMessageQueue();
     }
 
     protected function getModulName()
@@ -166,38 +137,6 @@ abstract class AbstractController
     public function getId(): int
     {
         return $this->id;
-    }
-
-    /**
-     * @return LanguageService
-     */
-    protected function getLanguageService(): LanguageService
-    {
-        return $GLOBALS['LANG'];
-    }
-
-    /**
-     * Returns the Backend User
-     * @return BackendUserAuthentication
-     */
-    protected function getBackendUser()
-    {
-        return $GLOBALS['BE_USER'];
-    }
-
-    protected function isAdmin(): bool
-    {
-        return $GLOBALS['BE_USER']->isAdmin();
-    }
-
-    protected function getTSConfig()
-    {
-        return $GLOBALS['BE_USER']->getTSConfig();
-    }
-
-    protected function getValueFromTYPO3_CONF_VARS(string $name)
-    {
-        return $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail'][$name] ?? 0;
     }
 
     protected function getConnection(string $table): Connection
@@ -259,7 +198,7 @@ abstract class AbstractController
      */
     protected function getRecordList(array $listArr, string $table): array
     {
-        $lang = $this->getLanguageService();
+        $lang = MailerUtility::getLanguageService();
         $output = [
             'title' => $lang->getLL('dmail_number_records'),
             'editLinkTitle' => $lang->getLL('dmail_edit'),
@@ -268,8 +207,8 @@ abstract class AbstractController
             'rows' => [],
         ];
 
-        $isAllowedDisplayTable = $this->getBackendUser()->check('tables_select', $table);
-        $isAllowedEditTable = $this->getBackendUser()->check('tables_modify', $table);
+        $isAllowedDisplayTable = MailerUtility::getBackendUser()->check('tables_select', $table);
+        $isAllowedEditTable = MailerUtility::getBackendUser()->check('tables_modify', $table);
 
         if (is_array($listArr)) {
             $notAllowedPlaceholder = $lang->getLL('mailgroup_table_disallowed_placeholder');
