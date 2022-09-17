@@ -170,6 +170,9 @@
 			<trans-unit id="dmail_edit" resname="dmail_edit">
 				<source>Edit</source>
 			</trans-unit>
+			<trans-unit id="dmail_edit_info" resname="dmail_edit_info">
+				<source>Edit sender data</source>
+			</trans-unit>
 			<trans-unit id="dmail_error" resname="dmail_error">
 				<source>An error has occurred</source>
 			</trans-unit>
@@ -345,7 +348,7 @@
 				<source>Select a newsletter source</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
-				<source>Step 2 - Check sender information</source>
+				<source>Step 2 - Check sender data</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
 				<source>The page was fetched successfully.</source>

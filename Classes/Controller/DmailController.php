@@ -928,72 +928,46 @@ class DmailController extends AbstractController
      * @param array $mailData DirectMail DB record
      *
      * @return array
-     * @throws RouteNotFoundException If the named route doesn't exist
      */
     protected function renderRecordDetailsTable(array $mailData): array
     {
-        $iconActionsOpen = $this->getIconActionsOpen();
-        if (isset($mailData['issent']) && !$mailData['issent']) {
-            if (MailerUtility::getBackendUser()->check('tables_modify', 'sys_dmail')) {
-                $requestUri = $this->buildUriFromRoute(
-                    $this->moduleName,
-                    [
-                        'id' => $this->id,
-                        'sys_dmail_uid' => $mailData['uid'],
-                        'fetchAtOnce' => 1,
-                        'cmd' => 'info',
-                    ]
-                );
+        $tableRows = [];
 
-                $editParams = MailerUtility::getEditOnClickLink([
-                    'edit' => [
-                        'sys_dmail' => [
-                            $mailData['uid'] => 'edit',
-                        ],
-                    ],
-                    'returnUrl' => $requestUri->__toString(),
-                ]);
-
-                $content = '<a href="#" onClick="' . $editParams . '">' . $iconActionsOpen . '<strong> ' . MailerUtility::getLL('dmail_edit') . '</strong></a>';
-            } else {
-                $content = $iconActionsOpen . ' (' . MailerUtility::getLL('dmail_noEdit_noPerms') . ')';
-            }
-        } else {
-            $content = $iconActionsOpen . '(' . MailerUtility::getLL('dmail_noEdit_isSent') . ')';
-        }
-
-        $trs = [];
-        $nameArr = ['from_name', 'from_email', 'replyto_name', 'replyto_email', 'organisation', 'return_path', 'priority', 'type', 'page',
-            'sendOptions', 'includeMedia', 'flowedFormat', 'sys_language_uid', 'plainParams', 'HTMLParams', 'encoding', 'charset', 'issent', 'renderedsize'];
-        foreach ($nameArr as $name) {
-            $trs[] = [
-                'title' => MailerUtility::getTranslatedLabelOfTcaField($name),
-                'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('sys_dmail', $name, ($mailData[$name] ?? false))),
-            ];
-        }
-
-        // attachments need to be fetched manually as BackendUtility::getProcessedValue can't do that
-        $fileNames = [];
-        $attachments = MailerUtility::getAttachments($mailData['uid'] ?? 0);
-        /** @var FileReference $attachment */
-        if (count($attachments)) {
-            foreach ($attachments as $attachment) {
-                $fileNames[] = $attachment->getName();
-            }
-        }
-
-        $trs[] = [
-            'title' => MailerUtility::getTranslatedLabelOfTcaField('attachment'),
-            'value' => implode(', ', $fileNames),
+        $groups = [
+            'composition' => ['type', 'sys_language_uid', 'page', 'plainParams', 'HTMLParams', 'attachment', 'renderedsize'],
+            'headers' => ['subject', 'from_email', 'from_name', 'replyto_email', 'replyto_name', 'return_path', 'organisation', 'priority', 'encoding'],
+            'sending' => ['sendOptions', 'includeMedia', 'flowedFormat', 'use_rdct', 'long_link_mode', 'authcode_fieldList']
         ];
 
+        foreach ($groups as $groupName => $tcaColumns) {
+            foreach ($tcaColumns as $columnName) {
+                if ($columnName === 'attachment') {
+                    $fileNames = [];
+                    $attachments = MailerUtility::getAttachments($mailData['uid'] ?? 0);
+                    if (count($attachments)) {
+                        /** @var FileReference $attachment */
+                        foreach ($attachments as $attachment) {
+                            $fileNames[] = $attachment->getName();
+                        }
+                    }
+                    $tableRows[$groupName][] = [
+                        'title' => MailerUtility::getTranslatedLabelOfTcaField('attachment'),
+                        'value' => implode(', ', $fileNames)
+                    ];
+                } else {
+                    $tableRows[$groupName][] = [
+                        'title' => MailerUtility::getTranslatedLabelOfTcaField($columnName),
+                        'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('sys_dmail', $columnName, ($mailData[$columnName] ?? false))),
+                    ];
+                }
+            }
+        }
+
         return [
-            'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $mailData, Icon::SIZE_DEFAULT),
             'title' => htmlspecialchars($mailData['subject'] ?? ''),
-            'theadTitle1' => MailerUtility::getTranslatedLabelOfTcaField('subject'),
-            'theadTitle2' => GeneralUtility::fixed_lgd_cs(htmlspecialchars($mailData['subject'] ?? ''), 60),
-            'trs' => $trs,
-            'out' => $content,
+            'tableRows' => $tableRows,
+            'isSent' => isset($mailData['issent']) && $mailData['issent'],
+            'allowEdit' => MailerUtility::getBackendUser()->check('tables_modify', 'sys_dmail'),
         ];
     }
 
