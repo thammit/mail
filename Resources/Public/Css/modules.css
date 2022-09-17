@@ -32,35 +32,76 @@ div.toggleTitle a img {
 	padding: 1em;
 }
 
-
-.typo3-message {
-	margin-top: 1em;
-	max-width: 48em;
+.mail-wizard-navigation ul {
+    display: flex;
+    display: -webkit-flex;
+    list-style: none;
+    padding-left: 0;
+}
+.mail-wizard-navigation li .title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.mail-wizard-navigation li,
+.mail-wizard-navigation li.current {
+    outline: none;
+    -o-outline: none;
+    -ms-outline: none;
+    -moz-outline: none;
+    -webkit-outline: none;
+}
+.mail-wizard-navigation li {
+    display: inline-block;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    -o-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    background-color: var(--bs-gray-400);
+    margin-right: 30px;
+    position: relative;
+    outline: none;
+}
+.mail-wizard-navigation li::before {
+    position: absolute;
+    content: "";
+    background-color: var(--bs-gray-200);
+    width: 30px;
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    left: 100%;
+}
+.mail-wizard-navigation li.last::before {
+    content: none;
+}
+.mail-wizard-navigation li.current,
+.mail-wizard-navigation li.current:active,
+.mail-wizard-navigation li.done::before,
+.mail-wizard-navigation li.done,
+.mail-wizard-navigation li.done:active  {
+    background-color: var(--bs-primary);
 }
 
-.t3-wizard-steps {
-	margin: 0px 10px 0px 0px;
-	float: left;
-	clear: both;
-	line-height: 22px;
-	background-image: none;
-	background-color: #ddd;
-	padding: 5px;
-}
-.t3-wizard-steps span {
-	font-size: 22px;
-	font-weight: bold;
-	color: #ffffff;
-	vertical-align: bottom;
-}
 
-.t3-wizard-steps span.t3-wizard-item-active {
-	color: #000000;
-}
-
-#typo3-docheader-row2 { 
-	line-height: 14px !important; 
-}
-#typo3-docheader-row2 span { 
-	font-weight: bold; margin-top: -3px; color: #000; margin-top: 0; padding-left: 20px; 
-}
+/*#typo3-docheader-row2 {*/
+/*	line-height: 14px !important;*/
+/*}*/
+/*#typo3-docheader-row2 span {*/
+/*	font-weight: bold; margin-top: -3px; color: #000; margin-top: 0; padding-left: 20px;*/
+/*}*/

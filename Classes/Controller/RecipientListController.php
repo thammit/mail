@@ -101,11 +101,11 @@ class RecipientListController extends AbstractController
                         ]
                     );
                 } else if ($this->id != 0) {
-                    $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING);
+                    $message = MailerUtility::getFlashMessage(MailerUtility::getLL('dmail_noRegular'), MailerUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
             } else {
-                $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_recip'), AbstractMessage::WARNING);
+                $message = MailerUtility::getFlashMessage(MailerUtility::getLL('select_folder'), MailerUtility::getLL('header_recip'), AbstractMessage::WARNING);
                 $this->messageQueue->addMessage($message);
             }
         } else {
@@ -397,7 +397,7 @@ class RecipientListController extends AbstractController
                 ],
                 'returnUrl' => $this->requestUri,
             ]);
-            $str = '<a href="#" onClick="' . $editOnClickLink . '" title="' . MailerUtility::getLanguageService()->getLL('dmail_edit') . '">' .
+            $str = '<a href="#" onClick="' . $editOnClickLink . '" title="' . MailerUtility::getLL('dmail_edit') . '">' .
                 $this->getIconActionsOpen() .
                 '</a>';
         }
@@ -481,7 +481,7 @@ class RecipientListController extends AbstractController
                 } else {
                     $message = MailerUtility::getFlashMessage(
                         '',
-                        MailerUtility::getLanguageService()->getLL('mailgroup_table_disallowed_csv'),
+                        MailerUtility::getLL('mailgroup_table_disallowed_csv'),
                         AbstractMessage::ERROR
                     );
                     $this->messageQueue->addMessage($message);

@@ -123,6 +123,15 @@ class MailerUtility
     }
 
     /**
+     * @param string $index
+     * @return string
+     */
+    public static function getLL(string $index): string
+    {
+        return static::getLanguageService()->getLL($index);
+    }
+
+    /**
      * Returns the Backend User
      * @return BackendUserAuthentication
      */

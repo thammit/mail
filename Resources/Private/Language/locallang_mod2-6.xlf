@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-	<file source-language="en" datatype="plaintext" original="EXT:direct_mail/Resources/Private/Language/Modules/locallang_mod2-6.xlf" date="2022-01-29T12:00:00Z" product-name="direct_mail">
-		<header>
-			<description>Labels for the main Direct Mail module</description>
-			<type>module</type>
-			<authorName>Ivan Kartolo</authorName>
-			<authorEmail>ivan.kartolo@gmail.com</authorEmail>
-		</header>
+	<file source-language="en" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/locallang_mod2-6.xlf" date="2022-01-29T12:00:00Z" product-name="mail">
+		<header />
 		<body>
 			<trans-unit id="configure_HTMLParams_description" resname="configure_HTMLParams_description">
 				<source>Enter the additional URL parameters used to fetch the HTML content from a TYPO3 page.</source>
@@ -178,6 +173,9 @@
 			<trans-unit id="dmail_error" resname="dmail_error">
 				<source>An error has occurred</source>
 			</trans-unit>
+			<trans-unit id="dmail_warning" resname="dmail_warning">
+				<source>A warning has occurred</source>
+			</trans-unit>
 			<trans-unit id="dmail_folders" resname="dmail_folders">
 				<source>Available Direct Mail folders</source>
 			</trans-unit>
@@ -289,6 +287,9 @@
 			<trans-unit id="dmail_no_plain_content" resname="dmail_no_plain_content">
 				<source>The plain text content could not be fetched.</source>
 			</trans-unit>
+			<trans-unit id="dmail_no_valid_url" resname="dmail_no_mail_content_format_selected">
+				<source>No mail content format selected.</source>
+			</trans-unit>
 			<trans-unit id="dmail_no_valid_url" resname="dmail_no_valid_url">
 				<source>Enter at least one valid URL!</source>
 			</trans-unit>
@@ -314,13 +315,16 @@
 				<source>Information on direct mail record:</source>
 			</trans-unit>
 			<trans-unit id="dmail_warning" resname="dmail_warning">
-				<source>Check the following warning.</source>
+				<source>Warning</source>
+			</trans-unit>
+			<trans-unit id="dmail_wizard_title" resname="dmail_wizard_title">
+				<source>Newsletter Wizard</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_external_page" resname="dmail_wiz1_external_page">
-				<source>External Pages</source>
+				<source>External Page</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_internal_page" resname="dmail_wiz1_internal_page">
-				<source>Internal Pages</source>
+				<source>Internal Page</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_dmail" resname="dmail_wiz1_list_dmail">
 				<source>Not yet sent newsletters</source>
@@ -338,10 +342,10 @@
 				<source>New Quickmail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Please select a newsletter source</source>
+				<source>Select a newsletter source</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
-				<source>Detailed Information</source>
+				<source>Step 2 - Check sender information</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
 				<source>The page was fetched successfully.</source>
@@ -636,10 +640,10 @@
 				<source>Draft</source>
 			</trans-unit>
 			<trans-unit id="nl_l_tPage" resname="nl_l_tPage">
-				<source>PAGE</source>
+				<source>Internal Page</source>
 			</trans-unit>
 			<trans-unit id="nl_l_tUrl" resname="nl_l_tUrl">
-				<source>EXT URL</source>
+				<source>External Page</source>
 			</trans-unit>
 			<trans-unit id="nl_l_type" resname="nl_l_type">
 				<source>Type</source>

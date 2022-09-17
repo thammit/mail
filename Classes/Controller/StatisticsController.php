@@ -134,11 +134,11 @@ class StatisticsController extends AbstractController
                         ]
                     );
                 } else if ($this->id != 0) {
-                    $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING);
+                    $message = MailerUtility::getFlashMessage(MailerUtility::getLL('dmail_noRegular'), MailerUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
             } else {
-                $message = MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_stat'), AbstractMessage::WARNING);
+                $message = MailerUtility::getFlashMessage(MailerUtility::getLL('select_folder'), MailerUtility::getLL('header_stat'), AbstractMessage::WARNING);
                 $this->messageQueue->addMessage($message);
             }
         } else {
@@ -225,12 +225,12 @@ class StatisticsController extends AbstractController
     {
         if (!empty($row['scheduled_begin'])) {
             if (!empty($row['scheduled_end'])) {
-                $sent = MailerUtility::getLanguageService()->getLL('stats_overview_sent');
+                $sent = MailerUtility::getLL('stats_overview_sent');
             } else {
-                $sent = MailerUtility::getLanguageService()->getLL('stats_overview_sending');
+                $sent = MailerUtility::getLL('stats_overview_sending');
             }
         } else {
-            $sent = MailerUtility::getLanguageService()->getLL('stats_overview_queuing');
+            $sent = MailerUtility::getLL('stats_overview_queuing');
         }
         return $sent;
     }

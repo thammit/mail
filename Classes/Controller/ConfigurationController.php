@@ -41,10 +41,10 @@ class ConfigurationController extends AbstractController
                         'implodedParams' => $this->implodedParams,
                     ]);
                 } else if ($this->id != 0) {
-                    $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('dmail_noRegular'), MailerUtility::getLanguageService()->getLL('dmail_newsletters'), AbstractMessage::WARNING));
+                    $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLL('dmail_noRegular'), MailerUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING));
                 }
             } else {
-                $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLanguageService()->getLL('select_folder'), MailerUtility::getLanguageService()->getLL('header_conf'), AbstractMessage::WARNING));
+                $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLL('select_folder'), MailerUtility::getLL('header_conf'), AbstractMessage::WARNING));
             }
         } else {
             // If no access or if ID == zero

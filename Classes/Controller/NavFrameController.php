@@ -172,7 +172,7 @@ class NavFrameController extends AbstractController
         $list = $buttonBar->makeLinkButton()
             ->setHref(GeneralUtility::linkThisScript(['unique' => uniqid('directmail_navframe')]))
             //->setHref(GeneralUtility::getIndpEnv('REQUEST_URI'))
-            ->setTitle(MailerUtility::getLanguageService()->getLL('labels.reload'))
+            ->setTitle(MailerUtility::getLL('labels.reload'))
             ->setShowLabelText('Link')
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($list, ButtonBar::BUTTON_POSITION_RIGHT, 1);
