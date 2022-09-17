@@ -1427,7 +1427,7 @@ class DmailController extends AbstractController
             if (!$hookSelectDisabled) {
                 $groupInput .= '<input type="hidden" name="mailgroup_uid[]" value="' . $lastGroup['uid'] . '" />';
             }
-            $groupInput .= '* ' . htmlentities($lastGroup['title']);
+            $groupInput .= '<ul><li>' . htmlentities($lastGroup['title']) . '</li></ul>';
             if ($hookSelectDisabled) {
                 $groupInput .= '<em>disabled</em>';
             }

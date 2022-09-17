@@ -735,7 +735,8 @@ class MailerUtility
         }
 
         // Firstname must be more than 1 character
-        $recipientData['firstname'] = trim(strtok(trim($recipientData['name']), ' '));
+        $token = strtok(trim($recipientData['name']), ' ');
+        $recipientData['firstname'] = $token ? trim($token) : '';
         if (strlen($recipientData['firstname']) < 2 || preg_match('|[^[:alnum:]]$|', $recipientData['firstname'])) {
             $recipientData['firstname'] = $recipientData['name'];
         }

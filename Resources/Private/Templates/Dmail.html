@@ -312,8 +312,6 @@
                 </h3>
                 <input type="hidden" name="id" value="{data.final.finalForm.id}"/>
                 <input type="hidden" name="sys_dmail_uid" value="{data.final.finalForm.sys_dmail_uid}"/>
-                <input type="hidden" name="sys_dmail_uid" value="{data.final.sys_dmail_uid}">
-                <input type="hidden" name="cmd" value="send_mail_final"/>
                 <input type="hidden" name="cmd" value="{data.final.cmd}">
                 <input type="hidden" name="pages_uid" value="{data.final.pages_uid}">
                 <input type="hidden" name="currentCMD" value="{data.final.currentCMD}">
@@ -350,7 +348,7 @@
                     <input class="form-check-input" type="checkbox" name="savedraft" id="tx-directmail-savedraft-check" value="1"/>
                     <label class="form-check-label" for="tx-directmail-savedraft-check"><f:translate key="{lll}schedule_draft"/></label>
                 </div>
-                <button class="btn btn-default" type="Submit" name="mailingMode_mailGroup"><f:translate key="{lll}schedule_send_all"/></button>
+                <button class="btn btn-default" type="Submit" name="mailingMode_mailGroup" value="1"><f:translate key="{lll}schedule_send_all"/></button>
             </div>
         </form>
     </f:if>
