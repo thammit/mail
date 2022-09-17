@@ -144,7 +144,7 @@
 				<source>This will be prepended to the test newsletter subject</source>
 			</trans-unit>
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
-				<source>Update configuration</source>
+				<source>Save</source>
 			</trans-unit>
 			<trans-unit id="configure_user_table" resname="configure_user_table">
 				<source>Custom-defined table:</source>

@@ -1,35 +1,58 @@
-a.bubble {position:relative; z-index:24; color:#000; text-decoration:none}
-a.bubble:hover {z-index:25; background-color: #e6e8ea;}
-a.bubble span.help {display: none;}
-a.bubble:hover span.help {display:block; position:absolute; top:2em; left:2em; width:32em; border:1px solid #aaaaaa; background-color:#e3dfdb; padding: 2px;}
+a.bubble {
+    position: relative;
+    color: #000;
+    text-decoration: none;
+}
+
+a.bubble .help {
+    display: none;
+}
+
+a.bubble:hover .help {
+    display: block;
+    position: absolute;
+    z-index: 1025;
+    top: -2em;
+    left: 2em;
+    max-width: 50em;
+    min-width: 30em;
+    border: 1px solid #aaaaaa;
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+    padding: 10px;
+}
 
 .box {
-	margin: 0 0 1em 0;
+    margin: 0 0 1em 0;
 }
 
 .toggleTitle:hover {
-	background-color: #cfcbc7 !important;
+    background-color: #cfcbc7 !important;
 }
+
 .toggleTitle a {
-	width: 100%;
-	position: relative;
-	display: block;
+    width: 100%;
+    position: relative;
+    display: block;
 }
+
 div.toggleTitle a img {
-	position: relative;
-	margin-right: 4px;
+    position: relative;
+    margin-right: 4px;
 }
+
 .toggleTitle {
-	font-weight: bold;
-	border: 1px solid #898989;
-	width: 15em;
-	background-color: #e3dfdb;
+    font-weight: bold;
+    border: 1px solid #898989;
+    width: 15em;
+    background-color: #e3dfdb;
 }
+
 .toggleBox {
-	margin-top: -1px;
-	background: #ffffff;
-	border: 1px solid #aaaaaa;
-	padding: 1em;
+    margin-top: -1px;
+    background: #ffffff;
+    border: 1px solid #aaaaaa;
+    padding: 1em;
 }
 
 .mail-wizard-navigation ul {
@@ -38,6 +61,7 @@ div.toggleTitle a img {
     list-style: none;
     padding-left: 0;
 }
+
 .mail-wizard-navigation li .title {
     position: absolute;
     top: 50%;
@@ -51,6 +75,7 @@ div.toggleTitle a img {
     font-size: 1rem;
     font-weight: 600;
 }
+
 .mail-wizard-navigation li,
 .mail-wizard-navigation li.current {
     outline: none;
@@ -59,6 +84,7 @@ div.toggleTitle a img {
     -moz-outline: none;
     -webkit-outline: none;
 }
+
 .mail-wizard-navigation li {
     display: inline-block;
     width: 45px;
@@ -73,6 +99,7 @@ div.toggleTitle a img {
     position: relative;
     outline: none;
 }
+
 .mail-wizard-navigation li::before {
     position: absolute;
     content: "";
@@ -87,14 +114,16 @@ div.toggleTitle a img {
     -webkit-transform: translateY(-50%);
     left: 100%;
 }
+
 .mail-wizard-navigation li.last::before {
     content: none;
 }
+
 .mail-wizard-navigation li.current,
 .mail-wizard-navigation li.current:active,
 .mail-wizard-navigation li.done::before,
 .mail-wizard-navigation li.done,
-.mail-wizard-navigation li.done:active  {
+.mail-wizard-navigation li.done:active {
     background-color: var(--bs-primary);
 }
 
