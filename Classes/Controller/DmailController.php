@@ -1299,6 +1299,8 @@ class DmailController extends AbstractController
 
         $mailGroups = MailerUtility::finalSendingGroups($this->id, $this->sys_dmail_uid, $groups, $this->userTable, $this->backendUserPermissions);
 
+        // todo: delete next block after upper method is working
+
         $opt = [];
         $lastGroup = null;
         if ($groups) {
@@ -1321,7 +1323,6 @@ class DmailController extends AbstractController
                 $lastGroup = $group;
             }
         }
-
         $groupInput = '';
         // added disabled. see hook
         if (count($opt) === 0) {
@@ -1343,7 +1344,6 @@ class DmailController extends AbstractController
             $groupInput = '<select class="form-control" size="20" multiple="multiple" name="mailgroup_uid[]" ' . ($hookSelectDisabled ? 'disabled' : '') . '>' . implode(chr(10), $opt) . '</select>';
         }
 
-        //$this->noView = 1;
         return [
             'mailGroups' => $mailGroups,
             'id' => $this->id,
