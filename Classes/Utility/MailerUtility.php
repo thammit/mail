@@ -7,6 +7,10 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use FoT3\Rdct\Redirects;
 use GuzzleHttp\Exception\RequestException;
+use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Database\QueryGenerator;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use PDO;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -19,11 +23,13 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Messaging\FlashMessageRendererResolver;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
@@ -135,7 +141,7 @@ class MailerUtility
      * Returns the Backend User
      * @return BackendUserAuthentication
      */
-    public static function getBackendUser()
+    public static function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -143,6 +149,11 @@ class MailerUtility
     public static function isAdmin(): bool
     {
         return static::getBackendUser()->isAdmin();
+    }
+
+    public static function backendUserPermissions(): string
+    {
+        return static::getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
     }
 
     public static function getTSConfig(): array
@@ -1064,6 +1075,249 @@ class MailerUtility
         $authCode = $preKey . '||' . $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'];
         return substr(md5($authCode), 0, $codeLength);
     }
+
+    /**
+     * Fetches recipient IDs from a given group ID
+     * Most of the functionality from cmd_compileMailGroup in order to use multiple recipient lists when sending
+     *
+     * @param int $pageId Page ID
+     * @param int $groupUid Recipient group ID
+     * @param string $userTable
+     * @param $backendUserPermissions
+     * @return array List of recipient IDs
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public static function getSingleMailGroup(int $pageId, int $groupUid, string $userTable, $backendUserPermissions): array
+    {
+        $idLists = [];
+        if ($groupUid) {
+            $sysDmailGroupRepository = GeneralUtility::makeInstance(SysDmailGroupRepository::class);
+            $mailGroup = $sysDmailGroupRepository->findByUid($groupUid);
+
+            if (is_array($mailGroup)) {
+                $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
+                switch ($mailGroup['type']) {
+                    case Constants::RECIPIENT_GROUP_TYPE_PAGES:
+                        // From pages
+                        // use current page if not set in mail group
+                        $thePages = $mailGroup['pages'] ?? $pageId;
+                        // Explode the pages
+                        $pages = GeneralUtility::intExplode(',', $thePages);
+                        $pageIdArray = [];
+
+                        foreach ($pages as $pageUid) {
+                            if ($pageUid > 0) {
+                                $pageinfo = BackendUtility::readPageAccess($pageUid, $backendUserPermissions);
+                                if (is_array($pageinfo)) {
+                                    $pageIdArray[] = $pageUid;
+                                    if ($mailGroup['recursive']) {
+                                        $pageIdArray = array_merge($pageIdArray, static::getRecursiveSelect($pageUid, $backendUserPermissions));
+                                    }
+                                }
+                            }
+                        }
+                        // Remove any duplicates
+                        $pageIdArray = array_unique($pageIdArray);
+                        $pidList = implode(',', $pageIdArray);
+
+                        // Make queries
+                        if ($pidList) {
+                            $whichTables = intval($mailGroup['whichtables']);
+                            if ($whichTables & 1) {
+                                // tt_address
+                                $idLists['tt_address'] = $tempRepository->getIdList('tt_address', $pidList, $groupUid, $mailGroup['select_categories']);
+                            }
+                            if ($whichTables & 2) {
+                                // fe_users
+                                $idLists['fe_users'] = $tempRepository->getIdList('fe_users', $pidList, $groupUid, $mailGroup['select_categories']);
+                            }
+                            if ($userTable && ($whichTables & 4)) {
+                                // user table
+                                $idLists[$userTable] = $tempRepository->getIdList($userTable, $pidList, $groupUid, $mailGroup['select_categories']);
+                            }
+                            if ($whichTables & 8) {
+                                // fe_groups
+                                if (!is_array($idLists['fe_users'])) {
+                                    $idLists['fe_users'] = [];
+                                }
+                                $idLists['fe_users'] = $tempRepository->getIdList('fe_groups', $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users']));
+                            }
+                        }
+                        break;
+                    case Constants::RECIPIENT_GROUP_TYPE_CSV:
+                        // List of mails
+                        if ($mailGroup['csv'] == 1) {
+                            $dmCsvUtility = GeneralUtility::makeInstance(CsvUtility::class);
+                            $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($mailGroup['list']));
+                        } else {
+                            $recipients = static::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
+                        }
+                        $idLists['PLAINLIST'] = static::removeDuplicates($recipients);
+                        break;
+                    case Constants::RECIPIENT_GROUP_TYPE_STATIC:
+                        // Static MM list
+                        $idLists['tt_address'] = $tempRepository->getStaticIdList('tt_address', $groupUid);
+                        $idLists['fe_users'] = $tempRepository->getStaticIdList('fe_users', $groupUid);
+                        $tempGroups = $tempRepository->getStaticIdList('fe_groups', $groupUid);
+                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $tempGroups));
+                        if ($userTable) {
+                            $idLists[$userTable] = $tempRepository->getStaticIdList($userTable, $groupUid);
+                        }
+                        break;
+                    case Constants::RECIPIENT_GROUP_TYPE_QUERY:
+                        // Special query list
+                        // Todo Remove that shit!
+                        $queryTable = GeneralUtility::_GP('SET')['queryTable'];
+                        $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
+                        $mailGroup = $sysDmailGroupRepository->updateMailGroup($mailGroup, $userTable, $queryTable, $queryConfig);
+                        $whichTables = intval($mailGroup['whichtables']);
+                        $table = '';
+                        if ($whichTables & 1) {
+                            $table = 'tt_address';
+                        } else if ($whichTables & 2) {
+                            $table = 'fe_users';
+                        } else if ($userTable && ($whichTables & 4)) {
+                            $table = $userTable;
+                        }
+                        if ($table) {
+                            $idLists[$table] = $tempRepository->getSpecialQueryIdList($table, $mailGroup);
+                        }
+                        break;
+                    case Constants::RECIPIENT_GROUP_TYPE_OTHER:
+                        $groups = array_unique($tempRepository->getMailGroups($mailGroup['mail_groups'], [$mailGroup['uid']], $backendUserPermissions));
+                        foreach ($groups as $groupUid) {
+                            $collect = static::getSingleMailGroup($pageId, $groupUid, $userTable, $backendUserPermissions);
+                            if (is_array($collect)) {
+                                $idLists = array_merge_recursive($idLists, $collect);
+                            }
+                        }
+                        break;
+                    default:
+                }
+            }
+        }
+        return $idLists;
+    }
+
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     * @throws DBALException
+     */
+    public static function compileMailGroup(int $pageId, array $groups, string $userTable, $backendUserPermissions): array
+    {
+        // If supplied with an empty array, quit instantly as there is nothing to do
+        if (!count($groups)) {
+            return [];
+        }
+
+        // Looping through the selected array, in order to fetch recipient details
+        $idLists = [];
+        foreach ($groups as $groupId) {
+            // Testing to see if group ID is a valid integer, if not - skip to next group ID
+            $groupId = MathUtility::convertToPositiveInteger($groupId);
+            if (!$groupId) {
+                continue;
+            }
+
+            $recipientList = static::getSingleMailGroup($pageId, $groupId, $userTable, $backendUserPermissions);
+            if (!is_array($recipientList)) {
+                continue;
+            }
+
+            $idLists = array_merge_recursive($idLists, $recipientList);
+        }
+
+        // Make unique entries
+        if (is_array($idLists['tt_address'] ?? false)) {
+            $idLists['tt_address'] = array_unique($idLists['tt_address']);
+        }
+
+        if (is_array($idLists['fe_users'] ?? false)) {
+            $idLists['fe_users'] = array_unique($idLists['fe_users']);
+        }
+
+        if (is_array($idLists[$userTable] ?? false) && $userTable) {
+            $idLists[$userTable] = array_unique($idLists[$userTable]);
+        }
+
+        if (is_array($idLists['PLAINLIST'] ?? false)) {
+            $idLists['PLAINLIST'] = static::removeDuplicates($idLists['PLAINLIST']);
+        }
+
+        return $idLists;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     * @throws DBALException
+     */
+    public static function finalSendingGroups(int $id, int $sys_dmail_uid, array $groups, string|int $userTable, $backendUserPermission): array
+    {
+//        $opt = [];
+        $mailGroups = [];
+        $lastGroup = null;
+        if ($groups) {
+            foreach ($groups as $group) {
+                $result = static::compileMailGroup($group['uid'], $groups, $userTable, $backendUserPermission);
+                $receiver = 0;
+                $idLists = $result['queryInfo']['id_lists'];
+                if (is_array($idLists['tt_address'] ?? false)) {
+                    $receiver += count($idLists['tt_address']);
+                }
+                if (is_array($idLists['fe_users'] ?? false)) {
+                    $receiver += count($idLists['fe_users']);
+                }
+                if (is_array($idLists['PLAINLIST'] ?? false)) {
+                    $receiver += count($idLists['PLAINLIST']);
+                }
+                if (is_array($idLists[$userTable] ?? false)) {
+                    $receiver += count($idLists[$userTable]);
+                }
+                $mailGroups[] = ['uid' => $group['uid'], 'title' => $group['title'], 'receiver' => $receiver];
+                $lastGroup = $group;
+            }
+        }
+
+        return $mailGroups;
+
+//        $groupInput = '';
+//        // added disabled. see hook
+//        if (count($opt) === 0) {
+//            $message = static::getFlashMessage(
+//                static::getLL('error.no_recipient_groups_found'),
+//                '',
+//                AbstractMessage::ERROR
+//            );
+//            $this->messageQueue->addMessage($message);
+//        } else if (count($opt) === 1) {
+//            if (!$hookSelectDisabled) {
+//                $groupInput .= '<input type="hidden" name="mailgroup_uid[]" value="' . $lastGroup['uid'] . '" />';
+//            }
+//            $groupInput .= '<ul><li>' . htmlentities($lastGroup['title']) . '</li></ul>';
+//            if ($hookSelectDisabled) {
+//                $groupInput .= '<em>disabled</em>';
+//            }
+//        } else {
+//            $groupInput = '<select class="form-control" size="20" multiple="multiple" name="mailgroup_uid[]" ' . ($hookSelectDisabled ? 'disabled' : '') . '>' . implode(chr(10), $opt) . '</select>';
+//        }
+//
+//        return [
+//            'id' => $id,
+//            'sys_dmail_uid' => $sys_dmail_uid,
+//            'mailGroups' => $mailGroups,
+//            'groupInput' => $groupInput,
+//            'hookContents' => $hookContents, // put content from hook
+//            'send_mail_datetime_hr' => strftime('%H:%M %d-%m-%Y', time()),
+//            'send_mail_datetime' => strftime('%H:%M %d-%m-%Y', time()),
+//        ];
+    }
+
 
     /**
      * @param string $path

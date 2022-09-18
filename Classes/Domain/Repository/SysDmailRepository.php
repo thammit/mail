@@ -6,8 +6,6 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SysDmailRepository extends AbstractRepository
 {
@@ -22,11 +20,8 @@ class SysDmailRepository extends AbstractRepository
      */
     public function selectSysDmailById(int $sys_dmail_uid, int $pid): array|bool
     {
-        $queryBuilder = $this->getQueryBuilder();
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
+
         return $queryBuilder->select('*')
             ->from($this->table)
             ->where(
@@ -47,11 +42,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function selectSysDmailsByPid(int $pid): array
     {
-        $queryBuilder = $this->getQueryBuilder();
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder->select('uid', 'pid', 'subject', 'scheduled', 'scheduled_begin', 'scheduled_end')
             ->from($this->table)
@@ -69,11 +60,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function selectForPageInfo(int $id): array
     {
-        $queryBuilder = $this->getQueryBuilder();
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder->selectLiteral('sys_dmail.uid', 'sys_dmail.subject', 'sys_dmail.scheduled', 'sys_dmail.scheduled_begin', 'sys_dmail.scheduled_end', 'COUNT(sys_dmail_maillog.mid) AS count')
             ->from($this->table, $this->table)
@@ -105,12 +92,7 @@ class SysDmailRepository extends AbstractRepository
      */
     public function findMailsNotSentAndScheduled(int $id, string $orderBy, string $order): array
     {
-        $queryBuilder = $this->getQueryBuilder();
-
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type')
             ->from($this->table)
@@ -158,5 +140,21 @@ class SysDmailRepository extends AbstractRepository
             $updateData, // value array
             ['uid' => $uid]
         );
+    }
+
+    /**
+     * @param int $uid
+     * @return void
+     */
+    public function delete(int $uid): void
+    {
+        if ($GLOBALS['TCA'][$this->table]['ctrl']['delete']) {
+            $connection = $this->getConnection();
+            $connection->update(
+                $this->table,
+                [$GLOBALS['TCA'][$this->table]['ctrl']['delete'] => 1],
+                ['uid' => $uid]
+            );
+        }
     }
 }

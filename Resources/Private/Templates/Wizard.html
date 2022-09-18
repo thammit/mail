@@ -24,7 +24,7 @@
                         parentId: 'mail-wizard-source-select-panel',
                         data: data.default.internal,
                         index: 4,
-                        section: 'DefaultInternal',
+                        section: 'InternalPanel',
                         title: 'dmail_wiz1_internal_page'
                     }"
                     section="Panel"
@@ -37,7 +37,7 @@
                         parentId: 'mail-wizard-source-select-panel',
                         data: data.default.external,
                         index: 5,
-                        section: 'DefaultExternal',
+                        section: 'ExternalPanel',
                         title: 'dmail_wiz1_external_page'
                     }"
                     section="Panel"
@@ -50,7 +50,7 @@
                         parentId: 'mail-wizard-source-select-panel',
                         data: data.default.quick,
                         index: 6,
-                        section: 'DefaultQuick',
+                        section: 'QuickMailPanel',
                         title: 'dmail_wiz1_quickmail'
                     }"
                     section="Panel"
@@ -63,7 +63,7 @@
                         parentId: 'mail-wizard-source-select-panel',
                         data: data.default.dmail,
                         index: 7,
-                        section: 'DefaultDmail',
+                        section: 'NotYetSentPanel',
                         title: 'dmail_wiz1_list_dmail'
                     }"
                     section="Panel"
@@ -321,25 +321,31 @@
                 </div>
                 <div class="my-3">
                     {data.final.finalForm.hookContents -> f:format.html()}
-                    <f:translate key="{lll}schedule_time"/>
                 </div>
-                <div class="form-control-wrap mb-3">
+                {data.final.finalForm.mailGroups -> f:debug(inline:1)}
+                <f:if condition="{data.final.finalForm.mailGroups -> f:count() == 1">
+                    <f:then>
+                        <f:variable name="group">{data.final.finalForm.mailGroups.0}</f:variable>
+                        <ul>
+                            <li title="{group.uid}">{group.title}<f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if></li>
+                        </ul>
+                    </f:then>
+                    <f:else></f:else>
+                </f:if>
+                <div class="mb-3">
+                    <label for="send_mail_datetime" class="form-label"><f:translate key="{lll}schedule_time"/></label>
                     <div class="input-group">
-                        <input class="form-control t3js-datetimepicker t3js-clearable"
-                               data-date-type="datetime"
-                               data-date-offset="0"
-                               type="text"
-                               id="tceforms-datetimefield-startdate"
-                               name="send_mail_datetime_hr" value="{data.final.finalForm.send_mail_datetime_hr}">
-                        <input name="send_mail_datetime" value="{data.final.finalForm.send_mail_datetime}"
-                               type="hidden">
-                        <span class="input-group-btn">
-                            <label class="btn btn-default" for="tceforms-datetimefield-startdate">
-                                <span class="fa fa-calendar"></span>
-                            </label>
-                        </span>
+                        <input autocomplete="off" data-date-type="datetime" class="form-control t3js-datetimepicker t3js-clearable" id="send_mail_datetime" type="text" name="send_mail_datetime" value="{data.final.finalForm.send_mail_datetime}" />
+                        <label class="mb-0 btn btn-default" for="send_mail_datetime">
+                                <span class="t3js-icon icon icon-size-small icon-state-default icon-actions-calendar" data-identifier="actions-calendar">
+<span class="icon-markup">
+<svg class="icon-color"><use xlink:href="/typo3/sysext/core/Resources/Public/Icons/T3Icons/sprites/actions.svg#actions-calendar" /></svg>
+</span>
+</span>
+                        </label>
                     </div>
                 </div>
+
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" name="testmail" id="tx-directmail-sendtestmail-check" value="1"/>
                     <label class="form-check-label" for="tx-directmail-sendtestmail-check"><f:translate key="{lll}schedule_testmail"/></label>
@@ -348,7 +354,7 @@
                     <input class="form-check-input" type="checkbox" name="savedraft" id="tx-directmail-savedraft-check" value="1"/>
                     <label class="form-check-label" for="tx-directmail-savedraft-check"><f:translate key="{lll}schedule_draft"/></label>
                 </div>
-                <button class="btn btn-default" type="Submit" name="mailingMode_mailGroup" value="1"><f:translate key="{lll}schedule_send_all"/></button>
+                <button class="btn btn-lg btn-primary text-uppercase" type="Submit" name="mailingMode_mailGroup" value="1"><f:translate key="{lll}schedule_send_all"/></button>
             </div>
         </form>
     </f:if>
@@ -404,7 +410,7 @@
             <h3 class="panel-title" id="heading{index}">
                 <a href="#" class="{classCollapsed}" data-bs-toggle="collapse" data-bs-target="#panel{index}" aria-expanded="{expanded}" aria-controls="panel{index}">
                     <span class="caret"></span>
-                    <strong><f:translate key="{lll}{title}"/></strong>
+                    <strong><f:translate key="{lll}{title}"/></strong> <f:if condition="{data.internalPages.rows}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{data.internalPages.rows -> f:count()}</span></f:if>
                 </a>
             </h3>
         </div>
@@ -416,7 +422,7 @@
     </div>
 </f:section>
 
-<f:section name="DefaultInternal">
+<f:section name="InternalPanel">
     {data.cshItem -> f:format.html()}
     <f:if condition="{data.internalPages.empty}">
         <h3>
@@ -427,29 +433,28 @@
     <f:if condition="{data.internalPages.rows}">
         <f:if condition="{data.internalPages.rows -> f:count()}">
             <table class="table table-striped table-hover">
-                <thead>
+                <thead class="table-light">
                     <tr>
                         <th style="width: 1%"></th>
                         <th>Page</th>
-                        <th class="text-end">Actions</th>
+                        <th class="table-active"></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                 <f:for each="{data.internalPages.rows}" as="row">
                     <tr class="db_list_normal">
                         <td style="width: 1%">{row.pageIcon -> f:format.html()}</td>
-                        <td>
-                            <a href="{row.createDmailLink -> f:format.html()}">
-                                {row.title -> f:format.html()}
-                            </a>
-                        </td>
-                        <td class="text-end">
+                        <td>{row.title}</td>
+                        <td class="table-active">
                             <a class="btn btn-default" onclick="{row.editOnClickLink -> f:format.html()}" href="#"
                                title="{f:translate(key: '{lll}nl_editPage')}">
                                 {row.iconActionsOpen -> f:format.html()}
                             </a>
                             {row.previewLink -> f:format.html()}
-                            {row.createLink -> f:format.html()}
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-primary" href="{row.settingsUri}">NEXT</a>
                         </td>
                     </tr>
                 </f:for>
@@ -459,7 +464,7 @@
     </f:if>
 </f:section>
 
-<f:section name="DefaultExternal">
+<f:section name="ExternalPanel">
     {data.cshItem -> f:format.html()}
     <form action="" method="post" name="dmailform" enctype="multipart/form-data">
         <input type="hidden" name="cmd" value="info"/>
@@ -483,7 +488,7 @@
     </form>
 </f:section>
 
-<f:section name="DefaultQuick">
+<f:section name="QuickMailPanel">
     <form action="" method="post" name="dmailform" enctype="multipart/form-data">
         <input type="hidden" name="cmd" value="info"/>
         <input type="hidden" name="id" value="{data.id}"/>
@@ -511,9 +516,9 @@
     </form>
 </f:section>
 
-<f:section name="DefaultDmail">
+<f:section name="NotYetSentPanel">
     <table class="table table-striped table-hover">
-        <thead>
+        <thead class="table-light">
         <tr>
             <th style="width: 1%">&nbsp;</th>
             <th><f:translate key="{lll}nl_l_subject"/></th>

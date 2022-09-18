@@ -32,4 +32,9 @@ class SysDmailCategoryRepository extends AbstractRepository
             ->execute()
             ->fetchAllAssociative();
     }
+
+    public function update(): array
+    {
+
+    }
 }

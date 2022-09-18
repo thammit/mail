@@ -32,7 +32,7 @@ class TempRepository extends AbstractRepository
         if (is_array($listArr) && count($listArr)) {
             $idlist = implode(',', $listArr);
 
-            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+            $queryBuilder = $this->getQueryBuilder($table);
             $queryBuilder
                 ->getRestrictions()
                 ->removeAll()
@@ -87,14 +87,9 @@ class TempRepository extends AbstractRepository
     public function getIdList(string $table, string $pidList, int $groupUid, int $cat): array
     {
         $addWhere = '';
-
         $switchTable = $table == 'fe_groups' ? 'fe_users' : $table;
-
         $pidArray = GeneralUtility::intExplode(',', $pidList);
-
-        /** @var Connection $connection */
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder = $this->getQueryBuilder($table);
 
         if ($switchTable == 'fe_users') {
             //$addWhere = ' AND fe_users.module_sys_dmail_newsletter = 1';
@@ -113,7 +108,6 @@ class TempRepository extends AbstractRepository
         // The following will work but INSTR and CONCAT are available only in mySQL
 
         $mmTable = $GLOBALS['TCA'][$switchTable]['columns']['module_sys_dmail_category']['config']['MM'];
-        $cat = intval($cat);
         if ($cat < 1) {
             if ($table == 'fe_groups') {
                 $res = $queryBuilder
@@ -226,8 +220,7 @@ class TempRepository extends AbstractRepository
     {
         $switchTable = $table == 'fe_groups' ? 'fe_users' : $table;
 
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder = $this->getQueryBuilder($table);
 
         // fe user group uid should be in list of fe users list of user groups
         // $field = $switchTable.'.usergroup';
@@ -314,8 +307,7 @@ class TempRepository extends AbstractRepository
 
         if ($table == 'fe_groups') {
             // get the uid of the current fe_group
-            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-            $queryBuilder = $connection->createQueryBuilder();
+            $queryBuilder = $this->getQueryBuilder($table);
 
             $res = $queryBuilder
                 ->selectLiteral('DISTINCT ' . $table . '.uid')
@@ -348,8 +340,7 @@ class TempRepository extends AbstractRepository
                 $usergroupInList = '(' . $usergroupInList . ')';
 
                 // fetch all fe_users from these subgroups
-                $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-                $queryBuilder = $connection->createQueryBuilder();
+                $queryBuilder = $this->getQueryBuilder($table);
                 // for fe_users and fe_group, only activated modulde_sys_dmail_newsletter
                 if ($switchTable == 'fe_users') {
                     $addWhere = $queryBuilder->expr()->eq(
@@ -403,7 +394,7 @@ class TempRepository extends AbstractRepository
         $mmTable = 'sys_dmail_group_mm';
         $groupTable = 'sys_dmail_group';
 
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $queryBuilder = $this->getQueryBuilder($table);
 
         $res = $queryBuilder->selectLiteral('DISTINCT fe_groups.uid')
             ->from($table, $table)
@@ -443,15 +434,18 @@ class TempRepository extends AbstractRepository
      * Construct the array of uid's from $table selected
      * by special query of mail group of such type
      *
-     * @param QueryGenerator $queryGenerator The query generator object
      * @param string $table The table to select from
      * @param array $group The direct_mail group record
+     * @param QueryGenerator|null $queryGenerator The query generator object
      *
      * @return array The resulting query.
      * @throws Exception|\Doctrine\DBAL\Driver\Exception
      */
-    public function getSpecialQueryIdList(QueryGenerator &$queryGenerator, string $table, array $group): array
+    public function getSpecialQueryIdList(string $table, array $group, QueryGenerator $queryGenerator = null): array
     {
+        if (!$queryGenerator instanceof QueryGenerator) {
+            $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
+        }
         $outArr = [];
         if ($group['query']) {
             $queryGenerator->init('dmail_queryConfig', $table);
@@ -486,11 +480,8 @@ class TempRepository extends AbstractRepository
         $groupIdList = GeneralUtility::intExplode(',', $list);
         $groups = [];
 
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_group');
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions(false, 'sys_dmail_group');
+
         $res = $queryBuilder->select('sys_dmail_group.*')
             ->from('sys_dmail_group', 'sys_dmail_group')
             ->leftJoin(
@@ -527,7 +518,7 @@ class TempRepository extends AbstractRepository
      */
     public function selectRowsByUid(string $table, int $uid): array
     {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $queryBuilder = $this->getQueryBuilder($table);
 
         return $queryBuilder
             ->select('*')

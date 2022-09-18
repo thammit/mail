@@ -6,12 +6,12 @@ namespace MEDIAESSENZ\Mail\Controller;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -21,10 +21,7 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
-use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
-use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
@@ -38,6 +35,7 @@ abstract class AbstractController
     protected PageRenderer $pageRenderer;
     protected SiteFinder $siteFinder;
     protected MailerService $mailerService;
+    protected EventDispatcherInterface $eventDispatcher;
     protected StandaloneView $view;
     protected int $id = 0;
     protected string $cmd = '';
@@ -70,7 +68,8 @@ abstract class AbstractController
         PageRenderer   $pageRenderer = null,
         StandaloneView  $view = null,
         SiteFinder     $siteFinder = null,
-        MailerService  $mailerService = null
+        MailerService  $mailerService = null,
+        EventDispatcherInterface $eventDispatcher = null
     )
     {
         $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
@@ -78,6 +77,7 @@ abstract class AbstractController
         $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
         $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
         $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
+        $this->eventDispatcher = $eventDispatcher ?? GeneralUtility::makeInstance(EventDispatcherInterface::class);
         $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
         $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
         $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
@@ -103,7 +103,7 @@ abstract class AbstractController
             $this->siteIdentifier = '';
         }
 
-        $this->backendUserPermissions = MailerUtility::getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
+        $this->backendUserPermissions = MailerUtility::backendUserPermissions();
         $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
 
         $this->access = is_array($this->pageinfo) ? true : false;
@@ -159,9 +159,7 @@ abstract class AbstractController
      */
     protected function buildUriFromRoute($name, $parameters = []): Uri
     {
-        /** @var UriBuilder $uriBuilder */
-        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        return $uriBuilder->buildUriFromRoute(
+        return GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
             $name,
             $parameters
         );

@@ -6,8 +6,6 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class TtAddressRepository extends AbstractRepository
 {
@@ -48,13 +46,7 @@ class TtAddressRepository extends AbstractRepository
      */
     public function selectTtAddressByPid(int $pid, string $recordUnique): array
     {
-        $queryBuilder = $this->getQueryBuilder();
-        // only add deleteClause
-        //https://github.com/FriendsOfTYPO3/tt_address/blob/master/Configuration/TCA/tt_address.php
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder
             ->select(

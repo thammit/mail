@@ -279,16 +279,16 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * @param array $row
+     * @param array $mailData
      * @param array $params
      * @return bool returns true if an error occurred
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function assemble(array $row, array $params): bool
+    public function assemble(array $mailData, array $params): bool
     {
-        $fetchPlainTextContent = MailerUtility::shouldFetchPlainText($row);
-        $fetchHtmlContent = MailerUtility::shouldFetchHtml($row);
+        $fetchPlainTextContent = MailerUtility::shouldFetchPlainText($mailData);
+        $fetchHtmlContent = MailerUtility::shouldFetchHtml($mailData);
 
         if (!$fetchPlainTextContent && !$fetchHtmlContent) {
             MailerUtility::addInfoToFlashMessageQueue('', MailerUtility::getLL('dmail_no_mail_content_format_selected'));
@@ -296,11 +296,11 @@ class MailerService implements LoggerAwareInterface
         }
 
         $this->start();
-        $this->setCharset($row['charset']);
-        $this->setIncludeMedia((bool)$row['includeMedia']);
+        $this->setCharset($mailData['charset']);
+        $this->setIncludeMedia((bool)$mailData['includeMedia']);
 
         $errors = false;
-        $baseUrl = MailerUtility::getAbsoluteBaseUrlForMailPage((int)$row['page']);
+        $baseUrl = MailerUtility::getAbsoluteBaseUrlForMailPage((int)$mailData['page']);
         $glue = str_contains($baseUrl, '?') ? '&' : '?';
         if ($params['enable_jump_url'] ?? false) {
             $this->setJumpUrlPrefix($baseUrl . $glue .
@@ -315,7 +315,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         if ($fetchPlainTextContent) {
-            $plainTextUrl = (int)$row['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($row['plainParams']) : MailerUtility::getUrlForInternalPage($row['page'], $row['plainParams']);
+            $plainTextUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plainParams']) : MailerUtility::getUrlForInternalPage($mailData['page'], $mailData['plainParams']);
             $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $params);
             try {
                 $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
@@ -330,7 +330,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         if ($fetchHtmlContent) {
-            $htmlUrl = (int)$row['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($row['HTMLParams']) : MailerUtility::getUrlForInternalPage($row['page'], $row['HTMLParams']);
+            $htmlUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['HTMLParams']) : MailerUtility::getUrlForInternalPage($mailData['page'], $mailData['HTMLParams']);
             $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $params);
             try {
                 $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
@@ -347,7 +347,7 @@ class MailerService implements LoggerAwareInterface
                     $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $this->getHtmlHyperLinks(), $this->getJumpUrlPrefix(), $this->getJumpUrlUseId(), $this->getJumpUrlUseMailto());
                 }
                 $this->setHtmlContent($htmlContent);
-                if ((int)$row['type'] == Constants::MAIL_TYPE_EXTERNAL) {
+                if ((int)$mailData['type'] == Constants::MAIL_TYPE_EXTERNAL) {
                     // Try to auto-detect the charset of the message
                     $matches = [];
                     $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', ($this->getMailPart('html_content') ?? ''), $matches);
@@ -378,7 +378,7 @@ class MailerService implements LoggerAwareInterface
                 'long_link_rdct_url' => $baseUrl,
             ];
 
-            GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$row['uid'], $updateData);
+            GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$mailData['uid'], $updateData);
         }
 
         return $errors;

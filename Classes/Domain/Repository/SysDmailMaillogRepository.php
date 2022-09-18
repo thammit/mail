@@ -448,7 +448,8 @@ class SysDmailMaillogRepository extends AbstractRepository
      */
     public function findSentMails(int $mailUid, string $recipientTable): array
     {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($this->table);
+        $queryBuilder = $this->getQueryBuilder();
+
         $statement = $queryBuilder
             ->select('rid')
             ->from($this->table)
