@@ -41,7 +41,7 @@ abstract class AbstractController
     protected string $cmd = '';
     protected int $sys_dmail_uid = 0;
     protected string $pages_uid = '';
-    protected array $params = [];
+    protected array $pageTSConfiguration = [];
 
     /**
      * A WHERE clause for selection records from the pages table based on read-permissions of the current backend user.
@@ -109,11 +109,11 @@ abstract class AbstractController
         $this->access = is_array($this->pageinfo) ? true : false;
 
         // get the config from pageTS
-        $this->params = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
-        $this->implodedParams = GeneralUtility::makeInstance(TypoScriptUtility::class)->implodeTSParams($this->params);
+        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
+        $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
 
-        if (array_key_exists('userTable', $this->params) && isset($GLOBALS['TCA'][$this->params['userTable']]) && is_array($GLOBALS['TCA'][$this->params['userTable']])) {
-            $this->userTable = $this->params['userTable'];
+        if (array_key_exists('userTable', $this->pageTSConfiguration) && isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) && is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])) {
+            $this->userTable = $this->pageTSConfiguration['userTable'];
             $this->allowedTables[] = $this->userTable;
         }
         // initialize backend user language

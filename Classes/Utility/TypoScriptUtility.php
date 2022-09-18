@@ -13,23 +13,22 @@ class TypoScriptUtility
      * Implodes a multi dimensional TypoScript array, $p,
      * into a one-dimensional array (return value)
      *
-     * @param array $p TypoScript structure
-     * @param string $k Prefix string
+     * @param array $tsConfig TypoScript structure
+     * @param string $prefix Prefix string
      *
-     * @return array Imploded TypoScript objectstring/values
+     * @return array Imploded TypoScript object string/values
      */
-    public function implodeTSParams(array $p, string $k = ''): array
+    public static function implodeTSParams(array $tsConfig, string $prefix = ''): array
     {
         $implodeParams = [];
-        if (is_array($p)) {
-            foreach ($p as $kb => $val) {
-                if (is_array($val)) {
-                    $implodeParams = array_merge($implodeParams, $this->implodeTSParams($val, $k . $kb));
-                } else {
-                    $implodeParams[$k . $kb] = $val;
-                }
+        foreach ($tsConfig as $kb => $val) {
+            if (is_array($val)) {
+                $implodeParams = array_merge($implodeParams, static::implodeTSParams($val, $prefix . $kb));
+            } else {
+                $implodeParams[$prefix . $kb] = $val;
             }
         }
+
         return $implodeParams;
     }
 
@@ -43,60 +42,61 @@ class TypoScriptUtility
      * THIS DOES NOT CHECK ANY PERMISSIONS. SHOULD IT?
      * More documentation is needed.
      *
-     * @param int $id Page id
-     * @param array $pageTs Page TS array to write
-     * @param string $tsConfPrefix Prefix for object paths
-     * @param array|string $impParams [Description needed.]
+     * @param int $pageId Page id
+     * @param array $pageTSConfig Page TS array to write
+     * @param string $tsConfigPrefix Prefix for object paths
      *
      * @return    void
      *
      * @see implodeTSParams(), getPagesTSconfig()
      */
-    public function updatePagesTSconfig(int $id, array $pageTs, string $tsConfPrefix, $impParams = '')
+    public static function updatePagesTSConfig(int $pageId, array $pageTSConfig, string $tsConfigPrefix)
     {
         $done = false;
-        if (is_array($pageTs) && $id > 0) {
-            if (!is_array($impParams)) {
-                $impParams = $this->implodeTSParams(BackendUtility::getPagesTSconfig($id));
-            }
+        if ($pageId > 0) {
+            $currentPageTSConfig = static::implodeTSParams(BackendUtility::getPagesTSconfig($pageId));
             $set = [];
-            foreach ($pageTs as $f => $v) {
-                $v = trim($v);
-                $f = $tsConfPrefix . $f;
-                $tempF = isset($impParams[$f]) ? trim($impParams[$f]) : '';
-                if (strcmp($tempF, $v)) {
-                    $set[$f] = $v;
+            foreach ($pageTSConfig as $key => $value) {
+                $value = trim($value);
+                $key = $tsConfigPrefix . $key;
+                $tempF = isset($currentPageTSConfig[$key]) ? trim($currentPageTSConfig[$key]) : '';
+                if (strcmp($tempF, $value)) {
+                    $set[$key] = $value;
                 }
             }
             if (count($set)) {
                 // Get page record and TS config lines
-                $pRec = BackendUtility::getRecord('pages', $id);
-                $tsLines = explode(LF, $pRec['TSconfig'] ?? '');
+                $pageRecord = BackendUtility::getRecord('pages', $pageId);
+                $tsLines = explode(LF, $pageRecord['TSconfig'] ?? '');
                 $tsLines = array_reverse($tsLines);
                 // Reset the set of changes.
-                foreach ($set as $f => $v) {
+                foreach ($set as $key => $value) {
                     $inserted = 0;
                     foreach ($tsLines as $ki => $kv) {
-                        if (substr($kv, 0, strlen($f) + 1) == $f . '=') {
-                            $tsLines[$ki] = $f . '=' . $v;
+                        if (substr($kv, 0, strlen($key) + 1) == $key . '=') {
+                            $tsLines[$ki] = $key . '=' . $value;
                             $inserted = 1;
                             break;
                         }
                     }
                     if (!$inserted) {
                         $tsLines = array_reverse($tsLines);
-                        $tsLines[] = $f . '=' . $v;
+                        $tsLines[] = $key . '=' . $value;
                         $tsLines = array_reverse($tsLines);
                     }
                 }
                 $tsLines = array_reverse($tsLines);
 
                 // store those changes
-                $tsConf = implode(LF, $tsLines);
-                $done = GeneralUtility::makeInstance(PagesRepository::class)->updatePageTSconfig($id, $tsConf);
+                $done = GeneralUtility::makeInstance(PagesRepository::class)->updatePageTSconfig($pageId, implode(LF, $tsLines));
             }
         }
 
         return $done;
+    }
+
+    public static function getUserTSConfig(): array
+    {
+        return MailerUtility::getBackendUser()->getTSConfig();
     }
 }

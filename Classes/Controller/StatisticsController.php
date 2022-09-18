@@ -1616,11 +1616,11 @@ class StatisticsController extends AbstractController
             }
         }
 
-        if ($this->params['showContentTitle'] == 1) {
+        if ($this->pageTSConfiguration['showContentTitle'] == 1) {
             $label = $contentTitle;
         }
 
-        if ($this->params['prependContentTitle'] == 1) {
+        if ($this->pageTSConfiguration['prependContentTitle'] == 1) {
             $label = $contentTitle . ' (' . $linkedWord . ')';
         }
 
@@ -1636,8 +1636,8 @@ class StatisticsController extends AbstractController
             $label = $url;
         }
 
-        if (isset($this->params['maxLabelLength']) && ($this->params['maxLabelLength'] > 0)) {
-            $label = GeneralUtility::fixed_lgd_cs($label, $this->params['maxLabelLength']);
+        if (isset($this->pageTSConfiguration['maxLabelLength']) && ($this->pageTSConfiguration['maxLabelLength'] > 0)) {
+            $label = GeneralUtility::fixed_lgd_cs($label, $this->pageTSConfiguration['maxLabelLength']);
         }
 
         return $label;

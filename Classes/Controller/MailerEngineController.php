@@ -199,7 +199,7 @@ class MailerEngineController extends AbstractController
         $moduleUrl = '';
 
         // enable manual invocation of mailer engine; enabled by default
-        $enableTrigger = !(isset($this->params['menu.']['dmail_mode.']['mailengine.']['disable_trigger']) && $this->params['menu.']['dmail_mode.']['mailengine.']['disable_trigger']);
+        $enableTrigger = !(isset($this->pageTSConfiguration['menu.']['dmail_mode.']['mailengine.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['dmail_mode.']['mailengine.']['disable_trigger']);
 
         if ($enableTrigger && $this->invokeMailerEngine) {
             $this->invokeMEngine();

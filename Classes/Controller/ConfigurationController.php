@@ -93,7 +93,7 @@ class ConfigurationController extends AbstractController
     {
         if (MailerUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
             if (is_array($this->pageTS) && count($this->pageTS)) {
-                GeneralUtility::makeInstance(TypoScriptUtility::class)->updatePagesTSconfig($this->id, $this->pageTS, $this->TSconfPrefix);
+                TypoScriptUtility::updatePagesTSConfig($this->id, $this->pageTS, $this->TSconfPrefix);
                 header('Location: ' . GeneralUtility::locationHeaderUrl($this->requestUri));
             }
         }

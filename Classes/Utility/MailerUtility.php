@@ -156,11 +156,6 @@ class MailerUtility
         return static::getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
     }
 
-    public static function getTSConfig(): array
-    {
-        return static::getBackendUser()->getTSConfig();
-    }
-
     /**
      * @param $url
      * @return string|bool
