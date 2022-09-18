@@ -1276,7 +1276,7 @@ class DmailController extends AbstractController
          */
         // Todo: Change to PSR-14 Event Dispatcher
         $hookContents = '';
-        $hookSelectDisabled = '';
+        $hookSelectDisabled = false;
 //        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] ?? false)) {
 //            $hookObjectsArr = [];
 //            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] as $classRef) {
