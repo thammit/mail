@@ -688,7 +688,7 @@
 				<source>Create a new recipient list?</source>
 			</trans-unit>
 			<trans-unit id="recip_group_amount" resname="recip_group_amount">
-				<source>Amount:</source>
+				<source>Recipients</source>
 			</trans-unit>
 			<trans-unit id="recip_import_mailgroup_msg" resname="recip_import_mailgroup_msg">
 				<source>Click here to import CSV</source>

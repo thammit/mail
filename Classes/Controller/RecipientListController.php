@@ -398,7 +398,7 @@ class RecipientListController extends AbstractController
                 ],
                 'returnUrl' => $this->requestUri,
             ]);
-            $str = '<a href="#" onClick="' . $editOnClickLink . '" title="' . MailerUtility::getLL('dmail_edit') . '">' .
+            $str = '<a href="#" class="btn btn-default" onClick="' . $editOnClickLink . '" title="' . MailerUtility::getLL('dmail_edit') . '">' .
                 $this->getIconActionsOpen() .
                 '</a>';
         }

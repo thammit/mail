@@ -432,10 +432,10 @@
                 <a href="#" class="{classCollapsed}" data-bs-toggle="collapse" data-bs-target="#panel{index}" aria-expanded="{expanded}" aria-controls="panel{index}">
                     <span class="caret"></span>
                     <strong><f:translate key="{lll}{title}"/></strong>
-                    <f:if condition="{data.internalPages.rows}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{data.internalPages.rows -> f:count()}</span></f:if>
+                    <f:if condition="{data.internalPages}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{data.internalPages -> f:count()}</span></f:if>
                     <f:if condition="{data.data}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{data.data -> f:count()}</span></f:if>
                 </a>
-                <span class="float-end"><f:if condition="{data.internalPages.rows}"><f:be.pageInfo /> <f:be.pagePath /></f:if></span>
+                <span class="float-end"><f:if condition="{index} == 4"><f:be.pageInfo /> <f:be.pagePath /></f:if></span>
             </h3>
         </div>
         <div id="panel{index}" class="accordion-collapse collapse {classShow}" aria-labelledby="heading{index}" data-bs-parent="#{parentId}">
@@ -453,35 +453,55 @@
 </f:section>
 
 <f:section name="InternalPanel">
-    <f:render section="InfoBox" arguments="{field: 'select_newsletter'}" />
-    <f:if condition="{data.internalPages.empty}">
-        <h3>
-            <f:translate key="{lll}nl_select"/>
-        </h3>
-        <f:translate key="{lll}nl_select_msg1"/>
-    </f:if>
-    <f:if condition="{data.internalPages.rows}">
-        <f:if condition="{data.internalPages.rows -> f:count()}">
+    <f:if condition="{data.internalPages}">
+        <f:then>
+            <f:render section="InfoBox" arguments="{field: 'select_newsletter'}" />
             <table class="table table-striped table-hover">
                 <thead class="table-light">
-                    <tr>
-                        <th style="width: 1%"></th>
-                        <th class="col-title col-responsive nowrap">Page</th>
-                        <th class="nowrap"></th>
-                        <th class="col-control nowrap"></th>
-                    </tr>
+                <tr>
+                    <th style="width: 1%"></th>
+                    <th class="col-title col-responsive nowrap">Page</th>
+                    <th class="nowrap"></th>
+                    <th class="col-control nowrap"></th>
+                </tr>
                 </thead>
                 <tbody>
-                <f:for each="{data.internalPages.rows}" as="row">
+                <f:for each="{data.internalPages}" as="row">
                     <tr class="db_list_normal">
                         <td class="col-icon nowrap" style="width: 1%"><core:iconForRecord row="{row}" table="sys_dmail"/></td>
                         <td class="col-title col-responsive nowrap">{row.title}</td>
                         <td class="nowrap">
-                            <a class="btn btn-default" onclick="{row.editOnClickLink -> f:format.html()}" href="#"
-                               title="{f:translate(key: '{lll}nl_editPage')}">
-                                {row.iconActionsOpen -> f:format.html()}
+                            <a class="btn btn-default" href="{row.editUri}" title="{f:translate(key: '{lll}nl_editPage')}">
+                                <core:icon identifier="actions-open" size="small"/>
                             </a>
-                            {row.previewLink -> f:format.html()}
+                            <f:for each="{row.previewLinks}" as="previewLinks" key="type">
+                                <f:if condition="{type} == 'htmlPreview'">
+                                    <f:variable name="addIconOverlay" value="0" />
+                                    <f:if condition="{previewLinks -> f:count()} > 1">
+                                        <f:variable name="addIconOverlay" value="1" />
+                                    </f:if>
+                                    <f:for each="{previewLinks}" as="htmlPreviewLink">
+                                        <f:variable name="overlay" value="" />
+                                        <f:if condition="{addIconOverlay}">
+                                            <f:variable name="iconOverlay" value="{htmlPreviewLink.data-flag-icon}" />
+                                        </f:if>
+                                        <a href="#" class="btn btn-default" title="{htmlPreviewLink.title}" data-dispatch-action="{htmlPreviewLink.data-dispatch-action}" data-dispatch-args="{htmlPreviewLink.data-dispatch-args}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
+                                    </f:for>
+                                </f:if>
+                                <f:if condition="{type} == 'textPreview'">
+                                    <f:variable name="addIconOverlay" value="0" />
+                                    <f:if condition="{previewLinks -> f:count()} > 1">
+                                        <f:variable name="addIconOverlay" value="1" />
+                                    </f:if>
+                                    <f:for each="{previewLinks}" as="textPreviewLink">
+                                        <f:variable name="overlay" value="" />
+                                        <f:if condition="{addIconOverlay}">
+                                            <f:variable name="iconOverlay" value="{textPreviewLink.data-flag-icon}" />
+                                        </f:if>
+                                        <a href="#" class="btn btn-default" title="{textPreviewLink.title}" data-dispatch-action="{textPreviewLink.data-dispatch-action}" data-dispatch-args="{textPreviewLink.data-dispatch-args}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
+                                    </f:for>
+                                </f:if>
+                            </f:for>
                         </td>
                         <td class="col-control nowrap">
                             <a class="btn btn-primary" href="{row.settingsUri}">NEXT</a>
@@ -490,7 +510,12 @@
                 </f:for>
                 </tbody>
             </table>
-        </f:if>
+        </f:then>
+        <f:else>
+            <f:be.infobox state="-1" title="{f:translate(key: '{lll}nl_select')}">
+                <f:translate key="{lll}nl_select_msg1"/>
+            </f:be.infobox>
+        </f:else>
     </f:if>
 </f:section>
 
