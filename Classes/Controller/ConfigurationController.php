@@ -27,6 +27,7 @@ class ConfigurationController extends AbstractController
         $this->init($request);
         $this->initConfiguration($request);
         $this->updatePageTS();
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
         if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
             $this->moduleTemplate->addJavaScriptCode($this->getJS($this->sys_dmail_uid));

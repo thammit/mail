@@ -5,4 +5,5 @@ defined('TYPO3') or die();
 
 (function () {
     \MEDIAESSENZ\Mail\Configuration::registerHooks();
+    \MEDIAESSENZ\Mail\Configuration::registerFluidNameSpace();
 })();;

@@ -330,7 +330,7 @@
 				<source>Internal Page</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_dmail" resname="dmail_wiz1_list_dmail">
-				<source>Not yet sent newsletters</source>
+				<source>Open/Stored Mails</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_header" resname="dmail_wiz1_list_header">
 				<source>Select a newsletter to continue sending:</source>
@@ -369,7 +369,7 @@
 				<source>Next</source>
 			</trans-unit>
 			<trans-unit id="dmail_write_subject" resname="dmail_write_subject">
-				<source>[write subject]</source>
+				<source>Subject</source>
 			</trans-unit>
 			<trans-unit id="dmail_yes" resname="dmail_yes">
 				<source>YES</source>
@@ -622,13 +622,13 @@
 				<source>ONLY</source>
 			</trans-unit>
 			<trans-unit id="nl_l_attach" resname="nl_l_attach">
-				<source>Attach.</source>
+				<source>Attachment</source>
 			</trans-unit>
 			<trans-unit id="nl_l_column" resname="nl_l_column">
 				<source>Column</source>
 			</trans-unit>
 			<trans-unit id="nl_l_lastM" resname="nl_l_lastM">
-				<source>Last mod.</source>
+				<source>Last modified</source>
 			</trans-unit>
 			<trans-unit id="nl_l_sent" resname="nl_l_sent">
 				<source>Sent?</source>
@@ -967,10 +967,10 @@
 				<source>Select a recipient list for the testmail. The mails will be generated based on the profiles of the recipients in that list.</source>
 			</trans-unit>
 			<trans-unit id="testmail_simple" resname="testmail_simple">
-				<source>Testmail - Simple</source>
+				<source>Send a simple test mail</source>
 			</trans-unit>
 			<trans-unit id="testmail_simple_msg" resname="testmail_simple_msg">
-				<source>A simple testmail includes all mail elements regardless of category. But any USER_fields are not substituted with data. Enter an email-address for the testmail:</source>
+				<source>The mail will include all elements regardless of their categories. USER_fields will not be substituted with data.</source>
 			</trans-unit>
 			<trans-unit id="view_delivery_begin_end" resname="view_delivery_begin_end">
 				<source>Delivery begun/ended:</source>

@@ -19,6 +19,11 @@ final class Configuration
         // $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['determineId-PreProcessing']['mail'] = \MEDIAESSENZ\Mail\Hooks\SimulateFrontendUserGroupHook::class . '->__invoke';
     }
 
+    public static function registerFluidNameSpace(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['fluid']['namespaces']['mail'] = ['MEDIAESSENZ\Mail\ViewHelpers'];
+    }
+
     public static function addPageTSConfig(): void
     {
         // Category field disabled by default in backend forms.

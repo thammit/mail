@@ -157,6 +157,8 @@ class DmailController extends AbstractController
         /**
          * Render template and return html content
          */
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
         $this->moduleTemplate->setContent($this->view->render());
         return new HtmlResponse($this->moduleTemplate->renderContent());
     }
@@ -504,7 +506,6 @@ class DmailController extends AbstractController
         return [
             'title' => 'dmail_dovsk_crFromNL',
             'internalPages' => $this->getInternalPages(),
-            'cshItem' => BackendUtility::helpText($this->cshTable, 'select_newsletter'),
         ];
     }
 
@@ -616,7 +617,6 @@ class DmailController extends AbstractController
     {
         return [
             'title' => 'dmail_dovsk_crFromUrl',
-            'cshItem' => BackendUtility::helpText($this->cshTable, 'create_directmail_from_url'),
             'no_valid_url' => $this->error == 'no_valid_url',
         ];
     }
@@ -666,15 +666,14 @@ class DmailController extends AbstractController
         $data = [];
         foreach ($rows as $row) {
             $data[] = [
-                'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $row, Icon::SIZE_SMALL)->render(),
-                'link' => $this->getWizardStepUri(Constants::WIZARD_STEP_SETTINGS, ['sys_dmail_uid' => (int)$row['uid'], 'fetchAtOnce' => 1]),
-                'linkText' => htmlspecialchars($row['subject'] ?: '_'),
-                'tstamp' => BackendUtility::date($row['tstamp']),
-                'issent' => ($row['issent'] ? MailerUtility::getLL('dmail_yes') : MailerUtility::getLL('dmail_no')),
-                'renderedsize' => ($row['renderedsize'] ? GeneralUtility::formatSize($row['renderedsize']) : ''),
-                'attachment' => ($row['attachment'] ? $this->iconFactory->getIcon('mail-attachment', Icon::SIZE_SMALL) : ''),
+                'settingsUri' => $this->getWizardStepUri(Constants::WIZARD_STEP_SETTINGS, ['sys_dmail_uid' => (int)$row['uid'], 'fetchAtOnce' => 1]),
+                'subject' => $row['subject'] ?? '_',
+                'tstamp' => $row['tstamp'],
+                'isSent' => (bool)($row['issent'] ?? false),
+                'size' => $row['renderedsize'] ?: 0,
+                'hasAttachment' => (bool)($row['attachment'] ?? false),
                 'type' => ($row['type'] & 0x1 ? MailerUtility::getLL('nl_l_tUrl') : MailerUtility::getLL('nl_l_tPage')) . ($row['type'] & 0x2 ? ' (' . MailerUtility::getLL('nl_l_tDraft') . ')' : ''),
-                'deleteLink' => $this->getDeleteMailUri($row['uid']),
+                'deleteUri' => $this->getDeleteMailUri($row['uid']),
             ];
         }
 
@@ -1013,7 +1012,7 @@ class DmailController extends AbstractController
             // Fixing addresses:
             $addresses = GeneralUtility::_GP('SET');
             $addressList = $addresses['dmail_test_email'] ?: $this->settings['dmail_test_email'];
-            $addresses = preg_split('|[' . LF . ',;]|', $addressList ?? '');
+            $addresses = preg_split('|[' . chr(10) . ',;]|', $addressList ?? '');
 
             foreach ($addresses as $key => $val) {
                 $addresses[$key] = trim($val);
@@ -1097,7 +1096,7 @@ class DmailController extends AbstractController
                 // Update the record:
                 $queryInfo['id_lists'] = $this->getRecipientIdsOfMailGroups($recipientGroups);
 
-                $distributionTime = strtotime(GeneralUtility::_GP('send_mail_datetime_hr'));
+                $distributionTime = strtotime(GeneralUtility::_GP('send_mail_datetime'));
                 if ($distributionTime < time()) {
                     $distributionTime = time();
                 }
@@ -1253,7 +1252,7 @@ class DmailController extends AbstractController
         }
         if (count($lines)) {
             $out = '<p>' . MailerUtility::getLL('dmail_number_records') . ' <strong>' . $count . '</strong></p><br />';
-            $out .= '<table class="table table-striped table-hover">' . implode(LF, $lines) . '</table>';
+            $out .= '<table class="table table-striped table-hover">' . implode(chr(10), $lines) . '</table>';
         }
         return $out;
     }
