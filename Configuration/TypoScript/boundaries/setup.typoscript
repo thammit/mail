@@ -1,5 +1,5 @@
 // In html content
-tt_content.stdWrap.postUserFunc = DirectMailTeam\DirectMail\Container->insert_dMailer_boundaries
+tt_content.stdWrap.postUserFunc = MEDIAESSENZ\Mail\UserFunc\BoundaryUserFunc->insertContentBoundaries
 
 // In old plaintext content static tenmplate
 lib.alt_plaintext.renderObj.userProc < tt_content.stdWrap.postUserFunc
@@ -17,6 +17,6 @@ config.insertDmailerBoundaries = 1
 tt_content.menu.20.3.renderObj {
 	outerWrap.cObject = USER
 	outerWrap.cObject {
-		userFunc = DirectMailTeam\DirectMail\Container->insertSitemapBoundaries
+		userFunc = MEDIAESSENZ\Mail\UserFunc\BoundaryUserFunc->insertSitemapBoundaries
 	}
 }

@@ -759,50 +759,6 @@ class DmailController extends AbstractController
     }
 
     /**
-     * Get wizard step uri
-     *
-     * @param string $step
-     * @param array $parameters
-     * @return Uri the link
-     * @throws RouteNotFoundException
-     */
-    protected function getWizardStepUri(string $step = Constants::WIZARD_STEP_OVERVIEW, array $parameters = []): Uri
-    {
-        $parameters = array_merge(['id' => $this->id], $parameters);
-        if ($step) {
-            $parameters['cmd'] = $step;
-        }
-
-        return $this->buildUriFromRoute($this->moduleName, $parameters);
-    }
-
-    /**
-     * Create delete link with trash icon
-     *
-     * @param int $uid Uid of the record
-     *
-     * @return Uri|null link with the trash icon
-     * @throws RouteNotFoundException
-     */
-    protected function getDeleteMailUri(int $uid): ?Uri
-    {
-        $dmail = BackendUtility::getRecord('sys_dmail', $uid);
-
-        if (!$dmail['scheduled_begin']) {
-            return $this->buildUriFromRoute(
-                $this->moduleName,
-                [
-                    'id' => $this->id,
-                    'uid' => $uid,
-                    'cmd' => 'delete',
-                ]
-            );
-        }
-
-        return null;
-    }
-
-    /**
      * Compiling the quickmail content and save to DB
      *
      * @param array $row The sys_dmail record
@@ -933,7 +889,7 @@ class DmailController extends AbstractController
                 ]);
 
                 // Members:
-                $result = $this->getRecipientIdsOfMailGroups([$row['uid']]);
+                $result = $this->recipientService->getRecipientIdsOfMailGroups([$row['uid']]);
 
                 $data['test_dmail_group_table'][] = [
                     'moduleUrl' => $moduleUrl,
@@ -1071,7 +1027,7 @@ class DmailController extends AbstractController
                 }
             } else if (is_array(GeneralUtility::_GP('sys_dmail_group_uid'))) {
                 // personalized to group
-                $idLists = $this->getRecipientIdsOfMailGroups(GeneralUtility::_GP('sys_dmail_group_uid'));
+                $idLists = $this->recipientService->getRecipientIdsOfMailGroups(GeneralUtility::_GP('sys_dmail_group_uid'));
 
                 $sendFlag = 0;
                 $sendFlag += $this->sendTestMailToTable($idLists, 'tt_address');
@@ -1094,7 +1050,7 @@ class DmailController extends AbstractController
             $recipientGroups = GeneralUtility::_GP('mailgroup_uid');
             if (GeneralUtility::_GP('mailingMode_mailGroup') && $this->sys_dmail_uid && is_array($recipientGroups)) {
                 // Update the record:
-                $queryInfo['id_lists'] = $this->getRecipientIdsOfMailGroups($recipientGroups);
+                $queryInfo['id_lists'] = $this->recipientService->getRecipientIdsOfMailGroups($recipientGroups);
 
                 $distributionTime = strtotime(GeneralUtility::_GP('send_mail_datetime'));
                 if ($distributionTime < time()) {
@@ -1305,7 +1261,7 @@ class DmailController extends AbstractController
         if ($groups) {
             foreach ($groups as $group) {
                 $count = 0;
-                $idLists = $this->getRecipientIdsOfMailGroups([$group['uid']]);
+                $idLists = $this->recipientService->getRecipientIdsOfMailGroups([$group['uid']]);
                 if (is_array($idLists['tt_address'] ?? false)) {
                     $count += count($idLists['tt_address']);
                 }
@@ -1352,92 +1308,6 @@ class DmailController extends AbstractController
             'send_mail_datetime_hr' => strftime('%H:%M %d-%m-%Y', time()),
             'send_mail_datetime' => strftime('%H:%M %d-%m-%Y', time()),
         ];
-    }
-
-    /**
-     * Get recipient ids of groups
-     *
-     * @param array $groups List of selected group IDs
-     *
-     * @return array list of the recipient ID
-     * @throws DBALException
-     * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function getRecipientIdsOfMailGroups(array $groups): array
-    {
-        $recipientIds = MailerUtility::compileMailGroup($this->id, $groups, $this->userTable, $this->backendUserPermissions);
-
-        // Todo: Add PSR-14 EventDispatcher to manipulate the id list (see commented hook code block below)
-
-        return $recipientIds;
-//        return [
-//            'queryInfo' => ['id_lists' => $idLists],
-//        ];
-//
-//        // If supplied with an empty array, quit instantly as there is nothing to do
-//        if (!count($groups)) {
-//            return [];
-//        }
-//
-//        // Looping through the selected array, in order to fetch recipient details
-//        $idLists = [];
-//        foreach ($groups as $groupUid) {
-//            // Testing to see if group ID is a valid integer, if not - skip to next group ID
-//            $groupUid = MathUtility::convertToPositiveInteger($groupUid);
-//            if (!$groupUid) {
-//                continue;
-//            }
-//
-//            $recipientList = $this->getSingleMailGroup($groupUid);
-//            if (!is_array($recipientList)) {
-//                continue;
-//            }
-//
-//            $idLists = array_merge_recursive($idLists, $recipientList);
-//        }
-//
-//        // Make unique entries
-//        if (is_array($idLists['tt_address'] ?? false)) {
-//            $idLists['tt_address'] = array_unique($idLists['tt_address']);
-//        }
-//
-//        if (is_array($idLists['fe_users'] ?? false)) {
-//            $idLists['fe_users'] = array_unique($idLists['fe_users']);
-//        }
-//
-//        if (is_array($idLists[$this->userTable] ?? false) && $this->userTable) {
-//            $idLists[$this->userTable] = array_unique($idLists[$this->userTable]);
-//        }
-//
-//        if (is_array($idLists['PLAINLIST'] ?? false)) {
-//            $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($idLists['PLAINLIST']);
-//        }
-//
-//        /**
-//         * Hook for cmd_compileMailGroup
-//         * manipulate the generated id_lists
-//         */
-//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_compileMailGroup'] ?? false)) {
-//            $hookObjectsArr = [];
-//            $temporaryList = '';
-//
-//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_compileMailGroup'] as $classRef) {
-//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-//            }
-//            foreach ($hookObjectsArr as $hookObj) {
-//                if (method_exists($hookObj, 'cmd_compileMailGroup_postProcess')) {
-//                    $temporaryList = $hookObj->cmd_compileMailGroup_postProcess($idLists, $this, $groups);
-//                }
-//            }
-//
-//            unset($idLists);
-//            $idLists = $temporaryList;
-//        }
-//
-//        return [
-//            'queryInfo' => ['id_lists' => $idLists],
-//        ];
     }
 
     /**
@@ -1711,6 +1581,50 @@ class DmailController extends AbstractController
             $result = false;
         }
         return $result;
+    }
+
+    /**
+     * Get wizard step uri
+     *
+     * @param string $step
+     * @param array $parameters
+     * @return Uri the link
+     * @throws RouteNotFoundException
+     */
+    protected function getWizardStepUri(string $step = Constants::WIZARD_STEP_OVERVIEW, array $parameters = []): Uri
+    {
+        $parameters = array_merge(['id' => $this->id], $parameters);
+        if ($step) {
+            $parameters['cmd'] = $step;
+        }
+
+        return $this->buildUriFromRoute($this->moduleName, $parameters);
+    }
+
+    /**
+     * Create delete link with trash icon
+     *
+     * @param int $uid Uid of the record
+     *
+     * @return Uri|null link with the trash icon
+     * @throws RouteNotFoundException
+     */
+    protected function getDeleteMailUri(int $uid): ?Uri
+    {
+        $dmail = BackendUtility::getRecord('sys_dmail', $uid);
+
+        if (!$dmail['scheduled_begin']) {
+            return $this->buildUriFromRoute(
+                $this->moduleName,
+                [
+                    'id' => $this->id,
+                    'uid' => $uid,
+                    'cmd' => 'delete',
+                ]
+            );
+        }
+
+        return null;
     }
 
     /**

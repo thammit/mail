@@ -1220,9 +1220,6 @@ class MailerUtility
             }
 
             $recipientList = static::getSingleMailGroup($pageId, $groupId, $userTable, $backendUserPermissions);
-            if (!is_array($recipientList)) {
-                continue;
-            }
 
             $idLists = array_merge_recursive($idLists, $recipientList);
         }

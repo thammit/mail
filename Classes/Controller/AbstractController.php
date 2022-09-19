@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use MEDIAESSENZ\Mail\Service\MailerService;
+use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -24,7 +25,6 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
@@ -35,6 +35,7 @@ abstract class AbstractController
     protected PageRenderer $pageRenderer;
     protected SiteFinder $siteFinder;
     protected MailerService $mailerService;
+    protected RecipientService $recipientService;
     protected EventDispatcherInterface $eventDispatcher;
     protected StandaloneView $view;
     protected int $id = 0;
@@ -69,6 +70,7 @@ abstract class AbstractController
         StandaloneView  $view = null,
         SiteFinder     $siteFinder = null,
         MailerService  $mailerService = null,
+        RecipientService $recipientService = null,
         EventDispatcherInterface $eventDispatcher = null
     )
     {
@@ -77,6 +79,8 @@ abstract class AbstractController
         $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
         $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
         $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
+        $this->recipientService = $recipientService ?? GeneralUtility::makeInstance(RecipientService::class);
+        $this->recipientService->setPageId($this->id);
         $this->eventDispatcher = $eventDispatcher ?? GeneralUtility::makeInstance(EventDispatcherInterface::class);
         $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
         $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
