@@ -1,3 +1,9 @@
+:root {
+    --mail-background-color: #0078e6;
+    --mail-background-color2: #00386b;
+    --mail-color: #ffffff;
+}
+
 .mail-wizard-navigation ul {
     display: flex;
     display: -webkit-flex;
@@ -14,7 +20,7 @@
     -ms-transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);
     -webkit-transform: translate(-50%, -50%);
-    color: #fff;
+    color: var(--mail-color);
     font-size: 1rem;
     font-weight: 600;
 }
@@ -67,5 +73,5 @@
 .mail-wizard-navigation li.done::before,
 .mail-wizard-navigation li.done,
 .mail-wizard-navigation li.done:active {
-    background-color: var(--bs-primary);
+    background-color: var(--mail-background-color);
 }

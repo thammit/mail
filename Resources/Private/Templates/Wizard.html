@@ -562,7 +562,7 @@
         </div>
         <div class="mb-3">
             <label for="quickmailMessage" class="form-label"><f:translate key="{lll}quickmail_message"/></label>
-            <textarea id="quickmailMessage" rows="20" name="quickmail[message]" class="form-control">{data.message -> f:format.html()}</textarea>
+            <textarea id="quickmailMessage" rows="10" name="quickmail[message]" class="form-control">{data.message -> f:format.html()}</textarea>
         </div>
         <div class="form-check mb-3">
             <input id="quickmailBreakLines" class="form-check-input mt-1" type="checkbox" name="quickmail[breakLines]" value="1" {f:if(condition: '{data.breakLines}', then: 'checked')} />
