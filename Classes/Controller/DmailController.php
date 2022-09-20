@@ -587,19 +587,10 @@ class DmailController extends AbstractController
                 default => ['htmlPreview' => $previewHTMLLinkAttributes, 'textPreview' => $previewTextLinkAttributes],
             };
 
-            $editUriParameters = [
-                'edit' => [
-                    'pages' => [
-                        $row['uid'] => 'edit',
-                    ],
-                ],
-                'returnUrl' => $this->requestUri,
-            ];
-
             $rowData[] = [
+                'uid' => $row['uid'],
                 'title' => $row['title'],
                 'settingsUri' => $settingsUri,
-                'editUri' => GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute('record_edit', $editUriParameters),
                 'previewLinks' => $previewLinks,
             ];
         }

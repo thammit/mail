@@ -471,9 +471,9 @@
                         <td class="col-icon nowrap" style="width: 1%"><core:iconForRecord row="{row}" table="sys_dmail"/></td>
                         <td class="col-title col-responsive nowrap">{row.title}</td>
                         <td class="nowrap">
-                            <a class="btn btn-default" href="{row.editUri}" title="{f:translate(key: '{lll}nl_editPage')}">
+                            <be:link.editRecord uid="{row.uid}" table="pages" class="btn btn-default" title="{f:translate(key: '{lll}nl_editPage')}">
                                 <core:icon identifier="actions-open" size="small"/>
-                            </a>
+                            </be:link.editRecord>
                             <f:for each="{row.previewLinks}" as="previewLinks" key="type">
                                 <f:if condition="{type} == 'htmlPreview'">
                                     <f:variable name="addIconOverlay" value="0" />
