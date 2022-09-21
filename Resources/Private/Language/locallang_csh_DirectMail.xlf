@@ -37,7 +37,7 @@
 			<source>No direct mail has been created using the content of the following newsletters. Click on the one you want to use to create a new direct mail.</source>
 		</trans-unit>
 		<trans-unit id="create_directmail_from_url.alttitle">
-			<source>Create a new mailing from the given external URLs</source>
+			<source>Create a new mailing from external pages</source>
 		</trans-unit>
 		<trans-unit id="create_directmail_from_url.description">
 			<source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
@@ -101,13 +101,13 @@ You may personalize the direct mails that will be sent to each recipient by inse
 			<source>The following mails have not yet been sent. Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
 		</trans-unit>
 		<trans-unit id="select_newsletter.alttitle">
-			<source>Select one of these internal pages to create a new mailing</source>
+			<source>Select an internal page to create a mailing</source>
 		</trans-unit>
 		<trans-unit id="select_newsletter.description">
-			<source>Click on NEXT to choose a page and continue with further settings (format, receiver group, sending time...)</source>
+			<source>Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
 		</trans-unit>
 		<trans-unit id="quick_mail.alttitle">
-			<source>Enter data to create a quick mail</source>
+			<source>Create a quick mailing</source>
 		</trans-unit>
 		<trans-unit id="quick_mail.description">
 			<source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>

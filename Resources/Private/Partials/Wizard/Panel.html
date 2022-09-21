@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:variable name="expanded" value="false"/>
+<f:variable name="classCollapsed" value="collapsed"/>
+<f:variable name="classShow" value=""/>
+<f:if condition="{data.open}">
+    <f:variable name="expanded" value="true"/>
+    <f:variable name="classCollapsed" value=""/>
+    <f:variable name="classShow" value="show"/>
+</f:if>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title" id="heading{index}">
+            <a href="#" class="{classCollapsed}" data-bs-toggle="collapse" data-bs-target="#panel{index}" aria-expanded="{expanded}" aria-controls="panel{index}">
+                <span class="caret"></span>
+                <strong><f:translate key="{lll}{title}"/></strong>
+                <f:if condition="{counter}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{counter}</span></f:if>
+            </a>
+            <span class="float-end"><f:if condition="{index} == 4"><f:be.pageInfo /> <f:be.pagePath /></f:if></span>
+        </h3>
+    </div>
+    <div id="panel{index}" class="accordion-collapse collapse {classShow}" aria-labelledby="heading{index}" data-bs-parent="#{parentId}">
+        <div class="panel-body {classPanelBody}">
+            {panelBody -> f:format.raw()}
+        </div>
+    </div>
+</div>
+
+</html>

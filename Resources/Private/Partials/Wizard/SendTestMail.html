@@ -1,0 +1,68 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:variable name="mailForm" value="mail-wizard-form-test"/>
+<form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
+    <h3>
+        <f:translate key="{lll}dmail_wiz4_testmail"/>
+    </h3>
+    <div class="mb-4">
+        <f:if condition="{data.test.testFormData.test_tt_address}">
+            <h3>
+                <f:translate key="{lll}testmail_individual"/>
+            </h3>
+            <f:translate key="{lll}testmail_individual_msg"/>
+            <div class="my-3">
+                {data.test.testFormData.test_tt_address -> f:format.html()}
+            </div>
+        </f:if>
+        <f:if condition="{data.test.testFormData.test_dmail_group_table -> f:count()}">
+            <h3>
+                <f:translate key="{lll}testmail_mailgroup"/>
+            </h3>
+            <f:translate key="{lll}testmail_mailgroup_msg"/>
+            <div class="my-3">
+                <f:for each="{data.test.testFormData.test_dmail_group_table}" as="table">
+                    <a href="{table.moduleUrl}">{table.iconFactory -> f:format.html()} {table.title}</a>
+                    <div class="my-3">
+                        <table class="table table-striped table-hover">
+                            <tbody>
+                            <tr>
+                                <td>{table.tds -> f:format.html()}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </f:for>
+            </div>
+        </f:if>
+        <h3>
+            <f:translate key="{lll}testmail_simple"/>
+        </h3>
+        <div class="mb-3">
+            <f:translate key="{lll}testmail_simple_msg"/>
+        </div>
+        <input type="hidden" name="id" value="{data.test.testFormData.id}"/>
+        <input type="hidden" name="sys_dmail_uid" value="{data.test.testFormData.sys_dmail_uid}"/>
+        <input type="hidden" name="cmd" value="{data.test.testFormData.cmd}"/>
+        <div class="row mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="input-group">
+                    <input class="form-control" type="email" placeholder="Mail address" name="SET[dmail_test_email]" value="{data.test.testFormData.dmail_test_email}" aria-label="Test mail recipient" aria-describedby="send-test-mail-button"/>
+                    <button class="btn btn-outline-primary" id="send-test-mail-button" type="submit" name="mailingMode_simple" value="1"><f:translate key="{lll}dmail_send"/></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="cmd" value="{data.test.cmd}">
+    <input type="hidden" name="sys_dmail_uid" value="{data.test.sys_dmail_uid}">
+    <input type="hidden" name="pages_uid" value="{data.test.pages_uid}">
+    <input type="hidden" name="currentCMD" value="{data.test.currentCMD}">
+</form>
+<f:render partial="Wizard/Navigation" arguments="{navigation: data.navigation, mailForm:mailForm, lll:lll}"/>
+
+</html>

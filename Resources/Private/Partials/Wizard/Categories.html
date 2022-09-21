@@ -1,0 +1,66 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<h3><f:translate key="{lll}dmail_wiz3_cats"/></h3>
+<f:variable name="mailForm" value="mail-wizard-form-categories"/>
+<form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
+    <input type="hidden" name="currentCMD" value="{data.cats.currentCMD}">
+    <input type="hidden" name="sys_dmail_uid" value="{data.cats.sys_dmail_uid}">
+    <h4>{data.cats.output.title}</h4>
+    <f:render partial="InfoBox" arguments="{field: 'assign_categories'}" />
+    <f:if condition="{data.cats.output.rowsFound}">
+        <f:if condition="{data.cats.output.rows -> f:count()}">
+            <table class="mb-4 table table-striped table-hover">
+                <tbody>
+                <f:for each="{data.cats.output.rows}" as="row">
+                    <tr>
+                        <f:if condition="{row.separator}">
+                            <f:then>
+                                <td colspan="3">{row.title}: <strong>{row.value -> f:format.html()}</strong></td>
+                            </f:then>
+                            <f:else>
+                                <td style="width: 75%">
+                                    {row.icon -> f:format.html()} {row.header}
+                                    [{row.CType}
+                                    <f:if condition="{row.list_type}">; {row.list_type}</f:if>
+                                    ]
+                                    <br>
+                                    {row.bodytext -> f:format.html()}
+                                    <br/>
+                                </td>
+                                <td class="text-nowrap">
+                                    <strong style="color:{row.color};">{row.labelOnlyAll}</strong><br/>
+                                    <f:if condition="{row.checkboxes -> f:count()}">
+                                        <f:for each="{row.checkboxes}" as="checkbox">
+                                            <input type="hidden" name="indata[categories][{row.uid}][{checkbox.pKey}]" value="0">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="1" id="indata_categories_{row.uid}_{checkbox.pKey}" name="indata[categories][{row.uid}][{checkbox.pKey}]" {f:if(condition: '{checkbox.checked} == 1', then: 'checked')}>
+                                                <label class="form-check-label" for="indata_categories_{row.uid}_{checkbox.pKey}">
+                                                    {checkbox.pVal}
+                                                </label>
+                                            </div>
+                                        </f:for>
+                                    </f:if>
+                                </td>
+                            </f:else>
+                        </f:if>
+                    </tr>
+                </f:for>
+                </tbody>
+                {data.cats.catsForm -> f:format.html()}
+            </table>
+        </f:if>
+        <input type="hidden" name="cmd" value="{data.cats.output.cmd}">
+        <input type="hidden" name="pages_uid" value="{data.cats.output.pages_uid}">
+        <input class="btn btn-default" type="submit" name="update_cats" value="{data.cats.output.update_cats -> f:format.html()}">
+    </f:if>
+    <input type="hidden" name="cmd" value="{data.cats.cmd}">
+    <input type="hidden" name="pages_uid" value="{data.cats.pages_uid}">
+</form>
+<f:render partial="Wizard/Navigation" arguments="{navigation: data.navigation, mailForm:mailForm, lll:lll}"/>
+
+</html>

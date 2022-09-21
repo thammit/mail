@@ -1,0 +1,21 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:variable name="disabled"></f:variable>
+<f:if condition="{navigation.next_error}">
+    <f:variable name="disabled">disabled</f:variable>
+</f:if>
+<div class="mt-4">
+    <f:if condition="{navigation.back}">
+        <button form="{mailForm}" type="submit" class="btn btn-default text-uppercase" value="back" name="back"><f:translate key="{lll}dmail_wiz_back" /></button>
+    </f:if>
+    <f:if condition="{navigation.next}">
+        <button form="{mailForm}" type="submit" class="btn btn-primary text-uppercase {disabled}" {disabled}><f:translate key="{lll}dmail_wiz_next" /></button>
+    </f:if>
+</div>
+
+</html>

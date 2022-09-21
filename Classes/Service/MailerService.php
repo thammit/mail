@@ -16,6 +16,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mime\Address;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -997,6 +998,48 @@ class MailerService implements LoggerAwareInterface
 
         $mailer->send();
         unset($mailer);
+    }
+
+    /**
+     * Get all open, not yet sent mails
+     *
+     * @return array config for form lists of all existing mail records
+     * @throws DBALException
+     * @throws Exception
+     * @throws RouteNotFoundException
+     */
+    protected function getOpenMails(int $pageId, string $orderBy = null, string $order = 'ASC'): array
+    {
+        $orderBy = $orderBy ?? preg_replace(
+            '/^(?:ORDER[[:space:]]*BY[[:space:]]*)+/i', '',
+            trim($GLOBALS['TCA']['sys_dmail']['ctrl']['default_sortby'])
+        );
+        if (!empty($orderBy)) {
+            // remove ASC/DESC from $orderBy
+            if (str_contains('ASC', $orderBy)) {
+                $orderBy = trim(str_replace('ASC', '', $orderBy));
+            } else if (str_contains('DESC', $orderBy)) {
+                $orderBy = trim(str_replace('DESC', '', $orderBy));
+                $order = 'DESC';
+            }
+        }
+        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->findOpenMailsByPageId($this->id, $orderBy, $order);
+
+        $data = [];
+        foreach ($rows as $row) {
+            $data[] = [
+                'settingsUri' => $this->getWizardStepUri(Constants::WIZARD_STEP_SETTINGS, ['sys_dmail_uid' => (int)$row['uid'], 'fetchAtOnce' => 1]),
+                'subject' => $row['subject'] ?? '_',
+                'tstamp' => $row['tstamp'],
+                'isSent' => (bool)($row['issent'] ?? false),
+                'size' => $row['renderedsize'] ?: 0,
+                'hasAttachment' => (bool)($row['attachment'] ?? false),
+                'type' => ($row['type'] & 0x1 ? MailerUtility::getLL('nl_l_tUrl') : MailerUtility::getLL('nl_l_tPage')) . ($row['type'] & 0x2 ? ' (' . MailerUtility::getLL('nl_l_tDraft') . ')' : ''),
+                'deleteUri' => $this->getDeleteMailUri($row['uid']),
+            ];
+        }
+
+        return $data;
     }
 
 }

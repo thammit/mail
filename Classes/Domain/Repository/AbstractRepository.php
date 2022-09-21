@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -41,8 +42,39 @@ abstract class AbstractRepository
         return $queryBuilder;
     }
 
+    public function getDefaultOrderBy(): string
+    {
+        $orderBy = TcaUtility::getDefaultSortByFromTca($this->table);
+        if (!empty($orderBy)) {
+            // remove ASC/DESC from $orderBy
+            if (str_contains($orderBy, 'ASC')) {
+                $orderBy = trim(str_replace('ASC', '', $orderBy));
+            } else if (str_contains($orderBy, 'DESC')) {
+                $orderBy = trim(str_replace('DESC', '', $orderBy));
+                $order = 'DESC';
+            }
+        }
+
+        return $orderBy;
+    }
+
+    public function getDefaultOrder(): string
+    {
+        $orderBy = TcaUtility::getDefaultSortByFromTca($this->table);
+        $order = 'ASC';
+        if (!empty($orderBy)) {
+            // remove ASC/DESC from $orderBy
+            if (str_contains('ASC', $orderBy)) {
+            } else if (str_contains('DESC', $orderBy)) {
+                $order = 'DESC';
+            }
+        }
+
+        return $order;
+    }
+
     public function findByUid(int $uid, string $fields = '*', string $where = '', bool $useDeleteClause = true): ?array
     {
-        return BackendUtility::getRecord($this->table, $uid, $fields, $useDeleteClause);
+        return BackendUtility::getRecord($this->table, $uid, $fields, $where, $useDeleteClause);
     }
 }

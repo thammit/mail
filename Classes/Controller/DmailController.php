@@ -59,10 +59,11 @@ class DmailController extends AbstractController
     protected string $requestUri = '';
 
     /**
-     * The name of the module
+     * The route of the module
      *
      * @var string
      */
+    protected string $route = 'MailNavFrame_Mail';
     protected string $moduleName = 'MailNavFrame_Mail';
 
     /**
@@ -106,6 +107,19 @@ class DmailController extends AbstractController
         $this->externalMailPlainUri = (string)($parsedBody['createMailFrom_plainUrl'] ?? $queryParams['createMailFrom_plainUrl'] ?? '');
         $this->mailgroup_uid = $parsedBody['mailgroup_uid'] ?? $queryParams['mailgroup_uid'] ?? [];
         $this->tt_address_uid = (int)($parsedBody['tt_address_uid'] ?? $queryParams['tt_address_uid'] ?? 0);
+        $this->view->assign('settings', [
+            'route' => $this->route,
+            'mailSysFolderUid' => $this->id,
+            'steps' => [
+                'overview' => Constants::WIZARD_STEP_OVERVIEW,
+                'settings' => Constants::WIZARD_STEP_SETTINGS,
+                'categories' => Constants::WIZARD_STEP_CATEGORIES,
+                'sendTest' => Constants::WIZARD_STEP_SEND_TEST,
+                'sendTest2' => Constants::WIZARD_STEP_SEND_TEST2,
+                'final' => Constants::WIZARD_STEP_FINAL,
+                'send' => Constants::WIZARD_STEP_SEND,
+            ]
+        ]);
     }
 
     /**
@@ -126,9 +140,8 @@ class DmailController extends AbstractController
      */
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
-        $this->view->setTemplate('Wizard');
-
         $this->init($request);
+        $this->view->setTemplate('Wizard');
 
         // get the config from pageTS
         $this->pageTSConfiguration['pid'] = $this->id;
@@ -499,6 +512,7 @@ class DmailController extends AbstractController
                             break;
                         case 'dmail':
                             $temp['data'] = $this->getMailsNotSentAndScheduled();
+                            $temp['data'] = $this->getMailsNotSentAndScheduled();
                             $temp['open'] = $open;
                             $moduleData['default']['dmail'] = $temp;
                             break;
@@ -590,7 +604,6 @@ class DmailController extends AbstractController
             $rowData[] = [
                 'uid' => $row['uid'],
                 'title' => $row['title'],
-                'settingsUri' => $settingsUri,
                 'previewLinks' => $previewLinks,
             ];
         }
@@ -638,25 +651,12 @@ class DmailController extends AbstractController
      */
     protected function getMailsNotSentAndScheduled(): array
     {
-        $orderBy = preg_replace(
-            '/^(?:ORDER[[:space:]]*BY[[:space:]]*)+/i', '',
-            trim($GLOBALS['TCA']['sys_dmail']['ctrl']['default_sortby'])
-        );
-        $order = 'ASC';
-        if (!empty($orderBy)) {
-            if (substr_count($orderBy, 'ASC') > 0) {
-                $orderBy = trim(str_replace('ASC', '', $orderBy));
-            } else {
-                $orderBy = trim(str_replace('DESC', '', $orderBy));
-                $order = 'DESC';
-            }
-        }
-        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->findMailsNotSentAndScheduled($this->id, $orderBy, $order);
+        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->findOpenMailsByPageId($this->id);
 
         $data = [];
         foreach ($rows as $row) {
             $data[] = [
-                'settingsUri' => $this->getWizardStepUri(Constants::WIZARD_STEP_SETTINGS, ['sys_dmail_uid' => (int)$row['uid'], 'fetchAtOnce' => 1]),
+                'uid' => $row['uid'],
                 'subject' => $row['subject'] ?? '_',
                 'tstamp' => $row['tstamp'],
                 'isSent' => (bool)($row['issent'] ?? false),
@@ -1602,7 +1602,7 @@ class DmailController extends AbstractController
             $parameters['cmd'] = $step;
         }
 
-        return $this->buildUriFromRoute($this->moduleName, $parameters);
+        return $this->buildUriFromRoute($this->route, $parameters);
     }
 
     /**
@@ -1619,7 +1619,7 @@ class DmailController extends AbstractController
 
         if (!$dmail['scheduled_begin']) {
             return $this->buildUriFromRoute(
-                $this->moduleName,
+                $this->route,
                 [
                     'id' => $this->id,
                     'uid' => $uid,

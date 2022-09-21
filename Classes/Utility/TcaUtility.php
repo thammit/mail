@@ -54,4 +54,12 @@ class TcaUtility
             }
         }
     }
+
+    public static function getDefaultSortByFromTca(string $table): string
+    {
+        return preg_replace(
+            '/^(?:ORDER[[:space:]]*BY[[:space:]]*)+/i', '',
+            trim($GLOBALS['TCA'][$table]['ctrl']['default_sortby'])
+        );
+    }
 }

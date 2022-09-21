@@ -1,0 +1,16 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div class="mail-wizard-navigation mb-4">
+    <ul>
+        <f:for each="{navigation.steps}" key="step" as="val" iteration="stepIterator">
+            <li class="{f:if(condition: '{navigation.currentStep} == {step}', then: 'current', else: '')} {f:if(condition: '{stepIterator.isLast}', then:'last')}"><span class="title">{step}</span></li>
+        </f:for>
+    </ul>
+</div>
+
+</html>

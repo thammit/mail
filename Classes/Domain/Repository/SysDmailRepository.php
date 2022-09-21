@@ -83,21 +83,27 @@ class SysDmailRepository extends AbstractRepository
     }
 
     /**
-     * @param int $id
-     * @param string $orderBy
-     * @param string $order
+     * @param int $pageId
+     * @param string|null $orderBy
+     * @param string|null $order
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findMailsNotSentAndScheduled(int $id, string $orderBy, string $order): array
+    public function findOpenMailsByPageId(int $pageId, string $orderBy = null, string $order = null): array
     {
+        $orderBy = $orderBy ?? $this->getDefaultOrderBy();
+        $order = $order ?? $this->getDefaultOrder();
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
-        return $queryBuilder->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type')
+        return $queryBuilder
+            ->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type')
             ->from($this->table)
-            ->add('where', 'pid = ' . $id .
-                ' AND scheduled=0 AND issent=0')
+            ->where(
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('scheduled', 0),
+                $queryBuilder->expr()->eq('issent', 0),
+            )
             ->orderBy($orderBy, $order)
             ->execute()
             ->fetchAllAssociative();
