@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail;
 
 final class Constants
 {
+    const MAIL_MODULE_NAME = 'dmail';
     const MAIL_TYPE_INTERNAL = 0;
     const MAIL_TYPE_EXTERNAL = 1;
     const MAIL_TYPE_DRAFT_INTERNAL = 2;
@@ -23,4 +24,9 @@ final class Constants
     const WIZARD_STEP_SEND_TEST2 = 'send_mail_test';
     const WIZARD_STEP_FINAL = 'send_mail_final';
     const WIZARD_STEP_SEND = 'send_mass';
+
+    const PANEL_INTERNAL = 'int';
+    const PANEL_EXTERNAL = 'ext';
+    const PANEL_QUICK_MAIL = 'quick';
+    const PANEL_OPEN_STORED = 'dmail';
 }

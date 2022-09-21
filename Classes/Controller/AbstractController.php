@@ -38,10 +38,14 @@ abstract class AbstractController
     protected RecipientService $recipientService;
     protected EventDispatcherInterface $eventDispatcher;
     protected StandaloneView $view;
+    protected FlashMessageQueue $messageQueue;
     protected int $id = 0;
     protected string $cmd = '';
     protected int $sys_dmail_uid = 0;
     protected string $pages_uid = '';
+    protected string $backendUserName = '';
+    protected string $backendUserEmail = '';
+    protected int $backendUserId = 0;
     protected array $pageTSConfiguration = [];
 
     /**
@@ -57,7 +61,6 @@ abstract class AbstractController
     protected int $sys_language_uid = 0;
     protected array $pageinfo = [];
     protected bool $access = false;
-    protected FlashMessageQueue $messageQueue;
     protected string $siteIdentifier;
 
     /**
@@ -88,6 +91,16 @@ abstract class AbstractController
         $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
         MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
         MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
+        $this->backendUserName = MailerUtility::getBackendUser()->user['realName'] ?? '';
+        $this->backendUserEmail = MailerUtility::getBackendUser()->user['email'] ?? '';
+        $this->backendUserId = MailerUtility::getBackendUser()->user['uid'] ?? '';
+        $this->view->assignMultiple([
+            'backendUser' => [
+                'name' => MailerUtility::getBackendUser()->user['realName'] ?? '',
+                'email' => MailerUtility::getBackendUser()->user['email'] ?? '',
+                'uid' => MailerUtility::getBackendUser()->user['uid'] ?? '',
+            ]
+        ]);
     }
 
     protected function init(ServerRequestInterface $request): void
@@ -115,6 +128,7 @@ abstract class AbstractController
         // get the config from pageTS
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
+        $this->pageTSConfiguration['pid'] = $this->id;
 
         if (array_key_exists('userTable', $this->pageTSConfiguration) && isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) && is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])) {
             $this->userTable = $this->pageTSConfiguration['userTable'];

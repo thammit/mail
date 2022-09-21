@@ -124,10 +124,16 @@
 			<source>Content transfer encoding</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.type.I.0">
-			<source>TYPO3 Page</source>
+			<source>Internal page</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.type.I.1">
-			<source>External URL</source>
+			<source>External page</source>
+		</trans-unit>
+		<trans-unit id="sys_dmail.type.I.2">
+			<source>Draft of internal page</source>
+		</trans-unit>
+		<trans-unit id="sys_dmail.type.I.3">
+			<source>Draft of external Page</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.use_rdct">
 			<source>Redirect links longer than 76 characters</source>

@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
@@ -320,11 +321,16 @@ class MailerService implements LoggerAwareInterface
             $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $params);
             try {
                 $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
-                if (!MailerUtility::contentContainsBoundaries($plainContent)) {
-                    MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLL('dmail_no_plain_boundaries'), MailerUtility::getLL('dmail_warning'));
+                if ($plainContent === false) {
+                    MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_external_plain_uri_is_invalid'), MailerUtility::getLL('dmail_error'));
+                    $errors = true;
+                } else {
+                    if (!MailerUtility::contentContainsBoundaries($plainContent)) {
+                        MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLL('dmail_no_plain_boundaries'), MailerUtility::getLL('dmail_warning'));
+                    }
+                    $this->setPlainContent($plainContent);
                 }
-                $this->setPlainContent($plainContent);
-            } catch (RequestException $exception) {
+            } catch (RequestException|ConnectException $exception) {
                 $errors = true;
                 MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(), MailerUtility::getLL('dmail_error'));
             }
@@ -335,29 +341,38 @@ class MailerService implements LoggerAwareInterface
             $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $params);
             try {
                 $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
-                if (MailerUtility::contentContainsFrameTag($htmlContent)) {
+                if ($htmlContent === false) {
+                    MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_external_html_uri_is_invalid'), MailerUtility::getLL('dmail_error'));
                     $errors = true;
-                    MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_frames_not allowed'), MailerUtility::getLL('dmail_error'));
-                }
-                if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
-                    MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLL('dmail_no_html_boundaries'), MailerUtility::getLL('dmail_warning'));
-                }
-                $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $baseUrl);
-                if ($htmlHyperLinks) {
-                    $this->setHtmlHyperLinks($htmlHyperLinks);
-                    $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $this->getHtmlHyperLinks(), $this->getJumpUrlPrefix(), $this->getJumpUrlUseId(), $this->getJumpUrlUseMailto());
-                }
-                $this->setHtmlContent($htmlContent);
-                if ((int)$mailData['type'] == Constants::MAIL_TYPE_EXTERNAL) {
-                    // Try to auto-detect the charset of the message
-                    $matches = [];
-                    $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', ($this->getMailPart('html_content') ?? ''), $matches);
-                    if ($res === 1) {
-                        $this->setCharset($matches[1]);
-                    } else if (isset($params['direct_mail_charset'])) {
-                        $this->setCharset($params['direct_mail_charset']);
-                    } else {
-                        $this->setCharset('iso-8859-1');
+                } else {
+                    if (MailerUtility::contentContainsFrameTag($htmlContent)) {
+                        $errors = true;
+                        MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_frames_not allowed'), MailerUtility::getLL('dmail_error'));
+                    }
+                    if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
+                        MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLL('dmail_no_html_boundaries'), MailerUtility::getLL('dmail_warning'));
+                    }
+                    $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $baseUrl);
+                    if ($htmlHyperLinks) {
+                        $this->setHtmlHyperLinks($htmlHyperLinks);
+                        $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $this->getHtmlHyperLinks(), $this->getJumpUrlPrefix(),
+                            $this->getJumpUrlUseId(), $this->getJumpUrlUseMailto());
+                    }
+                    $this->setHtmlContent($htmlContent);
+                    if ((int)$mailData['type'] == Constants::MAIL_TYPE_EXTERNAL) {
+                        // Try to auto-detect the charset of the message
+                        $matches = [];
+                        $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m',
+                            ($this->getMailPart('html_content') ?? ''), $matches);
+                        if ($res === 1) {
+                            $this->setCharset($matches[1]);
+                        } else {
+                            if (isset($params['direct_mail_charset'])) {
+                                $this->setCharset($params['direct_mail_charset']);
+                            } else {
+                                $this->setCharset('iso-8859-1');
+                            }
+                        }
                     }
                 }
             } catch (RequestException $exception) {
@@ -998,48 +1013,6 @@ class MailerService implements LoggerAwareInterface
 
         $mailer->send();
         unset($mailer);
-    }
-
-    /**
-     * Get all open, not yet sent mails
-     *
-     * @return array config for form lists of all existing mail records
-     * @throws DBALException
-     * @throws Exception
-     * @throws RouteNotFoundException
-     */
-    protected function getOpenMails(int $pageId, string $orderBy = null, string $order = 'ASC'): array
-    {
-        $orderBy = $orderBy ?? preg_replace(
-            '/^(?:ORDER[[:space:]]*BY[[:space:]]*)+/i', '',
-            trim($GLOBALS['TCA']['sys_dmail']['ctrl']['default_sortby'])
-        );
-        if (!empty($orderBy)) {
-            // remove ASC/DESC from $orderBy
-            if (str_contains('ASC', $orderBy)) {
-                $orderBy = trim(str_replace('ASC', '', $orderBy));
-            } else if (str_contains('DESC', $orderBy)) {
-                $orderBy = trim(str_replace('DESC', '', $orderBy));
-                $order = 'DESC';
-            }
-        }
-        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->findOpenMailsByPageId($this->id, $orderBy, $order);
-
-        $data = [];
-        foreach ($rows as $row) {
-            $data[] = [
-                'settingsUri' => $this->getWizardStepUri(Constants::WIZARD_STEP_SETTINGS, ['sys_dmail_uid' => (int)$row['uid'], 'fetchAtOnce' => 1]),
-                'subject' => $row['subject'] ?? '_',
-                'tstamp' => $row['tstamp'],
-                'isSent' => (bool)($row['issent'] ?? false),
-                'size' => $row['renderedsize'] ?: 0,
-                'hasAttachment' => (bool)($row['attachment'] ?? false),
-                'type' => ($row['type'] & 0x1 ? MailerUtility::getLL('nl_l_tUrl') : MailerUtility::getLL('nl_l_tPage')) . ($row['type'] & 0x2 ? ' (' . MailerUtility::getLL('nl_l_tDraft') . ')' : ''),
-                'deleteUri' => $this->getDeleteMailUri($row['uid']),
-            ];
-        }
-
-        return $data;
     }
 
 }

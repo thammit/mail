@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use PDO;
-use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class TempRepository extends AbstractRepository
@@ -20,36 +19,23 @@ class TempRepository extends AbstractRepository
      *
      * @param array $listArr List of recipient IDs
      * @param string $table Table name
-     * @param string $fields Field to be selected
+     * @param array $fields Field to be selected
      *
      * @return array recipients' data
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws DBALException
      */
-    public function fetchRecordsListValues(array $listArr, string $table, string $fields = 'uid,name,email'): array
+    public function fetchRecordsListValues(array $listArr, string $table, array $fields = ['uid','name','email']): array
     {
         $outListArr = [];
         if (is_array($listArr) && count($listArr)) {
             $idlist = implode(',', $listArr);
 
-            $queryBuilder = $this->getQueryBuilder($table);
-            $queryBuilder
-                ->getRestrictions()
-                ->removeAll()
-                ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+            $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
 
-            $fieldArray = GeneralUtility::trimExplode(',', $fields);
-
-            // handle selecting multiple fields
-            foreach ($fieldArray as $i => $field) {
-                if ($i) {
-                    $queryBuilder->addSelect($field);
-                } else {
-                    $queryBuilder->select($field);
-                }
-            }
-
-            $res = $queryBuilder->from($table)
+            $res = $queryBuilder
+                ->select(...$fields)
+                ->from($table)
                 ->where(
                     $queryBuilder->expr()->in(
                         'uid',
@@ -330,7 +316,9 @@ class TempRepository extends AbstractRepository
             [$groupId] = $res->fetchAllAssociative();
 
             // recursively get all subgroups of this fe_group
-            $subgroups = $this->getFEgroupSubgroups($groupId);
+            if (is_integer($groupId)) {
+                $subgroups = $this->getFEgroupSubgroups($groupId);
+            }
 
             if (!empty($subgroups)) {
                 $usergroupInList = null;
@@ -512,16 +500,17 @@ class TempRepository extends AbstractRepository
     /**
      * @param string $table
      * @param int $uid
+     * @param string[] $fields
      * @return array
      * @throws DBALException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    public function selectRowsByUid(string $table, int $uid): array
+    public function selectRowsByUid(string $table, int $uid, array $fields = ['*']): array
     {
         $queryBuilder = $this->getQueryBuilder($table);
 
         return $queryBuilder
-            ->select('*')
+            ->select(...$fields)
             ->from($table)
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid))

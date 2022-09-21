@@ -164,7 +164,11 @@ class MailerUtility
     public static function fetchContentFromUrl($url): string|bool
     {
         $requestFactory = GeneralUtility::makeInstance(RequestFactory::class);
-        $response = $requestFactory->request($url);
+        try {
+            $response = $requestFactory->request($url);
+        } catch (\Exception $exception) {
+            return false;
+        }
         return $response->getBody()->getContents();
     }
 

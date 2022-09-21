@@ -11,22 +11,22 @@
         <f:translate key="{lll}dmail_wiz4_testmail"/>
     </h3>
     <div class="mb-4">
-        <f:if condition="{data.test.testFormData.test_tt_address}">
+        <f:if condition="{test.testFormData.test_tt_address}">
             <h3>
                 <f:translate key="{lll}testmail_individual"/>
             </h3>
             <f:translate key="{lll}testmail_individual_msg"/>
             <div class="my-3">
-                {data.test.testFormData.test_tt_address -> f:format.html()}
+                {test.testFormData.test_tt_address -> f:format.html()}
             </div>
         </f:if>
-        <f:if condition="{data.test.testFormData.test_dmail_group_table -> f:count()}">
+        <f:if condition="{test.testFormData.test_dmail_group_table -> f:count()}">
             <h3>
                 <f:translate key="{lll}testmail_mailgroup"/>
             </h3>
             <f:translate key="{lll}testmail_mailgroup_msg"/>
             <div class="my-3">
-                <f:for each="{data.test.testFormData.test_dmail_group_table}" as="table">
+                <f:for each="{test.testFormData.test_dmail_group_table}" as="table">
                     <a href="{table.moduleUrl}">{table.iconFactory -> f:format.html()} {table.title}</a>
                     <div class="my-3">
                         <table class="table table-striped table-hover">
@@ -46,23 +46,23 @@
         <div class="mb-3">
             <f:translate key="{lll}testmail_simple_msg"/>
         </div>
-        <input type="hidden" name="id" value="{data.test.testFormData.id}"/>
-        <input type="hidden" name="sys_dmail_uid" value="{data.test.testFormData.sys_dmail_uid}"/>
-        <input type="hidden" name="cmd" value="{data.test.testFormData.cmd}"/>
+        <input type="hidden" name="id" value="{test.testFormData.id}"/>
+        <input type="hidden" name="sys_dmail_uid" value="{test.testFormData.sys_dmail_uid}"/>
+        <input type="hidden" name="cmd" value="{test.testFormData.cmd}"/>
         <div class="row mb-3">
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="input-group">
-                    <input class="form-control" type="email" placeholder="Mail address" name="SET[dmail_test_email]" value="{data.test.testFormData.dmail_test_email}" aria-label="Test mail recipient" aria-describedby="send-test-mail-button"/>
-                    <button class="btn btn-outline-primary" id="send-test-mail-button" type="submit" name="mailingMode_simple" value="1"><f:translate key="{lll}dmail_send"/></button>
+                    <input class="form-control" type="email" placeholder="Mail address" name="sendTestMail[address]" value="{backendUser.email}" aria-label="Test mail recipient" aria-describedby="send-test-mail-button"/>
+                    <button class="btn btn-outline-primary" id="send-test-mail-button" type="submit" name="sendTestMail[send]" value="1"><f:translate key="{lll}dmail_send"/></button>
                 </div>
             </div>
         </div>
     </div>
-    <input type="hidden" name="cmd" value="{data.test.cmd}">
-    <input type="hidden" name="sys_dmail_uid" value="{data.test.sys_dmail_uid}">
-    <input type="hidden" name="pages_uid" value="{data.test.pages_uid}">
-    <input type="hidden" name="currentCMD" value="{data.test.currentCMD}">
+    <input type="hidden" name="cmd" value="{test.cmd}">
+    <input type="hidden" name="sys_dmail_uid" value="{test.sys_dmail_uid}">
+    <input type="hidden" name="pages_uid" value="{test.pages_uid}">
+    <input type="hidden" name="currentCMD" value="{test.currentCMD}">
 </form>
-<f:render partial="Wizard/Navigation" arguments="{navigation: data.navigation, mailForm:mailForm, lll:lll}"/>
+<f:render partial="Wizard/Navigation" arguments="{navigation: navigation, mailForm:mailForm, lll:lll}"/>
 
 </html>

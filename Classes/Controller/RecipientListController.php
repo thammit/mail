@@ -477,7 +477,7 @@ class RecipientListController extends AbstractController
                     $fields = $csvValue == 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
                     $fields .= ',tstamp';
 
-                    $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$csvValue], $csvValue, $fields);
+                    $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$csvValue], $csvValue, GeneralUtility::trimExplode(',', $fields, true));
                     $this->downloadCSV($rows);
                 } else {
                     $message = MailerUtility::getFlashMessage(

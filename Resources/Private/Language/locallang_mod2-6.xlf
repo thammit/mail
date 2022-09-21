@@ -290,11 +290,17 @@
 			<trans-unit id="dmail_no_plain_content" resname="dmail_no_plain_content">
 				<source>The plain text content could not be fetched.</source>
 			</trans-unit>
-			<trans-unit id="dmail_no_valid_url" resname="dmail_no_mail_content_format_selected">
+			<trans-unit id="dmail_no_mail_content_format_selected" resname="dmail_no_mail_content_format_selected">
 				<source>No mail content format selected.</source>
 			</trans-unit>
 			<trans-unit id="dmail_no_valid_url" resname="dmail_no_valid_url">
 				<source>Enter at least one valid URL!</source>
+			</trans-unit>
+			<trans-unit id="dmail_external_html_uri_is_invalid" resname="dmail_external_html_uri_is_invalid">
+				<source>The external HTML Url is invalid!</source>
+			</trans-unit>
+			<trans-unit id="dmail_external_plain_uri_is_invalid" resname="dmail_external_plain_uri_is_invalid">
+				<source>The external plain Url is invalid!</source>
 			</trans-unit>
 			<trans-unit id="dmail_number_records" resname="dmail_number_records">
 				<source>Number of records:</source>

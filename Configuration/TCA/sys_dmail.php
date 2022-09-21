@@ -289,8 +289,8 @@ return [
                 'items' => [
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.0', \MEDIAESSENZ\Mail\Constants::MAIL_TYPE_INTERNAL],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.1', \MEDIAESSENZ\Mail\Constants::MAIL_TYPE_EXTERNAL],
-                    ['Draft of internal page', \MEDIAESSENZ\Mail\Constants::MAIL_TYPE_DRAFT_INTERNAL],
-                    ['Draft of external URL', \MEDIAESSENZ\Mail\Constants::MAIL_TYPE_DRAFT_EXTERNAL],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.2', \MEDIAESSENZ\Mail\Constants::MAIL_TYPE_DRAFT_INTERNAL],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.3', \MEDIAESSENZ\Mail\Constants::MAIL_TYPE_DRAFT_EXTERNAL],
                 ],
                 'default' => \MEDIAESSENZ\Mail\Constants::MAIL_TYPE_INTERNAL,
             ],
