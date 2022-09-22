@@ -85,8 +85,9 @@ class ImportService
      * @throws DBALException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws Exception
      */
-    public function displayImport(): array
+    public function csvImport(): array
     {
         $output = [
             'title' => '',
@@ -161,7 +162,7 @@ class ImportService
                 'tables' => []
             ]
         ];
-        
+
         $beUser = $this->getBeUser();
         $step = GeneralUtility::_GP('importStep');
         $defaultConf = [
@@ -202,10 +203,10 @@ class ImportService
         $stepCurrent = '';
         if ($this->indata['back'] ?? false) {
             $stepCurrent = $step['back'];
-        } 
+        }
         elseif ($this->indata['next'] ?? false) {
             $stepCurrent = $step['next'];
-        } 
+        }
         elseif ($this->indata['update'] ?? false) {
             $stepCurrent = 'mapping';
         }
@@ -215,10 +216,10 @@ class ImportService
             $tempFile = $this->writeTempFile($this->indata['csv'] ?? '', $this->indata['newFile'] ?? '', $this->indata['newFileUid'] ?? 0);
             $this->indata['newFile'] = $tempFile['newFile'];
             $this->indata['newFileUid'] = $tempFile['newFileUid'];
-        } 
+        }
         elseif (!empty($this->indata['newFile'])) {
             $this->indata['mode'] = 'file';
-        } 
+        }
         else {
             unset($stepCurrent);
         }
@@ -231,7 +232,7 @@ class ImportService
             $newMap = ArrayUtility::removeArrayEntryByValue(array_unique($map), 'noMap');
             if (empty($newMap)) {
                 $error[] = 'noMap';
-            } 
+            }
             elseif (!in_array('email', $map)) {
                 $error[] = 'email';
             }
@@ -246,7 +247,7 @@ class ImportService
                 $output['conf']['show'] = true;
                 $output['conf']['newFile'] = $this->indata['newFile'];
                 $output['conf']['newFileUid'] = $this->indata['newFileUid'];
-                
+
                 $pagePermsClause3 = $beUser->getPagePermsClause(3);
                 $pagePermsClause1 = $beUser->getPagePermsClause(1);
                 // get list of sysfolder
@@ -258,7 +259,7 @@ class ImportService
                     foreach($subfolders as $subfolder) {
                         if (BackendUtility::readPageAccess($subfolder['uid'], $pagePermsClause1)) {
                             $optStorage[] = [
-                                'val' => $subfolder['uid'], 
+                                'val' => $subfolder['uid'],
                                 'text' => $subfolder['title'] . ' [uid:' . $subfolder['uid'] . ']'
                             ];
                         }
@@ -301,7 +302,7 @@ class ImportService
                 // csv separator
                 $output['conf']['delimiter'] = $optDelimiter;
                 $output['conf']['delimiterSelected'] = $this->indata['delimiter'] ?? '';
-                
+
                 // csv encapsulation
                 $output['conf']['encapsulation'] = $optEncap;
                 $output['conf']['encapsulationSelected'] = $this->indata['encapsulation'] ?? '';
@@ -336,7 +337,7 @@ class ImportService
                 $output['mapping']['record_unique'] = $this->indata['record_unique'];
                 $output['mapping']['all_html'] = (bool)$this->indata['all_html'];
                 $output['mapping']['error'] = $error;
-                
+
                 // show charset selector
                 $cs = array_unique(array_values(mb_list_encodings()));
                 $charSets = [];
@@ -359,7 +360,7 @@ class ImportService
                     $csvData = $this->readExampleCSV(4);
                     $csv_firstRow = $csvData[0];
                     $csvData = array_slice($csvData, 1);
-                } 
+                }
                 else {
                     // read csv
                     $csvData = $this->readExampleCSV(3);
@@ -378,14 +379,14 @@ class ImportService
                 $mapFields = [];
                 foreach ($ttAddressFields as $map) {
                     $mapFields[] = [
-                        $map, 
+                        $map,
                         str_replace(':', '', $this->getLanguageService()->sL($GLOBALS['TCA']['tt_address']['columns'][$map]['label']))
                     ];
                 }
                 // add 'no value'
                 array_unshift($mapFields, ['noMap', $this->getLanguageService()->getLL('mailgroup_import_mapping_mapTo')]);
                 $mapFields[] = [
-                    'cats', 
+                    'cats',
                     $this->getLanguageService()->getLL('mailgroup_import_mapping_categories')
                 ];
                 reset($csv_firstRow);
@@ -405,7 +406,7 @@ class ImportService
                         'mapping_value' => $exampleLines
                     ];
                 }
-                
+
                 // get categories
                 $temp['value'] = BackendUtility::getPagesTSconfig($this->parent->getId())['TCEFORM.']['sys_dmail_group.']['select_categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
                 if (is_numeric($temp['value'])) {
@@ -444,7 +445,7 @@ class ImportService
                 $output['startImport']['record_unique'] = $this->indata['record_unique'];
                 $output['startImport']['all_html'] = !$this->indata['all_html'] ? false : true;
                 $output['startImport']['add_cat'] = $this->indata['add_cat'] ? true : false;
-                
+
                 $output['startImport']['error'] = $error;
 
                 // starting import & show errors
@@ -478,7 +479,7 @@ class ImportService
                             ];
                         }
                     }
-                    
+
                     $output['startImport']['tables'][] = [
                         'header' => $this->getLanguageService()->getLL('mailgroup_import_report_' . $order),
                         'rows' => $rowsTable
@@ -520,7 +521,7 @@ class ImportService
                     $this->indata['csv'] = fread($handleCsv, filesize($this->indata['newFile']));
                     fclose($handleCsv);
                 }
-                
+
                 $output['upload']['show'] = true;
                 $output['upload']['csv'] = htmlspecialchars($this->indata['csv'] ?? '');
                 $output['upload']['target'] = htmlspecialchars($this->userTempFolder());
@@ -537,7 +538,7 @@ class ImportService
          *  use it to manipulate the steps in the import process
          */
         $hookObjectsArr = [];
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail/mod3/class.tx_directmail_recipient_list.php']['displayImport']) && 
+        if (isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail/mod3/class.tx_directmail_recipient_list.php']['displayImport']) &&
             is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail/mod3/class.tx_directmail_recipient_list.php']['displayImport'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail/mod3/class.tx_directmail_recipient_list.php']['displayImport'] as $classRef) {
                 $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
@@ -627,11 +628,11 @@ class ImportService
                     if (($this->indata['valid_email']) && ($this->indata['map'][$kk] === 'email')) {
                         $invalidEmail = GeneralUtility::validEmail(trim($fieldData)) ? 0 : 1;
                         $tempData[$this->indata['map'][$kk]] = trim($fieldData);
-                    } 
+                    }
                     else {
                         if ($this->indata['map'][$kk] !== 'cats') {
                             $tempData[$this->indata['map'][$kk]] = $fieldData;
-                        } 
+                        }
                         else {
                             $tempCats = explode(',', $fieldData);
                             foreach ($tempCats as $catC => $tempCat) {
@@ -643,7 +644,7 @@ class ImportService
             }
             if ($invalidEmail) {
                 $invalidEmailCSV[] = $tempData;
-            } 
+            }
             else {
                 $mappedCSV[] = $tempData;
             }
@@ -663,7 +664,7 @@ class ImportService
             $userID = [];
 
             $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressByPid((int)$this->indata['storage'], $this->indata['record_unique']);
-            
+
             if(is_array($rows)) {
                 foreach ($rows as $row) {
                     $user[] = $row['email'];
@@ -697,7 +698,7 @@ class ImportService
                             }
                         }
                         $resultImport['update'][] = $dataArray;
-                    } 
+                    }
                     else {
                         // which one to update? all?
                         foreach ($foundUser as $kk => $_) {
@@ -706,7 +707,7 @@ class ImportService
                         }
                         $resultImport['update'][] = $dataArray;
                     }
-                } 
+                }
                 else {
                     // write new user
                     $this->addDataArray($data, 'NEW' . $c, $dataArray);
@@ -715,7 +716,7 @@ class ImportService
                     $c++;
                 }
             }
-        } 
+        }
         else {
             // no update, import all
             $c = 1;
@@ -779,7 +780,7 @@ class ImportService
             }
         }
     }
-    
+
     /**
      * Read in the given CSV file. The function is used during the final file import.
      * Removes first the first data row if the CSV has fieldnames.
@@ -789,7 +790,7 @@ class ImportService
     public function readCSV(): array
     {
         $mydata = [];
-        
+
         if((int)$this->indata['newFileUid'] < 1) {
             return $mydata;
         }
@@ -804,7 +805,7 @@ class ImportService
         $delimiter = ($delimiter === 'tab') ? "\t" : $delimiter;
         $encaps = ($encaps === 'singleQuote') ? "'" : $encaps;
         $encaps = ($encaps === 'doubleQuote') ? '"' : $encaps;
-        
+
         ini_set('auto_detect_line_endings', true);
         $handle = fopen($fileAbsolutePath, 'r');
         if($handle === false) {
@@ -834,11 +835,11 @@ class ImportService
     public function readExampleCSV(int $records = 3): array
     {
         $mydata = [];
-        
+
         if((int)$this->indata['newFileUid'] < 1) {
             return $mydata;
         }
-        
+
         $fileAbsolutePath = $this->getFileAbsolutePath((int)$this->indata['newFileUid']);
 
         $i = 0;
@@ -850,7 +851,7 @@ class ImportService
         $delimiter = ($delimiter === 'tab') ? "\t" : $delimiter;
         $encaps = ($encaps === 'singleQuote') ? "'" : $encaps;
         $encaps = ($encaps === 'doubleQuote') ? '"' : $encaps;
-        
+
         ini_set('auto_detect_line_endings', true);
         $handle = fopen($fileAbsolutePath, 'r');
         if($handle === false) {
@@ -916,10 +917,10 @@ class ImportService
             // Checking referer / executing:
             $refInfo = parse_url($this->parent->getHttpReferer());
             $httpHost = $this->parent->getRequestHostOnly();
-            
+
             if ($httpHost != $refInfo['host'] && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
                 $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$refInfo['host'], $httpHost]);
-            } 
+            }
             else {
                 // new file
                 $file['newfile']['target'] = $this->userTempFolder();
@@ -932,7 +933,7 @@ class ImportService
                     $newfile['newFileUid'] = $newfileObj->getUid();
                 }
             }
-        } 
+        }
         else {
             $newfile = ['newFile' => $newFile, 'newFileUid' => $newFileUid];
         }
@@ -956,20 +957,20 @@ class ImportService
     public function checkUpload(): array
     {
         $newfile = ['newFile' => '', 'newFileUid' => 0];
-        
+
         // Initializing:
         /* @var $extendedFileUtility ExtendedFileUtility */
         $extendedFileUtility = GeneralUtility::makeInstance(ExtendedFileUtility::class);
         $extendedFileUtility->setActionPermissions();
         $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
-        
+
         // Checking referer / executing:
         $refInfo = parse_url($this->parent->getHttpReferer());
         $httpHost = $this->parent->getRequestHostOnly();
 
         if ($httpHost != $refInfo['host'] && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
             $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$refInfo['host'], $httpHost]);
-        } 
+        }
         else {
             $file = GeneralUtility::_GP('file');
             $extendedFileUtility->start($file);
@@ -1000,11 +1001,11 @@ class ImportService
             return $resourceFactory->getFileObject($fileUid);
         }
         catch(FileDoesNotExistException $e) {
-            
+
         }
         return false;
     }
-    
+
     /**
      *
      * @param int $fileUid
@@ -1018,7 +1019,7 @@ class ImportService
         }
         return Environment::getPublicPath() . '/' . str_replace('//', '/', $file->getStorage()->getConfiguration()['basePath'] . $file->getProperty('identifier'));
     }
-    
+
     /**
      * Returns first temporary folder of the user account
      *
@@ -1030,7 +1031,7 @@ class ImportService
         $folder = $this->getBeUser()->getDefaultUploadTemporaryFolder();
         return $folder->getPublicUrl();
     }
-    
+
     /**
      *
      * @return int
@@ -1039,7 +1040,7 @@ class ImportService
         $context = GeneralUtility::makeInstance(Context::class);
         return $context->getPropertyFromAspect('date', 'timestamp');
     }
-    
+
     /**
      * Returns LanguageService
      *
@@ -1049,9 +1050,9 @@ class ImportService
     {
         return $GLOBALS['LANG'];
     }
-    
+
     /**
-     * 
+     *
      * @return BackendUserAuthentication
      */
     protected function getBeUser()

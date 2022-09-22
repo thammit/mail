@@ -83,6 +83,12 @@ class RecipientListController extends AbstractController
         $this->queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
     }
 
+    /**
+     * @throws Exception
+     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws DBALException
+     * @throws RouteNotFoundException
+     */
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
         $this->init($request);
@@ -102,15 +108,7 @@ class RecipientListController extends AbstractController
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
                 // Add module data to view
-                $data = $this->moduleContent();
-                $this->view->assignMultiple(
-                    [
-                        'data' => $data['data'],
-                        'type' => $data['type'],
-                        'formcontent' => $data['content'],
-                        'show' => true,
-                    ]
-                );
+                $this->view->assignMultiple($this->moduleContent());
             } else {
                 if ($this->id != 0) {
                     $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
@@ -132,11 +130,15 @@ class RecipientListController extends AbstractController
     /**
      * Show the module content
      *
-     * @return string The compiled content of the module.
+     * @return array The compiled content of the module.
+     * @throws DBALException
+     * @throws Exception
+     * @throws RouteNotFoundException
+     * @throws \TYPO3\CMS\Core\Resource\Exception
      */
-    protected function moduleContent(): array|string
+    protected function moduleContent(): array
     {
-        $theOutput = '';
+        $csvImportData = '';
         $data = [];
         // COMMAND:
         switch ($this->cmd) {
@@ -153,22 +155,23 @@ class RecipientListController extends AbstractController
                 /* @var $importService ImportService */
                 $importService = GeneralUtility::makeInstance(ImportService::class);
                 $importService->init($this);
-                $theOutput = $importService->displayImport();
+                $csvImportData = $importService->csvImport();
                 $type = 3;
                 break;
             default:
                 $data = $this->showExistingRecipientLists();
-                $theOutput = '';
                 $type = 4;
         }
 
-        return ['data' => $data, 'content' => $theOutput, 'type' => $type];
+        return ['data' => $data, 'csvImportData' => $csvImportData, 'type' => $type, 'show' => true];
     }
 
     /**
      * Shows the existing recipient lists and shows link to create a new one or import a list
      *
      * @return array|string List of existing recipient list, link to create a new list and link to import
+     * @throws DBALException
+     * @throws Exception
      * @throws RouteNotFoundException If the named route doesn't exist
      */
     protected function showExistingRecipientLists(): array|string
@@ -237,7 +240,10 @@ class RecipientListController extends AbstractController
      *
      * @param int $groupUid Uid of the group
      *
-     * @return    array List of the uid in an array
+     * @return array List of the uid in an array
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function cmd_compileMailGroup(int $groupUid): array
     {
@@ -403,6 +409,7 @@ class RecipientListController extends AbstractController
      * @param int $uid Record uid
      *
      * @return string the edit link
+     * @throws RouteNotFoundException
      */
     protected function editLink(string $table, int $uid): string
     {
@@ -453,7 +460,9 @@ class RecipientListController extends AbstractController
      *
      * @param array $result Array containing list of recipient uid
      *
-     * @return string list of all recipient (HTML)
+     * @return array|string list of all recipient (HTML)
+     * @throws DBALException
+     * @throws Exception
      * @throws RouteNotFoundException
      */
     protected function displayMailGroup(array $result): array|string
@@ -663,9 +672,9 @@ class RecipientListController extends AbstractController
      *
      * @param array $mailGroup Recipient list DB record
      *
-     * @return string HTML form to make a special query
+     * @return array HTML form to make a special query
      */
-    protected function specialQuery($mailGroup): array|string
+    protected function specialQuery(array $mailGroup): array
     {
         $special = [];
 
@@ -790,7 +799,7 @@ class RecipientListController extends AbstractController
                 ->from($mmTable)
                 ->where($queryBuilder->expr()->eq('uid_local', $queryBuilder->createNamedParameter($row['uid'])))
                 ->execute()
-                ->fetchAll();
+                ->fetchAllAssociative();
 
             $categoriesArray = [];
             foreach ($resCat as $rowCat) {

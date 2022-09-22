@@ -95,34 +95,34 @@
     </f:if>
     <f:if condition="{type} == 3">
 		<div>
-			<h2>{formcontent.output.title}</h2>
-			<h3>{formcontent.output.subtitle}</h3>
+			<h2>{csvImportData.output.title}</h2>
+			<h3>{csvImportData.output.subtitle}</h3>
 			<f:form action="" method="post" name="dmailform" enctype="multipart/form-data">
-				<f:if condition="{formcontent.output.upload.show}">
+				<f:if condition="{csvImportData.output.upload.show}">
 					<f:translate key="{lll}mailgroup_import_upload_file" />
 					<fieldset class="form-section">
 						<f:form.upload name="upload_1" />
 					</fieldset>
-					<f:if condition="{formcontent.output.upload.current}">
+					<f:if condition="{csvImportData.output.upload.current}">
 						<f:translate key="{lll}mailgroup_import_current_file" />
-						<f:if condition="{formcontent.output.upload.fileInfo -> f:count()}">
-							{formcontent.output.upload.fileInfo.name} ({formcontent.output.upload.fileInfo.extension}; {formcontent.output.upload.fileInfo.size})
+						<f:if condition="{csvImportData.output.upload.fileInfo -> f:count()}">
+							{csvImportData.output.upload.fileInfo.name} ({csvImportData.output.upload.fileInfo.extension}; {csvImportData.output.upload.fileInfo.size})
 						</f:if>
 					</f:if>
 					<p><f:translate key="{lll}mailgroup_import_or" /></p>
 					<f:translate key="{lll}mailgroup_import_paste_csv" />
 					<fieldset class="form-section">
-						<f:form.textarea name="CSV_IMPORT[csv]" class="form-control formengine-textarea">{formcontent.output.upload.csv}</f:form.textarea>
+						<f:form.textarea name="CSV_IMPORT[csv]" class="form-control formengine-textarea">{csvImportData.output.upload.csv}</f:form.textarea>
 					</fieldset>
 					<f:form.hidden name="cmd" value="displayImport" />
 					<f:form.hidden name="importStep[next]" value="conf" />
 					<f:form.hidden name="file[upload][1][data]" value="1" />
-					<f:form.hidden name="file[upload][1][target]" value="{formcontent.output.upload.target}" />
+					<f:form.hidden name="file[upload][1][target]" value="{csvImportData.output.upload.target}" />
 					<f:form.submit name="CSV_IMPORT[next]" value="{f:translate(key: '{lll}mailgroup_import_next')}" class="btn btn-default btn-sm" />
-					<f:form.hidden name="CSV_IMPORT[newFile]" value="{formcontent.output.upload.newFile}" />
-					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{formcontent.output.upload.newFileUid}" />
+					<f:form.hidden name="CSV_IMPORT[newFile]" value="{csvImportData.output.upload.newFile}" />
+					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{csvImportData.output.upload.newFileUid}" />
 				</f:if>
-				<f:if condition="{formcontent.output.conf.show}">
+				<f:if condition="{csvImportData.output.conf.show}">
 					<fieldset class="form-section">
 						<table class="table table-striped table-hover">
 							<tbody>
@@ -131,9 +131,9 @@
 										<f:translate key="{lll}mailgroup_import_header_conf" />
 									</td>
 									<td>
-										<f:if condition="{formcontent.output.conf.storage -> f:count()}">
-											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[storage]" value="{formcontent.output.conf.storageSelected}">
-												<f:for each="{formcontent.output.conf.storage}" as="st">
+										<f:if condition="{csvImportData.output.conf.storage -> f:count()}">
+											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[storage]" value="{csvImportData.output.conf.storageSelected}">
+												<f:for each="{csvImportData.output.conf.storage}" as="st">
 													<f:form.select.option value="{st.val}">{st.text}</f:form.select.option>
 												</f:for>
 											</f:form.select>
@@ -145,7 +145,7 @@
 										<f:translate key="{lll}mailgroup_import_remove_existing" />
 									</td>
 									<td>
-										<f:form.checkbox name="CSV_IMPORT[remove_existing]" value="1" checked="{formcontent.output.conf.remove_existing} == 1" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}" />
+										<f:form.checkbox name="CSV_IMPORT[remove_existing]" value="1" checked="{csvImportData.output.conf.remove_existing} == 1" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}" />
 									</td>
 								</tr>
 								<tr>
@@ -153,7 +153,7 @@
 										<f:translate key="{lll}mailgroup_import_first_fieldnames" />
 									</td>
 									<td>
-										<f:form.checkbox name="CSV_IMPORT[first_fieldname]" value="1" checked="{formcontent.output.conf.first_fieldname} == 1" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}" />
+										<f:form.checkbox name="CSV_IMPORT[first_fieldname]" value="1" checked="{csvImportData.output.conf.first_fieldname} == 1" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}" />
 									</td>
 								</tr>
 								<tr>
@@ -161,9 +161,9 @@
 										<f:translate key="{lll}mailgroup_import_separator" />
 									</td>
 									<td>
-										<f:if condition="{formcontent.output.conf.delimiter -> f:count()}">
-											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[delimiter]" value="{formcontent.output.conf.delimiterSelected}" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}">
-												<f:for each="{formcontent.output.conf.delimiter}" as="del">
+										<f:if condition="{csvImportData.output.conf.delimiter -> f:count()}">
+											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[delimiter]" value="{csvImportData.output.conf.delimiterSelected}" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}">
+												<f:for each="{csvImportData.output.conf.delimiter}" as="del">
 													<f:form.select.option value="{del.val}">{del.text}</f:form.select.option>
 												</f:for>
 											</f:form.select>
@@ -175,9 +175,9 @@
 										<f:translate key="{lll}mailgroup_import_encapsulation" />
 									</td>
 									<td>
-										<f:if condition="{formcontent.output.conf.encapsulation -> f:count()}">
-											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[encapsulation]" value="{formcontent.output.conf.encapsulationSelected}" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}">
-												<f:for each="{formcontent.output.conf.encapsulation}" as="en">
+										<f:if condition="{csvImportData.output.conf.encapsulation -> f:count()}">
+											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[encapsulation]" value="{csvImportData.output.conf.encapsulationSelected}" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}">
+												<f:for each="{csvImportData.output.conf.encapsulation}" as="en">
 													<f:form.select.option value="{en.val}">{en.text}</f:form.select.option>
 												</f:for>
 											</f:form.select>
@@ -189,7 +189,7 @@
 										<f:translate key="{lll}mailgroup_import_csv_validemail-description" />
 									</td>
 									<td>
-										<f:form.checkbox name="CSV_IMPORT[valid_email]" value="1" checked="{formcontent.output.conf.valid_email} == 1" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}" />
+										<f:form.checkbox name="CSV_IMPORT[valid_email]" value="1" checked="{csvImportData.output.conf.valid_email} == 1" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}" />
 									</td>
 								</tr>
 								<tr>
@@ -197,7 +197,7 @@
 										<f:translate key="{lll}mailgroup_import_csv_dublette-description" />
 									</td>
 									<td>
-										<f:form.checkbox name="CSV_IMPORT[remove_dublette]" value="1" checked="{formcontent.output.conf.remove_dublette} == 1" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}" />
+										<f:form.checkbox name="CSV_IMPORT[remove_dublette]" value="1" checked="{csvImportData.output.conf.remove_dublette} == 1" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}" />
 									</td>
 								</tr>
 								<tr>
@@ -205,7 +205,7 @@
 										<f:translate key="{lll}mailgroup_import_update_unique" />
 									</td>
 									<td>
-										<f:form.checkbox name="CSV_IMPORT[update_unique]" value="1" checked="{formcontent.output.conf.update_unique} == 1" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}" />
+										<f:form.checkbox name="CSV_IMPORT[update_unique]" value="1" checked="{csvImportData.output.conf.update_unique} == 1" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}" />
 									</td>
 								</tr>
 								<tr>
@@ -213,9 +213,9 @@
 										<f:translate key="{lll}mailgroup_import_record_unique" />
 									</td>
 									<td>
-										<f:if condition="{formcontent.output.conf.record_unique -> f:count()}">
-											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[record_unique]" value="{formcontent.output.conf.record_uniqueSelected}" disabled="{f:if(condition: '{formcontent.output.conf.disableInput}', then: 'disabled')}">
-												<f:for each="{formcontent.output.conf.record_unique}" as="ru">
+										<f:if condition="{csvImportData.output.conf.record_unique -> f:count()}">
+											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[record_unique]" value="{csvImportData.output.conf.record_uniqueSelected}" disabled="{f:if(condition: '{csvImportData.output.conf.disableInput}', then: 'disabled')}">
+												<f:for each="{csvImportData.output.conf.record_unique}" as="ru">
 													<f:form.select.option value="{ru.val}">{ru.text}</f:form.select.option>
 												</f:for>
 											</f:form.select>
@@ -231,10 +231,10 @@
 
 					<f:form.submit name="CSV_IMPORT[back]" value="{f:translate(key: '{lll}mailgroup_import_back')}" class="btn btn-default btn-sm" />
 					<f:form.submit name="CSV_IMPORT[next]" value="{f:translate(key: '{lll}mailgroup_import_next')}" class="btn btn-default btn-sm" />
-					<f:form.hidden name="CSV_IMPORT[newFile]" value="{formcontent.output.conf.newFile}" />
-					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{formcontent.output.conf.newFileUid}" />
+					<f:form.hidden name="CSV_IMPORT[newFile]" value="{csvImportData.output.conf.newFile}" />
+					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{csvImportData.output.conf.newFileUid}" />
 				</f:if>
-				<f:if condition="{formcontent.output.mapping.show}">
+				<f:if condition="{csvImportData.output.mapping.show}">
 					<fieldset class="form-section">
 						<table class="table table-striped table-hover">
 							<tbody>
@@ -243,9 +243,9 @@
 										<f:translate key="{lll}mailgroup_import_mapping_charset_choose" />
 									</td>
 									<td>
-										<f:if condition="{formcontent.output.mapping.charset -> f:count()}">
-											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[charset]" value="{formcontent.output.mapping.charsetSelected}">
-												<f:for each="{formcontent.output.mapping.charset}" as="cs">
+										<f:if condition="{csvImportData.output.mapping.charset -> f:count()}">
+											<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[charset]" value="{csvImportData.output.mapping.charsetSelected}">
+												<f:for each="{csvImportData.output.mapping.charset}" as="cs">
 													<f:form.select.option value="{cs.val}">{cs.text}</f:form.select.option>
 												</f:for>
 											</f:form.select>
@@ -256,11 +256,11 @@
 						</table>
 						<f:form.submit name="CSV_IMPORT[update]" value="{f:translate(key: '{lll}mailgroup_import_update')}" class="btn btn-default btn-sm" /><br /><br />
 					</fieldset>
-					<f:if condition="{formcontent.output.mapping.error -> f:count()}">
+					<f:if condition="{csvImportData.output.mapping.error -> f:count()}">
 						<h3><f:translate key="{lll}mailgroup_import_mapping_error" /></h3>
 						<f:translate key="{lll}mailgroup_import_mapping_error_detail" />
 						<ul>
-							<f:for each="{formcontent.output.mapping.error}" as="error">
+							<f:for each="{csvImportData.output.mapping.error}" as="error">
 								<li><f:translate key="{lll}mailgroup_import_mapping_error_{error}" /></li>
 							</f:for>
 						</ul>
@@ -277,15 +277,15 @@
 								</tr>
 							</thead>
 							<tbody>
-								<f:if condition="{formcontent.output.mapping.table -> f:count()}">
-									<f:for each="{formcontent.output.mapping.table}" iteration="iterator" as="row">
+								<f:if condition="{csvImportData.output.mapping.table -> f:count()}">
+									<f:for each="{csvImportData.output.mapping.table}" iteration="iterator" as="row">
 										<tr>
 											<td>{iterator.cycle}</td>
 											<td><f:format.html>{row.mapping_description}</f:format.html></td>
 											<td>
-												<f:if condition="{formcontent.output.mapping.fields -> f:count()}">
+												<f:if condition="{csvImportData.output.mapping.fields -> f:count()}">
 													<f:form.select class="form-select form-control-adapt" name="CSV_IMPORT[map][{row.mapping_i}]" value="{row.mapping_mappingSelected}">
-														<f:for each="{formcontent.output.mapping.fields}" as="field">
+														<f:for each="{csvImportData.output.mapping.fields}" as="field">
 															<f:form.select.option value="{field.0}">{field.1}</f:form.select.option>
 														</f:for>
 													</f:form.select>
@@ -319,10 +319,10 @@
 										<f:translate key="{lll}mailgroup_import_mapping_all_html" />
 									</td>
 									<td>
-										<f:form.checkbox name="CSV_IMPORT[all_html]" value="1" checked="{formcontent.output.mapping.all_html} == 1" />
+										<f:form.checkbox name="CSV_IMPORT[all_html]" value="1" checked="{csvImportData.output.mapping.all_html} == 1" />
 									</td>
 								</tr>
-								<f:if condition="{formcontent.output.mapping.mapping_cats -> f:count()}">
+								<f:if condition="{csvImportData.output.mapping.mapping_cats -> f:count()}">
 									<tr>
 										<td>
 											<f:translate key="{lll}mailgroup_import_mapping_cats" />
@@ -330,18 +330,18 @@
 										<td>
 										</td>
 									</tr>
-									<f:if condition="{formcontent.output.mapping.show_add_cat}">
+									<f:if condition="{csvImportData.output.mapping.show_add_cat}">
 										<tr>
 											<td>
 												<f:translate key="{lll}mailgroup_import_mapping_cats_add" />
 											</td>
 											<td>
-												<f:form.checkbox name="CSV_IMPORT[add_cat]" value="1" checked="{formcontent.output.mapping.add_cat} == 1" />
+												<f:form.checkbox name="CSV_IMPORT[add_cat]" value="1" checked="{csvImportData.output.mapping.add_cat} == 1" />
 											</td>
 										</tr>
 									</f:if>
 
-									<f:for each="{formcontent.output.mapping.mapping_cats}" as="mapping_cat">
+									<f:for each="{csvImportData.output.mapping.mapping_cats}" as="mapping_cat">
 										<tr>
 											<td>&nbsp;{mapping_cat.cat}</td>
 											<td>
@@ -359,24 +359,24 @@
 
 					<f:form.submit name="CSV_IMPORT[back]" value="{f:translate(key: '{lll}mailgroup_import_back')}" class="btn btn-default btn-sm" />
 					<f:form.submit name="CSV_IMPORT[next]" value="{f:translate(key: '{lll}mailgroup_import_next')}" class="btn btn-default btn-sm" />
-					<f:form.hidden name="CSV_IMPORT[newFile]" value="{formcontent.output.mapping.newFile}" />
-					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{formcontent.output.mapping.newFileUid}" />
-					<f:form.hidden name="CSV_IMPORT[storage]" value="{formcontent.output.mapping.storage}" />
-					<f:form.hidden name="CSV_IMPORT[remove_existing]" value="{formcontent.output.mapping.remove_existing}" />
-					<f:form.hidden name="CSV_IMPORT[first_fieldname]" value="{formcontent.output.mapping.first_fieldname}" />
-					<f:form.hidden name="CSV_IMPORT[delimiter]" value="{formcontent.output.mapping.delimiter}" />
-					<f:form.hidden name="CSV_IMPORT[encapsulation]" value="{formcontent.output.mapping.encapsulation}" />
-					<f:form.hidden name="CSV_IMPORT[valid_email]" value="{formcontent.output.mapping.valid_email}" />
-					<f:form.hidden name="CSV_IMPORT[remove_dublette]" value="{formcontent.output.mapping.remove_dublette}" />
-					<f:form.hidden name="CSV_IMPORT[update_unique]" value="{formcontent.output.mapping.update_unique}" />
-					<f:form.hidden name="CSV_IMPORT[record_unique]" value="{formcontent.output.mapping.record_unique}" />
-					<f:form.hidden name="CSV_IMPORT[all_html]" value="{formcontent.output.mapping.all_html}" />
-					<f:form.hidden name="CSV_IMPORT[charsetSelected]" value="{formcontent.output.mapping.charsetSelected}" />
+					<f:form.hidden name="CSV_IMPORT[newFile]" value="{csvImportData.output.mapping.newFile}" />
+					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{csvImportData.output.mapping.newFileUid}" />
+					<f:form.hidden name="CSV_IMPORT[storage]" value="{csvImportData.output.mapping.storage}" />
+					<f:form.hidden name="CSV_IMPORT[remove_existing]" value="{csvImportData.output.mapping.remove_existing}" />
+					<f:form.hidden name="CSV_IMPORT[first_fieldname]" value="{csvImportData.output.mapping.first_fieldname}" />
+					<f:form.hidden name="CSV_IMPORT[delimiter]" value="{csvImportData.output.mapping.delimiter}" />
+					<f:form.hidden name="CSV_IMPORT[encapsulation]" value="{csvImportData.output.mapping.encapsulation}" />
+					<f:form.hidden name="CSV_IMPORT[valid_email]" value="{csvImportData.output.mapping.valid_email}" />
+					<f:form.hidden name="CSV_IMPORT[remove_dublette]" value="{csvImportData.output.mapping.remove_dublette}" />
+					<f:form.hidden name="CSV_IMPORT[update_unique]" value="{csvImportData.output.mapping.update_unique}" />
+					<f:form.hidden name="CSV_IMPORT[record_unique]" value="{csvImportData.output.mapping.record_unique}" />
+					<f:form.hidden name="CSV_IMPORT[all_html]" value="{csvImportData.output.mapping.all_html}" />
+					<f:form.hidden name="CSV_IMPORT[charsetSelected]" value="{csvImportData.output.mapping.charsetSelected}" />
 				</f:if>
-				<f:if condition="{formcontent.output.startImport.show}">
-					<f:if condition="{formcontent.output.startImport.tables -> f:count()}">
+				<f:if condition="{csvImportData.output.startImport.show}">
+					<f:if condition="{csvImportData.output.startImport.tables -> f:count()}">
 						<fieldset class="form-section">
-							<f:for each="{formcontent.output.startImport.tables}" as="table">
+							<f:for each="{csvImportData.output.startImport.tables}" as="table">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr class="t3-row-header">
@@ -397,13 +397,13 @@
 							</f:for>
 						</fieldset>
 					</f:if>
-					<f:if condition="{formcontent.output.startImport.hiddenMap -> f:count()}">
-						<f:for each="{formcontent.output.startImport.hiddenMap}" as="map">
+					<f:if condition="{csvImportData.output.startImport.hiddenMap -> f:count()}">
+						<f:for each="{csvImportData.output.startImport.hiddenMap}" as="map">
 							<f:form.hidden name="{map.name}" value="{map.value}" />
 						</f:for>
 					</f:if>
-					<f:if condition="{formcontent.output.startImport.hiddenCat -> f:count()}">
-						<f:for each="{formcontent.output.startImport.hiddenCat}" as="cat">
+					<f:if condition="{csvImportData.output.startImport.hiddenCat -> f:count()}">
+						<f:for each="{csvImportData.output.startImport.hiddenCat}" as="cat">
 							<f:form.hidden name="{cat.name}" value="{cat.value}" />
 						</f:for>
 					</f:if>
@@ -412,23 +412,23 @@
 					<f:form.hidden name="importStep[back]" value="mapping" />
 
 					<f:form.submit name="CSV_IMPORT[back]" value="{f:translate(key: '{lll}mailgroup_import_back')}" class="btn btn-default btn-sm" />
-					<f:form.hidden name="CSV_IMPORT[newFile]" value="{formcontent.output.startImport.newFile}" />
-					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{formcontent.output.startImport.newFileUid}" />
-					<f:form.hidden name="CSV_IMPORT[storage]" value="{formcontent.output.startImport.storage}" />
-					<f:form.hidden name="CSV_IMPORT[remove_existing]" value="{formcontent.output.startImport.remove_existing}" />
-					<f:form.hidden name="CSV_IMPORT[first_fieldname]" value="{formcontent.output.startImport.first_fieldname}" />
-					<f:form.hidden name="CSV_IMPORT[delimiter]" value="{formcontent.output.startImport.delimiter}" />
-					<f:form.hidden name="CSV_IMPORT[encapsulation]" value="{formcontent.output.startImport.encapsulation}" />
-					<f:form.hidden name="CSV_IMPORT[valid_email]" value="{formcontent.output.startImport.valid_email}" />
-					<f:form.hidden name="CSV_IMPORT[remove_dublette]" value="{formcontent.output.startImport.remove_dublette}" />
-					<f:form.hidden name="CSV_IMPORT[update_unique]" value="{formcontent.output.startImport.update_unique}" />
-					<f:form.hidden name="CSV_IMPORT[record_unique]" value="{formcontent.output.startImport.record_unique}" />
-					<f:form.hidden name="CSV_IMPORT[all_html]" value="{formcontent.output.startImport.all_html}" />
-					<f:form.hidden name="CSV_IMPORT[charset]" value="{formcontent.output.startImport.charsetSelected}" />
-					<f:form.hidden name="CSV_IMPORT[add_cat]" value="{formcontent.output.startImport.add_cat}" />
+					<f:form.hidden name="CSV_IMPORT[newFile]" value="{csvImportData.output.startImport.newFile}" />
+					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{csvImportData.output.startImport.newFileUid}" />
+					<f:form.hidden name="CSV_IMPORT[storage]" value="{csvImportData.output.startImport.storage}" />
+					<f:form.hidden name="CSV_IMPORT[remove_existing]" value="{csvImportData.output.startImport.remove_existing}" />
+					<f:form.hidden name="CSV_IMPORT[first_fieldname]" value="{csvImportData.output.startImport.first_fieldname}" />
+					<f:form.hidden name="CSV_IMPORT[delimiter]" value="{csvImportData.output.startImport.delimiter}" />
+					<f:form.hidden name="CSV_IMPORT[encapsulation]" value="{csvImportData.output.startImport.encapsulation}" />
+					<f:form.hidden name="CSV_IMPORT[valid_email]" value="{csvImportData.output.startImport.valid_email}" />
+					<f:form.hidden name="CSV_IMPORT[remove_dublette]" value="{csvImportData.output.startImport.remove_dublette}" />
+					<f:form.hidden name="CSV_IMPORT[update_unique]" value="{csvImportData.output.startImport.update_unique}" />
+					<f:form.hidden name="CSV_IMPORT[record_unique]" value="{csvImportData.output.startImport.record_unique}" />
+					<f:form.hidden name="CSV_IMPORT[all_html]" value="{csvImportData.output.startImport.all_html}" />
+					<f:form.hidden name="CSV_IMPORT[charset]" value="{csvImportData.output.startImport.charsetSelected}" />
+					<f:form.hidden name="CSV_IMPORT[add_cat]" value="{csvImportData.output.startImport.add_cat}" />
 				</f:if>
-				<f:if condition="{formcontent.theOutput}">
-					<f:format.raw>{formcontent.theOutput}</f:format.raw>
+				<f:if condition="{csvImportData.theOutput}">
+					<f:format.raw>{csvImportData.theOutput}</f:format.raw>
 				</f:if>
 	        </f:form>
         </div>
