@@ -842,18 +842,8 @@ class DmailController extends AbstractController
             // setting Testmail flag
             $this->mailerService->setTestMail((bool)($this->pageTSConfiguration['testmail'] ?? false));
 
-            // Fixing addresses:
-            $addresses = preg_split('|[' . chr(10) . ',;]|', $this->sendTestMailAddress);
-
-            foreach ($addresses as $key => $val) {
-                $addresses[$key] = trim($val);
-                if (!GeneralUtility::validEmail($addresses[$key])) {
-                    unset($addresses[$key]);
-                }
-            }
-            $hash = array_flip($addresses);
-            $addresses = array_keys($hash);
-            $addressList = implode(',', $addresses);
+            // normalize addresses:
+            $addressList = RecipientUtility::normalizeListOfEmailAddresses($this->sendTestMailAddress);
 
             if ($addressList) {
                 // Sending the same mail to lots of recipients
@@ -866,8 +856,6 @@ class DmailController extends AbstractController
                     AbstractMessage::OK
                 );
                 $this->messageQueue->addMessage($message);
-
-                //$this->noView = 1;
             }
         } else {
             if ($this->cmd === Constants::WIZARD_STEP_SEND_TEST2) {

@@ -138,6 +138,26 @@ class RecipientUtility
     }
 
     /**
+     * Normalize a list of email addresses separated by colon, semicolon or enter (chr10) and remove not valid emails
+     *
+     * @param string $emailAddresses
+     * @return string
+     */
+    public static function normalizeListOfEmailAddresses(string $emailAddresses): string
+    {
+        $addresses = preg_split('|[' . chr(10) . ',;]|', $emailAddresses);
+
+        foreach ($addresses as $key => $val) {
+            $addresses[$key] = trim($val);
+            if (!GeneralUtility::validEmail($addresses[$key])) {
+                unset($addresses[$key]);
+            }
+        }
+
+        return implode(',', array_keys(array_flip($addresses)));
+    }
+
+    /**
      * Get the list of categories ids subscribed to by recipient $uid from table $table
      *
      * @param string $table Tablename of the recipient
