@@ -5,7 +5,6 @@ namespace MEDIAESSENZ\Mail\Controller;
 
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
@@ -28,39 +27,40 @@ class ConfigurationController extends AbstractController
         $this->view->setTemplate($currentModule);
 
         $this->init($request);
+
+        if ($this->backendUserHasModuleAccess() === false) {
+            $this->view->setTemplate('NoAccess');
+            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            $this->moduleTemplate->setContent($this->view->render());
+            return new HtmlResponse($this->moduleTemplate->renderContent());
+        }
+
         $this->initConfiguration($request);
         $this->updatePageTS();
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
-        if (($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id)) {
-            $this->moduleTemplate->addJavaScriptCode($this->getJS($this->sys_dmail_uid));
+        $module = $this->getModulName();
 
-            $module = $this->getModulName();
-
-            if ($module == 'dmail') {
-                // Direct mail module
-                if (($this->pageinfo['doktype'] ?? 0) == 254) {
-                    $this->setDefaultValues();
-                    $this->view->assignMultiple([
-                        'implodedParams' => $this->implodedParams,
-                    ]);
-                } else if ($this->id != 0) {
+        if ($module == 'dmail') {
+            // Direct mail module
+            if (($this->pageInfo['doktype'] ?? 0) == 254) {
+                $this->setDefaultValues();
+                $this->view->assignMultiple([
+                    'implodedParams' => $this->implodedParams,
+                ]);
+            } else {
+                if ($this->id != 0) {
                     $this->messageQueue->addMessage(ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'),
                         LanguageUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING));
                 }
-            } else {
-                $this->messageQueue->addMessage(ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_conf'),
-                    AbstractMessage::WARNING));
             }
         } else {
-            // If no access or if ID == zero
-            $this->view->setTemplate('NoAccess');
-            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            $this->messageQueue->addMessage(ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_conf'),
+                AbstractMessage::WARNING));
         }
 
-        /**
-         * Render template and return html content
-         */
+        // Render template and return html content
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        $this->moduleTemplate->addJavaScriptCode($this->getJS($this->mailUid));
         $this->moduleTemplate->setContent($this->view->render());
         return new HtmlResponse($this->moduleTemplate->renderContent());
     }

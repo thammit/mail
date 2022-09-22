@@ -16,7 +16,6 @@ use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility as MailCsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
@@ -37,7 +36,7 @@ class RecipientListController extends AbstractController
      *
      * @var string
      */
-    protected string $moduleName = '';
+    protected string $moduleName = 'MailNavFrame_RecipientList';
 
     protected int $group_uid = 0;
     protected string $lCmd = '';
@@ -87,46 +86,48 @@ class RecipientListController extends AbstractController
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
         $this->init($request);
+
+        if ($this->backendUserHasModuleAccess() === false) {
+            $this->view->setTemplate('NoAccess');
+            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            $this->moduleTemplate->setContent($this->view->render());
+            return new HtmlResponse($this->moduleTemplate->renderContent());
+        }
+
         $this->view->setTemplate('RecipientList');
 
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
 
-        if (($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id)) {
-            $module = $this->getModulName();
-            $this->moduleName = (string)($request->getQueryParams()['currentModule'] ?? $request->getParsedBody()['currentModule'] ?? 'MailNavFrame_RecipientList');
+        $module = $this->getModulName();
+//            $this->moduleName = (string)($request->getQueryParams()['currentModule'] ?? $request->getParsedBody()['currentModule'] ?? 'MailNavFrame_RecipientList');
 
-            if ($module == 'dmail') {
-                // Direct mail module
-                if (($this->pageinfo['doktype'] ?? 0) == 254) {
-                    $data = $this->moduleContent();
-                    $this->view->assignMultiple(
-                        [
-                            'data' => $data['data'],
-                            'type' => $data['type'],
-                            'formcontent' => $data['content'],
-                            'show' => true,
-                        ]
-                    );
-                } else if ($this->id != 0) {
+        if ($module == 'dmail') {
+            // Direct mail module
+            if (($this->pageInfo['doktype'] ?? 0) == 254) {
+                // Add module data to view
+                $data = $this->moduleContent();
+                $this->view->assignMultiple(
+                    [
+                        'data' => $data['data'],
+                        'type' => $data['type'],
+                        'formcontent' => $data['content'],
+                        'show' => true,
+                    ]
+                );
+            } else {
+                if ($this->id != 0) {
                     $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
                         AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
-            } else {
-                $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_recip'),
-                    AbstractMessage::WARNING);
-                $this->messageQueue->addMessage($message);
             }
         } else {
-            // If no access or if ID == zero
-            $this->view->setTemplate('NoAccess');
-            $message = ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
+            $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_recip'),
+                AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
-        /**
-         * Render template and return html content
-         */
+        // Render template and return html content
         $this->moduleTemplate->setContent($this->view->render());
         return new HtmlResponse($this->moduleTemplate->renderContent());
     }
@@ -179,7 +180,8 @@ class RecipientListController extends AbstractController
             'rows' => [],
         ];
 
-        $rows = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupByPid($this->id, trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby']));
+        $rows = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupByPid($this->id,
+            trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby']));
 
         foreach ($rows as $row) {
             $result = $this->cmd_compileMailGroup(intval($row['uid']));
@@ -202,7 +204,8 @@ class RecipientListController extends AbstractController
             $data['rows'][] = [
                 'icon' => $this->iconFactory->getIconForRecord('sys_dmail_group', $row, Icon::SIZE_SMALL)->render(),
                 'editLink' => $this->editLink('sys_dmail_group', $row['uid']),
-                'reciplink' => $this->linkRecip_record('<strong>' . htmlspecialchars(GeneralUtility::fixed_lgd_cs($row['title'], 30)) . '</strong>&nbsp;&nbsp;', $row['uid']),
+                'reciplink' => $this->linkRecip_record('<strong>' . htmlspecialchars(GeneralUtility::fixed_lgd_cs($row['title'], 30)) . '</strong>&nbsp;&nbsp;',
+                    $row['uid']),
                 'type' => htmlspecialchars(BackendUtility::getProcessedValue('sys_dmail_group', 'type', $row['type'])),
                 'description' => BackendUtility::getProcessedValue('sys_dmail_group', 'description', htmlspecialchars($row['description'])),
                 'count' => $count,
@@ -277,22 +280,26 @@ class RecipientListController extends AbstractController
                             $whichTables = intval($mailGroup['whichtables']);
                             // tt_address
                             if ($whichTables & 1) {
-                                $idLists['tt_address'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('tt_address', $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists['tt_address'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('tt_address', $pidList, $groupUid,
+                                    $mailGroup['select_categories']);
                             }
                             // fe_users
                             if ($whichTables & 2) {
-                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('fe_users', $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('fe_users', $pidList, $groupUid,
+                                    $mailGroup['select_categories']);
                             }
                             // user table
                             if ($this->userTable && ($whichTables & 4)) {
-                                $idLists[$this->userTable] = GeneralUtility::makeInstance(TempRepository::class)->getIdList($this->userTable, $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists[$this->userTable] = GeneralUtility::makeInstance(TempRepository::class)->getIdList($this->userTable, $pidList,
+                                    $groupUid, $mailGroup['select_categories']);
                             }
                             // fe_groups
                             if ($whichTables & 8) {
                                 if (!is_array($idLists['fe_users'])) {
                                     $idLists['fe_users'] = [];
                                 }
-                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('fe_groups', $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('fe_groups', $pidList, $groupUid,
+                                    $mailGroup['select_categories']);
                                 $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $idLists['fe_users']));
                             }
                         }
@@ -324,17 +331,23 @@ class RecipientListController extends AbstractController
                         $table = '';
                         if ($whichTables & 1) {
                             $table = 'tt_address';
-                        } else if ($whichTables & 2) {
-                            $table = 'fe_users';
-                        } else if ($this->userTable && ($whichTables & 4)) {
-                            $table = $this->userTable;
+                        } else {
+                            if ($whichTables & 2) {
+                                $table = 'fe_users';
+                            } else {
+                                if ($this->userTable && ($whichTables & 4)) {
+                                    $table = $this->userTable;
+                                }
+                            }
                         }
                         if ($table) {
-                            $idLists[$table] = GeneralUtility::makeInstance(TempRepository::class)->getSpecialQueryIdList($table, $mailGroup, $this->queryGenerator);
+                            $idLists[$table] = GeneralUtility::makeInstance(TempRepository::class)->getSpecialQueryIdList($table, $mailGroup,
+                                $this->queryGenerator);
                         }
                         break;
                     case Constants::RECIPIENT_GROUP_TYPE_OTHER:
-                        $groups = array_unique(GeneralUtility::makeInstance(TempRepository::class)->getMailGroups($mailGroup['mail_groups'], [$mailGroup['uid']], $this->backendUserPermissions));
+                        $groups = array_unique(GeneralUtility::makeInstance(TempRepository::class)->getMailGroups($mailGroup['mail_groups'],
+                            [$mailGroup['uid']], $this->backendUserPermissions));
 
                         foreach ($groups as $group) {
                             $collect = $this->cmd_compileMailGroup($group);
@@ -481,20 +494,23 @@ class RecipientListController extends AbstractController
         if ($csvValue) {
             if ($csvValue == 'PLAINLIST') {
                 $this->downloadCSV($idLists['PLAINLIST']);
-            } else if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $csvValue)) {
-                if (BackendUserUtility::getBackendUser()->check('tables_select', $csvValue)) {
-                    $fields = $csvValue == 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
-                    $fields .= ',tstamp';
+            } else {
+                if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $csvValue)) {
+                    if (BackendUserUtility::getBackendUser()->check('tables_select', $csvValue)) {
+                        $fields = $csvValue == 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
+                        $fields .= ',tstamp';
 
-                    $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$csvValue], $csvValue, GeneralUtility::trimExplode(',', $fields, true));
-                    $this->downloadCSV($rows);
-                } else {
-                    $message = ViewUtility::getFlashMessage(
-                        '',
-                        LanguageUtility::getLL('mailgroup_table_disallowed_csv'),
-                        AbstractMessage::ERROR
-                    );
-                    $this->messageQueue->addMessage($message);
+                        $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$csvValue], $csvValue,
+                            GeneralUtility::trimExplode(',', $fields, true));
+                        $this->downloadCSV($rows);
+                    } else {
+                        $message = ViewUtility::getFlashMessage(
+                            '',
+                            LanguageUtility::getLL('mailgroup_table_disallowed_csv'),
+                            AbstractMessage::ERROR
+                        );
+                        $this->messageQueue->addMessage($message);
+                    }
                 }
             }
         }
@@ -597,10 +613,14 @@ class RecipientListController extends AbstractController
         $table = '';
         if ($whichTables & 1) {
             $table = 'tt_address';
-        } else if ($whichTables & 2) {
-            $table = 'fe_users';
-        } else if ($this->userTable && ($whichTables & 4)) {
-            $table = $this->userTable;
+        } else {
+            if ($whichTables & 2) {
+                $table = 'fe_users';
+            } else {
+                if ($this->userTable && ($whichTables & 4)) {
+                    $table = $this->userTable;
+                }
+            }
         }
 
         $this->MOD_SETTINGS['queryTable'] = $queryTable ?: $table;
@@ -615,10 +635,14 @@ class RecipientListController extends AbstractController
             $whichTables = 0;
             if ($this->MOD_SETTINGS['queryTable'] == 'tt_address') {
                 $whichTables = 1;
-            } else if ($this->MOD_SETTINGS['queryTable'] == 'fe_users') {
-                $whichTables = 2;
-            } else if ($this->MOD_SETTINGS['queryTable'] == $this->userTable) {
-                $whichTables = 4;
+            } else {
+                if ($this->MOD_SETTINGS['queryTable'] == 'fe_users') {
+                    $whichTables = 2;
+                } else {
+                    if ($this->MOD_SETTINGS['queryTable'] == $this->userTable) {
+                        $whichTables = 4;
+                    }
+                }
             }
             $updateFields = [
                 'whichtables' => intval($whichTables),
@@ -800,7 +824,7 @@ class RecipientListController extends AbstractController
                 'cmd' => $this->cmd,
                 'html' => $row['module_sys_dmail_html'] ? true : false,
             ];
-            $this->categories = RepositoryUtility::makeCategories($this->table, $row, $this->sys_language_uid);
+            $this->categories = RepositoryUtility::makeCategories($this->table, $row, $this->sysLanguageUid);
 
             reset($this->categories);
             foreach ($this->categories as $pKey => $pVal) {

@@ -5,12 +5,10 @@ namespace MEDIAESSENZ\Mail\Controller;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use MEDIAESSENZ\Mail\Service\MailerService;
+use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
-use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,10 +34,12 @@ class MailerEngineController extends AbstractController
      *
      * @var string
      */
-    protected $moduleName = 'MailNavFrame_Status';
+    protected string $moduleName = 'MailNavFrame_Status';
 
-    protected function initMailerEngine(ServerRequestInterface $request): void
+    protected function init(ServerRequestInterface $request): void
     {
+        parent::init($request);
+
         $queryParams = $request->getQueryParams();
         $parsedBody = $request->getParsedBody();
 
@@ -49,55 +49,52 @@ class MailerEngineController extends AbstractController
 
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
+        $this->init($request);
+
+        if ($this->backendUserHasModuleAccess() === false) {
+            $this->view->setTemplate('NoAccess');
+            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            $this->moduleTemplate->setContent($this->view->render());
+            return new HtmlResponse($this->moduleTemplate->renderContent());
+        }
+
         $this->view->setTemplate('MailerEngine');
 
-        $this->init($request);
-        $this->initMailerEngine($request);
+        if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
+            if ($this->cmd == 'delete' && $this->uid) {
+                $this->deleteDMail($this->uid);
+            }
 
-        if (($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id)) {
-            $module = $this->getModulName();
+            // Direct mail module
+            if (($this->pageInfo['doktype'] ?? 0) == 254) {
+                $cronMonitor = $this->cronMonitor();
+                $mailerEngine = $this->mailerengine();
 
-            if ($module == 'dmail') {
-                if ($this->cmd == 'delete' && $this->uid) {
-                    $this->deleteDMail($this->uid);
-                }
-
-                // Direct mail module
-                if (($this->pageinfo['doktype'] ?? 0) == 254) {
-                    $cronMonitor = $this->cronMonitor();
-                    $mailerEngine = $this->mailerengine();
-
-                    $this->view->assignMultiple(
-                        [
-                            'cronMonitor' => $cronMonitor,
-                            'data' => $mailerEngine['data'],
-                            'id' => $this->id,
-                            'invoke' => $mailerEngine['invoke'],
-                            'moduleName' => $this->moduleName,
-                            'moduleUrl' => $mailerEngine['moduleUrl'],
-                            'show' => true,
-                        ]
-                    );
-                } else if ($this->id != 0) {
+                $this->view->assignMultiple(
+                    [
+                        'cronMonitor' => $cronMonitor,
+                        'data' => $mailerEngine['data'],
+                        'id' => $this->id,
+                        'invoke' => $mailerEngine['invoke'],
+                        'moduleName' => $this->moduleName,
+                        'moduleUrl' => $mailerEngine['moduleUrl'],
+                        'show' => true,
+                    ]
+                );
+            } else {
+                if ($this->id != 0) {
                     $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
                         AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
-            } else {
-                $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_mailer'),
-                    AbstractMessage::WARNING);
-                $this->messageQueue->addMessage($message);
             }
         } else {
-            // If no access or if ID == zero
-            $this->view->setTemplate('NoAccess');
-            $message = ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
+            $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_mailer'),
+                AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
-        /**
-         * Render template and return html content
-         */
+        // Render template and return html content
         $this->moduleTemplate->setContent($this->view->render());
         return new HtmlResponse($this->moduleTemplate->renderContent());
     }
@@ -146,16 +143,20 @@ class MailerEngineController extends AbstractController
                 }
             }
             // cron is idle or no cron
-        } else if (strpos($logContent, 'error')) {
-            // error in log file
-            $mailerStatus = -1;
-            $error = substr($logContent, strpos($logContent, 'error') + 7);
-        } else if (!strlen($logContent) || ($lastExecutionTime < $lastCronjobShouldBeNewThan)) {
-            // cron is not set or not running
-            $mailerStatus = 0;
         } else {
-            // last run of cron is in the interval
-            $mailerStatus = 1;
+            if (strpos($logContent, 'error')) {
+                // error in log file
+                $mailerStatus = -1;
+                $error = substr($logContent, strpos($logContent, 'error') + 7);
+            } else {
+                if (!strlen($logContent) || ($lastExecutionTime < $lastCronjobShouldBeNewThan)) {
+                    // cron is not set or not running
+                    $mailerStatus = 0;
+                } else {
+                    // last run of cron is in the interval
+                    $mailerStatus = 1;
+                }
+            }
         }
 
         $currentDate = ' / ' . LanguageUtility::getLL('dmail_mailerengine_current_time') . ' ' . BackendUtility::datetime(time()) . '. ';

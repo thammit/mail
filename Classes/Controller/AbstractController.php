@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -22,9 +23,11 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -33,6 +36,25 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 
 abstract class AbstractController
 {
+    protected int $id = 0;
+    protected int $pageUid = 0;
+    protected int $mailUid = 0;
+    protected int $sysLanguageUid = 0;
+    protected array|false $pageInfo = false;
+    protected bool $access = false;
+    protected string $siteIdentifier;
+    protected string $cmd = '';
+
+    protected int $backendUserId = 0;
+    protected string $backendUserName = '';
+    protected string $backendUserEmail = '';
+    protected string $backendUserPermissions = '';
+
+    protected array $pageTSConfiguration = [];
+    protected array $implodedParams = [];
+    protected string $userTable = '';
+    protected array $allowedTables = [];
+
     protected ModuleTemplate $moduleTemplate;
     protected IconFactory $iconFactory;
     protected PageRenderer $pageRenderer;
@@ -42,29 +64,6 @@ abstract class AbstractController
     protected EventDispatcherInterface $eventDispatcher;
     protected StandaloneView $view;
     protected FlashMessageQueue $messageQueue;
-    protected int $id = 0;
-    protected string $cmd = '';
-    protected int $sys_dmail_uid = 0;
-    protected string $pages_uid = '';
-    protected string $backendUserName = '';
-    protected string $backendUserEmail = '';
-    protected int $backendUserId = 0;
-    protected array $pageTSConfiguration = [];
-
-    /**
-     * A WHERE clause for selection records from the pages table based on read-permissions of the current backend user.
-     *
-     * @see init()
-     * @var string
-     */
-    protected string $backendUserPermissions = '';
-    protected array $implodedParams = [];
-    protected string $userTable = '';
-    protected array $allowedTables = [];
-    protected int $sys_language_uid = 0;
-    protected array $pageinfo = [];
-    protected bool $access = false;
-    protected string $siteIdentifier;
 
     /**
      * Constructor Method
@@ -113,8 +112,8 @@ abstract class AbstractController
 
         $this->id = (int)($parsedBody['id'] ?? $queryParams['id'] ?? 0);
         $this->cmd = (string)($parsedBody['cmd'] ?? $queryParams['cmd'] ?? '');
-        $this->pages_uid = (string)($parsedBody['pages_uid'] ?? $queryParams['pages_uid'] ?? '');
-        $this->sys_dmail_uid = (int)($parsedBody['sys_dmail_uid'] ?? $queryParams['sys_dmail_uid'] ?? 0);
+        $this->pageUid = (int)($parsedBody['pages_uid'] ?? $queryParams['pages_uid'] ?? 0);
+        $this->mailUid = (int)($parsedBody['sys_dmail_uid'] ?? $queryParams['sys_dmail_uid'] ?? 0);
 
         try {
             $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
@@ -124,9 +123,8 @@ abstract class AbstractController
         }
 
         $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
-        $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
-
-        $this->access = is_array($this->pageinfo) ? true : false;
+        $this->pageInfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
+        $this->access = $this->pageInfo !== false;
 
         // get the config from pageTS
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
@@ -143,12 +141,17 @@ abstract class AbstractController
         $this->messageQueue = ViewUtility::getFlashMessageQueue();
     }
 
+    protected function backendUserHasModuleAccess(): bool
+    {
+        return ($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id);
+    }
+
     protected function getModulName()
     {
-        $module = $this->pageinfo['module'] ?? false;
+        $module = $this->pageInfo['module'] ?? false;
 
-        if (!$module && isset($this->pageinfo['pid'])) {
-            $pidrec = BackendUtility::getRecord('pages', intval($this->pageinfo['pid']));
+        if (!$module && isset($this->pageInfo['pid'])) {
+            $pidrec = BackendUtility::getRecord('pages', intval($this->pageInfo['pid']));
             $module = $pidrec['module'] ?? false;
         }
 

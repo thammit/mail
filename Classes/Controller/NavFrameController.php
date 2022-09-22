@@ -5,19 +5,19 @@ namespace MEDIAESSENZ\Mail\Controller;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
-use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 
 class NavFrameController extends AbstractController
 {
@@ -40,7 +40,7 @@ class NavFrameController extends AbstractController
         $currentSubScript = $uriBuilder->buildUriFromRoute($currentModule);
 
         // Setting highlight mode:
-        $disableTitleHighlight = MailerUtility::getTSConfig()['options.']['pageTree.']['disableTitleHighlight'] ?? false;
+        $disableTitleHighlight = BackendUtility::getPagesTSconfig()['options.']['pageTree.']['disableTitleHighlight'] ?? false;
         $this->doHighlight = !$disableTitleHighlight;
 
         $this->view->setTemplate('NavFrame');
@@ -48,7 +48,7 @@ class NavFrameController extends AbstractController
         $rows = $this->getPages();
         $pages = [];
         while (($row = $rows->fetchAssociative()) !== false) {
-            if (BackendUtility::readPageAccess($row['uid'], MailerUtility::getBackendUser()->getPagePermsClause(1))) {
+            if (BackendUtility::readPageAccess($row['uid'], BackendUserUtility::getBackendUser()->getPagePermsClause(1))) {
                 $icon = $this->iconFactory->getIconForRecord('pages', $row, Icon::SIZE_SMALL)->render();
                 $pages[] = ['icon' => $icon, 'page' => $row];
             }

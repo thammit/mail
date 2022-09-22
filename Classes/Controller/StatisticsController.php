@@ -8,7 +8,6 @@ use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
@@ -70,8 +69,10 @@ class StatisticsController extends AbstractController
 
     private string $siteUrl = '';
 
-    protected function initStatistics(ServerRequestInterface $request): void
+    protected function init(ServerRequestInterface $request): void
     {
+        parent::init($request);
+
         $this->siteUrl = $request->getAttribute('normalizedParams')->getSiteUrl();
 
         $queryParams = $request->getQueryParams();
@@ -119,38 +120,38 @@ class StatisticsController extends AbstractController
 
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
-        $this->view->setTemplate('Statistics');
-
         $this->init($request);
-        $this->initStatistics($request);
 
-        if (($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id)) {
-            $module = $this->getModulName();
+        if ($this->backendUserHasModuleAccess() === false) {
+            $this->view->setTemplate('NoAccess');
+            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            $this->moduleTemplate->setContent($this->view->render());
+            return new HtmlResponse($this->moduleTemplate->renderContent());
+        }
 
-            if ($module == 'dmail') {
-                // Direct mail module
-                if (($this->pageinfo['doktype'] ?? 0) == 254) {
-                    $data = $this->moduleContent();
-                    $this->view->assignMultiple(
-                        [
-                            'data' => $data,
-                            'show' => true,
-                        ]
-                    );
-                } else if ($this->id != 0) {
+        $this->view->setTemplate('Statistics');
+        $module = $this->getModulName();
+
+        if ($module == 'dmail') {
+            // Direct mail module
+            if (($this->pageInfo['doktype'] ?? 0) == 254) {
+                $data = $this->moduleContent();
+                $this->view->assignMultiple(
+                    [
+                        'data' => $data,
+                        'show' => true,
+                    ]
+                );
+            } else {
+                if ($this->id != 0) {
                     $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
                         AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
-            } else {
-                $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_stat'),
-                    AbstractMessage::WARNING);
-                $this->messageQueue->addMessage($message);
             }
         } else {
-            // If no access or if ID == zero
-            $this->view->setTemplate('NoAccess');
-            $message = ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
+            $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_stat'),
+                AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
@@ -170,10 +171,10 @@ class StatisticsController extends AbstractController
     {
         $theOutput = [];
 
-        if (!$this->sys_dmail_uid) {
+        if (!$this->mailUid) {
             $theOutput['dataPageInfo'] = $this->displayPageInfo();
         } else {
-            $row = GeneralUtility::makeInstance(SysDmailRepository::class)->selectSysDmailById($this->sys_dmail_uid, $this->id);
+            $row = GeneralUtility::makeInstance(SysDmailRepository::class)->selectSysDmailById($this->mailUid, $this->id);
             if (is_array($row)) {
                 // COMMAND:
                 switch ($this->cmd) {
@@ -327,7 +328,7 @@ class StatisticsController extends AbstractController
                 'returnUrl' => $this->requestUri,
             ]);
 
-            $this->categories = GeneralUtility::makeInstance(TempRepository::class)->makeCategories($this->table, $row, $this->sys_language_uid);
+            $this->categories = GeneralUtility::makeInstance(TempRepository::class)->makeCategories($this->table, $row, $this->sysLanguageUid);
             $data = [
                 'icon' => $this->iconFactory->getIconForRecord($this->table, $row)->render(),
                 'iconActionsOpen' => $iconActionsOpen = $this->getIconActionsOpen(),
@@ -396,7 +397,10 @@ class StatisticsController extends AbstractController
         return [
             'table' => [
                 'head' => [
-                    '', 'stats_total', 'stats_HTML', 'stats_plaintext',
+                    '',
+                    'stats_total',
+                    'stats_HTML',
+                    'stats_plaintext',
                 ],
                 'body' => [
                     [
@@ -544,14 +548,17 @@ class StatisticsController extends AbstractController
 
         $tables[2] = [
             'head' => [
-                '', 'stats_total', 'stats_HTML', 'stats_plaintext',
+                '',
+                'stats_total',
+                'stats_HTML',
+                'stats_plaintext',
             ],
             'body' => [
                 [
                     'stats_total_responses',
                     ($table['1']['counter'] ?? 0) + ($table['2']['counter'] ?? 0),
-                        $table['1']['counter'] ?? '0',
-                        $table['2']['counter'] ?? '0',
+                    $table['1']['counter'] ?? '0',
+                    $table['2']['counter'] ?? '0',
                 ],
                 [
                     'stats_unique_responses',
@@ -561,7 +568,8 @@ class StatisticsController extends AbstractController
                 ],
                 [
                     'stats_links_clicked_per_respondent',
-                    ($uniqueHtmlResponses + $uniquePlainResponses ? number_format(($table['1']['counter'] + $table['2']['counter']) / ($uniqueHtmlResponses + $uniquePlainResponses), 2) : '-'),
+                    ($uniqueHtmlResponses + $uniquePlainResponses ? number_format(($table['1']['counter'] + $table['2']['counter']) / ($uniqueHtmlResponses + $uniquePlainResponses),
+                        2) : '-'),
                     ($uniqueHtmlResponses ? number_format(($table['1']['counter']) / ($uniqueHtmlResponses), 2) : '-'),
                     ($uniquePlainResponses ? number_format(($table['2']['counter']) / ($uniquePlainResponses), 2) : '-'),
                 ],
@@ -750,7 +758,9 @@ class StatisticsController extends AbstractController
 
         $tables[4] = [
             'head' => [
-                '', 'stats_count', '',
+                '',
+                'stats_count',
+                '',
             ],
             'body' => [
                 [
@@ -764,7 +774,8 @@ class StatisticsController extends AbstractController
                 ],
                 [
                     'title' => 'stats_recipient_unknown',
-                    'counter' => $this->showWithPercent(($responseResult['550']['counter'] ?? 0) + ($responseResult['553']['counter'] ?? 0), ($table['-127']['counter'] ?? 0)),
+                    'counter' => $this->showWithPercent(($responseResult['550']['counter'] ?? 0) + ($responseResult['553']['counter'] ?? 0),
+                        ($table['-127']['counter'] ?? 0)),
                     'icons' => [// Icons unknown recip
                         ['getAttr' => 'unknownList', 'lang' => 'stats_list_returned_unknown_recipient', 'icon' => $listIcons],
                         ['getAttr' => 'unknownDisable', 'lang' => 'stats_disable_returned_unknown_recipient', 'icon' => $hideIcons],
@@ -1443,14 +1454,18 @@ class StatisticsController extends AbstractController
                             $recRec['firstlink'] = $row['url_id'];
                             $recRec['firstlink_time'] = intval(@max($recRec['pings']));
                             $recRec['firstlink_time'] = $recRec['firstlink_time'] ? $row['tstamp'] - $recRec['firstlink_time'] : 0;
-                        } else if (!$recRec['secondlink']) {
-                            $recRec['secondlink'] = $row['url_id'];
-                            $recRec['secondlink_time'] = intval(@max($recRec['pings']));
-                            $recRec['secondlink_time'] = $recRec['secondlink_time'] ? $row['tstamp'] - $recRec['secondlink_time'] : 0;
-                        } else if (!$recRec['thirdlink']) {
-                            $recRec['thirdlink'] = $row['url_id'];
-                            $recRec['thirdlink_time'] = intval(@max($recRec['pings']));
-                            $recRec['thirdlink_time'] = $recRec['thirdlink_time'] ? $row['tstamp'] - $recRec['thirdlink_time'] : 0;
+                        } else {
+                            if (!$recRec['secondlink']) {
+                                $recRec['secondlink'] = $row['url_id'];
+                                $recRec['secondlink_time'] = intval(@max($recRec['pings']));
+                                $recRec['secondlink_time'] = $recRec['secondlink_time'] ? $row['tstamp'] - $recRec['secondlink_time'] : 0;
+                            } else {
+                                if (!$recRec['thirdlink']) {
+                                    $recRec['thirdlink'] = $row['url_id'];
+                                    $recRec['thirdlink_time'] = intval(@max($recRec['pings']));
+                                    $recRec['thirdlink_time'] = $recRec['thirdlink_time'] ? $row['tstamp'] - $recRec['thirdlink_time'] : 0;
+                                }
+                            }
                         }
                         $recRec['response'][] = $row['tstamp'];
                         break;
@@ -1492,8 +1507,10 @@ class StatisticsController extends AbstractController
             $recRec['links_last'] = empty($recRec['links']) ? 0 : intval(@max($recRec['links']));
             $recRec['links'] = count($recRec['links']);
 
-            $recRec['response_first'] = MathUtility::forceIntegerInRange((int)((int)(empty($recRec['response']) ? 0 : @min($recRec['response'])) - $recRec['tstamp']), 0);
-            $recRec['response_last'] = MathUtility::forceIntegerInRange((int)((int)(empty($recRec['response']) ? 0 : @max($recRec['response'])) - $recRec['tstamp']), 0);
+            $recRec['response_first'] = MathUtility::forceIntegerInRange((int)((int)(empty($recRec['response']) ? 0 : @min($recRec['response'])) - $recRec['tstamp']),
+                0);
+            $recRec['response_last'] = MathUtility::forceIntegerInRange((int)((int)(empty($recRec['response']) ? 0 : @max($recRec['response'])) - $recRec['tstamp']),
+                0);
             $recRec['response'] = count($recRec['response']);
 
             $recRec['time_firstping'] = MathUtility::forceIntegerInRange((int)($recRec['pings_first'] - $recRec['tstamp']), 0);
