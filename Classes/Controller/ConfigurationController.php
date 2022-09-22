@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
@@ -40,7 +41,7 @@ class ConfigurationController extends AbstractController
 
         $module = $this->getModulName();
 
-        if ($module == 'dmail') {
+        if ($module === Constants::MAIL_MODULE_NAME) {
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
                 $this->setDefaultValues();

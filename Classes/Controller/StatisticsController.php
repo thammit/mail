@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
+use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
@@ -132,7 +133,7 @@ class StatisticsController extends AbstractController
         $this->view->setTemplate('Statistics');
         $module = $this->getModulName();
 
-        if ($module == 'dmail') {
+        if ($module === Constants::MAIL_MODULE_NAME) {
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
                 $data = $this->moduleContent();

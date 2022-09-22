@@ -98,10 +98,7 @@ class RecipientListController extends AbstractController
 
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
 
-        $module = $this->getModulName();
-//            $this->moduleName = (string)($request->getQueryParams()['currentModule'] ?? $request->getParsedBody()['currentModule'] ?? 'MailNavFrame_RecipientList');
-
-        if ($module == 'dmail') {
+        if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
                 // Add module data to view
