@@ -147,7 +147,7 @@ class RecipientListController extends AbstractController
                 $type = 1;
                 break;
             case 'displayMailGroup':
-                $result = $this->cmd_compileMailGroup($this->group_uid);
+                $result = $this->compileMailGroup($this->group_uid);
                 $data = $this->displayMailGroup($result);
                 $type = 2;
                 break;
@@ -184,21 +184,21 @@ class RecipientListController extends AbstractController
             trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby']));
 
         foreach ($rows as $row) {
-            $result = $this->cmd_compileMailGroup(intval($row['uid']));
-            $count = 0;
+            $result = $this->compileMailGroup(intval($row['uid']));
+            $totalRecipients = 0;
             $idLists = $result['queryInfo']['id_lists'];
 
             if (is_array($idLists['tt_address'] ?? false)) {
-                $count += count($idLists['tt_address']);
+                $totalRecipients += count($idLists['tt_address']);
             }
             if (is_array($idLists['fe_users'] ?? false)) {
-                $count += count($idLists['fe_users']);
+                $totalRecipients += count($idLists['fe_users']);
             }
             if (is_array($idLists['PLAINLIST'] ?? false)) {
-                $count += count($idLists['PLAINLIST']);
+                $totalRecipients += count($idLists['PLAINLIST']);
             }
             if (is_array($idLists[$this->userTable] ?? false)) {
-                $count += count($idLists[$this->userTable]);
+                $totalRecipients += count($idLists[$this->userTable]);
             }
 
             $data['rows'][] = [
@@ -208,7 +208,7 @@ class RecipientListController extends AbstractController
                     $row['uid']),
                 'type' => htmlspecialchars(BackendUtility::getProcessedValue('sys_dmail_group', 'type', $row['type'])),
                 'description' => BackendUtility::getProcessedValue('sys_dmail_group', 'description', htmlspecialchars($row['description'])),
-                'count' => $count,
+                'count' => $totalRecipients,
             ];
         }
 
@@ -245,7 +245,7 @@ class RecipientListController extends AbstractController
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    protected function cmd_compileMailGroup(int $groupUid): array
+    protected function compileMailGroup(int $groupUid): array
     {
         $idLists = [];
         if ($groupUid) {
@@ -283,26 +283,26 @@ class RecipientListController extends AbstractController
                             $whichTables = intval($mailGroup['whichtables']);
                             // tt_address
                             if ($whichTables & 1) {
-                                $idLists['tt_address'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('tt_address', $pidList, $groupUid,
-                                    $mailGroup['select_categories']);
+                                $idLists['tt_address'] = GeneralUtility::makeInstance(TempRepository::class)
+                                    ->getIdList('tt_address', $pidList, $groupUid, $mailGroup['select_categories']);
                             }
                             // fe_users
                             if ($whichTables & 2) {
-                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('fe_users', $pidList, $groupUid,
-                                    $mailGroup['select_categories']);
+                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)
+                                    ->getIdList('fe_users', $pidList, $groupUid, $mailGroup['select_categories']);
                             }
                             // user table
                             if ($this->userTable && ($whichTables & 4)) {
-                                $idLists[$this->userTable] = GeneralUtility::makeInstance(TempRepository::class)->getIdList($this->userTable, $pidList,
-                                    $groupUid, $mailGroup['select_categories']);
+                                $idLists[$this->userTable] = GeneralUtility::makeInstance(TempRepository::class)
+                                    ->getIdList($this->userTable, $pidList, $groupUid, $mailGroup['select_categories']);
                             }
                             // fe_groups
                             if ($whichTables & 8) {
                                 if (!is_array($idLists['fe_users'])) {
                                     $idLists['fe_users'] = [];
                                 }
-                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getIdList('fe_groups', $pidList, $groupUid,
-                                    $mailGroup['select_categories']);
+                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)
+                                    ->getIdList('fe_groups', $pidList, $groupUid, $mailGroup['select_categories']);
                                 $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $idLists['fe_users']));
                             }
                         }
@@ -353,7 +353,7 @@ class RecipientListController extends AbstractController
                             [$mailGroup['uid']], $this->backendUserPermissions));
 
                         foreach ($groups as $group) {
-                            $collect = $this->cmd_compileMailGroup($group);
+                            $collect = $this->compileMailGroup($group);
                             if (is_array($collect['queryInfo']['id_lists'])) {
                                 $idLists = array_merge_recursive($idLists, $collect['queryInfo']['id_lists']);
                             }

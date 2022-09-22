@@ -57,21 +57,21 @@ class RecipientUtility
         if ($groups) {
             foreach ($groups as $group) {
                 $result = self::compileMailGroup($group['uid'], $groups, $userTable, $backendUserPermission);
-                $receiver = 0;
+                $totalRecipients = 0;
                 $idLists = $result['queryInfo']['id_lists'];
                 if (is_array($idLists['tt_address'] ?? false)) {
-                    $receiver += count($idLists['tt_address']);
+                    $totalRecipients += count($idLists['tt_address']);
                 }
                 if (is_array($idLists['fe_users'] ?? false)) {
-                    $receiver += count($idLists['fe_users']);
+                    $totalRecipients += count($idLists['fe_users']);
                 }
                 if (is_array($idLists['PLAINLIST'] ?? false)) {
-                    $receiver += count($idLists['PLAINLIST']);
+                    $totalRecipients += count($idLists['PLAINLIST']);
                 }
                 if (is_array($idLists[$userTable] ?? false)) {
-                    $receiver += count($idLists[$userTable]);
+                    $totalRecipients += count($idLists[$userTable]);
                 }
-                $mailGroups[] = ['uid' => $group['uid'], 'title' => $group['title'], 'receiver' => $receiver];
+                $mailGroups[] = ['uid' => $group['uid'], 'title' => $group['title'], 'receiver' => $totalRecipients];
                 $lastGroup = $group;
             }
         }
@@ -348,11 +348,13 @@ class RecipientUtility
             }
         }
         return $idLists;
-    }/**
+    }
+
+    /**
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      * @throws DBALException
- */
+    */
     public static function compileMailGroup(int $pageId, array $groups, string $userTable, $backendUserPermissions): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
