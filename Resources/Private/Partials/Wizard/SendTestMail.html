@@ -5,8 +5,7 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<f:variable name="mailForm" value="mail-wizard-form-test"/>
-<form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
+<form action="" method="post" name="dmailform" enctype="multipart/form-data">
     <h3>
         <f:translate key="{lll}dmail_wiz4_testmail"/>
     </h3>
@@ -15,7 +14,9 @@
             <h3>
                 <f:translate key="{lll}testmail_individual"/>
             </h3>
-            <f:translate key="{lll}testmail_individual_msg"/>
+            <f:be.infobox>
+                <f:translate key="{lll}testmail_individual_msg"/>
+            </f:be.infobox>
             <div class="my-3">
                 {test.testFormData.test_tt_address -> f:format.html()}
             </div>
@@ -40,24 +41,24 @@
                 </f:for>
             </div>
         </f:if>
-        <h3>
-            <f:translate key="{lll}testmail_simple"/>
-        </h3>
-        <div class="mb-3">
-            <f:translate key="{lll}testmail_simple_msg"/>
-        </div>
+        <f:be.infobox state="-1" title="{f:translate(key: '{lll}testmail_simple')}">
+            <f:format.html><f:translate key="{lll}testmail_simple_msg"/></f:format.html>
+        </f:be.infobox>
         <input type="hidden" name="id" value="{test.testFormData.id}"/>
         <input type="hidden" name="sys_dmail_uid" value="{test.testFormData.sys_dmail_uid}"/>
         <input type="hidden" name="cmd" value="{test.testFormData.cmd}"/>
         <div class="row mb-3">
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="input-group">
-                    <input class="form-control" type="email" placeholder="Mail address" name="sendTestMail[address]" value="{backendUser.email}" aria-label="Test mail recipient" aria-describedby="send-test-mail-button"/>
-                    <button class="btn btn-outline-primary" id="send-test-mail-button" type="submit" name="sendTestMail[send]" value="1"><f:translate key="{lll}dmail_send"/></button>
+                    <input class="form-control" type="text" placeholder="Mail address" name="sendTestMail[address]" value="{backendUser.email}" aria-label="Test mail recipient" aria-describedby="send-test-mail-button"/>
+                    <button class="btn btn-outline-primary text-uppercase" id="send-test-mail-button" type="submit" name="sendTestMail[send]" value="1"><f:translate key="{lll}dmail_send"/></button>
                 </div>
             </div>
         </div>
     </div>
+</form>
+<f:variable name="mailForm" value="mail-wizard-form-test"/>
+<form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
     <input type="hidden" name="cmd" value="{test.cmd}">
     <input type="hidden" name="sys_dmail_uid" value="{test.sys_dmail_uid}">
     <input type="hidden" name="pages_uid" value="{test.pages_uid}">

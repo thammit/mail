@@ -3,6 +3,7 @@ namespace MEDIAESSENZ\Mail\UserFunc;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Constants;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
@@ -10,8 +11,8 @@ use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 class BoundaryUserFunc
 {
-    public string $boundaryStartWrap = '<!--DMAILER_SECTION_BOUNDARY_ | -->';
-    public string $boundaryEnd = '<!--DMAILER_SECTION_BOUNDARY_END-->';
+    public string $boundaryStartWrap = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_ | -->';
+    public string $boundaryEnd = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
 
     /**
      * @var ContentObjectRenderer
@@ -162,7 +163,7 @@ class BoundaryUserFunc
             foreach ($categories as $category) {
                 $categoryList[] = $category['uid_foreign'];
             }
-            $content = '<!--DMAILER_SECTION_BOUNDARY_' . implode(',', $categoryList) . '-->|<!--DMAILER_SECTION_BOUNDARY_END-->';
+            $content = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_' . implode(',', $categoryList) . '-->|<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
         }
 
         return $content;

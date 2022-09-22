@@ -6,12 +6,16 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
+use MEDIAESSENZ\Mail\Utility\TcaUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
@@ -120,7 +124,7 @@ class StatisticsController extends AbstractController
         $this->init($request);
         $this->initStatistics($request);
 
-        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id)) {
             $module = $this->getModulName();
 
             if ($module == 'dmail') {
@@ -134,17 +138,19 @@ class StatisticsController extends AbstractController
                         ]
                     );
                 } else if ($this->id != 0) {
-                    $message = MailerUtility::getFlashMessage(MailerUtility::getLL('dmail_noRegular'), MailerUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING);
+                    $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
+                        AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
             } else {
-                $message = MailerUtility::getFlashMessage(MailerUtility::getLL('select_folder'), MailerUtility::getLL('header_stat'), AbstractMessage::WARNING);
+                $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_stat'),
+                    AbstractMessage::WARNING);
                 $this->messageQueue->addMessage($message);
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $message = MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
+            $message = ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
@@ -225,12 +231,12 @@ class StatisticsController extends AbstractController
     {
         if (!empty($row['scheduled_begin'])) {
             if (!empty($row['scheduled_end'])) {
-                $sent = MailerUtility::getLL('stats_overview_sent');
+                $sent = LanguageUtility::getLL('stats_overview_sent');
             } else {
-                $sent = MailerUtility::getLL('stats_overview_sending');
+                $sent = LanguageUtility::getLL('stats_overview_sending');
             }
         } else {
-            $sent = MailerUtility::getLL('stats_overview_queuing');
+            $sent = LanguageUtility::getLL('stats_overview_queuing');
         }
         return $sent;
     }
@@ -312,7 +318,7 @@ class StatisticsController extends AbstractController
                 $categories = rtrim($categories, ',');
             }
 
-            $editOnClickLink = MailerUtility::getEditOnClickLink([
+            $editOnClickLink = ViewUtility::getEditOnClickLink([
                 'edit' => [
                     $this->table => [
                         $row['uid'] => 'edit',
@@ -1306,7 +1312,7 @@ class StatisticsController extends AbstractController
         } else {
             $page = BackendUtility::getRecord('pages', $row['page'], 'title');
             $dmailData = $row['page'] . ', ' . htmlspecialchars($page['title']);
-            $dmailInfo = MailerUtility::getTranslatedLabelOfTcaField('plainParams') . ' ' . htmlspecialchars($row['plainParams'] . LF . MailerUtility::getTranslatedLabelOfTcaField('HTMLParams') . $row['HTMLParams']) . '; ' . LF;
+            $dmailInfo = TcaUtility::getTranslatedLabelOfTcaField('plainParams') . ' ' . htmlspecialchars($row['plainParams'] . LF . TcaUtility::getTranslatedLabelOfTcaField('HTMLParams') . $row['HTMLParams']) . '; ' . LF;
         }
 
         $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectSysDmailMaillogsCompactView($row['uid']);

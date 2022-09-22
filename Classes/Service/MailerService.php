@@ -11,7 +11,12 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
+use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -289,11 +294,11 @@ class MailerService implements LoggerAwareInterface
      */
     public function assemble(array $mailData, array $params): bool
     {
-        $fetchPlainTextContent = MailerUtility::shouldFetchPlainText($mailData);
-        $fetchHtmlContent = MailerUtility::shouldFetchHtml($mailData);
+        $fetchPlainTextContent = ConfigurationUtility::shouldFetchPlainText($mailData);
+        $fetchHtmlContent = ConfigurationUtility::shouldFetchHtml($mailData);
 
         if (!$fetchPlainTextContent && !$fetchHtmlContent) {
-            MailerUtility::addInfoToFlashMessageQueue('', MailerUtility::getLL('dmail_no_mail_content_format_selected'));
+            ViewUtility::addInfoToFlashMessageQueue('', LanguageUtility::getLL('dmail_no_mail_content_format_selected'));
             return false;
         }
 
@@ -302,7 +307,7 @@ class MailerService implements LoggerAwareInterface
         $this->setIncludeMedia((bool)$mailData['includeMedia']);
 
         $errors = false;
-        $baseUrl = MailerUtility::getAbsoluteBaseUrlForMailPage((int)$mailData['page']);
+        $baseUrl = BackendDataUtility::getAbsoluteBaseUrlForMailPage((int)$mailData['page']);
         $glue = str_contains($baseUrl, '?') ? '&' : '?';
         if ($params['enable_jump_url'] ?? false) {
             $this->setJumpUrlPrefix($baseUrl . $glue .
@@ -317,40 +322,47 @@ class MailerService implements LoggerAwareInterface
         }
 
         if ($fetchPlainTextContent) {
-            $plainTextUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plainParams']) : MailerUtility::getUrlForInternalPage($mailData['page'], $mailData['plainParams']);
+            $plainTextUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plainParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
+                $mailData['plainParams']);
             $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $params);
             try {
                 $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
                 if ($plainContent === false) {
-                    MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_external_plain_uri_is_invalid'), MailerUtility::getLL('dmail_error'));
+                    ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_plain_uri_is_invalid'),
+                        LanguageUtility::getLL('dmail_error'));
                     $errors = true;
                 } else {
                     if (!MailerUtility::contentContainsBoundaries($plainContent)) {
-                        MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLL('dmail_no_plain_boundaries'), MailerUtility::getLL('dmail_warning'));
+                        ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_boundaries'),
+                            LanguageUtility::getLL('dmail_warning'));
                     }
                     $this->setPlainContent($plainContent);
                 }
             } catch (RequestException|ConnectException $exception) {
                 $errors = true;
-                MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(), MailerUtility::getLL('dmail_error'));
+                ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
+                    LanguageUtility::getLL('dmail_error'));
             }
         }
 
         if ($fetchHtmlContent) {
-            $htmlUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['HTMLParams']) : MailerUtility::getUrlForInternalPage($mailData['page'], $mailData['HTMLParams']);
+            $htmlUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['HTMLParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
+                $mailData['HTMLParams']);
             $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $params);
             try {
                 $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
                 if ($htmlContent === false) {
-                    MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_external_html_uri_is_invalid'), MailerUtility::getLL('dmail_error'));
+                    ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid'),
+                        LanguageUtility::getLL('dmail_error'));
                     $errors = true;
                 } else {
                     if (MailerUtility::contentContainsFrameTag($htmlContent)) {
                         $errors = true;
-                        MailerUtility::addErrorToFlashMessageQueue(MailerUtility::getLL('dmail_frames_not allowed'), MailerUtility::getLL('dmail_error'));
+                        ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_frames_not allowed'), LanguageUtility::getLL('dmail_error'));
                     }
                     if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
-                        MailerUtility::addWarningToFlashMessageQueue(MailerUtility::getLL('dmail_no_html_boundaries'), MailerUtility::getLL('dmail_warning'));
+                        ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_html_boundaries'),
+                            LanguageUtility::getLL('dmail_warning'));
                     }
                     $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $baseUrl);
                     if ($htmlHyperLinks) {
@@ -377,7 +389,8 @@ class MailerService implements LoggerAwareInterface
                 }
             } catch (RequestException $exception) {
                 $errors = true;
-                MailerUtility::addErrorToFlashMessageQueue(' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(), MailerUtility::getLL('dmail_no_html_content'));
+                ViewUtility::addErrorToFlashMessageQueue(' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
+                    LanguageUtility::getLL('dmail_no_html_content'));
             }
         }
 
@@ -437,7 +450,7 @@ class MailerService implements LoggerAwareInterface
         $this->priority = MathUtility::forceIntegerInRange((int)$mailData['priority'], 1, 5);
         $this->authCodeFieldList = ($mailData['authcode_fieldList'] ?: 'uid');
 
-        $this->dmailer['sectionBoundary'] = '<!--DMAILER_SECTION_BOUNDARY';
+        $this->dmailer['sectionBoundary'] = '<!--' . Constants::CONTENT_SECTION_BOUNDARY;
         $this->dmailer['html_content'] = $this->getHtmlContent() ?? '';
         $this->dmailer['plain_content'] = $this->getPlainContent() ?? '';
         $this->dmailer['messageID'] = $this->messageId;
@@ -489,8 +502,8 @@ class MailerService implements LoggerAwareInterface
         // replace %23%23%23 with ###, since typolink generated link with urlencode
         $content = str_replace('%23%23%23', '###', $content);
 
-        $rowFieldsArray = GeneralUtility::trimExplode(',', MailerUtility::getExtensionConfiguration('defaultRecipFields'), true);
-        if ($addRecipientFields = MailerUtility::getExtensionConfiguration('addRecipFields')) {
+        $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipFields'), true);
+        if ($addRecipientFields = ConfigurationUtility::getExtensionConfiguration('addRecipFields')) {
             $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields), true);
         }
 
@@ -583,7 +596,7 @@ class MailerService implements LoggerAwareInterface
         if ($recipientData['email']) {
             $midRidId = 'MID' . $this->dmailer['sys_dmail_uid'] . '_' . $tableNameChar . $recipientData['uid'];
             $uniqMsgId = md5(microtime()) . '_' . $midRidId;
-            $authCode = MailerUtility::stdAuthCode($recipientData, $this->authCodeFieldList);
+            $authCode = RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList);
 
             $additionalMarkers = [
                 // Put in the tablename of the userinformation
@@ -700,7 +713,7 @@ class MailerService implements LoggerAwareInterface
                             $statement = $queryBuilder->execute();
 
                             while ($recipientData = $statement->fetchAssociative()) {
-                                $recipientData['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories($table, $recipientData['uid']);
+                                $recipientData['sys_dmail_categories_list'] = RecipientUtility::getListOfRecipientCategories($table, $recipientData['uid']);
 
                                 if ($c >= $this->sendPerCycle) {
                                     $returnVal = false;
@@ -715,7 +728,7 @@ class MailerService implements LoggerAwareInterface
                         }
                     }
 
-                    $this->logger->debug(MailerUtility::getLL('dmailer_sending') . ' ' . $ct . ' ' . MailerUtility::getLL('dmailer_sending_to_table') . ' ' . $table);
+                    $this->logger->debug(LanguageUtility::getLL('dmailer_sending') . ' ' . $ct . ' ' . LanguageUtility::getLL('dmailer_sending_to_table') . ' ' . $table);
                 }
             }
         }
@@ -737,9 +750,9 @@ class MailerService implements LoggerAwareInterface
      */
     protected function sendSingleMailAndAddLogEntry(int $mailUid, array $recipientData, string $recipientTable): void
     {
-        if (MailerUtility::isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $recipientTable) === false) {
+        if (RecipientUtility::isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $recipientTable) === false) {
             $pt = MailerUtility::getMilliseconds();
-            $recipientData = MailerUtility::normalizeAddress($recipientData);
+            $recipientData = RecipientUtility::normalizeAddress($recipientData);
 
             // write to dmail_maillog table. if it can be written, continue with sending.
             // if not, stop the script and report error
@@ -793,12 +806,12 @@ class MailerService implements LoggerAwareInterface
 
         switch ($key) {
             case 'begin':
-                $subject = MailerUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . MailerUtility::getLL('dmailer_job_begin');
-                $message = MailerUtility::getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s');
+                $subject = LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_begin');
+                $message = LanguageUtility::getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s');
                 break;
             case 'end':
-                $subject = MailerUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . MailerUtility::getLL('dmailer_job_end');
-                $message = MailerUtility::getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s');
+                $subject = LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_end');
+                $message = LanguageUtility::getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s');
                 break;
             default:
                 // do nothing
@@ -838,16 +851,16 @@ class MailerService implements LoggerAwareInterface
      */
     public function runcron(): void
     {
-        $this->notificationJob = (bool)MailerUtility::getExtensionConfiguration('notificationJob');
+        $this->notificationJob = (bool)ConfigurationUtility::getExtensionConfiguration('notificationJob');
 
-        if (!is_object(MailerUtility::getLanguageService())) {
+        if (!is_object(LanguageUtility::getLanguageService())) {
             $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
             $language = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['cron_language'] ?: $this->backendUserLanguage;
-            MailerUtility::getLanguageService()->init(trim($language));
+            LanguageUtility::getLanguageService()->init(trim($language));
         }
 
         // always include locallang file
-        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
 
         $pt = MailerUtility::getMilliseconds();
 
@@ -867,10 +880,10 @@ class MailerService implements LoggerAwareInterface
             ->orderBy('scheduled')
             ->execute();
 
-        $this->logger->debug(MailerUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
+        $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
 
         if (($row = $statement->fetchAssociative())) {
-            $this->logger->debug(MailerUtility::getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . MailerUtility::getLL('dmailer_processed'));
+            $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . LanguageUtility::getLL('dmailer_processed'));
             $this->prepare($row);
             $query_info = unserialize($row['query_info']);
 
@@ -898,11 +911,11 @@ class MailerService implements LoggerAwareInterface
                 $this->setBeginEnd((int)$row['uid'], 'end');
             }
         } else {
-            $this->logger->debug(MailerUtility::getLL('dmailer_nothing_to_do'));
+            $this->logger->debug(LanguageUtility::getLL('dmailer_nothing_to_do'));
         }
 
         $parsetime = MailerUtility::getMilliseconds() - $pt;
-        $this->logger->debug(MailerUtility::getLL('dmailer_ending') . ' ' . $parsetime . ' ms');
+        $this->logger->debug(LanguageUtility::getLL('dmailer_ending') . ' ' . $parsetime . ' ms');
     }
 
     /**

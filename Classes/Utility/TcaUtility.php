@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Repository\SysLanguageRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -20,7 +21,7 @@ class TcaUtility
     public static function getLocalizedCategories(array &$params): void
     {
         $sys_language_uid = 0;
-        $languageService = MailerUtility::getLanguageService();
+        $languageService = LanguageUtility::getLanguageService();
         //initialize backend user language
         $lang = $languageService->lang == 'default' ? 'en' : $languageService->lang;
 
@@ -61,5 +62,18 @@ class TcaUtility
             '/^(?:ORDER[[:space:]]*BY[[:space:]]*)+/i', '',
             trim($GLOBALS['TCA'][$table]['ctrl']['default_sortby'])
         );
+    }
+
+    /**
+     * Get translated label of table column
+     * default table: sys_dmail
+     *
+     * @param string $columnName
+     * @param string $table
+     * @return string The label
+     */
+    public static function getTranslatedLabelOfTcaField(string $columnName, string $table = 'sys_dmail'): string
+    {
+        return stripslashes(LanguageUtility::getLanguageService()->sL(BackendUtility::getItemLabel($table, $columnName)));
     }
 }

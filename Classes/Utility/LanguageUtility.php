@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use TYPO3\CMS\Backend\Configuration\TranslationConfigurationProvider;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class LanguageUtility
@@ -49,5 +50,22 @@ class LanguageUtility
         }
 
         return $languageUids;
+    }
+
+    /**
+     * @return LanguageService
+     */
+    public static function getLanguageService(): LanguageService
+    {
+        return $GLOBALS['LANG'];
+    }
+
+    /**
+     * @param string $index
+     * @return string
+     */
+    public static function getLL(string $index): string
+    {
+        return self::getLanguageService()->getLL($index);
     }
 }

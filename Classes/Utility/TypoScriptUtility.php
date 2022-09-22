@@ -97,6 +97,6 @@ class TypoScriptUtility
 
     public static function getUserTSConfig(): array
     {
-        return MailerUtility::getBackendUser()->getTSConfig();
+        return BackendUserUtility::getBackendUser()->getTSConfig();
     }
 }

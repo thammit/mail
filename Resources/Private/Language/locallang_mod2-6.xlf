@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+<xliff version="1.0">
 	<file source-language="en" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/locallang_mod2-6.xlf" date="2022-01-29T12:00:00Z" product-name="mail">
 		<header />
 		<body>
@@ -975,8 +975,10 @@
 			<trans-unit id="testmail_simple" resname="testmail_simple">
 				<source>Send a simple test mail</source>
 			</trans-unit>
-			<trans-unit id="testmail_simple_msg" resname="testmail_simple_msg">
-				<source>The mail will include all elements regardless of their categories. USER_fields will not be substituted with data.</source>
+			<trans-unit id="testmail_simple_msg" resname="testmail_simple_msg" xml:space="preserve">
+				<source><![CDATA[Here you can (optionally) send a simple test email to one or more recipients, before you schedule the final sending on the NEXT page.<br>
+				Please add one or more email addresses separated by colon or semicolon into the next field and press SEND.<br>
+				The generated email will include ALL elements regardless of their categories! User fields will NOT be substituted with data!]]></source>
 			</trans-unit>
 			<trans-unit id="view_delivery_begin_end" resname="view_delivery_begin_end">
 				<source>Delivery begun/ended:</source>

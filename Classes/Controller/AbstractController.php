@@ -5,8 +5,11 @@ namespace MEDIAESSENZ\Mail\Controller;
 
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
@@ -89,16 +92,16 @@ abstract class AbstractController
         $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
         $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
         $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
-        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
-        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
-        $this->backendUserName = MailerUtility::getBackendUser()->user['realName'] ?? '';
-        $this->backendUserEmail = MailerUtility::getBackendUser()->user['email'] ?? '';
-        $this->backendUserId = MailerUtility::getBackendUser()->user['uid'] ?? '';
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
+        $this->backendUserName = BackendUserUtility::getBackendUser()->user['realName'] ?? '';
+        $this->backendUserEmail = BackendUserUtility::getBackendUser()->user['email'] ?? '';
+        $this->backendUserId = BackendUserUtility::getBackendUser()->user['uid'] ?? '';
         $this->view->assignMultiple([
             'backendUser' => [
-                'name' => MailerUtility::getBackendUser()->user['realName'] ?? '',
-                'email' => MailerUtility::getBackendUser()->user['email'] ?? '',
-                'uid' => MailerUtility::getBackendUser()->user['uid'] ?? '',
+                'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
+                'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
+                'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
             ]
         ]);
     }
@@ -120,7 +123,7 @@ abstract class AbstractController
             $this->siteIdentifier = '';
         }
 
-        $this->backendUserPermissions = MailerUtility::backendUserPermissions();
+        $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
         $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
 
         $this->access = is_array($this->pageinfo) ? true : false;
@@ -137,7 +140,7 @@ abstract class AbstractController
         // initialize backend user language
         //$this->sys_language_uid = 0; //@TODO
 
-        $this->messageQueue = MailerUtility::getFlashMessageQueue();
+        $this->messageQueue = ViewUtility::getFlashMessageQueue();
     }
 
     protected function getModulName()
@@ -214,7 +217,7 @@ abstract class AbstractController
      */
     protected function getRecordList(array $listArr, string $table): array
     {
-        $lang = MailerUtility::getLanguageService();
+        $lang = LanguageUtility::getLanguageService();
         $output = [
             'title' => $lang->getLL('dmail_number_records'),
             'editLinkTitle' => $lang->getLL('dmail_edit'),
@@ -223,8 +226,8 @@ abstract class AbstractController
             'rows' => [],
         ];
 
-        $isAllowedDisplayTable = MailerUtility::getBackendUser()->check('tables_select', $table);
-        $isAllowedEditTable = MailerUtility::getBackendUser()->check('tables_modify', $table);
+        $isAllowedDisplayTable = BackendUserUtility::getBackendUser()->check('tables_select', $table);
+        $isAllowedEditTable = BackendUserUtility::getBackendUser()->check('tables_modify', $table);
 
         if (is_array($listArr)) {
             $notAllowedPlaceholder = $lang->getLL('mailgroup_table_disallowed_placeholder');

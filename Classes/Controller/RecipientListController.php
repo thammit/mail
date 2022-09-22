@@ -12,9 +12,14 @@ use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Service\ImportService;
+use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility as MailCsvUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
@@ -54,8 +59,10 @@ class RecipientListController extends AbstractController
 
     private bool $submit = false;
 
-    protected function initRecipientList(ServerRequestInterface $request): void
+    protected function init(ServerRequestInterface $request): void
     {
+        parent::init($request);
+
         $queryParams = $request->getQueryParams();
         $parsedBody = $request->getParsedBody();
 
@@ -79,13 +86,12 @@ class RecipientListController extends AbstractController
 
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
+        $this->init($request);
         $this->view->setTemplate('RecipientList');
 
-        $this->init($request);
-        $this->initRecipientList($request);
-        MailerUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
 
-        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id)) {
             $module = $this->getModulName();
             $this->moduleName = (string)($request->getQueryParams()['currentModule'] ?? $request->getParsedBody()['currentModule'] ?? 'MailNavFrame_RecipientList');
 
@@ -102,17 +108,19 @@ class RecipientListController extends AbstractController
                         ]
                     );
                 } else if ($this->id != 0) {
-                    $message = MailerUtility::getFlashMessage(MailerUtility::getLL('dmail_noRegular'), MailerUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING);
+                    $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
+                        AbstractMessage::WARNING);
                     $this->messageQueue->addMessage($message);
                 }
             } else {
-                $message = MailerUtility::getFlashMessage(MailerUtility::getLL('select_folder'), MailerUtility::getLL('header_recip'), AbstractMessage::WARNING);
+                $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_recip'),
+                    AbstractMessage::WARNING);
                 $this->messageQueue->addMessage($message);
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $message = MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
+            $message = ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING);
             $this->messageQueue->addMessage($message);
         }
 
@@ -201,7 +209,7 @@ class RecipientListController extends AbstractController
             ];
         }
 
-        $data['editOnClickLink'] = MailerUtility::getEditOnClickLink([
+        $data['editOnClickLink'] = ViewUtility::getEditOnClickLink([
             'edit' => [
                 'sys_dmail_group' => [
                     $this->id => 'new',
@@ -252,7 +260,8 @@ class RecipientListController extends AbstractController
                                     $info['fromPages'][] = $pageinfo;
                                     $pageIdArray[] = $pageUid;
                                     if ($mailGroup['recursive']) {
-                                        $pageIdArray = array_merge($pageIdArray, MailerUtility::getRecursiveSelect($pageUid, $this->backendUserPermissions));
+                                        $pageIdArray = array_merge($pageIdArray,
+                                            BackendDataUtility::getRecursiveSelect($pageUid, $this->backendUserPermissions));
                                     }
                                 }
                             }
@@ -294,9 +303,9 @@ class RecipientListController extends AbstractController
                             $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
                             $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($mailGroup['list']), $this->fieldList);
                         } else {
-                            $recipients = MailerUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
+                            $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
                         }
-                        $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($recipients);
+                        $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($recipients);
                         break;
                     case Constants::RECIPIENT_GROUP_TYPE_STATIC:
                         // Static MM list
@@ -345,7 +354,7 @@ class RecipientListController extends AbstractController
                             $idLists[$this->userTable] = array_unique($idLists[$this->userTable]);
                         }
                         if (is_array($idLists['PLAINLIST'])) {
-                            $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($idLists['PLAINLIST']);
+                            $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($idLists['PLAINLIST']);
                         }
                         break;
                     default:
@@ -389,8 +398,8 @@ class RecipientListController extends AbstractController
     {
         $str = '';
         // check if the user has the right to modify the table
-        if (MailerUtility::getBackendUser()->check('tables_modify', $table)) {
-            $editOnClickLink = MailerUtility::getEditOnClickLink([
+        if (BackendUserUtility::getBackendUser()->check('tables_modify', $table)) {
+            $editOnClickLink = ViewUtility::getEditOnClickLink([
                 'edit' => [
                     $table => [
                         $uid => 'edit',
@@ -398,7 +407,7 @@ class RecipientListController extends AbstractController
                 ],
                 'returnUrl' => $this->requestUri,
             ]);
-            $str = '<a href="#" class="btn btn-default" onClick="' . $editOnClickLink . '" title="' . MailerUtility::getLL('dmail_edit') . '">' .
+            $str = '<a href="#" class="btn btn-default" onClick="' . $editOnClickLink . '" title="' . LanguageUtility::getLL('dmail_edit') . '">' .
                 $this->getIconActionsOpen() .
                 '</a>';
         }
@@ -473,16 +482,16 @@ class RecipientListController extends AbstractController
             if ($csvValue == 'PLAINLIST') {
                 $this->downloadCSV($idLists['PLAINLIST']);
             } else if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $csvValue)) {
-                if (MailerUtility::getBackendUser()->check('tables_select', $csvValue)) {
+                if (BackendUserUtility::getBackendUser()->check('tables_select', $csvValue)) {
                     $fields = $csvValue == 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
                     $fields .= ',tstamp';
 
                     $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$csvValue], $csvValue, GeneralUtility::trimExplode(',', $fields, true));
                     $this->downloadCSV($rows);
                 } else {
-                    $message = MailerUtility::getFlashMessage(
+                    $message = ViewUtility::getFlashMessage(
                         '',
-                        MailerUtility::getLL('mailgroup_table_disallowed_csv'),
+                        LanguageUtility::getLL('mailgroup_table_disallowed_csv'),
                         AbstractMessage::ERROR
                     );
                     $this->messageQueue->addMessage($message);
@@ -562,7 +571,7 @@ class RecipientListController extends AbstractController
                 }
 
                 if (($group['type'] ?? false) == 3) {
-                    if (MailerUtility::getBackendUser()->check('tables_modify', 'sys_dmail_group')) {
+                    if (BackendUserUtility::getBackendUser()->check('tables_modify', 'sys_dmail_group')) {
                         $data['special'] = $this->specialQuery($group);
                     }
                 }
@@ -769,7 +778,7 @@ class RecipientListController extends AbstractController
 
             $categories = implode(',', $categoriesArray);
 
-            $editOnClickLink = MailerUtility::getEditOnClickLink([
+            $editOnClickLink = ViewUtility::getEditOnClickLink([
                 'edit' => [
                     $this->table => [
                         $row['uid'] => 'edit',

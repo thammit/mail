@@ -13,16 +13,19 @@ use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
+use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
-use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -55,6 +58,7 @@ class DmailController extends AbstractController
     protected string $externalMailPlainUri = '';
     protected array $mailGroupUids = [];
     protected bool $sendTestMail = false;
+    protected string $sendTestMailAddress = '';
     // protected int $tt_address_uid = 0;
     protected string $requestUri = '';
 
@@ -90,7 +94,8 @@ class DmailController extends AbstractController
             $this->cmd = Constants::WIZARD_STEP_CATEGORIES;
         }
 
-        $this->sendTestMail = (bool)($parsedBody['sendTestMail'] ?? $queryParams['sendTestMail'] ?? false);
+        $this->sendTestMail = (bool)($parsedBody['sendTestMail']['send'] ?? $queryParams['sendTestMail']['send'] ?? false);
+        $this->sendTestMailAddress = (string)($parsedBody['sendTestMail']['address'] ?? $queryParams['sendTestMail']['address'] ?? '');
         if ($this->sendTestMail) {
             $this->cmd = Constants::WIZARD_STEP_SEND_TEST2;
         }
@@ -148,7 +153,7 @@ class DmailController extends AbstractController
         $this->init($request);
         $this->view->setTemplate('Wizard');
 
-        if (($this->id && $this->access) || (MailerUtility::isAdmin() && !$this->id)) {
+        if (($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id)) {
             // get module name of the selected page in the page tree
             if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
                 // Direct mail module
@@ -156,21 +161,22 @@ class DmailController extends AbstractController
                     $this->view->assignMultiple($this->getModuleData());
                 } else {
                     if ($this->id != 0) {
-                        $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLL('dmail_noRegular'),
-                            MailerUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING));
+                        $this->messageQueue->addMessage(ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'),
+                            LanguageUtility::getLL('dmail_newsletters'), AbstractMessage::WARNING));
                     }
                 }
             } else {
                 // Todo search for dmail modules the tree up and if found open the wizard settings step of the selected page
-                $this->messageQueue->addMessage(MailerUtility::getFlashMessage('Todo search for dmail modules the tree up and if found open the wizard settings step of the selected page',
+                $this->messageQueue->addMessage(ViewUtility::getFlashMessage('Todo search for dmail modules the tree up and if found open the wizard settings step of the selected page',
                     'Todo', AbstractMessage::NOTICE));
-                $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLL('select_folder'), MailerUtility::getLL('header_directmail'),
+                $this->messageQueue->addMessage(ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'),
+                    LanguageUtility::getLL('header_directmail'),
                     AbstractMessage::WARNING));
             }
         } else {
             // If no access or if ID == zero
             $this->view->setTemplate('NoAccess');
-            $this->messageQueue->addMessage(MailerUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
         }
 
         /**
@@ -323,7 +329,8 @@ class DmailController extends AbstractController
                         } else {
                             // TODO: Error message - Error while adding the DB set
                             $this->error = 'no_valid_url';
-                            $this->messageQueue->addMessage(MailerUtility::getFlashMessage(MailerUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URL: ' . $this->externalMailHtmlUri, MailerUtility::getLL('dmail_error'), AbstractMessage::ERROR));
+                            $this->messageQueue->addMessage(ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URL: ' . $this->externalMailHtmlUri,
+                                LanguageUtility::getLL('dmail_error'), AbstractMessage::ERROR));
                         }
                     } // Quickmail
                     else {
@@ -333,11 +340,11 @@ class DmailController extends AbstractController
                                 $fetchError = false;
                             }
                             if ($temp['errorTitle']) {
-                                $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['errorText'], $temp['errorTitle'],
+                                $this->messageQueue->addMessage(ViewUtility::getFlashMessage($temp['errorText'], $temp['errorTitle'],
                                     AbstractMessage::ERROR));
                             }
                             if ($temp['warningTitle']) {
-                                $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['warningText'], $temp['warningTitle'],
+                                $this->messageQueue->addMessage(ViewUtility::getFlashMessage($temp['warningText'], $temp['warningTitle'],
                                     AbstractMessage::WARNING));
                             }
 
@@ -363,11 +370,11 @@ class DmailController extends AbstractController
                                     $unserializedMailContent = unserialize(base64_decode($mailData['mailContent']));
                                     $temp = $this->compileQuickMail($mailData, $unserializedMailContent['plain']['content'] ?? '', false);
                                     if ($temp['errorTitle']) {
-                                        $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['errorText'], $temp['errorTitle'],
+                                        $this->messageQueue->addMessage(ViewUtility::getFlashMessage($temp['errorText'], $temp['errorTitle'],
                                             AbstractMessage::ERROR));
                                     }
                                     if ($temp['warningTitle']) {
-                                        $this->messageQueue->addMessage(MailerUtility::getFlashMessage($temp['warningText'], $temp['warningTitle'],
+                                        $this->messageQueue->addMessage(ViewUtility::getFlashMessage($temp['warningText'], $temp['warningTitle'],
                                             AbstractMessage::WARNING));
                                     }
                                 } else {
@@ -387,9 +394,9 @@ class DmailController extends AbstractController
                 $moduleData['navigation']['nextError'] = $fetchError;
 
                 if (!$fetchError && $this->fetchAtOnce) {
-                    $this->messageQueue->addMessage(MailerUtility::getFlashMessage(
+                    $this->messageQueue->addMessage(ViewUtility::getFlashMessage(
                         '',
-                        MailerUtility::getLL('dmail_wiz2_fetch_success'),
+                        LanguageUtility::getLL('dmail_wiz2_fetch_success'),
                         AbstractMessage::OK
                     ));
                 }
@@ -411,7 +418,7 @@ class DmailController extends AbstractController
                 $moduleData['navigation']['next'] = true;
 
                 $indata = GeneralUtility::_GP('indata') ?? [];
-                $moduleData['cats']['output'] = $this->getCategoryData($mailData, $indata);;
+                $moduleData['cats']['output'] = $this->getCategoryData($mailData, $indata);
                 // $moduleData['cats']['catsForm'] = $temp['theOutput'];
 
                 $moduleData['cats']['cmd'] = Constants::WIZARD_STEP_SEND_TEST;
@@ -459,8 +466,8 @@ class DmailController extends AbstractController
                         $this->sendMail($mailData);
                         break;
                     } else {
-                        $this->messageQueue->addMessage(MailerUtility::getFlashMessage(
-                            MailerUtility::getLL('mod.no_recipients'),
+                        $this->messageQueue->addMessage(ViewUtility::getFlashMessage(
+                            LanguageUtility::getLL('mod.no_recipients'),
                             '',
                             AbstractMessage::WARNING
                         ));
@@ -542,8 +549,8 @@ class DmailController extends AbstractController
     {
         return [
             'id' => $this->id,
-            'senderName' => htmlspecialchars($this->quickMail['senderName'] ?? MailerUtility::getBackendUser()->user['realName']),
-            'senderMail' => htmlspecialchars($this->quickMail['senderEmail'] ?? MailerUtility::getBackendUser()->user['email']),
+            'senderName' => htmlspecialchars($this->quickMail['senderName'] ?? BackendUserUtility::getBackendUser()->user['realName']),
+            'senderMail' => htmlspecialchars($this->quickMail['senderEmail'] ?? BackendUserUtility::getBackendUser()->user['email']),
             'subject' => htmlspecialchars($this->quickMail['subject'] ?? ''),
             'message' => htmlspecialchars($this->quickMail['message'] ?? ''),
             'breakLines' => (bool)($this->quickMail['breakLines'] ?? false),
@@ -605,7 +612,7 @@ class DmailController extends AbstractController
 
             $row = BackendUtility::getRecord('sys_dmail', intval($this->sys_dmail_uid));
             // link in the mail
-            $message = '<!--DMAILER_SECTION_BOUNDARY_-->' . $indata['message'] . '<!--DMAILER_SECTION_BOUNDARY_END-->';
+            $message = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_-->' . $indata['message'] . '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
             if ($this->pageTSConfiguration['use_rdct'] ?? false) {
                 $message = MailerUtility::shortUrlsInPlainText(
                     $message,
@@ -614,7 +621,7 @@ class DmailController extends AbstractController
                 );
             }
             if ($indata['breakLines'] ?? false) {
-                $message = wordwrap($message, 76, "\n");
+                $message = wordwrap($message, 76);
             }
             // fetch functions
             $theOutput = $this->compileQuickMail($row, $message);
@@ -648,12 +655,12 @@ class DmailController extends AbstractController
         $this->mailerService->addPlainContent($message);
 
         if (!$message || !$this->mailerService->getPlainContent()) {
-            $erg['errorTitle'] = MailerUtility::getLL('dmail_error');
-            $erg['errorText'] = MailerUtility::getLL('dmail_no_plain_content');
+            $erg['errorTitle'] = LanguageUtility::getLL('dmail_error');
+            $erg['errorText'] = LanguageUtility::getLL('dmail_no_plain_content');
         } else {
-            if (!str_contains(base64_decode($this->mailerService->getPlainContent()), '<!--DMAILER_SECTION_BOUNDARY')) {
-                $erg['warningTitle'] = MailerUtility::getLL('dmail_warning');
-                $erg['warningText'] = MailerUtility::getLL('dmail_no_plain_boundaries');
+            if (!str_contains(base64_decode($this->mailerService->getPlainContent()), '<!--' . Constants::CONTENT_SECTION_BOUNDARY)) {
+                $erg['warningTitle'] = LanguageUtility::getLL('dmail_warning');
+                $erg['warningText'] = LanguageUtility::getLL('dmail_no_plain_boundaries');
             }
         }
 
@@ -702,12 +709,12 @@ class DmailController extends AbstractController
                         }
                     }
                     $tableRows[$groupName][] = [
-                        'title' => MailerUtility::getTranslatedLabelOfTcaField('attachment'),
+                        'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment'),
                         'value' => implode(', ', $fileNames),
                     ];
                 } else {
                     $tableRows[$groupName][] = [
-                        'title' => MailerUtility::getTranslatedLabelOfTcaField($columnName),
+                        'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName),
                         'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('sys_dmail', $columnName, ($mailData[$columnName] ?? false))),
                     ];
                 }
@@ -718,7 +725,7 @@ class DmailController extends AbstractController
             'title' => htmlspecialchars($mailData['subject'] ?? ''),
             'tableRows' => $tableRows,
             'isSent' => isset($mailData['issent']) && $mailData['issent'],
-            'allowEdit' => MailerUtility::getBackendUser()->check('tables_modify', 'sys_dmail'),
+            'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'sys_dmail'),
         ];
     }
 
@@ -726,7 +733,6 @@ class DmailController extends AbstractController
      * Show the step of sending a test mail
      *
      * @return array config for form
-     * @throws RouteNotFoundException If the named route doesn't exist
      * @throws DBALException
      * @throws Exception
      */
@@ -736,7 +742,7 @@ class DmailController extends AbstractController
             'id' => $this->id,
             'cmd' => Constants::WIZARD_STEP_SEND_TEST2,
             'sys_dmail_uid' => $this->sys_dmail_uid,
-            'dmail_test_email' => MailerUtility::getBackendUser()->user['email'] ?? '',
+            'dmail_test_email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
             'test_tt_address' => '',
             'test_dmail_group_table' => [],
         ];
@@ -837,10 +843,7 @@ class DmailController extends AbstractController
             $this->mailerService->setTestMail((bool)($this->pageTSConfiguration['testmail'] ?? false));
 
             // Fixing addresses:
-            $addresses = GeneralUtility::_GP('sendTestMail');
-            $addresses = (array)($parsedBody['sendTestMail'] ?? $queryParams['sendTestMail'] ?? []);
-            $addressList = $addresses['address'];
-            $addresses = preg_split('|[' . chr(10) . ',;]|', $addressList ?? '');
+            $addresses = preg_split('|[' . chr(10) . ',;]|', $this->sendTestMailAddress);
 
             foreach ($addresses as $key => $val) {
                 $addresses[$key] = trim($val);
@@ -856,10 +859,10 @@ class DmailController extends AbstractController
                 // Sending the same mail to lots of recipients
                 $this->mailerService->sendSimple($addressList);
                 $sentFlag = true;
-                $message = MailerUtility::getFlashMessage(
-                    MailerUtility::getLL('send_was_sent') . ' ' .
-                    MailerUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
-                    MailerUtility::getLL('send_sending'),
+                $message = ViewUtility::getFlashMessage(
+                    LanguageUtility::getLL('send_was_sent') . ' ' .
+                    LanguageUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
+                    LanguageUtility::getLL('send_sending'),
                     AbstractMessage::OK
                 );
                 $this->messageQueue->addMessage($message);
@@ -953,11 +956,11 @@ class DmailController extends AbstractController
                         }
 
                         $updateFields['scheduled'] = 0;
-                        $content = MailerUtility::getLL('send_draft_scheduler');
-                        $sectionTitle = MailerUtility::getLL('send_draft_saved');
+                        $content = LanguageUtility::getLL('send_draft_scheduler');
+                        $sectionTitle = LanguageUtility::getLL('send_draft_saved');
                     } else {
-                        $content = MailerUtility::getLL('send_was_scheduled_for') . ' ' . BackendUtility::datetime($distributionTime);
-                        $sectionTitle = MailerUtility::getLL('send_was_scheduled');
+                        $content = LanguageUtility::getLL('send_was_scheduled_for') . ' ' . BackendUtility::datetime($distributionTime);
+                        $sectionTitle = LanguageUtility::getLL('send_was_scheduled');
                     }
                     $sentFlag = true;
                     $connection = $this->getConnection('sys_dmail');
@@ -967,9 +970,9 @@ class DmailController extends AbstractController
                         ['uid' => $this->sys_dmail_uid] // where
                     );
 
-                    $message = MailerUtility::getFlashMessage(
+                    $message = ViewUtility::getFlashMessage(
                         $sectionTitle . ' ' . $content,
-                        MailerUtility::getLL('dmail_wiz5_sendmass'),
+                        LanguageUtility::getLL('dmail_wiz5_sendmass'),
                         AbstractMessage::OK
                     );
                     $this->messageQueue->addMessage($message);
@@ -1012,8 +1015,8 @@ class DmailController extends AbstractController
                 $rows = $idLists['PLAINLIST'];
             }
             foreach ($rows as $rec) {
-                $recipRow = MailerUtility::normalizeAddress($rec);
-                $recipRow['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories($table, $recipRow['uid']);
+                $recipRow = RecipientUtility::normalizeAddress($rec);
+                $recipRow['sys_dmail_categories_list'] = RecipientUtility::getListOfRecipientCategories($table, $recipRow['uid']);
                 $kc = substr($table, 0, 1);
                 $returnCode = $this->mailerService->sendAdvanced($recipRow, $kc == 'p' ? 'P' : $kc);
                 if ($returnCode) {
@@ -1060,8 +1063,8 @@ class DmailController extends AbstractController
                         'returnUrl' => $requestUri,
                     ];
 
-                    $editOnClick = MailerUtility::getEditOnClickLink($params);
-                    $editLink = '<td><a href="#" onClick="' . $editOnClick . '" title="' . MailerUtility::getLL('dmail_edit') . '">' .
+                    $editOnClick = ViewUtility::getEditOnClickLink($params);
+                    $editLink = '<td><a href="#" onClick="' . $editOnClick . '" title="' . LanguageUtility::getLL('dmail_edit') . '">' .
                         $iconActionsOpen .
                         '</a></td>';
                 }
@@ -1085,7 +1088,7 @@ class DmailController extends AbstractController
 				</tr>';
         }
         if (count($lines)) {
-            $out = '<p>' . MailerUtility::getLL('dmail_number_records') . ' <strong>' . $count . '</strong></p><br />';
+            $out = '<p>' . LanguageUtility::getLL('dmail_number_records') . ' <strong>' . $count . '</strong></p><br />';
             $out .= '<table class="table table-striped table-hover">' . implode(chr(10), $lines) . '</table>';
         }
         return $out;
@@ -1130,7 +1133,7 @@ class DmailController extends AbstractController
             trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby'])
         );
 
-        $mailGroups = MailerUtility::finalSendingGroups($this->id, $this->sys_dmail_uid, $groups, $this->userTable, $this->backendUserPermissions);
+        $mailGroups = RecipientUtility::finalSendingGroups($this->id, $this->sys_dmail_uid, $groups, $this->userTable, $this->backendUserPermissions);
 
         // todo: delete next block after upper method is working
 
@@ -1159,8 +1162,8 @@ class DmailController extends AbstractController
         $groupInput = '';
         // added disabled. see hook
         if (count($opt) === 0) {
-            $message = MailerUtility::getFlashMessage(
-                MailerUtility::getLL('error.no_recipient_groups_found'),
+            $message = ViewUtility::getFlashMessage(
+                LanguageUtility::getLL('error.no_recipient_groups_found'),
                 '',
                 AbstractMessage::ERROR
             );
@@ -1207,12 +1210,12 @@ class DmailController extends AbstractController
     public function getCategoryData(array $mailData, array $indata): array|string
     {
         $categoryData = [
-            'title' => MailerUtility::getLL('nl_cat'),
+            'title' => LanguageUtility::getLL('nl_cat'),
             'subtitle' => '',
             'rowsFound' => false,
             'rows' => [],
             'pages_uid' => $this->pages_uid,
-            'update_cats' => MailerUtility::getLL('nl_l_update'),
+            'update_cats' => LanguageUtility::getLL('nl_l_update'),
             'output' => '',
         ];
 
@@ -1245,7 +1248,7 @@ class DmailController extends AbstractController
         );
 
         if (empty($rows)) {
-            $categoryData['subtitle'] = MailerUtility::getLL('nl_cat_msg1');
+            $categoryData['subtitle'] = LanguageUtility::getLL('nl_cat_msg1');
             return $categoryData;
         }
         $categoryData['subtitle'] = BackendUtility::cshItem($this->cshTable, 'assign_categories');
@@ -1265,7 +1268,7 @@ class DmailController extends AbstractController
                 $categoryData['rows'][] = [
                     'separator' => true,
                     'bgcolor' => '#f00',
-                    'title' => MailerUtility::getLL('nl_l_column'),
+                    'title' => LanguageUtility::getLL('nl_l_column'),
                     'value' => BackendUtility::getProcessedValue('tt_content', 'colPos', $mailData['colPos']),
                 ];
                 $colPosVal = $mailData['colPos'];
@@ -1290,7 +1293,7 @@ class DmailController extends AbstractController
                 'list_type' => $mailData['list_type'],
                 'bodytext' => empty($mailData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($mailData['bodytext']), 200),
                 'color' => $mailData['module_sys_dmail_category'] ? 'red' : 'green',
-                'labelOnlyAll' => $mailData['module_sys_dmail_category'] ? MailerUtility::getLL('nl_l_ONLY') : MailerUtility::getLL('nl_l_ALL'),
+                'labelOnlyAll' => $mailData['module_sys_dmail_category'] ? LanguageUtility::getLL('nl_l_ONLY') : LanguageUtility::getLL('nl_l_ALL'),
                 'checkboxes' => $cboxes,
             ];
         }
@@ -1361,7 +1364,7 @@ class DmailController extends AbstractController
         if ($pageRecord['doktype']) {
             $newRecord['subject'] = $pageRecord['title'];
             $newRecord['page'] = $pageRecord['uid'];
-            $newRecord['charset'] = MailerUtility::getCharacterSet();
+            $newRecord['charset'] = ConfigurationUtility::getCharacterSet();
         }
 
         // save to database

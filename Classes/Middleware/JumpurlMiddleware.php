@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Middleware;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -301,7 +302,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function validateAuthCode(string $submittedAuthCode): void
     {
-        $authCodeToMatch = MailerUtility::stdAuthCode(
+        $authCodeToMatch = RecipientUtility::stdAuthCode(
             $this->recipientRecord,
             ($this->directMailRecord['authcode_fieldList'] ?: 'uid')
         );

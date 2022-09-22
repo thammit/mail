@@ -6,7 +6,9 @@ namespace MEDIAESSENZ\Mail\Service;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -24,7 +26,7 @@ class RecipientService
     {
         $this->sysDmailGroupRepository = $sysDmailGroupRepository ?? GeneralUtility::makeInstance(SysDmailGroupRepository::class);
         $this->eventDispatcher = $eventDispatcher ?? GeneralUtility::makeInstance(EventDispatcherInterface::class);
-        $this->backendUserPermissions = MailerUtility::backendUserPermissions();
+        $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
     }
 
     /**
@@ -47,7 +49,7 @@ class RecipientService
      */
     public function getRecipientIdsOfMailGroups(array $groups, string $userTable = ''): array
     {
-        $recipientIds = MailerUtility::compileMailGroup($this->pageId, $groups, $userTable, $this->backendUserPermissions);
+        $recipientIds = RecipientUtility::compileMailGroup($this->pageId, $groups, $userTable, $this->backendUserPermissions);
 
         // Todo: Add PSR-14 EventDispatcher to manipulate the id list (see commented hook code block below)
 
