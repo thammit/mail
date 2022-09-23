@@ -162,10 +162,10 @@
 				<source>Create mail</source>
 			</trans-unit>
 			<trans-unit id="dmail_dovsk_crFromNL" resname="dmail_dovsk_crFromNL">
-				<source>Create a new Direct Mail from a page</source>
+				<source>Create a new mail from a internal page</source>
 			</trans-unit>
 			<trans-unit id="dmail_dovsk_crFromUrl" resname="dmail_dovsk_crFromUrl">
-				<source>Create a new Direct Mail from external URL</source>
+				<source>Create a new mail from an external URL</source>
 			</trans-unit>
 			<trans-unit id="dmail_edit" resname="dmail_edit">
 				<source>Edit</source>
@@ -180,7 +180,7 @@
 				<source>A warning has occurred</source>
 			</trans-unit>
 			<trans-unit id="dmail_folders" resname="dmail_folders">
-				<source>Available Direct Mail folders</source>
+				<source>Available mail folders</source>
 			</trans-unit>
 			<trans-unit id="dmail_frames_not allowed" resname="dmail_frames_not allowed">
 				<source>Pages with HTML frames may not be fetched.</source>
@@ -261,7 +261,7 @@
 				<source>QuickMail</source>
 			</trans-unit>
 			<trans-unit id="dmail_newsletters" resname="dmail_newsletters">
-				<source>Direct Mail Extension</source>
+				<source>Mail Extension</source>
 			</trans-unit>
 			<trans-unit id="dmail_no" resname="dmail_no">
 				<source>NO</source>
