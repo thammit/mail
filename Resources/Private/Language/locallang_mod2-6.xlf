@@ -727,10 +727,10 @@
 				<source>Please select Direct Mail folder.</source>
 			</trans-unit>
 			<trans-unit id="send_draft_saved" resname="send_draft_saved">
-				<source>Draft saved</source>
+				<source>Mail saved as draft</source>
 			</trans-unit>
 			<trans-unit id="send_draft_scheduler" resname="send_draft_scheduler">
-				<source>Your directmail was sent as draft and can now be used from the scheduler.</source>
+				<source>The mail "%s" was successfully saved as draft for recurring sending within the scheduler.</source>
 			</trans-unit>
 			<trans-unit id="send_recipients" resname="send_recipients">
 				<source>Recipients:</source>
@@ -742,7 +742,7 @@
 				<source>Mail scheduled for distribution</source>
 			</trans-unit>
 			<trans-unit id="send_was_scheduled_for" resname="send_was_scheduled_for">
-				<source>The mail was scheduled for distribution at</source>
+				<source>The mail "%s" was successfully scheduled for distribution at %s</source>
 			</trans-unit>
 			<trans-unit id="send_was_sent" resname="send_was_sent">
 				<source>The mail was sent.</source>

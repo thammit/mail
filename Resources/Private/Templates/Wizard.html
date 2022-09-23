@@ -8,8 +8,6 @@
 <f:layout name="Default"/>
 
 <f:section name="content">
-    {_all -> f:debug(inline:1)}
-    {be:arrayBrowser(data:settings)}
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
     <h1><f:translate key="{lll}dmail_wizard_title"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>

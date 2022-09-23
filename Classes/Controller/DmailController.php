@@ -32,9 +32,9 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -45,6 +45,7 @@ class DmailController extends AbstractController
     protected string $cshTable;
     protected string $error = '';
     protected int $currentStep = 1;
+    protected bool $reset = false;
     protected int $uid = 0;
     protected bool $backButtonPressed = false;
     protected string $currentCMD = '';
@@ -177,6 +178,9 @@ class DmailController extends AbstractController
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
                 // Add module data to view
                 $this->view->assignMultiple($this->getModuleData());
+                if ($this->reset) {
+                    return new RedirectResponse($this->buildUriFromRoute($this->route, ['id' => $this->id]));
+                }
             } else {
                 if ($this->id) {
                     ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'));
@@ -311,7 +315,7 @@ class DmailController extends AbstractController
 
                         $moduleData['info']['internal']['cmd'] = $nextCmd ?: Constants::WIZARD_STEP_CATEGORIES;
                     } else {
-                        // TODO: Error message - Error while adding the DB set
+                        ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
                     }
                 } // external URL
                 else {
@@ -463,8 +467,12 @@ class DmailController extends AbstractController
                             $this->sendPersonalizedTestMails($mailData);
                         } else {
                             $this->schedulePersonalizedMails($mailData);
+                            // todo jump to overview page
+                            $moduleData = $this->getOverviewModuleData($moduleData);
+                            $this->reset = true;
+                            break;
                         }
-                        break;
+                        // break;
                     } else {
                         ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('mod.no_recipients'));
                     }
@@ -480,47 +488,55 @@ class DmailController extends AbstractController
 
             case Constants::WIZARD_STEP_OVERVIEW:
             default:
-                // choose source newsletter
-                $this->currentStep = 1;
-
-                $showTabs = [Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL, Constants::PANEL_OPEN_STORED];
-                if (isset($userTSConfig['tx_directmail.']['hideTabs'])) {
-                    $hideTabs = GeneralUtility::trimExplode(',', $userTSConfig['tx_directmail.']['hideTabs']);
-                    foreach ($hideTabs as $hideTab) {
-                        $showTabs = ArrayUtility::removeArrayEntryByValue($showTabs, $hideTab);
-                    }
-                }
-                if (!isset($userTSConfig['tx_directmail.']['defaultTab'])) {
-                    $userTSConfig['tx_directmail.']['defaultTab'] = Constants::PANEL_OPEN_STORED;
-                }
-
-                foreach ($showTabs as $showTab) {
-                    $open = $userTSConfig['tx_directmail.']['defaultTab'] == $showTab;
-                    switch ($showTab) {
-                        case Constants::PANEL_INTERNAL:
-                            $temp['data'] = GeneralUtility::makeInstance(PagesRepository::class)->findMailPages($this->id, $this->backendUserPermissions);
-                            $temp['open'] = $open;
-                            $moduleData['default']['internal'] = $temp;
-                            break;
-                        case Constants::PANEL_EXTERNAL:
-                            $temp['open'] = $open;
-                            $moduleData['default']['external'] = $temp;
-                            break;
-                        case Constants::PANEL_QUICK_MAIL:
-                            $temp = $this->getQuickMailConfig();
-                            $temp['open'] = $open;
-                            $moduleData['default']['quickMail'] = $temp;
-                            break;
-                        case Constants::PANEL_OPEN_STORED:
-                            $temp['data'] = GeneralUtility::makeInstance(SysDmailRepository::class)->findOpenMailsByPageId($this->id);
-                            $temp['open'] = $open;
-                            $moduleData['default']['openStored'] = $temp;
-                            break;
-                        default:
-                    }
-                }
+                $moduleData = $this->getOverviewModuleData($moduleData);
         }
 
+        return $moduleData;
+    }
+
+    protected function getOverviewModuleData($moduleData): array
+    {
+        // choose source newsletter
+        $this->currentStep = 1;
+        $moduleData['navigation']['currentStep'] = $this->currentStep;
+
+        $showTabs = [Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL, Constants::PANEL_OPEN_STORED];
+        if (isset($userTSConfig['tx_directmail.']['hideTabs'])) {
+            $hideTabs = GeneralUtility::trimExplode(',', $userTSConfig['tx_directmail.']['hideTabs']);
+            foreach ($hideTabs as $hideTab) {
+                $showTabs = ArrayUtility::removeArrayEntryByValue($showTabs, $hideTab);
+            }
+        }
+        if (!isset($userTSConfig['tx_directmail.']['defaultTab'])) {
+            $userTSConfig['tx_directmail.']['defaultTab'] = Constants::PANEL_OPEN_STORED;
+        }
+
+        foreach ($showTabs as $showTab) {
+            $open = $userTSConfig['tx_directmail.']['defaultTab'] == $showTab;
+            switch ($showTab) {
+                case Constants::PANEL_INTERNAL:
+                    $moduleData['default']['internal'] = [
+                        'open' => $open,
+                        'data' => GeneralUtility::makeInstance(PagesRepository::class)->findMailPages($this->id, $this->backendUserPermissions)
+                    ];
+                    break;
+                case Constants::PANEL_EXTERNAL:
+                    $moduleData['default']['external'] = ['open' => $open];
+                    break;
+                case Constants::PANEL_QUICK_MAIL:
+                    $temp = $this->getQuickMailConfig();
+                    $temp['open'] = $open;
+                    $moduleData['default']['quickMail'] = $temp;
+                    break;
+                case Constants::PANEL_OPEN_STORED:
+                    $moduleData['default']['openStored'] = [
+                        'open' => $open,
+                        'data' => GeneralUtility::makeInstance(SysDmailRepository::class)->findOpenMailsByPageId($this->id)
+                    ];
+                    break;
+                default:
+            }
+        }
         return $moduleData;
     }
 
@@ -532,7 +548,6 @@ class DmailController extends AbstractController
      * @return int|bool new record uid or FALSE if failed
      * @throws DBALException
      * @throws Exception
-     * @throws SiteNotFoundException
      * @throws InvalidConfigurationTypeException
      */
     protected function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
@@ -1232,16 +1247,15 @@ class DmailController extends AbstractController
                 } else {
                     $updateFields['type'] = Constants::MAIL_TYPE_DRAFT_EXTERNAL;
                 }
-
                 $updateFields['scheduled'] = 0;
                 ViewUtility::addOkToFlashMessageQueue(
-                    LanguageUtility::getLL('dmail_wiz5_sendmass'),
-                    LanguageUtility::getLL('send_draft_saved') . ' ' . LanguageUtility::getLL('send_draft_scheduler')
+                    sprintf(LanguageUtility::getLL('send_draft_scheduler'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
+                    LanguageUtility::getLL('send_draft_saved'), true
                 );
             } else {
                 ViewUtility::addOkToFlashMessageQueue(
-                    LanguageUtility::getLL('send_was_scheduled_for') . ' ' . BackendUtility::datetime($this->distributionTimeStamp),
-                    LanguageUtility::getLL('send_was_scheduled')
+                    sprintf(LanguageUtility::getLL('send_was_scheduled_for'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
+                    LanguageUtility::getLL('send_was_scheduled'), true
                 );
             }
             $connection = $this->getConnection('sys_dmail');
