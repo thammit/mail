@@ -7,7 +7,7 @@
 				<source>Enter the additional URL parameters used to fetch the HTML content from a TYPO3 page.</source>
 			</trans-unit>
 			<trans-unit id="configure_HTMLParams_details" resname="configure_HTMLParams_details">
-				<source>The specified parameters will be added to the URL used to fetch the HTML content of the direct mail from a TYPO3 page. If in doubt, leave it blank.</source>
+				<source>The specified parameters will be added to the URL used to fetch the HTML content of the mail from a TYPO3 page. If in doubt, leave it blank.</source>
 			</trans-unit>
 			<trans-unit id="configure_default_content" resname="configure_default_content">
 				<source>Default values for mail content format</source>
@@ -16,22 +16,22 @@
 				<source>Default values for mail content fetching options</source>
 			</trans-unit>
 			<trans-unit id="configure_default_headers" resname="configure_default_headers">
-				<source>Default values for Direct Mails headers</source>
+				<source>Default values for mails headers</source>
 			</trans-unit>
 			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
-				<source>Configure direct mail module</source>
+				<source>Configure mail module</source>
 			</trans-unit>
 			<trans-unit id="configure_directmail_charset" resname="configure_directmail_charset">
-				<source>Default character set for direct mails built from external pages</source>
+				<source>Default character set for mails built from external pages</source>
 			</trans-unit>
 			<trans-unit id="configure_directmail_charset_description" resname="configure_directmail_charset_description">
-				<source>Specify the character set used in direct mails when they are built from external pages and character set cannot be auto-detected.</source>
+				<source>Specify the character set used in mails when they are built from external pages and character set cannot be auto-detected.</source>
 			</trans-unit>
 			<trans-unit id="configure_directmail_encoding" resname="configure_directmail_encoding">
-				<source>Default encoding of direct mails</source>
+				<source>Default encoding of mails</source>
 			</trans-unit>
 			<trans-unit id="configure_directmail_encoding_description" resname="configure_directmail_encoding_description">
-				<source>Select the default content transfer encoding of direct mails.</source>
+				<source>Select the default content transfer encoding of mails.</source>
 			</trans-unit>
 			<trans-unit id="configure_html_only" resname="configure_html_only">
 				<source>HTML only</source>
@@ -74,7 +74,7 @@
 				<source>Check this option to enable jump URL's and the collection of click statistics.</source>
 			</trans-unit>
 			<trans-unit id="configure_options_links_rdct" resname="configure_options_links_rdct">
-				<source>This configuration determines how QuickMails are handled and further sets the default value for Direct Mails.</source>
+				<source>This configuration determines how QuickMails are handled and further sets the default value for mails.</source>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl" resname="configure_options_mailto_jumpurl">
 				<source>Enable jump URL's for mailto links:</source>
@@ -86,7 +86,7 @@
 				<source>Enter the additional URL parameters used to fetch the plain text content from a TYPO3 page.</source>
 			</trans-unit>
 			<trans-unit id="configure_plainParams_details" resname="configure_plainParams_details">
-				<source>The specified parameters will be added to the URL used to fetch the plain text content of the direct mail from a TYPO3 page. If in doubt, set it either to '&amp;type=99' or, when using TemplaVoila, to '&amp;print=1'.</source>
+				<source>The specified parameters will be added to the URL used to fetch the plain text content of the mail from a TYPO3 page. If in doubt, set it either to '&amp;type=99' or, when using TemplaVoila, to '&amp;print=1'.</source>
 			</trans-unit>
 			<trans-unit id="configure_plain_and_html" resname="configure_plain_and_html">
 				<source>Plain text and HTML</source>
@@ -150,7 +150,7 @@
 				<source>Custom-defined table:</source>
 			</trans-unit>
 			<trans-unit id="configure_user_table_description" resname="configure_user_table_description">
-				<source>Enter the name of a custom-defined table, with compatible columns defined, which may also be used for direct mails distribution.</source>
+				<source>Enter the name of a custom-defined table, with compatible columns defined, which may also be used for mails distribution.</source>
 			</trans-unit>
 			<trans-unit id="dmail_HTML_url" resname="dmail_HTML_url">
 				<source>URL of HTML content:</source>
@@ -267,25 +267,25 @@
 				<source>NO</source>
 			</trans-unit>
 			<trans-unit id="dmail_noCreateAccess" resname="dmail_noCreateAccess">
-				<source>You cannot create direct mails using pages that are hidden or access-restricted.</source>
+				<source>You cannot create mails using pages that are hidden or access-restricted.</source>
 			</trans-unit>
 			<trans-unit id="dmail_noEdit_isSent" resname="dmail_noEdit_isSent">
 				<source>Cannot edit - mail has been sent</source>
 			</trans-unit>
 			<trans-unit id="dmail_noEdit_noPerms" resname="dmail_noEdit_noPerms">
-				<source>Cannot edit - you don't have permissions to edit Direct Mails.</source>
+				<source>Cannot edit - you don't have permissions to edit mails.</source>
 			</trans-unit>
 			<trans-unit id="dmail_noRegular" resname="dmail_noRegular">
-				<source>This type of page cannot be used to create direct mails. Please select a regular page.</source>
+				<source>This type of page cannot be used to create mails. Please select a mail page.</source>
 			</trans-unit>
 			<trans-unit id="dmail_no_html_boundaries" resname="dmail_no_html_boundaries">
-				<source>The HTML content does not contain any direct mail boundaries.</source>
+				<source>The HTML content does not contain any mail boundaries.</source>
 			</trans-unit>
 			<trans-unit id="dmail_no_html_content" resname="dmail_no_html_content">
 				<source>The HTML content could not be fetched.</source>
 			</trans-unit>
 			<trans-unit id="dmail_no_plain_boundaries" resname="dmail_no_plain_boundaries">
-				<source>The plain text content does not contain any direct mail boundaries.</source>
+				<source>The plain text content does not contain any mail boundaries.</source>
 			</trans-unit>
 			<trans-unit id="dmail_no_plain_content" resname="dmail_no_plain_content">
 				<source>The plain text content could not be fetched.</source>
@@ -321,7 +321,7 @@
 				<source>Update query</source>
 			</trans-unit>
 			<trans-unit id="dmail_view" resname="dmail_view">
-				<source>Information on direct mail record:</source>
+				<source>Information on mail record:</source>
 			</trans-unit>
 			<trans-unit id="dmail_warning" resname="dmail_warning">
 				<source>Warning</source>
@@ -408,13 +408,13 @@
 				<source>mails using records from table</source>
 			</trans-unit>
 			<trans-unit id="dmailer_sys_dmail_record" resname="dmailer_sys_dmail_record">
-				<source>sys_dmail record</source>
+				<source>mail record</source>
 			</trans-unit>
 			<trans-unit id="header_conf" resname="header_conf">
 				<source>Configuration</source>
 			</trans-unit>
 			<trans-unit id="header_directmail" resname="header_directmail">
-				<source>Direct Mail</source>
+				<source>Mail</source>
 			</trans-unit>
 			<trans-unit id="header_mailer" resname="header_mailer">
 				<source>Mailer Engine</source>
@@ -616,7 +616,7 @@
 				<source>Create a newsletter</source>
 			</trans-unit>
 			<trans-unit id="nl_create_msg1" resname="nl_create_msg1">
-				<source>Click here to create a new page that you can later send as a direct mail.</source>
+				<source>Click here to create a new page that you can later send as a mail.</source>
 			</trans-unit>
 			<trans-unit id="nl_editPage" resname="nl_editPage">
 				<source>Edit page</source>
@@ -661,7 +661,7 @@
 				<source>Update category settings</source>
 			</trans-unit>
 			<trans-unit id="nl_l_warning" resname="nl_l_warning">
-				<source>There are already %s Direct Mails based on this newsletter. Are you sure you want to create another one?</source>
+				<source>There are already %s mails based on this newsletter. Are you sure you want to create another one?</source>
 			</trans-unit>
 			<trans-unit id="nl_select" resname="nl_select">
 				<source>Select a newsletter</source>
@@ -724,7 +724,7 @@
 				<source>Distribution time (hh:mm dd-mm-yyyy):</source>
 			</trans-unit>
 			<trans-unit id="select_folder" resname="select_folder">
-				<source>Please select Direct Mail folder.</source>
+				<source>Please select mail folder.</source>
 			</trans-unit>
 			<trans-unit id="send_draft_saved" resname="send_draft_saved">
 				<source>Mail saved as draft</source>
@@ -787,7 +787,7 @@
 				<source>Count:</source>
 			</trans-unit>
 			<trans-unit id="stats_direct_mail" resname="stats_direct_mail">
-				<source>Statistics for direct mail:</source>
+				<source>Statistics for mail:</source>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned" resname="stats_disable_returned">
 				<source>Disable returned recipients</source>
