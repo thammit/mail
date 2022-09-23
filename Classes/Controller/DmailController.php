@@ -376,7 +376,7 @@ class DmailController extends AbstractController
 
                                     // add attachment here, since attachment added in 2nd step
                                     $unserializedMailContent = unserialize(base64_decode($mailData['mailContent']));
-                                    $temp = $this->compileQuickMail($mailData, $unserializedMailContent['plain']['content'] ?? '', false);
+                                    $temp = $this->compileQuickMail($mailData, $unserializedMailContent['plain']['content'] ?? '');
                                     if ($temp['errorTitle']) {
                                         ViewUtility::addErrorToFlashMessageQueue($temp['errorText'], $temp['errorTitle']);
                                     }
@@ -494,6 +494,10 @@ class DmailController extends AbstractController
         return $moduleData;
     }
 
+    /**
+     * @throws Exception
+     * @throws DBALException
+     */
     protected function getOverviewModuleData($moduleData): array
     {
         // choose source newsletter
@@ -552,8 +556,6 @@ class DmailController extends AbstractController
      */
     protected function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
     {
-        $result = false;
-
         $newRecord = [
             'type' => 0,
             'pid' => $parameters['pid'] ?? 0,
@@ -616,16 +618,12 @@ class DmailController extends AbstractController
 
             /* @var $dataHandler DataHandler */
             $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-            $dataHandler->stripslashes_values = 0;
             $dataHandler->start($tcemainData, []);
             $dataHandler->process_datamap();
-            $result = $dataHandler->substNEWwithIDs['NEW'];
-        } else {
-            if (!$newRecord['sendOptions']) {
-                $result = false;
-            }
+            return $dataHandler->substNEWwithIDs['NEW'];
         }
-        return $result;
+
+        return false;
     }
 
     /**
@@ -636,7 +634,6 @@ class DmailController extends AbstractController
      * @param array $parameters Additional newsletter parameters
      *
      * @return int|bool Error or warning message produced during the process
-     * @throws SiteNotFoundException
      */
     protected function createMailRecordFromExternalUrls(string $subject, string $externalUrlHtml, string $externalUrlPlain, array $parameters): bool|int
     {
@@ -696,7 +693,6 @@ class DmailController extends AbstractController
 
             /* @var $dataHandler DataHandler */
             $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-            $dataHandler->stripslashes_values = 0;
             $dataHandler->start($tcemainData, []);
             $dataHandler->process_datamap();
             return $dataHandler->substNEWwithIDs['NEW'];
@@ -728,11 +724,9 @@ class DmailController extends AbstractController
      * @param array $indata Quickmail data (quickmail content, etc.)
      * @return array|string error or warning message produced during the process
      * @throws DBALException
-     * @throws SiteNotFoundException
      */
     protected function createQuickMail(array $indata): array|string
     {
-        $theOutput = [];
         // Set default values:
         $dmail = [];
         $dmail['sys_dmail']['NEW'] = [
@@ -768,9 +762,8 @@ class DmailController extends AbstractController
             $dmail['sys_dmail']['NEW']['encoding'] = $this->pageTSConfiguration['direct_mail_encoding'];
         }
 
-        if ($dmail['sys_dmail']['NEW']['pid'] && $dmail['sys_dmail']['NEW']['sendOptions']) {
+        if ($dmail['sys_dmail']['NEW']['pid']) {
             $dataHandler = $this->getDataHandler();
-            $dataHandler->stripslashes_values = 0;
             $dataHandler->start($dmail, []);
             $dataHandler->process_datamap();
             $this->mailUid = $dataHandler->substNEWwithIDs['NEW'];
@@ -789,15 +782,11 @@ class DmailController extends AbstractController
                 $message = wordwrap($message, 76);
             }
             // fetch functions
-            $theOutput = $this->compileQuickMail($row, $message);
+            return $this->compileQuickMail($row, $message);
             // end fetch function
-        } else {
-            if (!$dmail['sys_dmail']['NEW']['sendOptions']) {
-                $this->error = 'no_valid_url';
-            }
         }
 
-        return $theOutput;
+        return [];
     }
 
     /**
@@ -911,7 +900,6 @@ class DmailController extends AbstractController
     {
         $categoryData = [
             'title' => LanguageUtility::getLL('nl_cat'),
-            'subtitle' => '',
             'rowsFound' => false,
             'rows' => [],
             'pageUid' => $this->pageUid,
@@ -1131,10 +1119,6 @@ class DmailController extends AbstractController
      * Send personalized test mails
      *
      * @param array $row mail DB record
-     *
-     * @throws DBALException
-     * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
      */
     protected function sendPersonalizedTestMails(array $row): void
     {
@@ -1146,6 +1130,7 @@ class DmailController extends AbstractController
         // step 4, sending test personalized test emails
         // setting Testmail flag
         $this->mailerService->setTestMail($this->isTestMail);
+        // todo create personalized test mails
         /*
         if ($this->tt_address_uid) {
             // personalized to tt_address
