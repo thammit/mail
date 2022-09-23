@@ -131,8 +131,6 @@ abstract class AbstractController
             $this->userTable = $this->pageTSConfiguration['userTable'];
             $this->allowedTables[] = $this->userTable;
         }
-        // initialize backend user language
-        //$this->sys_language_uid = 0; //@TODO
 
         $this->messageQueue = ViewUtility::getFlashMessageQueue();
     }
