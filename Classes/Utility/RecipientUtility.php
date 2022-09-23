@@ -51,28 +51,24 @@ class RecipientUtility
      */
     public static function finalSendingGroups(int $id, int $sys_dmail_uid, array $groups, string|int $userTable, $backendUserPermission): array
     {
-//        $opt = [];
         $mailGroups = [];
-        $lastGroup = null;
         if ($groups) {
             foreach ($groups as $group) {
-                $result = self::compileMailGroup($group['uid'], $groups, $userTable, $backendUserPermission);
+                $result = self::compileMailGroup($groups, $userTable, $backendUserPermission);
                 $totalRecipients = 0;
-                $idLists = $result['queryInfo']['id_lists'];
-                if (is_array($idLists['tt_address'] ?? false)) {
-                    $totalRecipients += count($idLists['tt_address']);
+                if (is_array($result['tt_address'] ?? false)) {
+                    $totalRecipients += count($result['tt_address']);
                 }
-                if (is_array($idLists['fe_users'] ?? false)) {
-                    $totalRecipients += count($idLists['fe_users']);
+                if (is_array($result['fe_users'] ?? false)) {
+                    $totalRecipients += count($result['fe_users']);
                 }
-                if (is_array($idLists['PLAINLIST'] ?? false)) {
-                    $totalRecipients += count($idLists['PLAINLIST']);
+                if (is_array($result['PLAINLIST'] ?? false)) {
+                    $totalRecipients += count($result['PLAINLIST']);
                 }
-                if (is_array($idLists[$userTable] ?? false)) {
-                    $totalRecipients += count($idLists[$userTable]);
+                if (is_array($result[$userTable] ?? false)) {
+                    $totalRecipients += count($result[$userTable]);
                 }
                 $mailGroups[] = ['uid' => $group['uid'], 'title' => $group['title'], 'receiver' => $totalRecipients];
-                $lastGroup = $group;
             }
         }
 
@@ -224,7 +220,6 @@ class RecipientUtility
      * Fetches recipient IDs from a given group ID
      * Most of the functionality from cmd_compileMailGroup in order to use multiple recipient lists when sending
      *
-     * @param int $pageId Page ID
      * @param int $groupUid Recipient group ID
      * @param string $userTable
      * @param $backendUserPermissions
@@ -233,7 +228,7 @@ class RecipientUtility
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public static function getSingleMailGroup(int $pageId, int $groupUid, string $userTable, $backendUserPermissions): array
+    public static function getSingleMailGroup(int $groupUid, string $userTable, $backendUserPermissions): array
     {
         $idLists = [];
         if ($groupUid) {
@@ -246,7 +241,7 @@ class RecipientUtility
                     case Constants::RECIPIENT_GROUP_TYPE_PAGES:
                         // From pages
                         // use current page if not set in mail group
-                        $thePages = $mailGroup['pages'] ?? $pageId;
+                        $thePages = $mailGroup['pages'];
                         // Explode the pages
                         $pages = GeneralUtility::intExplode(',', $thePages);
                         $pageIdArray = [];
@@ -337,7 +332,7 @@ class RecipientUtility
                     case Constants::RECIPIENT_GROUP_TYPE_OTHER:
                         $groups = array_unique($tempRepository->getMailGroups($mailGroup['mail_groups'], [$mailGroup['uid']], $backendUserPermissions));
                         foreach ($groups as $groupUid) {
-                            $collect = self::getSingleMailGroup($pageId, $groupUid, $userTable, $backendUserPermissions);
+                            $collect = self::getSingleMailGroup($groupUid, $userTable, $backendUserPermissions);
                             if (is_array($collect)) {
                                 $idLists = array_merge_recursive($idLists, $collect);
                             }
@@ -355,7 +350,7 @@ class RecipientUtility
      * @throws Exception
      * @throws DBALException
     */
-    public static function compileMailGroup(int $pageId, array $groups, string $userTable, $backendUserPermissions): array
+    public static function compileMailGroup(array $groups, string $userTable, $backendUserPermissions): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
         if (!count($groups)) {
@@ -364,14 +359,14 @@ class RecipientUtility
 
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
-        foreach ($groups as $groupId) {
+        foreach ($groups as $group) {
             // Testing to see if group ID is a valid integer, if not - skip to next group ID
-            $groupId = MathUtility::convertToPositiveInteger($groupId);
+            $groupId = MathUtility::convertToPositiveInteger($group['uid'] ?? $group);
             if (!$groupId) {
                 continue;
             }
 
-            $recipientList = self::getSingleMailGroup($pageId, $groupId, $userTable, $backendUserPermissions);
+            $recipientList = self::getSingleMailGroup($groupId, $userTable, $backendUserPermissions);
 
             $idLists = array_merge_recursive($idLists, $recipientList);
         }

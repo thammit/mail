@@ -83,8 +83,8 @@ class MailerService implements LoggerAwareInterface
     public function __construct(
         protected CharsetConverter $charsetConverter,
         protected SysDmailMaillogRepository $sysDmailMaillogRepository
-    )
-    {}
+    ) {
+    }
 
     /**
      * @return string
@@ -273,7 +273,8 @@ class MailerService implements LoggerAwareInterface
         // Sets the message id
         $host = MailerUtility::getHostname();
         if (!$host || $host == '127.0.0.1' || $host == 'localhost' || $host == 'localhost.localdomain') {
-            $host = ($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] ? preg_replace('/[^A-Za-z0-9_\-]/', '_', $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']) : 'localhost') . '.TYPO3';
+            $host = ($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] ? preg_replace('/[^A-Za-z0-9_\-]/', '_',
+                    $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']) : 'localhost') . '.TYPO3';
         }
 
         $idLeft = time() . '.' . uniqid();
@@ -442,7 +443,8 @@ class MailerService implements LoggerAwareInterface
         $this->replyToEmail = ($mailData['replyto_email'] ?: '');
         $this->replyToName = ($mailData['replyto_name'] ? $this->charsetConverter->conv($mailData['replyto_name'], $this->backendCharset, $this->charset) : '');
 
-        $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset, $this->charset) : '');
+        $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset,
+            $this->charset) : '');
 
         $this->priority = MathUtility::forceIntegerInRange((int)$mailData['priority'], 1, 5);
         $this->authCodeFieldList = ($mailData['authcode_fieldList'] ?: 'uid');
@@ -514,7 +516,8 @@ class MailerService implements LoggerAwareInterface
         $uppercaseFieldsArray = ['name', 'firstname'];
         foreach ($uppercaseFieldsArray as $substField) {
             if (isset($recipient[$substField])) {
-                $markers['###USER_' . strtoupper($substField) . '###'] = strtoupper($this->charsetConverter->conv($recipient[$substField], $this->backendCharset, $this->charset));
+                $markers['###USER_' . strtoupper($substField) . '###'] = strtoupper($this->charsetConverter->conv($recipient[$substField],
+                    $this->backendCharset, $this->charset));
             }
         }
 
@@ -545,7 +548,7 @@ class MailerService implements LoggerAwareInterface
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function sendSimple(string $addressList): void
+    public function sendSimpleMail(string $addressList): void
     {
         $plainContent = '';
         if ($this->getPlainContent() ?? false) {
@@ -578,7 +581,7 @@ class MailerService implements LoggerAwareInterface
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function sendAdvanced(array $recipientData, string $tableNameChar): int
+    public function sendPersonalizedMail(array $recipientData, string $tableNameChar): int
     {
         $returnCode = 0;
 
@@ -607,7 +610,8 @@ class MailerService implements LoggerAwareInterface
 
             $this->setHtmlContent('');
             if ($this->isHtml && ($recipientData['module_sys_dmail_html'] || $tableNameChar == 'P')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html'], $recipientData['sys_dmail_categories_list']);
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html'],
+                    $recipientData['sys_dmail_categories_list']);
                 $tempContent_HTML = implode('', $contentParts);
 
                 if ($mailHasContent) {
@@ -620,7 +624,8 @@ class MailerService implements LoggerAwareInterface
             // Plain
             $this->setPlainContent('');
             if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain'], $recipientData['sys_dmail_categories_list']);
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain'],
+                    $recipientData['sys_dmail_categories_list']);
                 $plainTextContent = implode('', $contentParts);
 
                 if ($mailHasContent) {
@@ -655,7 +660,7 @@ class MailerService implements LoggerAwareInterface
     /**
      * Mass send to recipient in the list
      *
-     * @param array $recipientIds List of recipients' ID in the sys_dmail table
+     * @param array $groupedRecipientIds List of recipients' ID in the sys_dmail table
      * @param int $mailUid Directmail ID. UID of the sys_dmail table
      * @return boolean
      * @throws DBALException
@@ -663,73 +668,71 @@ class MailerService implements LoggerAwareInterface
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function massSend(array $recipientIds, int $mailUid): bool
+    protected function massSend(array $groupedRecipientIds, int $mailUid): bool
     {
-        $c = 0;
-        $returnVal = true;
-        if (is_array($recipientIds['id_lists'])) {
-            foreach ($recipientIds['id_lists'] as $table => $listArr) {
-                if (is_array($listArr)) {
-                    $ct = 0;
-                    // Find tKey
-                    $recipientTable = match ($table) {
-                        'tt_address', 'fe_users' => substr($table, 0, 1),
-                        'PLAINLIST' => 'P',
-                        default => 'u',
-                    };
+        $numberOfSentMails = 0;
+        $finished = true;
+        foreach ($groupedRecipientIds as $table => $listArr) {
+            if (is_array($listArr)) {
+                $numberOfSentMailsOfGroup = 0;
+                // Find tKey
+                $recipientTable = match ($table) {
+                    'tt_address', 'fe_users' => substr($table, 0, 1),
+                    'PLAINLIST' => 'P',
+                    default => 'u',
+                };
 
-                    // Send mails
-                    $sendIdsArr = $this->sysDmailMaillogRepository->findSentMails($mailUid, $recipientTable);
-                    if ($table == 'PLAINLIST') {
-                        foreach ($listArr as $kval => $recipientData) {
-                            $kval++;
-                            if (!in_array($kval, $sendIdsArr)) {
-                                if ($c >= $this->sendPerCycle) {
-                                    $returnVal = false;
-                                    break;
-                                }
-                                $recipientData['uid'] = $kval;
-                                $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
-                                $ct++;
-                                $c++;
+                // get already sent mails
+                $sentMails = $this->sysDmailMaillogRepository->findSentMails($mailUid, $recipientTable);
+                if ($table === 'PLAINLIST') {
+                    foreach ($listArr as $kval => $recipientData) {
+                        $kval++;
+                        if (!in_array($kval, $sentMails)) {
+                            if ($numberOfSentMails >= $this->sendPerCycle) {
+                                $finished = false;
+                                break;
                             }
-                        }
-                    } else {
-                        $idList = implode(',', $listArr);
-                        if ($idList) {
-                            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-                            $queryBuilder
-                                ->select('*')
-                                ->from($table)
-                                ->where($queryBuilder->expr()->in('uid', $idList))
-                                ->setMaxResults($this->sendPerCycle + 1);
-                            if ($sendIdsArr) {
-                                $queryBuilder->addWhere($queryBuilder->expr()->notIn('uid', implode(',', $sendIdsArr)));
-                            }
-
-                            $statement = $queryBuilder->execute();
-
-                            while ($recipientData = $statement->fetchAssociative()) {
-                                $recipientData['sys_dmail_categories_list'] = RecipientUtility::getListOfRecipientCategories($table, $recipientData['uid']);
-
-                                if ($c >= $this->sendPerCycle) {
-                                    $returnVal = false;
-                                    break;
-                                }
-
-                                // We are NOT finished!
-                                $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
-                                $ct++;
-                                $c++;
-                            }
+                            $recipientData['uid'] = $kval;
+                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
+                            $numberOfSentMailsOfGroup++;
+                            $numberOfSentMails++;
                         }
                     }
+                } else {
+                    $idList = implode(',', $listArr);
+                    if ($idList) {
+                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+                        $queryBuilder
+                            ->select('*')
+                            ->from($table)
+                            ->where($queryBuilder->expr()->in('uid', $idList))
+                            ->setMaxResults($this->sendPerCycle + 1);
+                        if ($sentMails) {
+                            $queryBuilder->addWhere($queryBuilder->expr()->notIn('uid', implode(',', $sentMails)));
+                        }
 
-                    $this->logger->debug(LanguageUtility::getLL('dmailer_sending') . ' ' . $ct . ' ' . LanguageUtility::getLL('dmailer_sending_to_table') . ' ' . $table);
+                        $statement = $queryBuilder->execute();
+
+                        while ($recipientData = $statement->fetchAssociative()) {
+                            $recipientData['sys_dmail_categories_list'] = RecipientUtility::getListOfRecipientCategories($table, $recipientData['uid']);
+
+                            if ($numberOfSentMails >= $this->sendPerCycle) {
+                                $finished = false;
+                                break;
+                            }
+
+                            // We are NOT finished!
+                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
+                            $numberOfSentMailsOfGroup++;
+                            $numberOfSentMails++;
+                        }
+                    }
                 }
+
+                $this->logger->debug(LanguageUtility::getLL('dmailer_sending') . ' ' . $numberOfSentMailsOfGroup . ' ' . LanguageUtility::getLL('dmailer_sending_to_table') . ' ' . $table);
             }
         }
-        return $returnVal;
+        return $finished;
     }
 
     /**
@@ -757,7 +760,8 @@ class MailerService implements LoggerAwareInterface
 
             // try to insert the mail to the mail log repository
             try {
-                $logUid = $this->sysDmailMaillogRepository->insertRecord($mailUid, $recipientTable . '_' . $recipientData['uid'], strlen($this->message), MailerUtility::getMilliseconds() - $pt, $returnCode, $recipientData['email']);
+                $logUid = $this->sysDmailMaillogRepository->insertRecord($mailUid, $recipientTable . '_' . $recipientData['uid'], strlen($this->message),
+                    MailerUtility::getMilliseconds() - $pt, $returnCode, $recipientData['email']);
             } catch (DBALException $exception) {
                 $message = 'Unable to update Log-Entry in table sys_dmail_maillog. Table full? Mass-Sending stopped. Delete each entries except the entries of active mailings (mid=' . $mailUid . ')';
                 $this->logger->critical($message);
@@ -765,7 +769,7 @@ class MailerService implements LoggerAwareInterface
             }
 
             // Send mail to recipient
-            $returnCode = $this->sendAdvanced($recipientData, $recipientTable);
+            $returnCode = $this->sendPersonalizedMail($recipientData, $recipientTable);
 
             // try to store the sending return code
             try {
@@ -873,13 +877,13 @@ class MailerService implements LoggerAwareInterface
             ->where($queryBuilder->expr()->neq('scheduled', '0'))
             ->andWhere($queryBuilder->expr()->lt('scheduled', time()))
             ->andWhere($queryBuilder->expr()->eq('scheduled_end', '0'))
-            ->andWhere($queryBuilder->expr()->notIn('type', ['2', '3']))
+            ->andWhere($queryBuilder->expr()->notIn('type', [Constants::MAIL_TYPE_DRAFT_INTERNAL, Constants::MAIL_TYPE_DRAFT_EXTERNAL]))
             ->orderBy('scheduled')
             ->execute();
 
         $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
 
-        if (($row = $statement->fetchAssociative())) {
+        if ($row = $statement->fetchAssociative()) {
             $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . LanguageUtility::getLL('dmailer_processed'));
             $this->prepare($row);
             $query_info = unserialize($row['query_info']);
@@ -902,7 +906,7 @@ class MailerService implements LoggerAwareInterface
                 $this->setBeginEnd((int)$row['uid'], 'begin');
             }
 
-            $finished = $this->massSend($query_info, $row['uid']);
+            $finished = !is_array($query_info['id_lists']) || $this->massSend($query_info['id_lists'], $row['uid']);
 
             if ($finished) {
                 $this->setBeginEnd((int)$row['uid'], 'end');

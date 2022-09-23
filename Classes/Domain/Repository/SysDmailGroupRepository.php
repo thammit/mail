@@ -46,7 +46,7 @@ class SysDmailGroupRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function selectSysDmailGroupForFinalMail(int $pid, int $sysLanguageUid, string $defaultSortBy): array
+    public function findSysDmailGroupUidsForFinalMail(int $pid, int $sysLanguageUid, string $defaultSortBy): array
     {
         $queryBuilder = $this->getQueryBuilder();
 

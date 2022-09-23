@@ -5,35 +5,26 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
+<h2><f:translate key="{lll}dmail_wiz5_sendmass"/></h2>
 <f:variable name="mailForm" value="mail-wizard-form-final"/>
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
-    <h3>
-        <f:translate key="{lll}dmail_wiz5_sendmass"/>
-    </h3>
     <div class="mb-4">
-        <h3>
-            <f:translate key="{lll}schedule_select_mailgroup"/>
-        </h3>
+        <f:be.infobox state="-1" title="{f:translate(key: '{lll}schedule_select_mailgroup')}">
+            <f:translate key="{lll}schedule_select_mailgroup2"/>
+        </f:be.infobox>
         <input type="hidden" name="id" value="{final.finalForm.id}"/>
         <input type="hidden" name="sys_dmail_uid" value="{final.finalForm.sys_dmail_uid}"/>
         <input type="hidden" name="cmd" value="{final.cmd}">
         <input type="hidden" name="pages_uid" value="{final.pages_uid}">
         <input type="hidden" name="currentCMD" value="{final.currentCMD}">
-        <div class="my-3">
-            {final.finalForm.groupInput -> f:format.html()}
-        </div>
-        <div class="my-3">
-            {final.finalForm.hookContents -> f:format.html()}
-        </div>
-        {final.finalForm.mailGroups -> f:debug(inline:1)}
         <f:if condition="{final.finalForm.mailGroups}">
             <f:then>
                 <f:variable name="numberOfRecipientGroups" value="{final.finalForm.mailGroups -> f:count()}" />
                 <f:if condition="{numberOfRecipientGroups} == 1">
                     <f:then>
                         <f:variable name="group">{final.finalForm.mailGroups.0}</f:variable>
-                        <label class="form-label"><f:translate key="{lll}schedule_mailgroup"/></label>
                         <input type="hidden" name="mailGroupUid[]" value="{group.uid}" />
+                        <label class="form-label"><f:translate key="{lll}schedule_mailgroup"/></label>
                         <ul>
                             <li title="{group.uid}">{group.title}<f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if></li>
                         </ul>
@@ -53,10 +44,10 @@
             </f:else>
         </f:if>
         <div class="mb-3">
-            <label for="send_mail_datetime" class="form-label"><f:translate key="{lll}schedule_time"/></label>
+            <label for="distributionTime" class="form-label"><f:translate key="{lll}schedule_time"/></label>
             <div class="input-group">
-                <input autocomplete="off" data-date-type="datetime" class="form-control t3js-datetimepicker t3js-clearable" id="send_mail_datetime" type="text" name="send_mail_datetime" value="{f:format.date(format:'H:i d-m-Y', date:'now')}" />
-                <label class="mb-0 btn btn-default" for="send_mail_datetime">
+                <input autocomplete="off" data-date-type="datetime" class="form-control t3js-datetimepicker t3js-clearable" id="distributionTime" type="text" name="distributionTime" value="{f:format.date(format:'H:i d-m-Y', date:'now')}" />
+                <label class="mb-0 btn btn-default" for="distributionTime">
                             <span class="t3js-icon icon icon-size-small icon-state-default icon-actions-calendar" data-identifier="actions-calendar">
                                 <span class="icon-markup">
                                     <svg class="icon-color"><use xlink:href="/typo3/sysext/core/Resources/Public/Icons/T3Icons/sprites/actions.svg#actions-calendar" /></svg>
@@ -66,14 +57,14 @@
             </div>
         </div>
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="testmail" id="tx-directmail-sendtestmail-check" value="1"/>
+            <input class="form-check-input" type="checkbox" name="isTestMail" id="tx-directmail-sendtestmail-check" value="1"/>
             <label class="form-check-label" for="tx-directmail-sendtestmail-check"><f:translate key="{lll}schedule_testmail"/></label>
         </div>
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="savedraft" id="tx-directmail-savedraft-check" value="1"/>
+            <input class="form-check-input" type="checkbox" name="saveDraft" id="tx-directmail-savedraft-check" value="1"/>
             <label class="form-check-label" for="tx-directmail-savedraft-check"><f:translate key="{lll}schedule_draft"/></label>
         </div>
-        <button class="btn btn-lg btn-primary text-uppercase" type="Submit" name="mailingMode_mailGroup" value="1"><f:translate key="{lll}schedule_send_all"/></button>
+        <button class="btn btn-lg btn-primary text-uppercase" type="Submit" name="scheduleSendAll" value="1"><f:translate key="{lll}schedule_send_all"/></button>
     </div>
 </form>
 <f:render partial="Wizard/Navigation" arguments="{navigation: navigation, mailForm:mailForm, lll:lll}"/>

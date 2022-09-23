@@ -66,19 +66,18 @@ class TempRepository extends AbstractRepository
      * @param int $groupUid The groupUid.
      * @param int $cat The number of relations from sys_dmail_group to sysmail_categories
      *
-     * @return    array The resulting array of uid's
+     * @return array The resulting array of uid's
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws DBALException
      */
     public function getIdList(string $table, string $pidList, int $groupUid, int $cat): array
     {
         $addWhere = '';
-        $switchTable = $table == 'fe_groups' ? 'fe_users' : $table;
-        $pidArray = GeneralUtility::intExplode(',', $pidList);
+        $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
+        $pidArray = GeneralUtility::intExplode(',', $pidList, true);
         $queryBuilder = $this->getQueryBuilder($table);
 
         if ($switchTable == 'fe_users') {
-            //$addWhere = ' AND fe_users.module_sys_dmail_newsletter = 1';
             $addWhere = $queryBuilder->expr()->eq(
                 'fe_users.module_sys_dmail_newsletter',
                 1
@@ -95,7 +94,7 @@ class TempRepository extends AbstractRepository
 
         $mmTable = $GLOBALS['TCA'][$switchTable]['columns']['module_sys_dmail_category']['config']['MM'];
         if ($cat < 1) {
-            if ($table == 'fe_groups') {
+            if ($table === 'fe_groups') {
                 $res = $queryBuilder
                     ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
                     ->from($switchTable, $switchTable)
@@ -129,7 +128,7 @@ class TempRepository extends AbstractRepository
                     ->execute();
             }
         } else {
-            if ($table == 'fe_groups') {
+            if ($table === 'fe_groups') {
                 $res = $queryBuilder
                     ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
                     ->from('sys_dmail_group', 'sys_dmail_group')

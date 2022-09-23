@@ -49,7 +49,7 @@ class RecipientService
      */
     public function getRecipientIdsOfMailGroups(array $groups, string $userTable = ''): array
     {
-        $recipientIds = RecipientUtility::compileMailGroup($this->pageId, $groups, $userTable, $this->backendUserPermissions);
+        $recipientIds = RecipientUtility::compileMailGroup($groups, $userTable, $this->backendUserPermissions);
 
         // Todo: Add PSR-14 EventDispatcher to manipulate the id list (see commented hook code block below)
 

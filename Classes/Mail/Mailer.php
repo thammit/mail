@@ -60,7 +60,7 @@ class Mailer extends \TYPO3\CMS\Core\Mail\Mailer
             // if no identifier is set use first site if exists
             $allSites = $siteFinder->getAllSites();
             if (count($allSites) > 0) {
-                $site = $allSites[0];
+                $site = reset($allSites);
                 $siteMailSettings = $site->getConfiguration()['mail'] ?? [];
             }
         }

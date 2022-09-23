@@ -450,7 +450,7 @@ class SysDmailMaillogRepository extends AbstractRepository
     {
         $queryBuilder = $this->getQueryBuilder();
 
-        $statement = $queryBuilder
+        return array_column($queryBuilder
             ->select('rid')
             ->from($this->table)
             ->where(
@@ -458,15 +458,8 @@ class SysDmailMaillogRepository extends AbstractRepository
                 $queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($recipientTable)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT))
             )
-            ->execute();
-
-        $list = [];
-
-        while (($row = $statement->fetchAssociative())) {
-            $list[] = $row['rid'];
-        }
-
-        return $list;
+            ->execute()
+            ->fetchAllAssociative(), 'rid');
     }
 
 

@@ -57,7 +57,11 @@ class DmailController extends AbstractController
     protected string $externalMailPlainUri = '';
     protected array $mailGroupUids = [];
     protected bool $sendTestMail = false;
+    protected bool $scheduleSendAll = false;
+    protected bool $saveDraft = false;
+    protected bool $isTestMail = false;
     protected string $sendTestMailAddress = '';
+    protected int $distributionTimeStamp = 0;
     // protected int $tt_address_uid = 0;
     protected string $requestUri = '';
 
@@ -115,6 +119,13 @@ class DmailController extends AbstractController
         $this->quickMail = (array)($parsedBody['quickmail'] ?? $queryParams['quickmail'] ?? []);
 
         $this->mailGroupUids = $parsedBody['mailGroupUid'] ?? $queryParams['mailGroupUid'] ?? [];
+        $this->scheduleSendAll = (bool)($parsedBody['scheduleSendAll'] ?? $queryParams['scheduleSendAll'] ?? false);
+        $this->saveDraft = (bool)($parsedBody['saveDraft'] ?? $queryParams['saveDraft'] ?? false);
+        $this->isTestMail = (bool)($parsedBody['isTestMail'] ?? $queryParams['isTestMail'] ?? false);
+        $this->distributionTimeStamp = strtotime((string)($parsedBody['distributionTime'] ?? $queryParams['distributionTime'] ?? '')) ?: time();
+        if ($this->distributionTimeStamp < time()) {
+            $this->distributionTimeStamp = time();
+        }
         // $this->tt_address_uid = (int)($parsedBody['tt_address_uid'] ?? $queryParams['tt_address_uid'] ?? 0);
         $this->view->assign('settings', [
             'route' => $this->route,
@@ -440,7 +451,7 @@ class DmailController extends AbstractController
                 $moduleData['navigation']['next'] = true;
 
                 if ($this->cmd === Constants::WIZARD_STEP_SEND_TEST2) {
-                    $this->sendMail($mailData);
+                    $this->sendSimpleTestMail($mailData);
                 }
                 $moduleData['test']['testFormData'] = $this->getTestMailConfig();
                 $moduleData['test']['cmd'] = Constants::WIZARD_STEP_SEND;
@@ -456,13 +467,15 @@ class DmailController extends AbstractController
                 $moduleData['navigation']['currentStep'] = $this->currentStep;
                 $moduleData['final'] = ['currentStep' => $this->currentStep];
 
-                if ($this->cmd === Constants::WIZARD_STEP_SEND) {
-                    $moduleData['navigation']['back'] = true;
-                }
+                $moduleData['navigation']['back'] = $this->cmd === Constants::WIZARD_STEP_SEND;
 
                 if ($this->cmd === Constants::WIZARD_STEP_FINAL) {
-                    if (is_array($this->mailGroupUids) && count($this->mailGroupUids)) {
-                        $this->sendMail($mailData);
+                    if (count($this->mailGroupUids)) {
+                        if ($this->isTestMail) {
+                            $this->sendPersonalizedTestMails($mailData);
+                        } else {
+                            $this->schedulePersonalizedMails($mailData);
+                        }
                         break;
                     } else {
                         $this->messageQueue->addMessage(ViewUtility::getFlashMessage(
@@ -537,7 +550,7 @@ class DmailController extends AbstractController
      * @throws SiteNotFoundException
      * @throws InvalidConfigurationTypeException
      */
-    public function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
+    protected function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
     {
         $result = false;
 
@@ -625,7 +638,7 @@ class DmailController extends AbstractController
      * @return int|bool Error or warning message produced during the process
      * @throws SiteNotFoundException
      */
-    public function createMailRecordFromExternalUrls(string $subject, string $externalUrlHtml, string $externalUrlPlain, array $parameters): bool|int
+    protected function createMailRecordFromExternalUrls(string $subject, string $externalUrlHtml, string $externalUrlPlain, array $parameters): bool|int
     {
         $newRecord = [
             'type' => 1,
@@ -1063,7 +1076,6 @@ class DmailController extends AbstractController
          */
         // Todo: Change to PSR-14 Event Dispatcher
         $hookContents = '';
-        $hookSelectDisabled = false;
 //        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] ?? false)) {
 //            $hookObjectsArr = [];
 //            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] as $classRef) {
@@ -1078,7 +1090,7 @@ class DmailController extends AbstractController
 //        }
 
         // Mail groups
-        $groups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupForFinalMail(
+        $groups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->findSysDmailGroupUidsForFinalMail(
             $this->id,
             (int)$direct_mail_row['sys_language_uid'],
             trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby'])
@@ -1086,63 +1098,122 @@ class DmailController extends AbstractController
 
         $mailGroups = RecipientUtility::finalSendingGroups($this->id, $this->mailUid, $groups, $this->userTable, $this->backendUserPermissions);
 
-        // todo: delete next block after upper method is working
-
-        $opt = [];
-        $lastGroup = null;
-        if ($groups) {
-            foreach ($groups as $group) {
-                $count = 0;
-                $idLists = $this->recipientService->getRecipientIdsOfMailGroups([$group['uid']]);
-                if (is_array($idLists['tt_address'] ?? false)) {
-                    $count += count($idLists['tt_address']);
-                }
-                if (is_array($idLists['fe_users'] ?? false)) {
-                    $count += count($idLists['fe_users']);
-                }
-                if (is_array($idLists['PLAINLIST'] ?? false)) {
-                    $count += count($idLists['PLAINLIST']);
-                }
-                if (is_array($idLists[$this->userTable] ?? false)) {
-                    $count += count($idLists[$this->userTable]);
-                }
-                $opt[] = '<option value="' . $group['uid'] . '">' . htmlspecialchars($group['title'] . ' (#' . $count . ')') . '</option>';
-                $lastGroup = $group;
-            }
-        }
-        $groupInput = '';
-        // added disabled. see hook
-        if (count($opt) === 0) {
-            $message = ViewUtility::getFlashMessage(
-                LanguageUtility::getLL('error.no_recipient_groups_found'),
-                '',
-                AbstractMessage::ERROR
-            );
-            $this->messageQueue->addMessage($message);
-        } else {
-            if (count($opt) === 1) {
-                if (!$hookSelectDisabled) {
-                    $groupInput .= '<input type="hidden" name="mailgroup_uid[]" value="' . $lastGroup['uid'] . '" />';
-                }
-                $groupInput .= '<ul><li>' . htmlentities($lastGroup['title']) . '</li></ul>';
-                if ($hookSelectDisabled) {
-                    $groupInput .= '<em>disabled</em>';
-                }
-            } else {
-                $groupInput = '<select class="form-control" size="20" multiple="multiple" name="mailgroup_uid[]" ' . ($hookSelectDisabled ? 'disabled' : '') . '>' . implode(chr(10),
-                        $opt) . '</select>';
-            }
-        }
-
         return [
-            'mailGroups' => $mailGroups,
             'id' => $this->id,
             'sys_dmail_uid' => $this->mailUid,
-            'groupInput' => $groupInput,
-            'hookContents' => $hookContents, // put content from hook
-            'send_mail_datetime_hr' => strftime('%H:%M %d-%m-%Y', time()),
-            'send_mail_datetime' => strftime('%H:%M %d-%m-%Y', time()),
+            'mailGroups' => $mailGroups,
+            'hookContents' => $hookContents,
         ];
+    }
+
+    /**
+     * Send a test mail to one or more email addresses
+     *
+     * @param array $row mail DB record
+     *
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
+     */
+    protected function sendSimpleTestMail(array $row): void
+    {
+        $this->mailerService->start();
+        $this->mailerService->prepare($row);
+
+        if ($this->sendTestMail) {
+            $this->mailerService->setTestMail(true);
+
+            // normalize addresses:
+            $addressList = RecipientUtility::normalizeListOfEmailAddresses($this->sendTestMailAddress);
+
+            if ($addressList) {
+                // Sending the same mail to lots of recipients
+                $this->mailerService->sendSimpleMail($addressList);
+                ViewUtility::addOkToFlashMessageQueue(
+                    LanguageUtility::getLL('send_was_sent') . ' ' . LanguageUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
+                    LanguageUtility::getLL('send_sending')
+                );
+            }
+        }
+    }
+
+    /**
+     * Send personalized test mails
+     *
+     * @param array $row mail DB record
+     *
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function sendPersonalizedTestMails(array $row): void
+    {
+        // Preparing mailer
+        $this->mailerService->start();
+        $this->mailerService->prepare($row);
+        $sentFlag = false;
+
+        // step 4, sending test personalized test emails
+        // setting Testmail flag
+        $this->mailerService->setTestMail($this->isTestMail);
+        /*
+        if ($this->tt_address_uid) {
+            // personalized to tt_address
+            $res = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressForSendMailTest($this->tt_address_uid,
+                $this->backendUserPermissions);
+
+            if (!empty($res)) {
+                foreach ($res as $recipRow) {
+                    $recipRow = MailerUtility::normalizeAddress($recipRow);
+                    $recipRow['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories('tt_address', $recipRow['uid']);
+                    $this->mailerService->sendAdvanced($recipRow, 't');
+                    $sentFlag = true;
+
+                    $message = MailerUtility::getFlashMessage(
+                        sprintf(MailerUtility::getLL('send_was_sent_to_name'), $recipRow['name'] . ' <' . $recipRow['email'] . '>'),
+                        MailerUtility::getLL('send_sending'),
+                        AbstractMessage::OK
+                    );
+                    $this->messageQueue->addMessage($message);
+                }
+            } else {
+                $message = MailerUtility::getFlashMessage(
+                    'Error: No valid recipient found to send test mail to. #1579209279',
+                    MailerUtility::getLL('send_sending'),
+                    AbstractMessage::ERROR
+                );
+                $this->messageQueue->addMessage($message);
+            }
+        } else {
+            if (is_array(GeneralUtility::_GP('sys_dmail_group_uid'))) {
+                // personalized to group
+                $idLists = $this->recipientService->getRecipientIdsOfMailGroups(GeneralUtility::_GP('sys_dmail_group_uid'));
+
+                $sendFlag = 0;
+                $sendFlag += $this->sendTestMailToTable($idLists, 'tt_address');
+                $sendFlag += $this->sendTestMailToTable($idLists, 'fe_users');
+                $sendFlag += $this->sendTestMailToTable($idLists, 'PLAINLIST');
+                if ($this->userTable) {
+                    $sendFlag += $this->sendTestMailToTable($idLists, $this->userTable);
+                }
+                $message = MailerUtility::getFlashMessage(
+                    sprintf(MailerUtility::getLL('send_was_sent_to_number'), $sendFlag),
+                    MailerUtility::getLL('send_sending'),
+                    AbstractMessage::OK
+                );
+                $this->messageQueue->addMessage($message);
+            }
+        }
+        */
+        // Setting flags and update the record:
+        if ($sentFlag && $this->cmd === Constants::WIZARD_STEP_FINAL) {
+
+            $connection = $this->getConnection('sys_dmail');
+            $connection->update(
+                'sys_dmail',
+                ['issent' => 1],
+                ['uid' => $this->mailUid]
+            );
+        }
     }
 
     /**
@@ -1154,156 +1225,66 @@ class DmailController extends AbstractController
      *
      * @throws DBALException
      * @throws Exception
-     * @throws TransportExceptionInterface
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    protected function sendMail(array $row): void
+    protected function schedulePersonalizedMails(array $row): void
     {
         // Preparing mailer
         $this->mailerService->start();
         $this->mailerService->prepare($row);
         $sentFlag = false;
 
-        // send out non-personalized emails
-        if ($this->sendTestMail) {
-            // step 4, sending simple test emails
-            // setting Testmail flag
-            $this->mailerService->setTestMail((bool)($this->pageTSConfiguration['testmail'] ?? false));
+        if ($this->scheduleSendAll && $this->mailUid) {
+            // Update the record:
+            $queryInfo['id_lists'] = $this->recipientService->getRecipientIdsOfMailGroups($this->mailGroupUids);
 
-            // normalize addresses:
-            $addressList = RecipientUtility::normalizeListOfEmailAddresses($this->sendTestMailAddress);
+            // todo: cast recipient groups to integer
+            $updateFields = [
+                'recipientGroups' => implode(',', $this->mailGroupUids),
+                'scheduled' => $this->distributionTimeStamp,
+                'query_info' => serialize($queryInfo),
+            ];
 
-            if ($addressList) {
-                // Sending the same mail to lots of recipients
-                $this->mailerService->sendSimple($addressList);
-                $sentFlag = true;
-                $message = ViewUtility::getFlashMessage(
-                    LanguageUtility::getLL('send_was_sent') . ' ' .
-                    LanguageUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
-                    LanguageUtility::getLL('send_sending'),
-                    AbstractMessage::OK
-                );
-                $this->messageQueue->addMessage($message);
+            if ($this->isTestMail) {
+                $updateFields['subject'] = ($this->pageTSConfiguration['testmail'] ?? '') . ' ' . $row['subject'];
             }
-        } else {
-            if ($this->cmd === Constants::WIZARD_STEP_SEND_TEST2) {
-                // step 4, sending test personalized test emails
-                // setting Testmail flag
-                $this->mailerService->setTestMail((bool)($this->pageTSConfiguration['testmail'] ?? false));
-                /*
-                if ($this->tt_address_uid) {
-                    // personalized to tt_address
-                    $res = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressForSendMailTest($this->tt_address_uid,
-                        $this->backendUserPermissions);
 
-                    if (!empty($res)) {
-                        foreach ($res as $recipRow) {
-                            $recipRow = MailerUtility::normalizeAddress($recipRow);
-                            $recipRow['sys_dmail_categories_list'] = MailerUtility::getListOfRecipientCategories('tt_address', $recipRow['uid']);
-                            $this->mailerService->sendAdvanced($recipRow, 't');
-                            $sentFlag = true;
-
-                            $message = MailerUtility::getFlashMessage(
-                                sprintf(MailerUtility::getLL('send_was_sent_to_name'), $recipRow['name'] . ' <' . $recipRow['email'] . '>'),
-                                MailerUtility::getLL('send_sending'),
-                                AbstractMessage::OK
-                            );
-                            $this->messageQueue->addMessage($message);
-                        }
-                    } else {
-                        $message = MailerUtility::getFlashMessage(
-                            'Error: No valid recipient found to send test mail to. #1579209279',
-                            MailerUtility::getLL('send_sending'),
-                            AbstractMessage::ERROR
-                        );
-                        $this->messageQueue->addMessage($message);
-                    }
+            // create a draft version of the record
+            if ($this->saveDraft) {
+                if ($row['type'] === Constants::MAIL_TYPE_INTERNAL) {
+                    $updateFields['type'] = Constants::MAIL_TYPE_DRAFT_INTERNAL;
                 } else {
-                    if (is_array(GeneralUtility::_GP('sys_dmail_group_uid'))) {
-                        // personalized to group
-                        $idLists = $this->recipientService->getRecipientIdsOfMailGroups(GeneralUtility::_GP('sys_dmail_group_uid'));
-
-                        $sendFlag = 0;
-                        $sendFlag += $this->sendTestMailToTable($idLists, 'tt_address');
-                        $sendFlag += $this->sendTestMailToTable($idLists, 'fe_users');
-                        $sendFlag += $this->sendTestMailToTable($idLists, 'PLAINLIST');
-                        if ($this->userTable) {
-                            $sendFlag += $this->sendTestMailToTable($idLists, $this->userTable);
-                        }
-                        $message = MailerUtility::getFlashMessage(
-                            sprintf(MailerUtility::getLL('send_was_sent_to_number'), $sendFlag),
-                            MailerUtility::getLL('send_sending'),
-                            AbstractMessage::OK
-                        );
-                        $this->messageQueue->addMessage($message);
-                    }
+                    $updateFields['type'] = Constants::MAIL_TYPE_DRAFT_EXTERNAL;
                 }
-                */
+
+                $updateFields['scheduled'] = 0;
+                ViewUtility::addOkToFlashMessageQueue(
+                    LanguageUtility::getLL('dmail_wiz5_sendmass'),
+                    LanguageUtility::getLL('send_draft_saved') . ' ' . LanguageUtility::getLL('send_draft_scheduler')
+                );
             } else {
-                // step 5, sending personalized emails to the mailqueue
-
-                // prepare the email for sending with the mailqueue
-                $recipientGroups = GeneralUtility::_GP('mailgroup_uid');
-                if (GeneralUtility::_GP('mailingMode_mailGroup') && $this->mailUid && is_array($recipientGroups)) {
-                    // Update the record:
-                    $queryInfo['id_lists'] = $this->recipientService->getRecipientIdsOfMailGroups($recipientGroups);
-
-                    $distributionTime = strtotime(GeneralUtility::_GP('send_mail_datetime'));
-                    if ($distributionTime < time()) {
-                        $distributionTime = time();
-                    }
-
-                    $updateFields = [
-                        'recipientGroups' => implode(',', $recipientGroups),
-                        'scheduled' => $distributionTime,
-                        'query_info' => serialize($queryInfo),
-                    ];
-
-                    if (GeneralUtility::_GP('testmail')) {
-                        $updateFields['subject'] = ($this->pageTSConfiguration['testmail'] ?? '') . ' ' . $row['subject'];
-                    }
-
-                    // create a draft version of the record
-                    if (GeneralUtility::_GP('savedraft')) {
-                        if ($row['type'] == 0) {
-                            $updateFields['type'] = 2;
-                        } else {
-                            $updateFields['type'] = 3;
-                        }
-
-                        $updateFields['scheduled'] = 0;
-                        $content = LanguageUtility::getLL('send_draft_scheduler');
-                        $sectionTitle = LanguageUtility::getLL('send_draft_saved');
-                    } else {
-                        $content = LanguageUtility::getLL('send_was_scheduled_for') . ' ' . BackendUtility::datetime($distributionTime);
-                        $sectionTitle = LanguageUtility::getLL('send_was_scheduled');
-                    }
-                    $sentFlag = true;
-                    $connection = $this->getConnection('sys_dmail');
-                    $connection->update(
-                        'sys_dmail', // table
-                        $updateFields,
-                        ['uid' => $this->mailUid] // where
-                    );
-
-                    $message = ViewUtility::getFlashMessage(
-                        $sectionTitle . ' ' . $content,
-                        LanguageUtility::getLL('dmail_wiz5_sendmass'),
-                        AbstractMessage::OK
-                    );
-                    $this->messageQueue->addMessage($message);
-                }
+                ViewUtility::addOkToFlashMessageQueue(
+                    LanguageUtility::getLL('dmail_wiz5_sendmass'),
+                    LanguageUtility::getLL('send_was_scheduled') . ' ' . LanguageUtility::getLL('send_was_scheduled_for') . ' ' . BackendUtility::datetime($this->distributionTimeStamp)
+                );
             }
+            $connection = $this->getConnection('sys_dmail');
+            $connection->update(
+                'sys_dmail',
+                $updateFields,
+                ['uid' => $this->mailUid]
+            );
+            $sentFlag = true;
         }
 
         // Setting flags and update the record:
-        if ($sentFlag && $this->cmd === Constants::WIZARD_STEP_FINAL) {
+        if ($sentFlag) {
 
             $connection = $this->getConnection('sys_dmail');
             $connection->update(
-                'sys_dmail', // table
+                'sys_dmail',
                 ['issent' => 1],
-                ['uid' => $this->mailUid] // where
+                ['uid' => $this->mailUid]
             );
         }
     }

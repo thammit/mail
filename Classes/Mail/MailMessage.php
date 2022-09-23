@@ -11,6 +11,8 @@ class MailMessage extends \TYPO3\CMS\Core\Mail\MailMessage
 {
     protected string $siteIdentifier = '';
 
+    protected int $scheduled = 0;
+
     /**
      * @throws Exception
      */
@@ -46,5 +48,21 @@ class MailMessage extends \TYPO3\CMS\Core\Mail\MailMessage
     {
         $this->siteIdentifier = $siteIdentifier;
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getScheduled(): int
+    {
+        return $this->scheduled;
+    }
+
+    /**
+     * @param int $scheduled
+     */
+    public function setScheduled(int $scheduled): void
+    {
+        $this->scheduled = $scheduled;
     }
 }

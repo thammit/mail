@@ -366,7 +366,7 @@
 				<source>Test Mail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz5_sendmass" resname="dmail_wiz5_sendmass">
-				<source>Mass Send</source>
+				<source>Schedule sending</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz_back" resname="dmail_wiz_back">
 				<source>Back</source>
@@ -709,7 +709,10 @@
 				<source>Recipient list:</source>
 			</trans-unit>
 			<trans-unit id="schedule_select_mailgroup" resname="schedule_select_mailgroup">
-				<source>Send mail - recipient list</source>
+				<source>Select recipients and time of sending</source>
+			</trans-unit>
+			<trans-unit id="schedule_select_mailgroup2" resname="schedule_select_mailgroup2">
+				<source>Select recipients and time of sending</source>
 			</trans-unit>
 			<trans-unit id="schedule_send_all" resname="schedule_send_all">
 				<source>Send to all subscribers in recipient list</source>
