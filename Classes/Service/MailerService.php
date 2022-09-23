@@ -121,7 +121,7 @@ class MailerService implements LoggerAwareInterface
      */
     public function getMailPart(string $part): mixed
     {
-        return $this->mailParts[$part];
+        return $this->mailParts[$part] ?? '';
     }
 
     /**
@@ -299,14 +299,13 @@ class MailerService implements LoggerAwareInterface
 
         if (!$fetchPlainTextContent && !$fetchHtmlContent) {
             ViewUtility::addInfoToFlashMessageQueue('', LanguageUtility::getLL('dmail_no_mail_content_format_selected'));
-            return false;
+            return true;
         }
 
         $this->start();
         $this->setCharset($mailData['charset']);
         $this->setIncludeMedia((bool)$mailData['includeMedia']);
 
-        $errors = false;
         $baseUrl = BackendDataUtility::getAbsoluteBaseUrlForMailPage((int)$mailData['page']);
         $glue = str_contains($baseUrl, '?') ? '&' : '?';
         if ($params['enable_jump_url'] ?? false) {
@@ -330,7 +329,7 @@ class MailerService implements LoggerAwareInterface
                 if ($plainContent === false) {
                     ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_plain_uri_is_invalid'),
                         LanguageUtility::getLL('dmail_error'));
-                    $errors = true;
+                    return true;
                 } else {
                     if (!MailerUtility::contentContainsBoundaries($plainContent)) {
                         ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_boundaries'),
@@ -339,9 +338,9 @@ class MailerService implements LoggerAwareInterface
                     $this->setPlainContent($plainContent);
                 }
             } catch (RequestException|ConnectException $exception) {
-                $errors = true;
                 ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
                     LanguageUtility::getLL('dmail_error'));
+                return true;
             }
         }
 
@@ -354,11 +353,26 @@ class MailerService implements LoggerAwareInterface
                 if ($htmlContent === false) {
                     ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid'),
                         LanguageUtility::getLL('dmail_error'));
-                    $errors = true;
+                    return true;
                 } else {
+                    if ((int)$mailData['type'] == Constants::MAIL_TYPE_EXTERNAL) {
+                        // Try to auto-detect the charset of the message
+                        $matches = [];
+                        $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m',
+                            $htmlContent, $matches);
+                        if ($res === 1) {
+                            $this->setCharset($matches[1]);
+                        } else {
+                            if (isset($params['direct_mail_charset'])) {
+                                $this->setCharset($params['direct_mail_charset']);
+                            } else {
+                                $this->setCharset('iso-8859-1');
+                            }
+                        }
+                    }
                     if (MailerUtility::contentContainsFrameTag($htmlContent)) {
-                        $errors = true;
                         ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_frames_not allowed'), LanguageUtility::getLL('dmail_error'));
+                        return true;
                     }
                     if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
                         ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_html_boundaries'),
@@ -371,46 +385,29 @@ class MailerService implements LoggerAwareInterface
                             $this->getJumpUrlUseId(), $this->getJumpUrlUseMailto());
                     }
                     $this->setHtmlContent($htmlContent);
-                    if ((int)$mailData['type'] == Constants::MAIL_TYPE_EXTERNAL) {
-                        // Try to auto-detect the charset of the message
-                        $matches = [];
-                        $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m',
-                            ($this->getMailPart('html_content') ?? ''), $matches);
-                        if ($res === 1) {
-                            $this->setCharset($matches[1]);
-                        } else {
-                            if (isset($params['direct_mail_charset'])) {
-                                $this->setCharset($params['direct_mail_charset']);
-                            } else {
-                                $this->setCharset('iso-8859-1');
-                            }
-                        }
-                    }
                 }
             } catch (RequestException $exception) {
-                $errors = true;
                 ViewUtility::addErrorToFlashMessageQueue(' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
                     LanguageUtility::getLL('dmail_no_html_content'));
+                return true;
             }
         }
 
-        if (!$errors) {
-            // Update the record:
-            $this->setMailPart('messageid', $this->getMessageId());
-            $mailContent = base64_encode(serialize($this->getMailParts()));
+        // Update the record:
+        $this->setMailPart('messageid', $this->getMessageId());
+        $mailContent = base64_encode(serialize($this->getMailParts()));
 
-            $updateData = [
-                'issent' => 0,
-                'charset' => $this->getCharset(),
-                'mailContent' => $mailContent,
-                'renderedSize' => strlen($mailContent),
-                'long_link_rdct_url' => $baseUrl,
-            ];
+        $updateData = [
+            'issent' => 0,
+            'charset' => $this->getCharset(),
+            'mailContent' => $mailContent,
+            'renderedSize' => strlen($mailContent),
+            'long_link_rdct_url' => $baseUrl,
+        ];
 
-            GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$mailData['uid'], $updateData);
-        }
+        GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$mailData['uid'], $updateData);
 
-        return $errors;
+        return false;
     }
 
     /**

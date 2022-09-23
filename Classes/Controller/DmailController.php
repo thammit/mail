@@ -9,10 +9,10 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
+use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -36,7 +36,6 @@ use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\FileReference;
-use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
@@ -528,16 +527,169 @@ class DmailController extends AbstractController
     }
 
     /**
-     * Get external page config
-     *
-     * @return array config for form for inputing the external page information
+     * Create a mail record from an internal page
+     * @param int $pageUid The page ID
+     * @param array $parameters The mail parameters
+     * @param int $sysLanguageUid
+     * @return int|bool new record uid or FALSE if failed
+     * @throws DBALException
+     * @throws Exception
+     * @throws SiteNotFoundException
+     * @throws InvalidConfigurationTypeException
      */
-    protected function getExternalPageConfig(): array
+    public function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
     {
-        return [
-            'title' => 'dmail_dovsk_crFromUrl',
-            'no_valid_url' => $this->error == 'no_valid_url',
+        $result = false;
+
+        $newRecord = [
+            'type' => 0,
+            'pid' => $parameters['pid'] ?? 0,
+            'from_email' => $parameters['from_email'] ?? '',
+            'from_name' => $parameters['from_name'] ?? '',
+            'replyto_email' => $parameters['replyto_email'] ?? '',
+            'replyto_name' => $parameters['replyto_name'] ?? '',
+            'return_path' => $parameters['return_path'] ?? '',
+            'priority' => $parameters['priority'] ?? 0,
+            'use_rdct' => (!empty($parameters['use_rdct']) ? $parameters['use_rdct'] : 0), /*$parameters['use_rdct'],*/
+            'long_link_mode' => (!empty($parameters['long_link_mode']) ? $parameters['long_link_mode'] : 0),//$parameters['long_link_mode'],
+            'organisation' => $parameters['organisation'] ?? '',
+            'authcode_fieldList' => $parameters['authcode_fieldList'] ?? '',
+            'sendOptions' => $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'],
+            'long_link_rdct_url' => BackendDataUtility::getBaseUrl($pageUid),
+            'sys_language_uid' => $sysLanguageUid,
+            'attachment' => '',
+            'mailContent' => '',
         ];
+
+        if ($newRecord['sys_language_uid'] > 0) {
+            $langParam = $parameters['langParams.'][$newRecord['sys_language_uid']] ?? '&L=' . $newRecord['sys_language_uid'];
+            $parameters['plainParams'] .= $langParam;
+            $parameters['HTMLParams'] .= $langParam;
+        }
+
+        // If params set, set default values:
+        $paramsToOverride = ['sendOptions', 'includeMedia', 'flowedFormat', 'HTMLParams', 'plainParams'];
+        foreach ($paramsToOverride as $param) {
+            if (isset($parameters[$param])) {
+                $newRecord[$param] = $parameters[$param];
+            }
+        }
+        if (isset($parameters['direct_mail_encoding'])) {
+            $newRecord['encoding'] = $parameters['direct_mail_encoding'];
+        }
+
+        $pageRecord = BackendUtility::getRecord('pages', $pageUid);
+        // Fetch page title from translated page
+        if ($newRecord['sys_language_uid'] > 0) {
+            $pageRecordOverlay = GeneralUtility::makeInstance(PagesRepository::class)->selectTitleTranslatedPage($pageUid, (int)$newRecord['sys_language_uid']);
+            if (is_array($pageRecordOverlay)) {
+                $pageRecord['title'] = $pageRecordOverlay['title'];
+            }
+        }
+
+        if ($pageRecord['doktype']) {
+            $newRecord['subject'] = $pageRecord['title'];
+            $newRecord['page'] = $pageRecord['uid'];
+            $newRecord['charset'] = ConfigurationUtility::getCharacterSet();
+        }
+
+        // save to database
+        if ($newRecord['page'] && $newRecord['sendOptions']) {
+            $tcemainData = [
+                'sys_dmail' => [
+                    'NEW' => $newRecord,
+                ],
+            ];
+
+            /* @var $dataHandler DataHandler */
+            $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+            $dataHandler->stripslashes_values = 0;
+            $dataHandler->start($tcemainData, []);
+            $dataHandler->process_datamap();
+            $result = $dataHandler->substNEWwithIDs['NEW'];
+        } else {
+            if (!$newRecord['sendOptions']) {
+                $result = false;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Creates a mail record from an external url
+     * @param string $subject Subject of the newsletter
+     * @param string $externalUrlHtml Link to the HTML version
+     * @param string $externalUrlPlain Linkt to the text version
+     * @param array $parameters Additional newsletter parameters
+     *
+     * @return int|bool Error or warning message produced during the process
+     * @throws SiteNotFoundException
+     */
+    public function createMailRecordFromExternalUrls(string $subject, string $externalUrlHtml, string $externalUrlPlain, array $parameters): bool|int
+    {
+        $newRecord = [
+            'type' => 1,
+            'pid' => $parameters['pid'] ?? 0,
+            'subject' => $subject,
+            'from_email' => $parameters['from_email'] ?? '',
+            'from_name' => $parameters['from_name'] ?? '',
+            'replyto_email' => $parameters['replyto_email'] ?? '',
+            'replyto_name' => $parameters['replyto_name'] ?? '',
+            'return_path' => $parameters['return_path'] ?? '',
+            'priority' => $parameters['priority'] ?? 0,
+            'use_rdct' => (!empty($parameters['use_rdct']) ? $parameters['use_rdct'] : 0),
+            'long_link_mode' => $parameters['long_link_mode'] ?? '',
+            'organisation' => $parameters['organisation'] ?? '',
+            'authcode_fieldList' => $parameters['authcode_fieldList'] ?? '',
+            'sendOptions' => $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'],
+            'long_link_rdct_url' => BackendDataUtility::getBaseUrl((int)($parameters['page'] ?? 0)),
+        ];
+
+        // If params set, set default values:
+        $paramsToOverride = ['sendOptions', 'includeMedia', 'flowedFormat', 'HTMLParams', 'plainParams'];
+        foreach ($paramsToOverride as $param) {
+            if (isset($parameters[$param])) {
+                $newRecord[$param] = $parameters[$param];
+            }
+        }
+        if (isset($parameters['direct_mail_encoding'])) {
+            $newRecord['encoding'] = $parameters['direct_mail_encoding'];
+        }
+
+        $urlParts = @parse_url($externalUrlPlain);
+        // No plain text url
+        if (!$externalUrlPlain || $urlParts === false || !$urlParts['host']) {
+            $newRecord['plainParams'] = '';
+            $newRecord['sendOptions'] &= 254;
+        } else {
+            $newRecord['plainParams'] = $externalUrlPlain;
+        }
+
+        // No html url
+        $urlParts = @parse_url($externalUrlHtml);
+        if (!$externalUrlHtml || $urlParts === false || !$urlParts['host']) {
+            $newRecord['sendOptions'] &= 253;
+        } else {
+            $newRecord['HTMLParams'] = $externalUrlHtml;
+        }
+
+        // save to database
+        if ($newRecord['pid'] && $newRecord['sendOptions']) {
+            $tcemainData = [
+                'sys_dmail' => [
+                    'NEW' => $newRecord,
+                ],
+            ];
+
+            /* @var $dataHandler DataHandler */
+            $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+            $dataHandler->stripslashes_values = 0;
+            $dataHandler->start($tcemainData, []);
+            $dataHandler->process_datamap();
+            return $dataHandler->substNEWwithIDs['NEW'];
+        }
+
+        return false;
     }
 
     /**
@@ -586,7 +738,7 @@ class DmailController extends AbstractController
 
         // always plaintext
         $dmail['sys_dmail']['NEW']['sendOptions'] = 1;
-        $dmail['sys_dmail']['NEW']['long_link_rdct_url'] = $this->getUrlBase((int)$this->pageTSConfiguration['pid']);
+        $dmail['sys_dmail']['NEW']['long_link_rdct_url'] = BackendDataUtility::getBaseUrl((int)$this->pageTSConfiguration['pid']);
         $dmail['sys_dmail']['NEW']['subject'] = $indata['subject'];
         $dmail['sys_dmail']['NEW']['type'] = 1;
         $dmail['sys_dmail']['NEW']['pid'] = $this->pageInfo['uid'];
@@ -617,7 +769,7 @@ class DmailController extends AbstractController
                 $message = MailerUtility::shortUrlsInPlainText(
                     $message,
                     $this->pageTSConfiguration['long_link_mode'] ? 0 : 76,
-                    $this->getUrlBase((int)$this->pageTSConfiguration['pid'])
+                    BackendDataUtility::getBaseUrl((int)$this->pageTSConfiguration['pid'])
                 );
             }
             if ($indata['breakLines'] ?? false) {
@@ -730,6 +882,112 @@ class DmailController extends AbstractController
     }
 
     /**
+     * Show the categories table for user to categorize the directmail content
+     * TYPO3 content
+     *
+     * @param array $mailData The dmail row.
+     * @param array $indata
+     *
+     * @return array|string HTML form showing the categories
+     * @throws DBALException
+     * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     */
+    protected function getCategoryData(array $mailData, array $indata): array|string
+    {
+        $categoryData = [
+            'title' => LanguageUtility::getLL('nl_cat'),
+            'subtitle' => '',
+            'rowsFound' => false,
+            'rows' => [],
+            'pages_uid' => $this->pageUid,
+            'update_cats' => LanguageUtility::getLL('nl_l_update'),
+            'output' => '',
+        ];
+
+        if (isset($indata['categories']) && is_array($indata['categories'])) {
+            $data = [];
+            foreach ($indata['categories'] as $recUid => $recValues) {
+                $enabled = [];
+                foreach ($recValues as $k => $b) {
+                    if ($b) {
+                        $enabled[] = $k;
+                    }
+                }
+                $data['tt_content'][$recUid]['module_sys_dmail_category'] = implode(',', $enabled);
+            }
+
+            $dataHandler = $this->getDataHandler();
+            // $dataHandler->stripslashes_values = 0;
+            $dataHandler->start($data, []);
+            $dataHandler->process_datamap();
+
+            // remove cache
+            $dataHandler->clear_cacheCmd($this->pageUid);
+            $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
+        }
+
+        // @TODO Perhaps we should here check if TV is installed and fetch content from that instead of the old Columns...
+        $rows = GeneralUtility::makeInstance(TtContentRepository::class)->selectTtContentByPidAndSysLanguageUid(
+            $this->pageUid,
+            (int)$mailData['sys_language_uid']
+        );
+
+        if (empty($rows)) {
+            $categoryData['subtitle'] = LanguageUtility::getLL('nl_cat_msg1');
+            return $categoryData;
+        }
+        $categoryData['subtitle'] = BackendUtility::cshItem($this->cshTable, 'assign_categories');
+        $categoryData['rowsFound'] = true;
+
+        $colPosVal = 99;
+        $ttContentCategoryMmRepository = GeneralUtility::makeInstance(TtContentCategoryMmRepository::class);
+        foreach ($rows as $mailData) {
+            $categoriesRow = [];
+            $resCat = $ttContentCategoryMmRepository->selectUidForeignByUid($mailData['uid']);
+
+            foreach ($resCat as $rowCat) {
+                $categoriesRow[] = (int)$rowCat['uid_foreign'];
+            }
+
+            if ($colPosVal != $mailData['colPos']) {
+                $categoryData['rows'][] = [
+                    'separator' => true,
+                    'bgcolor' => '#f00',
+                    'title' => LanguageUtility::getLL('nl_l_column'),
+                    'value' => BackendUtility::getProcessedValue('tt_content', 'colPos', $mailData['colPos']),
+                ];
+                $colPosVal = $mailData['colPos'];
+            }
+
+            $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $mailData, $this->sysLanguageUid);
+            reset($ttContentCategories);
+            $cboxes = [];
+            foreach ($ttContentCategories as $pKey => $pVal) {
+                $cboxes[] = [
+                    'pKey' => $pKey,
+                    'checked' => in_array((int)$pKey, $categoriesRow),
+                    'pVal' => htmlspecialchars($pVal),
+                ];
+            }
+
+            $categoryData['rows'][] = [
+                'uid' => $mailData['uid'],
+                'icon' => $this->iconFactory->getIconForRecord('tt_content', $mailData, Icon::SIZE_SMALL),
+                'header' => $mailData['header'],
+                'CType' => $mailData['CType'],
+                'list_type' => $mailData['list_type'],
+                'bodytext' => empty($mailData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($mailData['bodytext']), 200),
+                'color' => $mailData['module_sys_dmail_category'] ? 'red' : 'green',
+                'labelOnlyAll' => $mailData['module_sys_dmail_category'] ? LanguageUtility::getLL('nl_l_ONLY') : LanguageUtility::getLL('nl_l_ALL'),
+                'checkboxes' => $cboxes,
+            ];
+        }
+        return $categoryData;
+    }
+
+    /**
      * Show the step of sending a test mail
      *
      * @return array config for form
@@ -788,35 +1046,103 @@ class DmailController extends AbstractController
     }
 
     /**
-     * Display the test mail group, which configured in the configuration module
+     * Get data for the final step
+     * Show recipient list and calendar library
      *
-     * @param array $idLists Lists of recipient uids
-     *
-     * @return string List of the recipient (in HTML)
+     * @param array $direct_mail_row
+     * @return array
      * @throws DBALException
      * @throws Exception
-     * @throws RouteNotFoundException
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function displayMailGroup_test(array $idLists): string
+    protected function getFinalData(array $direct_mail_row): array
     {
-        $out = '';
-        if (is_array($idLists['tt_address'] ?? false)) {
-            $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-            $out .= $this->getRecordListHtmlTable($rows, 'tt_address');
+        /**
+         * Hook for cmd_finalmail
+         * insert a link to open extended importer
+         */
+        // Todo: Change to PSR-14 Event Dispatcher
+        $hookContents = '';
+        $hookSelectDisabled = false;
+//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] ?? false)) {
+//            $hookObjectsArr = [];
+//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] as $classRef) {
+//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
+//            }
+//            foreach ($hookObjectsArr as $hookObj) {
+//                if (method_exists($hookObj, 'cmd_finalmail')) {
+//                    $hookContents = $hookObj->cmd_finalmail($this);
+//                    $hookSelectDisabled = $hookObj->selectDisabled;
+//                }
+//            }
+//        }
+
+        // Mail groups
+        $groups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupForFinalMail(
+            $this->id,
+            (int)$direct_mail_row['sys_language_uid'],
+            trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby'])
+        );
+
+        $mailGroups = RecipientUtility::finalSendingGroups($this->id, $this->mailUid, $groups, $this->userTable, $this->backendUserPermissions);
+
+        // todo: delete next block after upper method is working
+
+        $opt = [];
+        $lastGroup = null;
+        if ($groups) {
+            foreach ($groups as $group) {
+                $count = 0;
+                $idLists = $this->recipientService->getRecipientIdsOfMailGroups([$group['uid']]);
+                if (is_array($idLists['tt_address'] ?? false)) {
+                    $count += count($idLists['tt_address']);
+                }
+                if (is_array($idLists['fe_users'] ?? false)) {
+                    $count += count($idLists['fe_users']);
+                }
+                if (is_array($idLists['PLAINLIST'] ?? false)) {
+                    $count += count($idLists['PLAINLIST']);
+                }
+                if (is_array($idLists[$this->userTable] ?? false)) {
+                    $count += count($idLists[$this->userTable]);
+                }
+                $opt[] = '<option value="' . $group['uid'] . '">' . htmlspecialchars($group['title'] . ' (#' . $count . ')') . '</option>';
+                $lastGroup = $group;
+            }
         }
-        if (is_array($idLists['fe_users'] ?? false)) {
-            $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-            $out .= $this->getRecordListHtmlTable($rows, 'fe_users');
-        }
-        if (is_array($idLists['PLAINLIST'] ?? false)) {
-            $out .= $this->getRecordListHtmlTable($idLists['PLAINLIST'], 'default');
-        }
-        if (is_array($idLists[$this->userTable] ?? false)) {
-            $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$this->userTable], $this->userTable);
-            $out .= $this->getRecordListHtmlTable($rows, $this->userTable);
+        $groupInput = '';
+        // added disabled. see hook
+        if (count($opt) === 0) {
+            $message = ViewUtility::getFlashMessage(
+                LanguageUtility::getLL('error.no_recipient_groups_found'),
+                '',
+                AbstractMessage::ERROR
+            );
+            $this->messageQueue->addMessage($message);
+        } else {
+            if (count($opt) === 1) {
+                if (!$hookSelectDisabled) {
+                    $groupInput .= '<input type="hidden" name="mailgroup_uid[]" value="' . $lastGroup['uid'] . '" />';
+                }
+                $groupInput .= '<ul><li>' . htmlentities($lastGroup['title']) . '</li></ul>';
+                if ($hookSelectDisabled) {
+                    $groupInput .= '<em>disabled</em>';
+                }
+            } else {
+                $groupInput = '<select class="form-control" size="20" multiple="multiple" name="mailgroup_uid[]" ' . ($hookSelectDisabled ? 'disabled' : '') . '>' . implode(chr(10),
+                        $opt) . '</select>';
+            }
         }
 
-        return $out;
+        return [
+            'mailGroups' => $mailGroups,
+            'id' => $this->id,
+            'sys_dmail_uid' => $this->mailUid,
+            'groupInput' => $groupInput,
+            'hookContents' => $hookContents, // put content from hook
+            'send_mail_datetime_hr' => strftime('%H:%M %d-%m-%Y', time()),
+            'send_mail_datetime' => strftime('%H:%M %d-%m-%Y', time()),
+        ];
     }
 
     /**
@@ -983,6 +1309,74 @@ class DmailController extends AbstractController
     }
 
     /**
+     * Get external page config
+     *
+     * @return array config for form for inputing the external page information
+     */
+    /*
+    protected function getExternalPageConfig(): array
+    {
+        return [
+            'title' => 'dmail_dovsk_crFromUrl',
+            'no_valid_url' => $this->error == 'no_valid_url',
+        ];
+    }
+    */
+
+    /**
+     * Get wizard step uri
+     *
+     * @param string $step
+     * @param array $parameters
+     * @return Uri the link
+     * @throws RouteNotFoundException
+     */
+    /*
+    protected function getWizardStepUri(string $step = Constants::WIZARD_STEP_OVERVIEW, array $parameters = []): Uri
+    {
+        $parameters = array_merge(['id' => $this->id], $parameters);
+        if ($step) {
+            $parameters['cmd'] = $step;
+        }
+
+        return $this->buildUriFromRoute($this->route, $parameters);
+    }
+    */
+
+    /**
+     * Display the test mail group, which configured in the configuration module
+     *
+     * @param array $idLists Lists of recipient uids
+     *
+     * @return string List of the recipient (in HTML)
+     * @throws DBALException
+     * @throws Exception
+     * @throws RouteNotFoundException
+     */
+    /*
+    public function displayMailGroup_test(array $idLists): string
+    {
+        $out = '';
+        if (is_array($idLists['tt_address'] ?? false)) {
+            $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+            $out .= $this->getRecordListHtmlTable($rows, 'tt_address');
+        }
+        if (is_array($idLists['fe_users'] ?? false)) {
+            $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+            $out .= $this->getRecordListHtmlTable($rows, 'fe_users');
+        }
+        if (is_array($idLists['PLAINLIST'] ?? false)) {
+            $out .= $this->getRecordListHtmlTable($idLists['PLAINLIST'], 'default');
+        }
+        if (is_array($idLists[$this->userTable] ?? false)) {
+            $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$this->userTable], $this->userTable);
+            $out .= $this->getRecordListHtmlTable($rows, $this->userTable);
+        }
+
+        return $out;
+    }
+    */
+    /**
      * Send mail to recipient based on table.
      *
      * @param array $idLists List of recipient ID
@@ -995,6 +1389,7 @@ class DmailController extends AbstractController
      * @throws \TYPO3\CMS\Core\Exception
      * @todo: remove htmlmail. sending mails to table
      */
+    /*
     protected function sendTestMailToTable(array $idLists, string $table): int
     {
         $sentFlag = 0;
@@ -1016,6 +1411,7 @@ class DmailController extends AbstractController
         }
         return $sentFlag;
     }
+    */
 
     /**
      * Show the recipient info and a link to edit it
@@ -1028,6 +1424,7 @@ class DmailController extends AbstractController
      * @return string HTML, the table showing the recipient's info
      * @throws RouteNotFoundException If the named route doesn't exist
      */
+    /*
     public function getRecordListHtmlTable(array $listArr, string $table, bool|int $editLinkFlag = 1, bool|int $testMailLink = 0): string
     {
         $lines = [];
@@ -1083,457 +1480,6 @@ class DmailController extends AbstractController
         }
         return $out;
     }
+    */
 
-    /**
-     * Get data for the final step
-     * Show recipient list and calendar library
-     *
-     * @param array $direct_mail_row
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
-     */
-    protected function getFinalData(array $direct_mail_row): array
-    {
-        /**
-         * Hook for cmd_finalmail
-         * insert a link to open extended importer
-         */
-        // Todo: Change to PSR-14 Event Dispatcher
-        $hookContents = '';
-        $hookSelectDisabled = false;
-//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] ?? false)) {
-//            $hookObjectsArr = [];
-//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_finalmail'] as $classRef) {
-//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-//            }
-//            foreach ($hookObjectsArr as $hookObj) {
-//                if (method_exists($hookObj, 'cmd_finalmail')) {
-//                    $hookContents = $hookObj->cmd_finalmail($this);
-//                    $hookSelectDisabled = $hookObj->selectDisabled;
-//                }
-//            }
-//        }
-
-        // Mail groups
-        $groups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupForFinalMail(
-            $this->id,
-            (int)$direct_mail_row['sys_language_uid'],
-            trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby'])
-        );
-
-        $mailGroups = RecipientUtility::finalSendingGroups($this->id, $this->mailUid, $groups, $this->userTable, $this->backendUserPermissions);
-
-        // todo: delete next block after upper method is working
-
-        $opt = [];
-        $lastGroup = null;
-        if ($groups) {
-            foreach ($groups as $group) {
-                $count = 0;
-                $idLists = $this->recipientService->getRecipientIdsOfMailGroups([$group['uid']]);
-                if (is_array($idLists['tt_address'] ?? false)) {
-                    $count += count($idLists['tt_address']);
-                }
-                if (is_array($idLists['fe_users'] ?? false)) {
-                    $count += count($idLists['fe_users']);
-                }
-                if (is_array($idLists['PLAINLIST'] ?? false)) {
-                    $count += count($idLists['PLAINLIST']);
-                }
-                if (is_array($idLists[$this->userTable] ?? false)) {
-                    $count += count($idLists[$this->userTable]);
-                }
-                $opt[] = '<option value="' . $group['uid'] . '">' . htmlspecialchars($group['title'] . ' (#' . $count . ')') . '</option>';
-                $lastGroup = $group;
-            }
-        }
-        $groupInput = '';
-        // added disabled. see hook
-        if (count($opt) === 0) {
-            $message = ViewUtility::getFlashMessage(
-                LanguageUtility::getLL('error.no_recipient_groups_found'),
-                '',
-                AbstractMessage::ERROR
-            );
-            $this->messageQueue->addMessage($message);
-        } else {
-            if (count($opt) === 1) {
-                if (!$hookSelectDisabled) {
-                    $groupInput .= '<input type="hidden" name="mailgroup_uid[]" value="' . $lastGroup['uid'] . '" />';
-                }
-                $groupInput .= '<ul><li>' . htmlentities($lastGroup['title']) . '</li></ul>';
-                if ($hookSelectDisabled) {
-                    $groupInput .= '<em>disabled</em>';
-                }
-            } else {
-                $groupInput = '<select class="form-control" size="20" multiple="multiple" name="mailgroup_uid[]" ' . ($hookSelectDisabled ? 'disabled' : '') . '>' . implode(chr(10),
-                        $opt) . '</select>';
-            }
-        }
-
-        return [
-            'mailGroups' => $mailGroups,
-            'id' => $this->id,
-            'sys_dmail_uid' => $this->mailUid,
-            'groupInput' => $groupInput,
-            'hookContents' => $hookContents, // put content from hook
-            'send_mail_datetime_hr' => strftime('%H:%M %d-%m-%Y', time()),
-            'send_mail_datetime' => strftime('%H:%M %d-%m-%Y', time()),
-        ];
-    }
-
-    /**
-     * Show the categories table for user to categorize the directmail content
-     * TYPO3 content
-     *
-     * @param array $mailData The dmail row.
-     * @param array $indata
-     *
-     * @return array|string HTML form showing the categories
-     * @throws DBALException
-     * @throws Exception
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     */
-    public function getCategoryData(array $mailData, array $indata): array|string
-    {
-        $categoryData = [
-            'title' => LanguageUtility::getLL('nl_cat'),
-            'subtitle' => '',
-            'rowsFound' => false,
-            'rows' => [],
-            'pages_uid' => $this->pageUid,
-            'update_cats' => LanguageUtility::getLL('nl_l_update'),
-            'output' => '',
-        ];
-
-        if (isset($indata['categories']) && is_array($indata['categories'])) {
-            $data = [];
-            foreach ($indata['categories'] as $recUid => $recValues) {
-                $enabled = [];
-                foreach ($recValues as $k => $b) {
-                    if ($b) {
-                        $enabled[] = $k;
-                    }
-                }
-                $data['tt_content'][$recUid]['module_sys_dmail_category'] = implode(',', $enabled);
-            }
-
-            $dataHandler = $this->getDataHandler();
-            // $dataHandler->stripslashes_values = 0;
-            $dataHandler->start($data, []);
-            $dataHandler->process_datamap();
-
-            // remove cache
-            $dataHandler->clear_cacheCmd($this->pageUid);
-            $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-        }
-
-        // @TODO Perhaps we should here check if TV is installed and fetch content from that instead of the old Columns...
-        $rows = GeneralUtility::makeInstance(TtContentRepository::class)->selectTtContentByPidAndSysLanguageUid(
-            $this->pageUid,
-            (int)$mailData['sys_language_uid']
-        );
-
-        if (empty($rows)) {
-            $categoryData['subtitle'] = LanguageUtility::getLL('nl_cat_msg1');
-            return $categoryData;
-        }
-        $categoryData['subtitle'] = BackendUtility::cshItem($this->cshTable, 'assign_categories');
-        $categoryData['rowsFound'] = true;
-
-        $colPosVal = 99;
-        $ttContentCategoryMmRepository = GeneralUtility::makeInstance(TtContentCategoryMmRepository::class);
-        foreach ($rows as $mailData) {
-            $categoriesRow = [];
-            $resCat = $ttContentCategoryMmRepository->selectUidForeignByUid($mailData['uid']);
-
-            foreach ($resCat as $rowCat) {
-                $categoriesRow[] = (int)$rowCat['uid_foreign'];
-            }
-
-            if ($colPosVal != $mailData['colPos']) {
-                $categoryData['rows'][] = [
-                    'separator' => true,
-                    'bgcolor' => '#f00',
-                    'title' => LanguageUtility::getLL('nl_l_column'),
-                    'value' => BackendUtility::getProcessedValue('tt_content', 'colPos', $mailData['colPos']),
-                ];
-                $colPosVal = $mailData['colPos'];
-            }
-
-            $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $mailData, $this->sysLanguageUid);
-            reset($ttContentCategories);
-            $cboxes = [];
-            foreach ($ttContentCategories as $pKey => $pVal) {
-                $cboxes[] = [
-                    'pKey' => $pKey,
-                    'checked' => in_array((int)$pKey, $categoriesRow),
-                    'pVal' => htmlspecialchars($pVal),
-                ];
-            }
-
-            $categoryData['rows'][] = [
-                'uid' => $mailData['uid'],
-                'icon' => $this->iconFactory->getIconForRecord('tt_content', $mailData, Icon::SIZE_SMALL),
-                'header' => $mailData['header'],
-                'CType' => $mailData['CType'],
-                'list_type' => $mailData['list_type'],
-                'bodytext' => empty($mailData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($mailData['bodytext']), 200),
-                'color' => $mailData['module_sys_dmail_category'] ? 'red' : 'green',
-                'labelOnlyAll' => $mailData['module_sys_dmail_category'] ? LanguageUtility::getLL('nl_l_ONLY') : LanguageUtility::getLL('nl_l_ALL'),
-                'checkboxes' => $cboxes,
-            ];
-        }
-        return $categoryData;
-    }
-
-    /**
-     * Create a mail record from an internal page
-     * @param int $pageUid The page ID
-     * @param array $parameters The mail parameters
-     * @param int $sysLanguageUid
-     * @return int|bool new record uid or FALSE if failed
-     * @throws DBALException
-     * @throws Exception
-     * @throws SiteNotFoundException
-     * @throws InvalidConfigurationTypeException
-     */
-    public function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
-    {
-        $result = false;
-
-        $newRecord = [
-            'type' => 0,
-            'pid' => $parameters['pid'] ?? 0,
-            'from_email' => $parameters['from_email'] ?? '',
-            'from_name' => $parameters['from_name'] ?? '',
-            'replyto_email' => $parameters['replyto_email'] ?? '',
-            'replyto_name' => $parameters['replyto_name'] ?? '',
-            'return_path' => $parameters['return_path'] ?? '',
-            'priority' => $parameters['priority'] ?? 0,
-            'use_rdct' => (!empty($parameters['use_rdct']) ? $parameters['use_rdct'] : 0), /*$parameters['use_rdct'],*/
-            'long_link_mode' => (!empty($parameters['long_link_mode']) ? $parameters['long_link_mode'] : 0),//$parameters['long_link_mode'],
-            'organisation' => $parameters['organisation'] ?? '',
-            'authcode_fieldList' => $parameters['authcode_fieldList'] ?? '',
-            'sendOptions' => $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'],
-            'long_link_rdct_url' => $this->getUrlBase($pageUid),
-            'sys_language_uid' => $sysLanguageUid,
-            'attachment' => '',
-            'mailContent' => '',
-        ];
-
-        if ($newRecord['sys_language_uid'] > 0) {
-            $langParam = $this->getLanguageParam($newRecord['sys_language_uid'], $parameters);
-            $parameters['plainParams'] .= $langParam;
-            $parameters['HTMLParams'] .= $langParam;
-        }
-
-        // If params set, set default values:
-        $paramsToOverride = ['sendOptions', 'includeMedia', 'flowedFormat', 'HTMLParams', 'plainParams'];
-        foreach ($paramsToOverride as $param) {
-            if (isset($parameters[$param])) {
-                $newRecord[$param] = $parameters[$param];
-            }
-        }
-        if (isset($parameters['direct_mail_encoding'])) {
-            $newRecord['encoding'] = $parameters['direct_mail_encoding'];
-        }
-
-        $pageRecord = BackendUtility::getRecord('pages', $pageUid);
-        // Fetch page title from translated page
-        if ($newRecord['sys_language_uid'] > 0) {
-            $pageRecordOverlay = GeneralUtility::makeInstance(PagesRepository::class)->selectTitleTranslatedPage($pageUid, (int)$newRecord['sys_language_uid']);
-            if (is_array($pageRecordOverlay)) {
-                $pageRecord['title'] = $pageRecordOverlay['title'];
-            }
-        }
-
-        if ($pageRecord['doktype']) {
-            $newRecord['subject'] = $pageRecord['title'];
-            $newRecord['page'] = $pageRecord['uid'];
-            $newRecord['charset'] = ConfigurationUtility::getCharacterSet();
-        }
-
-        // save to database
-        if ($newRecord['page'] && $newRecord['sendOptions']) {
-            $tcemainData = [
-                'sys_dmail' => [
-                    'NEW' => $newRecord,
-                ],
-            ];
-
-            /* @var $dataHandler DataHandler */
-            $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-            $dataHandler->stripslashes_values = 0;
-            $dataHandler->start($tcemainData, []);
-            $dataHandler->process_datamap();
-            $result = $dataHandler->substNEWwithIDs['NEW'];
-        } else {
-            if (!$newRecord['sendOptions']) {
-                $result = false;
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * Creates a mail record from an external url
-     * @param string $subject Subject of the newsletter
-     * @param string $externalUrlHtml Link to the HTML version
-     * @param string $externalUrlPlain Linkt to the text version
-     * @param array $parameters Additional newsletter parameters
-     *
-     * @return int|bool Error or warning message produced during the process
-     * @throws SiteNotFoundException
-     */
-    public function createMailRecordFromExternalUrls(string $subject, string $externalUrlHtml, string $externalUrlPlain, array $parameters): bool|int
-    {
-        $newRecord = [
-            'type' => 1,
-            'pid' => $parameters['pid'] ?? 0,
-            'subject' => $subject,
-            'from_email' => $parameters['from_email'] ?? '',
-            'from_name' => $parameters['from_name'] ?? '',
-            'replyto_email' => $parameters['replyto_email'] ?? '',
-            'replyto_name' => $parameters['replyto_name'] ?? '',
-            'return_path' => $parameters['return_path'] ?? '',
-            'priority' => $parameters['priority'] ?? 0,
-            'use_rdct' => (!empty($parameters['use_rdct']) ? $parameters['use_rdct'] : 0),
-            'long_link_mode' => $parameters['long_link_mode'] ?? '',
-            'organisation' => $parameters['organisation'] ?? '',
-            'authcode_fieldList' => $parameters['authcode_fieldList'] ?? '',
-            'sendOptions' => $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'],
-            'long_link_rdct_url' => $this->getUrlBase((int)($parameters['page'] ?? 0)),
-        ];
-
-        // If params set, set default values:
-        $paramsToOverride = ['sendOptions', 'includeMedia', 'flowedFormat', 'HTMLParams', 'plainParams'];
-        foreach ($paramsToOverride as $param) {
-            if (isset($parameters[$param])) {
-                $newRecord[$param] = $parameters[$param];
-            }
-        }
-        if (isset($parameters['direct_mail_encoding'])) {
-            $newRecord['encoding'] = $parameters['direct_mail_encoding'];
-        }
-
-        $urlParts = @parse_url($externalUrlPlain);
-        // No plain text url
-        if (!$externalUrlPlain || $urlParts === false || !$urlParts['host']) {
-            $newRecord['plainParams'] = '';
-            $newRecord['sendOptions'] &= 254;
-        } else {
-            $newRecord['plainParams'] = $externalUrlPlain;
-        }
-
-        // No html url
-        $urlParts = @parse_url($externalUrlHtml);
-        if (!$externalUrlHtml || $urlParts === false || !$urlParts['host']) {
-            $newRecord['sendOptions'] &= 253;
-        } else {
-            $newRecord['HTMLParams'] = $externalUrlHtml;
-        }
-
-        // save to database
-        if ($newRecord['pid'] && $newRecord['sendOptions']) {
-            $tcemainData = [
-                'sys_dmail' => [
-                    'NEW' => $newRecord,
-                ],
-            ];
-
-            /* @var $dataHandler DataHandler */
-            $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-            $dataHandler->stripslashes_values = 0;
-            $dataHandler->start($tcemainData, []);
-            $dataHandler->process_datamap();
-            return $dataHandler->substNEWwithIDs['NEW'];
-        }
-
-        return false;
-    }
-
-    /**
-     * Get wizard step uri
-     *
-     * @param string $step
-     * @param array $parameters
-     * @return Uri the link
-     * @throws RouteNotFoundException
-     */
-    protected function getWizardStepUri(string $step = Constants::WIZARD_STEP_OVERVIEW, array $parameters = []): Uri
-    {
-        $parameters = array_merge(['id' => $this->id], $parameters);
-        if ($step) {
-            $parameters['cmd'] = $step;
-        }
-
-        return $this->buildUriFromRoute($this->route, $parameters);
-    }
-
-    /**
-     * Create delete link with trash icon
-     *
-     * @param int $uid Uid of the record
-     *
-     * @return Uri|null link with the trash icon
-     * @throws RouteNotFoundException
-     */
-    protected function getDeleteMailUri(int $uid): ?Uri
-    {
-        $dmail = BackendUtility::getRecord('sys_dmail', $uid);
-
-        if (!$dmail['scheduled_begin']) {
-            return $this->buildUriFromRoute(
-                $this->route,
-                [
-                    'id' => $this->id,
-                    'uid' => $uid,
-                    'cmd' => 'delete',
-                ]
-            );
-        }
-
-        return null;
-    }
-
-    /**
-     * Get language param
-     * @param int $sysLanguageUid
-     * @param array $params direct_mail settings
-     * @return string
-     * todo use site api?
-     */
-    public function getLanguageParam(int $sysLanguageUid, array $params): string
-    {
-        return $params['langParams.'][$sysLanguageUid] ?? '&L=' . $sysLanguageUid;
-    }
-
-    /**
-     * Get the base URL
-     *
-     * @param int $pageId
-     * @return string
-     * @throws SiteNotFoundException
-     */
-    protected function getUrlBase(int $pageId): string
-    {
-        if ($pageId > 0) {
-            /** @var SiteFinder $siteFinder */
-            $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-            if (!empty($siteFinder->getAllSites())) {
-                $site = $siteFinder->getSiteByPageId($pageId);
-                $base = $site->getBase();
-
-                return sprintf('%s://%s', $base->getScheme(), $base->getHost());
-            } else {
-                return ''; // No site found in root line of pageId
-            }
-        }
-
-        return ''; // No valid pageId
-    }
 }
