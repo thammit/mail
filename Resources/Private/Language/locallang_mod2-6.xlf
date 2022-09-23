@@ -50,7 +50,7 @@
 			</trans-unit>
 			<trans-unit id="configure_http_username_details" resname="configure_http_username_details" xml:space="preserve">
 				<source><![CDATA[The username and password is used to fetch mail content. They are NOT sent in the mail!
-	If you do not specify a username and password and the newsletter pages happen to be protected, an error will occur and no mail content will be fetched.]]></source>
+	If you do not specify a username and password and the mail pages happen to be protected, an error will occur and no mail content will be fetched.]]></source>
 			</trans-unit>
 			<trans-unit id="configure_jumpurl_tracking_privacy" resname="configure_jumpurl_tracking_privacy">
 				<source>Privacy jumpurl</source>
@@ -141,7 +141,7 @@
 				<source>Subject for the testmail.</source>
 			</trans-unit>
 			<trans-unit id="configure_testmail_description" resname="configure_testmail_description">
-				<source>This will be prepended to the test newsletter subject</source>
+				<source>This will be prepended to the test mail subject</source>
 			</trans-unit>
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
 				<source>Save</source>
@@ -260,7 +260,7 @@
 			<trans-unit id="dmail_menu_quickMail" resname="dmail_menu_quickMail">
 				<source>QuickMail</source>
 			</trans-unit>
-			<trans-unit id="dmail_newsletters" resname="dmail_newsletters">
+			<trans-unit id="dmail_mails" resname="dmail_mails">
 				<source>Mail Extension</source>
 			</trans-unit>
 			<trans-unit id="dmail_no" resname="dmail_no">
@@ -327,7 +327,7 @@
 				<source>Warning</source>
 			</trans-unit>
 			<trans-unit id="dmail_wizard_title" resname="dmail_wizard_title">
-				<source>Newsletter Wizard</source>
+				<source>Mail Wizard</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_external_page" resname="dmail_wiz1_external_page">
 				<source>External Page</source>
@@ -339,9 +339,9 @@
 				<source>Open/Stored Mails</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_header" resname="dmail_wiz1_list_header">
-				<source>Select a newsletter to continue sending:</source>
+				<source>Select a mail to continue sending:</source>
 			</trans-unit>
-			<trans-unit id="dmail_wiz1_new_newsletter" resname="dmail_wiz1_new_newsletter">
+			<trans-unit id="dmail_wiz1_new_mail" resname="dmail_wiz1_new_mail">
 				<source>Step 1</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_quickmail" resname="dmail_wiz1_quickmail">
@@ -351,7 +351,7 @@
 				<source>New Quickmail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Select a newsletter source</source>
+				<source>Select a mail source</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
 				<source>Step 2 - Check sender data</source>
@@ -465,7 +465,7 @@
 				<source>Import</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_all_html" resname="mailgroup_import_mapping_all_html">
-				<source>All recipients receive HTML newsletter</source>
+				<source>All recipients receive HTML mail</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_categories" resname="mailgroup_import_mapping_categories">
 				<source>Categories</source>
@@ -613,7 +613,7 @@
 				<source>There are no content elements on the page.</source>
 			</trans-unit>
 			<trans-unit id="nl_create" resname="nl_create">
-				<source>Create a newsletter</source>
+				<source>Create a mail</source>
 			</trans-unit>
 			<trans-unit id="nl_create_msg1" resname="nl_create_msg1">
 				<source>Click here to create a new page that you can later send as a mail.</source>
@@ -661,10 +661,10 @@
 				<source>Update category settings</source>
 			</trans-unit>
 			<trans-unit id="nl_l_warning" resname="nl_l_warning">
-				<source>There are already %s mails based on this newsletter. Are you sure you want to create another one?</source>
+				<source>There are already %s mails based on this mail. Are you sure you want to create another one?</source>
 			</trans-unit>
 			<trans-unit id="nl_select" resname="nl_select">
-				<source>Select a newsletter</source>
+				<source>Select a mail</source>
 			</trans-unit>
 			<trans-unit id="nl_select_msg1" resname="nl_select_msg1">
 				<source>There are no pages in the mail module.</source>
@@ -718,7 +718,7 @@
 				<source>Send to all subscribers in recipient list</source>
 			</trans-unit>
 			<trans-unit id="schedule_testmail" resname="schedule_testmail">
-				<source>Send this as test newsletter</source>
+				<source>Send this as test mail</source>
 			</trans-unit>
 			<trans-unit id="schedule_time" resname="schedule_time">
 				<source>Distribution time (hh:mm dd-mm-yyyy):</source>
@@ -871,7 +871,7 @@
 				<source>Mails sent:</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_choose" resname="stats_overview_choose">
-				<source>Choose a newsletter</source>
+				<source>Choose a mail</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_delivery_begun" resname="stats_overview_delivery_begun">
 				<source>Delivery begun</source>
@@ -880,7 +880,7 @@
 				<source>Delivery ended</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_header" resname="stats_overview_header">
-				<source>Newsletter Statistics</source>
+				<source>Mail Statistics</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_queuing" resname="stats_overview_queuing">
 				<source>queuing</source>
