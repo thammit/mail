@@ -30,7 +30,7 @@ abstract class AbstractRepository
         return $this->getConnectionPool()->getQueryBuilderForTable($table ?? $this->table);
     }
 
-    public function getQueryBuilderWithoutRestrictions($withDeleted = false, string $table = null): QueryBuilder
+    public function getQueryBuilderWithoutRestrictions(string $table = null, $withDeleted = false): QueryBuilder
     {
         $queryBuilder = $this->getQueryBuilder($table);
         $queryBuilder

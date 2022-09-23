@@ -468,7 +468,7 @@ class TempRepository extends AbstractRepository
         $groupIdList = GeneralUtility::intExplode(',', $list);
         $groups = [];
 
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions(false, 'sys_dmail_group');
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions('sys_dmail_group');
 
         $res = $queryBuilder->select('sys_dmail_group.*')
             ->from('sys_dmail_group', 'sys_dmail_group')
