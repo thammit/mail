@@ -9,7 +9,7 @@
 <f:variable name="mailForm" value="mail-wizard-form-info"/>
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
     <input type="hidden" name="currentCMD" value="{info.currentCMD}">
-    <input type="hidden" name="sys_dmail_uid" value="{info.sys_dmail_uid}">
+    <input type="hidden" name="mailUid" value="{info.mailUid}">
     <f:if condition="{info.internal}">
         <input type="hidden" name="cmd" value="{info.internal.cmd}">
     </f:if>
@@ -19,8 +19,8 @@
     <f:if condition="{info.dmail}">
         <input type="hidden" name="cmd" value="{info.dmail.cmd}">
     </f:if>
-    <f:if condition="{info.pages_uid}">
-        <input type="hidden" name="pages_uid" value="{info.pages_uid}">
+    <f:if condition="{info.pageUid}">
+        <input type="hidden" name="pageUid" value="{info.pageUid}">
     </f:if>
     <f:if condition="{info.quickmail}">
         <input type="hidden" name="cmd" value="{info.quickmail.cmd}">
@@ -34,7 +34,7 @@
         <h3><core:iconForRecord table="sys_dmail" row="{info.table.tableRows}" size="default" /> {info.table.title}</h3>
         <f:if condition="{info.table.allowEdit} && !{info.table.isSent}">
             <f:then>
-                <be:link.editRecord uid="{info.sys_dmail_uid}" table="sys_dmail" class="btn btn-default mb-3">
+                <be:link.editRecord uid="{info.mailUid}" table="sys_dmail" class="btn btn-default mb-3">
                     <core:icon identifier="actions-open" />
                     <f:translate key="{lll}dmail_edit_info"/>
                 </be:link.editRecord>

@@ -49,9 +49,14 @@ class RecipientUtility
      * @throws Exception
      * @throws DBALException
      */
-    public static function finalSendingGroups(int $id, int $sys_dmail_uid, array $groups, string|int $userTable, $backendUserPermission): array
+    public static function finalSendingGroups(int $pageId, int $sysLanguageUid, string|int $userTable, $backendUserPermission): array
     {
         $mailGroups = [];
+        $groups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->findSysDmailGroupUidsForFinalMail(
+            $pageId,
+            $sysLanguageUid,
+            trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby'])
+        );
         if ($groups) {
             foreach ($groups as $group) {
                 $result = self::compileMailGroup($groups, $userTable, $backendUserPermission);
@@ -73,37 +78,6 @@ class RecipientUtility
         }
 
         return $mailGroups;
-
-//        $groupInput = '';
-//        // added disabled. see hook
-//        if (count($opt) === 0) {
-//            $message = static::getFlashMessage(
-//                static::getLL('error.no_recipient_groups_found'),
-//                '',
-//                AbstractMessage::ERROR
-//            );
-//            $this->messageQueue->addMessage($message);
-//        } else if (count($opt) === 1) {
-//            if (!$hookSelectDisabled) {
-//                $groupInput .= '<input type="hidden" name="mailgroup_uid[]" value="' . $lastGroup['uid'] . '" />';
-//            }
-//            $groupInput .= '<ul><li>' . htmlentities($lastGroup['title']) . '</li></ul>';
-//            if ($hookSelectDisabled) {
-//                $groupInput .= '<em>disabled</em>';
-//            }
-//        } else {
-//            $groupInput = '<select class="form-control" size="20" multiple="multiple" name="mailgroup_uid[]" ' . ($hookSelectDisabled ? 'disabled' : '') . '>' . implode(chr(10), $opt) . '</select>';
-//        }
-//
-//        return [
-//            'id' => $id,
-//            'sys_dmail_uid' => $sys_dmail_uid,
-//            'mailGroups' => $mailGroups,
-//            'groupInput' => $groupInput,
-//            'hookContents' => $hookContents, // put content from hook
-//            'send_mail_datetime_hr' => strftime('%H:%M %d-%m-%Y', time()),
-//            'send_mail_datetime' => strftime('%H:%M %d-%m-%Y', time()),
-//        ];
     }
 
     /**

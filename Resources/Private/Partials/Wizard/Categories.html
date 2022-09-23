@@ -9,7 +9,7 @@
 <f:variable name="mailForm" value="mail-wizard-form-categories"/>
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
     <input type="hidden" name="currentCMD" value="{cats.currentCMD}">
-    <input type="hidden" name="sys_dmail_uid" value="{cats.sys_dmail_uid}">
+    <input type="hidden" name="mailUid" value="{cats.mailUid}">
     <h4>{cats.output.title}</h4>
     <f:render partial="InfoBox" arguments="{field: 'assign_categories'}" />
     <f:if condition="{cats.output.rowsFound}">
@@ -55,11 +55,11 @@
             </table>
         </f:if>
         <input type="hidden" name="cmd" value="{cats.output.cmd}">
-        <input type="hidden" name="pages_uid" value="{cats.output.pages_uid}">
+        <input type="hidden" name="pageUid" value="{cats.output.pageUid}">
         <input class="btn btn-default" type="submit" name="update_cats" value="{cats.output.update_cats -> f:format.html()}">
     </f:if>
     <input type="hidden" name="cmd" value="{cats.cmd}">
-    <input type="hidden" name="pages_uid" value="{cats.pages_uid}">
+    <input type="hidden" name="pageUid" value="{cats.pageUid}">
 </form>
 <f:render partial="Wizard/Navigation" arguments="{navigation: navigation, mailForm:mailForm, lll:lll}"/>
 

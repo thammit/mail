@@ -98,7 +98,7 @@
                     </f:if>
                 </td>
                 <td class="col-control nowrap">
-                    <f:be.link route="{settings.route}" parameters="{id: settings.mailSysFolderUid, cmd: settings.steps.settings, sys_dmail_uid: row.uid, fetchAtOnce: 1}" class="btn btn-primary">NEXT</f:be.link>
+                    <f:be.link route="{settings.route}" parameters="{id: settings.mailSysFolderUid, cmd: settings.steps.settings, mailUid: row.uid, fetchAtOnce: 1}" class="btn btn-primary">NEXT</f:be.link>
                 </td>
             </tr>
         </f:for>

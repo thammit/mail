@@ -43,7 +43,7 @@
             <f:format.html><f:translate key="{lll}testmail_simple_msg"/></f:format.html>
         </f:be.infobox>
         <input type="hidden" name="id" value="{test.testFormData.id}"/>
-        <input type="hidden" name="sys_dmail_uid" value="{test.testFormData.sys_dmail_uid}"/>
+        <input type="hidden" name="mailUid" value="{test.testFormData.mailUid}"/>
         <input type="hidden" name="cmd" value="{test.testFormData.cmd}"/>
         <div class="row mb-3">
             <div class="col-12 col-md-6 col-lg-4">
@@ -58,8 +58,8 @@
 <f:variable name="mailForm" value="mail-wizard-form-test"/>
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
     <input type="hidden" name="cmd" value="{test.cmd}">
-    <input type="hidden" name="sys_dmail_uid" value="{test.sys_dmail_uid}">
-    <input type="hidden" name="pages_uid" value="{test.pages_uid}">
+    <input type="hidden" name="mailUid" value="{test.mailUid}">
+    <input type="hidden" name="pageUid" value="{test.pageUid}">
     <input type="hidden" name="currentCMD" value="{test.currentCMD}">
 </form>
 <f:render partial="Wizard/Navigation" arguments="{navigation: navigation, mailForm:mailForm, lll:lll}"/>

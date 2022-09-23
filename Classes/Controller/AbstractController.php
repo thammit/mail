@@ -7,11 +7,9 @@ use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -23,11 +21,9 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
-use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -112,8 +108,8 @@ abstract class AbstractController
 
         $this->id = (int)($parsedBody['id'] ?? $queryParams['id'] ?? 0);
         $this->cmd = (string)($parsedBody['cmd'] ?? $queryParams['cmd'] ?? '');
-        $this->pageUid = (int)($parsedBody['pages_uid'] ?? $queryParams['pages_uid'] ?? 0);
-        $this->mailUid = (int)($parsedBody['sys_dmail_uid'] ?? $queryParams['sys_dmail_uid'] ?? 0);
+        $this->pageUid = (int)($parsedBody['pageUid'] ?? $queryParams['pageUid'] ?? 0);
+        $this->mailUid = (int)($parsedBody['mailUid'] ?? $queryParams['mailUid'] ?? 0);
 
         try {
             $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
@@ -262,7 +258,7 @@ abstract class AbstractController
         return $output;
     }
 
-    protected function getJS($sys_dmail_uid): string
+    protected function getJS($mailUid): string
     {
         return '
         script_ended = 0;
@@ -270,7 +266,7 @@ abstract class AbstractController
             window.location.href = URL;
         }
         function jumpToUrlD(URL) {
-            window.location.href = URL+"&sys_dmail_uid=' . $sys_dmail_uid . '";
+            window.location.href = URL+"&mailUid=' . $mailUid . '";
         }
         function toggleDisplay(toggleId, e, countBox) {
             if (!e) {

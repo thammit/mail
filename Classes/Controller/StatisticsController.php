@@ -742,7 +742,7 @@ class StatisticsController extends AbstractController
             $this->moduleName,
             [
                 'id' => $this->id,
-                'sys_dmail_uid' => $row['uid'],
+                'mailUid' => $row['uid'],
                 'cmd' => $this->cmd,
                 'recalcCache' => 1,
             ]
@@ -1285,7 +1285,7 @@ class StatisticsController extends AbstractController
             $this->moduleName,
             [
                 'id' => $this->id,
-                'sys_dmail_uid' => $uid,
+                'mailUid' => $uid,
                 'cmd' => 'stats',
                 'SET[dmail_mode]' => 'direct',
             ]
