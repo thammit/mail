@@ -35,15 +35,13 @@ class MassMailingCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws DBALException
-     * @throws Exception
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->title($this->getDescription());
+
+        /*
         $lockfile = Environment::getPublicPath() . '/typo3temp/tx_mail_cron.lock';
 
         // Check if cronjob is already running:
@@ -60,6 +58,7 @@ class MassMailingCommand extends Command
         touch($lockfile);
         // Fix file permissions
         GeneralUtility::fixPermissions($lockfile);
+        */
 
         /**
          * The direct_mail engine
@@ -90,7 +89,7 @@ class MassMailingCommand extends Command
             return Command::FAILURE;
         }
 
-        unlink($lockfile);
+        // unlink($lockfile);
         return Command::SUCCESS;
     }
 }

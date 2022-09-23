@@ -630,7 +630,7 @@ class MailerService implements LoggerAwareInterface
 
                 if ($mailHasContent) {
                     $plainTextContent = $this->replaceMailMarkers($plainTextContent, $recipientData, $additionalMarkers);
-                    if (trim($this->dmailer['sys_dmail_rec']['use_rdct']) || trim($this->dmailer['sys_dmail_rec']['long_link_mode'])) {
+                    if ($this->dmailer['sys_dmail_rec']['use_rdct'] || $this->dmailer['sys_dmail_rec']['long_link_mode']) {
                         $plainTextContent = MailerUtility::shortUrlsInPlainText(
                             $plainTextContent,
                             $this->dmailer['sys_dmail_rec']['long_link_mode'] ? 0 : 76,
@@ -708,7 +708,7 @@ class MailerService implements LoggerAwareInterface
                             ->where($queryBuilder->expr()->in('uid', $idList))
                             ->setMaxResults($this->sendPerCycle + 1);
                         if ($sentMails) {
-                            $queryBuilder->addWhere($queryBuilder->expr()->notIn('uid', implode(',', $sentMails)));
+                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', implode(',', $sentMails)));
                         }
 
                         $statement = $queryBuilder->execute();

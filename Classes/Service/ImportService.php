@@ -622,11 +622,11 @@ class ImportService
         $invalidEmailCSV = [];
         foreach ($csvData as $dataArray) {
             $tempData = [];
-            $invalidEmail = 0;
+            $invalidEmail = false;
             foreach ($dataArray as $kk => $fieldData) {
                 if ($this->indata['map'][$kk] !== 'noMap') {
                     if (($this->indata['valid_email']) && ($this->indata['map'][$kk] === 'email')) {
-                        $invalidEmail = GeneralUtility::validEmail(trim($fieldData)) ? 0 : 1;
+                        $invalidEmail = GeneralUtility::validEmail(trim($fieldData)) === false;
                         $tempData[$this->indata['map'][$kk]] = trim($fieldData);
                     }
                     else {
