@@ -175,7 +175,7 @@ class StatisticsController extends AbstractController
         if (!$this->mailUid) {
             $theOutput['dataPageInfo'] = $this->displayPageInfo();
         } else {
-            $row = GeneralUtility::makeInstance(SysDmailRepository::class)->selectSysDmailById($this->mailUid, $this->id);
+            $row = GeneralUtility::makeInstance(SysDmailRepository::class)->findById($this->mailUid);
             if (is_array($row)) {
                 // COMMAND:
                 switch ($this->action) {

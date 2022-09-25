@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
+use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -322,7 +323,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         if ($fetchPlainTextContent) {
-            $plainTextUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plainParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
+            $plainTextUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plainParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
                 $mailData['plainParams']);
             $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $params);
             try {
@@ -346,7 +347,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         if ($fetchHtmlContent) {
-            $htmlUrl = (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['HTMLParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
+            $htmlUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['HTMLParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
                 $mailData['HTMLParams']);
             $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $params);
             try {
@@ -356,7 +357,7 @@ class MailerService implements LoggerAwareInterface
                         LanguageUtility::getLL('dmail_error'));
                     return true;
                 } else {
-                    if ((int)$mailData['type'] == Constants::MAIL_TYPE_EXTERNAL) {
+                    if ((int)$mailData['type'] == MailType::EXTERNAL) {
                         // Try to auto-detect the charset of the message
                         $matches = [];
                         $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m',
@@ -406,7 +407,7 @@ class MailerService implements LoggerAwareInterface
             'long_link_rdct_url' => $baseUrl,
         ];
 
-        GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmailRecord((int)$mailData['uid'], $updateData);
+        GeneralUtility::makeInstance(SysDmailRepository::class)->update((int)$mailData['uid'], $updateData);
 
         return false;
     }
@@ -789,7 +790,6 @@ class MailerService implements LoggerAwareInterface
      * @param string $key Begin or end
      *
      * @return void
-     * @throws DBALException
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
@@ -798,12 +798,7 @@ class MailerService implements LoggerAwareInterface
         $subject = '';
         $message = '';
 
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail');
-        $queryBuilder
-            ->update('sys_dmail')
-            ->set('scheduled_' . $key, time())
-            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
-            ->execute();
+        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_' . $key => time()]);
 
         switch ($key) {
             case 'begin':
@@ -874,10 +869,12 @@ class MailerService implements LoggerAwareInterface
         $statement = $queryBuilder
             ->select('*')
             ->from('sys_dmail')
-            ->where($queryBuilder->expr()->neq('scheduled', '0'))
-            ->andWhere($queryBuilder->expr()->lt('scheduled', time()))
-            ->andWhere($queryBuilder->expr()->eq('scheduled_end', '0'))
-            ->andWhere($queryBuilder->expr()->notIn('type', [Constants::MAIL_TYPE_DRAFT_INTERNAL, Constants::MAIL_TYPE_DRAFT_EXTERNAL]))
+            ->where(
+                $queryBuilder->expr()->neq('scheduled', 0),
+                $queryBuilder->expr()->lt('scheduled', time()),
+                $queryBuilder->expr()->eq('scheduled_end', 0),
+                $queryBuilder->expr()->notIn('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL])
+            )
             ->orderBy('scheduled')
             ->execute();
 

@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
+use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -212,7 +213,7 @@ class RecipientUtility
             if (is_array($mailGroup)) {
                 $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
                 switch ($mailGroup['type']) {
-                    case Constants::RECIPIENT_GROUP_TYPE_PAGES:
+                    case RecipientGroupType::PAGES:
                         // From pages
                         // use current page if not set in mail group
                         $thePages = $mailGroup['pages'];
@@ -260,7 +261,7 @@ class RecipientUtility
                             }
                         }
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_CSV:
+                    case RecipientGroupType::CSV:
                         // List of mails
                         if ($mailGroup['csv'] == 1) {
                             $dmCsvUtility = GeneralUtility::makeInstance(CsvUtility::class);
@@ -270,7 +271,7 @@ class RecipientUtility
                         }
                         $idLists['PLAINLIST'] = self::removeDuplicates($recipients);
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_STATIC:
+                    case RecipientGroupType::STATIC:
                         // Static MM list
                         $idLists['tt_address'] = $tempRepository->getStaticIdList('tt_address', $groupUid);
                         $idLists['fe_users'] = $tempRepository->getStaticIdList('fe_users', $groupUid);
@@ -280,7 +281,7 @@ class RecipientUtility
                             $idLists[$userTable] = $tempRepository->getStaticIdList($userTable, $groupUid);
                         }
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_QUERY:
+                    case RecipientGroupType::QUERY:
                         // Special query list
                         // Todo Remove that shit!
                         $queryTable = GeneralUtility::_GP('SET')['queryTable'];
@@ -303,7 +304,7 @@ class RecipientUtility
                             $idLists[$table] = $tempRepository->getSpecialQueryIdList($table, $mailGroup);
                         }
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_OTHER:
+                    case RecipientGroupType::OTHER:
                         $groups = array_unique($tempRepository->getMailGroups($mailGroup['mail_groups'], [$mailGroup['uid']], $backendUserPermissions));
                         foreach ($groups as $groupUid) {
                             $collect = self::getSingleMailGroup($groupUid, $userTable, $backendUserPermissions);

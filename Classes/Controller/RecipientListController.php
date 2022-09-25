@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
+use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
@@ -252,7 +253,7 @@ class RecipientListController extends AbstractController
             $mailGroup = BackendUtility::getRecord('sys_dmail_group', $groupUid);
             if (is_array($mailGroup) && $mailGroup['pid'] == $this->id) {
                 switch ($mailGroup['type']) {
-                    case Constants::RECIPIENT_GROUP_TYPE_PAGES:
+                    case RecipientGroupType::PAGES:
                         // From pages
                         // use current page if no else
                         $thePages = $mailGroup['pages'] ? $mailGroup['pages'] : $this->id;
@@ -307,7 +308,7 @@ class RecipientListController extends AbstractController
                             }
                         }
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_CSV:
+                    case RecipientGroupType::CSV:
                         // List of mails
                         if ($mailGroup['csv'] == 1) {
                             $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
@@ -317,7 +318,7 @@ class RecipientListController extends AbstractController
                         }
                         $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($recipients);
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_STATIC:
+                    case RecipientGroupType::STATIC:
                         // Static MM list
                         $idLists['tt_address'] = GeneralUtility::makeInstance(TempRepository::class)->getStaticIdList('tt_address', $groupUid);
                         $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getStaticIdList('fe_users', $groupUid);
@@ -327,7 +328,7 @@ class RecipientListController extends AbstractController
                             $idLists[$this->userTable] = GeneralUtility::makeInstance(TempRepository::class)->getStaticIdList($this->userTable, $groupUid);
                         }
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_QUERY:
+                    case RecipientGroupType::QUERY:
                         // Special query list
                         $mailGroup = $this->update_SpecialQuery($mailGroup);
                         $whichTables = intval($mailGroup['whichtables']);
@@ -348,7 +349,7 @@ class RecipientListController extends AbstractController
                                 $this->queryGenerator);
                         }
                         break;
-                    case Constants::RECIPIENT_GROUP_TYPE_OTHER:
+                    case RecipientGroupType::OTHER:
                         $groups = array_unique(GeneralUtility::makeInstance(TempRepository::class)->getMailGroups($mailGroup['mail_groups'],
                             [$mailGroup['uid']], $this->backendUserPermissions));
 

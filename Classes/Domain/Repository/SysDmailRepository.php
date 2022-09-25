@@ -12,24 +12,18 @@ class SysDmailRepository extends AbstractRepository
     protected string $table = 'sys_dmail';
 
     /**
-     * @param int $sys_dmail_uid
-     * @param int $pid
+     * @param int $uid
      * @return array|bool
      * @throws DBALException
      * @throws Exception
      */
-    public function selectSysDmailById(int $sys_dmail_uid, int $pid): array|bool
+    public function findById(int $uid): array|bool
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder->select('*')
             ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($sys_dmail_uid, PDO::PARAM_INT))
-            )
-            //debug($queryBuilder->getSQL());
-            //debug($queryBuilder->getParameters());
+            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
             ->execute()
             ->fetchAssociative();
     }
@@ -40,14 +34,44 @@ class SysDmailRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function selectSysDmailsByPid(int $pid): array
+    public function findScheduledByPid(int $pid): array
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder->select('uid', 'pid', 'subject', 'scheduled', 'scheduled_begin', 'scheduled_end')
             ->from($this->table)
-            ->add('where', 'pid = ' . intval($pid) . ' AND scheduled > 0')
+            ->where(
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->gt('scheduled', 0),
+            )
             ->orderBy('scheduled', 'DESC')
+            ->execute()
+            ->fetchAllAssociative();
+    }
+
+    /**
+     * @param int $pageId
+     * @param string|null $orderBy
+     * @param string|null $order
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findOpenMailsByPageId(int $pageId, string $orderBy = null, string $order = null): array
+    {
+        $orderBy = $orderBy ?? $this->getDefaultOrderBy();
+        $order = $order ?? $this->getDefaultOrder();
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
+
+        return $queryBuilder
+            ->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type')
+            ->from($this->table)
+            ->where(
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('scheduled', 0),
+                $queryBuilder->expr()->eq('issent', 0),
+            )
+            ->orderBy($orderBy, $order)
             ->execute()
             ->fetchAllAssociative();
     }
@@ -83,62 +107,12 @@ class SysDmailRepository extends AbstractRepository
     }
 
     /**
-     * @param int $pageId
-     * @param string|null $orderBy
-     * @param string|null $order
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function findOpenMailsByPageId(int $pageId, string $orderBy = null, string $order = null): array
-    {
-        $orderBy = $orderBy ?? $this->getDefaultOrderBy();
-        $order = $order ?? $this->getDefaultOrder();
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
-
-        return $queryBuilder
-            ->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type')
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('scheduled', 0),
-                $queryBuilder->expr()->eq('issent', 0),
-            )
-            ->orderBy($orderBy, $order)
-            ->execute()
-            ->fetchAllAssociative();
-    }
-
-    /**
-     * @param int $uid
-     * @param string $charset
-     * @param string $mailContent
-     * @return int
-     * @throws DBALException
-     */
-    public function updateSysDmail(int $uid, string $charset, string $mailContent): int
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        return $queryBuilder
-            ->update($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
-            )
-            ->set('issent', 0)
-            ->set('charset', $charset)
-            ->set('mailContent', $mailContent)
-            ->set('renderedSize', strlen($mailContent))
-            ->execute();
-    }
-
-    /**
      *
      * @param int $uid
      * @param array $updateData
      * @return int
      */
-    public function updateSysDmailRecord(int $uid, array $updateData): int
+    public function update(int $uid, array $updateData): int
     {
         $connection = $this->getConnection();
         return $connection->update(
@@ -155,12 +129,7 @@ class SysDmailRepository extends AbstractRepository
     public function delete(int $uid): void
     {
         if ($GLOBALS['TCA'][$this->table]['ctrl']['delete']) {
-            $connection = $this->getConnection();
-            $connection->update(
-                $this->table,
-                [$GLOBALS['TCA'][$this->table]['ctrl']['delete'] => 1],
-                ['uid' => $uid]
-            );
+            $this->update($uid, [$GLOBALS['TCA'][$this->table]['ctrl']['delete'] => 1]);
         }
     }
 }

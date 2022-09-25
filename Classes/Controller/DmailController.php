@@ -13,6 +13,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
 use MEDIAESSENZ\Mail\Enumeration\Action;
+use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -220,7 +221,7 @@ class DmailController extends AbstractController
         if ($this->mailUid) {
             // get the data of the currently selected mail
             $mailData = $sysDmailRepository->findByUid($this->mailUid);
-            $isExternalDirectMailRecord = is_array($mailData) && (int)$mailData['type'] === Constants::MAIL_TYPE_EXTERNAL;
+            $isExternalDirectMailRecord = is_array($mailData) && (int)$mailData['type'] === MailType::EXTERNAL;
         }
 
         $userTSConfig = TypoScriptUtility::getUserTSConfig();
@@ -818,10 +819,12 @@ class DmailController extends AbstractController
             $this->mailerService->setMailPart('messageid', $this->mailerService->getMessageId());
             $mailContent = base64_encode(serialize($this->mailerService->getMailParts()));
 
-            GeneralUtility::makeInstance(SysDmailRepository::class)->updateSysDmail(
-                $this->mailUid,
-                $this->mailerService->getCharset(), $mailContent
-            );
+            GeneralUtility::makeInstance(SysDmailRepository::class)->update($this->mailUid, [
+                'issent' => 0,
+                'charset' => $this->mailerService->getCharset(),
+                'mailContent' => $mailContent,
+                'renderedSize' => strlen($mailContent)
+            ]);
         }
 
         return $erg;
@@ -1220,10 +1223,10 @@ class DmailController extends AbstractController
 
             // create a draft version of the record
             if ($this->saveDraft) {
-                if ($row['type'] === Constants::MAIL_TYPE_INTERNAL) {
-                    $updateFields['type'] = Constants::MAIL_TYPE_DRAFT_INTERNAL;
+                if ($row['type'] === MailType::INTERNAL) {
+                    $updateFields['type'] = MailType::DRAFT_INTERNAL;
                 } else {
-                    $updateFields['type'] = Constants::MAIL_TYPE_DRAFT_EXTERNAL;
+                    $updateFields['type'] = MailType::DRAFT_EXTERNAL;
                 }
                 $updateFields['scheduled'] = 0;
                 ViewUtility::addOkToFlashMessageQueue(

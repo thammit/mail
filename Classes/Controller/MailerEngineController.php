@@ -227,7 +227,7 @@ class MailerEngineController extends AbstractController
         }
 
         $data = [];
-        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->selectSysDmailsByPid($this->id);
+        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->findScheduledByPid($this->id);
         if (is_array($rows)) {
             foreach ($rows as $row) {
                 $data[] = [
