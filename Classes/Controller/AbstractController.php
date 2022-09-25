@@ -245,7 +245,7 @@ abstract class AbstractController
 
         if (is_array($listArr)) {
             $notAllowedPlaceholder = $lang->getLL('mailgroup_table_disallowed_placeholder');
-            $tableIcon = $this->iconFactory->getIconForRecord($table, []);
+            $tableIcon = $this->iconFactory->getIconForRecord($table, [], Icon::SIZE_SMALL);
             foreach ($listArr as $row) {
                 $editLink = '';
                 if ($row['uid'] && $isAllowedEditTable) {

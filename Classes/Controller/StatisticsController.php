@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
@@ -119,6 +120,11 @@ class StatisticsController extends AbstractController
         $this->reasonUnknownCSV = (bool)($parsedBody['reasonUnknownCSV'] ?? $queryParams['reasonUnknownCSV'] ?? false);
     }
 
+    /**
+     * @throws Exception
+     * @throws DBALException
+     * @throws RouteNotFoundException
+     */
     public function indexAction(ServerRequestInterface $request): ResponseInterface
     {
         $this->init($request);
@@ -136,10 +142,9 @@ class StatisticsController extends AbstractController
         if ($module === Constants::MAIL_MODULE_NAME) {
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
-                $data = $this->moduleContent();
                 $this->view->assignMultiple(
                     [
-                        'data' => $data,
+                        'data' => $this->moduleContent(),
                         'show' => true,
                     ]
                 );
@@ -178,16 +183,16 @@ class StatisticsController extends AbstractController
             $row = GeneralUtility::makeInstance(SysDmailRepository::class)->findById($this->mailUid);
             if (is_array($row)) {
                 // COMMAND:
-                switch ($this->action) {
-                    case 'displayUserInfo':
+                switch ((string)$this->getCurrentAction()) {
+                    case Action::RECIPIENT_LIST_USER_INFO:
                         $theOutput['dataUserInfo'] = $this->displayUserInfo();
                         break;
-                    case 'stats':
+                    case Action::STATS:
                         $theOutput['dataStats'] = $this->stats($row);
                         break;
                     default:
                         // Hook for handling of custom direct mail commands:
-                        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['handledirectmailcmd-' . $this->action])) {
+                        if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['handledirectmailcmd-' . $this->action])) {
                             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['handledirectmailcmd-' . $this->action] as $funcRef) {
                                 $params = ['pObj' => &$this];
                                 $theOutput['dataHook'] = GeneralUtility::callUserFunction($funcRef, $params, $this);
@@ -614,8 +619,17 @@ class StatisticsController extends AbstractController
                     continue;
                 }
 
-                if (GeneralUtility::isFirstPartOfStr($url, 'mailto:')) {
+                if (str_starts_with($url, 'mailto:')) {
                     // Drop mail links
+                    continue;
+                }
+
+                if (str_starts_with($url, '#')) {
+                    // Drop internal anker links
+                    continue;
+                }
+
+                if (!str_contains($url, '=')) {
                     continue;
                 }
 

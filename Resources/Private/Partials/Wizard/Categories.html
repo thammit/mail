@@ -14,6 +14,7 @@
     <f:render partial="InfoBox" arguments="{field: 'assign_categories'}" />
     <f:if condition="{cats.output.rowsFound}">
         <f:if condition="{cats.output.rows -> f:count()}">
+            <div class="panel panel-default">
             <table class="mb-4 table table-striped table-hover">
                 <tbody>
                 <f:for each="{cats.output.rows}" as="row">
@@ -51,8 +52,9 @@
                     </tr>
                 </f:for>
                 </tbody>
-                {cats.catsForm -> f:format.html()}
             </table>
+            </div>
+            {cats.catsForm -> f:format.html()}
         </f:if>
         <input type="hidden" name="cmd" value="{cats.output.cmd}">
         <input type="hidden" name="pageUid" value="{cats.output.pageUid}">

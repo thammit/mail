@@ -26,6 +26,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -33,12 +34,8 @@ use TYPO3\CMS\Core\Utility\CsvUtility;
 
 class RecipientListController extends AbstractController
 {
-    /**
-     * The name of the module
-     *
-     * @var string
-     */
     protected string $moduleName = 'MailNavFrame_RecipientList';
+    protected string $route = 'MailNavFrame_RecipientList';
 
     protected int $group_uid = 0;
     protected string $lCmd = '';
@@ -83,6 +80,10 @@ class RecipientListController extends AbstractController
         $this->submit = (bool)($parsedBody['submit'] ?? $queryParams['submit'] ?? false);
 
         $this->queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
+        $this->view->assign('settings', [
+            'route' => $this->route,
+            'mailSysFolderUid' => $this->id
+        ]);
     }
 
     /**
@@ -204,10 +205,8 @@ class RecipientListController extends AbstractController
             }
 
             $data['rows'][] = [
-                'icon' => $this->iconFactory->getIconForRecord('sys_dmail_group', $row, Icon::SIZE_SMALL)->render(),
-                'editLink' => $this->editLink('sys_dmail_group', $row['uid']),
-                'reciplink' => $this->linkRecip_record('<strong>' . htmlspecialchars(GeneralUtility::fixed_lgd_cs($row['title'], 30)) . '</strong>&nbsp;&nbsp;',
-                    $row['uid']),
+                'uid' => $row['uid'],
+                'title' => $row['title'],
                 'type' => htmlspecialchars(BackendUtility::getProcessedValue('sys_dmail_group', 'type', $row['type'])),
                 'description' => BackendUtility::getProcessedValue('sys_dmail_group', 'description', htmlspecialchars($row['description'])),
                 'count' => $totalRecipients,
@@ -402,59 +401,6 @@ class RecipientListController extends AbstractController
         return [
             'queryInfo' => ['id_lists' => $idLists],
         ];
-    }
-
-    /**
-     * Shows edit link
-     *
-     * @param string $table Table name
-     * @param int $uid Record uid
-     *
-     * @return string the edit link
-     * @throws RouteNotFoundException
-     */
-    protected function editLink(string $table, int $uid): string
-    {
-        $str = '';
-        // check if the user has the right to modify the table
-        if (BackendUserUtility::getBackendUser()->check('tables_modify', $table)) {
-            $editOnClickLink = ViewUtility::getEditOnClickLink([
-                'edit' => [
-                    $table => [
-                        $uid => 'edit',
-                    ],
-                ],
-                'returnUrl' => $this->requestUri,
-            ]);
-            $str = '<a href="#" class="btn btn-default" onClick="' . $editOnClickLink . '" title="' . LanguageUtility::getLL('dmail_edit') . '">' .
-                $this->getIconActionsOpen() .
-                '</a>';
-        }
-
-        return $str;
-    }
-
-    /**
-     * Shows link to show the recipient infos
-     *
-     * @param string $str Name of the recipient link
-     * @param int $uid Uid of the recipient link
-     *
-     * @return string The link
-     * @throws RouteNotFoundException If the named route doesn't exist
-     */
-    protected function linkRecip_record(string $str, int $uid): string
-    {
-        $moduleUrl = $this->buildUriFromRoute(
-            $this->moduleName,
-            [
-                'id' => $this->id,
-                'group_uid' => $uid,
-                'cmd' => Action::RECIPIENT_LIST_MAIL_GROUP,
-                'SET[dmail_mode]' => 'recip',
-            ]
-        );
-        return '<a href="' . $moduleUrl . '">' . $str . '</a>';
     }
 
     /**

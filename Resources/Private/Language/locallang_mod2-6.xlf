@@ -222,13 +222,13 @@
 				<source>Delivery ended</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_invoke_now" resname="dmail_mailerengine_invoke_now">
-				<source>Invoke Mailer Engine</source>
+				<source>Start sending manually</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_invoked" resname="dmail_mailerengine_invoked">
-				<source>Mailer Engine Invoked!</source>
+				<source>Manual sending started!</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_explain" resname="dmail_mailerengine_manual_explain">
-				<source>If TYPO3 is not configured to automatically invoke the Mailer Engine, you can invoke it by clicking here:</source>
+				<source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can start the sending manually.</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_invoke" resname="dmail_mailerengine_manual_invoke">
 				<source>Manually Invoke Engine</source>
@@ -447,7 +447,7 @@
 				<source>Current file:</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_done" resname="mailgroup_import_done">
-				<source>Import is finished.</source>
+				<source>CSV import successfully finished.</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_encapsulation" resname="mailgroup_import_encapsulation">
 				<source>Field encapsulation character (data fields are encapsed with...):</source>
@@ -691,16 +691,16 @@
 				<source>New recipient list</source>
 			</trans-unit>
 			<trans-unit id="recip_create_mailgroup_msg" resname="recip_create_mailgroup_msg">
-				<source>Create a new recipient list?</source>
+				<source>New group</source>
 			</trans-unit>
 			<trans-unit id="recip_group_amount" resname="recip_group_amount">
 				<source>Recipients</source>
 			</trans-unit>
 			<trans-unit id="recip_import_mailgroup_msg" resname="recip_import_mailgroup_msg">
-				<source>Click here to import CSV</source>
+				<source>Import CSV</source>
 			</trans-unit>
 			<trans-unit id="recip_select_mailgroup" resname="recip_select_mailgroup">
-				<source>Select a recipient list</source>
+				<source>Select a recipient group</source>
 			</trans-unit>
 			<trans-unit id="schedule_draft" resname="schedule_draft">
 				<source>Save these settings as draft (for recurring sendings)</source>

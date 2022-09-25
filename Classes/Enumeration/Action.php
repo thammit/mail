@@ -21,4 +21,6 @@ class Action extends Enumeration
     const RECIPIENT_LIST_USER_INFO = 'displayUserInfo';
     const RECIPIENT_LIST_MAIL_GROUP = 'displayMailGroup';
     const RECIPIENT_LIST_IMPORT = 'displayImport';
+
+    const STATS = 'stats';
 }

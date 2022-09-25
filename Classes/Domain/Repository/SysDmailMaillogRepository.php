@@ -29,7 +29,7 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('response_type', 0)
             )
             ->add('where', 'mid=' . $mid . ' AND response_type=0')
             ->groupBy('html_sent')
@@ -47,17 +47,18 @@ class SysDmailMaillogRepository extends AbstractRepository
     {
         $queryBuilder = $this->getQueryBuilder();
 
-        return $queryBuilder
+        return count($queryBuilder
             ->count('*')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(1, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('response_type', 1)
             )
             ->groupBy('rid')
             ->addGroupBy('rtbl')
-            ->executeQuery()
-            ->fetchOne();
+            ->orderBy('COUNT(*)')
+            ->execute()
+            ->fetchAllAssociative());
     }
 
     /**
@@ -70,17 +71,18 @@ class SysDmailMaillogRepository extends AbstractRepository
     {
         $queryBuilder = $this->getQueryBuilder();
 
-        return $queryBuilder
+        return count($queryBuilder
             ->count('*')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(2, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('response_type', 2)
             )
             ->groupBy('rid')
             ->addGroupBy('rtbl')
-            ->executeQuery()
-            ->fetchOne();
+            ->orderBy('COUNT(*)')
+            ->execute()
+            ->fetchAllAssociative());
     }
 
     /**
@@ -93,17 +95,18 @@ class SysDmailMaillogRepository extends AbstractRepository
     {
         $queryBuilder = $this->getQueryBuilder();
 
-        return $queryBuilder
+        return count($queryBuilder
             ->count('*')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('response_type', -1)
             )
             ->groupBy('rid')
             ->addGroupBy('rtbl')
-            ->executeQuery()
-            ->fetchOne();
+            ->orderBy('COUNT(*)')
+            ->execute()
+            ->fetchAllAssociative());
     }
 
     /**

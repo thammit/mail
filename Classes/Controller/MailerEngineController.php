@@ -209,8 +209,7 @@ class MailerEngineController extends AbstractController
 
         if ($enableTrigger && $this->invokeMailerEngine) {
             $this->invokeMEngine();
-            $message = ViewUtility::getFlashMessage('', LanguageUtility::getLL('dmail_mailerengine_invoked'), AbstractMessage::INFO);
-            $this->messageQueue->addMessage($message);
+            ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_mailerengine_invoked'));
         }
 
         // Invoke engine

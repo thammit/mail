@@ -58,6 +58,7 @@
 
 <f:section name="OpenMailsPanel">
     <f:variable name="lllTypePrefix" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I." />
+    <div class="panel panel-default">
     <table class="table table-striped table-hover">
         <thead class="table-light">
         <tr>
@@ -102,12 +103,14 @@
         </f:for>
         </tbody>
     </table>
+    </div>
 </f:section>
 
 <f:section name="InternalPanel">
     <f:if condition="{data.data}">
         <f:then>
             <f:render partial="InfoBox" arguments="{field: 'select_newsletter'}" />
+            <div class="panel panel-default">
             <table class="table table-striped table-hover">
                 <thead class="table-light">
                 <tr>
@@ -163,6 +166,7 @@
                 </f:for>
                 </tbody>
             </table>
+            </div>
         </f:then>
         <f:else>
             <f:be.infobox state="-1" title="{f:translate(key: '{lll}nl_select')}">
