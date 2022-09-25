@@ -92,7 +92,7 @@
                 </f:if></td>
                 <td class="nowrap">
                     <f:if condition="!{row.scheduled_begin}">
-                        <f:be.link route="{settings.route}" parameters="{id:146,uid:row.uid,cmd:'delete'}" class="btn btn-default" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:be.link>
+                        <f:be.link route="{settings.route}" parameters="{id:row.pid,uid:row.uid,cmd:'delete'}" class="btn btn-default" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:be.link>
                     </f:if>
                 </td>
                 <td class="col-control nowrap">

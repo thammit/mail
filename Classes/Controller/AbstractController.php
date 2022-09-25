@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
@@ -39,7 +40,7 @@ abstract class AbstractController
     protected array|false $pageInfo = false;
     protected bool $access = false;
     protected string $siteIdentifier;
-    protected string $cmd = '';
+    protected Action $action;
 
     protected int $backendUserId = 0;
     protected string $backendUserName = '';
@@ -107,7 +108,7 @@ abstract class AbstractController
         $parsedBody = $request->getParsedBody();
 
         $this->id = (int)($parsedBody['id'] ?? $queryParams['id'] ?? 0);
-        $this->cmd = (string)($parsedBody['cmd'] ?? $queryParams['cmd'] ?? '');
+        $this->setCurrentAction(Action::cast($parsedBody['cmd'] ?? $queryParams['cmd'] ?? null));
         $this->pageUid = (int)($parsedBody['pageUid'] ?? $queryParams['pageUid'] ?? 0);
         $this->mailUid = (int)($parsedBody['mailUid'] ?? $queryParams['mailUid'] ?? 0);
 
@@ -155,6 +156,22 @@ abstract class AbstractController
     public function getId(): int
     {
         return $this->id;
+    }
+
+    /**
+     * @return Action
+     */
+    public function getCurrentAction(): Action
+    {
+        return $this->action;
+    }
+
+    /**
+     * @param Action $action
+     */
+    public function setCurrentAction(Action $action): void
+    {
+        $this->action = $action;
     }
 
     protected function getConnection(string $table): Connection

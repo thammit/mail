@@ -12,6 +12,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
+use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -42,13 +43,15 @@ use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
 
 class DmailController extends AbstractController
 {
-    protected string $cshTable;
+    protected string $route = 'MailNavFrame_Mail';
+    protected string $moduleName = 'MailNavFrame_Mail';
+    protected string $cshKey = '_MOD_MailNavFrame_Mail';
     protected string $error = '';
     protected int $currentStep = 1;
     protected bool $reset = false;
     protected int $uid = 0;
     protected bool $backButtonPressed = false;
-    protected string $currentCMD = '';
+    protected Action $currentCMD;
     protected bool $fetchAtOnce = false;
     protected array $quickMail = [];
     protected int $createMailFromPageUid = 0;
@@ -63,16 +66,8 @@ class DmailController extends AbstractController
     protected bool $isTestMail = false;
     protected string $sendTestMailAddress = '';
     protected int $distributionTimeStamp = 0;
-    // protected int $tt_address_uid = 0;
     protected string $requestUri = '';
-
-    /**
-     * The route of the module
-     *
-     * @var string
-     */
-    protected string $route = 'MailNavFrame_Mail';
-    protected string $moduleName = 'MailNavFrame_Mail';
+    // protected int $tt_address_uid = 0;
 
     /**
      * Init module
@@ -84,8 +79,6 @@ class DmailController extends AbstractController
     {
         parent::init($request);
 
-        $this->cshTable = '_MOD_' . $this->moduleName;
-
         $queryParams = $request->getQueryParams();
         $parsedBody = $request->getParsedBody();
 
@@ -95,18 +88,18 @@ class DmailController extends AbstractController
         $this->uid = (int)($parsedBody['uid'] ?? $queryParams['uid'] ?? 0);
 
         if ($parsedBody['update_cats'] ?? $queryParams['update_cats'] ?? false) {
-            $this->cmd = Constants::WIZARD_STEP_CATEGORIES;
+            $this->setCurrentAction(Action::cast( Action::WIZARD_STEP_CATEGORIES));
         }
 
         $this->sendTestMail = (bool)($parsedBody['sendTestMail']['send'] ?? $queryParams['sendTestMail']['send'] ?? false);
         $this->sendTestMailAddress = (string)($parsedBody['sendTestMail']['address'] ?? $queryParams['sendTestMail']['address'] ?? '');
         if ($this->sendTestMail) {
-            $this->cmd = Constants::WIZARD_STEP_SEND_TEST2;
+            $this->setCurrentAction(Action::cast( Action::WIZARD_STEP_SEND_TEST2));
         }
 
         $this->backButtonPressed = (bool)($parsedBody['back'] ?? $queryParams['back'] ?? false);
 
-        $this->currentCMD = (string)($parsedBody['currentCMD'] ?? $queryParams['currentCMD'] ?? '');
+        $this->currentCMD = Action::cast(($parsedBody['currentCMD'] ?? $queryParams['currentCMD'] ?? null));
         // Create mail and fetch the data
         $this->fetchAtOnce = (bool)($parsedBody['fetchAtOnce'] ?? $queryParams['fetchAtOnce'] ?? false);
 
@@ -132,13 +125,13 @@ class DmailController extends AbstractController
             'route' => $this->route,
             'mailSysFolderUid' => $this->id,
             'steps' => [
-                'overview' => Constants::WIZARD_STEP_OVERVIEW,
-                'settings' => Constants::WIZARD_STEP_SETTINGS,
-                'categories' => Constants::WIZARD_STEP_CATEGORIES,
-                'sendTest' => Constants::WIZARD_STEP_SEND_TEST,
-                'sendTest2' => Constants::WIZARD_STEP_SEND_TEST2,
-                'final' => Constants::WIZARD_STEP_FINAL,
-                'send' => Constants::WIZARD_STEP_SEND,
+                'overview' => Action::WIZARD_STEP_OVERVIEW,
+                'settings' => Action::WIZARD_STEP_SETTINGS,
+                'categories' => Action::WIZARD_STEP_CATEGORIES,
+                'sendTest' => Action::WIZARD_STEP_SEND_TEST,
+                'sendTest2' => Action::WIZARD_STEP_SEND_TEST2,
+                'final' => Action::WIZARD_STEP_FINAL,
+                'send' => Action::WIZARD_STEP_SEND,
             ],
         ]);
     }
@@ -218,7 +211,7 @@ class DmailController extends AbstractController
     {
         $sysDmailRepository = GeneralUtility::makeInstance(SysDmailRepository::class);
 
-        if ($this->cmd == 'delete') {
+        if ($this->action->equals(Action::DELETE_MAIL)) {
             $sysDmailRepository->delete($this->uid);
         }
 
@@ -235,26 +228,26 @@ class DmailController extends AbstractController
 
         if ($this->backButtonPressed) {
             // CMD move 1 step back
-            switch ($this->currentCMD) {
-                case Constants::WIZARD_STEP_SETTINGS:
-                    $this->cmd = Constants::WIZARD_STEP_OVERVIEW;
+            switch ((string)$this->currentCMD) {
+                case Action::WIZARD_STEP_SETTINGS:
+                    $this->setCurrentAction(Action::cast(Action::WIZARD_STEP_OVERVIEW));
                     break;
-                case Constants::WIZARD_STEP_CATEGORIES:
-                    $this->cmd = Constants::WIZARD_STEP_SETTINGS;
+                case Action::WIZARD_STEP_CATEGORIES:
+                    $this->setCurrentAction(Action::cast(Action::WIZARD_STEP_SETTINGS));
                     break;
-                case Constants::WIZARD_STEP_SEND_TEST:
+                case Action::WIZARD_STEP_SEND_TEST:
                     // Same as send_mail_test
-                case Constants::WIZARD_STEP_SEND_TEST2:
-                    if ($this->cmd === Constants::WIZARD_STEP_SEND && $hideCategoryStep) {
-                        $this->cmd = Constants::WIZARD_STEP_SETTINGS;
+                case Action::WIZARD_STEP_SEND_TEST2:
+                    if ($this->action->equals(Action::WIZARD_STEP_SEND) && $hideCategoryStep) {
+                        $this->setCurrentAction(Action::cast(Action::WIZARD_STEP_SETTINGS));
                     } else {
-                        $this->cmd = Constants::WIZARD_STEP_CATEGORIES;
+                        $this->setCurrentAction(Action::cast(Action::WIZARD_STEP_CATEGORIES));
                     }
                     break;
-                case Constants::WIZARD_STEP_FINAL:
+                case Action::WIZARD_STEP_FINAL:
                     // The same as send_mass
-                case Constants::WIZARD_STEP_SEND:
-                    $this->cmd = Constants::WIZARD_STEP_SEND_TEST;
+                case Action::WIZARD_STEP_SEND:
+                    $this->setCurrentAction(Action::cast(Action::WIZARD_STEP_SEND_TEST));
                     break;
                 default:
                     // Do nothing
@@ -264,13 +257,13 @@ class DmailController extends AbstractController
         $nextCmd = '';
         if ($hideCategoryStep) {
             $totalSteps = 4;
-            if ($this->cmd == Constants::WIZARD_STEP_SETTINGS) {
-                $nextCmd = Constants::WIZARD_STEP_SEND_TEST;
+            if ($this->action->equals(Action::WIZARD_STEP_SETTINGS)) {
+                $nextCmd = Action::WIZARD_STEP_SEND_TEST;
             }
         } else {
             $totalSteps = 5;
-            if ($this->cmd == Constants::WIZARD_STEP_SETTINGS) {
-                $nextCmd = Constants::WIZARD_STEP_CATEGORIES;
+            if ($this->action->equals(Action::WIZARD_STEP_SETTINGS)) {
+                $nextCmd = Action::WIZARD_STEP_CATEGORIES;
             }
         }
 
@@ -285,8 +278,8 @@ class DmailController extends AbstractController
             ],
         ];
 
-        switch ($this->cmd) {
-            case Constants::WIZARD_STEP_SETTINGS:
+        switch ((string)$this->getCurrentAction()) {
+            case Action::WIZARD_STEP_SETTINGS:
                 // step 2: create the Direct Mail record, or use existing
                 $this->currentStep = 2;
                 $moduleData['navigation']['currentStep'] = $this->currentStep;
@@ -313,7 +306,7 @@ class DmailController extends AbstractController
                             $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                         }
 
-                        $moduleData['info']['internal']['cmd'] = $nextCmd ?: Constants::WIZARD_STEP_CATEGORIES;
+                        $moduleData['info']['internal']['cmd'] = $nextCmd ?: Action::WIZARD_STEP_CATEGORIES;
                     } else {
                         ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
                     }
@@ -335,7 +328,7 @@ class DmailController extends AbstractController
                                 $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                             }
 
-                            $moduleData['info']['external']['cmd'] = Constants::WIZARD_STEP_SEND_TEST;
+                            $moduleData['info']['external']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                         } else {
                             // TODO: Error message - Error while adding the DB set
                             $this->error = 'no_valid_url';
@@ -359,7 +352,7 @@ class DmailController extends AbstractController
                             // Todo Check if we do not need the newly created quick mail here
                             $mailData = $sysDmailRepository->findByUid($this->mailUid);
 
-                            $moduleData['info']['quickmail']['cmd'] = Constants::WIZARD_STEP_SEND_TEST;
+                            $moduleData['info']['quickmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                             $moduleData['info']['quickmail']['senderName'] = htmlspecialchars($quickmail['senderName'] ?? '');
                             $moduleData['info']['quickmail']['senderEmail'] = htmlspecialchars($quickmail['senderEmail'] ?? '');
                             $moduleData['info']['quickmail']['subject'] = htmlspecialchars($quickmail['subject'] ?? '');
@@ -372,7 +365,7 @@ class DmailController extends AbstractController
                                     // it's a quickmail
                                     $fetchError = false;
 
-                                    $moduleData['info']['dmail']['cmd'] = Constants::WIZARD_STEP_SEND_TEST;
+                                    $moduleData['info']['dmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
 
                                     // add attachment here, since attachment added in 2nd step
                                     $unserializedMailContent = unserialize(base64_decode($mailData['mailContent']));
@@ -388,7 +381,7 @@ class DmailController extends AbstractController
                                         $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                                     }
 
-                                    $moduleData['info']['dmail']['cmd'] = ($mailData['type'] == 0) ? $nextCmd : Constants::WIZARD_STEP_SEND_TEST;
+                                    $moduleData['info']['dmail']['cmd'] = ($mailData['type'] == 0) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
                                 }
                             }
                         }
@@ -405,10 +398,10 @@ class DmailController extends AbstractController
                 $moduleData['info']['table'] = is_array($mailData) ? $this->getGroupedMailSettings($mailData) : '';
                 $moduleData['info']['mailUid'] = $this->mailUid;
                 $moduleData['info']['pageUid'] = $mailData['page'] ?: '';
-                $moduleData['info']['currentCMD'] = $this->cmd;
+                $moduleData['info']['currentCMD'] = $this->action;
                 break;
 
-            case Constants::WIZARD_STEP_CATEGORIES:
+            case Action::WIZARD_STEP_CATEGORIES:
                 // shows category if content-based cat
                 $this->currentStep = 3;
                 $moduleData['navigation']['currentStep'] = $this->currentStep;
@@ -423,15 +416,15 @@ class DmailController extends AbstractController
                 $moduleData['cats']['output'] = $this->getCategoryData($mailData, $indata);
                 // $moduleData['cats']['catsForm'] = $temp['theOutput'];
 
-                $moduleData['cats']['cmd'] = Constants::WIZARD_STEP_SEND_TEST;
+                $moduleData['cats']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                 $moduleData['cats']['mailUid'] = $this->mailUid;
                 $moduleData['cats']['pageUid'] = $this->pageUid;
-                $moduleData['cats']['currentCMD'] = $this->cmd;
+                $moduleData['cats']['currentCMD'] = $this->action;
                 break;
 
-            case Constants::WIZARD_STEP_SEND_TEST:
+            case Action::WIZARD_STEP_SEND_TEST:
                 // Same as send_mail_test
-            case Constants::WIZARD_STEP_SEND_TEST2:
+            case Action::WIZARD_STEP_SEND_TEST2:
                 // send test mail
                 $this->currentStep = (4 - (5 - $totalSteps));
                 $moduleData['navigation']['currentStep'] = $this->currentStep;
@@ -442,26 +435,26 @@ class DmailController extends AbstractController
                 $moduleData['navigation']['back'] = true;
                 $moduleData['navigation']['next'] = true;
 
-                if ($this->cmd === Constants::WIZARD_STEP_SEND_TEST2) {
+                if ($this->action->equals(Action::WIZARD_STEP_SEND_TEST2)) {
                     $this->sendSimpleTestMail($mailData);
                 }
                 $moduleData['test']['testFormData'] = $this->getTestMailConfig();
-                $moduleData['test']['cmd'] = Constants::WIZARD_STEP_SEND;
+                $moduleData['test']['cmd'] = Action::WIZARD_STEP_SEND;
                 $moduleData['test']['mailUid'] = $this->mailUid;
                 $moduleData['test']['pageUid'] = $this->pageUid;
-                $moduleData['test']['currentCMD'] = $this->cmd;
+                $moduleData['test']['currentCMD'] = $this->action;
                 break;
 
-            case Constants::WIZARD_STEP_FINAL:
+            case Action::WIZARD_STEP_FINAL:
                 // same as send_mass
-            case Constants::WIZARD_STEP_SEND:
+            case Action::WIZARD_STEP_SEND:
                 $this->currentStep = 5 - (5 - $totalSteps);
                 $moduleData['navigation']['currentStep'] = $this->currentStep;
                 $moduleData['final'] = ['currentStep' => $this->currentStep];
 
-                $moduleData['navigation']['back'] = $this->cmd === Constants::WIZARD_STEP_SEND;
+                $moduleData['navigation']['back'] = $this->action->equals(Action::WIZARD_STEP_SEND);
 
-                if ($this->cmd === Constants::WIZARD_STEP_FINAL) {
+                if ($this->action->equals(Action::WIZARD_STEP_FINAL)) {
                     if (count($this->mailGroupUids)) {
                         if ($this->isTestMail) {
                             $this->sendPersonalizedTestMails($mailData);
@@ -479,14 +472,14 @@ class DmailController extends AbstractController
                 }
                 // send mass, show calendar
                 $moduleData['final']['finalForm'] = $this->getFinalData($mailData);
-                $moduleData['final']['cmd'] = Constants::WIZARD_STEP_FINAL;
+                $moduleData['final']['cmd'] = Action::WIZARD_STEP_FINAL;
                 $moduleData['final']['id'] = $this->id;
                 $moduleData['final']['mailUid'] = $this->mailUid;
                 $moduleData['final']['pageUid'] = $this->pageUid;
-                $moduleData['final']['currentCMD'] = $this->cmd;
+                $moduleData['final']['currentCMD'] = $this->action;
                 break;
 
-            case Constants::WIZARD_STEP_OVERVIEW:
+            case Action::WIZARD_STEP_OVERVIEW:
             default:
                 $moduleData = $this->getOverviewModuleData($moduleData);
         }
@@ -939,7 +932,7 @@ class DmailController extends AbstractController
             $categoryData['subtitle'] = LanguageUtility::getLL('nl_cat_msg1');
             return $categoryData;
         }
-        $categoryData['subtitle'] = BackendUtility::cshItem($this->cshTable, 'assign_categories');
+        $categoryData['subtitle'] = BackendUtility::cshItem($this->cshKey, 'assign_categories');
         $categoryData['rowsFound'] = true;
 
         $colPosVal = 99;
@@ -999,7 +992,7 @@ class DmailController extends AbstractController
     {
         $data = [
             'id' => $this->id,
-            'cmd' => Constants::WIZARD_STEP_SEND_TEST2,
+            'cmd' => Action::WIZARD_STEP_SEND_TEST2,
             'mailUid' => $this->mailUid,
             'dmail_test_email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
             'test_tt_address' => '',
@@ -1026,7 +1019,7 @@ class DmailController extends AbstractController
                 $this->backendUserPermissions);
 
 //            foreach ($rows as $row) {
-//                $moduleUrl = $this->getWizardStepUri(Constants::WIZARD_STEP_SEND_TEST2, [
+//                $moduleUrl = $this->getWizardStepUri(Action::WIZARD_STEP_SEND_TEST2, [
 //                    'sys_dmail_uid' => $this->sys_dmail_uid,
 //                    'sys_dmail_group_uid[]' => $row['uid'],
 //                ]);
@@ -1181,7 +1174,7 @@ class DmailController extends AbstractController
         }
         */
         // Setting flags and update the record:
-        if ($sentFlag && $this->cmd === Constants::WIZARD_STEP_FINAL) {
+        if ($sentFlag && $this->action === Action::WIZARD_STEP_FINAL) {
 
             $connection = $this->getConnection('sys_dmail');
             $connection->update(
@@ -1413,7 +1406,7 @@ class DmailController extends AbstractController
                 }
 
                 if ($testMailLink) {
-                    $moduleUrl = $this->getWizardStepUri(Constants::WIZARD_STEP_SEND_TEST2, [
+                    $moduleUrl = $this->getWizardStepUri(Action::WIZARD_STEP_SEND_TEST2, [
                         'sys_dmail_uid' => $this->mailUid,
                         'tt_address_uid' => $row['uid'],
                     ]);

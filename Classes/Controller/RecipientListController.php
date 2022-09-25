@@ -141,7 +141,7 @@ class RecipientListController extends AbstractController
         $csvImportData = '';
         $data = [];
         // COMMAND:
-        switch ($this->cmd) {
+        switch ($this->action) {
             case 'displayUserInfo': //@TODO ???
                 $data = $this->displayUserInfo();
                 $type = 1;
@@ -827,7 +827,7 @@ class RecipientListController extends AbstractController
                 'categories' => [],
                 'table' => $this->table,
                 'thisID' => $this->uid,
-                'cmd' => $this->cmd,
+                'cmd' => $this->action,
                 'html' => $row['module_sys_dmail_html'] ? true : false,
             ];
             $this->categories = RepositoryUtility::makeCategories($this->table, $row, $this->sysLanguageUid);

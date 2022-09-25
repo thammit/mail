@@ -178,7 +178,7 @@ class StatisticsController extends AbstractController
             $row = GeneralUtility::makeInstance(SysDmailRepository::class)->selectSysDmailById($this->mailUid, $this->id);
             if (is_array($row)) {
                 // COMMAND:
-                switch ($this->cmd) {
+                switch ($this->action) {
                     case 'displayUserInfo':
                         $theOutput['dataUserInfo'] = $this->displayUserInfo();
                         break;
@@ -187,8 +187,8 @@ class StatisticsController extends AbstractController
                         break;
                     default:
                         // Hook for handling of custom direct mail commands:
-                        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['handledirectmailcmd-' . $this->cmd])) {
-                            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['handledirectmailcmd-' . $this->cmd] as $funcRef) {
+                        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['handledirectmailcmd-' . $this->action])) {
+                            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['handledirectmailcmd-' . $this->action] as $funcRef) {
                                 $params = ['pObj' => &$this];
                                 $theOutput['dataHook'] = GeneralUtility::callUserFunction($funcRef, $params, $this);
                             }
@@ -341,7 +341,7 @@ class StatisticsController extends AbstractController
                 'catChecked' => 0,
                 'table' => $this->table,
                 'thisID' => $this->uid,
-                'cmd' => $this->cmd,
+                'cmd' => $this->action,
                 'html' => $row['module_sys_dmail_html'] ? true : false,
             ];
 
@@ -743,7 +743,7 @@ class StatisticsController extends AbstractController
             [
                 'id' => $this->id,
                 'mailUid' => $row['uid'],
-                'cmd' => $this->cmd,
+                'cmd' => $this->action,
                 'recalcCache' => 1,
             ]
         );

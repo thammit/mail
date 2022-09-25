@@ -61,7 +61,7 @@ class MailerEngineController extends AbstractController
         $this->view->setTemplate('MailerEngine');
 
         if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
-            if ($this->cmd == 'delete' && $this->uid) {
+            if ($this->action == 'delete' && $this->uid) {
                 $this->deleteDMail($this->uid);
             }
 
