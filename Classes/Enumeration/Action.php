@@ -17,4 +17,8 @@ class Action extends Enumeration
     const WIZARD_STEP_SEND = 'send_mass';
 
     const DELETE_MAIL = 'delete';
+
+    const RECIPIENT_LIST_USER_INFO = 'displayUserInfo';
+    const RECIPIENT_LIST_MAIL_GROUP = 'displayMailGroup';
+    const RECIPIENT_LIST_IMPORT = 'displayImport';
 }

@@ -860,27 +860,9 @@ class MailerService implements LoggerAwareInterface
 
         $pt = MailerUtility::getMilliseconds();
 
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail');
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-
-        $statement = $queryBuilder
-            ->select('*')
-            ->from('sys_dmail')
-            ->where(
-                $queryBuilder->expr()->neq('scheduled', 0),
-                $queryBuilder->expr()->lt('scheduled', time()),
-                $queryBuilder->expr()->eq('scheduled_end', 0),
-                $queryBuilder->expr()->notIn('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL])
-            )
-            ->orderBy('scheduled')
-            ->execute();
-
         $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
 
-        if ($row = $statement->fetchAssociative()) {
+        if ($row = GeneralUtility::makeInstance(SysDmailRepository::class)->findMailsToSend()) {
             $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . LanguageUtility::getLL('dmailer_processed'));
             $this->prepare($row);
             $query_info = unserialize($row['query_info']);

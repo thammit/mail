@@ -382,7 +382,7 @@ class DmailController extends AbstractController
                                         $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                                     }
 
-                                    $moduleData['info']['dmail']['cmd'] = ($mailData['type'] == 0) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
+                                    $moduleData['info']['dmail']['cmd'] = ($mailData['type'] === MailType::INTERNAL) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
                                 }
                             }
                         }

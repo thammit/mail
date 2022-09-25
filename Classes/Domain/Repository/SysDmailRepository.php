@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Enumeration\MailType;
 use PDO;
 
 class SysDmailRepository extends AbstractRepository
@@ -74,6 +75,28 @@ class SysDmailRepository extends AbstractRepository
             ->orderBy($orderBy, $order)
             ->execute()
             ->fetchAllAssociative();
+    }
+
+    /**
+     * @return array|bool
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findMailsToSend(): array|bool
+    {
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
+        return $queryBuilder
+            ->select('*')
+            ->from($this->table)
+            ->where(
+                $queryBuilder->expr()->neq('scheduled', 0),
+                $queryBuilder->expr()->lt('scheduled', time()),
+                $queryBuilder->expr()->eq('scheduled_end', 0),
+                $queryBuilder->expr()->notIn('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL])
+            )
+            ->orderBy('scheduled')
+            ->execute()
+            ->fetchAssociative();
     }
 
     /**

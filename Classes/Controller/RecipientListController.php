@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
+use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
@@ -142,17 +143,17 @@ class RecipientListController extends AbstractController
         $csvImportData = '';
         $data = [];
         // COMMAND:
-        switch ($this->action) {
-            case 'displayUserInfo': //@TODO ???
+        switch ((string)$this->getCurrentAction()) {
+            case Action::RECIPIENT_LIST_USER_INFO: //@TODO ???
                 $data = $this->displayUserInfo();
                 $type = 1;
                 break;
-            case 'displayMailGroup':
+            case Action::RECIPIENT_LIST_MAIL_GROUP:
                 $result = $this->compileMailGroup($this->group_uid);
                 $data = $this->displayMailGroup($result);
                 $type = 2;
                 break;
-            case 'displayImport':
+            case Action::RECIPIENT_LIST_IMPORT:
                 /* @var $importService ImportService */
                 $importService = GeneralUtility::makeInstance(ImportService::class);
                 $importService->init($this);
@@ -229,7 +230,7 @@ class RecipientListController extends AbstractController
             $this->moduleName,
             [
                 'id' => $this->id,
-                'cmd' => 'displayImport',
+                'cmd' => Action::RECIPIENT_LIST_IMPORT,
             ]
         );
 
@@ -449,7 +450,7 @@ class RecipientListController extends AbstractController
             [
                 'id' => $this->id,
                 'group_uid' => $uid,
-                'cmd' => 'displayMailGroup',
+                'cmd' => Action::RECIPIENT_LIST_MAIL_GROUP,
                 'SET[dmail_mode]' => 'recip',
             ]
         );
