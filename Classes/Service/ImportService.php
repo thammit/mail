@@ -18,15 +18,18 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\DBALException;
 use Exception;
-use MEDIAESSENZ\Mail\Controller\RecipientListController;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailCategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailTtAddressCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -53,29 +56,29 @@ class ImportService
      * The GET-Data
      * @var array
      */
-    public $indata = [];
-    public $params = [];
+    protected array $indata = [];
+    protected array $params = [];
 
-    /**
-     * Parent object
-     *
-     * @var RecipientListController
-     */
-    public $parent;
+    protected int $pageId;
+    protected string $httpReferer;
+    protected string $requestHostOnly;
 
     /**
      * Init the class
      *
-     * @param $pObj $pObj The parent object
-     *
+     * @param int $pageId
+     * @param string $httpReferer
+     * @param string $requestHostOnly
      * @return void
      */
-    public function init(&$pObj): void
+    public function init(int $pageId, string $httpReferer, string $requestHostOnly): void
     {
-        $this->parent = &$pObj;
+        $this->pageId = $pageId;
+        $this->httpReferer = $httpReferer;
+        $this->requestHostOnly = $requestHostOnly;
 
         // get some importer default from pageTS
-        $this->params = BackendUtility::getPagesTSconfig((int)GeneralUtility::_GP('id'))['mod.']['web_modules.']['dmail.']['importer.'] ?? [];
+        $this->params = BackendUtility::getPagesTSconfig($this->pageId)['mod.']['web_modules.']['dmail.']['importer.'] ?? [];
     }
 
     /**
@@ -163,7 +166,7 @@ class ImportService
             ]
         ];
 
-        $beUser = $this->getBeUser();
+        $beUser = BackendUserUtility::getBackendUser();
         $step = GeneralUtility::_GP('importStep');
         $defaultConf = [
             'remove_existing' => 0,
@@ -173,10 +176,9 @@ class ImportService
             'update_unique' => 0
         ];
 
-        if (GeneralUtility::_GP('CSV_IMPORT')) {
-            $importerConfig = GeneralUtility::_GP('CSV_IMPORT');
+        if ($importerConfig = GeneralUtility::_GP('CSV_IMPORT')) {
             if ($step['next'] === 'mapping') {
-                $this->indata = $importerConfig + $defaultConf;
+                $this->indata = array_merge_recursive($defaultConf, $importerConfig);
             } else {
                 $this->indata = $importerConfig;
             }
@@ -267,10 +269,10 @@ class ImportService
                 }
 
                 $optDelimiter = [
-                    ['val' => 'comma', 'text' => $this->getLanguageService()->getLL('mailgroup_import_separator_comma')],
-                    ['val' => 'semicolon', 'text' => $this->getLanguageService()->getLL('mailgroup_import_separator_semicolon')],
-                    ['val' => 'colon', 'text' => $this->getLanguageService()->getLL('mailgroup_import_separator_colon')],
-                    ['val' => 'tab', 'text' => $this->getLanguageService()->getLL('mailgroup_import_separator_tab')]
+                    ['val' => 'comma', 'text' => LanguageUtility::getLL('mailgroup_import_separator_comma')],
+                    ['val' => 'semicolon', 'text' => LanguageUtility::getLL('mailgroup_import_separator_semicolon')],
+                    ['val' => 'colon', 'text' => LanguageUtility::getLL('mailgroup_import_separator_colon')],
+                    ['val' => 'tab', 'text' => LanguageUtility::getLL('mailgroup_import_separator_tab')]
                 ];
 
                 $optEncap = [
@@ -287,7 +289,7 @@ class ImportService
                 $output['conf']['disableInput'] = $this->params['inputDisable'] == 1;
 
                 // show configuration
-                $output['subtitle'] = $this->getLanguageService()->getLL('mailgroup_import_header_conf');
+                $output['subtitle'] = LanguageUtility::getLL('mailgroup_import_header_conf');
 
                 // get the all sysfolder
                 $output['conf']['storage'] = $optStorage;
@@ -348,7 +350,7 @@ class ImportService
                 if (!isset($this->indata['charset'])) {
                     $this->indata['charset'] = 'ISO-8859-1';
                 }
-                $output['subtitle'] = $this->getLanguageService()->getLL('mailgroup_import_mapping_charset');
+                $output['subtitle'] = LanguageUtility::getLL('mailgroup_import_mapping_charset');
 
                 $output['mapping']['charset'] = $charSets;
                 $output['mapping']['charsetSelected'] = $this->indata['charset'];
@@ -380,14 +382,14 @@ class ImportService
                 foreach ($ttAddressFields as $map) {
                     $mapFields[] = [
                         $map,
-                        str_replace(':', '', $this->getLanguageService()->sL($GLOBALS['TCA']['tt_address']['columns'][$map]['label']))
+                        str_replace(':', '', LanguageUtility::getLanguageService()->sL($GLOBALS['TCA']['tt_address']['columns'][$map]['label']))
                     ];
                 }
                 // add 'no value'
-                array_unshift($mapFields, ['noMap', $this->getLanguageService()->getLL('mailgroup_import_mapping_mapTo')]);
+                array_unshift($mapFields, ['noMap', LanguageUtility::getLL('mailgroup_import_mapping_mapTo')]);
                 $mapFields[] = [
                     'cats',
-                    $this->getLanguageService()->getLL('mailgroup_import_mapping_categories')
+                    LanguageUtility::getLL('mailgroup_import_mapping_categories')
                 ];
                 reset($csv_firstRow);
                 reset($csvData);
@@ -408,7 +410,7 @@ class ImportService
                 }
 
                 // get categories
-                $temp['value'] = BackendUtility::getPagesTSconfig($this->parent->getId())['TCEFORM.']['sys_dmail_group.']['select_categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
+                $temp['value'] = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['sys_dmail_group.']['select_categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
                 if (is_numeric($temp['value'])) {
                     $rowCat = GeneralUtility::makeInstance(SysDmailCategoryRepository::class)->selectSysDmailCategoryByPid((int)$temp['value']);
                     if (!empty($rowCat)) {
@@ -430,7 +432,6 @@ class ImportService
                 break;
             case 'startImport':
                 $output['startImport']['show'] = true;
-
                 $output['startImport']['charsetSelected'] = $this->indata['charset'];
                 $output['startImport']['newFile'] = $this->indata['newFile'];
                 $output['startImport']['newFileUid'] = $this->indata['newFileUid'];
@@ -443,9 +444,8 @@ class ImportService
                 $output['startImport']['remove_dublette'] = $this->indata['remove_dublette'];
                 $output['startImport']['update_unique'] = $this->indata['update_unique'];
                 $output['startImport']['record_unique'] = $this->indata['record_unique'];
-                $output['startImport']['all_html'] = !$this->indata['all_html'] ? false : true;
-                $output['startImport']['add_cat'] = $this->indata['add_cat'] ? true : false;
-
+                $output['startImport']['all_html'] = (bool)$this->indata['all_html'];
+                $output['startImport']['add_cat'] = (bool)$this->indata['add_cat'];
                 $output['startImport']['error'] = $error;
 
                 // starting import & show errors
@@ -457,7 +457,7 @@ class ImportService
 
                 // show not imported record and reasons,
                 $result = $this->doImport($csvData);
-                $output['subtitle'] = $this->getLanguageService()->getLL('mailgroup_import_done');
+                $output['subtitle'] = LanguageUtility::getLL('mailgroup_import_done');
 
                 $resultOrder = [];
                 if (!empty($this->params['resultOrder'])) {
@@ -481,7 +481,7 @@ class ImportService
                     }
 
                     $output['startImport']['tables'][] = [
-                        'header' => $this->getLanguageService()->getLL('mailgroup_import_report_' . $order),
+                        'header' => LanguageUtility::getLL('mailgroup_import_report_' . $order),
                         'rows' => $rowsTable
                     ];
                 }
@@ -502,7 +502,7 @@ class ImportService
             case 'upload':
             default:
                 // show upload file form
-                $output['subtitle'] = $this->getLanguageService()->getLL('mailgroup_import_header_upload');
+                $output['subtitle'] = LanguageUtility::getLL('mailgroup_import_header_upload');
 
                 if (($this->indata['mode'] === 'file') && !(((strpos($currentFileInfo['file'], 'import') === false) ? 0 : 1) && ($currentFileInfo['realFileext'] === 'txt'))) {
                     $output['upload']['current'] = true;
@@ -530,7 +530,7 @@ class ImportService
                 $output['upload']['newFileUid'] = $this->indata['newFileUid'];
         }
 
-        $output['title'] = $this->getLanguageService()->getLL('mailgroup_import') . BackendUtility::cshItem($this->cshTable ?? '', 'mailgroup_import');
+        $output['title'] = LanguageUtility::getLL('mailgroup_import') . BackendUtility::cshItem($this->cshTable ?? '', 'mailgroup_import');
         $theOutput = sprintf('%s', $out);
 
         /**
@@ -566,7 +566,7 @@ class ImportService
      *
      * @return array Filtered csv and double csv
      */
-    public function filterCSV(array $mappedCsv): array
+    public function filterCSV(array $mappedCsv, string $uniqueKey): array
     {
         $cmpCsv = $mappedCsv;
         $remove = [];
@@ -650,9 +650,9 @@ class ImportService
             }
         }
 
-        // remove doublette from csv data
+        // remove duplicates from csv data
         if ($this->indata['remove_dublette']) {
-            $filteredCSV = $this->filterCSV($mappedCSV);
+            $filteredCSV = CsvUtility::filterDuplicates($mappedCSV, $this->indata['record_unique']);
             unset($mappedCSV);
             $mappedCSV = $filteredCSV['clean'];
         }
@@ -898,14 +898,18 @@ class ImportService
     /**
      * Write CSV Data to a temporary file and will be used for the import
      *
-     * @return    array        path and uid of the temp file
+     * @param string $csv
+     * @param string $newFile
+     * @param int $newFileUid
+     * @return array        path and uid of the temp file
+     * @throws AspectNotFoundException
      * @throws \TYPO3\CMS\Core\Resource\Exception
      */
     public function writeTempFile(string $csv, string $newFile, int $newFileUid): array
     {
         $newfile = ['newFile' => '', 'newFileUid' => 0];
 
-        $userPermissions = $this->getBeUser()->getFilePermissions();
+        $userPermissions = BackendUserUtility::getBackendUser()->getFilePermissions();
         // Initializing:
         /* @var $extendedFileUtility ExtendedFileUtility */
         $extendedFileUtility = GeneralUtility::makeInstance(ExtendedFileUtility::class);
@@ -915,8 +919,8 @@ class ImportService
 
         if (empty($this->indata['newFile'])) {
             // Checking referer / executing:
-            $refInfo = parse_url($this->parent->getHttpReferer());
-            $httpHost = $this->parent->getRequestHostOnly();
+            $refInfo = parse_url($this->httpReferer);
+            $httpHost = $this->requestHostOnly;
 
             if ($httpHost != $refInfo['host'] && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
                 $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$refInfo['host'], $httpHost]);
@@ -965,8 +969,8 @@ class ImportService
         $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
 
         // Checking referer / executing:
-        $refInfo = parse_url($this->parent->getHttpReferer());
-        $httpHost = $this->parent->getRequestHostOnly();
+        $refInfo = parse_url($this->httpReferer);
+        $httpHost = $this->requestHostOnly;
 
         if ($httpHost != $refInfo['host'] && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
             $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$refInfo['host'], $httpHost]);
@@ -1028,35 +1032,17 @@ class ImportService
     public function userTempFolder()
     {
         /** @var Folder $folder */
-        $folder = $this->getBeUser()->getDefaultUploadTemporaryFolder();
+        $folder = BackendUserUtility::getBackendUser()->getDefaultUploadTemporaryFolder();
         return $folder->getPublicUrl();
     }
 
     /**
      *
      * @return int
+     * @throws AspectNotFoundException
      */
     private function getTimestampFromAspect(): int {
         $context = GeneralUtility::makeInstance(Context::class);
         return $context->getPropertyFromAspect('date', 'timestamp');
-    }
-
-    /**
-     * Returns LanguageService
-     *
-     * @return LanguageService
-     */
-    protected function getLanguageService()
-    {
-        return $GLOBALS['LANG'];
-    }
-
-    /**
-     *
-     * @return BackendUserAuthentication
-     */
-    protected function getBeUser()
-    {
-        return $GLOBALS['BE_USER'];
     }
 }

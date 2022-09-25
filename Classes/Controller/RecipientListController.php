@@ -156,7 +156,7 @@ class RecipientListController extends AbstractController
             case Action::RECIPIENT_LIST_IMPORT:
                 /* @var $importService ImportService */
                 $importService = GeneralUtility::makeInstance(ImportService::class);
-                $importService->init($this);
+                $importService->init($this->id, $this->httpReferer, $this->requestHostOnly, $this);
                 $csvImportData = $importService->csvImport();
                 $type = 3;
                 break;

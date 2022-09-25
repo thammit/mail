@@ -115,4 +115,46 @@ class CsvUtility
         }
         return $out;
     }
+
+
+    /**
+     * Filter duplicates from input csv data
+     *
+     * @param array $mappedCsv Mapped csv
+     *
+     * @return array Filtered csv and double csv
+     */
+    public static function filterDuplicates(array $mappedCsv, string $uniqueKey): array
+    {
+        $cmpCsv = $mappedCsv;
+        $remove = [];
+        $filtered = [];
+        $double = [];
+
+        foreach ($mappedCsv as $k => $csvData) {
+            if (!in_array($k, $remove)) {
+                $found = 0;
+                foreach ($cmpCsv as $kk =>$cmpData) {
+                    if ($k != $kk) {
+                        if ($csvData[$uniqueKey] == $cmpData[$uniqueKey]) {
+                            $double[] = $mappedCsv[$kk];
+                            if (!$found) {
+                                $filtered[] = $csvData;
+                            }
+                            $remove[] = $kk;
+                            $found = 1;
+                        }
+                    }
+                }
+                if (!$found) {
+                    $filtered[] = $csvData;
+                }
+            }
+        }
+        $csv['clean'] = $filtered;
+        $csv['double'] = $double;
+
+        return $csv;
+    }
+
 }

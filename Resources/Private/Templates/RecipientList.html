@@ -235,7 +235,7 @@
 					<f:form.hidden name="CSV_IMPORT[newFileUid]" value="{csvImportData.output.conf.newFileUid}" />
 				</f:if>
 				<f:if condition="{csvImportData.output.mapping.show}">
-					<fieldset class="form-section">
+                    <fieldset class="form-section">
 						<table class="table table-striped table-hover">
 							<tbody>
 								<tr>
@@ -370,7 +370,6 @@
 					<f:form.hidden name="CSV_IMPORT[remove_dublette]" value="{csvImportData.output.mapping.remove_dublette}" />
 					<f:form.hidden name="CSV_IMPORT[update_unique]" value="{csvImportData.output.mapping.update_unique}" />
 					<f:form.hidden name="CSV_IMPORT[record_unique]" value="{csvImportData.output.mapping.record_unique}" />
-					<f:form.hidden name="CSV_IMPORT[all_html]" value="{csvImportData.output.mapping.all_html}" />
 					<f:form.hidden name="CSV_IMPORT[charsetSelected]" value="{csvImportData.output.mapping.charsetSelected}" />
 				</f:if>
 				<f:if condition="{csvImportData.output.startImport.show}">
@@ -423,8 +422,8 @@
 					<f:form.hidden name="CSV_IMPORT[remove_dublette]" value="{csvImportData.output.startImport.remove_dublette}" />
 					<f:form.hidden name="CSV_IMPORT[update_unique]" value="{csvImportData.output.startImport.update_unique}" />
 					<f:form.hidden name="CSV_IMPORT[record_unique]" value="{csvImportData.output.startImport.record_unique}" />
-					<f:form.hidden name="CSV_IMPORT[all_html]" value="{csvImportData.output.startImport.all_html}" />
 					<f:form.hidden name="CSV_IMPORT[charset]" value="{csvImportData.output.startImport.charsetSelected}" />
+                    <f:form.hidden name="CSV_IMPORT[all_html]" value="{csvImportData.output.mapping.all_html}" />
 					<f:form.hidden name="CSV_IMPORT[add_cat]" value="{csvImportData.output.startImport.add_cat}" />
 				</f:if>
 				<f:if condition="{csvImportData.theOutput}">
