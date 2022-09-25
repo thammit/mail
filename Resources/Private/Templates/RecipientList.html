@@ -125,7 +125,7 @@
                             <core:iconForRecord row="{row}" table="sys_dmail_group" />
                         </td>
                         <td class="col-title col-responsive nowrap">
-                            <a href="{row.recipientGroupInfoUri}">{row.title}</a>
+                            {row.title}
                         </td>
                         <td class="nowrap">
                             <f:format.html>{row.type}</f:format.html>
@@ -175,9 +175,7 @@
                                 {csvImportData.output.upload.fileInfo.size})
                             </f:if>
                         </f:if>
-                        <p>
-                            <f:translate key="{lll}mailgroup_import_or"/>
-                        </p>
+                        <p><strong><f:translate key="{lll}mailgroup_import_or"/></strong></p>
 
                         <div class="mb-3">
                             <label for="receipientListPlain" class="form-label">

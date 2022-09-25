@@ -689,7 +689,7 @@ class ImportService
                         if ($this->indata['all_html']) {
                             $data['tt_address'][$userID[$foundUser[0]]]['module_sys_dmail_html'] = $this->indata['all_html'];
                         }
-                        if (is_array($this->indata['cat']) && !in_array('cats', $this->indata['map'])) {
+                        if (isset($this->indata['cat']) && is_array($this->indata['cat']) && !in_array('cats', $this->indata['map'])) {
                             if ($this->indata['add_cat']) {
                                 $rows = GeneralUtility::makeInstance(SysDmailTtAddressCategoryMmRepository::class)->selectUidsByUidLocal((int)$userID[$foundUser[0]]);
                                 if (is_array($rows)) {

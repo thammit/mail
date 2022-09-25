@@ -541,16 +541,16 @@
 				<source>Remove all Addresses in the storage folder before importing:</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_double" resname="mailgroup_import_report_double">
-				<source>Double records found in the CSV Data:</source>
+				<source>Duplicate addresses</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_invalid_email" resname="mailgroup_import_report_invalid_email">
-				<source>Do not insert/update invalid emails found in csv data:</source>
+				<source>NOT imported/update addresses (invalid email)</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_new" resname="mailgroup_import_report_new">
-				<source>Insert the following records:</source>
+				<source>Imported addresses</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_update" resname="mailgroup_import_report_update">
-				<source>Update the following records:</source>
+				<source>Updated addresses</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator" resname="mailgroup_import_separator">
 				<source>Field delimiter (data fields are separated by...):</source>
@@ -568,16 +568,16 @@
 				<source>horizontal tab [TAB]</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_storage" resname="mailgroup_import_storage">
-				<source>Please select the storage folder for the imported users:</source>
+				<source>Please select the storage folder for the users to be imported</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_update" resname="mailgroup_import_update">
 				<source>update</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_update_unique" resname="mailgroup_import_update_unique">
-				<source>Update existing user, instead renaming the new user:</source>
+				<source>Update existing (unique) user</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_upload_file" resname="mailgroup_import_upload_file">
-				<source>Choose a file from your local computer:</source>
+				<source>Choose a csv file from your local computer</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_list_all" resname="mailgroup_list_all">
 				<source>List all recipients</source>
