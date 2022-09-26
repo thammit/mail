@@ -40,7 +40,7 @@ class TempRepository extends AbstractRepository
                     $queryBuilder->expr()->in(
                         'uid',
                         $queryBuilder->createNamedParameter(
-                            GeneralUtility::intExplode(',', $idlist),
+                            GeneralUtility::intExplode(',', $idlist, true),
                             Connection::PARAM_INT_ARRAY
                         )
                     )

@@ -67,15 +67,14 @@ abstract class AbstractController
      */
     public function __construct(
         ModuleTemplate $moduleTemplate = null,
-        IconFactory    $iconFactory = null,
-        PageRenderer   $pageRenderer = null,
-        StandaloneView  $view = null,
-        SiteFinder     $siteFinder = null,
-        MailerService  $mailerService = null,
+        IconFactory $iconFactory = null,
+        PageRenderer $pageRenderer = null,
+        StandaloneView $view = null,
+        SiteFinder $siteFinder = null,
+        MailerService $mailerService = null,
         RecipientService $recipientService = null,
         EventDispatcherInterface $eventDispatcher = null
-    )
-    {
+    ) {
         $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
         $this->iconFactory = $iconFactory ?? GeneralUtility::makeInstance(IconFactory::class);
         $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
@@ -98,7 +97,7 @@ abstract class AbstractController
                 'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
                 'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
-            ]
+            ],
         ]);
     }
 
@@ -128,7 +127,8 @@ abstract class AbstractController
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
         $this->pageTSConfiguration['pid'] = $this->id;
 
-        if (array_key_exists('userTable', $this->pageTSConfiguration) && isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) && is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])) {
+        if (array_key_exists('userTable',
+                $this->pageTSConfiguration) && isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) && is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])) {
             $this->userTable = $this->pageTSConfiguration['userTable'];
             $this->allowedTables[] = $this->userTable;
         }
@@ -231,43 +231,22 @@ abstract class AbstractController
      */
     protected function getRecordList(array $listArr, string $table): array
     {
-        $lang = LanguageUtility::getLanguageService();
-        $output = [
-            'title' => $lang->getLL('dmail_number_records'),
-            'editLinkTitle' => $lang->getLL('dmail_edit'),
-            'actionsOpen' => $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL),
-            'counter' => is_array($listArr) ? count($listArr) : 0,
-            'rows' => [],
-        ];
-
         $isAllowedDisplayTable = BackendUserUtility::getBackendUser()->check('tables_select', $table);
         $isAllowedEditTable = BackendUserUtility::getBackendUser()->check('tables_modify', $table);
+        $output = [
+            'rows' => [],
+            'table' => $table,
+            'edit' => $isAllowedEditTable,
+            'show' => $isAllowedDisplayTable,
+        ];
 
-        if (is_array($listArr)) {
-            $notAllowedPlaceholder = $lang->getLL('mailgroup_table_disallowed_placeholder');
-            $tableIcon = $this->iconFactory->getIconForRecord($table, [], Icon::SIZE_SMALL);
-            foreach ($listArr as $row) {
-                $editLink = '';
-                if ($row['uid'] && $isAllowedEditTable) {
-                    $urlParameters = [
-                        'edit' => [
-                            $table => [
-                                $row['uid'] => 'edit',
-                            ],
-                        ],
-                        'returnUrl' => $this->requestUri,
-                    ];
-
-                    $editLink = $this->buildUriFromRoute('record_edit', $urlParameters);
-                }
-
-                $output['rows'][] = [
-                    'icon' => $tableIcon,
-                    'editLink' => $editLink,
-                    'email' => $isAllowedDisplayTable ? htmlspecialchars($row['email']) : $notAllowedPlaceholder,
-                    'name' => $isAllowedDisplayTable ? htmlspecialchars($row['name']) : '',
-                ];
-            }
+        $notAllowedPlaceholder = LanguageUtility::getLL('mailgroup_table_disallowed_placeholder');
+        foreach ($listArr as $row) {
+            $output['rows'][] = [
+                'uid' => $row['uid'],
+                'email' => $isAllowedDisplayTable ? htmlspecialchars($row['email']) : $notAllowedPlaceholder,
+                'name' => $isAllowedDisplayTable ? htmlspecialchars($row['name']) : '',
+            ];
         }
 
         return $output;

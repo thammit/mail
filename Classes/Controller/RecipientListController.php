@@ -473,70 +473,80 @@ class RecipientListController extends AbstractController
             case 'listall':
                 if (is_array($idLists['tt_address'] ?? false)) {
                     $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $data['tables'][] = [
-                        'title_table' => 'mailgroup_table_address',
-                        'recipListConfig' => $this->getRecordList($rows, 'tt_address'),
-                        'table_custom' => '',
+
+                    $data['tables']['tt_address'] = [
+                        'table' => 'tt_address',
+                        'recipients' => $rows,
+                        'numberOfRecipients' => count($rows),
+                        'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tt_address'),
+                        'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tt_address'),
                     ];
                 }
                 if (is_array($idLists['fe_users'] ?? false)) {
                     $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $data['tables'][] = [
-                        'title_table' => 'mailgroup_table_fe_users',
-                        'recipListConfig' => $this->getRecordList($rows, 'fe_users'),
-                        'table_custom' => '',
+                    $data['tables']['fe_users'] = [
+                        'table' => 'fe_users',
+                        'recipients' => $rows,
+                        'numberOfRecipients' => count($rows),
+                        'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'fe_users'),
+                        'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'fe_users'),
                     ];
                 }
                 if (is_array($idLists['PLAINLIST'] ?? false)) {
-                    $data['tables'][] = [
-                        'title_table' => 'mailgroup_plain_list',
-                        'recipListConfig' => $this->getRecordList($idLists['PLAINLIST'], 'sys_dmail_group'),
-                        'table_custom' => '',
+                    $data['tables']['sys_dmail_group'] = [
+                        'table' => 'sys_dmail_group',
+                        'recipients' => $idLists['PLAINLIST'],
+                        'numberOfRecipients' => count($idLists['PLAINLIST']),
+                        'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'sys_dmail_group'),
+                        'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'sys_dmail_group'),
                     ];
                 }
                 if (is_array($idLists[$this->userTable] ?? false)) {
                     $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$this->userTable], $this->userTable);
-                    $data['tables'][] = [
-                        'title_table' => 'mailgroup_table_custom',
-                        'recipListConfig' => $this->getRecordList($rows, $this->userTable),
-                        'table_custom' => ' ' . $this->userTable,
+                    $data['tables'][$this->userTable] = [
+                        'table' => $this->userTable,
+                        'recipients' => $rows,
+                        'numberOfRecipients' => count($rows),
+                        'show' => BackendUserUtility::getBackendUser()->check('tables_select', $this->userTable),
+                        'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $this->userTable),
                     ];
                 }
                 break;
             default:
                 if (is_array($idLists['tt_address'] ?? false) && count($idLists['tt_address'])) {
-                    $data['tables'][] = [
-                        'title_table' => 'mailgroup_table_address',
+                    $data['tables']['tt_address'] = [
+                        'table' => 'tt_address',
                         'title_recip' => 'mailgroup_recip_number',
-                        'recip_counter' => ' ' . count($idLists['tt_address']),
-                        'mailgroup_download_link' => GeneralUtility::linkThisScript(['csv' => 'tt_address']),
+                        'numberOfRecipients' => count($idLists['tt_address']),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => 'tt_address']),
                     ];
                 }
 
                 if (is_array($idLists['fe_users'] ?? false) && count($idLists['fe_users'])) {
-                    $data['tables'][] = [
-                        'title_table' => 'mailgroup_table_fe_users',
+                    $data['tables']['fe_users'] = [
+                        'table' => 'fe_users',
                         'title_recip' => 'mailgroup_recip_number',
-                        'recip_counter' => ' ' . count($idLists['fe_users']),
-                        'mailgroup_download_link' => GeneralUtility::linkThisScript(['csv' => 'fe_users']),
+                        'numberOfRecipients' => count($idLists['fe_users']),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => 'fe_users']),
                     ];
                 }
 
                 if (is_array($idLists['PLAINLIST'] ?? false) && count($idLists['PLAINLIST'])) {
-                    $data['tables'][] = [
-                        'title_table' => 'mailgroup_plain_list',
+                    $data['tables']['sys_dmail_group'] = [
+                        'table' => 'sys_dmail_group',
                         'title_recip' => 'mailgroup_recip_number',
-                        'recip_counter' => ' ' . count($idLists['PLAINLIST']),
-                        'mailgroup_download_link' => GeneralUtility::linkThisScript(['csv' => 'PLAINLIST']),
+                        'numberOfRecipients' => count($idLists['PLAINLIST']),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => 'PLAINLIST']),
                     ];
                 }
 
                 if (is_array($idLists[$this->userTable] ?? false) && count($idLists[$this->userTable])) {
-                    $data['tables'][] = [
+                    $data['tables'][$this->userTable] = [
+                        'table' => $this->userTable,
                         'title_table' => 'mailgroup_table_custom',
                         'title_recip' => 'mailgroup_recip_number',
-                        'recip_counter' => ' ' . count($idLists[$this->userTable]),
-                        'mailgroup_download_link' => GeneralUtility::linkThisScript(['csv' => $this->userTable]),
+                        'numberOfRecipients' => count($idLists[$this->userTable]),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => $this->userTable]),
                     ];
                 }
 

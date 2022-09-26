@@ -426,7 +426,7 @@
 				<source>Statistics</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_download" resname="mailgroup_download">
-				<source>Download CSV file</source>
+				<source>Download CSV</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_header" resname="mailgroup_header">
 				<source>Recipient List</source>
@@ -580,7 +580,7 @@
 				<source>Choose a csv file from your local computer</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_list_all" resname="mailgroup_list_all">
-				<source>List all recipients</source>
+				<source>List all</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_plain_list" resname="mailgroup_plain_list">
 				<source>Plain List</source>
@@ -592,13 +592,16 @@
 				<source>Number of recipients:</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_address" resname="mailgroup_table_address">
-				<source>Address Table</source>
+				<source>Address Table (tt_address)</source>
+			</trans-unit>
+			<trans-unit id="mailgroup_table_tt_address" resname="mailgroup_table_tt_address">
+				<source>Address Table [tt_address]</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_custom" resname="mailgroup_table_custom">
 				<source>Custom Table</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_fe_users" resname="mailgroup_table_fe_users">
-				<source>Website User Table</source>
+				<source>Website User [fe_users]</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_disallowed_placeholder" resname="mailgroup_table_disallowed_placeholder">
 				<source>Missing permission to display data</source>
