@@ -109,14 +109,14 @@ CREATE TABLE sys_dmail_group (
 #
 # Table structure for table 'sys_dmail_group_mm'
 #
-CREATE TABLE sys_dmail_group_mm (
-  uid_local int(11) unsigned DEFAULT '0' NOT NULL,
-  uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
-  tablenames varchar(30) DEFAULT '' NOT NULL,
-  sorting int(11) unsigned DEFAULT '0' NOT NULL,
-  KEY uid_local (uid_local),
-  KEY uid_foreign (uid_foreign)
-);
+# CREATE TABLE sys_dmail_group_mm (
+#   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
+#   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
+#   tablenames varchar(30) DEFAULT '' NOT NULL,
+#   sorting int(11) unsigned DEFAULT '0' NOT NULL,
+#   KEY uid_local (uid_local),
+#   KEY uid_foreign (uid_foreign)
+# );
 
 #
 # Table structure for table 'sys_dmail_maillog'
@@ -167,53 +167,53 @@ CREATE TABLE sys_dmail_category (
 # Table structure for table 'sys_dmail_group_category_mm'
 #
 #
-CREATE TABLE sys_dmail_group_category_mm (
-  uid_local int(11) unsigned DEFAULT '0' NOT NULL,
-  uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
-  tablenames varchar(30) DEFAULT '' NOT NULL,
-  sorting int(11) unsigned DEFAULT '0' NOT NULL,
-  KEY uid_local (uid_local),
-  KEY uid_foreign (uid_foreign)
-);
+# CREATE TABLE sys_dmail_group_category_mm (
+#   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
+#   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
+#   tablenames varchar(30) DEFAULT '' NOT NULL,
+#   sorting int(11) unsigned DEFAULT '0' NOT NULL,
+#   KEY uid_local (uid_local),
+#   KEY uid_foreign (uid_foreign)
+# );
 
 #
 # Table structure for table 'sys_dmail_feuser_category_mm'
 #
 #
-CREATE TABLE sys_dmail_feuser_category_mm (
-  uid_local int(11) unsigned DEFAULT '0' NOT NULL,
-  uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
-  tablenames varchar(30) DEFAULT '' NOT NULL,
-  sorting int(11) unsigned DEFAULT '0' NOT NULL,
-  KEY uid_local (uid_local),
-  KEY uid_foreign (uid_foreign)
-);
+# CREATE TABLE sys_dmail_feuser_category_mm (
+#   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
+#   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
+#   tablenames varchar(30) DEFAULT '' NOT NULL,
+#   sorting int(11) unsigned DEFAULT '0' NOT NULL,
+#   KEY uid_local (uid_local),
+#   KEY uid_foreign (uid_foreign)
+# );
 
 #
 # Table structure for table 'sys_dmail_ttaddress_category_mm'
 #
 #
-CREATE TABLE sys_dmail_ttaddress_category_mm (
-  uid_local int(11) unsigned DEFAULT '0' NOT NULL,
-  uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
-  tablenames varchar(30) DEFAULT '' NOT NULL,
-  sorting int(11) unsigned DEFAULT '0' NOT NULL,
-  KEY uid_local (uid_local),
-  KEY uid_foreign (uid_foreign)
-);
+# CREATE TABLE sys_dmail_ttaddress_category_mm (
+#   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
+#   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
+#   tablenames varchar(30) DEFAULT '' NOT NULL,
+#   sorting int(11) unsigned DEFAULT '0' NOT NULL,
+#   KEY uid_local (uid_local),
+#   KEY uid_foreign (uid_foreign)
+# );
 
 #
 # Table structure for table 'sys_dmail_ttcontent_category_mm'
 #
 #
-CREATE TABLE sys_dmail_ttcontent_category_mm (
-  uid_local int(11) unsigned DEFAULT '0' NOT NULL,
-  uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
-  tablenames varchar(30) DEFAULT '' NOT NULL,
-  sorting int(11) unsigned DEFAULT '0' NOT NULL,
-  KEY uid_local (uid_local),
-  KEY uid_foreign (uid_foreign)
-);
+# CREATE TABLE sys_dmail_ttcontent_category_mm (
+#   uid_local int(11) unsigned DEFAULT '0' NOT NULL,
+#   uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
+#   tablenames varchar(30) DEFAULT '' NOT NULL,
+#   sorting int(11) unsigned DEFAULT '0' NOT NULL,
+#   KEY uid_local (uid_local),
+#   KEY uid_foreign (uid_foreign)
+# );
 
 # THESE create statements will NOT work if this file is piped into MySQL.
 # Rather they will be detected by the Typo3 Install Tool and through that
@@ -227,9 +227,9 @@ CREATE TABLE fe_users (
 
 CREATE TABLE tt_address (
   module_sys_dmail_category int(10) unsigned DEFAULT '0' NOT NULL,
-  module_sys_dmail_html tinyint(3) unsigned DEFAULT '0' NOT NULL,
+  module_sys_dmail_html tinyint(3) unsigned DEFAULT '0' NOT NULL
 );
 
 CREATE TABLE tt_content (
-  module_sys_dmail_category int(10) unsigned DEFAULT '0' NOT NULL,
+  module_sys_dmail_category int(10) unsigned DEFAULT '0' NOT NULL
 );

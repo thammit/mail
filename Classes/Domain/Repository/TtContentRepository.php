@@ -18,7 +18,7 @@ class TtContentRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function selectTtContentByPidAndSysLanguageUid(int $pid, int $sysLanguageUid): array
+    public function findByPidAndSysLanguageUid(int $pid, int $sysLanguageUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 

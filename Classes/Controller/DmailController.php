@@ -925,8 +925,7 @@ class DmailController extends AbstractController
             $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
         }
 
-        // @TODO Perhaps we should here check if TV is installed and fetch content from that instead of the old Columns...
-        $rows = GeneralUtility::makeInstance(TtContentRepository::class)->selectTtContentByPidAndSysLanguageUid(
+        $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid(
             $this->pageUid,
             (int)$mailData['sys_language_uid']
         );
@@ -940,25 +939,25 @@ class DmailController extends AbstractController
 
         $colPosVal = 99;
         $ttContentCategoryMmRepository = GeneralUtility::makeInstance(TtContentCategoryMmRepository::class);
-        foreach ($rows as $mailData) {
+        foreach ($rows as $contentElementData) {
             $categoriesRow = [];
-            $resCat = $ttContentCategoryMmRepository->selectUidForeignByUid($mailData['uid']);
+            $resCat = $ttContentCategoryMmRepository->selectUidForeignByUid($contentElementData['uid']);
 
             foreach ($resCat as $rowCat) {
                 $categoriesRow[] = (int)$rowCat['uid_foreign'];
             }
 
-            if ($colPosVal != $mailData['colPos']) {
+            if ($colPosVal != $contentElementData['colPos']) {
                 $categoryData['rows'][] = [
                     'separator' => true,
                     'bgcolor' => '#f00',
                     'title' => LanguageUtility::getLL('nl_l_column'),
-                    'value' => BackendUtility::getProcessedValue('tt_content', 'colPos', $mailData['colPos']),
+                    'value' => BackendUtility::getProcessedValue('tt_content', 'colPos', $contentElementData['colPos']),
                 ];
-                $colPosVal = $mailData['colPos'];
+                $colPosVal = $contentElementData['colPos'];
             }
 
-            $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $mailData, $this->sysLanguageUid);
+            $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $contentElementData, $this->sysLanguageUid);
             reset($ttContentCategories);
             $cboxes = [];
             foreach ($ttContentCategories as $pKey => $pVal) {
@@ -970,14 +969,14 @@ class DmailController extends AbstractController
             }
 
             $categoryData['rows'][] = [
-                'uid' => $mailData['uid'],
-                'icon' => $this->iconFactory->getIconForRecord('tt_content', $mailData, Icon::SIZE_SMALL),
-                'header' => $mailData['header'],
-                'CType' => $mailData['CType'],
-                'list_type' => $mailData['list_type'],
-                'bodytext' => empty($mailData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($mailData['bodytext']), 200),
-                'color' => $mailData['module_sys_dmail_category'] ? 'red' : 'green',
-                'labelOnlyAll' => $mailData['module_sys_dmail_category'] ? LanguageUtility::getLL('nl_l_ONLY') : LanguageUtility::getLL('nl_l_ALL'),
+                'uid' => $contentElementData['uid'],
+                'icon' => $this->iconFactory->getIconForRecord('tt_content', $contentElementData, Icon::SIZE_SMALL),
+                'header' => $contentElementData['header'],
+                'CType' => $contentElementData['CType'],
+                'list_type' => $contentElementData['list_type'],
+                'bodytext' => empty($contentElementData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($contentElementData['bodytext']), 200),
+                'color' => $contentElementData['module_sys_dmail_category'] ? 'red' : 'green',
+                'labelOnlyAll' => $contentElementData['module_sys_dmail_category'] ? LanguageUtility::getLL('nl_l_ONLY') : LanguageUtility::getLL('nl_l_ALL'),
                 'checkboxes' => $cboxes,
             ];
         }
