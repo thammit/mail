@@ -21,10 +21,11 @@
                     <tr>
                         <f:if condition="{row.separator}">
                             <f:then>
-                                <td colspan="3">{row.title}: <strong>{row.value -> f:format.html()}</strong></td>
+                                <th class="col-title col-responsive nowrap">{row.title}: {row.value -> f:format.html()}</th>
+                                <th class="col-control nowrap">Restrict to categories</th>
                             </f:then>
                             <f:else>
-                                <td style="width: 75%">
+                                <td class="col-title col-responsive nowrap">
                                     {row.icon -> f:format.html()} {row.header}
                                     [{row.CType}
                                     <f:if condition="{row.list_type}">; {row.list_type}</f:if>
@@ -33,12 +34,11 @@
                                     {row.bodytext -> f:format.html()}
                                     <br/>
                                 </td>
-                                <td class="text-nowrap">
-                                    <strong style="color:{row.color};">{row.labelOnlyAll}</strong><br/>
+                                <td class="col-control nowrap">
                                     <f:if condition="{row.checkboxes -> f:count()}">
                                         <f:for each="{row.checkboxes}" as="checkbox">
                                             <input type="hidden" name="indata[categories][{row.uid}][{checkbox.pKey}]" value="0">
-                                            <div class="form-check">
+                                            <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="checkbox" value="1" id="indata_categories_{row.uid}_{checkbox.pKey}" name="indata[categories][{row.uid}][{checkbox.pKey}]" {f:if(condition: '{checkbox.checked} == 1', then: 'checked')}>
                                                 <label class="form-check-label" for="indata_categories_{row.uid}_{checkbox.pKey}">
                                                     {checkbox.pVal}
@@ -54,7 +54,6 @@
                 </tbody>
             </table>
             </div>
-            {cats.catsForm -> f:format.html()}
         </f:if>
         <input type="hidden" name="cmd" value="{cats.output.cmd}">
         <input type="hidden" name="pageUid" value="{cats.output.pageUid}">

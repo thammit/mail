@@ -41,13 +41,14 @@
                                 <label class="form-label" for="mailgroups">
                                     <f:translate key="{lll}schedule_mailgroup"/>
                                 </label>
-                                <select class="form-select" id="mailgroups" name="mailGroupUid[]" multiple size="{numberOfRecipientGroups}" aria-label="Recipient groups">
-                                    <f:for each="{final.finalForm.mailGroups}" as="group">
-                                        <option value="{group.uid}">{group.title}
-                                            <f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if>
-                                        </option>
-                                    </f:for>
-                                </select>
+                                <f:for each="{final.finalForm.mailGroups}" as="group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="mailGroupUid[]" value="{group.uid}" id="mailgroups-{group.uid}">
+                                        <label class="form-check-label" for="mailgroups-{group.uid}">
+                                            {group.title} <span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span>
+                                        </label>
+                                    </div>
+                                </f:for>
                             </div>
                         </div>
                     </f:else>

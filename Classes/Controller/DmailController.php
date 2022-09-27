@@ -416,7 +416,6 @@ class DmailController extends AbstractController
 
                 $indata = GeneralUtility::_GP('indata') ?? [];
                 $moduleData['cats']['output'] = $this->getCategoryData($mailData, $indata);
-                // $moduleData['cats']['catsForm'] = $temp['theOutput'];
 
                 $moduleData['cats']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                 $moduleData['cats']['mailUid'] = $this->mailUid;

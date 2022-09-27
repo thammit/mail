@@ -60,7 +60,7 @@ class RecipientUtility
         );
         if ($groups) {
             foreach ($groups as $group) {
-                $result = self::compileMailGroup($groups, $userTable, $backendUserPermission);
+                $result = self::compileMailGroup([$group], $userTable, $backendUserPermission);
                 $totalRecipients = 0;
                 if (is_array($result['tt_address'] ?? false)) {
                     $totalRecipients += count($result['tt_address']);
