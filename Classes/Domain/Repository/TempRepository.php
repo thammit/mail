@@ -100,7 +100,7 @@ class TempRepository extends AbstractRepository
                     ->from($switchTable, $switchTable)
                     ->from($table, $table)
                     ->andWhere(
-                        $queryBuilder->expr()->andX()
+                        $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
                             ->add('INSTR( CONCAT(\',\',fe_users.usergroup,\',\'),CONCAT(\',\',fe_groups.uid ,\',\') )')
                             ->add(
@@ -116,7 +116,7 @@ class TempRepository extends AbstractRepository
                     ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
                     ->from($switchTable)
                     ->andWhere(
-                        $queryBuilder->expr()->andX()
+                        $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
                             ->add(
                                 $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter(''))
@@ -142,7 +142,7 @@ class TempRepository extends AbstractRepository
                         $queryBuilder->expr()->eq($switchTable . '.uid', $queryBuilder->quoteIdentifier('mm_1.uid_local'))
                     )
                     ->andWhere(
-                        $queryBuilder->expr()->andX()
+                        $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
                             ->add('INSTR( CONCAT(\',\',fe_users.usergroup,\',\'),CONCAT(\',\',fe_groups.uid ,\',\') )')
                             ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
@@ -169,7 +169,7 @@ class TempRepository extends AbstractRepository
                         $queryBuilder->expr()->eq($table . '.uid', $queryBuilder->quoteIdentifier('mm_1.uid_local'))
                     )
                     ->andWhere(
-                        $queryBuilder->expr()->andX()
+                        $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
                             ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
@@ -245,7 +245,7 @@ class TempRepository extends AbstractRepository
                     $queryBuilder->expr()->inSet($switchTable . '.usergroup', $queryBuilder->quoteIdentifier($table . '.uid'))
                 )
                 ->andWhere(
-                    $queryBuilder->expr()->andX()
+                    $queryBuilder->expr()->and()
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
@@ -272,7 +272,7 @@ class TempRepository extends AbstractRepository
                     $queryBuilder->expr()->eq('sys_dmail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($switchTable . '.uid'))
                 )
                 ->andWhere(
-                    $queryBuilder->expr()->andX()
+                    $queryBuilder->expr()->and()
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
@@ -305,7 +305,7 @@ class TempRepository extends AbstractRepository
                     $queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->quoteIdentifier('sys_dmail_group.uid'))
                 )
                 ->andWhere(
-                    $queryBuilder->expr()->andX()
+                    $queryBuilder->expr()->and()
                         ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('sys_dmail_group_mm.uid_foreign')))
                         ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
@@ -346,7 +346,7 @@ class TempRepository extends AbstractRepository
                     )
                     ->orWhere($usergroupInList)
                     ->andWhere(
-                        $queryBuilder->expr()->andX()
+                        $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
                             ->add($addWhere)
                     )
@@ -504,7 +504,7 @@ class TempRepository extends AbstractRepository
      * @throws DBALException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    public function selectRowsByUid(string $table, int $uid, array $fields = ['*']): array
+    public function findByTableAndUid(string $table, int $uid, array $fields = ['*']): array
     {
         $queryBuilder = $this->getQueryBuilder($table);
 

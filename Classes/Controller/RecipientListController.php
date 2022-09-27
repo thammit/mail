@@ -26,7 +26,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -43,8 +42,8 @@ class RecipientListController extends AbstractController
     protected array $set = [];
     protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,module_sys_dmail_category,module_sys_dmail_html';
 
-    protected $queryGenerator;
-    protected $MOD_SETTINGS;
+    protected QueryGenerator $queryGenerator;
+    protected array $MOD_SETTINGS = [];
 
     protected int $uid = 0;
     protected string $table = '';
@@ -150,14 +149,13 @@ class RecipientListController extends AbstractController
                 $type = 1;
                 break;
             case Action::RECIPIENT_LIST_MAIL_GROUP:
-                $result = $this->compileMailGroup($this->group_uid);
-                $data = $this->displayMailGroup($result);
+                $data = $this->displayMailGroup($this->compileMailGroup($this->group_uid));
                 $type = 2;
                 break;
             case Action::RECIPIENT_LIST_IMPORT:
                 /* @var $importService ImportService */
                 $importService = GeneralUtility::makeInstance(ImportService::class);
-                $importService->init($this->id, $this->httpReferer, $this->requestHostOnly, $this);
+                $importService->init($this->id, $this->httpReferer, $this->requestHostOnly);
                 $csvImportData = $importService->csvImport();
                 $type = 3;
                 break;
@@ -411,7 +409,6 @@ class RecipientListController extends AbstractController
      * @return array|string list of all recipient (HTML)
      * @throws DBALException
      * @throws Exception
-     * @throws RouteNotFoundException
      */
     protected function displayMailGroup(array $result): array|string
     {
@@ -468,7 +465,6 @@ class RecipientListController extends AbstractController
                 }
             }
         }
-        $theOutput = '';
         switch ($this->lCmd) {
             case 'listall':
                 if (is_array($idLists['tt_address'] ?? false)) {
@@ -571,7 +567,6 @@ class RecipientListController extends AbstractController
         $set = $this->set;
         $queryTable = $set['queryTable'] ?? '';
         $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
-        $dmailUpdateQuery = GeneralUtility::_GP('dmailUpdateQuery');
 
         $whichTables = intval($mailGroup['whichtables']);
         $table = '';
@@ -664,7 +659,7 @@ class RecipientListController extends AbstractController
     {
         // https://api.typo3.org/master/class_t_y_p_o3_1_1_c_m_s_1_1_core_1_1_utility_1_1_csv_utility.html
         $lines = [];
-        if (is_array($idArr) && count($idArr)) {
+        if (count($idArr)) {
             reset($idArr);
             $lines[] = CsvUtility::csvValues(array_keys(current($idArr)));
 
@@ -705,7 +700,7 @@ class RecipientListController extends AbstractController
             case 'tt_address':
                 // see fe_users
             case 'fe_users':
-                if (is_array($this->indata) && count($this->indata)) {
+                if (count($this->indata)) {
                     $data = [];
                     if (is_array($this->indata['categories'] ?? false)) {
                         reset($this->indata['categories']);
@@ -723,7 +718,6 @@ class RecipientListController extends AbstractController
                     $data[$this->table][$this->uid]['module_sys_dmail_html'] = $this->indata['html'] ? 1 : 0;
 
                     $dataHandler = $this->getDataHandler();
-                    $dataHandler->stripslashes_values = 0;
                     $dataHandler->start($data, []);
                     $dataHandler->process_datamap();
                 }
@@ -735,18 +729,17 @@ class RecipientListController extends AbstractController
         $rows = [];
         switch ($this->table) {
             case 'tt_address':
-                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressByUid($this->uid, $this->backendUserPermissions);
+                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUidAndPermissionClause($this->uid, $this->backendUserPermissions);
                 break;
             case 'fe_users':
-                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->selectFeUsersByUid($this->uid, $this->backendUserPermissions);
+                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->findByUidAndPermissions($this->uid, $this->backendUserPermissions);
                 break;
             default:
                 // do nothing
         }
 
-        $theOutput = '';
-
         $row = $rows[0] ?? [];
+        $data = [];
 
         if (is_array($row) && count($row)) {
             $mmTable = $GLOBALS['TCA'][$this->table]['columns']['module_sys_dmail_category']['config']['MM'];
@@ -775,7 +768,7 @@ class RecipientListController extends AbstractController
                 'returnUrl' => $this->requestUri,
             ]);
 
-            $dataout = [
+            $data = [
                 'icon' => $this->iconFactory->getIconForRecord($this->table, $row)->render(),
                 'iconActionsOpen' => $this->getIconActionsOpen(),
                 'name' => htmlspecialchars($row['name']),
@@ -785,30 +778,20 @@ class RecipientListController extends AbstractController
                 'categories' => [],
                 'table' => $this->table,
                 'thisID' => $this->uid,
-                'cmd' => $this->action,
-                'html' => $row['module_sys_dmail_html'] ? true : false,
+                'cmd' => (string)$this->getCurrentAction(),
+                'html' => (bool)$row['module_sys_dmail_html'],
             ];
-            $this->categories = RepositoryUtility::makeCategories($this->table, $row, $this->sysLanguageUid);
+            $tableRowCategories = RepositoryUtility::makeCategories($this->table, $row, $this->sysLanguageUid);
 
-            reset($this->categories);
-            foreach ($this->categories as $pKey => $pVal) {
-                $dataout['categories'][] = [
+            reset($tableRowCategories);
+            foreach ($tableRowCategories as $pKey => $pVal) {
+                $data['categories'][] = [
                     'pkey' => $pKey,
                     'pVal' => htmlspecialchars($pVal),
                     'checked' => GeneralUtility::inList($categories, $pKey),
                 ];
             }
         }
-        return $dataout;
-    }
-
-    public function getRequestHostOnly(): string
-    {
-        return $this->requestHostOnly;
-    }
-
-    public function getHttpReferer(): string
-    {
-        return $this->httpReferer;
+        return $data;
     }
 }

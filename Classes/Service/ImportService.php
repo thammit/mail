@@ -622,9 +622,9 @@ class ImportService
         $resultImport = [];
         $filteredCSV = [];
 
-        //empty table if flag is set
+        // empty table if flag is set
         if ($this->indata['remove_existing']) {
-            GeneralUtility::makeInstance(TtAddressRepository::class)->deleteRowsByPid((int)$this->indata['storage']);
+            GeneralUtility::makeInstance(TtAddressRepository::class)->deleteByPid((int)$this->indata['storage']);
         }
 
         $mappedCSV = [];
@@ -669,7 +669,7 @@ class ImportService
             $user = [];
             $userID = [];
 
-            $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressByPid((int)$this->indata['storage'], $this->indata['record_unique']);
+            $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByPid((int)$this->indata['storage'], $this->indata['record_unique']);
 
             if (is_array($rows)) {
                 foreach ($rows as $row) {

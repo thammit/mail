@@ -44,7 +44,7 @@ class TcaUtility
             $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
 
             foreach ($params['items'] as $k => $item) {
-                $rows = $tempRepository->selectRowsByUid($table, intval($item[1]));
+                $rows = $tempRepository->findByTableAndUid($table, intval($item[1]));
                 if ($rows) {
                     foreach ($rows as $rowCat) {
                         if ($localizedRowCat = RepositoryUtility::getRecordOverlay($table, $rowCat, $sys_language_uid)) {

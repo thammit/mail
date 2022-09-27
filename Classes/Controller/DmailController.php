@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
@@ -1002,23 +1003,37 @@ class DmailController extends AbstractController
         ];
 
         if ($this->pageTSConfiguration['test_tt_address_uids'] ?? false) {
-            $testTtAddressUids = implode(',', GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_tt_address_uids']));
-            $data['ttAddress'] = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressForTestmail($testTtAddressUids,
+            $data['ttAddress'] = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUids(GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_tt_address_uids'], true),
                 $this->backendUserPermissions);
-//
-//            $ids = [];
-//
-//            foreach ($rows as $row) {
-//                $ids[] = $row['uid'];
-//            }
-//            $data['ttAddress'] = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($ids, 'tt_address');
-//            $data['ttAddress'] = $this->getRecordListHtmlTable($rows, 'tt_address', 1, 1);
         }
 
         if ($this->pageTSConfiguration['test_dmail_group_uids'] ?? false) {
-            $testMailGroupUids = implode(',', GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_dmail_group_uids']));
-            $data['mailGroups'] = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupForTestmail($testMailGroupUids,
+            $testMailGroups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->findByUids(GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_dmail_group_uids']),
                 $this->backendUserPermissions);
+
+            $data['mailGroups'] = [];
+
+            if ($testMailGroups) {
+                foreach ($testMailGroups as $testMailGroup) {
+                    $data['mailGroups'][$testMailGroup['uid']]['title'] = $testMailGroup['title'];
+                    $recipientGroups = $this->recipientService->getRecipientIdsOfMailGroups([$testMailGroup['uid']]);
+                    foreach ($recipientGroups as $recipientGroup => $recipients) {
+                        switch ($recipientGroup) {
+                            case 'fe_users':
+                                foreach ($recipients as $recipient) {
+                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = GeneralUtility::makeInstance(FeUsersRepository::class)->findByUid($recipient, 'uid,name,email');
+                                }
+                                break;
+                            case 'tt_address':
+                                foreach ($recipients as $recipient) {
+                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUid($recipient, 'uid,name,email');
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+
 
 //            foreach ($rows as $row) {
 //                $moduleUrl = $this->getWizardStepUri(Action::WIZARD_STEP_SEND_TEST2, [
@@ -1103,8 +1118,8 @@ class DmailController extends AbstractController
                 // Sending the same mail to lots of recipients
                 $this->mailerService->sendSimpleMail($addressList);
                 ViewUtility::addOkToFlashMessageQueue(
-                    LanguageUtility::getLL('send_was_sent') . ' ' . LanguageUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
-                    LanguageUtility::getLL('send_sending')
+                    LanguageUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
+                    LanguageUtility::getLL('testMailSent')
                 );
             }
         }
@@ -1129,7 +1144,7 @@ class DmailController extends AbstractController
         /*
         if ($this->tt_address_uid) {
             // personalized to tt_address
-            $res = GeneralUtility::makeInstance(TtAddressRepository::class)->selectTtAddressForSendMailTest($this->tt_address_uid,
+            $res = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUidAndPermissionClause($this->tt_address_uid,
                 $this->backendUserPermissions);
 
             if (!empty($res)) {

@@ -313,7 +313,7 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->where(
                 $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-127, PDO::PARAM_INT)),
-                $queryBuilder->expr()->orX(
+                $queryBuilder->expr()->or(
                     $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(550, PDO::PARAM_INT)),
                     $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(553, PDO::PARAM_INT))
                 )

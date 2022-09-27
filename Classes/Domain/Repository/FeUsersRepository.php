@@ -17,22 +17,23 @@ class FeUsersRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function selectFeUsersByUid(int $uid, string $permsClause): array
+    public function findByUidAndPermissions(int $uid, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select($this->table . '.*')
-            ->from($this->table, $this->table)
+            ->select('f.*')
+            ->from($this->table, 'f')
             ->leftjoin(
                 $this->table,
                 'pages',
-                'pages',
-                $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier($this->table . '.pid'))
+                'p',
+                $queryBuilder->expr()->eq('p.uid', $queryBuilder->quoteIdentifier('f.pid'))
             )
-            ->add('where', $this->table . '.uid = ' . intval($uid) .
-                ' AND ' . $permsClause . ' AND pages.deleted = 0')
-
+            ->where(
+                $queryBuilder->expr()->eq('f.uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+            )
+            ->andWhere($permsClause)
             ->execute()
             ->fetchAllAssociative();
     }

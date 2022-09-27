@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
@@ -72,13 +73,13 @@ class SysDmailGroupRepository extends AbstractRepository
     }
 
     /**
-     * @param string $intList
+     * @param array $uids
      * @param string $permsClause
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function selectSysDmailGroupForTestmail(string $intList, string $permsClause): array
+    public function findByUids(array $uids, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
@@ -88,11 +89,16 @@ class SysDmailGroupRepository extends AbstractRepository
             ->leftJoin(
                 $this->table,
                 'pages',
-                'pages',
-                $queryBuilder->expr()->eq($this->table . '.pid', $queryBuilder->quoteIdentifier('pages.uid'))
+                'p',
+                $queryBuilder->expr()->eq($this->table . '.pid', $queryBuilder->quoteIdentifier('p.uid'))
             )
-            ->add('where', $this->table . '.uid IN (' . $intList . ')' .
-                ' AND ' . $permsClause)
+            ->where(
+                $queryBuilder->expr()->in(
+                    $this->table . '.uid',
+                    $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY)
+                )
+            )
+            ->andWhere($permsClause)
             ->execute()
             ->fetchAllAssociative();
     }

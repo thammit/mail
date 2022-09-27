@@ -5,7 +5,9 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<h2><f:translate key="{lll}dmail_wiz5_sendmass"/></h2>
+<h2>
+    <f:translate key="{lll}dmail_wiz5_sendmass"/>
+</h2>
 <f:variable name="mailForm" value="mail-wizard-form-final"/>
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
     <div class="mb-4">
@@ -19,52 +21,77 @@
         <input type="hidden" name="currentCMD" value="{final.currentCMD}">
         <f:if condition="{final.finalForm.mailGroups}">
             <f:then>
-                <f:variable name="numberOfRecipientGroups" value="{final.finalForm.mailGroups -> f:count()}" />
+                <f:variable name="numberOfRecipientGroups" value="{final.finalForm.mailGroups -> f:count()}"/>
                 <f:if condition="{numberOfRecipientGroups} == 1">
                     <f:then>
                         <f:variable name="group">{final.finalForm.mailGroups.0}</f:variable>
-                        <input type="hidden" name="mailGroupUid[]" value="{group.uid}" />
-                        <label class="form-label"><f:translate key="{lll}schedule_mailgroup"/></label>
+                        <input type="hidden" name="mailGroupUid[]" value="{group.uid}"/>
+                        <label class="form-label">
+                            <f:translate key="{lll}schedule_mailgroup"/>
+                        </label>
                         <ul>
-                            <li title="{group.uid}">{group.title}<f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if></li>
+                            <li title="{group.uid}">{group.title}
+                                <f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if>
+                            </li>
                         </ul>
                     </f:then>
                     <f:else>
-                        <label class="form-label" for="mailgroups"><f:translate key="{lll}schedule_mailgroup"/></label>
-                        <select class="form-select" id="mailgroups" name="mailGroupUid[]" multiple size="{numberOfRecipientGroups}" aria-label="Recipient groups">
-                            <f:for each="{final.finalForm.mailGroups}" as="group">
-                                <option value="{group.uid}">{group.title} <f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if></option>
-                            </f:for>
-                        </select>
+                        <div class="mb-3 row">
+                            <div class="col-12 col-md-6 col-lg-3">
+                                <label class="form-label" for="mailgroups">
+                                    <f:translate key="{lll}schedule_mailgroup"/>
+                                </label>
+                                <select class="form-select" id="mailgroups" name="mailGroupUid[]" multiple size="{numberOfRecipientGroups}" aria-label="Recipient groups">
+                                    <f:for each="{final.finalForm.mailGroups}" as="group">
+                                        <option value="{group.uid}">{group.title}
+                                            <f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if>
+                                        </option>
+                                    </f:for>
+                                </select>
+                            </div>
+                        </div>
                     </f:else>
                 </f:if>
             </f:then>
             <f:else>
-                <f:be.infobox state="2"><f:translate key="{lll}error.no_recipient_groups_found"/></f:be.infobox>
+                <f:be.infobox state="2">
+                    <f:translate key="{lll}error.no_recipient_groups_found"/>
+                </f:be.infobox>
             </f:else>
         </f:if>
-        <div class="mb-3">
-            <label for="distributionTime" class="form-label"><f:translate key="{lll}schedule_time"/></label>
-            <div class="input-group">
-                <input autocomplete="off" data-date-type="datetime" class="form-control t3js-datetimepicker t3js-clearable" id="distributionTime" type="text" name="distributionTime" value="{f:format.date(format:'H:i d-m-Y', date:'now')}" />
-                <label class="mb-0 btn btn-default" for="distributionTime">
+        <div class="mb-3 row">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <label for="distributionTime" class="form-label">
+                    <f:translate key="{lll}schedule_time"/>
+                </label>
+                <div class="input-group">
+                    <input autocomplete="off" data-date-type="datetime" class="form-control t3js-datetimepicker t3js-clearable" id="distributionTime" type="text"
+                           name="distributionTime" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
+                    <label class="mb-0 btn btn-default" for="distributionTime">
                             <span class="t3js-icon icon icon-size-small icon-state-default icon-actions-calendar" data-identifier="actions-calendar">
                                 <span class="icon-markup">
-                                    <svg class="icon-color"><use xlink:href="/typo3/sysext/core/Resources/Public/Icons/T3Icons/sprites/actions.svg#actions-calendar" /></svg>
+                                    <svg class="icon-color"><use xlink:href="/typo3/sysext/core/Resources/Public/Icons/T3Icons/sprites/actions.svg#actions-calendar"/></svg>
                                 </span>
                             </span>
-                </label>
+                    </label>
+                </div>
             </div>
         </div>
         <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" name="isTestMail" id="tx-directmail-sendtestmail-check" value="1"/>
-            <label class="form-check-label" for="tx-directmail-sendtestmail-check"><f:translate key="{lll}schedule_testmail"/></label>
+            <label class="form-check-label" for="tx-directmail-sendtestmail-check">
+                <f:translate key="{lll}schedule_testmail"/>
+            </label>
         </div>
         <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" name="saveDraft" id="tx-directmail-savedraft-check" value="1"/>
-            <label class="form-check-label" for="tx-directmail-savedraft-check"><f:translate key="{lll}schedule_draft"/></label>
+            <label class="form-check-label" for="tx-directmail-savedraft-check">
+                <f:translate key="{lll}schedule_draft"/>
+            </label>
         </div>
-        <button class="btn btn-lg btn-primary text-uppercase" type="Submit" name="scheduleSendAll" value="1"><f:translate key="{lll}schedule_send_all"/></button>
+        <button class="btn btn-lg btn-primary text-uppercase" type="Submit" name="scheduleSendAll" value="1">
+            <f:translate key="{lll}schedule_send_all"/>
+        </button>
     </div>
 </form>
 <f:render partial="Wizard/Navigation" arguments="{navigation: navigation, mailForm:mailForm, lll:lll}"/>

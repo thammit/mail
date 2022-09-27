@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
@@ -18,21 +19,23 @@ class TtAddressRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function selectTtAddressByUid(int $uid, string $permsClause): array
+    public function findByUidAndPermissionClause(int $uid, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->select($this->table . '.*')
-            ->from($this->table, $this->table)
-            ->leftjoin(
+            ->from($this->table)
+            ->leftJoin(
                 $this->table,
                 'pages',
-                'pages',
-                $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier($this->table . '.pid'))
+                'p',
+                $queryBuilder->expr()->eq('p.uid', $queryBuilder->quoteIdentifier($this->table . '.pid'))
             )
-            ->add('where', $this->table . '.uid = ' . $uid .
-                ' AND ' . $permsClause . ' AND pages.deleted = 0')
+            ->where(
+                $queryBuilder->expr()->eq($this->table . '.uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+            )
+            ->andWhere($permsClause)
             ->execute()
             ->fetchAllAssociative();
     }
@@ -44,7 +47,7 @@ class TtAddressRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function selectTtAddressByPid(int $pid, string $recordUnique): array
+    public function findByPid(int $pid, string $recordUnique): array
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
@@ -55,23 +58,20 @@ class TtAddressRepository extends AbstractRepository
             )
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq(
-                    'pid',
-                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
-                )
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
             )
             ->execute()
             ->fetchAllAssociative();
     }
 
     /**
-     * @param string $intList
+     * @param array $uids
      * @param string $permsClause
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function selectTtAddressForTestmail(string $intList, string $permsClause): array
+    public function findByUids(array $uids, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -81,37 +81,14 @@ class TtAddressRepository extends AbstractRepository
             ->leftJoin(
                 $this->table,
                 'pages',
-                'pages',
-                $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier($this->table . '.pid'))
-            )
-            ->add('where', $this->table . '.uid IN (' . $intList . ')' .
-                ' AND ' . $permsClause)
-            ->execute()
-            ->fetchAllAssociative();
-    }
-
-    /**
-     * @param int $ttAddressUid
-     * @param string $permsClause
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function selectTtAddressForSendMailTest(int $ttAddressUid, string $permsClause): array
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        return $queryBuilder
-            ->select('a.*')
-            ->from($this->table, 'a')
-            ->leftJoin(
-                'a',
-                'pages',
-                'pages',
-                $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier('a.pid'))
+                'p',
+                $queryBuilder->expr()->eq('p.uid', $queryBuilder->quoteIdentifier($this->table . '.pid'))
             )
             ->where(
-                $queryBuilder->expr()->eq('a.uid', $queryBuilder->createNamedParameter($ttAddressUid, PDO::PARAM_INT))
+                $queryBuilder->expr()->in(
+                    $this->table . '.uid',
+                    $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY)
+                )
             )
             ->andWhere($permsClause)
             ->execute()
@@ -121,7 +98,7 @@ class TtAddressRepository extends AbstractRepository
     /**
      * @throws DBALException
      */
-    public function deleteRowsByPid(int $pid): int|\Doctrine\DBAL\Result
+    public function deleteByPid(int $pid): int|\Doctrine\DBAL\Result
     {
         $queryBuilder = $this->getQueryBuilder();
 

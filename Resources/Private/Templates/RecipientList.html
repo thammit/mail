@@ -18,11 +18,11 @@
             <h3>
                 <f:translate key="{lll}subscriber_info"/>
             </h3>
-            <f:format.html>{data.icon}</f:format.html>
-            <f:format.html>{data.name}</f:format.html> &lt;<f:format.html>{data.email}</f:format.html>&gt;
+            {data.icon -> f:format.html()}
+            {data.name} &lt;{data.email}&gt;
             <a class="btn btn-default mb-3" href="#" onClick="{data.editOnClickLink}"
                title="{f:translate(key: '{lll}dmail_edit')}">
-                <f:format.html>{data.iconActionsOpen}</f:format.html>
+                {data.iconActionsOpen -> f:format.html()}
                 <f:translate key="{lll}dmail_edit"/>
             </a>
             <h3>
@@ -33,7 +33,7 @@
                 <f:for each="{data.categories}" as="cat">
                     <f:form.checkbox name="indata[categories][{data.uid}][{cat.pkey}]" value="1"
                                      checked="{cat.checked} == 1"/>
-                    <f:format.html>{cat.pVal}</f:format.html>
+                    {cat.pVal -> f:format.html()}
                 </f:for>
                 <f:form.checkbox name="indata[html]" value="1" checked="{data.html} == 1"/>
                 <f:translate key="{lll}subscriber_profile_htmlemail"/>
@@ -79,7 +79,7 @@
                         {data.special.selected}
                         <div style="padding-top: 20px;"></div>
                     </f:if>
-                    <f:format.html>{data.special.selectTables}</f:format.html>
+                    {data.special.selectTables -> f:format.html()}
                     <f:form.hidden name="cmd" value="displayMailGroup"/>
                     <f:form.hidden name="group_uid" value="{data.group_id}"/>
                     <f:form.submit class="btn btn-primary text-uppercase"
@@ -120,10 +120,10 @@
                                 {row.title}
                             </td>
                             <td class="nowrap">
-                                <f:format.html>{row.type}</f:format.html>
+                                {row.type}
                             </td>
                             <td class="nowrap">
-                                <f:format.html>{row.description}</f:format.html>
+                                {row.description}
                             </td>
                             <td class="text-center"><span class="badge rounded-pill bg-primary pb-1">{row.count}</span></td>
                             <td class="col-control nowrap">
@@ -387,7 +387,7 @@
                                         <tr>
                                             <td>{iterator.cycle}</td>
                                             <td>
-                                                <f:format.html>{row.mapping_description}</f:format.html>
+                                                {row.mapping_description -> f:format.html()}
                                             </td>
                                             <td>
                                                 <f:if condition="{csvImportData.output.mapping.fields -> f:count()}">
@@ -407,7 +407,7 @@
                                                         <f:for each="{row.mapping_value}" as="mv">
                                                             <tr>
                                                                 <td>
-                                                                    <f:format.html>{mv}</f:format.html>
+                                                                    {mv -> f:format.html()}
                                                                 </td>
                                                             </tr>
                                                         </f:for>

@@ -709,7 +709,7 @@
 				<source>Save these settings as draft (for recurring sendings)</source>
 			</trans-unit>
 			<trans-unit id="schedule_mailgroup" resname="schedule_mailgroup">
-				<source>Recipient list:</source>
+				<source>Available recipient groups</source>
 			</trans-unit>
 			<trans-unit id="schedule_select_mailgroup" resname="schedule_select_mailgroup">
 				<source>Select recipients and time of sending</source>
@@ -718,7 +718,7 @@
 				<source>Select recipients and time of sending</source>
 			</trans-unit>
 			<trans-unit id="schedule_send_all" resname="schedule_send_all">
-				<source>Send to all subscribers in recipient list</source>
+				<source>Send mail to all selected groups</source>
 			</trans-unit>
 			<trans-unit id="schedule_testmail" resname="schedule_testmail">
 				<source>Send this as test mail</source>
@@ -736,7 +736,7 @@
 				<source>The mail "%s" was successfully saved as draft for recurring sending within the scheduler.</source>
 			</trans-unit>
 			<trans-unit id="send_recipients" resname="send_recipients">
-				<source>Recipients:</source>
+				<source>Recipient(s):</source>
 			</trans-unit>
 			<trans-unit id="send_sending" resname="send_sending">
 				<source>Sending mail</source>
@@ -746,6 +746,12 @@
 			</trans-unit>
 			<trans-unit id="send_was_scheduled_for" resname="send_was_scheduled_for">
 				<source>The mail "%s" was successfully scheduled for distribution at %s</source>
+			</trans-unit>
+            <trans-unit id="testMailSent" resname="testMailSent">
+                <source>Test mail successfully sent</source>
+            </trans-unit>
+			<trans-unit id="testMailSentTo" resname="testMailSentTo">
+				<source>The test mail was sent to %s.</source>
 			</trans-unit>
 			<trans-unit id="send_was_sent" resname="send_was_sent">
 				<source>The mail was sent.</source>
@@ -967,24 +973,23 @@
 				<source>Update profile settings</source>
 			</trans-unit>
 			<trans-unit id="testmail_individual" resname="testmail_individual">
-				<source>Testmail - Individual</source>
+				<source>Individual</source>
 			</trans-unit>
 			<trans-unit id="testmail_individual_msg" resname="testmail_individual_msg">
 				<source>Select a recipient of the testmail. The mail will be generated based on the profile of the recipient you select.</source>
 			</trans-unit>
 			<trans-unit id="testmail_mailgroup" resname="testmail_mailgroup">
-				<source>Testmail - Recipient list</source>
+				<source>Recipient group</source>
 			</trans-unit>
 			<trans-unit id="testmail_mailgroup_msg" resname="testmail_mailgroup_msg">
-				<source>Select a recipient list for the testmail. The mails will be generated based on the profiles of the recipients in that list.</source>
+				<source>Select a recipient group for the test mail.</source>
 			</trans-unit>
 			<trans-unit id="testmail_simple" resname="testmail_simple">
 				<source>Send a simple test mail</source>
 			</trans-unit>
 			<trans-unit id="testmail_simple_msg" resname="testmail_simple_msg" xml:space="preserve">
-				<source><![CDATA[Here you can (optionally) send a simple test email to one or more recipients, before you schedule the final sending on the NEXT page.<br>
-				Please add one or more email addresses separated by colon or semicolon into the next field and press SEND.<br>
-				The generated email will include ALL elements regardless of their categories! User fields will NOT be substituted with data!]]></source>
+				<source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.<br>
+				Beware: The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
 			</trans-unit>
 			<trans-unit id="view_delivery_begin_end" resname="view_delivery_begin_end">
 				<source>Delivery begun/ended:</source>
