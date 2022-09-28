@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
+use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
@@ -63,7 +64,7 @@ class MailerEngineController extends AbstractController
         $this->view->setTemplate('MailerEngine');
 
         if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
-            if ($this->action == 'delete' && $this->uid) {
+            if ($this->action->equals(Action::DELETE_MAIL) && $this->uid) {
                 $this->deleteDMail($this->uid);
             }
 

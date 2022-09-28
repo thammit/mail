@@ -400,7 +400,7 @@ class DmailController extends AbstractController
                 $moduleData['info']['table'] = is_array($mailData) ? $this->getGroupedMailSettings($mailData) : '';
                 $moduleData['info']['mailUid'] = $this->mailUid;
                 $moduleData['info']['pageUid'] = $mailData['page'] ?: '';
-                $moduleData['info']['currentCMD'] = $this->action;
+                $moduleData['info']['currentCMD'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_CATEGORIES:
@@ -420,7 +420,7 @@ class DmailController extends AbstractController
                 $moduleData['cats']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                 $moduleData['cats']['mailUid'] = $this->mailUid;
                 $moduleData['cats']['pageUid'] = $this->pageUid;
-                $moduleData['cats']['currentCMD'] = $this->action;
+                $moduleData['cats']['currentCMD'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_SEND_TEST:
@@ -443,7 +443,7 @@ class DmailController extends AbstractController
                 $moduleData['test']['cmd'] = Action::WIZARD_STEP_SEND;
                 $moduleData['test']['mailUid'] = $this->mailUid;
                 $moduleData['test']['pageUid'] = $this->pageUid;
-                $moduleData['test']['currentCMD'] = $this->action;
+                $moduleData['test']['currentCMD'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_FINAL:
@@ -477,7 +477,7 @@ class DmailController extends AbstractController
                 $moduleData['final']['id'] = $this->id;
                 $moduleData['final']['mailUid'] = $this->mailUid;
                 $moduleData['final']['pageUid'] = $this->pageUid;
-                $moduleData['final']['currentCMD'] = $this->action;
+                $moduleData['final']['currentCMD'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_OVERVIEW:
@@ -1190,7 +1190,7 @@ class DmailController extends AbstractController
         }
         */
         // Setting flags and update the record:
-        if ($sentFlag && $this->action === Action::WIZARD_STEP_FINAL) {
+        if ($sentFlag && $this->action->equals(Action::WIZARD_STEP_FINAL)) {
 
             $connection = $this->getConnection('sys_dmail');
             $connection->update(

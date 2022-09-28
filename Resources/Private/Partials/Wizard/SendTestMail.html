@@ -32,6 +32,9 @@
                             <f:variable name="recipients" value="{backendUser.email}"/>
                         </f:else>
                     </f:if>
+                    <input type="hidden" name="id" value="{test.testFormData.id}"/>
+                    <input type="hidden" name="mailUid" value="{test.testFormData.mailUid}"/>
+                    <input type="hidden" name="cmd" value="{test.testFormData.cmd}"/>
                     <input class="form-control" type="text" placeholder="Mail address" name="sendTestMail[address]" value="{recipients}"
                            aria-label="Test mail recipient" aria-describedby="send-test-mail-tt-address-{address.uid}-button"/>
                     <button class="btn btn-outline-primary text-uppercase" id="send-test-mail-tt-address-{address.uid}-button" type="submit" name="sendTestMail[send]"
@@ -74,6 +77,9 @@
                         </table>
                     </div>
                     <form action="" method="post" name="dmailform" enctype="multipart/form-data">
+                        <input type="hidden" name="id" value="{test.testFormData.id}"/>
+                        <input type="hidden" name="mailUid" value="{test.testFormData.mailUid}"/>
+                        <input type="hidden" name="cmd" value="{test.testFormData.cmd}"/>
                         <input class="form-control" type="hidden" placeholder="Mail address" name="sendTestMail[address]" value="{recipients}"
                                aria-label="Test mail recipient" aria-describedby="send-test-mail-group-{groupId}-button"/>
                         <button class="btn btn-outline-primary text-uppercase" id="send-test-mail-group-{groupId}-button" type="submit" name="sendTestMail[send]" value="1">
