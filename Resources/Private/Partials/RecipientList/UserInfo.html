@@ -1,0 +1,42 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+<h2>
+    <f:translate key="{lll}subscriber_info"/>
+</h2>
+<p>
+    <core:iconForRecord row="{uid:uid}" table="{table}" /> {data.name} &lt;{data.email}&gt;
+</p>
+<be:link.editRecord uid="{uid}" table="{table}" class="btn btn-default mb-3" title="{f:translate(key: '{lll}dmail_edit')}">
+    <core:icon identifier="actions-open" size="small" /> <f:translate key="{lll}dmail_edit"/>
+</be:link.editRecord>
+<h3>
+    <f:translate key="{lll}subscriber_profile"/>
+</h3>
+<p>
+    <f:translate key="{lll}subscriber_profile_instructions"/>
+</p>
+<f:form class="mt-3" method="post" name="dmailform" enctype="multipart/form-data">
+    <f:for each="{data.categories}" as="cat">
+        <div class="form-check">
+            <f:form.checkbox class="form-check-input" id="indata-category-{data.uid}-{cat.pkey}" name="indata[categories][{data.uid}][{cat.pkey}]" value="1" checked="{cat.checked}"/>
+            <label class="form-check-label" for="indata-category-{data.uid}-{cat.pkey}">
+                {cat.pVal}
+            </label>
+        </div>
+    </f:for>
+    <div class="form-check">
+        <f:form.checkbox class="form-check-input" id="indata-html" name="indata[html]" value="1" checked="{data.html} == 1"/>
+        <label class="form-check-label" for="indata-html">
+            <f:translate key="{lll}subscriber_profile_htmlemail"/>
+        </label>
+    </div>
+    <f:form.hidden name="table" value="{data.table}"/>
+    <f:form.hidden name="uid" value="{data.thisID}"/>
+    <f:form.hidden name="cmd" value="{data.cmd}"/>
+    <f:form.submit class="btn btn-primary text-uppercase" value="{f:translate(key: '{lll}subscriber_profile_update')}"/>
+</f:form>
+</html>

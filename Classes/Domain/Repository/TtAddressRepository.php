@@ -19,7 +19,7 @@ class TtAddressRepository extends AbstractRepository
      * @throws DBALException
      * @throws Exception
      */
-    public function findByUidAndPermissionClause(int $uid, string $permsClause): array
+    public function findByUidAndPermission(int $uid, string $permsClause): array
     {
         $queryBuilder = $this->getQueryBuilder();
 

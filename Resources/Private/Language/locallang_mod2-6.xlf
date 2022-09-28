@@ -432,7 +432,7 @@
 				<source>Recipient List</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import" resname="mailgroup_import">
-				<source>Import CSV into 'ADDRESS' table</source>
+				<source>Import CSV into tt_address database table</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_back" resname="mailgroup_import_back">
 				<source>Back</source>
@@ -612,6 +612,9 @@
 			<trans-unit id="nl_cat" resname="nl_cat">
 				<source>Assign categories to content elements</source>
 			</trans-unit>
+			<trans-unit id="restrictToCategories" resname="restrictToCategories">
+				<source>Restrict to categories</source>
+			</trans-unit>
 			<trans-unit id="nl_cat_msg1" resname="nl_cat_msg1">
 				<source>There are no content elements on the page.</source>
 			</trans-unit>
@@ -706,7 +709,7 @@
 				<source>Select a recipient group</source>
 			</trans-unit>
 			<trans-unit id="schedule_draft" resname="schedule_draft">
-				<source>Save these settings as draft (for recurring sendings)</source>
+				<source>Save mail settings for recurring mailings</source>
 			</trans-unit>
 			<trans-unit id="schedule_mailgroup" resname="schedule_mailgroup">
 				<source>Available recipient groups</source>

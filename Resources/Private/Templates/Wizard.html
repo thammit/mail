@@ -20,23 +20,28 @@
         <div class="panel-group" id="mail-wizard-source-select-panel">
             <f:if condition="{default.openStored.data}">
                 <f:variable name="counter" value="{default.openStored.data -> f:count()}"/>
-                <f:render partial="Wizard/Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: 'dmail_wiz1_list_dmail', index:7, open:default.openStored.open, counter: counter}" contentAs="panelBody">
+                <f:variable name="title"><f:translate key="{lll}dmail_wiz1_list_dmail"/></f:variable>
+                <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:7, open:default.openStored.open, counter: counter}" contentAs="panelBody">
                     <f:render section="OpenMailsPanel" arguments="{lll:lll, data: default.openStored}" />
                 </f:render>
             </f:if>
             <f:if condition="{default.internal}">
                 <f:variable name="counter" value="{default.internal.data -> f:count()}"/>
-                <f:render partial="Wizard/Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: 'dmail_wiz1_internal_page', index:4, open:default.internal.open, counter: counter}" contentAs="panelBody">
+                <f:variable name="title"><f:translate key="{lll}dmail_wiz1_internal_page"/></f:variable>
+                <f:variable name="additionalHeading"><f:be.pageInfo /> <f:be.pagePath /></f:variable>
+                <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:4, open:default.internal.open, counter: counter, additionalHeading: additionalHeading}" contentAs="panelBody">
                     <f:render section="InternalPanel" arguments="{lll:lll, data: default.internal}" />
                 </f:render>
             </f:if>
             <f:if condition="{default.external}">
-                <f:render partial="Wizard/Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: 'dmail_wiz1_external_page', index:5, open:default.external.open, counter: 0}" contentAs="panelBody">
+                <f:variable name="title"><f:translate key="{lll}dmail_wiz1_external_page"/></f:variable>
+                <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:5, open:default.external.open, counter: 0}" contentAs="panelBody">
                     <f:render section="ExternalPanel" arguments="{lll:lll, settings: settings, data: default.external}" />
                 </f:render>
             </f:if>
             <f:if condition="{default.quickMail}">
-                <f:render partial="Wizard/Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: 'dmail_wiz1_quickmail', index:6, open:default.quickMail.open, counter: 0}" contentAs="panelBody">
+                <f:variable name="title"><f:translate key="{lll}dmail_wiz1_quickmail"/></f:variable>
+                <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:6, open:default.quickMail.open, counter: 0}" contentAs="panelBody">
                     <f:render section="QuickMailPanel" arguments="{lll:lll, settings: settings, data: default.quickMail}" />
                 </f:render>
             </f:if>

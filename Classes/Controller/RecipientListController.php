@@ -81,7 +81,7 @@ class RecipientListController extends AbstractController
         $this->queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
         $this->view->assign('settings', [
             'route' => $this->route,
-            'mailSysFolderUid' => $this->id
+            'mailSysFolderUid' => $this->id,
         ]);
     }
 
@@ -254,7 +254,7 @@ class RecipientListController extends AbstractController
                     case RecipientGroupType::PAGES:
                         // From pages
                         // use current page if no else
-                        $thePages = $mailGroup['pages'] ? $mailGroup['pages'] : $this->id;
+                        $thePages = $mailGroup['pages'] ?: $this->id;
                         // Explode the pages
                         $pages = GeneralUtility::intExplode(',', $thePages);
                         $pageIdArray = [];
@@ -427,15 +427,14 @@ class RecipientListController extends AbstractController
             $totalRecipients += count($idLists[$this->userTable]);
         }
 
-        $group = BackendUtility::getRecord('sys_dmail_group', $this->group_uid);
-        $group = is_array($group) ? $group : [];
+        $group = BackendUtility::getRecord('sys_dmail_group', $this->group_uid) ?? [];
 
         $data = [
             'group_id' => $this->group_uid,
             'group_icon' => $this->iconFactory->getIconForRecord('sys_dmail_group', $group, Icon::SIZE_SMALL),
             'group_title' => htmlspecialchars($group['title'] ?? ''),
             'group_totalRecipients' => $totalRecipients,
-            'group_link_listall' => ($this->lCmd == '') ? GeneralUtility::linkThisScript(['lCmd' => 'listall']) : '',
+//            'group_link_listall' => ($this->lCmd == '') ? GeneralUtility::linkThisScript(['lCmd' => 'listall']) : '',
             'tables' => [],
             'special' => [],
         ];
@@ -465,7 +464,8 @@ class RecipientListController extends AbstractController
                 }
             }
         }
-        switch ($this->lCmd) {
+//        switch ($this->lCmd) {
+        switch ('listall') {
             case 'listall':
                 if (is_array($idLists['tt_address'] ?? false)) {
                     $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
@@ -476,6 +476,7 @@ class RecipientListController extends AbstractController
                         'numberOfRecipients' => count($rows),
                         'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tt_address'),
                         'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tt_address'),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => 'tt_address']),
                     ];
                 }
                 if (is_array($idLists['fe_users'] ?? false)) {
@@ -486,6 +487,7 @@ class RecipientListController extends AbstractController
                         'numberOfRecipients' => count($rows),
                         'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'fe_users'),
                         'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'fe_users'),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => 'fe_users']),
                     ];
                 }
                 if (is_array($idLists['PLAINLIST'] ?? false)) {
@@ -495,6 +497,7 @@ class RecipientListController extends AbstractController
                         'numberOfRecipients' => count($idLists['PLAINLIST']),
                         'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'sys_dmail_group'),
                         'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'sys_dmail_group'),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => 'PLAINLIST']),
                     ];
                 }
                 if (is_array($idLists[$this->userTable] ?? false)) {
@@ -505,6 +508,7 @@ class RecipientListController extends AbstractController
                         'numberOfRecipients' => count($rows),
                         'show' => BackendUserUtility::getBackendUser()->check('tables_select', $this->userTable),
                         'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $this->userTable),
+                        'csvDownload' => GeneralUtility::linkThisScript(['csv' => $this->userTable]),
                     ];
                 }
                 break;
@@ -690,46 +694,37 @@ class RecipientListController extends AbstractController
         if (!in_array($this->table, ['tt_address', 'fe_users'])) {
             return [];
         }
-        if ($this->submit) {
-            if (count($this->indata) < 1) {
-                $this->indata['html'] = 0;
-            }
+
+        if ($this->submit && count($this->indata) === 0) {
+            $this->indata['html'] = false;
         }
 
-        switch ($this->table) {
-            case 'tt_address':
-                // see fe_users
-            case 'fe_users':
-                if (count($this->indata)) {
-                    $data = [];
-                    if (is_array($this->indata['categories'] ?? false)) {
-                        reset($this->indata['categories']);
-                        foreach ($this->indata['categories'] as $recValues) {
-                            reset($recValues);
-                            $enabled = [];
-                            foreach ($recValues as $k => $b) {
-                                if ($b) {
-                                    $enabled[] = $k;
-                                }
-                            }
-                            $data[$this->table][$this->uid]['module_sys_dmail_category'] = implode(',', $enabled);
+        if (count($this->indata)) {
+            $data = [];
+            if (is_array($this->indata['categories'] ?? false)) {
+                reset($this->indata['categories']);
+                foreach ($this->indata['categories'] as $recValues) {
+                    reset($recValues);
+                    $enabled = [];
+                    foreach ($recValues as $k => $b) {
+                        if ($b) {
+                            $enabled[] = $k;
                         }
                     }
-                    $data[$this->table][$this->uid]['module_sys_dmail_html'] = $this->indata['html'] ? 1 : 0;
-
-                    $dataHandler = $this->getDataHandler();
-                    $dataHandler->start($data, []);
-                    $dataHandler->process_datamap();
+                    $data[$this->table][$this->uid]['module_sys_dmail_category'] = implode(',', $enabled);
                 }
-                break;
-            default:
-                // do nothing
+            }
+            $data[$this->table][$this->uid]['module_sys_dmail_html'] = (bool)$this->indata['html'];
+
+            $dataHandler = $this->getDataHandler();
+            $dataHandler->start($data, []);
+            $dataHandler->process_datamap();
         }
 
         $rows = [];
         switch ($this->table) {
             case 'tt_address':
-                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUidAndPermissionClause($this->uid, $this->backendUserPermissions);
+                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUidAndPermission($this->uid, $this->backendUserPermissions);
                 break;
             case 'fe_users':
                 $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->findByUidAndPermissions($this->uid, $this->backendUserPermissions);
@@ -759,35 +754,35 @@ class RecipientListController extends AbstractController
 
             $categories = implode(',', $categoriesArray);
 
-            $editOnClickLink = ViewUtility::getEditOnClickLink([
-                'edit' => [
-                    $this->table => [
-                        $row['uid'] => 'edit',
-                    ],
-                ],
-                'returnUrl' => $this->requestUri,
-            ]);
+//            $editOnClickLink = ViewUtility::getEditOnClickLink([
+//                'edit' => [
+//                    $this->table => [
+//                        $row['uid'] => 'edit',
+//                    ],
+//                ],
+//                'returnUrl' => $this->requestUri,
+//            ]);
 
             $data = [
-                'icon' => $this->iconFactory->getIconForRecord($this->table, $row)->render(),
-                'iconActionsOpen' => $this->getIconActionsOpen(),
-                'name' => htmlspecialchars($row['name']),
-                'email' => htmlspecialchars($row['email']),
+//                'icon' => $this->iconFactory->getIconForRecord($this->table, $row)->render(),
+//                'iconActionsOpen' => $this->getIconActionsOpen(),
+                'name' => $row['name'],
+                'email' => $row['email'],
                 'uid' => $row['uid'],
-                'editOnClickLink' => $editOnClickLink,
+//                'editOnClickLink' => $editOnClickLink,
                 'categories' => [],
                 'table' => $this->table,
                 'thisID' => $this->uid,
                 'cmd' => (string)$this->getCurrentAction(),
                 'html' => (bool)$row['module_sys_dmail_html'],
             ];
-            $tableRowCategories = RepositoryUtility::makeCategories($this->table, $row, $this->sysLanguageUid);
 
+            $tableRowCategories = RepositoryUtility::makeCategories($this->table, $row, $this->sysLanguageUid);
             reset($tableRowCategories);
             foreach ($tableRowCategories as $pKey => $pVal) {
                 $data['categories'][] = [
                     'pkey' => $pKey,
-                    'pVal' => htmlspecialchars($pVal),
+                    'pVal' => $pVal,
                     'checked' => GeneralUtility::inList($categories, $pKey),
                 ];
             }

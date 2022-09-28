@@ -16,13 +16,13 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h3 class="panel-title" id="heading{index}">
-            <a href="#" class="{classCollapsed}" data-bs-toggle="collapse" data-bs-target="#panel{index}" aria-expanded="{expanded}" aria-controls="panel{index}">
+        <h3 class="panel-title d-flex align-items-center" id="heading{index}">
+            <a href="#" class="{classCollapsed} flex-grow-1" data-bs-toggle="collapse" data-bs-target="#panel{index}" aria-expanded="{expanded}" aria-controls="panel{index}">
                 <span class="caret"></span>
-                <strong><f:translate key="{lll}{title}"/></strong>
+                <strong>{title}</strong>
                 <f:if condition="{counter}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{counter}</span></f:if>
             </a>
-            <span class="float-end"><f:if condition="{index} == 4"><f:be.pageInfo /> <f:be.pagePath /></f:if></span>
+            <f:if condition="{additionalHeading}"><div>{additionalHeading -> f:format.raw()}</div></f:if>
         </h3>
     </div>
     <div id="panel{index}" class="accordion-collapse collapse {classShow}" aria-labelledby="heading{index}" data-bs-parent="#{parentId}">
