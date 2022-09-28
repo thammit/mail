@@ -15,6 +15,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
@@ -22,6 +23,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -34,9 +36,9 @@ class StatisticsController extends AbstractController
      *
      * @var string
      */
-    protected $moduleName = 'MailNavFrame_Statistics';
+    protected string $moduleName = 'MailNavFrame_Statistics';
 
-    protected $requestUri = '';
+    protected string $requestUri = '';
 
     private int $uid = 0;
     private string $table = '';
@@ -80,6 +82,7 @@ class StatisticsController extends AbstractController
         $queryParams = $request->getQueryParams();
         $parsedBody = $request->getParsedBody();
 
+        /** @var NormalizedParams $normalizedParams */
         $normalizedParams = $request->getAttribute('normalizedParams');
         $this->requestUri = $normalizedParams->getRequestUri();
 
@@ -219,13 +222,16 @@ class StatisticsController extends AbstractController
         $data = [];
         if (is_array($rows)) {
             foreach ($rows as $row) {
+                [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend((int)$row['count'], (int)$row['recipients']);
+
                 $data[] = [
-                    'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $row, Icon::SIZE_SMALL)->render(),
                     'subject' => $this->linkDMail_record(GeneralUtility::fixed_lgd_cs($row['subject'], 30) . '  ', $row['uid'], $row['subject']),
                     'scheduled' => BackendUtility::datetime($row['scheduled']),
                     'scheduled_begin' => $row['scheduled_begin'] ? BackendUtility::datetime($row['scheduled_begin']) : '',
                     'scheduled_end' => $row['scheduled_end'] ? BackendUtility::datetime($row['scheduled_end']) : '',
-                    'sent' => $row['count'] ? $row['count'] : '',
+                    'sent' => $row['count'] ?: 0,
+                    'percentOfSent' => $percentOfSent,
+                    'numberOfRecipients' => $numberOfRecipients,
                     'status' => $this->getSentStatus($row),
                 ];
             }
@@ -238,14 +244,13 @@ class StatisticsController extends AbstractController
     {
         if (!empty($row['scheduled_begin'])) {
             if (!empty($row['scheduled_end'])) {
-                $sent = LanguageUtility::getLL('stats_overview_sent');
+                return 'sent';
             } else {
-                $sent = LanguageUtility::getLL('stats_overview_sending');
+                return 'sending';
             }
-        } else {
-            $sent = LanguageUtility::getLL('stats_overview_queuing');
         }
-        return $sent;
+
+        return 'queuing';
     }
 
     /**
@@ -346,7 +351,7 @@ class StatisticsController extends AbstractController
                 'catChecked' => 0,
                 'table' => $this->table,
                 'thisID' => $this->uid,
-                'cmd' => $this->action,
+                'cmd' => (string)$this->getCurrentAction(),
                 'html' => $row['module_sys_dmail_html'] ? true : false,
             ];
 
@@ -757,7 +762,7 @@ class StatisticsController extends AbstractController
             [
                 'id' => $this->id,
                 'mailUid' => $row['uid'],
-                'cmd' => $this->action,
+                'cmd' => (string)$this->getCurrentAction(),
                 'recalcCache' => 1,
             ]
         );

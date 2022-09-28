@@ -743,7 +743,7 @@ class MailerService implements LoggerAwareInterface
      * @param array $recipientData Recipient's data array
      * @param string $recipientTable Table name
      *
-     * @return    void
+     * @return void
      * @throws DBALException
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
@@ -798,7 +798,9 @@ class MailerService implements LoggerAwareInterface
         $subject = '';
         $message = '';
 
-        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_' . $key => time()]);
+        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mailUid);
+
+        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_' . $key => time(), 'recipients' => $numberOfRecipients]);
 
         switch ($key) {
             case 'begin':

@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use FoT3\Rdct\Redirects;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
@@ -104,7 +105,7 @@ class MailerUtility
                 $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
                 // subst_str is the string to look for, when substituting lateron
                 $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-                if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
+                if (!str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
                     $imageList .= '|' . $imageData['subst_str'] . '|';
                     $imageData['absRef'] = static::absRef($imageData['ref'], $path);
                     $imageData['tag'] = $tag;
@@ -132,7 +133,7 @@ class MailerUtility
                 $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
                 // subst_str is the string to look for, when substituting lateron
                 $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-                if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
+                if (!str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
                     $imageList .= '|' . $imageData['subst_str'] . '|';
                     $imageData['absRef'] = static::absRef($imageData['ref'], $path);
                     $mediaLinks[] = $imageData;
@@ -209,7 +210,7 @@ class MailerUtility
                 $hrefData['quotes'] = $quotes;
                 // subst_str is the string to look for when substituting later on
                 $hrefData['subst_str'] = $quotes . $hrefData['ref'] . $quotes;
-                if ($hrefData['ref'] && !str_starts_with(trim($hrefData['ref']), '#') && !str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
+                if (!str_starts_with(trim($hrefData['ref']), '#') && !str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
                     $linkList .= '|' . $hrefData['subst_str'] . '|';
                     $hrefData['absRef'] = static::absRef($hrefData['ref'], $path);
                     $hrefData['tag'] = $tag;
@@ -336,10 +337,6 @@ class MailerUtility
      */
     public static function replaceUrlsInPlainText(string $content, string $jumpUrlPrefix, bool $jumpUrlUseId): array
     {
-        if (empty($jumpUrlPrefix)) {
-            $content;
-        }
-
         $jumpUrlCounter = 1;
         $plainLinkIds = [];
         $contentWithReplacedUrls = preg_replace_callback(
@@ -437,12 +434,12 @@ class MailerUtility
     /**
      * Fetches the attachment files referenced in the sys_dmail record.
      *
-     * @param int $dmailUid The uid of the sys_dmail record to fetch the records for
+     * @param int $uid The uid of the sys_dmail record to fetch the records for
      * @return array An array of FileReferences
      */
-    public static function getAttachments(int $dmailUid): array
+    public static function getAttachments(int $uid): array
     {
-        return GeneralUtility::makeInstance(FileRepository::class)->findByRelation('sys_dmail', 'attachment', $dmailUid);
+        return GeneralUtility::makeInstance(FileRepository::class)->findByRelation('sys_dmail', 'attachment', $uid);
     }
 
     /**
@@ -635,78 +632,45 @@ class MailerUtility
         return (int)round(microtime(true) * 1000);
     }
 
-
-    /*
-     * CURRENTLY NOT USED STUFF
-     */
-
     /**
-     * @param string $table
-     * @param array $row
-     * @param int $sys_language_content
-     * @param string $overlayMode
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     * todo Not used!
+     * @param int $uid
+     * @return int
      */
-    public static function getRecordOverlay(string $table, array $row, int $sys_language_content, string $overlayMode = ''): array
+    public static function getNumberOfRecipients(int $uid): int
     {
-        if ($row['uid'] > 0 && $row['pid'] > 0) {
-            if ($GLOBALS['TCA'][$table] && $GLOBALS['TCA'][$table]['ctrl']['languageField'] && $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField']) {
-                if (!isset($GLOBALS['TCA'][$table]['ctrl']['transOrigPointerTable'])) {
-                    // Will try to overlay a record only
-                    // if the sys_language_content value is larger that zero.
-                    if ($sys_language_content > 0) {
-                        // Must be default language or [All], otherwise no overlaying:
-                        if ($row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] <= 0) {
-                            // Select overlay record:
-                            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-                            $overlayRow = $queryBuilder->select('*')
-                                ->from($table)
-                                ->add('where', 'pid=' . intval($row['pid']) .
-                                    ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['languageField'] . '=' . $sys_language_content .
-                                    ' AND ' . $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] . '=' . intval($row['uid']))
-                                ->setMaxResults(1)/* LIMIT 1*/
-                                ->execute()
-                                ->fetchAssociative();
-
-                            // Merge record content by traversing all fields:
-                            if (is_array($overlayRow)) {
-                                foreach ($row as $fieldName => $fieldValue) {
-                                    if ($fieldName != 'uid' && $fieldName != 'pid' && isset($overlayRow[$fieldName])) {
-                                        if ($GLOBALS['TCA'][$table]['l10n_mode'][$fieldName] != 'exclude' && ($GLOBALS['TCA'][$table]['l10n_mode'][$fieldName] != 'mergeIfNotBlank' || strcmp(trim($overlayRow[$fieldName]),
-                                                    ''))) {
-                                            $row[$fieldName] = $overlayRow[$fieldName];
-                                        }
-                                    }
-                                }
-                            } else {
-                                if ($overlayMode === 'hideNonTranslated' && $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] == 0) {
-                                    // Unset, if non-translated records should be hidden.
-                                    // ONLY done if the source record really is default language and not [All] in which case it is allowed.
-                                    unset($row);
-                                }
-                            }
-
-                            // Otherwise, check if sys_language_content is different from the value of the record
-                            // that means a japanese site might try to display french content.
-                        } else {
-                            if ($sys_language_content != $row[$GLOBALS['TCA'][$table]['ctrl']['languageField']]) {
-                                unset($row);
-                            }
-                        }
-                    } else {
-                        // When default language is displayed,
-                        // we never want to return a record carrying another language!:
-                        if ($row[$GLOBALS['TCA'][$table]['ctrl']['languageField']] > 0) {
-                            unset($row);
-                        }
-                    }
+        $numberOfRecipients = 0;
+        $mail = GeneralUtility::makeInstance(SysDmailRepository::class)->findByUid($uid);
+        if ($mail['query_info'] ?? false) {
+            $queryInfo = unserialize($mail['query_info']);
+            if (isset($queryInfo['id_lists'])) {
+                foreach ($queryInfo['id_lists'] as $uids) {
+                    $numberOfRecipients += count($uids);
                 }
             }
         }
 
-        return $row;
+        return $numberOfRecipients;
+    }
+
+    /**
+     * @param int $sent
+     * @param int $numberOfRecipients
+     * @return array
+     */
+    public static function calculatePercentOfSend(int $sent, int $numberOfRecipients): array
+    {
+        if ($numberOfRecipients) {
+            $percentOfSent = 100 / $numberOfRecipients * $sent;
+            if ($percentOfSent > 100) {
+                $percentOfSent = 100;
+            }
+            if ($percentOfSent < 0) {
+                $percentOfSent = 0;
+            }
+        } else {
+            $percentOfSent = $sent ? 100 : 0;
+            $numberOfRecipients = $sent;
+        }
+        return [$percentOfSent, $numberOfRecipients];
     }
 }

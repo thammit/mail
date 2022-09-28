@@ -65,6 +65,7 @@ CREATE TABLE sys_dmail (
   HTMLParams varchar(80) DEFAULT '' NOT NULL,
   plainParams varchar(80) DEFAULT '' NOT NULL,
   issent tinyint(4) unsigned DEFAULT '0' NOT NULL,
+  recipients int(11) unsigned DEFAULT '0' NOT NULL,
   renderedsize int(11) unsigned DEFAULT '0' NOT NULL,
   mailContent mediumblob,
   scheduled int(10) unsigned DEFAULT '0' NOT NULL,

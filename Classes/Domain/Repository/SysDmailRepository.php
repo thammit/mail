@@ -31,15 +31,16 @@ class SysDmailRepository extends AbstractRepository
 
     /**
      * @param int $pid
+     * @param array $fields
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findScheduledByPid(int $pid): array
+    public function findScheduledByPid(int $pid, array $fields = ['uid', 'pid', 'subject', 'scheduled', 'scheduled_begin', 'scheduled_end', 'recipients', 'query_info']): array
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
-        return $queryBuilder->select('uid', 'pid', 'subject', 'scheduled', 'scheduled_begin', 'scheduled_end')
+        return $queryBuilder->select(...$fields)
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
@@ -109,7 +110,7 @@ class SysDmailRepository extends AbstractRepository
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
-        return $queryBuilder->selectLiteral('sys_dmail.uid', 'sys_dmail.subject', 'sys_dmail.scheduled', 'sys_dmail.scheduled_begin', 'sys_dmail.scheduled_end', 'COUNT(sys_dmail_maillog.mid) AS count')
+        return $queryBuilder->selectLiteral('sys_dmail.uid', 'sys_dmail.subject', 'sys_dmail.scheduled', 'sys_dmail.scheduled_begin', 'sys_dmail.scheduled_end', 'sys_dmail.recipients', 'COUNT(sys_dmail_maillog.mid) AS count')
             ->from($this->table, $this->table)
             ->leftJoin(
                 'sys_dmail',

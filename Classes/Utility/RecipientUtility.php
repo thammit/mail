@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use PDO;
@@ -197,13 +198,13 @@ class RecipientUtility
      *
      * @param int $groupUid Recipient group ID
      * @param string $userTable
-     * @param $backendUserPermissions
+     * @param string $backendUserPermissions
      * @return array List of recipient IDs
      * @throws DBALException
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public static function getSingleMailGroup(int $groupUid, string $userTable, $backendUserPermissions): array
+    public static function getSingleMailGroup(int $groupUid, string $userTable, string $backendUserPermissions): array
     {
         $idLists = [];
         if ($groupUid) {
@@ -321,11 +322,15 @@ class RecipientUtility
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
-     * @throws Exception
+     * @param array $groups
+     * @param string $userTable
+     * @param string $backendUserPermissions
+     * @return array
      * @throws DBALException
-    */
-    public static function compileMailGroup(array $groups, string $userTable, $backendUserPermissions): array
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public static function compileMailGroup(array $groups, string $userTable, string $backendUserPermissions): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
         if (!count($groups)) {

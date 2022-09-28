@@ -9,6 +9,8 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -67,12 +69,10 @@ class MailerEngineController extends AbstractController
 
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
-                $cronMonitor = $this->cronMonitor();
                 $mailerEngine = $this->mailerengine();
 
                 $this->view->assignMultiple(
                     [
-                        'cronMonitor' => $cronMonitor,
                         'data' => $mailerEngine['data'],
                         'id' => $this->id,
                         'invoke' => $mailerEngine['invoke'],
@@ -100,106 +100,15 @@ class MailerEngineController extends AbstractController
     }
 
     /**
-     * Monitor the cronjob.
-     *
-     * @return void        status of the cronjob in HTML Tableformat
-     */
-    public function cronMonitor(): void
-    {
-        $mailerStatus = 0;
-        $lastExecutionTime = 0;
-        $logContent = '';
-        $error = '';
-
-        // seconds
-//        $cronInterval = MailerUtility::getExtensionConfiguration('cronInt') * 60;
-        $cronInterval = 60 * 60;
-        $lastCronjobShouldBeNewThan = (time() - $cronInterval);
-        $filename = $this->getDmailerLogFilePath();
-        if (file_exists($filename)) {
-            $logContent = file_get_contents($filename);
-            $lastExecutionTime = substr($logContent, 0, 10);
-        }
-
-        /*
-         * status:
-         * 	1 = ok
-         * 	0 = check
-         * 	-1 = cron stopped
-         *
-         * cron running or error (die function in dmailer_log)
-         */
-        if (file_exists($this->getDmailerLockFilePath())) {
-            $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->findByResponseType(0);
-            if (is_array($res)) {
-                foreach ($res as $lastSend) {
-                    if (($lastSend['tstamp'] < time()) && ($lastSend['tstamp'] > $lastCronjobShouldBeNewThan)) {
-                        // cron is sending
-                        $mailerStatus = 1;
-                    } else {
-                        // there's lock file but cron is not sending
-                        $mailerStatus = -1;
-                    }
-                }
-            }
-            // cron is idle or no cron
-        } else {
-            if (strpos($logContent, 'error')) {
-                // error in log file
-                $mailerStatus = -1;
-                $error = substr($logContent, strpos($logContent, 'error') + 7);
-            } else {
-                if (!strlen($logContent) || ($lastExecutionTime < $lastCronjobShouldBeNewThan)) {
-                    // cron is not set or not running
-                    $mailerStatus = 0;
-                } else {
-                    // last run of cron is in the interval
-                    $mailerStatus = 1;
-                }
-            }
-        }
-
-        $currentDate = ' / ' . LanguageUtility::getLL('dmail_mailerengine_current_time') . ' ' . BackendUtility::datetime(time()) . '. ';
-        $lastRun = ' ' . LanguageUtility::getLL('dmail_mailerengine_cron_lastrun') . ($lastExecutionTime ? BackendUtility::datetime($lastExecutionTime) : '-') . $currentDate;
-        switch ($mailerStatus) {
-            case -1:
-                $message = ViewUtility::getFlashMessage(
-                    LanguageUtility::getLL('dmail_mailerengine_cron_warning') . ': ' . ($error ? $error : LanguageUtility::getLL('dmail_mailerengine_cron_warning_msg')) . $lastRun,
-                    LanguageUtility::getLL('dmail_mailerengine_cron_status'),
-                    AbstractMessage::ERROR
-                );
-                $this->messageQueue->addMessage($message);
-                break;
-            case 0:
-                $message = ViewUtility::getFlashMessage(
-                    LanguageUtility::getLL('dmail_mailerengine_cron_caution') . ': ' . LanguageUtility::getLL('dmail_mailerengine_cron_caution_msg') . $lastRun,
-                    LanguageUtility::getLL('dmail_mailerengine_cron_status'),
-                    AbstractMessage::WARNING
-                );
-                $this->messageQueue->addMessage($message);
-                break;
-            case 1:
-                $message = ViewUtility::getFlashMessage(
-                    LanguageUtility::getLL('dmail_mailerengine_cron_ok') . ': ' . LanguageUtility::getLL('dmail_mailerengine_cron_ok_msg') . $lastRun,
-                    LanguageUtility::getLL('dmail_mailerengine_cron_status'),
-                    AbstractMessage::OK
-                );
-                $this->messageQueue->addMessage($message);
-                break;
-            default:
-        }
-    }
-
-    /**
      * Shows the status of the mailer engine.
      * TODO: Should really only show some entries, or provide a browsing interface.
      *
-     * @return array|string List of the mailing status
+     * @return array List of the mailing status
      * @throws DBALException
      * @throws Exception
      * @throws RouteNotFoundException
      */
-    public function mailerengine(): array|string
+    public function mailerengine(): array
     {
         $invoke = false;
         $moduleUrl = '';
@@ -226,17 +135,23 @@ class MailerEngineController extends AbstractController
         }
 
         $data = [];
-        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->findScheduledByPid($this->id);
+        $sysDmailRepository = GeneralUtility::makeInstance(SysDmailRepository::class);
+        $rows = $sysDmailRepository->findScheduledByPid($this->id);
         if (is_array($rows)) {
+            $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
             foreach ($rows as $row) {
+                $sent = $sysDmailMaillogRepository->countByUid($row['uid']);
+                [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend($sent, (int)$row['recipients']);
+
                 $data[] = [
                     'uid' => $row['uid'],
-                    'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $row, Icon::SIZE_SMALL)->render(),
                     'subject' => $this->linkDMail_record(htmlspecialchars(GeneralUtility::fixed_lgd_cs($row['subject'], 100)), $row['uid']),
                     'scheduled' => BackendUtility::datetime($row['scheduled']),
                     'scheduled_begin' => $row['scheduled_begin'] ? BackendUtility::datetime($row['scheduled_begin']) : '',
                     'scheduled_end' => $row['scheduled_end'] ? BackendUtility::datetime($row['scheduled_end']) : '',
-                    'sent' => GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->countByUid($row['uid']),
+                    'sent' => $sent,
+                    'numberOfRecipients' => $numberOfRecipients,
+                    'percentOfSent' => $percentOfSent,
                     'delete' => $this->canDelete($row['uid']),
                 ];
             }
