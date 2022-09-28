@@ -673,7 +673,7 @@ class RecipientListController extends AbstractController
             }
         }
 
-        $filename = 'DirectMail_export_' . date('dmy-Hi') . '.csv';
+        $filename = 'mail_recipients_' . date('dmy-Hi') . '.csv';
         $mimeType = 'application/octet-stream';
         header('Content-Type: ' . $mimeType);
         header('Content-Disposition: attachment; filename=' . $filename);
@@ -685,7 +685,6 @@ class RecipientListController extends AbstractController
      * Shows user's info and categories
      *
      * @return array|string HTML showing user's info and the categories
-     * @throws RouteNotFoundException
      * @throws DBALException
      * @throws Exception
      */
