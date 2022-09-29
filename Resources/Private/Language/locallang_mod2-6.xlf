@@ -336,7 +336,7 @@
 				<source>Internal Page</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_dmail" resname="dmail_wiz1_list_dmail">
-				<source>Open/Stored Mails</source>
+				<source>Open Mails</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_header" resname="dmail_wiz1_list_header">
 				<source>Select a mail to continue sending</source>

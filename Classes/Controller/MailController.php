@@ -51,16 +51,18 @@ class MailController extends AbstractController
     protected string $error = '';
     protected int $currentStep = 1;
     protected bool $reset = false;
-    protected int $uid = 0;
-    protected bool $backButtonPressed = false;
     protected Action $currentCMD;
-    protected bool $fetchAtOnce = false;
-    protected array $quickMail = [];
+    protected bool $backButtonPressed = false;
+
+    protected int $uid = 0;
     protected int $createMailFromPageUid = 0;
     protected int $createMailForLanguageUid = 0;
-    protected string $subjectForExternalMail = '';
-    protected string $externalMailHtmlUri = '';
-    protected string $externalMailPlainUri = '';
+    protected array $external = [];
+    protected array $quickMail = [];
+    protected bool $isOpen = false;
+    protected bool $isInternal = false;
+    protected bool $isExternal = false;
+    protected bool $isQuickMail = false;
     protected array $mailGroupUids = [];
     protected bool $sendTestMail = false;
     protected bool $scheduleSendAll = false;
@@ -102,17 +104,26 @@ class MailController extends AbstractController
         $this->backButtonPressed = (bool)($parsedBody['back'] ?? $queryParams['back'] ?? false);
 
         $this->currentCMD = Action::cast(($parsedBody['currentCMD'] ?? $queryParams['currentCMD'] ?? null));
-        // Create mail and fetch the data
-        $this->fetchAtOnce = (bool)($parsedBody['fetchAtOnce'] ?? $queryParams['fetchAtOnce'] ?? false);
+
+        $this->isOpen = (bool)$this->mailUid;
 
         $this->createMailFromPageUid = (int)($parsedBody['createMailFromPageUid'] ?? $queryParams['createMailFromPageUid'] ?? 0);
         $this->createMailForLanguageUid = (int)($parsedBody['createMailForLanguageUid'] ?? $queryParams['createMailForLanguageUid'] ?? 0);
+        $this->isInternal = (bool)$this->createMailFromPageUid;
 
-        $this->subjectForExternalMail = (string)($parsedBody['subjectForExternalMail'] ?? $queryParams['subjectForExternalMail'] ?? '');
-        $this->externalMailHtmlUri = (string)($parsedBody['externalMailHtmlUri'] ?? $queryParams['externalMailHtmlUri'] ?? '');
-        $this->externalMailPlainUri = (string)($parsedBody['externalMailPlainUri'] ?? $queryParams['externalMailPlainUri'] ?? '');
+        $this->external = (array)($parsedBody['external'] ?? $queryParams['external'] ?? []);
+        $this->external['subject'] = (string)($this->external['subject'] ?? '');
+        $this->external['htmlUri'] = (string)($this->external['htmlUri'] ?? '');
+        $this->external['plainUri'] = (string)($this->external['plainUri'] ?? '');
+        $this->isExternal = (bool)($this->external['send'] ?? false);
 
         $this->quickMail = (array)($parsedBody['quickmail'] ?? $queryParams['quickmail'] ?? []);
+        $this->quickMail['senderName'] = (string)($this->quickMail['senderName'] ?? '');
+        $this->quickMail['senderEmail'] = (string)($this->quickMail['senderEmail'] ?? '');
+        $this->quickMail['subject'] = (string)($this->quickMail['subject'] ?? '');
+        $this->quickMail['message'] = (string)($this->quickMail['message'] ?? '');
+        $this->quickMail['breakLines'] = (bool)($this->quickMail['breakLines'] ?? false);
+        $this->isQuickMail = (bool)($this->quickMail['send'] ?? false);
 
         $this->mailGroupUids = $parsedBody['mailGroupUid'] ?? $queryParams['mailGroupUid'] ?? [];
         $this->scheduleSendAll = (bool)($parsedBody['scheduleSendAll'] ?? $queryParams['scheduleSendAll'] ?? false);
@@ -170,7 +181,7 @@ class MailController extends AbstractController
         // get module name of the selected page in the page tree
         if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
             // mail module
-            if (($this->pageInfo['doktype'] ?? 0) == 254) {
+            if (($this->pageInfo['doktype'] ?? 0) === 254) {
                 // Add module data to view
                 $this->view->assignMultiple($this->getModuleData());
                 if ($this->reset) {
@@ -178,12 +189,37 @@ class MailController extends AbstractController
                 }
             } else {
                 if ($this->id) {
-                    ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'));
+                    // a subpage of a mail folder is selected -> redirect user to settings page
+                    // todo check if there is a open, not yet sent mail of this page and open it
+                    $openMails = GeneralUtility::makeInstance(SysDmailRepository::class)->findOpenMailsByPageId($this->pageInfo['pid']);
+                    foreach ($openMails as $openMail) {
+                        if ($openMail['uid'] === $this->id) {
+                            $uri = $this->buildUriFromRoute(
+                                'Mail_Mail',
+                                [
+                                    'id' => $this->pageInfo['pid'],
+                                    'cmd' => Action::WIZARD_STEP_SETTINGS,
+                                    'mailUid' => $openMail['uid'],
+                                    'fetchAtOnce' => 1
+                                ]
+                            );
+                            return new RedirectResponse($uri);
+                        }
+                    }
+
+                    $uri = $this->buildUriFromRoute(
+                        'Mail_Mail',
+                        [
+                            'id' => $this->pageInfo['pid'],
+                            'cmd' => Action::WIZARD_STEP_SETTINGS,
+                            'createMailFromPageUid' => $this->id,
+                            'fetchAtOnce' => 1
+                        ]
+                    );
+                    return new RedirectResponse($uri);
                 }
             }
         } else {
-            // Todo search for dmail modules the tree up and if found open the wizard settings step of the selected page
-            ViewUtility::addInfoToFlashMessageQueue('Todo search for dmail modules the tree up and if found open the wizard settings step of the selected page', 'Todo');
             ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_directmail'));
         }
 
@@ -282,7 +318,9 @@ class MailController extends AbstractController
 
         switch ((string)$this->getCurrentAction()) {
             case Action::WIZARD_STEP_SETTINGS:
-                // step 2: create the Direct Mail record, or use existing
+
+                // step 2: create mail record or use existing
+
                 $this->currentStep = 2;
                 $moduleData['navigation']['currentStep'] = $this->currentStep;
                 $moduleData['info'] = [
@@ -292,11 +330,8 @@ class MailController extends AbstractController
                 // greyed out next-button if fetching is not successful (on error)
                 $fetchError = true;
 
-                $quickmail = $this->quickMail;
-                $quickmail['send'] = $quickmail['send'] ?? false;
-
-                // internal page
-                if ($this->createMailFromPageUid && !$quickmail['send']) {
+                if ($this->isInternal) {
+                    // create mail from internal page
                     $newUid = $this->createMailRecordFromInternalPage($this->createMailFromPageUid, $this->pageTSConfiguration,
                         $this->createMailForLanguageUid);
                     if (is_numeric($newUid)) {
@@ -304,7 +339,7 @@ class MailController extends AbstractController
                         // Read new record (necessary because TCEmain sets default field values)
                         $mailData = $sysDmailRepository->findByUid($newUid);
                         // fetch the data
-                        if ($this->fetchAtOnce) {
+                        if (!$this->isQuickMail) {
                             $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                         }
 
@@ -312,13 +347,14 @@ class MailController extends AbstractController
                     } else {
                         ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
                     }
-                } // external URL
+                }
                 else {
-                    if ($this->subjectForExternalMail != '' && !$quickmail['send']) {
+                    // external URL
+                    if ($this->isExternal) {
                         $newUid = $this->createMailRecordFromExternalUrls(
-                            $this->subjectForExternalMail,
-                            $this->externalMailHtmlUri,
-                            $this->externalMailPlainUri,
+                            $this->external['subject'],
+                            $this->external['htmlUri'],
+                            $this->external['plainUri'],
                             $this->pageTSConfiguration
                         );
                         if (is_numeric($newUid)) {
@@ -326,45 +362,42 @@ class MailController extends AbstractController
                             // Read new record (necessary because TCEmain sets default field values)
                             $mailData = $sysDmailRepository->findByUid($newUid);
                             // fetch the data
-                            if ($this->fetchAtOnce) {
-                                $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-                            }
+                            $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
 
                             $moduleData['info']['external']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                         } else {
-                            // TODO: Error message - Error while adding the DB set
                             $this->error = 'no_valid_url';
-                            ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URL: ' . $this->externalMailHtmlUri,
+                            ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URL: ' . $this->external['htmlUri'],
                                 LanguageUtility::getLL('dmail_error'));
                         }
-                    } // Quickmail
+                    }
                     else {
-                        if ($quickmail['send']) {
-                            $temp = $this->createQuickMail($quickmail);
-                            if (!$temp['errorTitle']) {
-                                $fetchError = false;
-                            }
+                        // Quick mail
+                        if ($this->isQuickMail) {
+                            $temp = $this->createQuickMail($this->quickMail);
                             if ($temp['errorTitle']) {
                                 ViewUtility::addErrorToFlashMessageQueue($temp['errorText'], $temp['errorTitle']);
+                            } else {
+                                $fetchError = false;
                             }
                             if ($temp['warningTitle']) {
                                 ViewUtility::addWarningToFlashMessageQueue($temp['warningText'], $temp['warningTitle']);
                             }
 
-                            // Todo Check if we do not need the newly created quick mail here
                             $mailData = $sysDmailRepository->findByUid($this->mailUid);
 
                             $moduleData['info']['quickmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
-                            $moduleData['info']['quickmail']['senderName'] = htmlspecialchars($quickmail['senderName'] ?? '');
-                            $moduleData['info']['quickmail']['senderEmail'] = htmlspecialchars($quickmail['senderEmail'] ?? '');
-                            $moduleData['info']['quickmail']['subject'] = htmlspecialchars($quickmail['subject'] ?? '');
-                            $moduleData['info']['quickmail']['message'] = htmlspecialchars($quickmail['message'] ?? '');
-                            $moduleData['info']['quickmail']['breakLines'] = ($quickmail['breakLines'] ?? false) ? (int)$quickmail['breakLines'] : 0;
-                        } // existing dmail
+                            $moduleData['info']['quickmail']['senderName'] = $this->quickMail['senderName'];
+                            $moduleData['info']['quickmail']['senderEmail'] = $this->quickMail['senderEmail'];
+                            $moduleData['info']['quickmail']['subject'] = $this->quickMail['subject'];
+                            $moduleData['info']['quickmail']['message'] = $this->quickMail['message'];
+                            $moduleData['info']['quickmail']['breakLines'] = $this->quickMail['breakLines'];
+                        }
                         else {
-                            if ($mailData) {
-                                if ($mailData['type'] == '1' && (empty($mailData['HTMLParams']) || empty($mailData['plainParams']))) {
-                                    // it's a quickmail
+                            // existing mail
+                            if ($this->isOpen && $mailData) {
+                                if ($mailData['type'] === MailType::EXTERNAL && (empty($mailData['HTMLParams']) || empty($mailData['plainParams']))) {
+                                    // it's a quick/external mail
                                     $fetchError = false;
 
                                     $moduleData['info']['dmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
@@ -379,9 +412,7 @@ class MailController extends AbstractController
                                         ViewUtility::addWarningToFlashMessageQueue($temp['warningText'], $temp['warningTitle']);
                                     }
                                 } else {
-                                    if ($this->fetchAtOnce) {
-                                        $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-                                    }
+                                    $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
 
                                     $moduleData['info']['dmail']['cmd'] = ($mailData['type'] === MailType::INTERNAL) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
                                 }
@@ -394,7 +425,7 @@ class MailController extends AbstractController
                 $moduleData['navigation']['next'] = true;
                 $moduleData['navigation']['nextError'] = $fetchError;
 
-                if (!$fetchError && $this->fetchAtOnce) {
+                if (!$fetchError && !$this->isQuickMail) {
                     ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_wiz2_fetch_success'));
                 }
                 $moduleData['info']['table'] = is_array($mailData) ? $this->getGroupedMailSettings($mailData) : '';
@@ -551,7 +582,7 @@ class MailController extends AbstractController
     protected function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
     {
         $newRecord = [
-            'type' => 0,
+            'type' => MailType::INTERNAL,
             'pid' => $parameters['pid'] ?? 0,
             'from_email' => $parameters['from_email'] ?? '',
             'from_name' => $parameters['from_name'] ?? '',
@@ -623,16 +654,16 @@ class MailController extends AbstractController
     /**
      * Creates a mail record from an external url
      * @param string $subject Subject of the newsletter
-     * @param string $externalUrlHtml Link to the HTML version
-     * @param string $externalUrlPlain Linkt to the text version
+     * @param string $htmlUri Link to the HTML version
+     * @param string $plainUri Linkt to the text version
      * @param array $parameters Additional newsletter parameters
      *
      * @return int|bool Error or warning message produced during the process
      */
-    protected function createMailRecordFromExternalUrls(string $subject, string $externalUrlHtml, string $externalUrlPlain, array $parameters): bool|int
+    protected function createMailRecordFromExternalUrls(string $subject, string $htmlUri, string $plainUri, array $parameters): bool|int
     {
         $newRecord = [
-            'type' => 1,
+            'type' => MailType::EXTERNAL,
             'pid' => $parameters['pid'] ?? 0,
             'subject' => $subject,
             'from_email' => $parameters['from_email'] ?? '',
@@ -660,21 +691,21 @@ class MailController extends AbstractController
             $newRecord['encoding'] = $parameters['direct_mail_encoding'];
         }
 
-        $urlParts = @parse_url($externalUrlPlain);
+        $urlParts = @parse_url($plainUri);
         // No plain text url
-        if (!$externalUrlPlain || $urlParts === false || !$urlParts['host']) {
+        if (!$plainUri || $urlParts === false || !$urlParts['host']) {
             $newRecord['plainParams'] = '';
             $newRecord['sendOptions'] &= 254;
         } else {
-            $newRecord['plainParams'] = $externalUrlPlain;
+            $newRecord['plainParams'] = $plainUri;
         }
 
         // No html url
-        $urlParts = @parse_url($externalUrlHtml);
-        if (!$externalUrlHtml || $urlParts === false || !$urlParts['host']) {
+        $urlParts = @parse_url($htmlUri);
+        if (!$htmlUri || $urlParts === false || !$urlParts['host']) {
             $newRecord['sendOptions'] &= 253;
         } else {
-            $newRecord['HTMLParams'] = $externalUrlHtml;
+            $newRecord['HTMLParams'] = $htmlUri;
         }
 
         // save to database
@@ -704,11 +735,11 @@ class MailController extends AbstractController
     {
         return [
             'id' => $this->id,
-            'senderName' => htmlspecialchars($this->quickMail['senderName'] ?? BackendUserUtility::getBackendUser()->user['realName']),
-            'senderMail' => htmlspecialchars($this->quickMail['senderEmail'] ?? BackendUserUtility::getBackendUser()->user['email']),
-            'subject' => htmlspecialchars($this->quickMail['subject'] ?? ''),
-            'message' => htmlspecialchars($this->quickMail['message'] ?? ''),
-            'breakLines' => (bool)($this->quickMail['breakLines'] ?? false),
+            'senderName' => $this->quickMail['senderName'] ?: BackendUserUtility::getBackendUser()->user['realName'],
+            'senderEmail' => $this->quickMail['senderEmail'] ?: BackendUserUtility::getBackendUser()->user['email'],
+            'subject' => $this->quickMail['subject'],
+            'message' => $this->quickMail['message'],
+            'breakLines' => $this->quickMail['breakLines'],
         ];
     }
 
@@ -735,15 +766,13 @@ class MailController extends AbstractController
             'organisation' => $this->pageTSConfiguration['organisation'] ?? '',
             'authcode_fieldList' => $this->pageTSConfiguration['authcode_fieldList'] ?? '',
             'plainParams' => '',
+            'sendOptions' => 1,
+            'long_link_rdct_url' => BackendDataUtility::getBaseUrl((int)$this->pageTSConfiguration['pid']),
+            'subject' => $indata['subject'],
+            'type' => MailType::EXTERNAL,
+            'pid' => $this->pageInfo['uid'],
+            'charset' => $this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8',
         ];
-
-        // always plaintext
-        $dmail['sys_dmail']['NEW']['sendOptions'] = 1;
-        $dmail['sys_dmail']['NEW']['long_link_rdct_url'] = BackendDataUtility::getBaseUrl((int)$this->pageTSConfiguration['pid']);
-        $dmail['sys_dmail']['NEW']['subject'] = $indata['subject'];
-        $dmail['sys_dmail']['NEW']['type'] = 1;
-        $dmail['sys_dmail']['NEW']['pid'] = $this->pageInfo['uid'];
-        $dmail['sys_dmail']['NEW']['charset'] = $this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8';
 
         // If params set, set default values:
         if (isset($this->pageTSConfiguration['includeMedia'])) {

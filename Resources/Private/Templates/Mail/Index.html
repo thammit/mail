@@ -87,7 +87,7 @@
                 <td class="col-title col-responsive nowrap">
                     {row.subject}
                 </td>
-                <td class="nowrap"><f:translate key="{lllTypePrefix}{row.typeRaw}"/></td>
+                <td class="nowrap"><f:translate key="{lllTypePrefix}{row.type}"/></td>
                 <td class="nowrap">{row.tstamp -> f:format.date(format:'H:i d-m-Y')}</td>
                 <td class="nowrap">{row.renderedsize -> f:format.bytes()}</td>
                 <td class="nowrap"><f:if condition="{row.attachment}">
@@ -102,7 +102,7 @@
                     </f:if>
                 </td>
                 <td class="col-control nowrap">
-                    <f:be.link route="{settings.route}" parameters="{id: settings.mailSysFolderUid, cmd: settings.steps.settings, mailUid: row.uid, fetchAtOnce: 1}" class="btn btn-primary">NEXT</f:be.link>
+                    <f:be.link route="{settings.route}" parameters="{id: settings.mailSysFolderUid, cmd: settings.steps.settings, mailUid: row.uid}" class="btn btn-primary">NEXT</f:be.link>
                 </td>
             </tr>
         </f:for>
@@ -165,7 +165,7 @@
                             </f:for>
                         </td>
                         <td class="col-control nowrap">
-                            <f:be.link route="{settings.route}" parameters="{id: settings.mailSysFolderUid, cmd: settings.steps.settings, createMailFromPageUid: row.uid, fetchAtOnce: 1}" class="btn btn-primary">NEXT</f:be.link>
+                            <f:be.link route="{settings.route}" parameters="{id: settings.mailSysFolderUid, cmd: settings.steps.settings, createMailFromPageUid: row.uid}" class="btn btn-primary">NEXT</f:be.link>
                         </td>
                     </tr>
                 </f:for>
@@ -188,17 +188,17 @@
         <input type="hidden" name="fetchAtOnce" value="1">
         <div class="mb-3">
             <label for="externalMailHtmlUri" class="form-label"><f:translate key="{lll}dmail_HTML_url"/></label>
-            <input id="externalMailHtmlUri" type="url" placeholder="https://" name="externalMailHtmlUri" class="form-control"/>
+            <input id="externalMailHtmlUri" type="url" placeholder="https://" name="external[htmlUri]" class="form-control"/>
         </div>
         <div class="mb-3">
             <label for="externalMailPlainUri" class="form-label"><f:translate key="{lll}dmail_plaintext_url"/></label>
-            <input id="externalMailPlainUri" type="url" placeholder="https://" name="externalMailPlainUri" class="form-control"/>
+            <input id="externalMailPlainUri" type="url" placeholder="https://" name="external[plainUri]" class="form-control"/>
         </div>
         <div class="mb-3">
             <label for="subjectForExternalMail" class="form-label"><f:translate key="{lll}dmail_subject"/></label>
-            <input id="subjectForExternalMail" type="text" placeholder="{f:translate(key: '{lll}dmail_write_subject')}" name="subjectForExternalMail" class="form-control" required/>
+            <input id="subjectForExternalMail" type="text" placeholder="{f:translate(key: '{lll}dmail_write_subject')}" name="external[subject]" class="form-control" required/>
         </div>
-        <button class="btn btn-primary text-uppercase" type="submit" value="1"><f:translate key="{lll}dmail_wiz_next" /></button>
+        <button class="btn btn-primary text-uppercase" type="submit" name="external[send]" value="1"><f:translate key="{lll}dmail_wiz_next" /></button>
     </form>
 </f:section>
 
@@ -213,7 +213,7 @@
         </div>
         <div class="mb-3">
             <label for="quickmailSenderEmail" class="form-label"><f:translate key="{lll}quickmail_sender_email"/></label>
-            <input id="quickmailSenderEmail" type="email" name="quickmail[senderEmail]" value="{data.senderMail}" class="form-control" required/>
+            <input id="quickmailSenderEmail" type="email" name="quickmail[senderEmail]" value="{data.senderEmail}" class="form-control" required/>
         </div>
         <div class="mb-3">
             <label for="quickmailSubject" class="form-label"><f:translate key="{lll}dmail_subject"/></label>
