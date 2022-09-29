@@ -47,9 +47,9 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/preview-text.svg'
     ],
-    'mail-module-group' => [
+    'mail-module-main' => [
         'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/module-group.svg'
+        'source' => 'EXT:mail/Resources/Public/Icons/module-main.svg'
     ],
     'mail-module-configuration' => [
         'provider' => SvgIconProvider::class,

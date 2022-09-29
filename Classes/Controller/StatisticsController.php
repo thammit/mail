@@ -36,7 +36,7 @@ class StatisticsController extends AbstractController
      *
      * @var string
      */
-    protected string $moduleName = 'MailNavFrame_Statistics';
+    protected string $moduleName = 'Mail_Statistics';
 
     protected string $requestUri = '';
 

@@ -4,8 +4,8 @@
 		<header>
 			<description>CSH for Direct Mail Module</description>
 			<type>CSH</type>
-			<fileId>EXT:direct_mail/mod/locallang_csh_web_DirectMailNavFrame</fileId>
-			<csh_table>_MOD_web_DirectMailNavFrame</csh_table>
+			<fileId>EXT:direct_mail/mod/locallang_csh_web_DirectMail</fileId>
+			<csh_table>_MOD_web_DirectMail</csh_table>
 			<keep_original_text>1</keep_original_text>
 			<authorName>Ivan Kartolo</authorName>
 			<authorEmail>ivan.kartolo@gmail.com</authorEmail>

@@ -12,7 +12,7 @@
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
     <div class="mb-4">
         <f:be.infobox state="-1" title="{f:translate(key: '{lll}schedule_select_mailgroup')}">
-            <f:translate key="{lll}schedule_select_mailgroup2"/>
+            <f:format.nl2br><f:translate key="{lll}schedule_select_mailgroup2"/></f:format.nl2br>
         </f:be.infobox>
         <input type="hidden" name="id" value="{final.id}"/>
         <input type="hidden" name="mailUid" value="{final.mailUid}"/>
@@ -38,9 +38,9 @@
                     <f:else>
                         <div class="mb-3 row">
                             <div class="col-12 col-md-6 col-lg-3">
-                                <label class="form-label" for="mailgroups">
-                                    <f:translate key="{lll}schedule_mailgroup"/>
-                                </label>
+                                <p>
+                                    <f:translate key="{lll}schedule_mailgroups"/>
+                                </p>
                                 <f:for each="{final.finalForm.mailGroups}" as="group">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="mailGroupUid[]" value="{group.uid}" id="mailgroups-{group.uid}">
@@ -78,6 +78,7 @@
                 </div>
             </div>
         </div>
+        <f:comment>
         <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" name="isTestMail" id="tx-directmail-sendtestmail-check" value="1"/>
             <label class="form-check-label" for="tx-directmail-sendtestmail-check">
@@ -90,8 +91,9 @@
                 <f:translate key="{lll}schedule_draft"/>
             </label>
         </div>
+        </f:comment>
         <button class="btn btn-lg btn-primary text-uppercase" type="Submit" name="scheduleSendAll" value="1">
-            <f:translate key="{lll}schedule_send_all"/>
+            <f:translate key="{lll}schedule_finish"/>
         </button>
     </div>
 </form>

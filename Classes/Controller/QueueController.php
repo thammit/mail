@@ -22,7 +22,7 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class MailerEngineController extends AbstractController
+class QueueController extends AbstractController
 {
     /**
      * for cmd == 'delete'
@@ -37,7 +37,7 @@ class MailerEngineController extends AbstractController
      *
      * @var string
      */
-    protected string $moduleName = 'MailNavFrame_Status';
+    protected string $moduleName = 'Mail_Status';
 
     protected function init(ServerRequestInterface $request): void
     {
@@ -125,7 +125,7 @@ class MailerEngineController extends AbstractController
         // Invoke engine
         if ($enableTrigger) {
             $moduleUrl = $this->buildUriFromRoute(
-                'MailNavFrame_Status',
+                'Mail_Status',
                 [
                     'id' => $this->id,
                     'invokeMailerEngine' => 1,

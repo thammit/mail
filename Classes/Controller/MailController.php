@@ -43,11 +43,11 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
 
-class DmailController extends AbstractController
+class MailController extends AbstractController
 {
-    protected string $route = 'MailNavFrame_Mail';
-    protected string $moduleName = 'MailNavFrame_Mail';
-    protected string $cshKey = '_MOD_MailNavFrame_Mail';
+    protected string $route = 'Mail_Mail';
+    protected string $moduleName = 'Mail_Mail';
+    protected string $cshKey = '_MOD_Mail_Mail';
     protected string $error = '';
     protected int $currentStep = 1;
     protected bool $reset = false;
@@ -165,7 +165,7 @@ class DmailController extends AbstractController
             return new HtmlResponse($this->moduleTemplate->renderContent());
         }
 
-        $this->view->setTemplate('Wizard');
+        $this->view->setTemplate('Mail/Index');
 
         // get module name of the selected page in the page tree
         if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {

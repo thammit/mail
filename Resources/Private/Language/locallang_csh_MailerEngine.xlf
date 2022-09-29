@@ -5,7 +5,7 @@
 			<description>CSH for Direct Mail Mailer Engine Module</description>
 			<type>CSH</type>
 			<fileId>EXT:direct_mail/Resources/Private/Language/locallang_csh_txdirectmailM5</fileId>
-			<csh_table>_MOD_DirectMailNavFrame_txdirectmailM5</csh_table>
+			<csh_table>_MOD_DirectMail_txdirectmailM5</csh_table>
 			<keep_original_text>1</keep_original_text>
 			<authorName>Ivan Kartolo</authorName>
 			<authorEmail>ivan.kartolo@gmail.com</authorEmail>

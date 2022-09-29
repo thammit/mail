@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail;
 
 use MEDIAESSENZ\Mail\Controller\ConfigurationController;
-use MEDIAESSENZ\Mail\Controller\DmailController;
-use MEDIAESSENZ\Mail\Controller\MailerEngineController;
+use MEDIAESSENZ\Mail\Controller\MailController;
+use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\NavFrameController;
 use MEDIAESSENZ\Mail\Controller\RecipientListController;
 use MEDIAESSENZ\Mail\Controller\StatisticsController;
@@ -40,51 +40,50 @@ final class Configuration
         ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
         ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail_group', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmailg.xlf');
         ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail_category', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmailcat.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Mail', 'EXT:mail/Resources/Private/Language/locallang_csh_DirectMail.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_RecipientList', 'EXT:mail/Resources/Private/Language/locallang_csh_RecipientList.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Statistics', 'EXT:mail/Resources/Private/Language/locallang_csh_Statistics.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Status', 'EXT:mail/Resources/Private/Language/locallang_csh_MailerEngine.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_MailNavFrame_Configuration', 'EXT:mail/Resources/Private/Language/locallang_csh_Configuration.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Mail', 'EXT:mail/Resources/Private/Language/locallang_csh_DirectMail.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_RecipientList', 'EXT:mail/Resources/Private/Language/locallang_csh_RecipientList.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Statistics', 'EXT:mail/Resources/Private/Language/locallang_csh_Statistics.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Status', 'EXT:mail/Resources/Private/Language/locallang_csh_MailerEngine.xlf');
+        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Configuration', 'EXT:mail/Resources/Private/Language/locallang_csh_Configuration.xlf');
     }
 
     public static function registerBackendModules(): void
     {
         ExtensionManagementUtility::addModule(
-            'MailNavFrame',
+            'Mail',
             '',
             '',
             '',
             [
-                'routeTarget' => NavFrameController::class . '::indexAction',
                 'access' => 'group,user',
-                'name' => 'MailNavFrame',
-                'iconIdentifier' => 'mail-module-group',
+                'name' => 'Mail',
+                'iconIdentifier' => 'mail-module-main',
                 'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/locallangNavFrame.xlf',
+                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/MainModule.xlf',
                 ],
             ]
         );
 
         ExtensionManagementUtility::addModule(
-            'MailNavFrame',
+            'Mail',
             'Mail',
             'bottom',
             '',
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => DmailController::class . '::indexAction',
+                'routeTarget' => MailController::class . '::indexAction',
                 'access' => 'group,user',
-                'name' => 'MailNavFrame_Mail',
+                'name' => 'Mail_Mail',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-start',
                 'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/locallangDirectMail.xlf',
+                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/MailModule.xlf',
                 ],
             ]
         );
 
         ExtensionManagementUtility::addModule(
-            'MailNavFrame',
+            'Mail',
             'RecipientList',
             'bottom',
             '',
@@ -92,17 +91,17 @@ final class Configuration
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
                 'routeTarget' => RecipientListController::class . '::indexAction',
                 'access' => 'group,user',
-                'name' => 'MailNavFrame_RecipientList',
+                'name' => 'Mail_RecipientList',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-recipient-list',
                 'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/locallangRecipientList.xlf',
+                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/RecipientModule.xlf',
                 ],
             ]
         );
 
         ExtensionManagementUtility::addModule(
-            'MailNavFrame',
+            'Mail',
             'Statistics',
             'bottom',
             '',
@@ -110,35 +109,35 @@ final class Configuration
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
                 'routeTarget' => StatisticsController::class . '::indexAction',
                 'access' => 'group,user',
-                'name' => 'MailNavFrame_Statistics',
+                'name' => 'Mail_Statistics',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-statistics',
                 'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/locallangStatistics.xlf',
+                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/StatisticModule.xlf',
                 ],
             ]
         );
 
         ExtensionManagementUtility::addModule(
-            'MailNavFrame',
+            'Mail',
             'Status',
             'bottom',
             '',
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => MailerEngineController::class . '::indexAction',
+                'routeTarget' => QueueController::class . '::indexAction',
                 'access' => 'group,user',
-                'name' => 'MailNavFrame_Status',
+                'name' => 'Mail_Status',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-status',
                 'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/locallangMailerEngine.xlf',
+                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
                 ],
             ]
         );
 
         ExtensionManagementUtility::addModule(
-            'MailNavFrame',
+            'Mail',
             'Configuration',
             'bottom',
             '',
@@ -146,11 +145,11 @@ final class Configuration
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
                 'routeTarget' => ConfigurationController::class . '::indexAction',
                 'access' => 'group,user',
-                'name' => 'MailNavFrame_Configuration',
+                'name' => 'Mail_Configuration',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-configuration',
                 'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/locallangConfiguration.xlf',
+                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
                 ],
             ]
         );

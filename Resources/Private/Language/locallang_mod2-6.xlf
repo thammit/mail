@@ -712,22 +712,29 @@
 				<source>Save mail settings for recurring mailings</source>
 			</trans-unit>
 			<trans-unit id="schedule_mailgroup" resname="schedule_mailgroup">
-				<source>Available recipient groups</source>
+				<source>Recipient group</source>
+			</trans-unit>
+			<trans-unit id="schedule_mailgroups" resname="schedule_mailgroups">
+				<source>Recipient groups</source>
 			</trans-unit>
 			<trans-unit id="schedule_select_mailgroup" resname="schedule_select_mailgroup">
 				<source>Select recipients and time of sending</source>
 			</trans-unit>
-			<trans-unit id="schedule_select_mailgroup2" resname="schedule_select_mailgroup2">
-				<source>Select recipients and time of sending</source>
+			<trans-unit id="schedule_select_mailgroup2" resname="schedule_select_mailgroup2" xmlspace="preserve">
+				<source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
+				After pressing FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending starts at the given distribution time.]]></source>
 			</trans-unit>
 			<trans-unit id="schedule_send_all" resname="schedule_send_all">
 				<source>Send mail to all selected groups</source>
+			</trans-unit>
+			<trans-unit id="schedule_finish" resname="schedule_finish">
+				<source>Finish</source>
 			</trans-unit>
 			<trans-unit id="schedule_testmail" resname="schedule_testmail">
 				<source>Send this as test mail</source>
 			</trans-unit>
 			<trans-unit id="schedule_time" resname="schedule_time">
-				<source>Distribution time (hhmm dd-mm-yyyy)</source>
+				<source>Distribution time (hh:mm dd-mm-yyyy)</source>
 			</trans-unit>
 			<trans-unit id="select_folder" resname="select_folder">
 				<source>Please select mail folder.</source>

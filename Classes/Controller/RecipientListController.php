@@ -33,8 +33,8 @@ use TYPO3\CMS\Core\Utility\CsvUtility;
 
 class RecipientListController extends AbstractController
 {
-    protected string $moduleName = 'MailNavFrame_RecipientList';
-    protected string $route = 'MailNavFrame_RecipientList';
+    protected string $moduleName = 'Mail_RecipientList';
+    protected string $route = 'Mail_RecipientList';
 
     protected int $group_uid = 0;
     protected string $lCmd = '';

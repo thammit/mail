@@ -9,12 +9,12 @@
 <div class="typo3-fullDoc">
     <div class="module-body t3js-module-body">
         <f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:dmail_folders" />
-	    <table cellspacing="0" cellpadding="0" border="0" width="100%">
+	    <table>
 		    <f:if condition="{pages -> f:count()}">
 			    <f:for each="{pages}" as="page">
 			      <tr>
 			          <td id="dmail_{page.page.uid}">
-			              <a href="#" onclick="top.fsMod.recentIds['DirectMailNavFrame']={page.page.uid};jumpTo(id={page.page.uid},this,dmail_{page.page.uid});">
+			              <a href="#" onclick="top.fsMod.recentIds['DirectMail']={page.page.uid};jumpTo(id={page.page.uid},this,dmail_{page.page.uid});">
 			                  <f:format.raw>{page.icon}</f:format.raw>
 			                  &nbsp; <f:format.htmlspecialchars>[{page.page.uid}] {page.page.title}</f:format.htmlspecialchars>
 			              </a>
