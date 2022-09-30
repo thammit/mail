@@ -330,27 +330,26 @@ class MailController extends AbstractController
                 // greyed out next-button if fetching is not successful (on error)
                 $fetchError = true;
 
-                if ($this->isInternal) {
-                    // create mail from internal page
-                    $newUid = $this->createMailRecordFromInternalPage($this->createMailFromPageUid, $this->pageTSConfiguration,
-                        $this->createMailForLanguageUid);
-                    if (is_numeric($newUid)) {
-                        $this->mailUid = $newUid;
-                        // Read new record (necessary because TCEmain sets default field values)
-                        $mailData = $sysDmailRepository->findByUid($newUid);
-                        // fetch the data
-                        if (!$this->isQuickMail) {
-                            $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-                        }
+                switch (true) {
+                    case $this->isInternal:
+                        // create mail from internal page
+                        $newUid = $this->createMailRecordFromInternalPage($this->createMailFromPageUid, $this->pageTSConfiguration,
+                            $this->createMailForLanguageUid);
+                        if (is_numeric($newUid)) {
+                            $this->mailUid = $newUid;
+                            // Read new record (necessary because TCEmain sets default field values)
+                            $mailData = $sysDmailRepository->findByUid($newUid);
+                            // fetch the data
+                            if (!$this->isQuickMail) {
+                                $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
+                            }
 
-                        $moduleData['info']['internal']['cmd'] = $nextCmd ?: Action::WIZARD_STEP_CATEGORIES;
-                    } else {
-                        ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
-                    }
-                }
-                else {
-                    // external URL
-                    if ($this->isExternal) {
+                            $moduleData['info']['internal']['cmd'] = $nextCmd ?: Action::WIZARD_STEP_CATEGORIES;
+                        } else {
+                            ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
+                        }
+                        break;
+                    case $this->isExternal:
                         $newUid = $this->createMailRecordFromExternalUrls(
                             $this->external['subject'],
                             $this->external['htmlUri'],
@@ -370,55 +369,53 @@ class MailController extends AbstractController
                             ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URL: ' . $this->external['htmlUri'],
                                 LanguageUtility::getLL('dmail_error'));
                         }
-                    }
-                    else {
-                        // Quick mail
-                        if ($this->isQuickMail) {
-                            $temp = $this->createQuickMail($this->quickMail);
-                            if ($temp['errorTitle']) {
-                                ViewUtility::addErrorToFlashMessageQueue($temp['errorText'], $temp['errorTitle']);
-                            } else {
+                        break;
+                    case $this->isQuickMail:
+                        $temp = $this->createQuickMail($this->quickMail);
+                        if ($temp['errorTitle']) {
+                            ViewUtility::addErrorToFlashMessageQueue($temp['errorText'], $temp['errorTitle']);
+                        } else {
+                            $fetchError = false;
+                        }
+                        if ($temp['warningTitle']) {
+                            ViewUtility::addWarningToFlashMessageQueue($temp['warningText'], $temp['warningTitle']);
+                        }
+
+                        $mailData = $sysDmailRepository->findByUid($this->mailUid);
+
+                        $moduleData['info']['quickmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
+                        $moduleData['info']['quickmail']['senderName'] = $this->quickMail['senderName'];
+                        $moduleData['info']['quickmail']['senderEmail'] = $this->quickMail['senderEmail'];
+                        $moduleData['info']['quickmail']['subject'] = $this->quickMail['subject'];
+                        $moduleData['info']['quickmail']['message'] = $this->quickMail['message'];
+                        $moduleData['info']['quickmail']['breakLines'] = $this->quickMail['breakLines'];
+                        break;
+                    case $this->isOpen:
+                        if ($mailData) {
+                            if ($mailData['type'] === MailType::EXTERNAL && (empty($mailData['HTMLParams']) || empty($mailData['plainParams']))) {
+                                // it's a quick/external mail
                                 $fetchError = false;
-                            }
-                            if ($temp['warningTitle']) {
-                                ViewUtility::addWarningToFlashMessageQueue($temp['warningText'], $temp['warningTitle']);
-                            }
 
-                            $mailData = $sysDmailRepository->findByUid($this->mailUid);
+                                $moduleData['info']['dmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
 
-                            $moduleData['info']['quickmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
-                            $moduleData['info']['quickmail']['senderName'] = $this->quickMail['senderName'];
-                            $moduleData['info']['quickmail']['senderEmail'] = $this->quickMail['senderEmail'];
-                            $moduleData['info']['quickmail']['subject'] = $this->quickMail['subject'];
-                            $moduleData['info']['quickmail']['message'] = $this->quickMail['message'];
-                            $moduleData['info']['quickmail']['breakLines'] = $this->quickMail['breakLines'];
-                        }
-                        else {
-                            // existing mail
-                            if ($this->isOpen && $mailData) {
-                                if ($mailData['type'] === MailType::EXTERNAL && (empty($mailData['HTMLParams']) || empty($mailData['plainParams']))) {
-                                    // it's a quick/external mail
-                                    $fetchError = false;
-
-                                    $moduleData['info']['dmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
-
-                                    // add attachment here, since attachment added in 2nd step
-                                    $unserializedMailContent = unserialize(base64_decode($mailData['mailContent']));
-                                    $temp = $this->compileQuickMail($mailData, $unserializedMailContent['plain']['content'] ?? '');
-                                    if ($temp['errorTitle']) {
-                                        ViewUtility::addErrorToFlashMessageQueue($temp['errorText'], $temp['errorTitle']);
-                                    }
-                                    if ($temp['warningTitle']) {
-                                        ViewUtility::addWarningToFlashMessageQueue($temp['warningText'], $temp['warningTitle']);
-                                    }
-                                } else {
-                                    $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-
-                                    $moduleData['info']['dmail']['cmd'] = ($mailData['type'] === MailType::INTERNAL) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
+                                // add attachment here, since attachment added in 2nd step
+                                $unserializedMailContent = unserialize(base64_decode($mailData['mailContent']));
+                                $temp = $this->compileQuickMail($mailData, $unserializedMailContent['plain']['content'] ?? '');
+                                if ($temp['errorTitle']) {
+                                    ViewUtility::addErrorToFlashMessageQueue($temp['errorText'], $temp['errorTitle']);
                                 }
+                                if ($temp['warningTitle']) {
+                                    ViewUtility::addWarningToFlashMessageQueue($temp['warningText'], $temp['warningTitle']);
+                                }
+                            } else {
+                                $fetchError = $this->mailerService->assemble($mailData, $this->pageTSConfiguration);
+
+                                $moduleData['info']['dmail']['cmd'] = ($mailData['type'] === MailType::INTERNAL) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
                             }
                         }
-                    }
+                        break;
+                    default:
+
                 }
 
                 $moduleData['navigation']['back'] = true;
