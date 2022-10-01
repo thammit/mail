@@ -7,6 +7,7 @@ use DateTimeImmutable;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
+use TYPO3\CMS\Extbase\Domain\Model\File;
 
 class Mail extends AbstractEntity
 {
@@ -29,7 +30,7 @@ class Mail extends AbstractEntity
     protected string $plainParams = '';
     protected bool $sent = false;
     protected int $recipients = 0;
-    protected int $size = 0;
+    protected int $renderedSize = 0;
     protected string $mailContent = '';
     protected string $queryInfo = '';
     protected DateTimeImmutable $scheduled;
@@ -79,7 +80,7 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return ObjectStorage
+     * @return ObjectStorage<File>
      */
     public function getAttachment(): ObjectStorage
     {
@@ -87,7 +88,7 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @param ObjectStorage $attachment
+     * @param ObjectStorage<File> $attachment
      * @return Mail
      */
     public function setAttachment(ObjectStorage $attachment): Mail
@@ -387,18 +388,18 @@ class Mail extends AbstractEntity
     /**
      * @return int
      */
-    public function getSize(): int
+    public function getRenderedSize(): int
     {
-        return $this->size;
+        return $this->renderedSize;
     }
 
     /**
-     * @param int $size
+     * @param int $renderedSize
      * @return Mail
      */
-    public function setSize(int $size): Mail
+    public function setRenderedSize(int $renderedSize): Mail
     {
-        $this->size = $size;
+        $this->renderedSize = $renderedSize;
         return $this;
     }
 

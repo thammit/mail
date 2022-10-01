@@ -22,7 +22,7 @@ CREATE TABLE tx_mail_domain_model_mail (
     html_params varchar(80) DEFAULT '' NOT NULL,
     plain_params varchar(80) DEFAULT '' NOT NULL,
     sent tinyint(4) unsigned DEFAULT '0' NOT NULL,
-    size int(11) unsigned DEFAULT '0' NOT NULL,
+    rendered_size int(11) unsigned DEFAULT '0' NOT NULL,
     mail_content mediumblob,
     query_info mediumblob,
     scheduled int(10) unsigned DEFAULT '0' NOT NULL,

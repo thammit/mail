@@ -30,7 +30,7 @@ return [
             'sent' => [
                 'fieldName' => 'issent'
             ],
-            'size' => [
+            'renderedSize' => [
                 'fieldName' => 'renderedsize'
             ],
             'mailContent' => [
