@@ -631,8 +631,7 @@ class MailController extends AbstractController
                 ],
             ];
 
-            /* @var $dataHandler DataHandler */
-            $dataHandler = $this->getDataHandler;
+            $dataHandler = $this->getDataHandler();
             $dataHandler->start($tcemainData, []);
             $dataHandler->process_datamap();
             return $dataHandler->substNEWwithIDs['NEW'];
@@ -706,8 +705,7 @@ class MailController extends AbstractController
                 ],
             ];
 
-            /* @var $dataHandler DataHandler */
-            $dataHandler = $this->getDataHandler;
+            $dataHandler = $this->getDataHandler();
             $dataHandler->start($tcemainData, []);
             $dataHandler->process_datamap();
             return $dataHandler->substNEWwithIDs['NEW'];

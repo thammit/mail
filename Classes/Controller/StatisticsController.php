@@ -278,7 +278,7 @@ class StatisticsController extends AbstractController
                     $data[$this->table][$this->uid]['module_sys_dmail_html'] = $this->indata['html'] ? 1 : 0;
 
                     $dataHandler = $this->getDataHandler();
-                    $dataHandler->stripslashes_values = 0;
+//                    $dataHandler->stripslashes_values = 0;
                     $dataHandler->start($data, []);
                     $dataHandler->process_datamap();
                 }
