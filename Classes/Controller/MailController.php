@@ -180,14 +180,13 @@ class MailController extends AbstractController
                     // todo check if there is a open, not yet sent mail of this page and open it
                     $openMails = $this->sysDmailRepository->findOpenMailsByPageId($this->pageInfo['pid']);
                     foreach ($openMails as $openMail) {
-                        if ($openMail['uid'] === $this->id) {
+                        if ($openMail['page'] === $this->id) {
                             $uri = $this->uriBuilder->buildUriFromRoute(
                                 'Mail_Mail',
                                 [
                                     'id' => $this->pageInfo['pid'],
                                     'cmd' => Action::WIZARD_STEP_SETTINGS,
                                     'mailUid' => $openMail['uid'],
-                                    'fetchAtOnce' => 1
                                 ]
                             );
                             return new RedirectResponse($uri);
@@ -200,7 +199,6 @@ class MailController extends AbstractController
                             'id' => $this->pageInfo['pid'],
                             'cmd' => Action::WIZARD_STEP_SETTINGS,
                             'createMailFromPageUid' => $this->id,
-                            'fetchAtOnce' => 1
                         ]
                     );
                     return new RedirectResponse($uri);

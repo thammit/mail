@@ -66,7 +66,7 @@ class SysDmailRepository extends AbstractRepository
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder
-            ->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type')
+            ->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type', 'page')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)),
