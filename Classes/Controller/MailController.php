@@ -172,7 +172,7 @@ class MailController extends AbstractController
                 // Add module data to view
                 $this->view->assignMultiple($this->getModuleData());
                 if ($this->reset) {
-                    return new RedirectResponse($this->buildUriFromRoute($this->route, ['id' => $this->id]));
+                    return new RedirectResponse($this->uriBuilder->buildUriFromRoute($this->route, ['id' => $this->id]));
                 }
             } else {
                 if ($this->id) {
@@ -181,7 +181,7 @@ class MailController extends AbstractController
                     $openMails = $this->sysDmailRepository->findOpenMailsByPageId($this->pageInfo['pid']);
                     foreach ($openMails as $openMail) {
                         if ($openMail['uid'] === $this->id) {
-                            $uri = $this->buildUriFromRoute(
+                            $uri = $this->uriBuilder->buildUriFromRoute(
                                 'Mail_Mail',
                                 [
                                     'id' => $this->pageInfo['pid'],
@@ -194,7 +194,7 @@ class MailController extends AbstractController
                         }
                     }
 
-                    $uri = $this->buildUriFromRoute(
+                    $uri = $this->uriBuilder->buildUriFromRoute(
                         'Mail_Mail',
                         [
                             'id' => $this->pageInfo['pid'],
@@ -632,7 +632,7 @@ class MailController extends AbstractController
             ];
 
             /* @var $dataHandler DataHandler */
-            $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+            $dataHandler = $this->getDataHandler;
             $dataHandler->start($tcemainData, []);
             $dataHandler->process_datamap();
             return $dataHandler->substNEWwithIDs['NEW'];
@@ -707,7 +707,7 @@ class MailController extends AbstractController
             ];
 
             /* @var $dataHandler DataHandler */
-            $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+            $dataHandler = $this->getDataHandler;
             $dataHandler->start($tcemainData, []);
             $dataHandler->process_datamap();
             return $dataHandler->substNEWwithIDs['NEW'];
@@ -1188,13 +1188,7 @@ class MailController extends AbstractController
         */
         // Setting flags and update the record:
         if ($sentFlag && $this->action->equals(Action::WIZARD_STEP_FINAL)) {
-
-            $connection = $this->getConnection('sys_dmail');
-            $connection->update(
-                'sys_dmail',
-                ['issent' => 1],
-                ['uid' => $this->mailUid]
-            );
+            $this->sysDmailRepository->update($this->mailUid, ['issent' => 1]);
         }
     }
 
@@ -1249,24 +1243,13 @@ class MailController extends AbstractController
                     LanguageUtility::getLL('send_was_scheduled'), true
                 );
             }
-            $connection = $this->getConnection('sys_dmail');
-            $connection->update(
-                'sys_dmail',
-                $updateFields,
-                ['uid' => $this->mailUid]
-            );
+            $this->sysDmailRepository->update($this->mailUid, $updateFields);
             $sentFlag = true;
         }
 
         // Setting flags and update the record:
         if ($sentFlag) {
-
-            $connection = $this->getConnection('sys_dmail');
-            $connection->update(
-                'sys_dmail',
-                ['issent' => 1],
-                ['uid' => $this->mailUid]
-            );
+            $this->sysDmailRepository->update($this->mailUid, ['issent' => 1]);
         }
     }
 

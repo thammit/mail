@@ -161,5 +161,19 @@ class SysDmailGroupRepository extends AbstractRepository
         return $mailGroup;
     }
 
+    /**
+     * @param int $uid
+     * @param array $updateData
+     * @return int
+     */
+    public function update(int $uid, array $updateData): int
+    {
+        $connection = $this->getConnection();
+        return $connection->update(
+            $this->table,
+            $updateData,
+            ['uid' => $uid]
+        );
+    }
 
 }

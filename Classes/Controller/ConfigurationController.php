@@ -38,9 +38,7 @@ class ConfigurationController extends AbstractController
         $this->initConfiguration($request);
         $this->updatePageTS();
 
-        $module = $this->getModulName();
-
-        if ($module === Constants::MAIL_MODULE_NAME) {
+        if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
                 $this->setDefaultValues();

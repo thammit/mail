@@ -215,7 +215,7 @@ class RecipientListController extends AbstractController
         $data['sysDmailGroupIcon'] = $this->iconFactory->getIconForRecord('sys_dmail_group', [], Icon::SIZE_SMALL);
 
         // Import
-        $data['moduleUrl'] = $this->buildUriFromRoute(
+        $data['moduleUrl'] = $this->uriBuilder->buildUriFromRoute(
             $this->moduleName,
             [
                 'id' => $this->id,
@@ -446,12 +446,7 @@ class RecipientListController extends AbstractController
                             GeneralUtility::trimExplode(',', $fields, true));
                         $this->downloadCSV($rows);
                     } else {
-                        $message = ViewUtility::getFlashMessage(
-                            '',
-                            LanguageUtility::getLL('mailgroup_table_disallowed_csv'),
-                            AbstractMessage::ERROR
-                        );
-                        $this->messageQueue->addMessage($message);
+                        ViewUtility::addErrorToFlashMessageQueue('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'));
                     }
                 }
             }
@@ -599,20 +594,14 @@ class RecipientListController extends AbstractController
                     }
                 }
             }
-            $updateFields = [
-                'whichtables' => intval($whichTables),
+
+            $this->sysDmailGroupRepository->update((int)$mailGroup['uid'], [
+                'whichtables' => $whichTables,
                 'query' => $this->MOD_SETTINGS['queryConfig'],
-            ];
-
-            $connection = $this->getConnection('sys_dmail_group');
-
-            $connection->update(
-                'sys_dmail_group', // table
-                $updateFields,
-                ['uid' => intval($mailGroup['uid'])] // where
-            );
+            ]);
             $mailGroup = BackendUtility::getRecord('sys_dmail_group', $mailGroup['uid']);
         }
+
         return $mailGroup;
     }
 

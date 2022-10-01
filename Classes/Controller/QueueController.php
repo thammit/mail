@@ -73,7 +73,7 @@ class QueueController extends AbstractController
 
         if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
             if ($this->action->equals(Action::DELETE_MAIL) && $this->uid) {
-                $this->deleteDMail($this->uid);
+                $this->sysDmailRepository->delete($this->uid);
             }
 
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
@@ -148,26 +148,5 @@ class QueueController extends AbstractController
 
         // show delete icon if newsletter hasn't been sent, or not yet finished sending
         return ($mail['scheduled_begin'] === 0 || $mail['scheduled_end'] === 0);
-    }
-
-    /**
-     * Delete existing dmail record
-     *
-     * @param int $uid Record uid to be deleted
-     *
-     * @return void
-     */
-    public function deleteDMail(int $uid): void
-    {
-        $table = 'sys_dmail';
-        if ($GLOBALS['TCA'][$table]['ctrl']['delete']) {
-            $connection = $this->getConnection($table);
-
-            $connection->update(
-                $table,
-                [$GLOBALS['TCA'][$table]['ctrl']['delete'] => 1],
-                ['uid' => $uid]
-            );
-        }
     }
 }

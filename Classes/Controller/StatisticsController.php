@@ -133,9 +133,8 @@ class StatisticsController extends AbstractController
         }
 
         $this->view->setTemplate('Statistics');
-        $module = $this->getModulName();
 
-        if ($module === Constants::MAIL_MODULE_NAME) {
+        if ($this->getModulName() === Constants::MAIL_MODULE_NAME) {
             // Direct mail module
             if (($this->pageInfo['doktype'] ?? 0) == 254) {
                 $this->view->assignMultiple(
@@ -331,7 +330,6 @@ class StatisticsController extends AbstractController
             $this->categories = $this->tempRepository->makeCategories($this->table, $row, $this->sysLanguageUid);
             $data = [
                 'icon' => $this->iconFactory->getIconForRecord($this->table, $row)->render(),
-                'iconActionsOpen' => $iconActionsOpen = $this->getIconActionsOpen(),
                 'name' => htmlspecialchars($row['name']),
                 'email' => htmlspecialchars($row['email']),
                 'uid' => $row['uid'],
@@ -743,7 +741,7 @@ class StatisticsController extends AbstractController
         // ******************
         // Returned mails
         // ******************
-        $thisurl = $this->buildUriFromRoute(
+        $thisurl = $this->uriBuilder->buildUriFromRoute(
             $this->moduleName,
             [
                 'id' => $this->id,
@@ -1286,7 +1284,7 @@ class StatisticsController extends AbstractController
      */
     protected function linkDMail_record(string $str, int $uid, string $aTitle = ''): string
     {
-        $moduleUrl = $this->buildUriFromRoute(
+        $moduleUrl = $this->uriBuilder->buildUriFromRoute(
             $this->moduleName,
             [
                 'id' => $this->id,

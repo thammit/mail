@@ -16,23 +16,17 @@ use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
-use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
-use TYPO3\CMS\Core\Http\Uri;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
-use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -49,9 +43,6 @@ abstract class AbstractController
     protected string $siteIdentifier;
     protected Action $action;
 
-    protected int $backendUserId = 0;
-    protected string $backendUserName = '';
-    protected string $backendUserEmail = '';
     protected string $backendUserPermissions = '';
 
     protected array $pageTSConfiguration = [];
@@ -62,12 +53,11 @@ abstract class AbstractController
     protected ModuleTemplate $moduleTemplate;
     protected IconFactory $iconFactory;
     protected PageRenderer $pageRenderer;
+    protected StandaloneView $view;
     protected SiteFinder $siteFinder;
+    protected UriBuilder $uriBuilder;
     protected MailerService $mailerService;
     protected RecipientService $recipientService;
-    protected EventDispatcherInterface $eventDispatcher;
-    protected StandaloneView $view;
-    protected FlashMessageQueue $messageQueue;
     protected SysDmailRepository $sysDmailRepository;
     protected SysDmailGroupRepository $sysDmailGroupRepository;
     protected SysDmailMaillogRepository $sysDmailMaillogRepository;
@@ -75,6 +65,7 @@ abstract class AbstractController
     protected TempRepository $tempRepository;
     protected TtAddressRepository $ttAddressRepository;
     protected FeUsersRepository $feUsersRepository;
+    protected EventDispatcherInterface $eventDispatcher;
 
     /**
      * Constructor Method
@@ -85,6 +76,7 @@ abstract class AbstractController
         PageRenderer $pageRenderer = null,
         StandaloneView $view = null,
         SiteFinder $siteFinder = null,
+        UriBuilder $uriBuilder = null,
         MailerService $mailerService = null,
         RecipientService $recipientService = null,
         SysDmailRepository $sysDmailRepository = null,
@@ -99,7 +91,9 @@ abstract class AbstractController
         $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
         $this->iconFactory = $iconFactory ?? GeneralUtility::makeInstance(IconFactory::class);
         $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
+        $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
         $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
+        $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
         $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
         $this->recipientService = $recipientService ?? GeneralUtility::makeInstance(RecipientService::class);
         $this->recipientService->setPageId($this->id);
@@ -111,15 +105,13 @@ abstract class AbstractController
         $this->ttAddressRepository = $ttAddressRepository ?? GeneralUtility::makeInstance(TtAddressRepository::class);
         $this->feUsersRepository = $feUsersRepository ?? GeneralUtility::makeInstance(FeUsersRepository::class);
         $this->eventDispatcher = $eventDispatcher ?? GeneralUtility::makeInstance(EventDispatcherInterface::class);
-        $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
+
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
+
         $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
         $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
         $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
-        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
-        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
-        $this->backendUserName = BackendUserUtility::getBackendUser()->user['realName'] ?? '';
-        $this->backendUserEmail = BackendUserUtility::getBackendUser()->user['email'] ?? '';
-        $this->backendUserId = BackendUserUtility::getBackendUser()->user['uid'] ?? '';
         $this->view->assignMultiple([
             'backendUser' => [
                 'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
@@ -160,8 +152,6 @@ abstract class AbstractController
             $this->userTable = $this->pageTSConfiguration['userTable'];
             $this->allowedTables[] = $this->userTable;
         }
-
-        $this->messageQueue = ViewUtility::getFlashMessageQueue();
     }
 
     protected function backendUserHasModuleAccess(): bool
@@ -215,37 +205,6 @@ abstract class AbstractController
     protected function getDataHandler(): DataHandler
     {
         return GeneralUtility::makeInstance(DataHandler::class);
-    }
-
-    /**
-     * @throws RouteNotFoundException
-     */
-    protected function buildUriFromRoute($name, $parameters = []): Uri
-    {
-        return GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
-            $name,
-            $parameters
-        );
-    }
-
-    protected function getTempPath(): string
-    {
-        return Environment::getPublicPath() . '/typo3temp/';
-    }
-
-    protected function getDmailerLogFilePath(): string
-    {
-        return $this->getTempPath() . 'tx_directmail_dmailer_log.txt';
-    }
-
-    protected function getDmailerLockFilePath(): string
-    {
-        return $this->getTempPath() . 'tx_directmail_cron.lock';
-    }
-
-    protected function getIconActionsOpen(): Icon
-    {
-        return $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL);
     }
 
     /**
