@@ -8,13 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Enumeration\Action;
-use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
@@ -25,7 +19,6 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
@@ -134,7 +127,7 @@ class StatisticsController extends AbstractController
 
         if ($this->backendUserHasModuleAccess() === false) {
             $this->view->setTemplate('NoAccess');
-            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            ViewUtility::addWarningToFlashMessageQueue('If no access or if ID == zero', 'No Access');
             $this->moduleTemplate->setContent($this->view->render());
             return new HtmlResponse($this->moduleTemplate->renderContent());
         }
@@ -153,15 +146,11 @@ class StatisticsController extends AbstractController
                 );
             } else {
                 if ($this->id != 0) {
-                    $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
-                        AbstractMessage::WARNING);
-                    $this->messageQueue->addMessage($message);
+                    ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'));
                 }
             }
         } else {
-            $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_stat'),
-                AbstractMessage::WARNING);
-            $this->messageQueue->addMessage($message);
+            ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_stat'));
         }
 
         /**
@@ -183,7 +172,7 @@ class StatisticsController extends AbstractController
         if (!$this->mailUid) {
             $theOutput['dataPageInfo'] = $this->displayPageInfo();
         } else {
-            $row = GeneralUtility::makeInstance(SysDmailRepository::class)->findById($this->mailUid);
+            $row = $this->sysDmailRepository->findById($this->mailUid);
             if (is_array($row)) {
                 // COMMAND:
                 switch ((string)$this->getCurrentAction()) {
@@ -218,7 +207,7 @@ class StatisticsController extends AbstractController
     protected function displayPageInfo(): array|string
     {
         // Here the dmail list is rendered:
-        $rows = GeneralUtility::makeInstance(SysDmailRepository::class)->selectForPageInfo($this->id);
+        $rows = $this->sysDmailRepository->selectForPageInfo($this->id);
         $data = [];
         if (is_array($rows)) {
             foreach ($rows as $row) {
@@ -301,10 +290,10 @@ class StatisticsController extends AbstractController
 
         switch ($this->table) {
             case 'tt_address':
-                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUidAndPermission($this->uid, $this->backendUserPermissions);
+                $rows = $this->ttAddressRepository->findByUidAndPermission($this->uid, $this->backendUserPermissions);
                 break;
             case 'fe_users':
-                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->findByUidAndPermissions($this->uid, $this->backendUserPermissions);
+                $rows = $this->feUsersRepository->findByUidAndPermissions($this->uid, $this->backendUserPermissions);
                 break;
             default:
                 // do nothing
@@ -339,7 +328,7 @@ class StatisticsController extends AbstractController
                 'returnUrl' => $this->requestUri,
             ]);
 
-            $this->categories = GeneralUtility::makeInstance(TempRepository::class)->makeCategories($this->table, $row, $this->sysLanguageUid);
+            $this->categories = $this->tempRepository->makeCategories($this->table, $row, $this->sysLanguageUid);
             $data = [
                 'icon' => $this->iconFactory->getIconForRecord($this->table, $row)->render(),
                 'iconActionsOpen' => $iconActionsOpen = $this->getIconActionsOpen(),
@@ -376,12 +365,11 @@ class StatisticsController extends AbstractController
      */
     protected function mailResponsesGeneral(int $mailingId): array
     {
-        $sysDmailMailLogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
-        $table = $sysDmailMailLogRepository->countSysDmailMaillogsResponseTypeByMid($mailingId);
+        $table = $this->sysDmailMaillogRepository->countSysDmailMaillogsResponseTypeByMid($mailingId);
         $table = $this->changekeyname($table, 'counter', 'COUNT(*)');
 
         // Plaintext/HTML
-        $res = $sysDmailMailLogRepository->countSysDmailMaillogAllByMid($mailingId);
+        $res = $this->sysDmailMaillogRepository->countSysDmailMaillogAllByMid($mailingId);
 
         /* this function is called to change the key from 'COUNT(*)' to 'counter' */
         $res = $this->changekeyname($res, 'counter', 'COUNT(*)');
@@ -393,13 +381,13 @@ class StatisticsController extends AbstractController
         }
 
         // Unique responses, html
-        $uniqueHtmlResponses = $sysDmailMailLogRepository->countSysDmailMaillogHtmlByMid($mailingId);
+        $uniqueHtmlResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogHtmlByMid($mailingId);
 
         // Unique responses, Plain
-        $uniquePlainResponses = $sysDmailMailLogRepository->countSysDmailMaillogPlainByMid($mailingId);
+        $uniquePlainResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPlainByMid($mailingId);
 
         // Unique responses, pings
-        $uniquePingResponses = $sysDmailMailLogRepository->countSysDmailMaillogPingByMid($mailingId);
+        $uniquePingResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPingByMid($mailingId);
 
         $totalSent = intval(($textHtml['1'] ?? 0) + ($textHtml['2'] ?? 0) + ($textHtml['3'] ?? 0));
         $htmlSent = intval(($textHtml['1'] ?? 0) + ($textHtml['3'] ?? 0));
@@ -488,14 +476,12 @@ class StatisticsController extends AbstractController
             'html' => [],
         ];
 
-        $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
-
         // Most popular links, html:
-        $htmlUrlsTable = $sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 1);
+        $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 1);
         $htmlUrlsTable = $this->changekeyname($htmlUrlsTable, 'counter', 'COUNT(*)');
 
         // Most popular links, plain:
-        $plainUrlsTable = $sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 2);
+        $plainUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 2);
         $plainUrlsTable = $this->changekeyname($plainUrlsTable, 'counter', 'COUNT(*)');
 
         // Find urls:
@@ -773,7 +759,7 @@ class StatisticsController extends AbstractController
         $hideIcons = $this->iconFactory->getIcon('actions-lock', Icon::SIZE_SMALL);
 
         // Table with Icon
-        $responseResult = $sysDmailMaillogRepository->countReturnCode($row['uid']);
+        $responseResult = $this->sysDmailMaillogRepository->countReturnCode($row['uid']);
         $responseResult = $this->changekeyname($responseResult, 'counter', 'COUNT(*)');
 
         $tables[4] = [
@@ -842,11 +828,11 @@ class StatisticsController extends AbstractController
             'url' => $thisurl,
         ];
 
-        $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
+        $tempRepository = $this->tempRepository;
 
         // Find all returned mail
         if ($this->returnList || $this->returnDisable || $this->returnCSV) {
-            $rrows = $sysDmailMaillogRepository->findAllReturnedMail($row['uid']);
+            $rrows = $this->sysDmailMaillogRepository->findAllReturnedMail($row['uid']);
             $idLists = $this->getIdLists($rrows);
             if ($this->returnList) {
                 if (count($idLists['tt_address'])) {
@@ -909,7 +895,7 @@ class StatisticsController extends AbstractController
 
         // Find Unknown Recipient
         if ($this->unknownList || $this->unknownDisable || $this->unknownCSV) {
-            $rrows = $sysDmailMaillogRepository->findUnknownRecipient($row['uid']);
+            $rrows = $this->sysDmailMaillogRepository->findUnknownRecipient($row['uid']);
             $idLists = $this->getIdLists($rrows);
 
             if ($this->unknownList) {
@@ -973,7 +959,7 @@ class StatisticsController extends AbstractController
 
         // Mailbox Full
         if ($this->fullList || $this->fullDisable || $this->fullCSV) {
-            $rrows = $sysDmailMaillogRepository->findMailboxFull($row['uid']);
+            $rrows = $this->sysDmailMaillogRepository->findMailboxFull($row['uid']);
             $idLists = $this->getIdLists($rrows);
 
             if ($this->fullList) {
@@ -1037,7 +1023,7 @@ class StatisticsController extends AbstractController
 
         // find Bad Host
         if ($this->badHostList || $this->badHostDisable || $this->badHostCSV) {
-            $rrows = $sysDmailMaillogRepository->findBadHost($row['uid']);
+            $rrows = $this->sysDmailMaillogRepository->findBadHost($row['uid']);
             $idLists = $this->getIdLists($rrows);
 
             if ($this->badHostList) {
@@ -1103,7 +1089,7 @@ class StatisticsController extends AbstractController
 
         // find Bad Header
         if ($this->badHeaderList || $this->badHeaderDisable || $this->badHeaderCSV) {
-            $rrows = $sysDmailMaillogRepository->findBadHeader($row['uid']);
+            $rrows = $this->sysDmailMaillogRepository->findBadHeader($row['uid']);
             $idLists = $this->getIdLists($rrows);
 
             if ($this->badHeaderList) {
@@ -1168,7 +1154,7 @@ class StatisticsController extends AbstractController
         // find Unknown Reasons
         // TODO: list all reason
         if ($this->reasonUnknownList || $this->reasonUnknownDisable || $this->reasonUnknownCSV) {
-            $rrows = $sysDmailMaillogRepository->findUnknownReasons($row['uid']);
+            $rrows = $this->sysDmailMaillogRepository->findUnknownReasons($row['uid']);
             $idLists = $this->getIdLists($rrows);
 
             if ($this->reasonUnknownList) {
@@ -1333,6 +1319,8 @@ class StatisticsController extends AbstractController
      * @param array $row Direct mail record
      *
      * @return array|string The compact infos of the direct mail record
+     * @throws DBALException
+     * @throws Exception
      */
     protected function directMail_compactView(array $row): array|string
     {
@@ -1346,7 +1334,7 @@ class StatisticsController extends AbstractController
             $dmailInfo = TcaUtility::getTranslatedLabelOfTcaField('plainParams') . ' ' . htmlspecialchars($row['plainParams'] . LF . TcaUtility::getTranslatedLabelOfTcaField('HTMLParams') . $row['HTMLParams']) . '; ' . LF;
         }
 
-        $res = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectSysDmailMaillogsCompactView($row['uid']);
+        $res = $this->sysDmailMaillogRepository->selectSysDmailMaillogsCompactView($row['uid']);
 
         $data = [
             'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $row, Icon::SIZE_SMALL)->render(),
@@ -1421,6 +1409,8 @@ class StatisticsController extends AbstractController
      * @param array $mrow DB mail records
      *
      * @return void
+     * @throws DBALException
+     * @throws Exception
      */
     protected function makeStatTempTableContent(array $mrow): void
     {
@@ -1431,7 +1421,7 @@ class StatisticsController extends AbstractController
             ['mid' => intval($mrow['uid'])] // where
         );
 
-        $rows = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectStatTempTableContent($mrow['uid']);
+        $rows = $this->sysDmailMaillogRepository->selectStatTempTableContent($mrow['uid']);
 
         $currentRec = '';
         $recRec = [];

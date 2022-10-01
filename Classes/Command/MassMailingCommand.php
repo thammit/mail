@@ -68,7 +68,7 @@ class MassMailingCommand extends Command
         $mailerService->setSiteIdentifier($input->getOption('site-identifier'));
         $mailerService->start((int)$input->getOption('send-per-cycle'));
         try {
-            $mailerService->runcron();
+            $mailerService->handleQueue();
         } catch (DBALException $e) {
             $io->warning('DBALException: ' . $e->getMessage());
             return Command::FAILURE;

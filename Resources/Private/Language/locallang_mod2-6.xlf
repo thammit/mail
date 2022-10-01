@@ -417,7 +417,7 @@
 				<source>Mail</source>
 			</trans-unit>
 			<trans-unit id="header_mailer" resname="header_mailer">
-				<source>Mailer Engine</source>
+				<source>Mail Queue</source>
 			</trans-unit>
 			<trans-unit id="header_recip" resname="header_recip">
 				<source>Recipient Lists</source>

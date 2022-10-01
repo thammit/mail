@@ -3,6 +3,13 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
@@ -61,6 +68,13 @@ abstract class AbstractController
     protected EventDispatcherInterface $eventDispatcher;
     protected StandaloneView $view;
     protected FlashMessageQueue $messageQueue;
+    protected SysDmailRepository $sysDmailRepository;
+    protected SysDmailGroupRepository $sysDmailGroupRepository;
+    protected SysDmailMaillogRepository $sysDmailMaillogRepository;
+    protected PagesRepository $pagesRepository;
+    protected TempRepository $tempRepository;
+    protected TtAddressRepository $ttAddressRepository;
+    protected FeUsersRepository $feUsersRepository;
 
     /**
      * Constructor Method
@@ -73,6 +87,13 @@ abstract class AbstractController
         SiteFinder $siteFinder = null,
         MailerService $mailerService = null,
         RecipientService $recipientService = null,
+        SysDmailRepository $sysDmailRepository = null,
+        SysDmailGroupRepository $sysDmailGroupRepository = null,
+        SysDmailMaillogRepository $sysDmailMaillogRepository = null,
+        PagesRepository $pagesRepository = null,
+        TempRepository $tempRepository = null,
+        TtAddressRepository $ttAddressRepository = null,
+        FeUsersRepository $feUsersRepository = null,
         EventDispatcherInterface $eventDispatcher = null
     ) {
         $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
@@ -82,6 +103,13 @@ abstract class AbstractController
         $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
         $this->recipientService = $recipientService ?? GeneralUtility::makeInstance(RecipientService::class);
         $this->recipientService->setPageId($this->id);
+        $this->sysDmailRepository = $sysDmailRepository ?? GeneralUtility::makeInstance(SysDmailRepository::class);
+        $this->sysDmailGroupRepository = $sysDmailGroupRepository ?? GeneralUtility::makeInstance(SysDmailGroupRepository::class);
+        $this->sysDmailMaillogRepository = $sysDmailMaillogRepository ?? GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
+        $this->pagesRepository = $pagesRepository ?? GeneralUtility::makeInstance(PagesRepository::class);
+        $this->tempRepository = $tempRepository ?? GeneralUtility::makeInstance(TempRepository::class);
+        $this->ttAddressRepository = $ttAddressRepository ?? GeneralUtility::makeInstance(TtAddressRepository::class);
+        $this->feUsersRepository = $feUsersRepository ?? GeneralUtility::makeInstance(FeUsersRepository::class);
         $this->eventDispatcher = $eventDispatcher ?? GeneralUtility::makeInstance(EventDispatcherInterface::class);
         $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
         $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
@@ -227,7 +255,6 @@ abstract class AbstractController
      * @param string $table Table name
      *
      * @return    array        list of record
-     * @throws RouteNotFoundException
      */
     protected function getRecordList(array $listArr, string $table): array
     {

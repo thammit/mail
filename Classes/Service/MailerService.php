@@ -290,7 +290,7 @@ class MailerService implements LoggerAwareInterface
     /**
      * @param array $mailData
      * @param array $params
-     * @return bool returns true if an error occurred
+     * @return bool returns false if an error occurred
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
@@ -301,7 +301,7 @@ class MailerService implements LoggerAwareInterface
 
         if (!$fetchPlainTextContent && !$fetchHtmlContent) {
             ViewUtility::addInfoToFlashMessageQueue('', LanguageUtility::getLL('dmail_no_mail_content_format_selected'));
-            return true;
+            return false;
         }
 
         $this->start();
@@ -331,7 +331,7 @@ class MailerService implements LoggerAwareInterface
                 if ($plainContent === false) {
                     ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_plain_uri_is_invalid'),
                         LanguageUtility::getLL('dmail_error'));
-                    return true;
+                    return false;
                 } else {
                     if (!MailerUtility::contentContainsBoundaries($plainContent)) {
                         ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_boundaries'),
@@ -342,7 +342,7 @@ class MailerService implements LoggerAwareInterface
             } catch (RequestException|ConnectException $exception) {
                 ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
                     LanguageUtility::getLL('dmail_error'));
-                return true;
+                return false;
             }
         }
 
@@ -355,7 +355,7 @@ class MailerService implements LoggerAwareInterface
                 if ($htmlContent === false) {
                     ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid'),
                         LanguageUtility::getLL('dmail_error'));
-                    return true;
+                    return false;
                 } else {
                     if ((int)$mailData['type'] == MailType::EXTERNAL) {
                         // Try to auto-detect the charset of the message
@@ -374,7 +374,7 @@ class MailerService implements LoggerAwareInterface
                     }
                     if (MailerUtility::contentContainsFrameTag($htmlContent)) {
                         ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_frames_not allowed'), LanguageUtility::getLL('dmail_error'));
-                        return true;
+                        return false;
                     }
                     if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
                         ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_html_boundaries'),
@@ -391,7 +391,7 @@ class MailerService implements LoggerAwareInterface
             } catch (RequestException $exception) {
                 ViewUtility::addErrorToFlashMessageQueue(' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
                     LanguageUtility::getLL('dmail_no_html_content'));
-                return true;
+                return false;
             }
         }
 
@@ -409,7 +409,7 @@ class MailerService implements LoggerAwareInterface
 
         GeneralUtility::makeInstance(SysDmailRepository::class)->update((int)$mailData['uid'], $updateData);
 
-        return false;
+        return true;
     }
 
     /**
@@ -847,7 +847,7 @@ class MailerService implements LoggerAwareInterface
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function runcron(): void
+    public function handleQueue(): void
     {
         $this->notificationJob = (bool)ConfigurationUtility::getExtensionConfiguration('notificationJob');
 

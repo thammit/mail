@@ -18,11 +18,11 @@
             <f:translate key="{lll}dmail_wiz1_select_nl_source"/>
         </h3>
         <div class="panel-group" id="mail-wizard-source-select-panel">
-            <f:if condition="{default.openStored.data}">
-                <f:variable name="counter" value="{default.openStored.data -> f:count()}"/>
+            <f:if condition="{default.open.data}">
+                <f:variable name="counter" value="{default.open.data -> f:count()}"/>
                 <f:variable name="title"><f:translate key="{lll}dmail_wiz1_list_dmail"/></f:variable>
-                <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:7, open:default.openStored.open, counter: counter}" contentAs="panelBody">
-                    <f:render section="OpenMailsPanel" arguments="{lll:lll, data: default.openStored}" />
+                <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:7, open:default.open.open, counter: counter}" contentAs="panelBody">
+                    <f:render section="OpenMailsPanel" arguments="{lll:lll, data: default.open}" />
                 </f:render>
             </f:if>
             <f:if condition="{default.internal}">

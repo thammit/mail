@@ -7,10 +7,6 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Database\QueryGenerator;
-use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Service\ImportService;
@@ -97,7 +93,7 @@ class RecipientListController extends AbstractController
 
         if ($this->backendUserHasModuleAccess() === false) {
             $this->view->setTemplate('NoAccess');
-            $this->messageQueue->addMessage(ViewUtility::getFlashMessage('If no access or if ID == zero', 'No Access', AbstractMessage::WARNING));
+            ViewUtility::addWarningToFlashMessageQueue('If no access or if ID == zero', 'No Access');
             $this->moduleTemplate->setContent($this->view->render());
             return new HtmlResponse($this->moduleTemplate->renderContent());
         }
@@ -113,15 +109,11 @@ class RecipientListController extends AbstractController
                 $this->view->assignMultiple($this->moduleContent());
             } else {
                 if ($this->id != 0) {
-                    $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'),
-                        AbstractMessage::WARNING);
-                    $this->messageQueue->addMessage($message);
+                    ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_noRegular'), LanguageUtility::getLL('dmail_newsletters'));
                 }
             }
         } else {
-            $message = ViewUtility::getFlashMessage(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_recip'),
-                AbstractMessage::WARNING);
-            $this->messageQueue->addMessage($message);
+            ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('select_folder'), LanguageUtility::getLL('header_recip'));
         }
 
         // Render template and return html content
@@ -181,7 +173,7 @@ class RecipientListController extends AbstractController
             'rows' => [],
         ];
 
-        $rows = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->selectSysDmailGroupByPid($this->id,
+        $rows = $this->sysDmailGroupRepository->selectSysDmailGroupByPid($this->id,
             trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby']));
 
         foreach ($rows as $row) {
@@ -282,17 +274,17 @@ class RecipientListController extends AbstractController
                             $whichTables = intval($mailGroup['whichtables']);
                             // tt_address
                             if ($whichTables & 1) {
-                                $idLists['tt_address'] = GeneralUtility::makeInstance(TempRepository::class)
+                                $idLists['tt_address'] = $this->tempRepository
                                     ->getIdList('tt_address', $pidList, $groupUid, $mailGroup['select_categories']);
                             }
                             // fe_users
                             if ($whichTables & 2) {
-                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)
+                                $idLists['fe_users'] = $this->tempRepository
                                     ->getIdList('fe_users', $pidList, $groupUid, $mailGroup['select_categories']);
                             }
                             // user table
                             if ($this->userTable && ($whichTables & 4)) {
-                                $idLists[$this->userTable] = GeneralUtility::makeInstance(TempRepository::class)
+                                $idLists[$this->userTable] = $this->tempRepository
                                     ->getIdList($this->userTable, $pidList, $groupUid, $mailGroup['select_categories']);
                             }
                             // fe_groups
@@ -300,7 +292,7 @@ class RecipientListController extends AbstractController
                                 if (!is_array($idLists['fe_users'])) {
                                     $idLists['fe_users'] = [];
                                 }
-                                $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)
+                                $idLists['fe_users'] = $this->tempRepository
                                     ->getIdList('fe_groups', $pidList, $groupUid, $mailGroup['select_categories']);
                                 $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $idLists['fe_users']));
                             }
@@ -318,12 +310,12 @@ class RecipientListController extends AbstractController
                         break;
                     case RecipientGroupType::STATIC:
                         // Static MM list
-                        $idLists['tt_address'] = GeneralUtility::makeInstance(TempRepository::class)->getStaticIdList('tt_address', $groupUid);
-                        $idLists['fe_users'] = GeneralUtility::makeInstance(TempRepository::class)->getStaticIdList('fe_users', $groupUid);
-                        $tempGroups = GeneralUtility::makeInstance(TempRepository::class)->getStaticIdList('fe_groups', $groupUid);
+                        $idLists['tt_address'] = $this->tempRepository->getStaticIdList('tt_address', $groupUid);
+                        $idLists['fe_users'] = $this->tempRepository->getStaticIdList('fe_users', $groupUid);
+                        $tempGroups = $this->tempRepository->getStaticIdList('fe_groups', $groupUid);
                         $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $tempGroups));
                         if ($this->userTable) {
-                            $idLists[$this->userTable] = GeneralUtility::makeInstance(TempRepository::class)->getStaticIdList($this->userTable, $groupUid);
+                            $idLists[$this->userTable] = $this->tempRepository->getStaticIdList($this->userTable, $groupUid);
                         }
                         break;
                     case RecipientGroupType::QUERY:
@@ -343,12 +335,12 @@ class RecipientListController extends AbstractController
                             }
                         }
                         if ($table) {
-                            $idLists[$table] = GeneralUtility::makeInstance(TempRepository::class)->getSpecialQueryIdList($table, $mailGroup,
+                            $idLists[$table] = $this->tempRepository->getSpecialQueryIdList($table, $mailGroup,
                                 $this->queryGenerator);
                         }
                         break;
                     case RecipientGroupType::OTHER:
-                        $groups = array_unique(GeneralUtility::makeInstance(TempRepository::class)->getMailGroups($mailGroup['mail_groups'],
+                        $groups = array_unique($this->tempRepository->getMailGroups($mailGroup['mail_groups'],
                             [$mailGroup['uid']], $this->backendUserPermissions));
 
                         foreach ($groups as $group) {
@@ -450,7 +442,7 @@ class RecipientListController extends AbstractController
                         $fields = $csvValue == 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
                         $fields .= ',tstamp';
 
-                        $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$csvValue], $csvValue,
+                        $rows = $this->tempRepository->fetchRecordsListValues($idLists[$csvValue], $csvValue,
                             GeneralUtility::trimExplode(',', $fields, true));
                         $this->downloadCSV($rows);
                     } else {
@@ -468,7 +460,7 @@ class RecipientListController extends AbstractController
         switch ('listall') {
             case 'listall':
                 if (is_array($idLists['tt_address'] ?? false)) {
-                    $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $rows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
 
                     $data['tables']['tt_address'] = [
                         'table' => 'tt_address',
@@ -480,7 +472,7 @@ class RecipientListController extends AbstractController
                     ];
                 }
                 if (is_array($idLists['fe_users'] ?? false)) {
-                    $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $rows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $data['tables']['fe_users'] = [
                         'table' => 'fe_users',
                         'recipients' => $rows,
@@ -501,7 +493,7 @@ class RecipientListController extends AbstractController
                     ];
                 }
                 if (is_array($idLists[$this->userTable] ?? false)) {
-                    $rows = GeneralUtility::makeInstance(TempRepository::class)->fetchRecordsListValues($idLists[$this->userTable], $this->userTable);
+                    $rows = $this->tempRepository->fetchRecordsListValues($idLists[$this->userTable], $this->userTable);
                     $data['tables'][$this->userTable] = [
                         'table' => $this->userTable,
                         'recipients' => $rows,
@@ -723,10 +715,10 @@ class RecipientListController extends AbstractController
         $rows = [];
         switch ($this->table) {
             case 'tt_address':
-                $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUidAndPermission($this->uid, $this->backendUserPermissions);
+                $rows = $this->ttAddressRepository->findByUidAndPermission($this->uid, $this->backendUserPermissions);
                 break;
             case 'fe_users':
-                $rows = GeneralUtility::makeInstance(FeUsersRepository::class)->findByUidAndPermissions($this->uid, $this->backendUserPermissions);
+                $rows = $this->feUsersRepository->findByUidAndPermissions($this->uid, $this->backendUserPermissions);
                 break;
             default:
                 // do nothing
