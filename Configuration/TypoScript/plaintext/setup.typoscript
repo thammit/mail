@@ -1,4 +1,4 @@
-[request.getQueryParams()["type"] == 99]
+[traverse(request.getQueryParams(), 'type') == 99]
 // add template path for fluid_styled_content
 lib.contentElement {
   templateRootPaths.100 = EXT:mail/Resources/Private/Plaintext/FluidContentElement/Templates/
