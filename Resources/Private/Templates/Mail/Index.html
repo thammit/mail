@@ -73,7 +73,6 @@
             <th><f:translate key="{lll}nl_l_lastM"/></th>
             <th><f:translate key="{lll}nl_l_size"/></th>
             <th><f:translate key="{lll}nl_l_attach"/></th>
-            <th><f:translate key="{lll}nl_l_sent"/></th>
             <th class="col-control nowrap"></th>
             <th class="col-control nowrap"></th>
         </tr>
@@ -92,9 +91,6 @@
                 <td class="nowrap">{row.renderedsize -> f:format.bytes()}</td>
                 <td class="nowrap"><f:if condition="{row.attachment}">
                     <core:icon identifier="mail-attachment" size="small"/>
-                </f:if></td>
-                <td><f:if condition="{row.issent}">
-                    <core:icon identifier="status-status-checked" size="small"/>
                 </f:if></td>
                 <td class="nowrap">
                     <f:if condition="!{row.scheduled_begin}">
