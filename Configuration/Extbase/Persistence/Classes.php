@@ -70,6 +70,9 @@ return [
     \MEDIAESSENZ\Mail\Domain\Model\Category::class => [
         'tableName' => 'sys_dmail_category',
         'properties' => [
+            'title' => [
+                'fieldName' => 'category'
+            ]
         ]
     ],
     \MEDIAESSENZ\Mail\Domain\Model\Log::class => [
