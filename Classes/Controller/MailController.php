@@ -678,10 +678,7 @@ class MailController extends AbstractController
 
             if ($colPosVal != $contentElementData['colPos']) {
                 $categoryData['rows'][] = [
-                    'separator' => true,
-                    'bgcolor' => '#f00',
-                    'title' => LanguageUtility::getLL('nl_l_column'),
-                    'value' => BackendUtility::getProcessedValue('tt_content', 'colPos', $contentElementData['colPos']),
+                    'colPos' => BackendUtility::getProcessedValue('tt_content', 'colPos', $contentElementData['colPos']),
                 ];
                 $colPosVal = $contentElementData['colPos'];
             }

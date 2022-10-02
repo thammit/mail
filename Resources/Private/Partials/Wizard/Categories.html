@@ -18,14 +18,16 @@
             <table class="table table-striped table-hover">
                 <tbody>
                 <f:for each="{cats.output.rows}" as="row">
-                    <tr>
-                        <f:if condition="{row.separator}">
-                            <f:then>
+                    <f:if condition="{row.colPos}">
+                        <f:then>
+                            <tr class="table-primary">
                                 <th class="col-icon nowrap"></th>
-                                <th class="col-title col-responsive nowrap">{row.title}: {row.value -> f:format.html()}</th>
-                                <th class=" nowrap"><f:translate key="{lll}restrictToCategories" /></th>
-                            </f:then>
-                            <f:else>
+                                <th class="col-title col-responsive nowrap"><f:translate key="{lll}nl_l_column" />: {row.colPos}</th>
+                                <th class="nowrap"><f:translate key="{lll}restrictToCategories" /></th>
+                            </tr>
+                        </f:then>
+                        <f:else>
+                            <tr>
                                 <td class="align-top col-icon nowrap"><core:iconForRecord row="{row}" table="tt_content" size="small" /></td>
                                 <td class="align-top col-title col-responsive nowrap">
                                     {row.header} [{row.CType}<f:if condition="{row.list_type}">; {row.list_type}</f:if>]
@@ -44,9 +46,9 @@
                                         </f:for>
                                     </f:if>
                                 </td>
-                            </f:else>
-                        </f:if>
-                    </tr>
+                            </tr>
+                        </f:else>
+                    </f:if>
                 </f:for>
                 </tbody>
             </table>
