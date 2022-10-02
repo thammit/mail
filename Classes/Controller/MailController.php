@@ -699,13 +699,11 @@ class MailController extends AbstractController
 
             $categoryData['rows'][] = [
                 'uid' => $contentElementData['uid'],
-                'icon' => $this->iconFactory->getIconForRecord('tt_content', $contentElementData, Icon::SIZE_SMALL),
                 'header' => $contentElementData['header'],
                 'CType' => $contentElementData['CType'],
                 'list_type' => $contentElementData['list_type'],
                 'bodytext' => empty($contentElementData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($contentElementData['bodytext']), 200),
-                'color' => $contentElementData['module_sys_dmail_category'] ? 'red' : 'green',
-                'labelOnlyAll' => $contentElementData['module_sys_dmail_category'] ? LanguageUtility::getLL('nl_l_ONLY') : LanguageUtility::getLL('nl_l_ALL'),
+                'hasCategory' => (bool)$contentElementData['module_sys_dmail_category'],
                 'checkboxes' => $cboxes,
             ];
         }

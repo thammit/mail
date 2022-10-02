@@ -26,15 +26,10 @@
                                 <th class=" nowrap"><f:translate key="{lll}restrictToCategories" /></th>
                             </f:then>
                             <f:else>
-                                <td class="align-top col-icon nowrap">{row.icon -> f:format.html()}</td>
+                                <td class="align-top col-icon nowrap"><core:iconForRecord row="{row}" table="tt_content" size="small" /></td>
                                 <td class="align-top col-title col-responsive nowrap">
-                                    {row.header}
-                                    [{row.CType}
-                                    <f:if condition="{row.list_type}">; {row.list_type}</f:if>
-                                    ]
-                                    <br>
-                                    {row.bodytext -> f:format.html()}
-                                    <br/>
+                                    {row.header} [{row.CType}<f:if condition="{row.list_type}">; {row.list_type}</f:if>]
+                                    <f:if condition="{row.bodytext}"><br>{row.bodytext}</f:if>
                                 </td>
                                 <td class="col-control nowrap">
                                     <f:if condition="{row.checkboxes -> f:count()}">
