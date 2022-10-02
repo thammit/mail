@@ -6,6 +6,9 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
+use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
 use MEDIAESSENZ\Mail\Enumeration\Action;
@@ -37,13 +40,13 @@ use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class MailController extends AbstractController
 {
     protected string $route = 'Mail_Mail';
     protected string $moduleName = 'Mail_Mail';
     protected string $cshKey = '_MOD_Mail_Mail';
-    protected string $error = '';
     protected int $currentStep = 1;
     protected bool $reset = false;
     protected Action $currentCMD;
@@ -311,64 +314,85 @@ class MailController extends AbstractController
                 ];
 
                 // greyed out next-button if fetching is not successful (on error)
-                $fetchError = true;
+                $fetchError = false;
+
+                $mailFactory = MailFactory::forStorageFolder($this->id);
 
                 switch (true) {
                     case $this->isInternal:
                         // create mail from internal page
-                        $newUid = $this->createMailRecordFromInternalPage($this->createMailFromPageUid, $this->pageTSConfiguration,
-                            $this->createMailForLanguageUid);
-                        if (is_numeric($newUid)) {
+                        $newMail = $mailFactory->fromInternalPage($this->createMailFromPageUid, $this->createMailForLanguageUid);
+                        if ($newMail instanceof Mail) {
+                            $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+                            $persistenceManager->add($newMail);
+                            $persistenceManager->persistAll();
+                            $newUid = $newMail->getUid();
+                            // $newUid = $this->createMailRecordFromInternalPage($this->createMailFromPageUid, $this->pageTSConfiguration, $this->createMailForLanguageUid);
                             $this->mailUid = $newUid;
                             // Read new record (necessary because TCEmain sets default field values)
                             $mailData = $this->sysDmailRepository->findByUid($newUid);
                             // fetch the data
-                            if (!$this->isQuickMail) {
-                                $fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-                            }
-
+//                            $fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                             $moduleData['info']['internal']['cmd'] = $nextCmd ?: Action::WIZARD_STEP_CATEGORIES;
                         } else {
                             ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
+                            $fetchError = true;
                         }
                         break;
                     case $this->isExternal:
-                        $newUid = $this->createMailRecordFromExternalUrls(
-                            (string)($this->external['subject'] ?? ''),
-                            (string)($this->external['htmlUri'] ?? ''),
-                            (string)($this->external['plainUri'] ?? ''),
-                            $this->pageTSConfiguration
-                        );
-                        if (is_numeric($newUid)) {
+                        $newMail = $mailFactory->fromExternalUrls((string)($this->external['subject'] ?? ''), (string)($this->external['htmlUri'] ?? ''), (string)($this->external['plainUri'] ?? ''));
+                        if ($newMail instanceof Mail) {
+                            $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+                            $persistenceManager->add($newMail);
+                            $persistenceManager->persistAll();
+                            $newUid = $newMail->getUid();
+    //                        $newUid = $this->createMailRecordFromExternalUrls(
+    //                            (string)($this->external['subject'] ?? ''),
+    //                            (string)($this->external['htmlUri'] ?? ''),
+    //                            (string)($this->external['plainUri'] ?? ''),
+    //                            $this->pageTSConfiguration
+    //                        );
                             $this->mailUid = $newUid;
                             // Read new record (necessary because TCEmain sets default field values)
                             $mailData = $this->sysDmailRepository->findByUid($newUid);
                             // fetch the data
-                            $fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-
+                            //$fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                             $moduleData['info']['external']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                         } else {
-                            $this->error = 'no_valid_url';
+                            $fetchError = true;
                             ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URL: ' . $this->external['htmlUri'],
                                 LanguageUtility::getLL('dmail_error'));
+
                         }
                         break;
                     case $this->isQuickMail:
-                        $senderEmail = (string)($this->quickMail['senderEmail'] ?? '');
-                        $senderName = (string)($this->quickMail['senderName'] ?? '');
                         $subject = (string)($this->quickMail['subject'] ?? '');
                         $message = (string)($this->quickMail['message'] ?? '');
+                        $senderName = (string)($this->quickMail['senderName'] ?? '');
+                        $senderEmail = (string)($this->quickMail['senderEmail'] ?? '');
                         $breakLines = (bool)($this->quickMail['breakLines'] ?? false);
 
-                        $fetchError = !$this->createQuickMail(
-                            $senderEmail,
-                            $senderName,
-                            $subject,
-                            $message,
-                            $breakLines,
-                        );
+                        $newMail = $mailFactory->fromText($subject, $message, $senderName, $senderEmail, $breakLines);
+                        if ($newMail instanceof Mail) {
+                            $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+                            $persistenceManager->add($newMail);
+                            $persistenceManager->persistAll();
+                            $newUid = $newMail->getUid();
 
-                        $mailData = $this->sysDmailRepository->findByUid($this->mailUid);
+    //                        $fetchError = !$this->createQuickMail(
+    //                            $senderEmail,
+    //                            $senderName,
+    //                            $subject,
+    //                            $message,
+    //                            $breakLines,
+    //                        );
+
+    //                        $mailData = $this->sysDmailRepository->findByUid($this->mailUid);
+                            $mailData = $this->sysDmailRepository->findByUid($newUid);
+                            $this->mailUid = $newUid;
+                        } else {
+                            $fetchError = true;
+                        }
 
                         // todo what is this for?
                         $moduleData['info']['quickmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;

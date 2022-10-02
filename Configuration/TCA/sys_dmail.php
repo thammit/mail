@@ -281,6 +281,18 @@ return [
                 $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
             ),
         ],
+        'mailContent' => [
+            'label' => 'mail content',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
+        'query_info' => [
+            'label' => 'query info',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
         'type' => [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.type',
             'config' => [

@@ -33,9 +33,9 @@ class Mail extends AbstractEntity
     protected int $renderedSize = 0;
     protected string $mailContent = '';
     protected string $queryInfo = '';
-    protected DateTimeImmutable $scheduled;
-    protected DateTimeImmutable $scheduledBegin;
-    protected DateTimeImmutable $scheduledEnd;
+    protected ?DateTimeImmutable $scheduled = null;
+    protected ?DateTimeImmutable $scheduledBegin = null;
+    protected ?DateTimeImmutable $scheduledEnd = null;
     protected string $returnPath = '';
     protected bool $redirect = false;
     protected bool $redirectAll = false;

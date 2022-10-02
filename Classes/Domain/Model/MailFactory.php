@@ -88,7 +88,7 @@ class MailFactory
 
         $htmlContent = '';
         $htmlLinks = [];
-        if ($mail->getSendOptions() & 2 !== 0) {
+        if (($mail->getSendOptions() & 2) !== 0) {
             $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams());
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             $htmlLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
@@ -98,7 +98,7 @@ class MailFactory
         }
 
         $plainTextContent = '';
-        if ($mail->getSendOptions() & 1 !== 0) {
+        if (($mail->getSendOptions() & 1) !== 0) {
             $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams());
             $plainTextContent = $this->fetchPlainTextContent($plainTextUrl);
         }
@@ -227,6 +227,9 @@ class MailFactory
             'plain' => [
                 'content' => $message
             ],
+            'html' => [
+                'content' => ''
+            ]
         ];
         $mailContent = base64_encode(serialize($mailParts));
 
@@ -248,12 +251,12 @@ class MailFactory
             ->setReplyToEmail($this->pageTSConfiguration['replyto_email'] ?? '')
             ->setReplyToName($this->pageTSConfiguration['replyto_name'] ?? '')
             ->setReturnPath($this->pageTSConfiguration['return_path'] ?? '')
-            ->setPriority($this->pageTSConfiguration['priority'] ?? 3)
+            ->setPriority((int)($this->pageTSConfiguration['priority'] ?? 3))
             ->setRedirect((bool)($this->pageTSConfiguration['use_rdct'] ?? false))
             ->setRedirectAll((bool)($this->pageTSConfiguration['long_link_mode'] ?? false))
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
             ->setAuthCodeFields($this->pageTSConfiguration['authcode_fieldList'] ?? '')
-            ->setSendOptions($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'])
+            ->setSendOptions((int)($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default']))
             ->setIncludeMedia((bool)($this->pageTSConfiguration['includeMedia'] ?? false))
             ->setFlowedFormat((bool)($this->pageTSConfiguration['flowedFormat'] ?? false))
             ->setPid($this->storageFolder);
