@@ -43,6 +43,11 @@ class Mail extends AbstractEntity
     protected string $authCodeFields = '';
     protected string $recipientGroups = '';
 
+    public function __construct()
+    {
+        $this->attachment = new ObjectStorage();
+    }
+
     /**
      * @return int
      */
