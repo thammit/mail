@@ -8,7 +8,7 @@
 <h2><f:translate key="{lll}dmail_wiz3_cats"/></h2>
 <f:variable name="mailForm" value="mail-wizard-form-categories"/>
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
-    <input type="hidden" name="currentCMD" value="{cats.currentCMD}">
+    <input type="hidden" name="currentCmd" value="{cats.currentCmd}">
     <input type="hidden" name="mailUid" value="{cats.mailUid}">
     <h4>{cats.output.title}</h4>
     <f:render partial="InfoBox" arguments="{field: 'assign_categories'}" />

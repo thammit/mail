@@ -44,7 +44,7 @@ class MailController extends AbstractController
     protected string $cshKey = '_MOD_Mail_Mail';
     protected int $currentStep = 1;
     protected bool $reset = false;
-    protected Action $currentCMD;
+    protected Action $currentCmd;
     protected bool $backButtonPressed = false;
 
     protected int $uid = 0;
@@ -95,7 +95,7 @@ class MailController extends AbstractController
 
         $this->backButtonPressed = (bool)($parsedBody['back'] ?? $queryParams['back'] ?? false);
 
-        $this->currentCMD = Action::cast(($parsedBody['currentCMD'] ?? $queryParams['currentCMD'] ?? null));
+        $this->currentCmd = Action::cast(($parsedBody['currentCmd'] ?? $queryParams['currentCmd'] ?? null));
 
         $this->isOpen = (bool)$this->mailUid;
 
@@ -245,7 +245,7 @@ class MailController extends AbstractController
 
         if ($this->backButtonPressed) {
             // CMD move 1 step back
-            switch ((string)$this->currentCMD) {
+            switch ((string)$this->currentCmd) {
                 case Action::WIZARD_STEP_SETTINGS:
                     $this->setCurrentAction(Action::cast(Action::WIZARD_STEP_OVERVIEW));
                     break;
@@ -310,6 +310,7 @@ class MailController extends AbstractController
                 $fetchError = false;
 
                 $mailFactory = MailFactory::forStorageFolder($this->id);
+                $moduleData['info']['nextCmd'] = Action::WIZARD_STEP_SEND_TEST;
 
                 switch (true) {
                     case $this->isInternal:
@@ -323,7 +324,7 @@ class MailController extends AbstractController
                             $this->mailUid = $newUid;
                             // Read new record (necessary because TCEmain sets default field values)
                             $mailData = $this->sysDmailRepository->findByUid($newUid);
-                            $moduleData['info']['internal']['cmd'] = $nextCmd ?: Action::WIZARD_STEP_CATEGORIES;
+                            $moduleData['info']['nextCmd'] = $nextCmd ?: Action::WIZARD_STEP_CATEGORIES;
                         } else {
                             ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
                             $fetchError = true;
@@ -339,12 +340,10 @@ class MailController extends AbstractController
                             $this->mailUid = $newUid;
                             // Read new record (necessary because TCEmain sets default field values)
                             $mailData = $this->sysDmailRepository->findByUid($newUid);
-                            $moduleData['info']['external']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                         } else {
                             $fetchError = true;
                             ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URL: ' . $this->external['htmlUri'],
                                 LanguageUtility::getLL('dmail_error'));
-
                         }
                         break;
                     case $this->isQuickMail:
@@ -353,7 +352,6 @@ class MailController extends AbstractController
                         $senderName = (string)($this->quickMail['senderName'] ?? '');
                         $senderEmail = (string)($this->quickMail['senderEmail'] ?? '');
                         $breakLines = (bool)($this->quickMail['breakLines'] ?? false);
-
                         $newMail = $mailFactory->fromText($subject, $message, $senderName, $senderEmail, $breakLines);
                         if ($newMail instanceof Mail) {
                             $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
@@ -366,20 +364,11 @@ class MailController extends AbstractController
                         } else {
                             $fetchError = true;
                         }
-
-                        // todo what is this for?
-                        $moduleData['info']['quickmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
-                        $moduleData['info']['quickmail']['senderName'] = $senderName;
-                        $moduleData['info']['quickmail']['senderEmail'] = $senderEmail;
-                        $moduleData['info']['quickmail']['subject'] = $subject;
-                        $moduleData['info']['quickmail']['message'] = $message;
-                        $moduleData['info']['quickmail']['breakLines'] = $breakLines;
                         break;
                     case $this->isOpen:
                         if ($mailData) {
                             if ($mailData['type'] === MailType::EXTERNAL) {
                                 // it's a quick/external mail
-                                $moduleData['info']['dmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                                 if (str_starts_with($mailData['HTMLParams'], 'http') || str_starts_with($mailData['plainParams'], 'http')) {
                                     // it's an external mail -> fetch content again
                                     $newMail = $mailFactory->fromExternalUrls($mailData['subject'], $mailData['HTMLParams'], $mailData['plainParams']);
@@ -411,7 +400,7 @@ class MailController extends AbstractController
                                 } else {
                                     $fetchError = true;
                                 }
-                                $moduleData['info']['dmail']['cmd'] = ($mailData['type'] === MailType::INTERNAL) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
+                                $moduleData['info']['nextCmd'] = ($mailData['type'] === MailType::INTERNAL) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
                             }
                         }
                         break;
@@ -428,7 +417,7 @@ class MailController extends AbstractController
                 $moduleData['info']['table'] = is_array($mailData) ? $this->getGroupedMailSettings($mailData) : '';
                 $moduleData['info']['mailUid'] = $this->mailUid;
                 $moduleData['info']['pageUid'] = $mailData['page'] ?: '';
-                $moduleData['info']['currentCMD'] = (string)$this->getCurrentAction();
+                $moduleData['info']['currentCmd'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_CATEGORIES:
@@ -448,7 +437,7 @@ class MailController extends AbstractController
                 $moduleData['cats']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                 $moduleData['cats']['mailUid'] = $this->mailUid;
                 $moduleData['cats']['pageUid'] = $this->pageUid;
-                $moduleData['cats']['currentCMD'] = (string)$this->getCurrentAction();
+                $moduleData['cats']['currentCmd'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_SEND_TEST:
@@ -471,7 +460,7 @@ class MailController extends AbstractController
                 $moduleData['test']['cmd'] = Action::WIZARD_STEP_SEND;
                 $moduleData['test']['mailUid'] = $this->mailUid;
                 $moduleData['test']['pageUid'] = $this->pageUid;
-                $moduleData['test']['currentCMD'] = (string)$this->getCurrentAction();
+                $moduleData['test']['currentCmd'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_FINAL:
@@ -505,7 +494,7 @@ class MailController extends AbstractController
                 $moduleData['final']['id'] = $this->id;
                 $moduleData['final']['mailUid'] = $this->mailUid;
                 $moduleData['final']['pageUid'] = $this->pageUid;
-                $moduleData['final']['currentCMD'] = (string)$this->getCurrentAction();
+                $moduleData['final']['currentCmd'] = (string)$this->getCurrentAction();
                 break;
 
             case Action::WIZARD_STEP_OVERVIEW:

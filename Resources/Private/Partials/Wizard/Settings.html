@@ -8,27 +8,13 @@
 <h2><f:translate key="{lll}dmail_wiz2_detail"/></h2>
 <f:variable name="mailForm" value="mail-wizard-form-info"/>
 <form action="" id="{mailForm}" method="post" name="dmailform" enctype="multipart/form-data">
-    <input type="hidden" name="currentCMD" value="{info.currentCMD}">
+    <input type="hidden" name="currentCmd" value="{info.currentCmd}">
+    <f:if condition="{info.nextCmd}">
+        <input type="hidden" name="cmd" value="{info.nextCmd}">
+    </f:if>
     <input type="hidden" name="mailUid" value="{info.mailUid}">
-    <f:if condition="{info.internal}">
-        <input type="hidden" name="cmd" value="{info.internal.cmd}">
-    </f:if>
-    <f:if condition="{info.external}">
-        <input type="hidden" name="cmd" value="{info.external.cmd}">
-    </f:if>
-    <f:if condition="{info.dmail}">
-        <input type="hidden" name="cmd" value="{info.dmail.cmd}">
-    </f:if>
     <f:if condition="{info.pageUid}">
         <input type="hidden" name="pageUid" value="{info.pageUid}">
-    </f:if>
-    <f:if condition="{info.quickmail}">
-        <input type="hidden" name="cmd" value="{info.quickmail.cmd}">
-        <input type="hidden" name="quickmail[senderName]" value="{info.quickmail.senderName}"/>
-        <input type="hidden" name="quickmail[senderEmail]" value="{info.quickmail.senderEmail}"/>
-        <input type="hidden" name="quickmail[subject]" value="{info.quickmail.subject}"/>
-        <input type="hidden" name="quickmail[message]" value="{info.quickmail.message}"/>
-        <input type="hidden" name="quickmail[breakLines]" value="{info.quickmail.breakLines}"/>
     </f:if>
     <f:if condition="{info.table}">
         <h3><core:iconForRecord table="sys_dmail" row="{info.table.tableRows}" size="default" /> {info.table.title}</h3>
