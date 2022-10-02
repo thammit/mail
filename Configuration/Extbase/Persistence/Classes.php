@@ -3,20 +3,6 @@
 declare(strict_types=1);
 
 return [
-    \MEDIAESSENZ\Mail\Domain\Model\Group::class => [
-        'tableName' => 'sys_dmail_group',
-        'properties' => [
-            'recordTypes' => [
-                'fieldName' => 'whichtables'
-            ],
-            'categories' => [
-                'fieldName' => 'select_categories'
-            ],
-            'children' => [
-                'fieldName' => 'mail_groups'
-            ],
-        ]
-    ],
     \MEDIAESSENZ\Mail\Domain\Model\Mail::class => [
         'tableName' => 'sys_dmail',
         'properties' => [
@@ -66,5 +52,29 @@ return [
                 'fieldName' => 'recipientGroups'
             ],
         ],
+    ],
+    \MEDIAESSENZ\Mail\Domain\Model\Group::class => [
+        'tableName' => 'sys_dmail_group',
+        'properties' => [
+            'recordTypes' => [
+                'fieldName' => 'whichtables'
+            ],
+            'categories' => [
+                'fieldName' => 'select_categories'
+            ],
+            'children' => [
+                'fieldName' => 'mail_groups'
+            ],
+        ]
+    ],
+    \MEDIAESSENZ\Mail\Domain\Model\Category::class => [
+        'tableName' => 'sys_dmail_category',
+        'properties' => [
+        ]
+    ],
+    \MEDIAESSENZ\Mail\Domain\Model\Log::class => [
+        'tableName' => 'sys_dmail_maillog',
+        'properties' => [
+        ]
     ],
 ];
