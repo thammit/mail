@@ -30,7 +30,6 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\RedirectResponse;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -63,7 +62,6 @@ class MailController extends AbstractController
     protected bool $isTestMail = false;
     protected string $sendTestMailAddress = '';
     protected int $distributionTimeStamp = 0;
-    protected string $requestUri = '';
 
     /**
      * Init module
@@ -77,9 +75,6 @@ class MailController extends AbstractController
 
         $queryParams = $request->getQueryParams();
         $parsedBody = $request->getParsedBody();
-
-        $normalizedParams = $request->getAttribute('normalizedParams');
-        $this->requestUri = $normalizedParams->getRequestUri();
 
         $this->uid = (int)($parsedBody['uid'] ?? $queryParams['uid'] ?? 0);
 
