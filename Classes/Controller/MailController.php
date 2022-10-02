@@ -30,7 +30,6 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\RedirectResponse;
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -118,7 +117,6 @@ class MailController extends AbstractController
         if ($this->distributionTimeStamp < time()) {
             $this->distributionTimeStamp = time();
         }
-        // $this->tt_address_uid = (int)($parsedBody['tt_address_uid'] ?? $queryParams['tt_address_uid'] ?? 0);
         $this->view->assign('settings', [
             'route' => $this->route,
             'mailSysFolderUid' => $this->id,
@@ -383,7 +381,7 @@ class MailController extends AbstractController
                                 // it's a quick/external mail
                                 $moduleData['info']['dmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                                 if (str_starts_with($mailData['HTMLParams'], 'http') || str_starts_with($mailData['plainParams'], 'http')) {
-//                                  // it's an external mail -> fetch content again
+                                    // it's an external mail -> fetch content again
                                     $newMail = $mailFactory->fromExternalUrls($mailData['subject'], $mailData['HTMLParams'], $mailData['plainParams']);
                                     if ($newMail instanceof Mail) {
                                         // copy new fetch content and charset to current mail record
@@ -418,7 +416,6 @@ class MailController extends AbstractController
                         }
                         break;
                     default:
-
                 }
 
                 $moduleData['navigation']['back'] = true;
@@ -659,7 +656,6 @@ class MailController extends AbstractController
             }
 
             $dataHandler = $this->getDataHandler();
-            // $dataHandler->stripslashes_values = 0;
             $dataHandler->start($data, []);
             $dataHandler->process_datamap();
 
@@ -776,24 +772,6 @@ class MailController extends AbstractController
                     }
                 }
             }
-
-
-//            foreach ($rows as $row) {
-//                $moduleUrl = $this->getWizardStepUri(Action::WIZARD_STEP_SEND_TEST2, [
-//                    'sys_dmail_uid' => $this->sys_dmail_uid,
-//                    'sys_dmail_group_uid[]' => $row['uid'],
-//                ]);
-//
-//                // Members:
-//                $result = $this->recipientService->getRecipientIdsOfMailGroups([$row['uid']]);
-//
-//                $data['test_dmail_group_table'][] = [
-//                    'moduleUrl' => $moduleUrl,
-//                    'iconFactory' => $this->iconFactory->getIconForRecord('sys_dmail_group', $row, Icon::SIZE_SMALL),
-//                    'title' => htmlspecialchars($row['title']),
-//                    'tds' => $this->displayMailGroup_test($result),
-//                ];
-//            }
         }
 
         return $data;
