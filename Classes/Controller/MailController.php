@@ -634,8 +634,6 @@ class MailController extends AbstractController
      * @return array|string HTML form showing the categories
      * @throws DBALException
      * @throws Exception
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     protected function getCategoryData(array $mailData, array $indata): array|string
     {
