@@ -449,7 +449,7 @@ class MailerUtility
      * @param bool $requestHost Use request host (when not in CLI mode).
      * @return string The fully-qualified host name.
      */
-    public static function getHostname(bool $requestHost = true): string
+    public static function generateMessageId(bool $requestHost = true): string
     {
         $host = '';
         // If not called from the command-line, resolve on getIndpEnv()
@@ -478,7 +478,16 @@ class MailerUtility
         if (!$host) {
             $host = 'localhost.localdomain';
         }
-        return $host;
+
+        if ($host == '127.0.0.1' || $host == 'localhost' || $host == 'localhost.localdomain') {
+            $host = ($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] ? preg_replace('/[^A-Za-z0-9_\-]/', '_',
+                    $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']) : 'localhost') . '.TYPO3';
+        }
+
+        $idLeft = time() . '.' . uniqid();
+        $idRight = $host ?: 'symfony.generated';
+
+        return $idLeft . '@' . $idRight;
     }
 
     /**

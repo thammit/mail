@@ -354,15 +354,15 @@ class MailController extends AbstractController
                         }
                         break;
                     case $this->isQuickMail:
-                        $senderName = (string)($this->quickMail['senderName'] ?? '');
                         $senderEmail = (string)($this->quickMail['senderEmail'] ?? '');
+                        $senderName = (string)($this->quickMail['senderName'] ?? '');
                         $subject = (string)($this->quickMail['subject'] ?? '');
                         $message = (string)($this->quickMail['message'] ?? '');
                         $breakLines = (bool)($this->quickMail['breakLines'] ?? false);
 
                         $fetchError = !$this->createQuickMail(
-                            $senderName,
                             $senderEmail,
+                            $senderName,
                             $subject,
                             $message,
                             $breakLines,
@@ -641,13 +641,13 @@ class MailController extends AbstractController
     /**
      * Creates a mail record from an external url
      * @param string $subject Subject of the newsletter
-     * @param string $htmlUri Link to the HTML version
-     * @param string $plainUri Linkt to the text version
+     * @param string $htmlUrl Link to the HTML version
+     * @param string $plainUrl Linkt to the text version
      * @param array $parameters Additional newsletter parameters
      *
      * @return int|bool Error or warning message produced during the process
      */
-    protected function createMailRecordFromExternalUrls(string $subject, string $htmlUri, string $plainUri, array $parameters): bool|int
+    protected function createMailRecordFromExternalUrls(string $subject, string $htmlUrl, string $plainUrl, array $parameters): bool|int
     {
         $newRecord = [
             'type' => MailType::EXTERNAL,
@@ -678,21 +678,21 @@ class MailController extends AbstractController
             $newRecord['encoding'] = $parameters['direct_mail_encoding'];
         }
 
-        $urlParts = @parse_url($plainUri);
+        $urlParts = @parse_url($plainUrl);
         // No plain text url
-        if (!$plainUri || $urlParts === false || !$urlParts['host']) {
+        if (!$plainUrl || $urlParts === false || !$urlParts['host']) {
             $newRecord['plainParams'] = '';
             $newRecord['sendOptions'] &= 254;
         } else {
-            $newRecord['plainParams'] = $plainUri;
+            $newRecord['plainParams'] = $plainUrl;
         }
 
         // No html url
-        $urlParts = @parse_url($htmlUri);
-        if (!$htmlUri || $urlParts === false || !$urlParts['host']) {
+        $urlParts = @parse_url($htmlUrl);
+        if (!$htmlUrl || $urlParts === false || !$urlParts['host']) {
             $newRecord['sendOptions'] &= 253;
         } else {
-            $newRecord['HTMLParams'] = $htmlUri;
+            $newRecord['HTMLParams'] = $htmlUrl;
         }
 
         // save to database
@@ -753,8 +753,8 @@ class MailController extends AbstractController
         if (isset($this->pageTSConfiguration['flowedFormat'])) {
             $data['sys_dmail']['NEW']['flowedFormat'] = $this->pageTSConfiguration['flowedFormat'];
         }
-        if (isset($this->pageTSConfiguration['direct_mail_encoding'])) {
-            $data['sys_dmail']['NEW']['encoding'] = $this->pageTSConfiguration['direct_mail_encoding'];
+        if (isset($this->pageTSConfiguration['quick_mail_encoding'])) {
+            $data['sys_dmail']['NEW']['encoding'] = $this->pageTSConfiguration['quick_mail_encoding'];
         }
 
         if ($data['sys_dmail']['NEW']['pid']) {
@@ -798,7 +798,7 @@ class MailController extends AbstractController
     {
         $this->mailerService->start();
         $this->mailerService->setCharset($charset);
-        $this->mailerService->addPlainContent($message);
+        $this->mailerService->setPlainContent($message);
 
         if (!$message || !$this->mailerService->getPlainContent()) {
             ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_content'), LanguageUtility::getLL('dmail_error'));
@@ -810,7 +810,7 @@ class MailController extends AbstractController
         }
 
         // Update the record:
-        $this->mailerService->setMailPart('messageid', $this->mailerService->getMessageId());
+        // $this->mailerService->setMailPart('messageid', $this->mailerService->getMessageId());
         $mailContent = base64_encode(serialize($this->mailerService->getMailParts()));
 
         $this->sysDmailRepository->update($this->mailUid, [
@@ -915,7 +915,8 @@ class MailController extends AbstractController
 
             // remove cache
             $dataHandler->clear_cacheCmd($this->pageUid);
-            $fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
+            // todo check if the following line is needed since there is no change to $mailData made
+            // $fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
         }
 
         $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid(

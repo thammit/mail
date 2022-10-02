@@ -42,6 +42,7 @@ class Mail extends AbstractEntity
     protected string $redirectUrl = '';
     protected string $authCodeFields = '';
     protected string $recipientGroups = '';
+    protected int $sysLanguageUid = 0;
 
     public function __construct()
     {
@@ -603,6 +604,24 @@ class Mail extends AbstractEntity
     public function setRecipientGroups(string $recipientGroups): Mail
     {
         $this->recipientGroups = $recipientGroups;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSysLanguageUid(): int
+    {
+        return $this->sysLanguageUid;
+    }
+
+    /**
+     * @param int $sysLanguageUid
+     * @return Mail
+     */
+    public function setSysLanguageUid(int $sysLanguageUid): Mail
+    {
+        $this->sysLanguageUid = $sysLanguageUid;
         return $this;
     }
 

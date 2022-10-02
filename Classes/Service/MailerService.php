@@ -18,18 +18,15 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
-use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mime\Address;
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -64,7 +61,6 @@ class MailerService implements LoggerAwareInterface
     protected string $backendUserLanguage = 'default';
     protected bool $isTestMail = false;
     protected string $charset = 'utf-8';
-    protected string $messageId = '';
     protected string $subject = '';
     protected string $fromEmail = '';
     protected string $fromName = '';
@@ -130,7 +126,16 @@ class MailerService implements LoggerAwareInterface
      */
     public function getMessageId(): string
     {
-        return $this->messageId;
+        return $this->mailParts['messageid'];
+    }
+
+    /**
+     * @param string $messageId
+     * @return void
+     */
+    public function setMessageId(string $messageId): void
+    {
+        $this->mailParts['messageid'] = $messageId;
     }
 
     /**
@@ -246,22 +251,6 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Adds plain-text, replaces the HTTP urls in the plain text and then encodes it
-     *
-     * @param string $content The plain text content
-     *
-     * @return void
-     */
-    public function addPlainContent(string $content): void
-    {
-        if ($this->jumpUrlPrefix) {
-            [$content, $plainLinkIds] = MailerUtility::replaceUrlsInPlainText($content, $this->jumpUrlPrefix, $this->jumpUrlUseId);
-            $this->setPlainLinkIds($plainLinkIds);
-        }
-        $this->setPlainContent($content);
-    }
-
-    /**
      * Initializing the MailMessage class and setting the first global variables. Write to log file if it's a cronjob
      *
      * @param int $sendPerCycle Total of recipient in a cycle
@@ -271,18 +260,9 @@ class MailerService implements LoggerAwareInterface
      */
     public function start(int $sendPerCycle = 50, string $backendUserLanguage = 'en'): void
     {
-        // Sets the message id
-        $host = MailerUtility::getHostname();
-        if (!$host || $host == '127.0.0.1' || $host == 'localhost' || $host == 'localhost.localdomain') {
-            $host = ($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] ? preg_replace('/[^A-Za-z0-9_\-]/', '_',
-                    $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']) : 'localhost') . '.TYPO3';
-        }
+        $this->setMessageId(MailerUtility::generateMessageId());
 
-        $idLeft = time() . '.' . uniqid();
-        $idRight = $host ?: 'symfony.generated';
-        $this->messageId = $idLeft . '@' . $idRight;
-
-        // Mailer engine parameters
+            // Mailer engine parameters
         $this->sendPerCycle = $sendPerCycle;
         $this->backendUserLanguage = $backendUserLanguage;
     }
@@ -308,19 +288,6 @@ class MailerService implements LoggerAwareInterface
         $this->setCharset($mailData['charset']);
         $this->setIncludeMedia((bool)$mailData['includeMedia']);
 
-        $baseUrl = BackendDataUtility::getAbsoluteBaseUrlForMailPage((int)$mailData['page']);
-        $glue = str_contains($baseUrl, '?') ? '&' : '?';
-        if ($params['enable_jump_url'] ?? false) {
-            $this->setJumpUrlPrefix($baseUrl . $glue .
-                'mid=###SYS_MAIL_ID###' .
-                ($params['jumpurl_tracking_privacy'] ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
-                '&aC=###SYS_AUTHCODE###' .
-                '&jumpurl=');
-            $this->setJumpUrlUseId(true);
-        }
-        if ($params['enable_mailto_jump_url'] ?? false) {
-            $this->setJumpUrlUseMailto(true);
-        }
 
         if ($fetchPlainTextContent) {
             $plainTextUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plainParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
@@ -380,11 +347,26 @@ class MailerService implements LoggerAwareInterface
                         ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_html_boundaries'),
                             LanguageUtility::getLL('dmail_warning'));
                     }
-                    $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $baseUrl);
+                    // $baseUrl = $this->theParts['html']['path']
+                    $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
+                    $this->setHtmlHyperLinks($htmlHyperLinks);
+
                     if ($htmlHyperLinks) {
-                        $this->setHtmlHyperLinks($htmlHyperLinks);
-                        $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $this->getHtmlHyperLinks(), $this->getJumpUrlPrefix(),
-                            $this->getJumpUrlUseId(), $this->getJumpUrlUseMailto());
+                        $baseUrl = BackendDataUtility::getAbsoluteBaseUrlForMailPage((int)$mailData['page']);
+                        $glue = str_contains($baseUrl, '?') ? '&' : '?';
+                        $jumpUrlPrefix = '';
+                        $jumpUrlUseId = false;
+                        if ($params['enable_jump_url'] ?? false) {
+                            $jumpUrlPrefix = $baseUrl . $glue .
+                                'mid=###SYS_MAIL_ID###' .
+                                ($params['jumpurl_tracking_privacy'] ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
+                                '&aC=###SYS_AUTHCODE###' .
+                                '&jumpurl=';
+                            $jumpUrlUseId = true;
+                        }
+                        $jumpUrlUseMailto = (bool)($params['enable_mailto_jump_url'] ?? false);
+
+                        $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $htmlHyperLinks, $jumpUrlPrefix, $jumpUrlUseId, $jumpUrlUseMailto);
                     }
                     $this->setHtmlContent($htmlContent);
                 }
@@ -396,7 +378,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         // Update the record:
-        $this->setMailPart('messageid', $this->getMessageId());
+        // $this->setMailPart('messageid', $this->getMessageId());
         $mailContent = base64_encode(serialize($this->getMailParts()));
 
         $updateData = [
@@ -434,7 +416,6 @@ class MailerService implements LoggerAwareInterface
         }
 
         $this->mailParts = unserialize(base64_decode($mailData['mailContent']));
-        $this->messageId = $this->mailParts['messageid'];
 
         $this->subject = $this->charsetConverter->conv($mailData['subject'], $this->backendCharset, $this->charset);
 
@@ -453,7 +434,7 @@ class MailerService implements LoggerAwareInterface
         $this->dmailer['sectionBoundary'] = '<!--' . Constants::CONTENT_SECTION_BOUNDARY;
         $this->dmailer['html_content'] = $this->getHtmlContent() ?? '';
         $this->dmailer['plain_content'] = $this->getPlainContent() ?? '';
-        $this->dmailer['messageID'] = $this->messageId;
+        $this->dmailer['messageID'] = $this->getMessageId();
         $this->dmailer['sys_dmail_uid'] = $mailUid;
         $this->dmailer['sys_dmail_rec'] = $mailData;
 
