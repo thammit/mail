@@ -8,14 +8,11 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
-use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
 use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
-use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
-use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
@@ -30,7 +27,6 @@ use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\RedirectResponse;
@@ -69,7 +65,6 @@ class MailController extends AbstractController
     protected string $sendTestMailAddress = '';
     protected int $distributionTimeStamp = 0;
     protected string $requestUri = '';
-    // protected int $tt_address_uid = 0;
 
     /**
      * Init module
@@ -180,10 +175,10 @@ class MailController extends AbstractController
             } else {
                 if ($this->id) {
                     // a subpage of a mail folder is selected -> redirect user to settings page
-                    // todo check if there is a open, not yet sent mail of this page and open it
                     $openMails = $this->sysDmailRepository->findOpenMailsByPageId($this->pageInfo['pid']);
                     foreach ($openMails as $openMail) {
                         if ($openMail['page'] === $this->id) {
+                            // there is already an open mail of this page -> use it
                             $uri = $this->uriBuilder->buildUriFromRoute(
                                 'Mail_Mail',
                                 [
@@ -195,7 +190,7 @@ class MailController extends AbstractController
                             return new RedirectResponse($uri);
                         }
                     }
-
+                    // create a new mail of the page
                     $uri = $this->uriBuilder->buildUriFromRoute(
                         'Mail_Mail',
                         [
@@ -327,12 +322,9 @@ class MailController extends AbstractController
                             $persistenceManager->add($newMail);
                             $persistenceManager->persistAll();
                             $newUid = $newMail->getUid();
-                            // $newUid = $this->createMailRecordFromInternalPage($this->createMailFromPageUid, $this->pageTSConfiguration, $this->createMailForLanguageUid);
                             $this->mailUid = $newUid;
                             // Read new record (necessary because TCEmain sets default field values)
                             $mailData = $this->sysDmailRepository->findByUid($newUid);
-                            // fetch the data
-//                            $fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                             $moduleData['info']['internal']['cmd'] = $nextCmd ?: Action::WIZARD_STEP_CATEGORIES;
                         } else {
                             ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
@@ -346,17 +338,9 @@ class MailController extends AbstractController
                             $persistenceManager->add($newMail);
                             $persistenceManager->persistAll();
                             $newUid = $newMail->getUid();
-    //                        $newUid = $this->createMailRecordFromExternalUrls(
-    //                            (string)($this->external['subject'] ?? ''),
-    //                            (string)($this->external['htmlUri'] ?? ''),
-    //                            (string)($this->external['plainUri'] ?? ''),
-    //                            $this->pageTSConfiguration
-    //                        );
                             $this->mailUid = $newUid;
                             // Read new record (necessary because TCEmain sets default field values)
                             $mailData = $this->sysDmailRepository->findByUid($newUid);
-                            // fetch the data
-                            //$fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
                             $moduleData['info']['external']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
                         } else {
                             $fetchError = true;
@@ -378,18 +362,9 @@ class MailController extends AbstractController
                             $persistenceManager->add($newMail);
                             $persistenceManager->persistAll();
                             $newUid = $newMail->getUid();
-
-    //                        $fetchError = !$this->createQuickMail(
-    //                            $senderEmail,
-    //                            $senderName,
-    //                            $subject,
-    //                            $message,
-    //                            $breakLines,
-    //                        );
-
-    //                        $mailData = $this->sysDmailRepository->findByUid($this->mailUid);
-                            $mailData = $this->sysDmailRepository->findByUid($newUid);
                             $this->mailUid = $newUid;
+                            // Read new record (necessary because TCEmain sets default field values)
+                            $mailData = $this->sysDmailRepository->findByUid($newUid);
                         } else {
                             $fetchError = true;
                         }
@@ -407,18 +382,37 @@ class MailController extends AbstractController
                             if ($mailData['type'] === MailType::EXTERNAL) {
                                 // it's a quick/external mail
                                 $moduleData['info']['dmail']['cmd'] = Action::WIZARD_STEP_SEND_TEST;
-
-                                // add attachment here, since attachment added in 2nd step
-                                $mailContent = unserialize(base64_decode($mailData['mailContent']));
-                                $boundaryCheck = false;
                                 if (str_starts_with($mailData['HTMLParams'], 'http') || str_starts_with($mailData['plainParams'], 'http')) {
-                                    // it's an external mail
-                                    $boundaryCheck = true;
+//                                  // it's an external mail -> fetch content again
+                                    $newMail = $mailFactory->fromExternalUrls($mailData['subject'], $mailData['HTMLParams'], $mailData['plainParams']);
+                                    if ($newMail instanceof Mail) {
+                                        // copy new fetch content and charset to current mail record
+                                        // todo use extbase
+                                        $this->sysDmailRepository->update($mailData['uid'], [
+                                            'mailContent' => $newMail->getMailContent(),
+                                            'renderedSize' => $newMail->getRenderedSize(),
+                                            'charset' => $newMail->getCharset()
+                                        ]);
+                                        // Read new record (necessary because TCEmain sets default field values)
+                                        $mailData = $this->sysDmailRepository->findByUid($mailData['uid']);
+                                    } else {
+                                        $fetchError = true;
+                                    }
                                 }
-                                $fetchError = !$this->compileQuickMail($mailContent['plain']['content'] ?? '', $mailData['charset'], $boundaryCheck);
                             } else {
-                                $fetchError = !$this->mailerService->assemble($mailData, $this->pageTSConfiguration);
-
+                                $newMail = $mailFactory->fromInternalPage($mailData['page'], $mailData['sys_language_uid']);
+                                if ($newMail instanceof Mail) {
+                                    // copy new fetch content and charset to current mail record
+                                    // todo use extbase
+                                    $this->sysDmailRepository->update($mailData['uid'], [
+                                        'mailContent' => $newMail->getMailContent(),
+                                        'renderedSize' => $newMail->getRenderedSize(),
+                                    ]);
+                                    // Read new record (necessary because TCEmain sets default field values)
+                                    $mailData = $this->sysDmailRepository->findByUid($mailData['uid']);
+                                } else {
+                                    $fetchError = true;
+                                }
                                 $moduleData['info']['dmail']['cmd'] = ($mailData['type'] === MailType::INTERNAL) ? $nextCmd : Action::WIZARD_STEP_SEND_TEST;
                             }
                         }
@@ -579,272 +573,6 @@ class MailController extends AbstractController
             }
         }
         return $moduleData;
-    }
-
-    /**
-     * Create a mail record from an internal page
-     * @param int $pageUid The page ID
-     * @param array $parameters The mail parameters
-     * @param int $sysLanguageUid
-     * @return int|bool new record uid or FALSE if failed
-     * @throws DBALException
-     * @throws Exception
-     * @throws InvalidConfigurationTypeException
-     */
-    protected function createMailRecordFromInternalPage(int $pageUid, array $parameters, int $sysLanguageUid = 0): bool|int
-    {
-        $newRecord = [
-            'type' => MailType::INTERNAL,
-            'pid' => $parameters['pid'] ?? 0,
-            'from_email' => $parameters['from_email'] ?? '',
-            'from_name' => $parameters['from_name'] ?? '',
-            'replyto_email' => $parameters['replyto_email'] ?? '',
-            'replyto_name' => $parameters['replyto_name'] ?? '',
-            'return_path' => $parameters['return_path'] ?? '',
-            'priority' => $parameters['priority'] ?? 0,
-            'use_rdct' => (!empty($parameters['use_rdct']) ? $parameters['use_rdct'] : 0), /*$parameters['use_rdct'],*/
-            'long_link_mode' => (!empty($parameters['long_link_mode']) ? $parameters['long_link_mode'] : 0),//$parameters['long_link_mode'],
-            'organisation' => $parameters['organisation'] ?? '',
-            'authcode_fieldList' => $parameters['authcode_fieldList'] ?? '',
-            'sendOptions' => $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'],
-            'long_link_rdct_url' => BackendDataUtility::getBaseUrl($pageUid),
-            'sys_language_uid' => $sysLanguageUid,
-            'attachment' => '',
-            'mailContent' => '',
-        ];
-
-        if ($newRecord['sys_language_uid'] > 0) {
-            $langParam = $parameters['langParams.'][$newRecord['sys_language_uid']] ?? '&L=' . $newRecord['sys_language_uid'];
-            $parameters['plainParams'] .= $langParam;
-            $parameters['HTMLParams'] .= $langParam;
-        }
-
-        // If params set, set default values:
-        $paramsToOverride = ['sendOptions', 'includeMedia', 'flowedFormat', 'HTMLParams', 'plainParams'];
-        foreach ($paramsToOverride as $param) {
-            if (isset($parameters[$param])) {
-                $newRecord[$param] = $parameters[$param];
-            }
-        }
-        if (isset($parameters['direct_mail_encoding'])) {
-            $newRecord['encoding'] = $parameters['direct_mail_encoding'];
-        }
-
-        $pageRecord = BackendUtility::getRecord('pages', $pageUid);
-        // Fetch page title from translated page
-        if ($newRecord['sys_language_uid'] > 0) {
-            $pageRecordOverlay = $this->pagesRepository->selectTitleTranslatedPage($pageUid, (int)$newRecord['sys_language_uid']);
-            if (is_array($pageRecordOverlay)) {
-                $pageRecord['title'] = $pageRecordOverlay['title'];
-            }
-        }
-
-        if ($pageRecord['doktype']) {
-            $newRecord['subject'] = $pageRecord['title'];
-            $newRecord['page'] = $pageRecord['uid'];
-            $newRecord['charset'] = ConfigurationUtility::getCharacterSet();
-        }
-
-        // save to database
-        if ($newRecord['page'] && $newRecord['sendOptions']) {
-            $tcemainData = [
-                'sys_dmail' => [
-                    'NEW' => $newRecord,
-                ],
-            ];
-
-            $dataHandler = $this->getDataHandler();
-            $dataHandler->start($tcemainData, []);
-            $dataHandler->process_datamap();
-            return $dataHandler->substNEWwithIDs['NEW'];
-        }
-
-        return false;
-    }
-
-    /**
-     * Creates a mail record from an external url
-     * @param string $subject Subject of the newsletter
-     * @param string $htmlUrl Link to the HTML version
-     * @param string $plainUrl Linkt to the text version
-     * @param array $parameters Additional newsletter parameters
-     *
-     * @return int|bool Error or warning message produced during the process
-     */
-    protected function createMailRecordFromExternalUrls(string $subject, string $htmlUrl, string $plainUrl, array $parameters): bool|int
-    {
-        $newRecord = [
-            'type' => MailType::EXTERNAL,
-            'pid' => $parameters['pid'] ?? 0,
-            'subject' => $subject,
-            'from_email' => $parameters['from_email'] ?? '',
-            'from_name' => $parameters['from_name'] ?? '',
-            'replyto_email' => $parameters['replyto_email'] ?? '',
-            'replyto_name' => $parameters['replyto_name'] ?? '',
-            'return_path' => $parameters['return_path'] ?? '',
-            'priority' => $parameters['priority'] ?? 0,
-            'use_rdct' => (!empty($parameters['use_rdct']) ? $parameters['use_rdct'] : 0),
-            'long_link_mode' => $parameters['long_link_mode'] ?? '',
-            'organisation' => $parameters['organisation'] ?? '',
-            'authcode_fieldList' => $parameters['authcode_fieldList'] ?? '',
-            'sendOptions' => $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default'],
-            'long_link_rdct_url' => BackendDataUtility::getBaseUrl((int)($parameters['page'] ?? 0)),
-        ];
-
-        // If params set, set default values:
-        $paramsToOverride = ['sendOptions', 'includeMedia', 'flowedFormat', 'HTMLParams', 'plainParams'];
-        foreach ($paramsToOverride as $param) {
-            if (isset($parameters[$param])) {
-                $newRecord[$param] = $parameters[$param];
-            }
-        }
-        if (isset($parameters['direct_mail_encoding'])) {
-            $newRecord['encoding'] = $parameters['direct_mail_encoding'];
-        }
-
-        $urlParts = @parse_url($plainUrl);
-        // No plain text url
-        if (!$plainUrl || $urlParts === false || !$urlParts['host']) {
-            $newRecord['plainParams'] = '';
-            $newRecord['sendOptions'] &= 254;
-        } else {
-            $newRecord['plainParams'] = $plainUrl;
-        }
-
-        // No html url
-        $urlParts = @parse_url($htmlUrl);
-        if (!$htmlUrl || $urlParts === false || !$urlParts['host']) {
-            $newRecord['sendOptions'] &= 253;
-        } else {
-            $newRecord['HTMLParams'] = $htmlUrl;
-        }
-
-        // save to database
-        if ($newRecord['pid'] && $newRecord['sendOptions']) {
-            $tcemainData = [
-                'sys_dmail' => [
-                    'NEW' => $newRecord,
-                ],
-            ];
-
-            $dataHandler = $this->getDataHandler();
-            $dataHandler->start($tcemainData, []);
-            $dataHandler->process_datamap();
-            return $dataHandler->substNEWwithIDs['NEW'];
-        }
-
-        return false;
-    }
-
-    /**
-     * Create a quick mail record.
-     *
-     * @param string $fromEmail
-     * @param string $fromName
-     * @param string $subject
-     * @param string $message
-     * @param bool $breakLines
-     * @return bool return false if an error occurred
-     */
-    protected function createQuickMail(string $fromEmail, string $fromName, string $subject, string $message, bool $breakLines): bool
-    {
-        // Set default values:
-        $data = [];
-        $data['sys_dmail']['NEW'] = [
-            'from_email' => $fromEmail,
-            'from_name' => $fromName,
-            'replyto_email' => $this->pageTSConfiguration['replyto_email'] ?? '',
-            'replyto_name' => $this->pageTSConfiguration['replyto_name'] ?? '',
-            'return_path' => $this->pageTSConfiguration['return_path'] ?? '',
-            'priority' => (int)($this->pageTSConfiguration['priority'] ?? 3),
-            'use_rdct' => (int)($this->pageTSConfiguration['use_rdct'] ?? 0),
-            'long_link_mode' => (int)($this->pageTSConfiguration['long_link_mode'] ?? 0),
-            'organisation' => $this->pageTSConfiguration['organisation'] ?? '',
-            'authcode_fieldList' => $this->pageTSConfiguration['authcode_fieldList'] ?? '',
-            'plainParams' => '',
-            'sendOptions' => 1,
-            'long_link_rdct_url' => BackendDataUtility::getBaseUrl((int)$this->pageTSConfiguration['pid']),
-            'subject' => $subject,
-            'type' => MailType::EXTERNAL,
-            'pid' => $this->pageInfo['uid'],
-            'charset' => $this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8',
-        ];
-
-        // If params set, set default values:
-        if (isset($this->pageTSConfiguration['includeMedia'])) {
-            $data['sys_dmail']['NEW']['includeMedia'] = $this->pageTSConfiguration['includeMedia'];
-        }
-        if (isset($this->pageTSConfiguration['flowedFormat'])) {
-            $data['sys_dmail']['NEW']['flowedFormat'] = $this->pageTSConfiguration['flowedFormat'];
-        }
-        if (isset($this->pageTSConfiguration['quick_mail_encoding'])) {
-            $data['sys_dmail']['NEW']['encoding'] = $this->pageTSConfiguration['quick_mail_encoding'];
-        }
-
-        if ($data['sys_dmail']['NEW']['pid']) {
-            // create new mail record
-            $dataHandler = $this->getDataHandler();
-            $dataHandler->start($data, []);
-            $dataHandler->process_datamap();
-
-            // store uid of new mail record
-            $this->mailUid = $dataHandler->substNEWwithIDs['NEW'];
-
-            $row = BackendUtility::getRecord('sys_dmail', intval($this->mailUid));
-            // link in the mail
-            $message = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_-->' . $message . '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
-            if ($this->pageTSConfiguration['use_rdct'] ?? false) {
-                $message = MailerUtility::shortUrlsInPlainText(
-                    $message,
-                    $this->pageTSConfiguration['long_link_mode'] ? 0 : 76,
-                    BackendDataUtility::getBaseUrl((int)$this->pageTSConfiguration['pid'])
-                );
-            }
-            if ($breakLines) {
-                $message = wordwrap($message, 76);
-            }
-            return $this->compileQuickMail($message, $row['charset']);
-        }
-
-        return false;
-    }
-
-    /**
-     * Compiling the quick mail content and save to DB
-     *
-     * @param string $message Body of the mail
-     * @param string $charset charset
-     * @param bool $boundaryCheck do boundary check
-     *
-     * @return bool return true if an error occurred
-     */
-    protected function compileQuickMail(string $message = '', string $charset = 'utf-8', bool $boundaryCheck = true): bool
-    {
-        $this->mailerService->start();
-        $this->mailerService->setCharset($charset);
-        $this->mailerService->setPlainContent($message);
-
-        if (!$message || !$this->mailerService->getPlainContent()) {
-            ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_content'), LanguageUtility::getLL('dmail_error'));
-            return false;
-        }
-
-        if ($boundaryCheck && !str_contains(base64_decode($this->mailerService->getPlainContent()), '<!--' . Constants::CONTENT_SECTION_BOUNDARY)) {
-            ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_boundaries'), LanguageUtility::getLL('dmail_warning'));
-        }
-
-        // Update the record:
-        // $this->mailerService->setMailPart('messageid', $this->mailerService->getMessageId());
-        $mailContent = base64_encode(serialize($this->mailerService->getMailParts()));
-
-        $this->sysDmailRepository->update($this->mailUid, [
-            'issent' => 0,
-            'charset' => $this->mailerService->getCharset(),
-            'mailContent' => $mailContent,
-            'renderedSize' => strlen($mailContent)
-        ]);
-
-        return true;
     }
 
     /**
