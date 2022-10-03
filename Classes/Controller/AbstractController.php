@@ -38,7 +38,6 @@ abstract class AbstractController extends ActionController
 {
     protected int $id = 0;
     protected int $pageUid = 0;
-    protected int $mailUid = 0;
     protected int $sysLanguageUid = 0;
     protected array|false $pageInfo = false;
     protected bool $access = false;
@@ -69,41 +68,10 @@ abstract class AbstractController extends ActionController
         protected TtAddressRepository $ttAddressRepository,
         protected FeUsersRepository $feUsersRepository,
     ) {
-//        $this->moduleTemplateFactory = $moduleTemplateFactory ?? GeneralUtility::makeInstance(ModuleTemplate::class);
-//        $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
-//        $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
-//        $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
-//        $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
-//        $this->recipientService = $recipientService ?? GeneralUtility::makeInstance(RecipientService::class);
         $this->id = (int)GeneralUtility::_GP('id');
         $this->recipientService->setPageId($this->id);
-//        $this->sysDmailRepository = $sysDmailRepository ?? GeneralUtility::makeInstance(SysDmailRepository::class);
-//        $this->sysDmailGroupRepository = $sysDmailGroupRepository ?? GeneralUtility::makeInstance(SysDmailGroupRepository::class);
-//        $this->sysDmailMaillogRepository = $sysDmailMaillogRepository ?? GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
-//        $this->pagesRepository = $pagesRepository ?? GeneralUtility::makeInstance(PagesRepository::class);
-//        $this->tempRepository = $tempRepository ?? GeneralUtility::makeInstance(TempRepository::class);
-//        $this->ttAddressRepository = $ttAddressRepository ?? GeneralUtility::makeInstance(TtAddressRepository::class);
-//        $this->feUsersRepository = $feUsersRepository ?? GeneralUtility::makeInstance(FeUsersRepository::class);
-
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
-
-//        $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
-//        $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
-//        $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
-
-    }
-
-    protected function init(ServerRequestInterface $request): void
-    {
-        $queryParams = $request->getQueryParams();
-        $parsedBody = $request->getParsedBody();
-
-        $this->id = (int)($parsedBody['id'] ?? $queryParams['id'] ?? 0);
-        $this->setCurrentAction(Action::cast($parsedBody['cmd'] ?? $queryParams['cmd'] ?? null));
-        $this->pageUid = (int)($parsedBody['pageUid'] ?? $queryParams['pageUid'] ?? 0);
-        $this->mailUid = (int)($parsedBody['mailUid'] ?? $queryParams['mailUid'] ?? 0);
-
         try {
             $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
             $this->mailerService->setSiteIdentifier($this->siteIdentifier);
@@ -127,150 +95,8 @@ abstract class AbstractController extends ActionController
         }
     }
 
-    protected function backendUserHasModuleAccess(): bool
-    {
-        return ($this->id && $this->access) || (BackendUserUtility::isAdmin() && !$this->id);
-    }
-
-    protected function getModulName()
-    {
-        $module = $this->pageInfo['module'] ?? false;
-
-        if (!$module && isset($this->pageInfo['pid'])) {
-            $pidrec = BackendUtility::getRecord('pages', intval($this->pageInfo['pid']));
-            $module = $pidrec['module'] ?? false;
-        }
-
-        return $module;
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return Action
-     */
-    public function getCurrentAction(): Action
-    {
-        return $this->action;
-    }
-
-    /**
-     * @param Action $action
-     */
-    public function setCurrentAction(Action $action): void
-    {
-        $this->action = $action;
-    }
-
-    protected function getConnection(string $table): Connection
-    {
-        return GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-    }
-
-    protected function getQueryBuilder(string $table): QueryBuilder
-    {
-        return GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-    }
-
     protected function getDataHandler(): DataHandler
     {
         return GeneralUtility::makeInstance(DataHandler::class);
-    }
-
-    /**
-     * Prepare DB record
-     *
-     * @param array $listArr All DB records to be formated
-     * @param string $table Table name
-     *
-     * @return    array        list of record
-     */
-    protected function getRecordList(array $listArr, string $table): array
-    {
-        $isAllowedDisplayTable = BackendUserUtility::getBackendUser()->check('tables_select', $table);
-        $isAllowedEditTable = BackendUserUtility::getBackendUser()->check('tables_modify', $table);
-        $output = [
-            'rows' => [],
-            'table' => $table,
-            'edit' => $isAllowedEditTable,
-            'show' => $isAllowedDisplayTable,
-        ];
-
-        $notAllowedPlaceholder = LanguageUtility::getLL('mailgroup_table_disallowed_placeholder');
-        foreach ($listArr as $row) {
-            $output['rows'][] = [
-                'uid' => $row['uid'],
-                'email' => $isAllowedDisplayTable ? htmlspecialchars($row['email']) : $notAllowedPlaceholder,
-                'name' => $isAllowedDisplayTable ? htmlspecialchars($row['name']) : '',
-            ];
-        }
-
-        return $output;
-    }
-
-    protected function getJS($mailUid): string
-    {
-        return '
-        script_ended = 0;
-        function jumpToUrl(URL)	{
-            window.location.href = URL;
-        }
-        function jumpToUrlD(URL) {
-            window.location.href = URL+"&mailUid=' . $mailUid . '";
-        }
-        function toggleDisplay(toggleId, e, countBox) {
-            if (!e) {
-                e = window.event;
-            }
-            if (!document.getElementById) {
-                return false;
-            }
-
-            prefix = toggleId.split("-");
-            for (i=1; i<=countBox; i++){
-                newToggleId = prefix[0]+"-"+i;
-                body = document.getElementById(newToggleId);
-                image = document.getElementById(toggleId + "_toggle"); //ConfigurationController
-                //image = document.getElementById(newToggleId + "_toggle"); //DmailController
-                if (newToggleId != toggleId){
-                    if (body.style.display == "block"){
-                        body.style.display = "none";
-                        if (image) {
-                            image.className = image.className.replace( /expand/ , "collapse");
-                        }
-                    }
-                }
-            }
-
-            var body = document.getElementById(toggleId);
-            if (!body) {
-                return false;
-            }
-            var image = document.getElementById(toggleId + "_toggle");
-            if (body.style.display == "none") {
-                body.style.display = "block";
-                if (image) {
-                    image.className = image.className.replace( /collapse/ , "expand");
-                }
-            } else {
-                body.style.display = "none";
-                if (image) {
-                    image.className = image.className.replace( /expand/ , "collapse");
-                }
-            }
-            if (e) {
-                // Stop the event from propagating, which
-                // would cause the regular HREF link to
-                // be followed, ruining our hard work.
-                e.cancelBubble = true;
-                if (e.stopPropagation) {
-                    e.stopPropagation();
-                }
-            }
-        }
-        ';
     }
 }

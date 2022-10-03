@@ -212,7 +212,6 @@ class MailController extends AbstractController
      */
     public function settingsAction(Mail $mail): ResponseInterface
     {
-        $this->mail = $mail;
         ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_wiz2_fetch_success'));
         $data = [];
 
@@ -254,7 +253,7 @@ class MailController extends AbstractController
             'isSent' => $mail->isSent(),
             'title' => $mail->getSubject(),
             'mailUid' => $mail->getUid(),
-            'navigation' => $this->getNavigation(2, $this->hideCategoryStep())
+            'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail))
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -264,26 +263,21 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function categoriesAction(Mail $mail): ResponseInterface
     {
-        $data = [
-            'title' => LanguageUtility::getLL('nl_cat'),
-            'rowsFound' => false,
-            'rows' => [],
-            'pageUid' => $this->pageUid,
-            'update_cats' => LanguageUtility::getLL('nl_l_update'),
-            'output' => '',
-        ];
-
+        $data = [];
         $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid($mail->getPage(), $mail->getSysLanguageUid());
 
         if ($rows) {
-            $data['subtitle'] = BackendUtility::cshItem($this->cshKey, 'assign_categories');
-            $data['rowsFound'] = true;
+            $data = [
+                'subtitle' => BackendUtility::cshItem($this->cshKey, 'assign_categories'),
+                'rows' => [],
+            ];
 
+            // todo Why colPos 99 ???
             $colPosVal = 99;
             $ttContentCategoryMmRepository = GeneralUtility::makeInstance(TtContentCategoryMmRepository::class);
             foreach ($rows as $contentElementData) {
@@ -303,9 +297,9 @@ class MailController extends AbstractController
 
                 $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $contentElementData, $this->sysLanguageUid);
                 reset($ttContentCategories);
-                $cboxes = [];
+                $checkBoxes = [];
                 foreach ($ttContentCategories as $pKey => $pVal) {
-                    $cboxes[] = [
+                    $checkBoxes[] = [
                         'pKey' => $pKey,
                         'checked' => in_array((int)$pKey, $categoriesRow),
                         'pVal' => htmlspecialchars($pVal),
@@ -319,16 +313,14 @@ class MailController extends AbstractController
                     'list_type' => $contentElementData['list_type'],
                     'bodytext' => empty($contentElementData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($contentElementData['bodytext']), 200),
                     'hasCategory' => (bool)$contentElementData['module_sys_dmail_category'],
-                    'checkboxes' => $cboxes,
+                    'checkboxes' => $checkBoxes,
                 ];
             }
-        } else {
-            $data['subtitle'] = LanguageUtility::getLL('nl_cat_msg1');
         }
         $this->view->assignMultiple([
             'data' => $data,
             'mailUid' => $mail->getUid(),
-            'navigation' => $this->getNavigation(3, $this->hideCategoryStep())
+            'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail))
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -409,7 +401,8 @@ class MailController extends AbstractController
                 }
             }
         }
-        $hideCategoryStep = $this->hideCategoryStep();
+
+        $hideCategoryStep = $this->hideCategoryStep($mail);
 
         $this->view->assignMultiple([
             'data' => $data,
@@ -463,7 +456,7 @@ class MailController extends AbstractController
      */
     public function scheduleSendingAction(Mail $mail): ResponseInterface
     {
-        $hideCategoryStep = $this->hideCategoryStep();
+        $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
             'data' => RecipientUtility::finalSendingGroups($this->id, $mail->getSysLanguageUid(), $this->userTable, $this->backendUserPermissions),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
@@ -544,10 +537,10 @@ class MailController extends AbstractController
         $this->redirect('index');
     }
 
-    protected function hideCategoryStep(): bool
+    protected function hideCategoryStep(Mail $mail = null): bool
     {
         $userTSConfig = TypoScriptUtility::getUserTSConfig();
-        return (($this->mail ?? false) && $this->mail->getType() === MailType::EXTERNAL) || (isset($userTSConfig['tx_directmail.']['hideSteps']) && $userTSConfig['tx_directmail.']['hideSteps'] === 'cat');
+        return (($mail ?? false) && $mail->getType() === MailType::EXTERNAL) || (isset($userTSConfig['tx_directmail.']['hideSteps']) && $userTSConfig['tx_directmail.']['hideSteps'] === 'cat');
     }
 
     protected function getNavigation(int $currentStep, bool $hideCategoryStep): array
