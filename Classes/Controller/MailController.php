@@ -352,7 +352,7 @@ class MailController extends AbstractController
             $dataHandler->process_datamap();
 
             // remove cache
-            $dataHandler->clear_cacheCmd($this->pageUid);
+            $dataHandler->clear_cacheCmd($mail->getPage());
         }
 
         $this->redirect('categories', null, null, ['mail' => $mail->getUid()]);
