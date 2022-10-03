@@ -188,9 +188,9 @@ class MailController extends AbstractController
                     $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
                     $persistenceManager->update($mail);
                     $persistenceManager->persistAll();
-                    $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
                 }
             }
+            $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
         } else {
             $newMail = $mailFactory->fromInternalPage($mail->getPage(), $mail->getSysLanguageUid());
             if ($newMail instanceof Mail) {
