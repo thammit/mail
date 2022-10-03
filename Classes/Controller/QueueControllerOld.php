@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 
-class QueueController extends AbstractController
+class QueueControllerOld extends OldAbstractController
 {
     /**
      * for cmd == 'delete'

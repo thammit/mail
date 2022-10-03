@@ -14,7 +14,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class ConfigurationController extends AbstractController
+class ConfigurationControllerOld extends OldAbstractController
 {
     protected string $tsConfigPrefix = 'mod.web_modules.dmail.';
     protected array $pageTS = [];

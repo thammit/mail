@@ -22,7 +22,7 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
-class StatisticsController extends AbstractController
+class StatisticsControllerOld extends OldAbstractController
 {
     /**
      * The name of the module

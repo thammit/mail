@@ -20,7 +20,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
-use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -31,10 +30,9 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
-abstract class AbstractController extends ActionController
+abstract class OldAbstractController
 {
     protected int $id = 0;
     protected int $pageUid = 0;
@@ -52,46 +50,75 @@ abstract class AbstractController extends ActionController
     protected string $userTable = '';
     protected array $allowedTables = [];
 
+    protected ModuleTemplate $moduleTemplate;
+    protected IconFactory $iconFactory;
+    protected PageRenderer $pageRenderer;
+    protected StandaloneView $view;
+    protected SiteFinder $siteFinder;
+    protected UriBuilder $uriBuilder;
+    protected MailerService $mailerService;
+    protected RecipientService $recipientService;
+    protected SysDmailRepository $sysDmailRepository;
+    protected SysDmailGroupRepository $sysDmailGroupRepository;
+    protected SysDmailMaillogRepository $sysDmailMaillogRepository;
+    protected PagesRepository $pagesRepository;
+    protected TempRepository $tempRepository;
+    protected TtAddressRepository $ttAddressRepository;
+    protected FeUsersRepository $feUsersRepository;
+    protected EventDispatcherInterface $eventDispatcher;
+
     /**
      * Constructor Method
      */
     public function __construct(
-        protected ModuleTemplateFactory $moduleTemplateFactory,
-        protected PageRenderer $pageRenderer,
-        protected SiteFinder $siteFinder,
-        protected MailerService $mailerService,
-        protected RecipientService $recipientService,
-        protected SysDmailRepository $sysDmailRepository,
-        protected SysDmailGroupRepository $sysDmailGroupRepository,
-        protected SysDmailMaillogRepository $sysDmailMaillogRepository,
-        protected PagesRepository $pagesRepository,
-        protected TempRepository $tempRepository,
-        protected TtAddressRepository $ttAddressRepository,
-        protected FeUsersRepository $feUsersRepository,
+        ModuleTemplate $moduleTemplate = null,
+        IconFactory $iconFactory = null,
+        PageRenderer $pageRenderer = null,
+        StandaloneView $view = null,
+        SiteFinder $siteFinder = null,
+        UriBuilder $uriBuilder = null,
+        MailerService $mailerService = null,
+        RecipientService $recipientService = null,
+        SysDmailRepository $sysDmailRepository = null,
+        SysDmailGroupRepository $sysDmailGroupRepository = null,
+        SysDmailMaillogRepository $sysDmailMaillogRepository = null,
+        PagesRepository $pagesRepository = null,
+        TempRepository $tempRepository = null,
+        TtAddressRepository $ttAddressRepository = null,
+        FeUsersRepository $feUsersRepository = null,
+        EventDispatcherInterface $eventDispatcher = null
     ) {
-//        $this->moduleTemplateFactory = $moduleTemplateFactory ?? GeneralUtility::makeInstance(ModuleTemplate::class);
-//        $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
-//        $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
-//        $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
-//        $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
-//        $this->recipientService = $recipientService ?? GeneralUtility::makeInstance(RecipientService::class);
-        $this->id = (int)GeneralUtility::_GP('id');
+        $this->moduleTemplate = $moduleTemplate ?? GeneralUtility::makeInstance(ModuleTemplate::class);
+        $this->iconFactory = $iconFactory ?? GeneralUtility::makeInstance(IconFactory::class);
+        $this->pageRenderer = $pageRenderer ?? GeneralUtility::makeInstance(PageRenderer::class);
+        $this->view = $view ?? GeneralUtility::makeInstance(StandaloneView::class);
+        $this->siteFinder = $siteFinder ?? GeneralUtility::makeInstance(SiteFinder::class);
+        $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
+        $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
+        $this->recipientService = $recipientService ?? GeneralUtility::makeInstance(RecipientService::class);
         $this->recipientService->setPageId($this->id);
-//        $this->sysDmailRepository = $sysDmailRepository ?? GeneralUtility::makeInstance(SysDmailRepository::class);
-//        $this->sysDmailGroupRepository = $sysDmailGroupRepository ?? GeneralUtility::makeInstance(SysDmailGroupRepository::class);
-//        $this->sysDmailMaillogRepository = $sysDmailMaillogRepository ?? GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
-//        $this->pagesRepository = $pagesRepository ?? GeneralUtility::makeInstance(PagesRepository::class);
-//        $this->tempRepository = $tempRepository ?? GeneralUtility::makeInstance(TempRepository::class);
-//        $this->ttAddressRepository = $ttAddressRepository ?? GeneralUtility::makeInstance(TtAddressRepository::class);
-//        $this->feUsersRepository = $feUsersRepository ?? GeneralUtility::makeInstance(FeUsersRepository::class);
+        $this->sysDmailRepository = $sysDmailRepository ?? GeneralUtility::makeInstance(SysDmailRepository::class);
+        $this->sysDmailGroupRepository = $sysDmailGroupRepository ?? GeneralUtility::makeInstance(SysDmailGroupRepository::class);
+        $this->sysDmailMaillogRepository = $sysDmailMaillogRepository ?? GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
+        $this->pagesRepository = $pagesRepository ?? GeneralUtility::makeInstance(PagesRepository::class);
+        $this->tempRepository = $tempRepository ?? GeneralUtility::makeInstance(TempRepository::class);
+        $this->ttAddressRepository = $ttAddressRepository ?? GeneralUtility::makeInstance(TtAddressRepository::class);
+        $this->feUsersRepository = $feUsersRepository ?? GeneralUtility::makeInstance(FeUsersRepository::class);
+        $this->eventDispatcher = $eventDispatcher ?? GeneralUtility::makeInstance(EventDispatcherInterface::class);
 
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
 
-//        $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
-//        $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
-//        $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
-
+        $this->view->setTemplateRootPaths(['EXT:mail/Resources/Private/Templates/']);
+        $this->view->setPartialRootPaths(['EXT:mail/Resources/Private/Partials/']);
+        $this->view->setLayoutRootPaths(['EXT:mail/Resources/Private/Layouts/']);
+        $this->view->assignMultiple([
+            'backendUser' => [
+                'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
+                'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
+                'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
+            ],
+        ]);
     }
 
     protected function init(ServerRequestInterface $request): void

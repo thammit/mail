@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail;
 
-use MEDIAESSENZ\Mail\Controller\ConfigurationController;
+use MEDIAESSENZ\Mail\Controller\ConfigurationControllerOld;
 use MEDIAESSENZ\Mail\Controller\MailController;
-use MEDIAESSENZ\Mail\Controller\QueueController;
+use MEDIAESSENZ\Mail\Controller\MailControllerOld;
+use MEDIAESSENZ\Mail\Controller\QueueControllerOld;
 use MEDIAESSENZ\Mail\Controller\NavFrameController;
-use MEDIAESSENZ\Mail\Controller\RecipientListController;
-use MEDIAESSENZ\Mail\Controller\StatisticsController;
+use MEDIAESSENZ\Mail\Controller\RecipientListControllerOld;
+use MEDIAESSENZ\Mail\Controller\StatisticsControllerOld;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 final class Configuration
@@ -64,6 +65,23 @@ final class Configuration
             ]
         );
 
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+            'Mail',
+            'Mail',
+            'mailExtbase',
+            'top',
+            [
+                MailController::class => 'index,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,openMail,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete'
+            ],
+            [
+                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'access' => 'group,user',
+                'workspaces' => 'online',
+                'iconIdentifier' => 'mail-module-start',
+                'labels' => 'LLL:EXT:mail/Resources/Private/Language/MailModule.xlf',
+            ]
+        );
+
         ExtensionManagementUtility::addModule(
             'Mail',
             'Mail',
@@ -71,7 +89,7 @@ final class Configuration
             '',
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => MailController::class . '::indexAction',
+                'routeTarget' => MailControllerOld::class . '::indexAction',
                 'access' => 'group,user',
                 'name' => 'Mail_Mail',
                 'workspaces' => 'online',
@@ -89,7 +107,7 @@ final class Configuration
             '',
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => RecipientListController::class . '::indexAction',
+                'routeTarget' => RecipientListControllerOld::class . '::indexAction',
                 'access' => 'group,user',
                 'name' => 'Mail_RecipientList',
                 'workspaces' => 'online',
@@ -107,7 +125,7 @@ final class Configuration
             '',
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => StatisticsController::class . '::indexAction',
+                'routeTarget' => StatisticsControllerOld::class . '::indexAction',
                 'access' => 'group,user',
                 'name' => 'Mail_Statistics',
                 'workspaces' => 'online',
@@ -125,7 +143,7 @@ final class Configuration
             '',
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => QueueController::class . '::indexAction',
+                'routeTarget' => QueueControllerOld::class . '::indexAction',
                 'access' => 'group,user',
                 'name' => 'Mail_Status',
                 'workspaces' => 'online',
@@ -143,7 +161,7 @@ final class Configuration
             '',
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => ConfigurationController::class . '::indexAction',
+                'routeTarget' => ConfigurationControllerOld::class . '::indexAction',
                 'access' => 'group,user',
                 'name' => 'Mail_Configuration',
                 'workspaces' => 'online',

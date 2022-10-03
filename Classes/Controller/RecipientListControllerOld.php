@@ -27,7 +27,7 @@ use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\CsvUtility;
 
-class RecipientListController extends AbstractController
+class RecipientListControllerOld extends OldAbstractController
 {
     protected string $moduleName = 'Mail_RecipientList';
     protected string $route = 'Mail_RecipientList';

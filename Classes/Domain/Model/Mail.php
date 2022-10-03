@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DateTimeImmutable;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
+use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Domain\Model\File;
@@ -13,6 +14,9 @@ class Mail extends AbstractEntity
 {
     protected int $type = MailType::INTERNAL;
     protected int $page = 0;
+    /**
+     * @var ObjectStorage<FileReference>
+     */
     protected ObjectStorage $attachment;
     protected string $subject = '';
     protected string $fromEmail = '';

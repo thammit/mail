@@ -1,0 +1,13 @@
+module.tx_mail {
+    view {
+        templateRootPaths {
+            10 = EXT:mail/Resources/Private/Backend/Templates/
+        }
+        partialRootPaths {
+            10 = EXT:mail/Resources/Private/Backend/Partials/
+        }
+        layoutRootPaths {
+            10 = EXT:mail/Resources/Private/Backend/Layouts/
+        }
+    }
+}
