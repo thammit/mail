@@ -264,25 +264,25 @@ class MailController extends AbstractController
 
         foreach ($groups as $groupName => $properties) {
             foreach ($properties as $property) {
+                $getter = 'get' . ucfirst($property);
+                if (!method_exists($mail, $getter)) {
+                    $getter = 'is' . ucfirst($property);
+                }
                 $columnName = $dataMap->getColumnMap($classSchema->getProperty($property)->getName())->getColumnName();
-                if ($columnName === 'attachment') {
-                    $fileNames = [];
-                    $attachments = MailerUtility::getAttachments($mail->getUid());
-                    if (count($attachments)) {
-                        /** @var FileReference $attachment */
-                        foreach ($attachments as $attachment) {
-                            $fileNames[] = $attachment->getName();
+                if ($property === 'attachment') {
+                    $value = '';
+                    if ($mail->getAttachment()->count() > 0) {
+                        $attachments = [];
+                        foreach ($mail->getAttachment() as $attachment) {
+                            $attachments[] = $attachment->getOriginalResource()->getName();
                         }
+                        $value = implode(', ', $attachments);
                     }
                     $data[$groupName][] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment'),
-                        'value' => implode(', ', $fileNames),
+                        'value' => $value,
                     ];
                 } else {
-                    $getter = 'get' . ucfirst($property);
-                    if (!method_exists($mail, $getter)) {
-                        $getter = 'is' . ucfirst($property);
-                    }
                     if (method_exists($mail, $getter)) {
                         $data[$groupName][] = [
                             'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName),
