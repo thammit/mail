@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Controller;
 use DateTimeImmutable;
 use Doctrine\DBAL\DBALException;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
@@ -417,28 +418,25 @@ class MailController extends AbstractController
         }
 
         if ($this->pageTSConfiguration['test_dmail_group_uids'] ?? false) {
-            $testMailGroups = $this->sysDmailGroupRepository->findByUids(GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_dmail_group_uids']),
-                $this->backendUserPermissions);
-
+            $mailGroupUids = GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_dmail_group_uids']);
             $data['mailGroups'] = [];
-
-            if ($testMailGroups) {
-                foreach ($testMailGroups as $testMailGroup) {
-                    $data['mailGroups'][$testMailGroup['uid']]['title'] = $testMailGroup['title'];
-                    $recipientGroups = $this->recipientService->getRecipientIdsOfMailGroups([$testMailGroup['uid']]);
-                    foreach ($recipientGroups as $recipientGroup => $recipients) {
-                        switch ($recipientGroup) {
-                            case 'fe_users':
-                                foreach ($recipients as $recipient) {
-                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->feUsersRepository->findByUid($recipient, 'uid,name,email');
-                                }
-                                break;
-                            case 'tt_address':
-                                foreach ($recipients as $recipient) {
-                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByPid($recipient, 'uid,name,email');
-                                }
-                                break;
-                        }
+            foreach ($mailGroupUids as $mailGroupUid) {
+                /** @var Group $testMailGroup */
+                $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
+                $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
+                $recipientGroups = $this->recipientService->getRecipientIdsOfMailGroups([$testMailGroup->getUid()]);
+                foreach ($recipientGroups as $recipientGroup => $recipients) {
+                    switch ($recipientGroup) {
+                        case 'fe_users':
+                            foreach ($recipients as $recipient) {
+                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $this->feUsersRepository->findByUid($recipient, 'uid,name,email');
+                            }
+                            break;
+                        case 'tt_address':
+                            foreach ($recipients as $recipient) {
+                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByUid($recipient, 'uid,name,email');
+                            }
+                            break;
                     }
                 }
             }

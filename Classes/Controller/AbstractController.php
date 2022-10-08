@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
@@ -48,6 +49,7 @@ abstract class AbstractController extends ActionController
         protected MailerService $mailerService,
         protected RecipientService $recipientService,
         protected MailRepository $mailRepository,
+        protected GroupRepository $groupRepository,
         protected PageRepository $pageRepository,
         protected SysDmailRepository $sysDmailRepository,
         protected SysDmailGroupRepository $sysDmailGroupRepository,
