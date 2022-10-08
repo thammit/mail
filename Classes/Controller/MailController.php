@@ -257,9 +257,9 @@ class MailController extends AbstractController
 
         $className = get_class($mail);
         $dataMapFactory = GeneralUtility::makeInstance(DataMapFactory::class);
-        $reflectionService = GeneralUtility::makeInstance(ReflectionService::class);
         $dataMap = $dataMapFactory->buildDataMap($className);
         $tableName = $dataMap->getTableName();
+        $reflectionService = GeneralUtility::makeInstance(ReflectionService::class);
         $classSchema = $reflectionService->getClassSchema($className);
 
         foreach ($groups as $groupName => $properties) {
