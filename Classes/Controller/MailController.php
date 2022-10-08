@@ -59,7 +59,6 @@ class MailController extends AbstractController
                     // there is already an open mail of this page -> use it
                     // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
                     $_GET['id'] = $this->pageInfo['pid'];
-                    $mailUid = $openMails->getFirst()->getUid();
                     $this->redirect('openMail', null, null, ['mail' => $openMails->getFirst()->getUid()], $this->pageInfo['pid']);
             }
             // create a new mail of the page
