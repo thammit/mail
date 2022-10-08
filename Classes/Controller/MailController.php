@@ -10,6 +10,7 @@ use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
+use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -29,16 +30,42 @@ use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
+use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
+use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 
 class MailController extends AbstractController
 {
     private ?Mail $mail;
     private string $cshKey = '_MOD_Mail_Mail';
 
+    /**
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws StopActionException
+     */
     public function indexAction(): ResponseInterface
     {
+        if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
+            // the currently selected page is not a mail module sys folder
+            $openMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
+            if ($openMails->count() > 0) {
+                    // there is already an open mail of this page -> use it
+                    // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+                    $_GET['id'] = $this->pageInfo['pid'];
+                    $this->redirect('settings', null, null, ['mail' => $openMails->getFirst()->getUid()], $this->pageInfo['pid']);
+            }
+            // create a new mail of the page
+            // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+            $_GET['id'] = $this->pageInfo['pid'];
+            $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id], $this->pageInfo['pid']);
+        }
+
         $panels = [Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL, Constants::PANEL_OPEN];
         if (isset($userTSConfig['tx_directmail.']['hideTabs'])) {
             $hidePanel = GeneralUtility::trimExplode(',', $userTSConfig['tx_directmail.']['hideTabs']);
@@ -57,13 +84,13 @@ class MailController extends AbstractController
                 case Constants::PANEL_OPEN:
                     $panelData['open'] = [
                         'open' => $open,
-                        'data' => $this->sysDmailRepository->findOpenMailsByPageId($this->id)
+                        'data' => $this->mailRepository->findOpenByPid($this->id)
                     ];
                     break;
                 case Constants::PANEL_INTERNAL:
                     $panelData['internal'] = [
                         'open' => $open,
-                        'data' => $this->pagesRepository->findMailPages($this->id, $this->backendUserPermissions)
+                        'data' => $this->pageRepository->getMenu($this->id)
                     ];
                     break;
                 case Constants::PANEL_EXTERNAL:
@@ -79,6 +106,7 @@ class MailController extends AbstractController
                 default:
             }
         }
+
         $this->view->assignMultiple([
             'panel' => $panelData,
             'navigation' => $this->getNavigation(1, $this->hideCategoryStep()),
@@ -92,6 +120,7 @@ class MailController extends AbstractController
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
+
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
@@ -209,6 +238,8 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
+     * @throws NoSuchPropertyException
+     * @throws UnknownClassException
      */
     public function settingsAction(Mail $mail): ResponseInterface
     {
@@ -216,17 +247,24 @@ class MailController extends AbstractController
         $data = [];
 
         $groups = [
-            'composition' => ['type', 'sys_language_uid', 'page', 'plainParams', 'HTMLParams', 'attachment', 'renderedsize'],
-            'headers' => ['subject', 'from_email', 'from_name', 'replyto_email', 'replyto_name', 'return_path', 'organisation', 'priority', 'encoding'],
-            'sending' => ['sendOptions', 'includeMedia', 'flowedFormat', 'use_rdct', 'long_link_mode', 'authcode_fieldList'],
+            'composition' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
+            'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority', 'encoding'],
+            'sending' => ['sendOptions', 'includeMedia', 'flowedFormat', 'redirect', 'redirectAll', 'authCodeFields'],
         ];
 
-        $mailData = $this->sysDmailRepository->findByUid($mail->getUid());
-        foreach ($groups as $groupName => $tcaColumns) {
-            foreach ($tcaColumns as $columnName) {
+        $className = get_class($mail);
+        $dataMapFactory = GeneralUtility::makeInstance(DataMapFactory::class);
+        $reflectionService = GeneralUtility::makeInstance(ReflectionService::class);
+        $dataMap = $dataMapFactory->buildDataMap($className);
+        $tableName = $dataMap->getTableName();
+        $classSchema = $reflectionService->getClassSchema($className);
+
+        foreach ($groups as $groupName => $properties) {
+            foreach ($properties as $property) {
+                $columnName = $dataMap->getColumnMap($classSchema->getProperty($property)->getName())->getColumnName();
                 if ($columnName === 'attachment') {
                     $fileNames = [];
-                    $attachments = MailerUtility::getAttachments($mailData['uid'] ?? 0);
+                    $attachments = MailerUtility::getAttachments($mail->getUid());
                     if (count($attachments)) {
                         /** @var FileReference $attachment */
                         foreach ($attachments as $attachment) {
@@ -238,18 +276,23 @@ class MailController extends AbstractController
                         'value' => implode(', ', $fileNames),
                     ];
                 } else {
-                    $data[$groupName][] = [
-                        'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName),
-                        'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('sys_dmail', $columnName, ($mailData[$columnName] ?? false))),
-                    ];
+                    $getter = 'get' . ucfirst($property);
+                    if (!method_exists($mail, $getter)) {
+                        $getter = 'is' . ucfirst($property);
+                    }
+                    if (method_exists($mail, $getter)) {
+                        $data[$groupName][] = [
+                            'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName),
+                            'value' => htmlspecialchars((string)BackendUtility::getProcessedValue($tableName, $columnName, ($mail->$getter() ?? false))),
+                        ];
+                    }
                 }
             }
         }
 
-
         $this->view->assignMultiple([
             'data' => $data,
-            'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'sys_dmail'),
+            'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
             'isSent' => $mail->isSent(),
             'title' => $mail->getSubject(),
             'mailUid' => $mail->getUid(),
@@ -257,6 +300,7 @@ class MailController extends AbstractController
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
+
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
@@ -393,7 +437,7 @@ class MailController extends AbstractController
                                 break;
                             case 'tt_address':
                                 foreach ($recipients as $recipient) {
-                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByUid($recipient, 'uid,name,email');
+                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByPid($recipient, 'uid,name,email');
                                 }
                                 break;
                         }
@@ -428,16 +472,13 @@ class MailController extends AbstractController
      */
     public function sendTestMailAction(Mail $mail, string $recipients = ''): void
     {
-        $this->mailerService->start();
-        $row = $this->sysDmailRepository->findByUid($mail->getUid());
-        $this->mailerService->prepare($row);
-        $this->mailerService->setTestMail(true);
-
         // normalize addresses:
         $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
 
         if ($addressList) {
-            // Sending the same mail to lots of recipients
+            $this->mailerService->start();
+            $this->mailerService->prepare($mail->getUid());
+            $this->mailerService->setTestMail(true);
             $this->mailerService->sendSimpleMail($addressList);
             ViewUtility::addOkToFlashMessageQueue(
                 LanguageUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
@@ -475,65 +516,61 @@ class MailController extends AbstractController
      * @throws StopActionException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
      */
     public function finishAction(Mail $mail, array $groups, string $distributionTime): void
     {
         $groups = array_keys(array_filter($groups));
         $distributionTime = new DateTimeImmutable($distributionTime);
-        // Preparing mailer
-        $this->mailerService->start();
-        $row = $this->sysDmailRepository->findByUid($mail->getUid());
-        $this->mailerService->prepare($row);
-        $sentFlag = false;
-
-        // Update the record:
         $queryInfo['id_lists'] = RecipientUtility::compileMailGroup($groups, '', $this->backendUserPermissions);;
 
-        // todo: cast recipient groups to integer
-        $updateFields = [
-            'recipientGroups' => implode(',', $groups),
-            'scheduled' => $distributionTime->getTimestamp(),
-            'query_info' => serialize($queryInfo),
-        ];
+        // Update the record:
+        $mail->setRecipientGroups(implode(',', $groups))
+            ->setScheduled($distributionTime)
+            ->setQueryInfo(serialize($queryInfo))
+            ->setSent(true);
 
-        if (false && $this->isTestMail) {
-            $updateFields['subject'] = ($this->pageTSConfiguration['testmail'] ?? '') . ' ' . $row['subject'];
-        }
+//        if (false && $this->isTestMail) {
+//            $updateFields['subject'] = ($this->pageTSConfiguration['testmail'] ?? '') . ' ' . $row['subject'];
+//        }
+//
+//        // create a draft version of the record
+//        if (false && $this->saveDraft) {
+//            if ($row['type'] === MailType::INTERNAL) {
+//                $updateFields['type'] = MailType::DRAFT_INTERNAL;
+//            } else {
+//                $updateFields['type'] = MailType::DRAFT_EXTERNAL;
+//            }
+//            $updateFields['scheduled'] = 0;
+//            ViewUtility::addOkToFlashMessageQueue(
+//                sprintf(LanguageUtility::getLL('send_draft_scheduler'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
+//                LanguageUtility::getLL('send_draft_saved'), true
+//            );
+//        } else {
+//            ViewUtility::addOkToFlashMessageQueue(
+//                sprintf(LanguageUtility::getLL('send_was_scheduled_for'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
+//                LanguageUtility::getLL('send_was_scheduled'), true
+//            );
+//        }
 
-        // create a draft version of the record
-        if (false && $this->saveDraft) {
-            if ($row['type'] === MailType::INTERNAL) {
-                $updateFields['type'] = MailType::DRAFT_INTERNAL;
-            } else {
-                $updateFields['type'] = MailType::DRAFT_EXTERNAL;
-            }
-            $updateFields['scheduled'] = 0;
-            ViewUtility::addOkToFlashMessageQueue(
-                sprintf(LanguageUtility::getLL('send_draft_scheduler'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
-                LanguageUtility::getLL('send_draft_saved'), true
-            );
-        } else {
-            ViewUtility::addOkToFlashMessageQueue(
-                sprintf(LanguageUtility::getLL('send_was_scheduled_for'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
-                LanguageUtility::getLL('send_was_scheduled'), true
-            );
-        }
-        $this->sysDmailRepository->update($mail->getUid(), $updateFields);
-        $sentFlag = true;
+        $this->mailRepository->update($mail);
 
-        // Setting flags and update the record:
-        if ($sentFlag) {
-            $this->sysDmailRepository->update($mail->getUid(), ['issent' => 1]);
-        }
+        ViewUtility::addOkToFlashMessageQueue(
+            sprintf(LanguageUtility::getLL('send_was_scheduled_for'), $mail->getSubject(), BackendUtility::datetime($mail->getScheduled()->getTimestamp())),
+            LanguageUtility::getLL('send_was_scheduled'), true
+        );
+
         $this->redirect('index');
     }
 
     /**
+     * @param Mail $mail
      * @throws StopActionException
+     * @throws IllegalObjectTypeException
      */
     public function deleteAction(Mail $mail): void
     {
-        $this->sysDmailRepository->delete($mail->getUid());
+        $this->mailRepository->remove($mail);
         $this->redirect('index');
     }
 

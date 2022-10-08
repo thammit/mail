@@ -533,7 +533,7 @@ class MailControllerOld extends OldAbstractController
                 case Constants::PANEL_INTERNAL:
                     $moduleData['default']['internal'] = [
                         'open' => $open,
-                        'data' => $this->pagesRepository->findMailPages($this->id, $this->backendUserPermissions)
+                        'data' => $this->pagesRepository->findByPid($this->id, $this->backendUserPermissions)
                     ];
                     break;
                 case Constants::PANEL_EXTERNAL:
@@ -744,7 +744,7 @@ class MailControllerOld extends OldAbstractController
                                 break;
                             case 'tt_address':
                                 foreach ($recipients as $recipient) {
-                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByUid($recipient, 'uid,name,email');
+                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByPid($recipient, 'uid,name,email');
                                 }
                                 break;
                         }
@@ -806,7 +806,7 @@ class MailControllerOld extends OldAbstractController
     protected function sendSimpleTestMail(array $row): void
     {
         $this->mailerService->start();
-        $this->mailerService->prepare($row);
+        $this->mailerService->prepare($row['uid']);
 
         if ($this->sendTestMail) {
             $this->mailerService->setTestMail(true);
@@ -834,7 +834,7 @@ class MailControllerOld extends OldAbstractController
     {
         // Preparing mailer
         $this->mailerService->start();
-        $this->mailerService->prepare($row);
+        $this->mailerService->prepare($row['uid']);
         $sentFlag = false;
 
         // step 4, sending test personalized test emails
@@ -909,9 +909,6 @@ class MailControllerOld extends OldAbstractController
      */
     protected function schedulePersonalizedMails(array $row): void
     {
-        // Preparing mailer
-        $this->mailerService->start();
-        $this->mailerService->prepare($row);
         $sentFlag = false;
 
         if ($this->scheduleSendAll && $this->mailUid) {

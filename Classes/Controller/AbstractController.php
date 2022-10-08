@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
@@ -18,6 +19,7 @@ use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -45,6 +47,8 @@ abstract class AbstractController extends ActionController
         protected SiteFinder $siteFinder,
         protected MailerService $mailerService,
         protected RecipientService $recipientService,
+        protected MailRepository $mailRepository,
+        protected PageRepository $pageRepository,
         protected SysDmailRepository $sysDmailRepository,
         protected SysDmailGroupRepository $sysDmailGroupRepository,
         protected SysDmailMaillogRepository $sysDmailMaillogRepository,

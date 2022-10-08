@@ -47,6 +47,7 @@ class Mail extends AbstractEntity
     protected string $authCodeFields = '';
     protected string $recipientGroups = '';
     protected int $sysLanguageUid = 0;
+    protected ?DateTimeImmutable $lastModified = null;
 
     public function __construct()
     {
@@ -450,9 +451,9 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return DateTimeImmutable
+     * @return ?DateTimeImmutable
      */
-    public function getScheduled(): DateTimeImmutable
+    public function getScheduled(): ?DateTimeImmutable
     {
         return $this->scheduled;
     }
@@ -468,9 +469,9 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return DateTimeImmutable
+     * @return ?DateTimeImmutable
      */
-    public function getScheduledBegin(): DateTimeImmutable
+    public function getScheduledBegin(): ?DateTimeImmutable
     {
         return $this->scheduledBegin;
     }
@@ -486,9 +487,9 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return DateTimeImmutable
+     * @return ?DateTimeImmutable
      */
-    public function getScheduledEnd(): DateTimeImmutable
+    public function getScheduledEnd(): ?DateTimeImmutable
     {
         return $this->scheduledEnd;
     }
@@ -626,6 +627,24 @@ class Mail extends AbstractEntity
     public function setSysLanguageUid(int $sysLanguageUid): Mail
     {
         $this->sysLanguageUid = $sysLanguageUid;
+        return $this;
+    }
+
+    /**
+     * @return DateTimeImmutable|null
+     */
+    public function getLastModified(): ?DateTimeImmutable
+    {
+        return $this->lastModified;
+    }
+
+    /**
+     * @param DateTimeImmutable|null $lastModified
+     * @return Mail
+     */
+    public function setLastModified(?DateTimeImmutable $lastModified): Mail
+    {
+        $this->lastModified = $lastModified;
         return $this;
     }
 

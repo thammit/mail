@@ -38,11 +38,6 @@ class MailerService implements LoggerAwareInterface
     use LoggerAwareTrait;
 
     /*
-     * @var array Used to store public variables
-     */
-    public array $dmailer = [];
-
-    /*
      * special header to identify returned mail
      *
      * @var string
@@ -52,6 +47,7 @@ class MailerService implements LoggerAwareInterface
     /*
      * @var array the mail parts (HTML and Plain, incl. href and link to media)
      */
+    protected int $mailUid = 0;
     protected array $mailParts = [];
     protected int $sendPerCycle = 50;
     protected bool $isHtml = false;
@@ -67,6 +63,7 @@ class MailerService implements LoggerAwareInterface
     protected string $organisation = '';
     protected string $replyToEmail = '';
     protected string $replyToName = '';
+    protected string $returnPath = '';
     protected int $priority = 3;
     protected string $authCodeFieldList = '';
     protected string $backendCharset = 'utf-8';
@@ -75,6 +72,12 @@ class MailerService implements LoggerAwareInterface
     protected string $jumpUrlPrefix = '';
     protected bool $jumpUrlUseMailto = false;
     protected bool $jumpUrlUseId = false;
+    protected bool $redirect = false;
+    protected bool $redirectAll = false;
+    protected string $redirectUrl = '';
+    protected int $attachment = 0;
+    protected array $htmlBoundaryParts = [];
+    protected array $plainBoundaryParts = [];
     protected string $siteIdentifier = '';
 
     public function __construct(
@@ -397,74 +400,58 @@ class MailerService implements LoggerAwareInterface
     /**
      * Preparing the Email. Headers are set in global variables
      *
-     * @param array $mailData Record from the sys_dmail table
+     * @param int $mailUid
      *
      * @return void
      */
-    public function prepare(array $mailData): void
+    public function prepare(int $mailUid): void
     {
-        $mailUid = $mailData['uid'];
-        if ($mailData['flowedFormat']) {
-            $this->flowedFormat = true;
-        }
-        if ($mailData['charset']) {
-            if ($mailData['type'] == 0) {
-                $this->charset = 'utf-8';
-            } else {
-                $this->charset = $mailData['charset'];
-            }
-        }
+        $mailData = GeneralUtility::makeInstance(SysDmailRepository::class)->findByUid($mailUid);
 
-        $this->mailParts = unserialize(base64_decode($mailData['mailContent']));
-
+        $this->mailUid = $mailData['uid'];
+        $this->charset = (string)((int)$mailData['type'] === MailType::INTERNAL ? 'utf-8' : $mailData['charset']);
         $this->subject = $this->charsetConverter->conv($mailData['subject'], $this->backendCharset, $this->charset);
-
-        $this->fromEmail = $mailData['from_email'];
         $this->fromName = ($mailData['from_name'] ? $this->charsetConverter->conv($mailData['from_name'], $this->backendCharset, $this->charset) : '');
-
-        $this->replyToEmail = ($mailData['replyto_email'] ?: '');
+        $this->fromEmail = $mailData['from_email'];
         $this->replyToName = ($mailData['replyto_name'] ? $this->charsetConverter->conv($mailData['replyto_name'], $this->backendCharset, $this->charset) : '');
-
-        $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset,
-            $this->charset) : '');
-
+        $this->replyToEmail = ($mailData['replyto_email'] ?: '');
+        $this->returnPath = (string)($mailData['return_path'] ?? '');
+        $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset, $this->charset) : '');
         $this->priority = MathUtility::forceIntegerInRange((int)$mailData['priority'], 1, 5);
+        $this->mailParts = unserialize(base64_decode($mailData['mailContent']));
+        $this->isHtml = (bool)($this->getHtmlContent() ?? false);
+        $this->isPlain = (bool)($this->getPlainContent() ?? false);
+        $this->flowedFormat = (bool)($mailData['flowedFormat'] ?? false);
+        $this->includeMedia = (bool)$mailData['includeMedia'];
         $this->authCodeFieldList = ($mailData['authcode_fieldList'] ?: 'uid');
+        $this->redirect = (bool)($mailData['use_rdct'] ?? false);
+        $this->redirectAll = (bool)($mailData['long_link_mode'] ?? false);
+        $this->redirectUrl = (string)($mailData['long_link_rdct_url'] ?? '');
+        $this->attachment = (int)($mailData['attachment'] ?? 0);
 
-        $this->dmailer['sectionBoundary'] = '<!--' . Constants::CONTENT_SECTION_BOUNDARY;
-        $this->dmailer['html_content'] = $this->getHtmlContent() ?? '';
-        $this->dmailer['plain_content'] = $this->getPlainContent() ?? '';
-        $this->dmailer['messageID'] = $this->getMessageId();
-        $this->dmailer['sys_dmail_uid'] = $mailUid;
-        $this->dmailer['sys_dmail_rec'] = $mailData;
-
-        $this->dmailer['boundaryParts_html'] = explode($this->dmailer['sectionBoundary'], '_END-->' . $this->dmailer['html_content']);
-        foreach ($this->dmailer['boundaryParts_html'] as $bKey => $bContent) {
-            $this->dmailer['boundaryParts_html'][$bKey] = explode('-->', $bContent, 2);
+        $this->htmlBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->getHtmlContent());
+        foreach ($this->htmlBoundaryParts as $bKey => $bContent) {
+            $this->htmlBoundaryParts[$bKey] = explode('-->', $bContent, 2);
 
             // Remove useless HTML comments
-            if (substr($this->dmailer['boundaryParts_html'][$bKey][0], 1) == 'END') {
-                $this->dmailer['boundaryParts_html'][$bKey][1] = MailerUtility::removeHtmlComments($this->dmailer['boundaryParts_html'][$bKey][1]);
+            if (substr($this->htmlBoundaryParts[$bKey][0], 1) == 'END') {
+                $this->htmlBoundaryParts[$bKey][1] = MailerUtility::removeHtmlComments($this->htmlBoundaryParts[$bKey][1]);
             }
 
             // Now, analyzing which media files are used in this part of the mail:
-            $mediaParts = explode('cid:part', $this->dmailer['boundaryParts_html'][$bKey][1]);
+            $mediaParts = explode('cid:part', $this->htmlBoundaryParts[$bKey][1]);
             next($mediaParts);
-            if (!isset($this->dmailer['boundaryParts_html'][$bKey]['mediaList'])) {
-                $this->dmailer['boundaryParts_html'][$bKey]['mediaList'] = '';
+            if (!isset($this->htmlBoundaryParts[$bKey]['mediaList'])) {
+                $this->htmlBoundaryParts[$bKey]['mediaList'] = '';
             }
             foreach ($mediaParts as $part) {
-                $this->dmailer['boundaryParts_html'][$bKey]['mediaList'] .= ',' . strtok($part, '.');
+                $this->htmlBoundaryParts[$bKey]['mediaList'] .= ',' . strtok($part, '.');
             }
         }
-        $this->dmailer['boundaryParts_plain'] = explode($this->dmailer['sectionBoundary'], '_END-->' . $this->dmailer['plain_content']);
-        foreach ($this->dmailer['boundaryParts_plain'] as $bKey => $bContent) {
-            $this->dmailer['boundaryParts_plain'][$bKey] = explode('-->', $bContent, 2);
+        $this->plainBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->getPlainContent());
+        foreach ($this->plainBoundaryParts as $bKey => $bContent) {
+            $this->plainBoundaryParts[$bKey] = explode('-->', $bContent, 2);
         }
-
-        $this->isHtml = (bool)($this->getHtmlContent() ?? false);
-        $this->isPlain = (bool)($this->getPlainContent() ?? false);
-        $this->includeMedia = (bool)$mailData['includeMedia'];
     }
 
     /**
@@ -534,14 +521,14 @@ class MailerService implements LoggerAwareInterface
     {
         $plainContent = '';
         if ($this->getPlainContent() ?? false) {
-            [$contentParts] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain']);
+            [$contentParts] = MailerUtility::getBoundaryParts($this->plainBoundaryParts);
             $plainContent = implode('', $contentParts);
         }
         $this->setPlainContent($plainContent);
 
         $htmlContent = '';
         if ($this->getHtmlContent() ?? false) {
-            [$contentParts] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html']);
+            [$contentParts] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts);
             $htmlContent = implode('', $contentParts);
         }
         $this->setHtmlContent($htmlContent);
@@ -576,7 +563,7 @@ class MailerService implements LoggerAwareInterface
         $recipientData['email'] = trim($recipientData['email']);
 
         if ($recipientData['email']) {
-            $midRidId = 'MID' . $this->dmailer['sys_dmail_uid'] . '_' . $tableNameChar . $recipientData['uid'];
+            $midRidId = 'MID' . $this->mailUid . '_' . $tableNameChar . $recipientData['uid'];
             $uniqMsgId = md5(microtime()) . '_' . $midRidId;
             $authCode = RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList);
 
@@ -584,15 +571,15 @@ class MailerService implements LoggerAwareInterface
                 // Put in the tablename of the userinformation
                 '###SYS_TABLE_NAME###' => $tableNameChar,
                 // Put in the uid of the mail-record
-                '###SYS_MAIL_ID###' => $this->dmailer['sys_dmail_uid'],
+                '###SYS_MAIL_ID###' => $this->mailUid,
                 '###SYS_AUTHCODE###' => $authCode,
                 // Put in the unique message id in HTML-code
-                $this->dmailer['messageID'] => $uniqMsgId,
+                $this->getMessageId() => $uniqMsgId,
             ];
 
             $this->setHtmlContent('');
             if ($this->isHtml && ($recipientData['module_sys_dmail_html'] || $tableNameChar == 'P')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_html'],
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts,
                     $recipientData['sys_dmail_categories_list']);
                 $tempContent_HTML = implode('', $contentParts);
 
@@ -606,17 +593,17 @@ class MailerService implements LoggerAwareInterface
             // Plain
             $this->setPlainContent('');
             if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->dmailer['boundaryParts_plain'],
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts,
                     $recipientData['sys_dmail_categories_list']);
                 $plainTextContent = implode('', $contentParts);
 
                 if ($mailHasContent) {
                     $plainTextContent = $this->replaceMailMarkers($plainTextContent, $recipientData, $additionalMarkers);
-                    if ($this->dmailer['sys_dmail_rec']['use_rdct'] || $this->dmailer['sys_dmail_rec']['long_link_mode']) {
+                    if ($this->redirect || $this->redirectAll) {
                         $plainTextContent = MailerUtility::shortUrlsInPlainText(
                             $plainTextContent,
-                            $this->dmailer['sys_dmail_rec']['long_link_mode'] ? 0 : 76,
-                            $this->dmailer['sys_dmail_rec']['long_link_rdct_url']
+                            $this->redirectAll ? 0 : 76,
+                            $this->redirectUrl
                         );
                     }
                     $this->setPlainContent($plainTextContent);
@@ -625,7 +612,7 @@ class MailerService implements LoggerAwareInterface
             }
 
             $this->TYPO3MID = $midRidId . '-' . md5($midRidId);
-            $this->dmailer['sys_dmail_rec']['return_path'] = str_replace('###XID###', $midRidId, $this->dmailer['sys_dmail_rec']['return_path']);
+            $this->returnPath = str_replace('###XID###', $midRidId, $this->returnPath);
 
             if ($returnCode && GeneralUtility::validEmail($recipientData['email'])) {
                 $this->sendMailToRecipient(
@@ -847,7 +834,7 @@ class MailerService implements LoggerAwareInterface
 
         if ($row = GeneralUtility::makeInstance(SysDmailRepository::class)->findMailsToSend()) {
             $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . LanguageUtility::getLL('dmailer_processed'));
-            $this->prepare($row);
+            $this->prepare($row['uid']);
             $query_info = unserialize($row['query_info']);
 
             if (!$row['scheduled_begin']) {
@@ -919,8 +906,8 @@ class MailerService implements LoggerAwareInterface
         }
 
         // handle FAL attachments
-        if ((int)$this->dmailer['sys_dmail_rec']['attachment'] > 0) {
-            $files = MailerUtility::getAttachments($this->dmailer['sys_dmail_rec']['uid']);
+        if ($this->attachment > 0) {
+            $files = MailerUtility::getAttachments($this->mailUid);
             /** @var FileReference $file */
             foreach ($files as $file) {
                 $filePath = Environment::getPublicPath() . '/' . $file->getPublicUrl();
@@ -955,8 +942,8 @@ class MailerService implements LoggerAwareInterface
             $mailer->replyTo(new Address($this->fromEmail, $this->fromName));
         }
 
-        if (GeneralUtility::validEmail($this->dmailer['sys_dmail_rec']['return_path'])) {
-            $mailer->sender($this->dmailer['sys_dmail_rec']['return_path']);
+        if (GeneralUtility::validEmail($this->returnPath)) {
+            $mailer->sender($this->returnPath);
         }
 
         $this->setContent($mailer);

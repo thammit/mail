@@ -6,6 +6,9 @@ return [
     \MEDIAESSENZ\Mail\Domain\Model\Mail::class => [
         'tableName' => 'sys_dmail',
         'properties' => [
+            'lastModified' => [
+                'fieldName' => 'tstamp'
+            ],
             'replyToEmail' => [
                 'fieldName' => 'replyto_email'
             ],

@@ -273,7 +273,7 @@
 				<source>Cannot edit - mail has been sent</source>
 			</trans-unit>
 			<trans-unit id="dmail_noEdit_noPerms" resname="dmail_noEdit_noPerms">
-				<source>Cannot edit - you don't have permissions to edit mails.</source>
+				<source>You don't have permissions to change mail settings.</source>
 			</trans-unit>
 			<trans-unit id="dmail_noRegular" resname="dmail_noRegular">
 				<source>This type of page cannot be used to create mails. Please select a mail page.</source>
@@ -345,16 +345,16 @@
 				<source>Step 1</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_quickmail" resname="dmail_wiz1_quickmail">
-				<source>Quickmail</source>
+				<source>Quick Mail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_quickmail_header" resname="dmail_wiz1_quickmail_header">
 				<source>New Quickmail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Select a mail source</source>
+				<source>Mail source</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
-				<source>Step 2 - Check sender data</source>
+				<source>Step 2 - Mail settings</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
 				<source>The page was fetched successfully.</source>

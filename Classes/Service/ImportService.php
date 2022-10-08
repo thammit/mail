@@ -669,7 +669,7 @@ class ImportService
             $user = [];
             $userID = [];
 
-            $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByPid((int)$this->indata['storage'], $this->indata['record_unique']);
+            $rows = GeneralUtility::makeInstance(TtAddressRepository::class)->findByUid((int)$this->indata['storage'], $this->indata['record_unique']);
 
             if (is_array($rows)) {
                 foreach ($rows as $row) {

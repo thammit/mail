@@ -293,6 +293,12 @@ return [
                 'type' => 'passthrough'
             ]
         ],
+        'tstamp' => [
+            'label' => 'last modified',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
         'type' => [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.type',
             'config' => [
