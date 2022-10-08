@@ -16,7 +16,6 @@ use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
@@ -28,7 +27,6 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception;
-use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Repository\FrontendUserRepository;
@@ -61,7 +59,8 @@ class MailController extends AbstractController
                     // there is already an open mail of this page -> use it
                     // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
                     $_GET['id'] = $this->pageInfo['pid'];
-                    $this->redirect('settings', null, null, ['mail' => $openMails->getFirst()->getUid()], $this->pageInfo['pid']);
+                    $mailUid = $openMails->getFirst()->getUid();
+                    $this->redirect('openMail', null, null, ['mail' => $openMails->getFirst()->getUid()], $this->pageInfo['pid']);
             }
             // create a new mail of the page
             // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
@@ -200,6 +199,7 @@ class MailController extends AbstractController
      * @return void
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws IllegalObjectTypeException
      * @throws StopActionException
      * @throws UnknownObjectException
      */
@@ -217,6 +217,7 @@ class MailController extends AbstractController
                     $mail->setMailContent($newMail->getMailContent());
                     $mail->setRenderedSize($newMail->getRenderedSize());
                     $mail->setCharset($newMail->getCharset());
+//                    $this->mailRepository->update($mail);
                     $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
                     $persistenceManager->update($mail);
                     $persistenceManager->persistAll();
@@ -229,10 +230,11 @@ class MailController extends AbstractController
                 // copy new fetch content and charset to current mail record
                 $mail->setMailContent($newMail->getMailContent());
                 $mail->setRenderedSize($newMail->getRenderedSize());
+//                $this->mailRepository->update($mail);
                 $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
                 $persistenceManager->update($mail);
                 $persistenceManager->persistAll();
-                $this->redirect('settings', 'Mail', null, ['mail' => $mail->getUid()]);
+                $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
             }
         }
         $this->redirect('index');

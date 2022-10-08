@@ -13,7 +13,7 @@
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2><f:translate key="{lll}dmail_wiz2_detail"/></h2>
     <f:if condition="{data}">
-        <h3><core:iconForRecord table="sys_dmail" row="{data}" size="default" /> {data.title}</h3>
+        <h3><core:iconForRecord table="sys_dmail" row="{data}" size="default" /> {title}</h3>
         <f:if condition="{allowEdit} && !{isSent}">
             <f:then>
                 <be:link.editRecord uid="{mailUid}" table="sys_dmail" class="btn btn-default mb-3">
