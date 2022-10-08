@@ -744,7 +744,7 @@ class MailControllerOld extends OldAbstractController
                                 break;
                             case 'tt_address':
                                 foreach ($recipients as $recipient) {
-                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByPid($recipient, 'uid,name,email');
+                                    $data['mailGroups'][$testMailGroup['uid']]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByUid($recipient, 'uid,name,email');
                                 }
                                 break;
                         }

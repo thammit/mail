@@ -63,7 +63,7 @@
                                     <f:for each="{group}" as="recipient">
                                         <tr>
                                             <td>
-                                                <core:iconForRecord row="{recipient}" table="{type}"/>
+                                                <core:iconForRecord row="{uid: recipient.uid}" table="{type}"/>
                                                 {recipient.name}, {recipient.email}
                                                 <f:variable name="recipients" value="{recipient.email};{recipients}"/>
                                             </td>

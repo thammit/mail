@@ -5,6 +5,8 @@ namespace MEDIAESSENZ\Mail\Controller;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\DBALException;
+use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
+use FriendsOfTYPO3\TtAddress\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
@@ -29,8 +31,10 @@ use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Domain\Repository\FrontendUserRepository;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
@@ -407,14 +411,18 @@ class MailController extends AbstractController
      * @throws DBALException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
+     * @throws InvalidQueryException
      */
     public function testMailAction(Mail $mail): ResponseInterface
     {
         $data = [];
+        $ttAddressRepository = GeneralUtility::makeInstance(AddressRepository::class);
+        $frontendUsersRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
 
         if ($this->pageTSConfiguration['test_tt_address_uids'] ?? false) {
-            $data['ttAddress'] = $this->ttAddressRepository->findByUids(GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_tt_address_uids'], true),
-                $this->backendUserPermissions);
+            $demand = new Demand();
+            $demand->setSingleRecords($this->pageTSConfiguration['test_tt_address_uids']);
+            $data['ttAddress'] = $ttAddressRepository->getAddressesByCustomSorting($demand);
         }
 
         if ($this->pageTSConfiguration['test_dmail_group_uids'] ?? false) {
@@ -429,12 +437,12 @@ class MailController extends AbstractController
                     switch ($recipientGroup) {
                         case 'fe_users':
                             foreach ($recipients as $recipient) {
-                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $this->feUsersRepository->findByUid($recipient, 'uid,name,email');
+                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $frontendUsersRepository->findByUid($recipient);
                             }
                             break;
                         case 'tt_address':
                             foreach ($recipients as $recipient) {
-                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $this->ttAddressRepository->findByUid($recipient, 'uid,name,email');
+                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $ttAddressRepository->findByUid($recipient);
                             }
                             break;
                     }

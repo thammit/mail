@@ -3,15 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use MEDIAESSENZ\Mail\Domain\Repository\FeUsersRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailGroupRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
@@ -50,14 +43,7 @@ abstract class AbstractController extends ActionController
         protected RecipientService $recipientService,
         protected MailRepository $mailRepository,
         protected GroupRepository $groupRepository,
-        protected PageRepository $pageRepository,
-        protected SysDmailRepository $sysDmailRepository,
-        protected SysDmailGroupRepository $sysDmailGroupRepository,
-        protected SysDmailMaillogRepository $sysDmailMaillogRepository,
-        protected PagesRepository $pagesRepository,
-        protected TempRepository $tempRepository,
-        protected TtAddressRepository $ttAddressRepository,
-        protected FeUsersRepository $feUsersRepository,
+        protected PageRepository $pageRepository
     ) {
         $this->id = (int)GeneralUtility::_GP('id');
         $this->recipientService->setPageId($this->id);
