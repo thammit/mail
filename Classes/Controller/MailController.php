@@ -217,10 +217,7 @@ class MailController extends AbstractController
                     $mail->setMailContent($newMail->getMailContent());
                     $mail->setRenderedSize($newMail->getRenderedSize());
                     $mail->setCharset($newMail->getCharset());
-//                    $this->mailRepository->update($mail);
-                    $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
-                    $persistenceManager->update($mail);
-                    $persistenceManager->persistAll();
+                    $this->mailRepository->update($mail);
                 }
             }
             $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
@@ -230,10 +227,7 @@ class MailController extends AbstractController
                 // copy new fetch content and charset to current mail record
                 $mail->setMailContent($newMail->getMailContent());
                 $mail->setRenderedSize($newMail->getRenderedSize());
-//                $this->mailRepository->update($mail);
-                $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
-                $persistenceManager->update($mail);
-                $persistenceManager->persistAll();
+                $this->mailRepository->update($mail);
                 $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
             }
         }
