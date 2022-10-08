@@ -142,7 +142,7 @@ class MailController extends AbstractController
             $persistenceManager->persistAll();
             $this->redirect('settings', null, null, ['mail' => $newMail->getUid()]);
         }
-        ViewUtility::addErrorToFlashMessageQueue('Error while adding the DB set', LanguageUtility::getLL('dmail_error'));
+        ViewUtility::addErrorToFlashMessageQueue('Could not generate mail from internal page.', LanguageUtility::getLL('dmail_error'), true);
         $this->redirect('index');
     }
 
@@ -481,7 +481,8 @@ class MailController extends AbstractController
             $this->mailerService->sendSimpleMail($addressList);
             ViewUtility::addOkToFlashMessageQueue(
                 LanguageUtility::getLL('send_recipients') . ' ' . htmlspecialchars($addressList),
-                LanguageUtility::getLL('testMailSent')
+                LanguageUtility::getLL('testMailSent'),
+                true
             );
         }
         $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
