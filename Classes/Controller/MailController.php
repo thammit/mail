@@ -10,7 +10,6 @@ use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
-use MEDIAESSENZ\Mail\Enumeration\Action;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -40,7 +39,6 @@ use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 
 class MailController extends AbstractController
 {
-    private ?Mail $mail;
     private string $cshKey = '_MOD_Mail_Mail';
 
     /**
@@ -134,7 +132,7 @@ class MailController extends AbstractController
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         // todo add multi language support
-        $newMail = $mailFactory->fromInternalPage($page, 0);
+        $newMail = $mailFactory->fromInternalPage($page);
         if ($newMail instanceof Mail) {
             $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
             $persistenceManager->add($newMail);
@@ -522,7 +520,7 @@ class MailController extends AbstractController
     {
         $groups = array_keys(array_filter($groups));
         $distributionTime = new DateTimeImmutable($distributionTime);
-        $queryInfo['id_lists'] = RecipientUtility::compileMailGroup($groups, '', $this->backendUserPermissions);;
+        $queryInfo['id_lists'] = RecipientUtility::compileMailGroup($groups, '', $this->backendUserPermissions);
 
         // Update the record:
         $mail->setRecipientGroups(implode(',', $groups))
