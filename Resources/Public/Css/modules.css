@@ -1,7 +1,35 @@
 :root {
+    --mail-primary: #0078e6;
+    --mail-primary-rgb: 0,120,230;
     --mail-background-color: #0078e6;
     --mail-background-color2: #00386b;
+    --mail-active-bg: #0060b8;
+    --mail-border-color: #005db3;
+    --mail-hover-border-color: #004380;
+    --mail-active-border-color: #004686;
     --mail-color: #ffffff;
+}
+
+.btn-mail-theme {
+    --bs-btn-color: var(--mail-color);
+    --bs-btn-bg: var(--mail-background-color);
+    --bs-btn-border-color: var(--mail-border-color);
+    --bs-btn-hover-color: var(--mail-color);
+    --bs-btn-hover-bg: var(--mail-border-color);
+    --bs-btn-hover-border-color: var(--mail-hover-border-color);
+    --bs-btn-focus-shadow-rgb: 38,118,190;
+    --bs-btn-active-color: var(--mail-color);
+    --bs-btn-active-bg: var(--mail-active-bg);
+    --bs-btn-active-border-color: var(--mail-active-border-color);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #000;
+    --bs-btn-disabled-bg: var(--mail-background-color);
+    --bs-btn-disabled-border-color: var(--mail-border-color);
+}
+
+.bg-mail-theme {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--mail-primary-rgb),var(--bs-bg-opacity)) !important;
 }
 
 .mail-wizard-navigation ul {
