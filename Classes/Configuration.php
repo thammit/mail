@@ -89,7 +89,7 @@ final class Configuration
             'queueExtbase',
             'after:mailExtbase',
             [
-                QueueController::class => 'index'
+                QueueController::class => 'index,trigger,delete'
             ],
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',

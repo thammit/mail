@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 use TYPO3\CMS\Extbase\Persistence\Repository;
 
@@ -43,6 +45,23 @@ class MailRepository extends Repository
                 $query->equals('pid', $pid),
             ])
         );
+        return $query->execute();
+    }
+
+    /**
+     * @throws InvalidQueryException
+     */
+    public function findScheduledByPid(int $pid): QueryResultInterface|array
+    {
+        $query = $this->createQuery();
+        $query->getQuerySettings()->setRespectStoragePage(false);
+        $query->matching(
+            $query->logicalAnd([
+                $query->equals('pid', $pid),
+                $query->greaterThan('scheduled', 0),
+            ])
+        );
+        $query->setOrderings(['scheduled' => QueryInterface::ORDER_DESCENDING]);
         return $query->execute();
     }
 }

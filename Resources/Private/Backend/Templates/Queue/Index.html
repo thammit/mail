@@ -8,6 +8,72 @@
 <f:layout name="Default"/>
 
 <f:section name="content">
-    <h1>Queue</h1>
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
+    <h1>
+        <f:translate key="{lll}header_mailer"/>
+    </h1>
+    <f:if condition="{trigger}">
+        <f:be.infobox title="{f:translate(key: '{lll}dmail_mailerengine_manual_invoke')}">
+            <p>
+                <f:translate key="{lll}dmail_mailerengine_manual_explain"/>
+            </p>
+            <f:link.action action="trigger" class="btn btn-primary"><f:translate key="{lll}dmail_mailerengine_invoke_now"/></f:link.action>
+        </f:be.infobox>
+    </f:if>
+    <div class="panel panel-default">
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th class="col-icon nowrap"></th>
+                <th class="col-title col-responsive nowrap">
+                    <f:translate key="{lll}dmail_mailerengine_subject"/>
+                </th>
+                <th class="nowrap">
+                    <f:translate key="{lll}dmail_mailerengine_scheduled"/>
+                </th>
+                <th class="nowrap">
+                    <f:translate key="{lll}dmail_mailerengine_delivery_begun"/>
+                </th>
+                <th class="nowrap">
+                    <f:translate key="{lll}dmail_mailerengine_delivery_ended"/>
+                </th>
+                <th class="nowrap" style="min-width: 200px;">
+                    <f:translate key="{lll}dmail_mailerengine_number_sent"/>
+                </th>
+                <th class="col-control nowrap">
+                    <f:translate key="{lll}dmail_mailerengine_delete"/>
+                </th>
+            </tr>
+            </thead>
+            <f:for each="{data}" as="row">
+                <f:variable name="mail" value="{row.mail}" />
+                <tr>
+                    <td class="col-icon nowrap">
+                        <core:iconForRecord row="{uid: mail.uid}" table="sys_dmail" size="small"/>
+                    </td>
+                    <td class="col-title col-responsive nowrap">{mail.subject}</td>
+                    <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y h:i')}</td>
+                    <td class="nowrap">{mail.scheduledBegin -> f:format.date(format: 'd.m.Y h:i')}</td>
+                    <td class="nowrap">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y h:i')}</td>
+                    <td class="nowrap">
+                        <div class="progress">
+                            <f:if condition="{row.percentOfSent} == 100">
+                                <f:variable name="finished" value="bg-success"/>
+                            </f:if>
+                            <div class="progress-bar {finished}" role="progressbar" style="width: {row.percentOfSent}%"
+                                 aria-valuenow="{row.sent}" aria-valuemin="0" aria-valuemax="{row.numberOfRecipients}">
+                                {row.sent}/{row.numberOfRecipients}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-control nowrap">
+                        <f:if condition="{row.delete}">
+                            <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
+                        </f:if>
+                    </td>
+                </tr>
+            </f:for>
+        </table>
+    </div>
 </f:section>
 </html>
