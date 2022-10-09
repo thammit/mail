@@ -734,22 +734,10 @@ class RecipientListControllerOld extends OldAbstractController
 
             $categories = implode(',', $categoriesArray);
 
-//            $editOnClickLink = ViewUtility::getEditOnClickLink([
-//                'edit' => [
-//                    $this->table => [
-//                        $row['uid'] => 'edit',
-//                    ],
-//                ],
-//                'returnUrl' => $this->requestUri,
-//            ]);
-
             $data = [
-//                'icon' => $this->iconFactory->getIconForRecord($this->table, $row)->render(),
-//                'iconActionsOpen' => $this->getIconActionsOpen(),
                 'name' => $row['name'],
                 'email' => $row['email'],
                 'uid' => $row['uid'],
-//                'editOnClickLink' => $editOnClickLink,
                 'categories' => [],
                 'table' => $this->table,
                 'thisID' => $this->uid,
