@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail;
 use MEDIAESSENZ\Mail\Controller\ConfigurationControllerOld;
 use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\MailControllerOld;
+use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\QueueControllerOld;
 use MEDIAESSENZ\Mail\Controller\NavFrameController;
 use MEDIAESSENZ\Mail\Controller\RecipientListControllerOld;
@@ -79,6 +80,23 @@ final class Configuration
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-start',
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/MailModule.xlf',
+            ]
+        );
+
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+            'Mail',
+            'Mail',
+            'queueExtbase',
+            'after:mailExtbase',
+            [
+                QueueController::class => 'index'
+            ],
+            [
+                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'access' => 'group,user',
+                'workspaces' => 'online',
+                'iconIdentifier' => 'mail-module-status',
+                'labels' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
             ]
         );
 
