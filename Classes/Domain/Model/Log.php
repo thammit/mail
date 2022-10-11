@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
+use DateTimeImmutable;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Log extends AbstractEntity
 {
@@ -22,5 +22,18 @@ class Log extends AbstractEntity
     // url_id tinyint(4) DEFAULT '0' NOT NULL,
     // return_content mediumblob NULL,
     // return_code smallint(6) DEFAULT '0' NOT NULL,
-
+    protected Mail $mail;
+    protected SimpleRecipientInterface $recipient;
+    protected string $recipientTable = '';
+    protected string $recipientUid = '';
+    protected string $email = '';
+    protected string $url = '';
+    protected int $size = 0;
+    protected int $parseTime = 0;
+    protected int $responseType = 0;
+    protected int $formatSent = 0;
+    protected int $urlId = 0;
+    protected string $returnContent;
+    protected int $returnCode = 0;
+    protected ?DateTimeImmutable $lastChange;
 }

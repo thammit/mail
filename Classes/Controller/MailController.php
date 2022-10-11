@@ -26,6 +26,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -236,6 +237,8 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws NoSuchPropertyException
      * @throws UnknownClassException
      */
@@ -243,7 +246,8 @@ class MailController extends AbstractController
     {
         ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_wiz2_fetch_success'));
         $data = [];
-
+        $useDirectMailTables = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('mail', 'useDirectMailTables');
+        $table = $useDirectMailTables ? 'sys_dmail' : 'tx_mail_domain_model_mail';
         $groups = [
             'composition' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
             'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority', 'encoding'],
@@ -274,13 +278,13 @@ class MailController extends AbstractController
                         $value = implode(', ', $attachments);
                     }
                     $data[$groupName][] = [
-                        'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment'),
+                        'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment', $table),
                         'value' => $value,
                     ];
                 } else {
                     if (method_exists($mail, $getter)) {
                         $data[$groupName][] = [
-                            'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName),
+                            'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $table),
                             'value' => htmlspecialchars((string)BackendUtility::getProcessedValue($tableName, $columnName, ($mail->$getter() ?? false))),
                         ];
                     }
@@ -294,6 +298,7 @@ class MailController extends AbstractController
             'isSent' => $mail->isSent(),
             'title' => $mail->getSubject(),
             'mailUid' => $mail->getUid(),
+            'table' => $table,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail))
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);

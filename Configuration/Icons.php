@@ -31,6 +31,10 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/group.svg'
     ],
+    'mail-log' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/mail.svg'
+    ],
     'mail-folder-mails-inactive' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/files-folder-mails.svg'

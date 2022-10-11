@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Controller\QueueControllerOld;
 use MEDIAESSENZ\Mail\Controller\NavFrameController;
 use MEDIAESSENZ\Mail\Controller\RecipientListControllerOld;
 use MEDIAESSENZ\Mail\Controller\StatisticsControllerOld;
+use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 final class Configuration
@@ -191,5 +192,12 @@ final class Configuration
         );
 
         $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/';
+    }
+
+    public static function directMailMigration(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail']
+            = DirectMailMigration::class;
+
     }
 }

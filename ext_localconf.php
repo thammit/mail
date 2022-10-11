@@ -7,4 +7,5 @@ defined('TYPO3') or die();
     \MEDIAESSENZ\Mail\Configuration::addPageTSConfig();
     \MEDIAESSENZ\Mail\Configuration::registerHooks();
     \MEDIAESSENZ\Mail\Configuration::registerFluidNameSpace();
+    \MEDIAESSENZ\Mail\Configuration::directMailMigration();
 })();;

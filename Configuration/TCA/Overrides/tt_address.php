@@ -3,6 +3,13 @@ defined('TYPO3') or die();
 
 // tt_address modified
 $ttAddressCols = [
+    'accepts_html' => [
+        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:module_sys_dmail_group.htmlemail',
+        'exclude' => '1',
+        'config' => [
+            'type' => 'check'
+        ]
+    ],
     'module_sys_dmail_category' => [
         'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:module_sys_dmail_group.category',
         'exclude' => '1',
@@ -33,4 +40,4 @@ $ttAddressCols = [
 ];
 
 TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('tt_address', $ttAddressCols);
-TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('tt_address', '--div--;Direct mail,module_sys_dmail_category,module_sys_dmail_html');
+TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('tt_address', '--div--;Direct mail,module_sys_dmail_category,accepts_html,module_sys_dmail_html');

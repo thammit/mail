@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
@@ -43,6 +44,7 @@ abstract class AbstractController extends ActionController
         protected RecipientService $recipientService,
         protected MailRepository $mailRepository,
         protected GroupRepository $groupRepository,
+        protected LogRepository $logRepository,
         protected PageRepository $pageRepository
     ) {
         $this->id = (int)GeneralUtility::_GP('id');

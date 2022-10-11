@@ -54,6 +54,11 @@ class Mail extends AbstractEntity
         $this->attachment = new ObjectStorage();
     }
 
+    public function initializeObject(): void
+    {
+        $this->attachment = $this->attachment ?? new ObjectStorage();
+    }
+
     /**
      * @return int
      */
