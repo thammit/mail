@@ -35,7 +35,13 @@ final class Configuration
     	TCEFORM.tt_address.module_sys_dmail_category.disabled = 1
     	TCEFORM.fe_users.module_sys_dmail_category.disabled = 1
     	TCEFORM.sys_dmail_group.select_categories.disabled = 1
-    ');
+        ');
+        ExtensionManagementUtility::addPageTSConfig('
+    	TCEFORM.tt_content.module_mail_category.disabled = 1
+    	TCEFORM.tt_address.module_mail_category.disabled = 1
+    	TCEFORM.fe_users.module_mail_category.disabled = 1
+    	TCEFORM.tx_mail_domain_model_group.categories.disabled = 1
+        ');
     }
 
     public static function registerTranslations(): void

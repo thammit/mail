@@ -32,14 +32,14 @@ class RecipientUtility
      */
     public static function isMailSendToRecipient(int $mailUid, int $recipientUid, string $table): bool
     {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_maillog');
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_mail_domain_model_log');
 
         $statement = $queryBuilder
             ->select('uid')
-            ->from('sys_dmail_maillog')
-            ->where($queryBuilder->expr()->eq('rid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($table)))
-            ->andWhere($queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
+            ->from('tx_mail_domain_model_log')
+            ->where($queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($table)))
+            ->andWhere($queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
             ->andWhere($queryBuilder->expr()->eq('response_type', '0'))
             ->execute();
 
@@ -57,7 +57,7 @@ class RecipientUtility
         $groups = GeneralUtility::makeInstance(SysDmailGroupRepository::class)->findSysDmailGroupUidsForFinalMail(
             $pageId,
             $sysLanguageUid,
-            trim($GLOBALS['TCA']['sys_dmail_group']['ctrl']['default_sortby'])
+            trim($GLOBALS['TCA']['tx_mail_domain_model_group']['ctrl']['default_sortby'])
         );
         if ($groups) {
             foreach ($groups as $group) {
@@ -239,25 +239,25 @@ class RecipientUtility
 
                         // Make queries
                         if ($pidList) {
-                            $whichTables = intval($mailGroup['whichtables']);
+                            $whichTables = intval($mailGroup['record_types']);
                             if ($whichTables & 1) {
                                 // tt_address
-                                $idLists['tt_address'] = $tempRepository->getIdList('tt_address', $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists['tt_address'] = $tempRepository->getIdList('tt_address', $pidList, $groupUid, $mailGroup['categories']);
                             }
                             if ($whichTables & 2) {
                                 // fe_users
-                                $idLists['fe_users'] = $tempRepository->getIdList('fe_users', $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists['fe_users'] = $tempRepository->getIdList('fe_users', $pidList, $groupUid, $mailGroup['categories']);
                             }
                             if ($userTable && ($whichTables & 4)) {
                                 // user table
-                                $idLists[$userTable] = $tempRepository->getIdList($userTable, $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists[$userTable] = $tempRepository->getIdList($userTable, $pidList, $groupUid, $mailGroup['categories']);
                             }
                             if ($whichTables & 8) {
                                 // fe_groups
                                 if (!is_array($idLists['fe_users'])) {
                                     $idLists['fe_users'] = [];
                                 }
-                                $idLists['fe_users'] = $tempRepository->getIdList('fe_groups', $pidList, $groupUid, $mailGroup['select_categories']);
+                                $idLists['fe_users'] = $tempRepository->getIdList('fe_groups', $pidList, $groupUid, $mailGroup['categories']);
                                 $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users']));
                             }
                         }
@@ -288,7 +288,7 @@ class RecipientUtility
                         $queryTable = GeneralUtility::_GP('SET')['queryTable'];
                         $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
                         $mailGroup = $sysDmailGroupRepository->updateMailGroup($mailGroup, $userTable, $queryTable, $queryConfig);
-                        $whichTables = intval($mailGroup['whichtables']);
+                        $whichTables = intval($mailGroup['record_types']);
                         $table = '';
                         if ($whichTables & 1) {
                             $table = 'tt_address';
@@ -306,7 +306,7 @@ class RecipientUtility
                         }
                         break;
                     case RecipientGroupType::OTHER:
-                        $groups = array_unique($tempRepository->getMailGroups($mailGroup['mail_groups'], [$mailGroup['uid']], $backendUserPermissions));
+                        $groups = array_unique($tempRepository->getMailGroups($mailGroup['children'], [$mailGroup['uid']], $backendUserPermissions));
                         foreach ($groups as $groupUid) {
                             $collect = self::getSingleMailGroup($groupUid, $userTable, $backendUserPermissions);
                             if (is_array($collect)) {

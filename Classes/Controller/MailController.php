@@ -11,6 +11,8 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
+use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
@@ -30,7 +32,6 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Domain\Repository\FrontendUserRepository;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
@@ -246,8 +247,7 @@ class MailController extends AbstractController
     {
         ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_wiz2_fetch_success'));
         $data = [];
-        $useDirectMailTables = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('mail', 'useDirectMailTables');
-        $table = $useDirectMailTables ? 'sys_dmail' : 'tx_mail_domain_model_mail';
+        $table = 'tx_mail_domain_model_mail';
         $groups = [
             'composition' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
             'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority', 'encoding'],
@@ -324,32 +324,34 @@ class MailController extends AbstractController
                 'rows' => [],
             ];
 
-            // todo Why colPos 99 ???
-            $colPosVal = 99;
-            $ttContentCategoryMmRepository = GeneralUtility::makeInstance(TtContentCategoryMmRepository::class);
+            $colPos = 9999;
+//            $ttContentCategoryMmRepository = GeneralUtility::makeInstance(OldTtContentCategoryMmRepository::class);
+            $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
             foreach ($rows as $contentElementData) {
                 $categoriesRow = [];
-                $resCat = $ttContentCategoryMmRepository->selectUidForeignByUid($contentElementData['uid']);
+//                $resCat = $ttContentCategoryMmRepository->selectUidForeignByUid($contentElementData['uid']);
+                $contentElementCategories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName($contentElementData['uid'], 'tt_content');
 
-                foreach ($resCat as $rowCat) {
-                    $categoriesRow[] = (int)$rowCat['uid_foreign'];
+                foreach ($contentElementCategories as $contentElementCategory) {
+                    $categoriesRow[] = (int)$contentElementCategory['uid_local'];
                 }
 
-                if ($colPosVal != $contentElementData['colPos']) {
+                if ($colPos !== (int)$contentElementData['colPos']) {
                     $data['rows'][] = [
                         'colPos' => BackendUtility::getProcessedValue('tt_content', 'colPos', $contentElementData['colPos']),
                     ];
-                    $colPosVal = $contentElementData['colPos'];
+                    $colPos = (int)$contentElementData['colPos'];
                 }
 
-                $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $contentElementData, $this->sysLanguageUid);
+//                $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $contentElementData, $this->sysLanguageUid);
+                $ttContentCategories = RepositoryUtility::getCategories('tt_content', $contentElementData, $this->sysLanguageUid);
                 reset($ttContentCategories);
-                $checkBoxes = [];
-                foreach ($ttContentCategories as $pKey => $pVal) {
-                    $checkBoxes[] = [
-                        'pKey' => $pKey,
-                        'checked' => in_array((int)$pKey, $categoriesRow),
-                        'pVal' => htmlspecialchars($pVal),
+                $categories = [];
+                foreach ($ttContentCategories as $categoryUid => $categoryTitle) {
+                    $categories[] = [
+                        'uid' => $categoryUid,
+                        'checked' => in_array($categoryUid, $categoriesRow),
+                        'title' => $categoryTitle,
                     ];
                 }
 
@@ -360,7 +362,7 @@ class MailController extends AbstractController
                     'list_type' => $contentElementData['list_type'],
                     'bodytext' => empty($contentElementData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($contentElementData['bodytext']), 200),
                     'hasCategory' => (bool)$contentElementData['module_sys_dmail_category'],
-                    'checkboxes' => $checkBoxes,
+                    'categories' => $categories,
                 ];
             }
         }
@@ -391,7 +393,8 @@ class MailController extends AbstractController
                         $enabled[] = $k;
                     }
                 }
-                $data['tt_content'][$recUid]['module_sys_dmail_category'] = implode(',', $enabled);
+//                $data['tt_content'][$recUid]['module_sys_dmail_category'] = implode(',', $enabled);
+                $data['tt_content'][$recUid]['categories'] = implode(',', $enabled);
             }
 
             $dataHandler = $this->getDataHandler();
@@ -425,8 +428,8 @@ class MailController extends AbstractController
             $data['ttAddress'] = $ttAddressRepository->getAddressesByCustomSorting($demand);
         }
 
-        if ($this->pageTSConfiguration['test_dmail_group_uids'] ?? false) {
-            $mailGroupUids = GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_dmail_group_uids']);
+        if ($this->pageTSConfiguration['test_mail_group_uids'] ?? false) {
+            $mailGroupUids = GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_mail_group_uids']);
             $data['mailGroups'] = [];
             foreach ($mailGroupUids as $mailGroupUid) {
                 /** @var Group $testMailGroup */
@@ -504,7 +507,7 @@ class MailController extends AbstractController
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
-            'data' => RecipientUtility::finalSendingGroups($this->id, $mail->getSysLanguageUid(), $this->userTable, $this->backendUserPermissions),
+            'data' => $this->recipientService->getFinalSendingGroups($this->userTable, $this->backendUserPermissions),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mailUid' => $mail->getUid(),
         ]);
@@ -530,7 +533,7 @@ class MailController extends AbstractController
     {
         $groups = array_keys(array_filter($groups));
         $distributionTime = new DateTimeImmutable($distributionTime);
-        $queryInfo['id_lists'] = RecipientUtility::compileMailGroup($groups, '', $this->backendUserPermissions);
+        $queryInfo['id_lists'] = $this->recipientService->getQueryInfoIdLists($groups, '', $this->backendUserPermissions);
 
         // Update the record:
         $mail->setRecipientGroups(implode(',', $groups))

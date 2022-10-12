@@ -1,9 +1,11 @@
 <?php
+
 namespace MEDIAESSENZ\Mail\UserFunc;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
@@ -46,53 +48,23 @@ class BoundaryUserFunc
             $this->contentObjectRenderer = $conf['parentObj']->cObj;
         }
 
-        // this check could probably be moved to TS
-        if ($GLOBALS['TSFE']->config['config']['insertDmailerBoundaries']) {
-            if ($content != '') {
-                // setting the default
-                $categoryList = '';
-                if (intval($this->contentObjectRenderer->data['module_sys_dmail_category']) >= 1) {
-                    // if content type "RECORDS" we have to strip off
-                    // boundaries from indcluded records
-                    if ($this->contentObjectRenderer->data['CType'] == 'shortcut') {
-                        $content = $this->stripInnerBoundaries($content);
-                    }
-
-                    // get categories of tt_content element
-                    $foreignTable = 'sys_dmail_category';
-                    $select = "$foreignTable.uid";
-                    $localTableUidList = intval($this->contentObjectRenderer->data['uid']);
-                    $mmTable = 'sys_dmail_ttcontent_category_mm';
-                    $orderBy = $foreignTable . '.uid';
-
-                    $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($foreignTable);
-                    $statement = $queryBuilder
-                        ->select($select)
-                        ->from($foreignTable)
-                        ->from($mmTable)
-                        ->where(
-                            $queryBuilder->expr()->eq(
-                                $foreignTable . '.uid',
-                                $mmTable . '.uid_foreign'
-                            )
-                        )
-                        ->andWhere(
-                            $queryBuilder->expr()->in(
-                                $mmTable . '.uid_local',
-                                $localTableUidList
-                            )
-                        )
-                        ->orderBy($orderBy)
-                        ->execute();
-
-                    while ($row = $statement->fetchAssociative()) {
-                        $categoryList .= $row['uid'] . ',';
-                    }
-                    $categoryList = rtrim($categoryList, ',');
-                }
-                // wrap boundaries around content
-                $content = $this->contentObjectRenderer->wrap($categoryList, $this->boundaryStartWrap) . $content . $this->boundaryEnd;
+        if ($GLOBALS['TSFE']->config['config']['insertDmailerBoundaries'] && $content && (int)$this->contentObjectRenderer->data['categories'] > 0) {
+            // if content type is shortcut -> use boundaries from included records
+            if ($this->contentObjectRenderer->data['CType'] == 'shortcut') {
+                $content = $this->stripInnerBoundaries($content);
             }
+
+            // get categories from tt_content element
+            $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
+            $contentElementCategories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName((int)$this->contentObjectRenderer->data['uid'], 'tt_content');
+
+            $categoryList = [];
+            foreach ($contentElementCategories as $contentElementCategory) {
+                $categoryList[] = $contentElementCategory['uid_local'];
+            }
+
+            // wrap boundaries around content
+            $content = $this->contentObjectRenderer->wrap(implode(',', $categoryList), $this->boundaryStartWrap) . $content . $this->boundaryEnd;
         }
         return $content;
     }
@@ -109,8 +81,7 @@ class BoundaryUserFunc
         // only dummy code at the moment
         $searchString = $this->contentObjectRenderer->wrap('[\d,]*', $this->boundaryStartWrap);
         $content = preg_replace('/' . $searchString . '/', '', $content);
-        $content = preg_replace('/' . $this->boundaryEnd . '/', '', $content);
-        return $content;
+        return preg_replace('/' . $this->boundaryEnd . '/', '', $content);
     }
 
     /**
@@ -141,27 +112,14 @@ class BoundaryUserFunc
      */
     public function insertSitemapBoundaries(string $content, array $conf): string
     {
-        $uid = $this->contentObjectRenderer->data['uid'];
         $content = '';
-
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_ttcontent_category_mm');
-        $categories = $queryBuilder
-            ->select('*')
-            ->from('sys_dmail_ttcontent_category_mm')
-            ->where(
-                $queryBuilder->expr()->eq(
-                    'uid_local',
-                    (int) $uid
-                )
-            )
-            ->orderBy('sorting')
-            ->execute()
-            ->fetchAllAssociative();
+        $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
+        $categories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName((int)$this->contentObjectRenderer->data['uid'], 'tt_content');
 
         if (count($categories) > 0) {
             $categoryList = [];
             foreach ($categories as $category) {
-                $categoryList[] = $category['uid_foreign'];
+                $categoryList[] = $category['uid_local'];
             }
             $content = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_' . implode(',', $categoryList) . '-->|<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
         }

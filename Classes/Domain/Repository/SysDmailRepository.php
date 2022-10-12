@@ -10,7 +10,7 @@ use PDO;
 
 class SysDmailRepository extends AbstractRepository
 {
-    protected string $table = 'sys_dmail';
+    protected string $table = 'tx_mail_domain_model_mail';
 
     /**
      * @param int $uid
@@ -66,12 +66,12 @@ class SysDmailRepository extends AbstractRepository
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
         return $queryBuilder
-            ->select('uid', 'pid', 'subject', 'tstamp', 'issent', 'renderedsize', 'attachment', 'type', 'page')
+            ->select('uid', 'pid', 'subject', 'tstamp', 'sent', 'rendered_size', 'attachment', 'type', 'page')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('scheduled', 0),
-                $queryBuilder->expr()->eq('issent', 0),
+                $queryBuilder->expr()->eq('sent', 0),
             )
             ->orderBy($orderBy, $order)
             ->execute()
@@ -110,22 +110,22 @@ class SysDmailRepository extends AbstractRepository
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
-        return $queryBuilder->selectLiteral('sys_dmail.uid', 'sys_dmail.subject', 'sys_dmail.scheduled', 'sys_dmail.scheduled_begin', 'sys_dmail.scheduled_end', 'sys_dmail.recipients', 'COUNT(sys_dmail_maillog.mid) AS count')
+        return $queryBuilder->selectLiteral('tx_mail_domain_model_mail.uid', 'tx_mail_domain_model_mail.subject', 'tx_mail_domain_model_mail.scheduled', 'tx_mail_domain_model_mail.scheduled_begin', 'tx_mail_domain_model_mail.scheduled_end', 'tx_mail_domain_model_mail.recipients', 'COUNT(tx_mail_domain_model_log.mail) AS count')
             ->from($this->table, $this->table)
             ->leftJoin(
-                'sys_dmail',
-                'sys_dmail_maillog',
-                'sys_dmail_maillog',
-                $queryBuilder->expr()->eq('sys_dmail.uid', $queryBuilder->quoteIdentifier('sys_dmail_maillog.mid'))
+                'tx_mail_domain_model_mail',
+                'tx_mail_domain_model_log',
+                'tx_mail_domain_model_log',
+                $queryBuilder->expr()->eq('tx_mail_domain_model_mail.uid', $queryBuilder->quoteIdentifier('tx_mail_domain_model_log.mail'))
             )
-            ->add('where', 'sys_dmail.pid = ' . $id .
-                ' AND sys_dmail.type IN (0,1)' .
-                ' AND sys_dmail.issent = 1' .
-                ' AND sys_dmail_maillog.response_type = 0' .
-                ' AND sys_dmail_maillog.html_sent > 0')
-            ->groupBy('sys_dmail_maillog.mid')
-            ->orderBy('sys_dmail.scheduled', 'DESC')
-            ->addOrderBy('sys_dmail.scheduled_begin', 'DESC')
+            ->add('where', 'tx_mail_domain_model_mail.pid = ' . $id .
+                ' AND tx_mail_domain_model_mail.type IN (0,1)' .
+                ' AND tx_mail_domain_model_mail.sent = 1' .
+                ' AND tx_mail_domain_model_log.response_type = 0' .
+                ' AND tx_mail_domain_model_log.format_sent > 0')
+            ->groupBy('tx_mail_domain_model_log.mail')
+            ->orderBy('tx_mail_domain_model_mail.scheduled', 'DESC')
+            ->addOrderBy('tx_mail_domain_model_mail.scheduled_begin', 'DESC')
             ->execute()
             ->fetchAllAssociative();
     }

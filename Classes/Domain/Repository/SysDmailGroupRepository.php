@@ -11,7 +11,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 
 class SysDmailGroupRepository extends AbstractRepository
 {
-    protected string $table = 'sys_dmail_group';
+    protected string $table = 'tx_mail_domain_model_group';
 
     /**
      * @param int $pid
@@ -118,7 +118,7 @@ class SysDmailGroupRepository extends AbstractRepository
 //        $queryTable = $set['queryTable'];
 //        $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
 
-        $whichTables = (int)$mailGroup['whichtables'];
+        $whichTables = (int)$mailGroup['record_types'];
         $table = '';
         if ($whichTables & 1) {
             $table = 'tt_address';
@@ -145,7 +145,7 @@ class SysDmailGroupRepository extends AbstractRepository
                 $whichTables = 4;
             }
             $updateFields = [
-                'whichtables' => $whichTables,
+                'record_types' => $whichTables,
                 'query' => $settings['queryConfig'],
             ];
 

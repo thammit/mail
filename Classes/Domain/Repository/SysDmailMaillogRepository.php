@@ -6,44 +6,42 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SysDmailMaillogRepository extends AbstractRepository
 {
-    protected string $table = 'sys_dmail_maillog';
+    protected string $table = 'tx_mail_domain_model_log';
 
     /**
-     * @param int $mid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function countSysDmailMaillogAllByMid(int $mid): array
+    public function countSysDmailMaillogAllByMid(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
             ->count('*')
-            ->addSelect('html_sent')
+            ->addSelect('format_sent')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', 0)
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', 0),
+
             )
-            ->add('where', 'mid=' . $mid . ' AND response_type=0')
-            ->groupBy('html_sent')
+            ->groupBy('format_sent')
             ->execute()
             ->fetchAllAssociative();
     }
 
     /**
-     * @param int $mid
+     * @param int $mailUid
      * @return int
      * @throws DBALException
      * @throws Exception
      */
-    public function countSysDmailMaillogHtmlByMid(int $mid): int
+    public function countSysDmailMaillogHtmlByMid(int $mailUid): int
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -51,23 +49,23 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->count('*')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', 1)
             )
-            ->groupBy('rid')
-            ->addGroupBy('rtbl')
+            ->groupBy('recipient_uid')
+            ->addGroupBy('recipient_table')
             ->orderBy('COUNT(*)')
             ->execute()
             ->fetchAllAssociative());
     }
 
     /**
-     * @param int $mid
+     * @param int $mailUid
      * @return int
      * @throws DBALException
      * @throws Exception
      */
-    public function countSysDmailMaillogPlainByMid(int $mid): int
+    public function countSysDmailMaillogPlainByMid(int $mailUid): int
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -75,23 +73,23 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->count('*')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', 2)
             )
-            ->groupBy('rid')
-            ->addGroupBy('rtbl')
+            ->groupBy('recipient_uid')
+            ->addGroupBy('recipient_table')
             ->orderBy('COUNT(*)')
             ->execute()
             ->fetchAllAssociative());
     }
 
     /**
-     * @param int $mid
+     * @param int $mailUid
      * @return int
      * @throws DBALException
      * @throws Exception
      */
-    public function countSysDmailMaillogPingByMid(int $mid): int
+    public function countSysDmailMaillogPingByMid(int $mailUid): int
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -99,11 +97,11 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->count('*')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', -1)
             )
-            ->groupBy('rid')
-            ->addGroupBy('rtbl')
+            ->groupBy('recipient_uid')
+            ->addGroupBy('recipient_table')
             ->orderBy('COUNT(*)')
             ->execute()
             ->fetchAllAssociative());
@@ -129,12 +127,12 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return int
      * @throws DBALException
      * @throws Exception
      */
-    public function countByUid(int $uid): int
+    public function countByUid(int $mailUid): int
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -142,21 +140,21 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->count('*')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)),
-                $queryBuilder->expr()->gt('html_sent', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT))
+                $queryBuilder->expr()->gt('format_sent', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT))
             )
             ->executeQuery()
             ->fetchOne();
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function countSysDmailMaillogsResponseTypeByMid(int $uid): array
+    public function countSysDmailMaillogsResponseTypeByMid(int $mailUid): array
     {
         $responseTypes = [];
         $queryBuilder = $this->getQueryBuilder();
@@ -165,7 +163,7 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->count('*')
             ->addSelect('response_type')
             ->from($this->table)
-            ->where($queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
+            ->where($queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
             ->groupBy('response_type')
             ->execute();
 
@@ -177,12 +175,12 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function selectSysDmailMaillogsCompactView(int $uid): array
+    public function selectSysDmailMaillogsCompactView(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -190,23 +188,23 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->select('uid')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT))
             )
-            ->orderBy('rid', 'ASC')
+            ->orderBy('recipient_uid', 'ASC')
             ->execute()
             ->fetchAllAssociative();
     }
 
     /**
      *
-     * @param int $uid
+     * @param int $mailUid
      * @param int $responseType 1 for html, 2 for plain
      * @return array
      * @throws Exception
      * @throws DBALException
      */
-    public function findMostPopularLinks(int $uid, int $responseType = 1): array
+    public function findMostPopularLinks(int $mailUid, int $responseType = 1): array
     {
         $popularLinks = [];
         $queryBuilder = $this->getQueryBuilder();
@@ -216,7 +214,7 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->addSelect('url_id')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, PDO::PARAM_INT))
             )
             ->groupBy('url_id')
@@ -233,7 +231,7 @@ class SysDmailMaillogRepository extends AbstractRepository
      * @throws Exception
      * @throws DBALException
      */
-    public function countReturnCode(int $uid, int $responseType = -127): array
+    public function countReturnCode(int $mailUid, int $responseType = -127): array
     {
         $returnCodes = [];
         $queryBuilder = $this->getQueryBuilder();
@@ -243,7 +241,7 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->addSelect('return_code')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, PDO::PARAM_INT))
             )
             ->groupBy('return_code')
@@ -258,39 +256,39 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function selectStatTempTableContent(int $uid): array
+    public function selectStatTempTableContent(int $mailUid): array
     {
         return $this->getQueryBuilder()
-            ->select('rid', 'rtbl', 'tstamp', 'response_type', 'url_id', 'html_sent', 'size')
+            ->select('recipient_uid', 'recipient_table', 'tstamp', 'response_type', 'url_id', 'format_sent', 'size')
             ->from($this->table)
-            ->add('where', 'mid=' . $uid)
-            ->orderBy('rtbl')
-            ->addOrderBy('rid')
+            ->where($this->getQueryBuilder()->expr()->eq('mail', $mailUid))
+            ->orderBy('recipient_table')
+            ->addOrderBy('recipient_uid')
             ->addOrderBy('tstamp')
             ->execute()
             ->fetchAllAssociative();
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findAllReturnedMail(int $uid): array
+    public function findAllReturnedMail(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select('rid', 'rtbl', 'email')
+            ->select('recipient_uid', 'recipient_tablew', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-127, PDO::PARAM_INT))
             )
             ->execute()
@@ -298,20 +296,20 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findUnknownRecipient(int $uid): array
+    public function findUnknownRecipient(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select('rid', 'rtbl', 'email')
+            ->select('recipient_uid', 'recipient_table', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-127, PDO::PARAM_INT)),
                 $queryBuilder->expr()->or(
                     $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(550, PDO::PARAM_INT)),
@@ -326,20 +324,20 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findMailboxFull(int $uid): array
+    public function findMailboxFull(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select('rid', 'rtbl', 'email')
+            ->select('recipient_uid', 'recipient_table', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-127, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(551, PDO::PARAM_INT))
             )
@@ -348,20 +346,20 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findBadHost(int $uid): array
+    public function findBadHost(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select('rid', 'rtbl', 'email')
+            ->select('recipient_uid', 'recipient_table', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-127, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(552, PDO::PARAM_INT))
             )
@@ -370,20 +368,20 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findBadHeader(int $uid): array
+    public function findBadHeader(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select('rid', 'rtbl', 'email')
+            ->select('recipient_uid', 'recipient_table', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-127, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(554, PDO::PARAM_INT))
             )
@@ -392,20 +390,20 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $uid
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    public function findUnknownReasons(int $uid): array
+    public function findUnknownReasons(int $mailUid): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select('rid', 'rtbl', 'email')
+            ->select('recipient_uid', 'recipient_table', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(-127, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(-1, PDO::PARAM_INT))
             )
@@ -414,14 +412,14 @@ class SysDmailMaillogRepository extends AbstractRepository
     }
 
     /**
-     * @param int $rid
-     * @param string $rtbl
-     * @param int $mid
+     * @param int $recipientUid
+     * @param string $recipientTable
+     * @param int $mailUid
      * @return bool|array
      * @throws DBALException
      * @throws Exception
      */
-    public function selectForAnalyzeBounceMail(int $rid, string $rtbl, int $mid): bool|array
+    public function selectForAnalyzeBounceMail(int $recipientUid, string $recipientTable, int $mailUid): bool|array
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -429,9 +427,9 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->select('uid', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('rid', $queryBuilder->createNamedParameter($rid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($rtbl)),
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientTable)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT))
             )
             ->setMaxResults(1)
@@ -454,15 +452,15 @@ class SysDmailMaillogRepository extends AbstractRepository
         $queryBuilder = $this->getQueryBuilder();
 
         return array_column($queryBuilder
-            ->select('rid')
+            ->select('recipient_uid')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($recipientTable)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientTable)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT))
             )
             ->execute()
-            ->fetchAllAssociative(), 'rid');
+            ->fetchAllAssociative(), 'recipient_uid');
     }
 
 
@@ -470,7 +468,7 @@ class SysDmailMaillogRepository extends AbstractRepository
      * Add action to sys_dmail_maillog table
      *
      * @param int $mid Newsletter ID
-     * @param string $rid Recipient ID
+     * @param string $recipientUid Recipient ID
      * @param int $size Size of the sent email
      * @param int $parseTime Parse time of the email
      * @param int $html Set if HTML email is sent
@@ -479,23 +477,23 @@ class SysDmailMaillogRepository extends AbstractRepository
      * @return int
      * @throws DBALException
      */
-    public function insertRecord(int $mid, string $rid, int $size, int $parseTime, int $html, string $email): int
+    public function insertRecord(int $mid, string $recipientUid, int $size, int $parseTime, int $html, string $email): int
     {
-        [$rtbl, $rid] = explode('_', $rid);
+        [$recipientTable, $recipientUid] = explode('_', $recipientUid);
 
         $queryBuilder = $this->getQueryBuilder();
         $queryBuilder
-            ->insert('sys_dmail_maillog')
+            ->insert('tx_mail_domain_model_log')
             ->values([
-                'mid' => $mid,
-                'rtbl' => $rtbl,
-                'rid' => $rid,
+                'mail' => $mid,
+                'recipient_table' => $recipientTable,
+                'recipient_uid' => $recipientUid,
                 'email' => $email,
                 'tstamp' => time(),
                 'url' => '',
                 'size' => $size,
-                'parsetime' => $parseTime,
-                'html_sent' => $html,
+                'parse_time' => $parseTime,
+                'format_sent' => $html,
             ])
             ->execute();
 
@@ -506,20 +504,20 @@ class SysDmailMaillogRepository extends AbstractRepository
      * @param int $uid
      * @param int $size
      * @param int $parseTime
-     * @param int $returnCode
+     * @param int $formatSent
      * @return int
      * @throws DBALException
      */
-    public function updateRecord(int $uid, int $size, int $parseTime, int $returnCode): int
+    public function updateRecord(int $uid, int $size, int $parseTime, int $formatSent): int
     {
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->update('sys_dmail_maillog')
+            ->update('tx_mail_domain_model_log')
             ->set('tstamp', time())
             ->set('size', $size)
-            ->set('parsetime', $parseTime)
-            ->set('html_sent', $returnCode)
+            ->set('parse_time', $parseTime)
+            ->set('format_sent', $formatSent)
             ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
             ->executeStatement();
     }

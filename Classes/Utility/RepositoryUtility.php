@@ -23,25 +23,25 @@ class RepositoryUtility
      * @throws DBALException
      * @throws Exception
      */
-    public static function makeCategories(string $table, array $row, int $sysLanguageUid): array
+    public static function getCategories(string $table, array $row, int $sysLanguageUid): array
     {
         $categories = [];
 
-        $mmField = $table == 'sys_dmail_group' ? 'select_categories' : 'module_sys_dmail_category';
-
         $pageTsConfig = BackendUtility::getTCEFORM_TSconfig($table, $row);
-        if (is_array($pageTsConfig[$mmField])) {
-            $pidList = $pageTsConfig[$mmField]['PAGE_TSCONFIG_IDLIST'] ?? [];
+        if (is_array($pageTsConfig['categories'])) {
+            $pidList = $pageTsConfig['categories']['PAGE_TSCONFIG_IDLIST'] ?? [];
             if ($pidList) {
-                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_dmail_category');
+                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_category');
                 $res = $queryBuilder->select('*')
-                    ->from('sys_dmail_category')
-                    ->add('where', 'sys_dmail_category.pid IN (' . str_replace(',', "','", $queryBuilder->createNamedParameter($pidList)) . ')' .
-                        ' AND l18n_parent=0')
+                    ->from('sys_category')
+                    ->where(
+                        $queryBuilder->expr()->in('pid', str_replace(',', "','", $queryBuilder->createNamedParameter($pidList))),
+                        $queryBuilder->expr()->eq('l10n_parent', 0)
+                    )
                     ->execute();
                 while ($rowCat = $res->fetchAssociative()) {
-                    if ($localizedRowCat = self::getRecordOverlay('sys_dmail_category', $rowCat, $sysLanguageUid)) {
-                        $categories[$localizedRowCat['uid']] = htmlspecialchars($localizedRowCat['category']);
+                    if ($localizedRowCat = self::getRecordOverlay('sys_category', $rowCat, $sysLanguageUid)) {
+                        $categories[$localizedRowCat['uid']] = $localizedRowCat['title'];
                     }
                 }
             }

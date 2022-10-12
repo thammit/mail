@@ -80,6 +80,7 @@ CREATE TABLE tx_mail_domain_model_mail (
    redirect_url varchar(2048) DEFAULT '' NOT NULL,
    auth_code_fields varchar(80) DEFAULT '' NOT NULL,
    recipient_groups varchar(80) DEFAULT '' NOT NULL,
+   recipients int(11) unsigned DEFAULT '0' NOT NULL,
    PRIMARY KEY (uid)
 );
 
@@ -128,7 +129,6 @@ CREATE TABLE tx_mail_domain_model_group (
     recursive tinyint(4) DEFAULT '0' NOT NULL,
     children tinyblob,
     categories int(11) DEFAULT '0' NOT NULL,
-    sys_language_uid int(11) DEFAULT '0' NOT NULL,
     PRIMARY KEY (uid),
     KEY parent (pid)
 );

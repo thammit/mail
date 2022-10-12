@@ -64,7 +64,7 @@ class TempRepository extends AbstractRepository
      * @param string $table The table to select from
      * @param string $pidList The pidList
      * @param int $groupUid The groupUid.
-     * @param int $cat The number of relations from sys_dmail_group to sysmail_categories
+     * @param int $cat The number of relations from tx_mail_domain_model_group to sys_categories
      *
      * @return array The resulting array of uid's
      * @throws \Doctrine\DBAL\Driver\Exception
@@ -77,11 +77,8 @@ class TempRepository extends AbstractRepository
         $pidArray = GeneralUtility::intExplode(',', $pidList, true);
         $queryBuilder = $this->getQueryBuilder($table);
 
-        if ($switchTable == 'fe_users') {
-            $addWhere = $queryBuilder->expr()->eq(
-                'fe_users.module_sys_dmail_newsletter',
-                1
-            );
+        if ($switchTable === 'fe_users') {
+            $addWhere = $queryBuilder->expr()->eq('fe_users.newsletter', 1);
         }
 
         // fe user group uid should be in list of fe users list of user groups
@@ -92,7 +89,7 @@ class TempRepository extends AbstractRepository
         // $usergroupInList = ' AND ('.$field.' LIKE \'%,\'||'.$command.'||\',%\' OR '.$field.' LIKE '.$command.'||\',%\' OR '.$field.' LIKE \'%,\'||'.$command.' OR '.$field.'='.$command.')';
         // The following will work but INSTR and CONCAT are available only in mySQL
 
-        $mmTable = $GLOBALS['TCA'][$switchTable]['columns']['module_sys_dmail_category']['config']['MM'];
+        $mmTable = $GLOBALS['TCA'][$switchTable]['columns']['categories']['config']['MM'];
         if ($cat < 1) {
             if ($table === 'fe_groups') {
                 $res = $queryBuilder
@@ -131,8 +128,8 @@ class TempRepository extends AbstractRepository
             if ($table === 'fe_groups') {
                 $res = $queryBuilder
                     ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
-                    ->from('sys_dmail_group', 'sys_dmail_group')
-                    ->from('sys_dmail_group_category_mm', 'g_mm')
+                    ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
+                    ->from('sys_category_record_mm', 'g_mm')
                     ->from('fe_groups', 'fe_groups')
                     ->from($mmTable, 'mm_1')
                     ->leftJoin(
@@ -145,9 +142,10 @@ class TempRepository extends AbstractRepository
                         $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
                             ->add('INSTR( CONCAT(\',\',fe_users.usergroup,\',\'),CONCAT(\',\',fe_groups.uid ,\',\') )')
-                            ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
-                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
-                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
+//                            ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
+                            ->add($queryBuilder->expr()->eq('mm_1.tablenames', $queryBuilder->createNamedParameter('fe_groups')))
+                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
+                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
                             ->add(
                                 $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter(''))
                             )
@@ -159,8 +157,8 @@ class TempRepository extends AbstractRepository
             } else {
                 $res = $queryBuilder
                     ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
-                    ->from('sys_dmail_group', 'sys_dmail_group')
-                    ->from('sys_dmail_group_category_mm', 'g_mm')
+                    ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
+                    ->from('sys_category_record_mm', 'g_mm')
                     ->from($mmTable, 'mm_1')
                     ->leftJoin(
                         'mm_1',
@@ -171,9 +169,10 @@ class TempRepository extends AbstractRepository
                     ->andWhere(
                         $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
-                            ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
-                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
-                            ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
+//                            ->add($queryBuilder->expr()->eq('mm_1.uid_foreign', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
+                            ->add($queryBuilder->expr()->eq('mm_1.tablenames', $queryBuilder->createNamedParameter('fe_users')))
+                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
+                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
                             ->add(
                                 $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter(''))
                             )
@@ -217,7 +216,7 @@ class TempRepository extends AbstractRepository
         // for fe_users and fe_group, only activated modulde_sys_dmail_newsletter
         if ($switchTable == 'fe_users') {
             $addWhere = $queryBuilder->expr()->eq(
-                $switchTable . '.module_sys_dmail_newsletter',
+                $switchTable . '.newsletter',
                 1
             );
         }
@@ -225,18 +224,18 @@ class TempRepository extends AbstractRepository
         if ($table == 'fe_groups') {
             $res = $queryBuilder
                 ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
-                ->from('sys_dmail_group_mm', 'sys_dmail_group_mm')
+                ->from('tx_mail_group_mm', 'tx_mail_group_mm')
                 ->innerJoin(
-                    'sys_dmail_group_mm',
-                    'sys_dmail_group',
-                    'sys_dmail_group',
-                    $queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->quoteIdentifier('sys_dmail_group.uid'))
+                    'tx_mail_group_mm',
+                    'tx_mail_domain_model_group',
+                    'tx_mail_domain_model_group',
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
                 )
                 ->innerJoin(
-                    'sys_dmail_group_mm',
+                    'tx_mail_group_mm',
                     $table,
                     $table,
-                    $queryBuilder->expr()->eq('sys_dmail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($table . '.uid'))
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($table . '.uid'))
                 )
                 ->innerJoin(
                     $table,
@@ -246,10 +245,10 @@ class TempRepository extends AbstractRepository
                 )
                 ->andWhere(
                     $queryBuilder->expr()->and()
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
+                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
                         ->add($addWhere)
                 )
                 ->orderBy($switchTable . '.uid')
@@ -258,25 +257,25 @@ class TempRepository extends AbstractRepository
         } else {
             $res = $queryBuilder
                 ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
-                ->from('sys_dmail_group_mm', 'sys_dmail_group_mm')
+                ->from('tx_mail_group_mm', 'tx_mail_group_mm')
                 ->innerJoin(
-                    'sys_dmail_group_mm',
-                    'sys_dmail_group',
-                    'sys_dmail_group',
-                    $queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->quoteIdentifier('sys_dmail_group.uid'))
+                    'tx_mail_group_mm',
+                    'tx_mail_domain_model_group',
+                    'tx_mail_domain_model_group',
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
                 )
                 ->innerJoin(
-                    'sys_dmail_group_mm',
+                    'tx_mail_group_mm',
                     $switchTable,
                     $switchTable,
-                    $queryBuilder->expr()->eq('sys_dmail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($switchTable . '.uid'))
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($switchTable . '.uid'))
                 )
                 ->andWhere(
                     $queryBuilder->expr()->and()
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
+                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
                         ->add($addWhere)
                 )
                 ->orderBy($switchTable . '.uid')
@@ -297,18 +296,18 @@ class TempRepository extends AbstractRepository
             $res = $queryBuilder
                 ->selectLiteral('DISTINCT ' . $table . '.uid')
                 ->from($table, $table)
-                ->from('sys_dmail_group', 'sys_dmail_group')
+                ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
                 ->leftJoin(
-                    'sys_dmail_group',
-                    'sys_dmail_group_mm',
-                    'sys_dmail_group_mm',
-                    $queryBuilder->expr()->eq('sys_dmail_group_mm.uid_local', $queryBuilder->quoteIdentifier('sys_dmail_group.uid'))
+                    'tx_mail_domain_model_group',
+                    'tx_mail_group_mm',
+                    'tx_mail_group_mm',
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
                 )
                 ->andWhere(
                     $queryBuilder->expr()->and()
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group.uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
-                        ->add($queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('sys_dmail_group_mm.uid_foreign')))
-                        ->add($queryBuilder->expr()->eq('sys_dmail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
+                        ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
+                        ->add($queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign')))
+                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                 )
                 ->execute();
 
@@ -331,7 +330,7 @@ class TempRepository extends AbstractRepository
                 // for fe_users and fe_group, only activated modulde_sys_dmail_newsletter
                 if ($switchTable == 'fe_users') {
                     $addWhere = $queryBuilder->expr()->eq(
-                        $switchTable . '.module_sys_dmail_newsletter',
+                        $switchTable . '.newsletter',
                         1
                     );
                 }
@@ -378,8 +377,8 @@ class TempRepository extends AbstractRepository
         // fe_groups having this id in their subgroup field
 
         $table = 'fe_groups';
-        $mmTable = 'sys_dmail_group_mm';
-        $groupTable = 'sys_dmail_group';
+        $mmTable = 'tx_mail_group_mm';
+        $groupTable = 'tx_mail_domain_model_group';
 
         $queryBuilder = $this->getQueryBuilder($table);
 
@@ -467,17 +466,17 @@ class TempRepository extends AbstractRepository
         $groupIdList = GeneralUtility::intExplode(',', $list);
         $groups = [];
 
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions('sys_dmail_group');
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions('tx_mail_domain_model_group');
 
-        $res = $queryBuilder->select('sys_dmail_group.*')
-            ->from('sys_dmail_group', 'sys_dmail_group')
+        $res = $queryBuilder->select('tx_mail_domain_model_group.*')
+            ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
             ->leftJoin(
-                'sys_dmail_group',
+                'tx_mail_domain_model_group',
                 'pages',
                 'pages',
-                $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier('sys_dmail_group.pid'))
+                $queryBuilder->expr()->eq('pages.uid', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.pid'))
             )
-            ->add('where', 'sys_dmail_group.uid IN (' . implode(',', $groupIdList) . ')' .
+            ->add('where', 'tx_mail_domain_model_group.uid IN (' . implode(',', $groupIdList) . ')' .
                 ' AND ' . $permsClause)
             ->execute();
 
@@ -486,7 +485,7 @@ class TempRepository extends AbstractRepository
                 // Other mail group...
                 if (!in_array($row['uid'], $parsedGroups)) {
                     $parsedGroups[] = $row['uid'];
-                    $groups = array_merge($groups, $this->getMailGroups($row['mail_groups'], $parsedGroups, $permsClause));
+                    $groups = array_merge($groups, $this->getMailGroups($row['children'], $parsedGroups, $permsClause));
                 }
             } else {
                 // Normal mail group, just add to list

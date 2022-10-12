@@ -255,10 +255,10 @@ class MailFactory
             ->setRedirect((bool)($this->pageTSConfiguration['use_rdct'] ?? false))
             ->setRedirectAll((bool)($this->pageTSConfiguration['long_link_mode'] ?? false))
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
-            ->setAuthCodeFields($this->pageTSConfiguration['authcode_fieldList'] ?? '')
-            ->setSendOptions((int)($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['sys_dmail']['columns']['sendOptions']['config']['default']))
+            ->setAuthCodeFields($this->pageTSConfiguration['auth_code_fields'] ?? '')
+            ->setSendOptions((int)($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))
             ->setIncludeMedia((bool)($this->pageTSConfiguration['includeMedia'] ?? false))
-            ->setFlowedFormat((bool)($this->pageTSConfiguration['flowedFormat'] ?? false))
+            ->setFlowedFormat((bool)($this->pageTSConfiguration['flowed_format'] ?? false))
             ->setPid($this->storageFolder);
 
         return $mail;

@@ -48,7 +48,7 @@ class TcaUtility
                 if ($rows) {
                     foreach ($rows as $rowCat) {
                         if ($localizedRowCat = RepositoryUtility::getRecordOverlay($table, $rowCat, $sys_language_uid)) {
-                            $params['items'][$k][0] = $localizedRowCat['category'];
+                            $params['items'][$k][0] = $localizedRowCat['title'];
                         }
                     }
                 }
@@ -72,7 +72,7 @@ class TcaUtility
      * @param string $table
      * @return string The label
      */
-    public static function getTranslatedLabelOfTcaField(string $columnName, string $table = 'sys_dmail'): string
+    public static function getTranslatedLabelOfTcaField(string $columnName, string $table = 'tx_mail_domain_model_mail'): string
     {
         return stripslashes(LanguageUtility::getLanguageService()->sL(BackendUtility::getItemLabel($table, $columnName)));
     }

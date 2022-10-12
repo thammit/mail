@@ -52,9 +52,9 @@ class BounceMailUtility
             if (md5($mid) == $hash) {
                 $moreParts = explode('_', substr($mid, 3));
                 return [
-                    'mid' => $moreParts[0],
-                    'rtbl' => substr($moreParts[1], 0, 1),
-                    'rid' => substr($moreParts[1], 1)
+                    'mail' => $moreParts[0],
+                    'recipient_table' => substr($moreParts[1], 0, 1),
+                    'recipient_uid' => substr($moreParts[1], 1)
                 ];
             }
         }

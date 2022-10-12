@@ -144,7 +144,7 @@ class QueueControllerOld extends OldAbstractController
      */
     public function canDelete(int $uid): bool
     {
-        $mail = BackendUtility::getRecord('sys_dmail', $uid);
+        $mail = BackendUtility::getRecord('tx_mail_domain_model_mail', $uid);
 
         // show delete icon if newsletter hasn't been sent, or not yet finished sending
         return ($mail['scheduled_begin'] === 0 || $mail['scheduled_end'] === 0);

@@ -364,14 +364,14 @@ class MailControllerOld extends OldAbstractController
                         if ($mailData) {
                             if ($mailData['type'] === MailType::EXTERNAL) {
                                 // it's a quick/external mail
-                                if (str_starts_with($mailData['HTMLParams'], 'http') || str_starts_with($mailData['plainParams'], 'http')) {
+                                if (str_starts_with($mailData['html_params'], 'http') || str_starts_with($mailData['plain_params'], 'http')) {
                                     // it's an external mail -> fetch content again
-                                    $newMail = $mailFactory->fromExternalUrls($mailData['subject'], $mailData['HTMLParams'], $mailData['plainParams']);
+                                    $newMail = $mailFactory->fromExternalUrls($mailData['subject'], $mailData['html_params'], $mailData['plain_params']);
                                     if ($newMail instanceof Mail) {
                                         // copy new fetch content and charset to current mail record
                                         // todo use extbase
                                         $this->sysDmailRepository->update($mailData['uid'], [
-                                            'mailContent' => $newMail->getMailContent(),
+                                            'mail_content' => $newMail->getMailContent(),
                                             'renderedSize' => $newMail->getRenderedSize(),
                                             'charset' => $newMail->getCharset()
                                         ]);
@@ -387,7 +387,7 @@ class MailControllerOld extends OldAbstractController
                                     // copy new fetch content and charset to current mail record
                                     // todo use extbase
                                     $this->sysDmailRepository->update($mailData['uid'], [
-                                        'mailContent' => $newMail->getMailContent(),
+                                        'mail_content' => $newMail->getMailContent(),
                                         'renderedSize' => $newMail->getRenderedSize(),
                                     ]);
                                     // Read new record (necessary because TCEmain sets default field values)
@@ -570,7 +570,7 @@ class MailControllerOld extends OldAbstractController
         $groups = [
             'composition' => ['type', 'sys_language_uid', 'page', 'plainParams', 'HTMLParams', 'attachment', 'renderedsize'],
             'headers' => ['subject', 'from_email', 'from_name', 'replyto_email', 'replyto_name', 'return_path', 'organisation', 'priority', 'encoding'],
-            'sending' => ['sendOptions', 'includeMedia', 'flowedFormat', 'use_rdct', 'long_link_mode', 'authcode_fieldList'],
+            'sending' => ['sendOptions', 'includeMedia', 'flowedFormat', 'use_rdct', 'long_link_mode', 'auth_code_fields'],
         ];
 
         foreach ($groups as $groupName => $tcaColumns) {
@@ -591,7 +591,7 @@ class MailControllerOld extends OldAbstractController
                 } else {
                     $tableRows[$groupName][] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName),
-                        'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('sys_dmail', $columnName, ($mailData[$columnName] ?? false))),
+                        'value' => htmlspecialchars((string)BackendUtility::getProcessedValue('tx_mail_domain_model_mail', $columnName, ($mailData[$columnName] ?? false))),
                     ];
                 }
             }
@@ -600,8 +600,8 @@ class MailControllerOld extends OldAbstractController
         return [
             'title' => htmlspecialchars($mailData['subject'] ?? ''),
             'tableRows' => $tableRows,
-            'isSent' => isset($mailData['issent']) && $mailData['issent'],
-            'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'sys_dmail'),
+            'isSent' => isset($mailData['sent']) && $mailData['sent'],
+            'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tx_mail_domain_model_mail'),
         ];
     }
 
@@ -678,7 +678,7 @@ class MailControllerOld extends OldAbstractController
                 $colPosVal = $contentElementData['colPos'];
             }
 
-            $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $contentElementData, $this->sysLanguageUid);
+            $ttContentCategories = RepositoryUtility::getCategories('tt_content', $contentElementData, $this->sysLanguageUid);
             reset($ttContentCategories);
             $cboxes = [];
             foreach ($ttContentCategories as $pKey => $pVal) {
@@ -892,7 +892,7 @@ class MailControllerOld extends OldAbstractController
         */
         // Setting flags and update the record:
         if ($sentFlag && $this->action->equals(Action::WIZARD_STEP_FINAL)) {
-            $this->sysDmailRepository->update($this->mailUid, ['issent' => 1]);
+            $this->sysDmailRepository->update($this->mailUid, ['sent' => 1]);
         }
     }
 
@@ -917,7 +917,7 @@ class MailControllerOld extends OldAbstractController
 
             // todo: cast recipient groups to integer
             $updateFields = [
-                'recipientGroups' => implode(',', $this->mailGroupUids),
+                'recipient_groups' => implode(',', $this->mailGroupUids),
                 'scheduled' => $this->distributionTimeStamp,
                 'query_info' => serialize($queryInfo),
             ];
@@ -950,7 +950,7 @@ class MailControllerOld extends OldAbstractController
 
         // Setting flags and update the record:
         if ($sentFlag) {
-            $this->sysDmailRepository->update($this->mailUid, ['issent' => 1]);
+            $this->sysDmailRepository->update($this->mailUid, ['sent' => 1]);
         }
     }
 }

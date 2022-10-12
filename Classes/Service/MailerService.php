@@ -289,12 +289,12 @@ class MailerService implements LoggerAwareInterface
 
         $this->start();
         $this->setCharset($mailData['charset']);
-        $this->setIncludeMedia((bool)$mailData['includeMedia']);
+        $this->setIncludeMedia((bool)$mailData['include_media']);
 
 
         if ($fetchPlainTextContent) {
-            $plainTextUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plainParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
-                $mailData['plainParams']);
+            $plainTextUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plain_params']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
+                $mailData['plain_params']);
             $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $params);
             try {
                 $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
@@ -317,8 +317,8 @@ class MailerService implements LoggerAwareInterface
         }
 
         if ($fetchHtmlContent) {
-            $htmlUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['HTMLParams']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
-                $mailData['HTMLParams']);
+            $htmlUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['html_params']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
+                $mailData['html_params']);
             $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $params);
             try {
                 $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
@@ -385,11 +385,11 @@ class MailerService implements LoggerAwareInterface
         $mailContent = base64_encode(serialize($this->getMailParts()));
 
         $updateData = [
-            'issent' => 0,
+            'sent' => 0,
             'charset' => $this->getCharset(),
-            'mailContent' => $mailContent,
+            'mail_content' => $mailContent,
             'renderedSize' => strlen($mailContent),
-            'long_link_rdct_url' => $baseUrl,
+            'redirect_url' => $baseUrl,
         ];
 
         GeneralUtility::makeInstance(SysDmailRepository::class)->update((int)$mailData['uid'], $updateData);
@@ -413,20 +413,20 @@ class MailerService implements LoggerAwareInterface
         $this->subject = $this->charsetConverter->conv($mailData['subject'], $this->backendCharset, $this->charset);
         $this->fromName = ($mailData['from_name'] ? $this->charsetConverter->conv($mailData['from_name'], $this->backendCharset, $this->charset) : '');
         $this->fromEmail = $mailData['from_email'];
-        $this->replyToName = ($mailData['replyto_name'] ? $this->charsetConverter->conv($mailData['replyto_name'], $this->backendCharset, $this->charset) : '');
-        $this->replyToEmail = ($mailData['replyto_email'] ?: '');
+        $this->replyToName = ($mailData['reply_to_name'] ? $this->charsetConverter->conv($mailData['reply_to_name'], $this->backendCharset, $this->charset) : '');
+        $this->replyToEmail = ($mailData['reply_to_email'] ?: '');
         $this->returnPath = (string)($mailData['return_path'] ?? '');
         $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset, $this->charset) : '');
         $this->priority = MathUtility::forceIntegerInRange((int)$mailData['priority'], 1, 5);
-        $this->mailParts = unserialize(base64_decode($mailData['mailContent']));
+        $this->mailParts = unserialize(base64_decode($mailData['mail_content']));
         $this->isHtml = (bool)($this->getHtmlContent() ?? false);
         $this->isPlain = (bool)($this->getPlainContent() ?? false);
-        $this->flowedFormat = (bool)($mailData['flowedFormat'] ?? false);
-        $this->includeMedia = (bool)$mailData['includeMedia'];
-        $this->authCodeFieldList = ($mailData['authcode_fieldList'] ?: 'uid');
-        $this->redirect = (bool)($mailData['use_rdct'] ?? false);
-        $this->redirectAll = (bool)($mailData['long_link_mode'] ?? false);
-        $this->redirectUrl = (string)($mailData['long_link_rdct_url'] ?? '');
+        $this->flowedFormat = (bool)($mailData['flowed_format'] ?? false);
+        $this->includeMedia = (bool)$mailData['include_media'];
+        $this->authCodeFieldList = ($mailData['auth_code_fields'] ?: 'uid');
+        $this->redirect = (bool)($mailData['redirect'] ?? false);
+        $this->redirectAll = (bool)($mailData['redirect_all'] ?? false);
+        $this->redirectUrl = (string)($mailData['redirect_url'] ?? '');
         $this->attachment = (int)($mailData['attachment'] ?? 0);
 
         $this->htmlBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->getHtmlContent());

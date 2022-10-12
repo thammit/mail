@@ -9,7 +9,7 @@ use PDO;
 
 class SysDmailCategoryRepository extends AbstractRepository
 {
-    protected string $table = 'sys_dmail_category';
+    protected string $table = 'sys_category';
 
     /**
      * @param int $pid

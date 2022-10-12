@@ -439,7 +439,7 @@ class MailerUtility
      */
     public static function getAttachments(int $uid): array
     {
-        return GeneralUtility::makeInstance(FileRepository::class)->findByRelation('sys_dmail', 'attachment', $uid);
+        return GeneralUtility::makeInstance(FileRepository::class)->findByRelation('tx_mail_domain_model_mail', 'attachment', $uid);
     }
 
     /**

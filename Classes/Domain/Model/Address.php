@@ -5,7 +5,6 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use MEDIAESSENZ\Mail\Enumeration\Gender;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
-use TYPO3\CMS\Extbase\Domain\Model\Category;
 
 class Address extends \FriendsOfTYPO3\TtAddress\Domain\Model\Address implements RecipientInterface
 {

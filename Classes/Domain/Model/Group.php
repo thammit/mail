@@ -8,23 +8,76 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Group extends AbstractEntity
 {
+    /**
+     * @var int
+     */
     protected int $type;
+
+    /**
+     * @var string
+     */
     protected string $title;
+
+    /**
+     * @var string
+     */
     protected string $description;
+
+    /**
+     * @var string
+     */
     protected string $query;
+
+    /**
+     * @var int
+     */
     protected int $staticList;
+
+    /**
+     * @var string
+     */
     protected string $list;
+
+    /**
+     * @var bool
+     */
     protected bool $csv = false;
+
+    /**
+     * @var string
+     */
     protected string $pages;
+
+    /**
+     * @var int
+     */
     protected int $recordTypes;
+
+    /**
+     * @var bool
+     */
     protected bool $recursive = false;
+
+    /**
+     * @var ObjectStorage<Group>
+     */
     protected ObjectStorage $children;
+
+    /**
+     * @var ObjectStorage<Category>
+     */
     protected ObjectStorage $categories;
 
     public function __construct()
     {
         $this->children = new ObjectStorage();
         $this->categories = new ObjectStorage();
+    }
+
+    public function initializeObject(): void
+    {
+        $this->children = $this->children ?? new ObjectStorage();
+        $this->categories = $this->categories ?? new ObjectStorage();
     }
 
     /**
@@ -216,7 +269,7 @@ class Group extends AbstractEntity
     }
 
     /**
-     * @param ObjectStorage $children
+     * @param ObjectStorage<Group> $children
      * @return Group
      */
     public function setChildren(ObjectStorage $children): Group
@@ -234,7 +287,7 @@ class Group extends AbstractEntity
     }
 
     /**
-     * @param ObjectStorage $categories
+     * @param ObjectStorage<Category> $categories
      * @return Group
      */
     public function setCategories(ObjectStorage $categories): Group

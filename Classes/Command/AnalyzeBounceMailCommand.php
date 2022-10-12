@@ -178,20 +178,20 @@ class AnalyzeBounceMailCommand extends Command
         // Extract text content
         $cp = BounceMailUtility::analyseReturnError($message->getMessageBody());
 
-        $row = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectForAnalyzeBounceMail($midArray['rid'], $midArray['rtbl'], $midArray['mid']);
+        $row = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectForAnalyzeBounceMail($midArray['recipient_uid'], $midArray['recipient_table'], $midArray['mail']);
 
         // only write to log table, if we found a corresponding recipient record
         if (!empty($row)) {
-            $tableMaillog = 'sys_dmail_maillog';
+            $tableMaillog = 'tx_mail_domain_model_log';
             /** @var Connection $connection */
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableMaillog);
             try {
                 $insertFields = [
                     'tstamp' => $this->context->getPropertyFromAspect('date', 'timestamp'),
                     'response_type' => -127,
-                    'mid' => (int)$midArray['mid'],
-                    'rid' => (int)$midArray['rid'],
-                    'rtbl' => $midArray['rtbl'],
+                    'mail' => (int)$midArray['mail'],
+                    'recipient_uid' => (int)$midArray['recipient_uid'],
+                    'recipient_table' => $midArray['recipient_table'],
                     'email' => $row['email'],
                     'return_content' => serialize($cp),
                     'return_code' => (int)$cp['reason'],

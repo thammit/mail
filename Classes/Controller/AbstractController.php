@@ -62,7 +62,7 @@ abstract class AbstractController extends ActionController
         $this->pageInfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
 
         // get the config from pageTS
-        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
+        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['mail.'] ?? [];
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
         $this->pageTSConfiguration['pid'] = $this->id;
 

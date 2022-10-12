@@ -375,7 +375,7 @@ class StatisticsControllerOld extends OldAbstractController
         $textHtml = [];
         foreach ($res as $row2) {
             // 0:No mail; 1:HTML; 2:TEXT; 3:HTML+TEXT
-            $textHtml[$row2['html_sent']] = $row2['counter'];
+            $textHtml[$row2['format_sent']] = $row2['counter'];
         }
 
         // Unique responses, html
@@ -483,7 +483,7 @@ class StatisticsControllerOld extends OldAbstractController
         $plainUrlsTable = $this->changekeyname($plainUrlsTable, 'counter', 'COUNT(*)');
 
         // Find urls:
-        $unpackedMail = unserialize(base64_decode($row['mailContent']));
+        $unpackedMail = unserialize(base64_decode($row['mail_content']));
         // this array will include a unique list of all URLs that are used in the mailing
         $urlArr = [];
 
@@ -576,7 +576,7 @@ class StatisticsControllerOld extends OldAbstractController
         reset($urlCounter['total']);
 
         // HTML mails
-        if (intval($row['sendOptions']) & 0x2) {
+        if (intval($row['send_options']) & 0x2) {
             $htmlContent = $unpackedMail['html']['content'];
 
             $htmlLinks = [];
@@ -1253,18 +1253,18 @@ class StatisticsControllerOld extends OldAbstractController
 
         if (is_array($rrows)) {
             foreach ($rrows as $rrow) {
-                switch ($rrow['rtbl']) {
+                switch ($rrow['recipient_table']) {
                     case 't':
-                        $idLists['tt_address'][] = $rrow['rid'];
+                        $idLists['tt_address'][] = $rrow['recipient_uid'];
                         break;
                     case 'f':
-                        $idLists['fe_users'][] = $rrow['rid'];
+                        $idLists['fe_users'][] = $rrow['recipient_uid'];
                         break;
                     case 'P':
                         $idLists['PLAINLIST'][] = $rrow['email'];
                         break;
                     default:
-                        $idLists[$rrow['rtbl']][] = $rrow['rid'];
+                        $idLists[$rrow['recipient_table']][] = $rrow['recipient_uid'];
                 }
             }
         }
@@ -1325,33 +1325,33 @@ class StatisticsControllerOld extends OldAbstractController
         $dmailInfo = '';
         // Render record:
         if ($row['type']) {
-            $dmailData = $row['plainParams'] . ', ' . $row['HTMLParams'];
+            $dmailData = $row['plain_params'] . ', ' . $row['html_params'];
         } else {
             $page = BackendUtility::getRecord('pages', $row['page'], 'title');
             $dmailData = $row['page'] . ', ' . htmlspecialchars($page['title']);
-            $dmailInfo = TcaUtility::getTranslatedLabelOfTcaField('plainParams') . ' ' . htmlspecialchars($row['plainParams'] . LF . TcaUtility::getTranslatedLabelOfTcaField('HTMLParams') . $row['HTMLParams']) . '; ' . LF;
+            $dmailInfo = TcaUtility::getTranslatedLabelOfTcaField('plain_params') . ' ' . htmlspecialchars($row['plain_params'] . LF . TcaUtility::getTranslatedLabelOfTcaField('html_params') . $row['html_params']) . '; ' . LF;
         }
 
         $res = $this->sysDmailMaillogRepository->selectSysDmailMaillogsCompactView($row['uid']);
 
         $data = [
-            'icon' => $this->iconFactory->getIconForRecord('sys_dmail', $row, Icon::SIZE_SMALL)->render(),
+            'icon' => $this->iconFactory->getIconForRecord('tx_mail_domain_model_mail', $row, Icon::SIZE_SMALL)->render(),
             'iconInfo' => $this->iconFactory->getIcon('actions-document-info', Icon::SIZE_SMALL)->render(),
             'subject' => htmlspecialchars($row['subject']),
             'from_name' => htmlspecialchars($row['from_name']),
             'from_email' => htmlspecialchars($row['from_email']),
-            'replyto_name' => htmlspecialchars($row['replyto_name']),
-            'replyto_email' => htmlspecialchars($row['replyto_email']),
-            'type' => BackendUtility::getProcessedValue('sys_dmail', 'type', $row['type']),
+            'replyto_name' => htmlspecialchars($row['reply_to_name']),
+            'replyto_email' => htmlspecialchars($row['reply_to_email']),
+            'type' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'type', $row['type']),
             'dmailData' => $dmailData,
             'dmailInfo' => $dmailInfo,
-            'priority' => BackendUtility::getProcessedValue('sys_dmail', 'priority', $row['priority']),
-            'encoding' => BackendUtility::getProcessedValue('sys_dmail', 'encoding', $row['encoding']),
-            'charset' => BackendUtility::getProcessedValue('sys_dmail', 'charset', $row['charset']),
-            'sendOptions' => BackendUtility::getProcessedValue('sys_dmail', 'sendOptions', $row['sendOptions']) . ($row['attachment'] ? '; ' : ''),
-            'attachment' => BackendUtility::getProcessedValue('sys_dmail', 'attachment', $row['attachment']),
-            'flowedFormat' => BackendUtility::getProcessedValue('sys_dmail', 'flowedFormat', $row['flowedFormat']),
-            'includeMedia' => BackendUtility::getProcessedValue('sys_dmail', 'includeMedia', $row['includeMedia']),
+            'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $row['priority']),
+            'encoding' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'encoding', $row['encoding']),
+            'charset' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'charset', $row['charset']),
+            'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'sendOptions', $row['sendOptions']) . ($row['attachment'] ? '; ' : ''),
+            'attachment' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'attachment', $row['attachment']),
+            'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowedFormat', $row['flowedFormat']),
+            'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'includeMedia', $row['include_media']),
             'delBegin' => $row['scheduled_begin'] ? BackendUtility::datetime($row['scheduled_begin']) : '-',
             'delEnd' => $row['scheduled_end'] ? BackendUtility::datetime($row['scheduled_end']) : '-',
             'totalRecip' => $this->countTotalRecipientFromQueryInfo($row['query_info']),
@@ -1416,7 +1416,7 @@ class StatisticsControllerOld extends OldAbstractController
         $connection = $this->getConnection('cache_sys_dmail_stat');
         $connection->delete(
             'cache_sys_dmail_stat', // from
-            ['mid' => intval($mrow['uid'])] // where
+            ['mail' => intval($mrow['uid'])] // where
         );
 
         $rows = $this->sysDmailMaillogRepository->selectStatTempTableContent($mrow['uid']);
@@ -1426,13 +1426,13 @@ class StatisticsControllerOld extends OldAbstractController
 
         if (is_array($rows)) {
             foreach ($rows as $row) {
-                $thisRecPointer = $row['rtbl'] . $row['rid'];
+                $thisRecPointer = $row['recipient_table'] . $row['recipient_uid'];
 
                 if ($thisRecPointer != $currentRec) {
                     $recRec = [
-                        'mid' => intval($mrow['uid']),
-                        'rid' => $row['rid'],
-                        'rtbl' => $row['rtbl'],
+                        'mail' => intval($mrow['uid']),
+                        'recipient_uid' => $row['recipient_uid'],
+                        'recipient_table' => $row['recipient_table'],
                         'pings' => [],
                         'plain_links' => [],
                         'html_links' => [],
@@ -1447,8 +1447,8 @@ class StatisticsControllerOld extends OldAbstractController
                         $recRec['response'][] = $row['tstamp'];
                         break;
                     case '0':
-                        $recRec['recieved_html'] = $row['html_sent'] & 1;
-                        $recRec['recieved_plain'] = $row['html_sent'] & 2;
+                        $recRec['recieved_html'] = $row['forma_sent'] & 1;
+                        $recRec['recieved_plain'] = $row['format_sent'] & 2;
                         $recRec['size'] = $row['size'];
                         $recRec['tstamp'] = $row['tstamp'];
                         break;

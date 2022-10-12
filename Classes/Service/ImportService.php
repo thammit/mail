@@ -3,21 +3,10 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Service;
 
-/*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
- */
-
 use Doctrine\DBAL\DBALException;
 use Exception;
+use MEDIAESSENZ\Mail\Domain\Model\Category;
+use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailCategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailTtAddressCategoryMmRepository;
@@ -27,13 +16,11 @@ use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
@@ -43,14 +30,6 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\File\ExtendedFileUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-/**
- * Recipient list module for tx_directmail extension
- *
- * @author        Ivan-Dharma Kartolo    <ivan.kartolo@dkd.de>
- *
- * @package    TYPO3
- * @subpackage    tx_directmail
- */
 class ImportService
 {
     /**
@@ -104,7 +83,7 @@ class ImportService
                 'target' => '',
                 'target_disabled' => '',
                 'newFile' => '',
-                'newFileUid' => 0
+                'newFileUid' => 0,
             ],
             'conf' => [
                 'show' => false,
@@ -119,7 +98,7 @@ class ImportService
                 'record_unique' => '',
                 'newFile' => '',
                 'newFileUid' => 0,
-                'disableInput' => false
+                'disableInput' => false,
             ],
             'mapping' => [
                 'show' => false,
@@ -142,7 +121,7 @@ class ImportService
                 'add_cat' => false,
                 'error' => [],
                 'table' => [],
-                'fields' => []
+                'fields' => [],
             ],
             'startImport' => [
                 'show' => false,
@@ -163,8 +142,8 @@ class ImportService
                 'hiddenMap' => [],
                 'hiddenCat' => [],
                 'add_cat' => false,
-                'tables' => []
-            ]
+                'tables' => [],
+            ],
         ];
 
         $beUser = BackendUserUtility::getBackendUser();
@@ -174,7 +153,7 @@ class ImportService
             'first_fieldname' => false,
             'valid_email' => false,
             'remove_dublette' => false,
-            'update_unique' => false
+            'update_unique' => false,
         ];
 
         if ($importerConfig = GeneralUtility::_GP('CSV_IMPORT')) {
@@ -271,7 +250,7 @@ class ImportService
                         if (BackendUtility::readPageAccess($subfolder['uid'], $pagePermsClause1)) {
                             $optStorage[] = [
                                 'val' => $subfolder['uid'],
-                                'text' => $subfolder['title'] . ' [uid:' . $subfolder['uid'] . ']'
+                                'text' => $subfolder['title'] . ' [uid:' . $subfolder['uid'] . ']',
                             ];
                         }
                     }
@@ -281,7 +260,7 @@ class ImportService
                     ['val' => 'comma', 'text' => LanguageUtility::getLL('mailgroup_import_separator_comma')],
                     ['val' => 'semicolon', 'text' => LanguageUtility::getLL('mailgroup_import_separator_semicolon')],
                     ['val' => 'colon', 'text' => LanguageUtility::getLL('mailgroup_import_separator_colon')],
-                    ['val' => 'tab', 'text' => LanguageUtility::getLL('mailgroup_import_separator_tab')]
+                    ['val' => 'tab', 'text' => LanguageUtility::getLL('mailgroup_import_separator_tab')],
                 ];
 
                 $optEncap = [
@@ -292,7 +271,7 @@ class ImportService
                 // TODO: make it variable?
                 $optUnique = [
                     ['val' => 'email', 'text' => 'email'],
-                    ['val' => 'name', 'text' => 'name']
+                    ['val' => 'name', 'text' => 'name'],
                 ];
 
                 $output['conf']['disableInput'] = (bool)($this->params['inputDisable'] ?? false);
@@ -390,14 +369,14 @@ class ImportService
                 foreach ($ttAddressFields as $map) {
                     $mapFields[] = [
                         $map,
-                        str_replace(':', '', LanguageUtility::getLanguageService()->sL($GLOBALS['TCA']['tt_address']['columns'][$map]['label']))
+                        str_replace(':', '', LanguageUtility::getLanguageService()->sL($GLOBALS['TCA']['tt_address']['columns'][$map]['label'])),
                     ];
                 }
                 // add 'no value'
                 array_unshift($mapFields, ['noMap', LanguageUtility::getLL('mailgroup_import_mapping_mapTo')]);
                 $mapFields[] = [
                     'cats',
-                    LanguageUtility::getLL('mailgroup_import_mapping_categories')
+                    LanguageUtility::getLL('mailgroup_import_mapping_categories'),
                 ];
                 reset($csv_firstRow);
                 reset($csvData);
@@ -413,26 +392,29 @@ class ImportService
                         'mapping_description' => $csv_firstRow[$i],
                         'mapping_i' => $i,
                         'mapping_mappingSelected' => $this->indata['map'][$i] ?? '',
-                        'mapping_value' => $exampleLines
+                        'mapping_value' => $exampleLines,
                     ];
                 }
 
                 // get categories
-                $temp['value'] = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['sys_dmail_group.']['select_categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
+                $temp['value'] = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
                 if (is_numeric($temp['value'])) {
-                    $rowCat = GeneralUtility::makeInstance(SysDmailCategoryRepository::class)->selectSysDmailCategoryByPid((int)$temp['value']);
-                    if (!empty($rowCat)) {
+                    $categoryRepository = GeneralUtility::makeInstance(CategoryRepository::class);
+                    $sysCategories = $categoryRepository->findByPid((int)$temp['value'])->toArray();
+//                    $rowCat = GeneralUtility::makeInstance(SysDmailCategoryRepository::class)->selectSysDmailCategoryByPid((int)$temp['value']);
+                    if (count($sysCategories) > 0) {
                         // additional options
                         if ($output['mapping']['update_unique']) {
                             $output['mapping']['show_add_cat'] = true;
                             $output['mapping']['add_cat'] = $this->indata['add_cat'] ? true : false;
                         }
-                        foreach ($rowCat as $k => $v) {
+                        /** @var Category $sysCategory */
+                        foreach ($sysCategories as $key => $sysCategory) {
                             $output['mapping']['mapping_cats'][] = [
-                                'cat' => htmlspecialchars($v['category']),
-                                'k' => $k,
-                                'vUid' => $v['uid'],
-                                'checked' => $this->indata['cat'][$k] != $v['uid'] ? false : true
+                                'cat' => $sysCategory->getTitle(),
+                                'k' => $key,
+                                'vUid' => $sysCategory->getUid(),
+                                'checked' => !($this->indata['cat'][$key] != $sysCategory->getUid()),
                             ];
                         }
                     }
@@ -484,14 +466,14 @@ class ImportService
                             $mapKeys = array_keys($v);
                             $rowsTable[] = [
                                 'val' => $v[$mapKeys[0]],
-                                'email' => $v['email']
+                                'email' => $v['email'],
                             ];
                         }
                     }
 
                     $output['startImport']['tables'][] = [
                         'header' => LanguageUtility::getLL('mailgroup_import_report_' . $order),
-                        'rows' => $rowsTable
+                        'rows' => $rowsTable,
                     ];
                 }
 
@@ -520,7 +502,7 @@ class ImportService
                         $output['upload']['fileInfo'] = [
                             'name' => $file->getName(),
                             'extension' => $file->getProperty('extension'),
-                            'size' => GeneralUtility::formatSize($file->getProperty('size'))
+                            'size' => GeneralUtility::formatSize($file->getProperty('size')),
                         ];
                     }
                 }
@@ -946,7 +928,7 @@ class ImportService
         if ($newfile['newFile']) {
             $csvFile = [
                 'data' => $csv,
-                'target' => $newfile['newFile']
+                'target' => $newfile['newFile'],
             ];
             $write = $extendedFileUtility->func_edit($csvFile);
         }
@@ -985,7 +967,7 @@ class ImportService
                 $storageConfig = $tempFile[0]->getStorage()->getConfiguration();
                 $newfile = [
                     'newFile' => rtrim($storageConfig['basePath'], '/') . '/' . ltrim($tempFile[0]->getIdentifier(), '/'),
-                    'newFileUid' => $tempFile[0]->getUid()
+                    'newFileUid' => $tempFile[0]->getUid(),
                 ];
             }
         }

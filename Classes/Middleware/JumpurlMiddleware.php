@@ -72,8 +72,8 @@ class JumpurlMiddleware implements MiddlewareInterface
         $queryParamsToPass = $request->getQueryParams();
 
         if ($this->shouldProcess()) {
-            $mailId = $this->request->getQueryParams()['mid'];
-            $submittedRecipient = $this->request->getQueryParams()['rid'];
+            $mailId = $this->request->getQueryParams()['mail'];
+            $submittedRecipient = $this->request->getQueryParams()['recipient_uid'];
             $submittedAuthCode = $this->request->getQueryParams()['aC'];
             $jumpurl = $this->request->getQueryParams()['jumpurl'];
 
@@ -110,18 +110,18 @@ class JumpurlMiddleware implements MiddlewareInterface
 
             if ($this->responseType !== 0) {
                 $mailLogParams = [
-                    'mid' => (int)$mailId,
+                    'mail' => (int)$mailId,
                     'tstamp' => time(),
                     'url' => $jumpurl,
                     'response_type' => $this->responseType,
                     'url_id' => (int)$urlId,
-                    'rtbl' => mb_substr($this->recipientTable, 0, 1),
-                    'rid' => (int)($recipientUid ?? $this->recipientRecord['uid']),
+                    'recipient_table' => mb_substr($this->recipientTable, 0, 1),
+                    'recipient_uid' => (int)($recipientUid ?? $this->recipientRecord['uid']),
                 ];
                 if ($this->hasRecentLog($mailLogParams) === false) {
                     GeneralUtility::makeInstance(ConnectionPool::class)
-                        ->getConnectionForTable('sys_dmail_maillog')
-                        ->insert('sys_dmail_maillog', $mailLogParams);
+                        ->getConnectionForTable('tx_mail_domain_model_log')
+                        ->insert('tx_mail_domain_model_log', $mailLogParams);
                 }
             }
         }
@@ -145,19 +145,19 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function hasRecentLog(array $mailLogParameters): bool
     {
-        $logTable = 'sys_dmail_maillog';
+        $logTable = 'tx_mail_domain_model_log';
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($logTable);
         $query = $queryBuilder
             ->count('*')
             ->from($logTable)
             ->where(
-                $queryBuilder->expr()->eq('mid', $queryBuilder->createNamedParameter($mailLogParameters['mid'], PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailLogParameters['mail'], PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('url', $queryBuilder->createNamedParameter($mailLogParameters['url'])),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($mailLogParameters['response_type'], PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('url_id', $queryBuilder->createNamedParameter($mailLogParameters['url_id'], PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('rtbl', $queryBuilder->createNamedParameter($mailLogParameters['rtbl'])),
-                $queryBuilder->expr()->eq('rid', $queryBuilder->createNamedParameter($mailLogParameters['rid'], PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($mailLogParameters['recipient_table'])),
+                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($mailLogParameters['recipient_uid'], PDO::PARAM_INT)),
                 $queryBuilder->expr()->lte('tstamp', $queryBuilder->createNamedParameter($mailLogParameters['tstamp'], PDO::PARAM_INT)),
                 $queryBuilder->expr()->gte('tstamp', $queryBuilder->createNamedParameter($mailLogParameters['tstamp'] - 10, PDO::PARAM_INT))
             );
@@ -208,7 +208,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function shouldProcess(): bool
     {
-        $mid = $this->request->getQueryParams()['mid'] ?? null;
+        $mid = $this->request->getQueryParams()['mail'] ?? null;
         return ($mid !== null);
     }
 
@@ -222,10 +222,10 @@ class JumpurlMiddleware implements MiddlewareInterface
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable('sys_dmail');
+            ->getQueryBuilderForTable('tx_mail_domain_model_mail');
         $result = $queryBuilder
-            ->select('mailContent', 'page', 'authcode_fieldList')
-            ->from('sys_dmail')
+            ->select('mail_content', 'page', 'auth_code_fields')
+            ->from('tx_mail_domain_model_mail')
             ->where(
                 $queryBuilder->expr()->eq(
                     'uid',
@@ -250,7 +250,7 @@ class JumpurlMiddleware implements MiddlewareInterface
 
         if (!empty($this->directMailRecord)) {
             $mailContent = unserialize(
-                base64_decode($this->directMailRecord['mailContent']),
+                base64_decode($this->directMailRecord['mail_content']),
                 ['allowed_classes' => false]
             );
             if ($targetIndex >= 0) {
@@ -304,7 +304,7 @@ class JumpurlMiddleware implements MiddlewareInterface
     {
         $authCodeToMatch = RecipientUtility::stdAuthCode(
             $this->recipientRecord,
-            ($this->directMailRecord['authcode_fieldList'] ?: 'uid')
+            ($this->directMailRecord['auth_code_fields'] ?: 'uid')
         );
 
         if (!empty($submittedAuthCode) && $submittedAuthCode !== $authCodeToMatch) {
@@ -369,7 +369,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function substituteSystemMarkersFromTargetUrl(string $targetUrl): string
     {
-        $mailId = $this->request->getQueryParams()['mid'];
+        $mailId = $this->request->getQueryParams()['mail'];
         $submittedAuthCode = $this->request->getQueryParams()['aC'];
 
         // substitute system markers
@@ -393,7 +393,7 @@ class JumpurlMiddleware implements MiddlewareInterface
         // TODO: add a switch in Direct Mail configuration to decide if this option should be enabled by default
         if ($this->recipientTable === 'fe_users' &&
             GeneralUtility::inList(
-                $this->directMailRecord['authcode_fieldList'],
+                $this->directMailRecord['auth_code_fields'],
                 'password'
             )) {
             $_POST['user'] = $this->recipientRecord['username'];

@@ -36,12 +36,12 @@
                                         <f:if condition="{row.bodytext}"><br>{row.bodytext}</f:if>
                                     </td>
                                     <td class="col-control nowrap">
-                                        <f:if condition="{row.checkboxes -> f:count()}">
-                                            <f:for each="{row.checkboxes}" as="checkbox">
-                                                <f:form.hidden name="categories[{row.uid}][{checkbox.pKey}]" value="0" />
+                                        <f:if condition="{row.categories -> f:count()}">
+                                            <f:for each="{row.categories}" as="category">
+                                                <f:form.hidden name="categories[{row.uid}][{category.uid}]" value="0" />
                                                 <div class="form-check form-check-inline">
-                                                    <f:form.checkbox class="form-check-input" value="1" id="categories_{row.uid}_{checkbox.pKey}" name="categories[{row.uid}][{checkbox.pKey}]" checked="{checkbox.checked}" />
-                                                    <label class="form-check-label" for="categories_{row.uid}_{checkbox.pKey}">{checkbox.pVal}</label>
+                                                    <f:form.checkbox class="form-check-input" value="1" id="categories_{row.uid}_{category.uid}" name="categories[{row.uid}][{category.uid}]" checked="{category.checked}" />
+                                                    <label class="form-check-label" for="categories_{row.uid}_{category.uid}">{category.title}</label>
                                                 </div>
                                             </f:for>
                                         </f:if>
