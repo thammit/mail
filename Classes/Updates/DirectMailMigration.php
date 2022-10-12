@@ -38,6 +38,13 @@ class DirectMailMigration implements UpgradeWizardInterface
      */
     public function executeUpdate(): bool
     {
+        // todo copy fe_users.module_sys_dmail_newsletter -> newsletter
+        // todo copy fe_users.module_sys_dmail_html -> accepts_html
+        // todo copy fe_users.module_sys_dmail_category -> categories (or reference index update ?)
+        // todo copy tt_address.module_sys_dmail_html -> accepts_html
+        // todo copy tt_address.module_sys_dmail_category -> categories (or reference index update ?)
+
+
         // sys_dmail -> tx_mail_domain_model_mail
         $connectionMail = $this->getConnectionPool()->getConnectionForTable('tx_mail_domain_model_mail');
         foreach ($this->getSysDmailRecordsToMigrate() as $record) {
