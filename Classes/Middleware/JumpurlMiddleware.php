@@ -355,7 +355,7 @@ class JumpurlMiddleware implements MiddlewareInterface
         foreach ($rowFieldsArray as $substField) {
             $processedTargetUrl = str_replace(
                 '###USER_' . $substField . '###',
-                $this->recipientRecord[$substField],
+                $this->recipientRecord[$substField] ?? '',
                 $processedTargetUrl
             );
         }
