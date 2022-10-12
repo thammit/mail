@@ -5,6 +5,9 @@ namespace MEDIAESSENZ\Mail\Updates;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -137,10 +140,106 @@ class DirectMailMigration implements UpgradeWizardInterface
         }
 
         // sys_dmail_category -> sys_category
-        // todo
+        $connectionCategory = $this->getConnectionPool()->getConnectionForTable('sys_category');
+        try {
+            $directMailCategorySysCategoryMappings = $this->getRelations((string)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('mail',
+                'directMailCategorySysCategoryMapping'));
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
+            $directMailCategorySysCategoryMappings = [];
+        }
+
+        foreach ($this->getSysDmailCategoryRecordsToMigrate() as $record) {
+            $sysCategoryUid = $directMailCategorySysCategoryMappings[$record['uid']] ?? 0;
+            $sysCategoryExists = $connectionCategory->count('*', 'sys_category', ['uid' => $sysCategoryUid]);
+            if ($sysCategoryExists === 0) {
+                // Add sys_category
+                $connectionCategory->insert('sys_category', [
+                    'uid' => $sysCategoryUid,
+                    'pid' => $record['pid'],
+                    'cruser_id' => $record['cruser_id'],
+                    'tstamp' => time(),
+                    'crdate' => time(),
+                    'title' => $record['category'],
+                    'deleted' => $record['deleted'],
+                    'hidden' => $record['hidden'],
+                    'sorting' => $record['sorting'],
+                    'sys_language_uid' => $record['sys_language_uid'],
+                    'l10n_parent' => $record['l18n_parent'],
+                ]);
+                if ($sysCategoryUid === 0) {
+                    $directMailCategorySysCategoryMappings[$record['uid']] = $connectionCategory->lastInsertId();
+                }
+            }
+        }
+
+        $mmTables = [
+            'sys_dmail_feuser_category_mm' => [
+                'tablenames' => 'fe_users',
+                'fieldname' => 'categories',
+            ],
+            'sys_dmail_group_category_mm' => [
+                'tablenames' => 'tx_mail_domain_model_group',
+                'fieldname' => 'categories',
+            ],
+            'sys_dmail_ttaddress_category_mm' => [
+                'tablenames' => 'tt_address',
+                'fieldname' => 'categories',
+            ],
+            'sys_dmail_ttcontent_category_mm' => [
+                'tablenames' => 'tt_content',
+                'fieldname' => 'categories',
+            ]
+        ];
+
+        $connectionSysCategoryRecordMm = $this->getConnectionPool()->getConnectionForTable('sys_category_record_mm');
+        foreach ($mmTables as $table => $config) {
+            $mmRecords = $this->getPreparedQueryBuilder($table)->select('*')->executeQuery()->fetchAllAssociative();
+            foreach ($mmRecords as $record) {
+                $sysCategoryUid = $directMailCategorySysCategoryMappings[$record['uid_foreign']];
+                $connectionSysCategoryRecordMm->insert('sys_category_record_mm',
+                    [
+                        'uid_local' => $record['uid_local'],
+                        'uid_foreign' => $sysCategoryUid,
+                        'tablenames' => $config['tablenames'],
+                        'sorting' => $record['sorting'],
+                        'sorting_foreign' => $record['sorting_foreign'],
+                        'fieldname' => $config['fieldname'],
+                    ]);
+            }
+        }
+
+        // sys_dmail_group_mm -> tx_mail_group_mm
+        $connectionMailGroupMm = $this->getConnectionPool()->getConnectionForTable('tx_mail_group_mm');
+        $sysDmailGroupMmRecords = $this->getPreparedQueryBuilder('sys_dmail_group_mm')->select('*')->executeQuery()->fetchAllAssociative();
+        foreach ($sysDmailGroupMmRecords as $record) {
+            $connectionMailGroupMm->insert('tx_mail_group_mm', [
+                'uid_local' => $record['uid_local'],
+                'uid_foreign' => $record['uid_foreign'],
+                'tablenames' => $record['tablenames'],
+                'sorting' => $record['sorting'],
+                'sorting_foreign' => $record['sorting_foreign'],
+            ]);
+        }
 
         return true;
     }
+
+    /**
+     * @param string $relationsCsv
+     * @return array
+     */
+    public function getRelations(string $relationsCsv): array
+    {
+        $relations = [];
+        $relationsArray = GeneralUtility::trimExplode(',', $relationsCsv, true);
+        foreach ($relationsArray as $relationPair) {
+            $relationPairArray = GeneralUtility::intExplode(':', $relationPair, true);
+            $relations[$relationPairArray[0]] = $relationPairArray[1];
+        }
+
+        return $relations;
+    }
+
 
     /**
      * @throws DBALException
@@ -148,7 +247,7 @@ class DirectMailMigration implements UpgradeWizardInterface
      */
     public function updateNecessary(): bool
     {
-        return $this->hasSysDmailRecordsToMigrate() || $this->hasSysDmailGroupRecordsToMigrate() || $this->hasSysDmailLogRecordsToMigrate();
+        return $this->hasSysDmailRecordsToMigrate() || $this->hasSysDmailGroupRecordsToMigrate() || $this->hasSysDmailLogRecordsToMigrate() || $this->hasSysDmailCategoryRecordsToMigrate();
     }
 
     public function getPrerequisites(): array
@@ -198,6 +297,19 @@ class DirectMailMigration implements UpgradeWizardInterface
     }
 
     /**
+     * @throws Exception
+     * @throws DBALException
+     */
+    protected function hasSysDmailCategoryRecordsToMigrate(): bool
+    {
+        $queryBuilder = $this->getPreparedQueryBuilder('sys_dmail_category');
+        return (bool)$queryBuilder
+            ->count('uid')
+            ->executeQuery()
+            ->fetchOne();
+    }
+
+    /**
      * @throws DBALException
      * @throws Exception
      */
@@ -222,6 +334,15 @@ class DirectMailMigration implements UpgradeWizardInterface
     protected function getSysDmailLogRecordsToMigrate(): array
     {
         return $this->getPreparedQueryBuilder('sys_dmail_maillog')->select('*')->executeQuery()->fetchAllAssociative();
+    }
+
+    /**
+     * @throws DBALException
+     * @throws Exception
+     */
+    protected function getSysDmailCategoryRecordsToMigrate(): array
+    {
+        return $this->getPreparedQueryBuilder('sys_dmail_category')->select('*')->executeQuery()->fetchAllAssociative();
     }
 
     protected function getPreparedQueryBuilder(string $table): QueryBuilder

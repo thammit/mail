@@ -15,3 +15,6 @@ UseImplicitPortToFetch = 0
 
 # cat=basic/enable; type=boolean; label=Use direct mail tables
 useDirectMailTables = 0
+
+# cat=basic; type=string; label=Direct Mail category -> sys_category mapping e.g. 1:2,2:3,3:4 maps Direct mail category 1 to sys_category 2 and Direct mail category 2 to sys_category 3 and so on
+directMailCategorySysCategoryMapping =
