@@ -27,6 +27,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -683,7 +684,7 @@ class MailerService implements LoggerAwareInterface
                         $statement = $queryBuilder->execute();
 
                         while ($recipientData = $statement->fetchAssociative()) {
-                            $recipientData['sys_dmail_categories_list'] = RecipientUtility::getListOfRecipientCategories($table, $recipientData['uid']);
+                            $recipientData['sys_dmail_categories_list'] = $this->getListOfRecipientCategories($table, $recipientData['uid']);
 
                             if ($numberOfSentMails >= $this->sendPerCycle) {
                                 $finished = false;
@@ -704,6 +705,45 @@ class MailerService implements LoggerAwareInterface
         return $finished;
     }
 
+
+    /**
+     * Get the list of categories ids subscribed to by recipient $uid from table $table
+     *
+     * @param string $table Tablename of the recipient
+     * @param int $uid Uid of the recipient
+     *
+     * @return string        list of categories
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function getListOfRecipientCategories(string $table, int $uid): string
+    {
+        if ($table === 'PLAINLIST') {
+            return '';
+        }
+
+        $relationTable = $GLOBALS['TCA'][$table]['columns']['categories']['config']['MM'];
+
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $statement = $queryBuilder
+            ->select($relationTable . '.uid_foreign')
+            ->from($relationTable, $relationTable)
+            ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_local = ' . $table . '.uid')
+            ->where(
+                $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table)),
+                $queryBuilder->expr()->eq($relationTable . '.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+            )
+            ->execute();
+
+        $list = '';
+        while ($row = $statement->fetchAssociative()) {
+            $list .= $row['uid_foreign'] . ',';
+        }
+
+        return rtrim($list, ',');
+    }
+
     /**
      * Sending the email and write to log.
      *
@@ -719,7 +759,7 @@ class MailerService implements LoggerAwareInterface
      */
     protected function sendSingleMailAndAddLogEntry(int $mailUid, array $recipientData, string $recipientTable): void
     {
-        if (RecipientUtility::isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $recipientTable) === false) {
+        if ($this->isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $recipientTable) === false) {
             $pt = MailerUtility::getMilliseconds();
             $recipientData = RecipientUtility::normalizeAddress($recipientData);
 
@@ -749,6 +789,32 @@ class MailerService implements LoggerAwareInterface
                 throw new \Exception($message, 1663340700, $exception);
             }
         }
+    }
+
+    /**
+     * Find out, if an email has been sent to a recipient
+     *
+     * @param int $mailUid Newsletter ID. UID of the sys_dmail record
+     * @param int $recipientUid Recipient UID
+     * @param string $table Recipient table
+     *
+     * @return bool Number of found records
+     * @throws DBALException
+     */
+    public function isMailSendToRecipient(int $mailUid, int $recipientUid, string $table): bool
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_mail_domain_model_log');
+
+        $statement = $queryBuilder
+            ->select('uid')
+            ->from('tx_mail_domain_model_log')
+            ->where($queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($table)))
+            ->andWhere($queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('response_type', '0'))
+            ->execute();
+
+        return (bool)$statement->rowCount();
     }
 
     /**

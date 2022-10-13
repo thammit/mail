@@ -13,7 +13,6 @@ use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -53,7 +52,7 @@ class RecipientService
         if ($groups) {
             /** @var Group $group */
             foreach ($groups as $group) {
-                $result = RecipientUtility::compileMailGroup([$group->getUid()], $userTable, $backendUserPermission);
+                $result = $this->compileMailGroup([$group->getUid()], $userTable, $backendUserPermission);
                 $totalRecipients = 0;
                 if (is_array($result['tt_address'] ?? false)) {
                     $totalRecipients += count($result['tt_address']);
@@ -72,6 +71,56 @@ class RecipientService
         }
 
         return $mailGroups;
+    }
+
+    /**
+     * @param array $groups
+     * @param string $userTable
+     * @param string $backendUserPermissions
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function compileMailGroup(array $groups, string $userTable, string $backendUserPermissions): array
+    {
+        // If supplied with an empty array, quit instantly as there is nothing to do
+        if (!count($groups)) {
+            return [];
+        }
+
+        // Looping through the selected array, in order to fetch recipient details
+        $idLists = [];
+        foreach ($groups as $group) {
+            // Testing to see if group ID is a valid integer, if not - skip to next group ID
+            $groupId = MathUtility::convertToPositiveInteger($group['uid'] ?? $group);
+            if (!$groupId) {
+                continue;
+            }
+
+            $recipientList = $this->getSingleMailGroup($groupId, $userTable, $backendUserPermissions);
+
+            $idLists = array_merge_recursive($idLists, $recipientList);
+        }
+
+        // Make unique entries
+        if (is_array($idLists['tt_address'] ?? false)) {
+            $idLists['tt_address'] = array_unique($idLists['tt_address']);
+        }
+
+        if (is_array($idLists['fe_users'] ?? false)) {
+            $idLists['fe_users'] = array_unique($idLists['fe_users']);
+        }
+
+        if (is_array($idLists[$userTable] ?? false) && $userTable) {
+            $idLists[$userTable] = array_unique($idLists[$userTable]);
+        }
+
+        if (is_array($idLists['PLAINLIST'] ?? false)) {
+            $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($idLists['PLAINLIST']);
+        }
+
+        return $idLists;
     }
 
 
@@ -264,7 +313,7 @@ class RecipientService
      */
     public function getRecipientIdsOfMailGroups(array $groups, string $userTable = ''): array
     {
-        $recipientIds = RecipientUtility::compileMailGroup($groups, $userTable, $this->backendUserPermissions);
+        $recipientIds = $this->compileMailGroup($groups, $userTable, $this->backendUserPermissions);
 
         // Todo: Add PSR-14 EventDispatcher to manipulate the id list (see commented hook code block below)
 

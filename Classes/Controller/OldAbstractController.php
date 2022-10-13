@@ -143,7 +143,7 @@ abstract class OldAbstractController
         $this->access = $this->pageInfo !== false;
 
         // get the config from pageTS
-        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['dmail.'] ?? [];
+        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['mail.'] ?? [];
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
         $this->pageTSConfiguration['pid'] = $this->id;
 
@@ -236,68 +236,5 @@ abstract class OldAbstractController
         }
 
         return $output;
-    }
-
-    protected function getJS($mailUid): string
-    {
-        return '
-        script_ended = 0;
-        function jumpToUrl(URL)	{
-            window.location.href = URL;
-        }
-        function jumpToUrlD(URL) {
-            window.location.href = URL+"&mailUid=' . $mailUid . '";
-        }
-        function toggleDisplay(toggleId, e, countBox) {
-            if (!e) {
-                e = window.event;
-            }
-            if (!document.getElementById) {
-                return false;
-            }
-
-            prefix = toggleId.split("-");
-            for (i=1; i<=countBox; i++){
-                newToggleId = prefix[0]+"-"+i;
-                body = document.getElementById(newToggleId);
-                image = document.getElementById(toggleId + "_toggle"); //ConfigurationController
-                //image = document.getElementById(newToggleId + "_toggle"); //DmailController
-                if (newToggleId != toggleId){
-                    if (body.style.display == "block"){
-                        body.style.display = "none";
-                        if (image) {
-                            image.className = image.className.replace( /expand/ , "collapse");
-                        }
-                    }
-                }
-            }
-
-            var body = document.getElementById(toggleId);
-            if (!body) {
-                return false;
-            }
-            var image = document.getElementById(toggleId + "_toggle");
-            if (body.style.display == "none") {
-                body.style.display = "block";
-                if (image) {
-                    image.className = image.className.replace( /collapse/ , "expand");
-                }
-            } else {
-                body.style.display = "none";
-                if (image) {
-                    image.className = image.className.replace( /expand/ , "collapse");
-                }
-            }
-            if (e) {
-                // Stop the event from propagating, which
-                // would cause the regular HREF link to
-                // be followed, ruining our hard work.
-                e.cancelBubble = true;
-                if (e.stopPropagation) {
-                    e.stopPropagation();
-                }
-            }
-        }
-        ';
     }
 }

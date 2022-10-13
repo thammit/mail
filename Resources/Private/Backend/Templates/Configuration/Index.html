@@ -1,0 +1,355 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Default"/>
+
+<f:section name="content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
+    <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
+    <f:variable name="lll3" value="LLL:EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:"/>
+    <f:if condition="{implodedParams -> f:count()}">
+        <h1>
+            <f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:header_conf"/>
+        </h1>
+        <f:form action="update" method="post" enctype="multipart/form-data">
+            <div id="mail-configuration-accordion">
+            <f:render
+                arguments="{
+                    configuration: implodedParams,
+                    index: 1,
+                    section: 'box-1',
+                    title: 'configure_default_headers',
+                    lll: lll,
+                    lll2: lll2,
+                    lll3: lll3
+                }"
+                section="Panel"
+            />
+            <f:render
+                arguments="{
+                    configuration: implodedParams,
+                    index: 2,
+                    section: 'box-2',
+                    title: 'configure_default_content',
+                    lll: lll,
+                    lll2: lll2,
+                    lll3: lll3
+                }"
+                section="Panel"
+            />
+            <f:render
+                arguments="{
+                    configuration: implodedParams,
+                    index: 3,
+                    section: 'box-3',
+                    title: 'configure_default_fetching',
+                    lll: lll,
+                    lll2: lll2,
+                    lll3: lll3
+                }"
+                section="Panel"
+            />
+            <f:render
+                arguments="{
+                    configuration: implodedParams,
+                    index: 4,
+                    section: 'box-4',
+                    title: 'configure_options_encoding',
+                    lll: lll,
+                    lll2: lll2,
+                    lll3: lll3
+                }"
+                section="Panel"
+            />
+            <f:render
+                arguments="{
+                    configuration: implodedParams,
+                    index: 5,
+                    section: 'box-5',
+                    title: 'configure_options_links',
+                    lll: lll,
+                    lll2: lll2,
+                    lll3: lll3
+                }"
+                section="Panel"
+            />
+            <f:render
+                arguments="{
+                    configuration: implodedParams,
+                    index: 6,
+                    section: 'box-6',
+                    title: 'configure_options_additional',
+                    lll: lll,
+                    lll2: lll2,
+                    lll3: lll3
+                }"
+                section="Panel"
+            />
+            </div>
+            <button class="btn btn-primary text-uppercase" type="submit" name="submit">
+                <f:translate
+                    key="{lll}configure_update_configuration"/>
+            </button>
+        </f:form>
+    </f:if>
+</f:section>
+
+<f:comment><!--
+    Parameters:
+    - configuration: all configuration options
+    - index: numeric section index
+    - title: panel title
+    - section: section that renders content
+--></f:comment>
+<f:section name="Panel">
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="heading{index}">
+            <h4 class="panel-title">
+                <a role="button" data-bs-toggle="collapse" href="#collapse{index}"
+                   aria-expanded="true" aria-controls="collapse{index}" class="collapsed">
+                    <span class="caret"></span>
+                    <f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:{title}"/>
+                </a>
+            </h4>
+        </div>
+        <div id="collapse{index}" class="panel-collapse collapse" data-bs-parent="#mail-configuration-accordion" aria-labelledby="heading{index}">
+            <div class="panel-body">
+                <f:render section="{section}" arguments="{
+                    implodedParams: configuration,
+                    lll: lll,
+                    lll2: lll2,
+                    lll3: lll3}"/>
+            </div>
+        </div>
+    </div>
+</f:section>
+
+<f:section name="help">
+    <f:variable name="tooltip">
+    <f:for each="{_all}" as="message">
+        <f:if condition="{message}">
+            <f:translate key="{message}" default="{message}"/><br>
+        </f:if>
+    </f:for>
+    </f:variable>
+    <span class="badge rounded-pill bg-primary mb-1 ms-1" data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="popover" data-bs-html="true" data-bs-placement="right" data-bs-content="{tooltip -> f:format.html()}">
+        i
+    </span>
+</f:section>
+
+<f:section name="box-1">
+    <div class="mb-3">
+        <label for="pageTS_from_email" class="form-label">
+            <f:translate key="{lll2}sys_dmail.from_email"/><f:render section="help" arguments="{0: '{lll3}from_email.description', 1: '{lll3}from_email.details'}"/>
+        </label>
+        <f:form.textfield type="email" id="pageTS_from_email" name="pageTS[from_email]" value="{implodedParams.from_email}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_from_name" class="form-label">
+            <f:translate key="{lll2}sys_dmail.from_name"/><f:render section="help" arguments="{0: '{lll3}from_name.description', 1: '{lll3}from_name.details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_from_name" name="pageTS[from_name]" value="{implodedParams.from_name}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_replyto_email" class="form-label">
+            <f:translate key="{lll2}sys_dmail.replyto_email"/><f:render section="help" arguments="{0: '{lll3}replyto_email.description', 1: '{lll3}replyto_email.details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_replyto_email" name="pageTS[replyto_email]" value="{implodedParams.replyto_email}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_replyto_name" class="form-label">
+            <f:translate key="{lll2}sys_dmail.replyto_name"/><f:render section="help" arguments="{0: '{lll3}replyto_name.description', 1: '{lll3}replyto_name.details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_replyto_name" name="pageTS[replyto_name]" value="{implodedParams.replyto_name}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_return_path" class="form-label">
+            <f:translate key="{lll2}sys_dmail.return_path"/><f:render section="help" arguments="{0: '{lll3}return_path.description', 1: '{lll3}return_path.details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_return_path" name="pageTS[return_path]" value="{implodedParams.return_path}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_organisation" class="form-label">
+            <f:translate key="{lll2}sys_dmail.organisation"/><f:render section="help" arguments="{0: '{lll3}organisation.description', 1: '{lll3}organisation.details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_organisation" name="pageTS[organisation]" value="{implodedParams.organisation}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_priority" class="form-label">
+            <f:translate key="{lll2}sys_dmail.priority"/><f:render section="help" arguments="{0: '{lll3}priority.description', 1: '{lll3}priority.details'}"/>
+        </label>
+        <f:form.select id="pageTS_priority" name="pageTS[priority]" value="{implodedParams.priority}" class="form-select form-control-adapt">
+            <f:form.select.option value="3">
+                <f:translate key="{lll}configure_priority_normal"/>
+            </f:form.select.option>
+            <f:form.select.option value="1">
+                <f:translate key="{lll}configure_priority_high"/>
+            </f:form.select.option>
+            <f:form.select.option value="5">
+                <f:translate key="{lll}configure_priority_low"/>
+            </f:form.select.option>
+        </f:form.select>
+    </div>
+</f:section>
+
+<f:section name="box-2">
+    <div class="mb-3">
+        <label for="pageTS_sendOptions" class="form-label">
+            <f:translate key="{lll2}sys_dmail.sendOptions"/><f:render section="help" arguments="{0: '{lll3}sendOptions.description', 1: '{lll3}sendOptions.details'}"/>
+        </label>
+        <f:form.select id="pageTS_sendOptions" name="pageTS[sendOptions]" value="{implodedParams.sendOptions}" class="form-select form-control-adapt">
+            <f:form.select.option value="3">
+                <f:translate key="{lll}configure_plain_and_html"/>
+            </f:form.select.option>
+            <f:form.select.option value="1">
+                <f:translate key="{lll}configure_plain_only"/>
+            </f:form.select.option>
+            <f:form.select.option value="2">
+                <f:translate key="{lll}configure_html_only"/>
+            </f:form.select.option>
+        </f:form.select>
+    </div>
+    <div class="form-check mb-3">
+        <f:form.checkbox id="pageTS_includeMedia" class="form-check-input" name="pageTS[includeMedia]" value="1" checked="{implodedParams.includeMedia} == 1"/>
+        <label for="pageTS_includeMedia" class="form-check-label">
+            <f:translate key="{lll2}sys_dmail.includeMedia"/><f:render section="help" arguments="{0: '{lll3}includeMedia.description', 1: '{lll3}includeMedia.details'}"/>
+        </label>
+    </div>
+    <div class="form-check mb-3">
+        <f:form.checkbox id="pageTS_flowedFormat" class="form-check-input" name="pageTS[flowedFormat]" value="1" checked="{implodedParams.flowedFormat} == 1"/>
+        <label for="pageTS_flowedFormat" class="form-check-label">
+            <f:translate key="{lll2}sys_dmail.flowedFormat"/><f:render section="help" arguments="{0: '{lll3}flowedFormat.description', 1: '{lll3}flowedFormat.details'}"/>
+        </label>
+    </div>
+</f:section>
+
+<f:section name="box-3">
+    <div class="mb-3">
+        <label for="pageTS_HTMLParams" class="form-label">
+            <f:translate key="{lll2}sys_dmail.HTMLParams"/><f:render section="help" arguments="{0: '{lll}configure_HTMLParams_description', 1: '{lll}configure_HTMLParams_details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_HTMLParams" name="pageTS[HTMLParams]" value="{implodedParams.HTMLParams}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_plainParams" class="form-label">
+            <f:translate key="{lll2}sys_dmail.plainParams"/><f:render section="help" arguments="{0: '{lll}configure_plainParams_description', 1: '{lll}configure_plainParams_details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_plainParams" name="pageTS[plainParams]" value="{implodedParams.plainParams}" class="form-control"/>
+    </div>
+</f:section>
+
+<f:section name="box-4">
+    <div class="mb-3">
+        <label for="pageTS_quick_mail_encoding" class="form-label">
+            <f:translate key="{lll}configure_quickmail_encoding"/><f:render section="help" arguments="{0: '{lll}configure_quickmail_encoding'}"/>
+        </label>
+        <f:form.select id="pageTS_quick_mail_encoding" name="pageTS[quick_mail_encoding]" options="{quoted-printable: 'quoted-printable', base64: 'base64'}"
+                       value="{implodedParams.quick_mail_encoding}" class="form-select form-control-adapt"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_direct_mail_encoding" class="form-label">
+            <f:translate key="{lll}configure_directmail_encoding"/><f:render section="help" arguments="{0: '{lll}configure_directmail_encoding_description'}"/>
+        </label>
+        <f:form.select id="pageTS_direct_mail_encoding" name="pageTS[direct_mail_encoding]" options="{quoted-printable:'quoted-printable', base64:'base64', 8bit:'8bit'}"
+                       value="{implodedParams.direct_mail_encoding}" class="form-select form-control-adapt"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_quick_mail_charset" class="form-label">
+            <f:translate key="{lll}configure_quickmail_charset"/><f:render section="help" arguments="{0: '{lll}configure_quickmail_charset_description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_quick_mail_charset" name="pageTS[quick_mail_charset]" value="{implodedParams.quick_mail_charset}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_direct_mail_charset" class="form-label">
+            <f:translate key="{lll}configure_directmail_charset"/><f:render section="help" arguments="{0: '{lll}configure_directmail_charset_description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_direct_mail_charset" name="pageTS[direct_mail_charset]" value="{implodedParams.direct_mail_charset}" class="form-control"/>
+    </div>
+</f:section>
+
+<f:section name="box-5">
+    <div class="form-check mb-3">
+        <f:form.checkbox id="pageTS_use_rdct" class="form-check-input" name="pageTS[use_rdct]" value="1" checked="{implodedParams.use_rdct} == 1"/>
+        <label for="pageTS_use_rdct" class="form-check-label">
+            <f:translate key="{lll2}sys_dmail.use_rdct"/><f:render section="help" arguments="{0: '{lll3}use_rdct.description', 1: '{lll3}use_rdct.details'}"/>
+        </label>
+    </div>
+    <div class="form-check mb-3">
+        <f:form.checkbox id="pageTS_long_link_mode" class="form-check-input" name="pageTS[long_link_mode]" value="1" checked="{implodedParams.long_link_mode} == 1"/>
+        <label for="pageTS_long_link_mode" class="form-check-label">
+            <f:translate key="{lll2}sys_dmail.long_link_mode"/><f:render section="help" arguments="{0: '{lll3}long_link_mode.description'}"/>
+        </label>
+    </div>
+    <div class="form-check mb-3">
+        <f:form.checkbox id="pageTS_enable_jump_url" class="form-check-input" name="pageTS[enable_jump_url]" value="1" checked="{implodedParams.enable_jump_url} == 1"/>
+        <label for="pageTS_enable_jump_url" class="form-check-label">
+            <f:translate key="{lll}configure_options_links_jumpurl"/><f:render section="help" arguments="{0: '{lll}configure_options_links_jumpurl_description'}"/>
+        </label>
+    </div>
+    <div class="form-check mb-3">
+        <f:form.checkbox id="pageTS_jumpurl_tracking_privacy" class="form-check-input" name="pageTS[jumpurl_tracking_privacy]" value="1" checked="{implodedParams.jumpurl_tracking_privacy} == 1"/>
+        <label for="pageTS_jumpurl_tracking_privacy" class="form-check-label">
+            <f:translate key="{lll}configure_jumpurl_tracking_privacy"/><f:render section="help" arguments="{0: '{lll}configure_jumpurl_tracking_privacy_description'}"/>
+        </label>
+    </div>
+    <div class="form-check mb-3">
+        <f:form.checkbox id="pageTS_enable_mailto_jump_url" class="form-check-input" name="pageTS[enable_mailto_jump_url]" value="1" checked="{implodedParams.enable_mailto_jump_url} == 1"/>
+        <label for="pageTS_enable_mailto_jump_url" class="form-check-label">
+            <f:translate key="{lll}configure_options_mailto_jumpurl"/><f:render section="help" arguments="{0: '{lll}configure_options_mailto_jumpurl_description'}"/>
+        </label>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_authcode_fieldList" class="form-label">
+            <f:translate key="{lll2}sys_dmail.authcode_fieldList"/><f:render section="help" arguments="{0: '{lll3}authcode_fieldList.description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_authcode_fieldList" name="pageTS[authcode_fieldList]" value="{implodedParams.authcode_fieldList}" class="form-control"/>
+    </div>
+</f:section>
+
+<f:section name="box-6">
+    <div class="mb-3">
+        <label for="pageTS_http_username" class="form-label">
+            <f:translate key="{lll}configure_http_username"/><f:render section="help" arguments="{0: '{lll}configure_http_username_description', 1: '{lll}configure_http_username_details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_http_username" name="pageTS[http_username]" value="{implodedParams.http_username}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_http_password" class="form-label">
+            <f:translate key="{lll}configure_http_password"/><f:render section="help" arguments="{0: '{lll}configure_http_password_description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_http_password" name="pageTS[http_password]" value="{implodedParams.http_password}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_simulate_usergroup" class="form-label">
+            <f:translate key="{lll}configure_simulate_usergroup"/><f:render section="help" arguments="{0: '{lll}configure_simulate_usergroup_description', 1: '{lll}configure_simulate_usergroup_details'}"/>
+        </label>
+        <f:form.textfield id="pageTS_simulate_usergroup" name="pageTS[simulate_usergroup]" value="{implodedParams.simulate_usergroup}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_userTable" class="form-label">
+            <f:translate key="{lll}configure_user_table"/><f:render section="help" arguments="{0: '{lll}configure_user_table_description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_userTable" name="pageTS[userTable]" value="{implodedParams.userTable}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_test_tt_address_uids" class="form-label">
+            <f:translate key="{lll}configure_test_tt_address_uids"/><f:render section="help" arguments="{0: '{lll}configure_test_tt_address_uids_description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_test_tt_address_uids" name="pageTS[test_tt_address_uids]" value="{implodedParams.test_tt_address_uids}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_test_dmail_group_uids" class="form-label">
+            <f:translate key="{lll}configure_test_dmail_group_uids"/><f:render section="help" arguments="{0: '{lll}configure_test_dmail_group_uids_description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_test_dmail_group_uids" name="pageTS[test_dmail_group_uids]" value="{implodedParams.test_dmail_group_uids}" class="form-control"/>
+    </div>
+    <div class="mb-3">
+        <label for="pageTS_testmail" class="form-label">
+            <f:translate key="{lll}configure_testmail"/><f:render section="help" arguments="{0: '{lll}configure_testmail_description'}"/>
+        </label>
+        <f:form.textfield id="pageTS_testmail" name="pageTS[testmail]" value="{implodedParams.testmail}" class="form-control"/>
+    </div>
+</f:section>
+</html>

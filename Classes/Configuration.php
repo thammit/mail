@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail;
 
+use MEDIAESSENZ\Mail\Controller\ConfigurationController;
 use MEDIAESSENZ\Mail\Controller\ConfigurationControllerOld;
 use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\MailControllerOld;
@@ -104,6 +105,23 @@ final class Configuration
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-status',
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
+            ]
+        );
+
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+            'Mail',
+            'Mail',
+            'configurationExtbase',
+            'after:queueExtbase',
+            [
+                ConfigurationController::class => 'index,update'
+            ],
+            [
+                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'access' => 'group,user',
+                'workspaces' => 'online',
+                'iconIdentifier' => 'mail-module-configuration',
+                'labels' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
             ]
         );
 

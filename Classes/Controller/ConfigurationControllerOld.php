@@ -16,7 +16,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ConfigurationControllerOld extends OldAbstractController
 {
-    protected string $tsConfigPrefix = 'mod.web_modules.dmail.';
+    protected string $tsConfigPrefix = 'mod.web_modules.mail.';
     protected array $pageTS = [];
 
     protected string $requestUri = '';

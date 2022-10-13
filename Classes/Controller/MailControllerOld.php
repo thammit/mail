@@ -787,7 +787,7 @@ class MailControllerOld extends OldAbstractController
 //            }
 //        }
 
-        $mailGroups = RecipientUtility::finalSendingGroups($this->id, (int)$mailData['sys_language_uid'], $this->userTable, $this->backendUserPermissions);
+        $mailGroups = $this->recipientService->getFinalSendingGroups($this->userTable, $this->backendUserPermissions);
 
         return [
             'mailGroups' => $mailGroups,

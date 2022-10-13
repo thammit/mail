@@ -146,6 +146,9 @@
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
 				<source>Save</source>
 			</trans-unit>
+			<trans-unit id="configure_update_configuration_success" resname="configure_update_configuration_success">
+				<source>The configuration was successfully saved to the selected page</source>
+			</trans-unit>
 			<trans-unit id="configure_user_table" resname="configure_user_table">
 				<source>Custom-defined table</source>
 			</trans-unit>

@@ -8,7 +8,7 @@ use Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
 use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailCategoryRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailTtAddressCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;

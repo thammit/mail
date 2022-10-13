@@ -1,0 +1,59 @@
+<?php
+declare(strict_types=1);
+
+namespace MEDIAESSENZ\Mail\Controller;
+
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
+
+class ConfigurationController  extends AbstractController
+{
+    protected string $tsConfigPrefix = 'mod.web_modules.mail.';
+
+    public function indexAction(): ResponseInterface
+    {
+        if (!isset($this->implodedParams['plainParams'])) {
+            $this->implodedParams['plainParams'] = '&type=99';
+        }
+        if (!isset($this->implodedParams['quick_mail_charset'])) {
+            $this->implodedParams['quick_mail_charset'] = 'utf-8';
+        }
+        if (!isset($this->implodedParams['direct_mail_charset'])) {
+            $this->implodedParams['direct_mail_charset'] = 'iso-8859-1';
+        }
+
+        $this->view->assignMultiple([
+            'implodedParams' => $this->implodedParams,
+            'backendUser' => [
+                'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
+                'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
+                'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
+            ],
+        ]);
+
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param array $pageTS
+     * @return void
+     * @throws StopActionException
+     */
+    public function updateAction(array $pageTS): void
+    {
+        if ($pageTS && BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
+            TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, $this->tsConfigPrefix);
+            ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('configure_update_configuration_success') . ' ' . $this->id, true);
+        }
+        $this->redirect('index');
+    }
+}

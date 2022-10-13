@@ -1,7 +1,7 @@
-# cat=basic; type=string; label= Default recipient fields : Default fields that substituted in the mail messages.
+# cat=basic; type=string; label=Default recipient fields : Default fields that substituted in the mail messages.
 defaultRecipFields = uid,name,title,email,phone,www,address,company,city,zip,country,fax,firstname,first_name,last_name
 
-# cat=basic; type=string; label= Additional DB fields of the recipient : Additional fields that may be substituted in the mail messages.
+# cat=basic; type=string; label=Additional DB fields of the recipient : Additional fields that may be substituted in the mail messages.
 addRecipFields =
 
 # cat=basic/enable; type=boolean; label=Enable notification email : Allow mail to send notification about start and end of a mailing job.
@@ -16,5 +16,8 @@ UseImplicitPortToFetch = 0
 # cat=basic/enable; type=boolean; label=Use direct mail tables
 useDirectMailTables = 0
 
-# cat=basic; type=string; label=Direct Mail category -> sys_category mapping used by update wizard; Format: 1:2,2:3,3:4 maps Direct mail category 1 to sys_category 2 and Direct mail category 2 to sys_category 3 and so on. If categories not found or set, new categories will be added.
+# cat=basic; type=string; label=Direct Mail category -> sys_category mapping used by update wizard to migrate Direct Mail records to Mail records; Format: 1:2,2:3,3:4 maps Direct mail category 1 to sys_category 2 and Direct mail category 2 to sys_category 3 and so on. If categories not found or set, new categories will be added.
 directMailCategorySysCategoryMapping =
+
+# cat=basic; type=string; label=Parent sys_category used by direct mail -> sys category migration
+directMailCategorySysCategoryParentCategory =

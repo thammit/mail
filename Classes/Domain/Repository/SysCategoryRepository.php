@@ -7,7 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
 
-class SysDmailCategoryRepository extends AbstractRepository
+class SysCategoryRepository extends AbstractRepository
 {
     protected string $table = 'sys_category';
 

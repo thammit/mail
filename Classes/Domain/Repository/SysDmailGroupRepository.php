@@ -106,59 +106,50 @@ class SysDmailGroupRepository extends AbstractRepository
     /**
      * Update the mailgroup DB record
      *
-     * @param array $mailGroup Mailgroup DB record
+     * @param array $group Mailgroup DB record
      * @param string $userTable
      * @param string $queryTable
      * @param $queryConfig
      * @return array Mailgroup DB record after updated
      */
-    public function updateMailGroup(array $mailGroup, string $userTable, string $queryTable, $queryConfig): array
+    public function updateMailGroup(array $group, string $userTable, string $queryTable, $queryConfig): array
     {
-//        $set = GeneralUtility::_GP('SET');
-//        $queryTable = $set['queryTable'];
-//        $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
-
-        $whichTables = (int)$mailGroup['record_types'];
+        $recordTypes = (int)$group['record_types'];
         $table = '';
-        if ($whichTables & 1) {
+        if ($recordTypes & 1) {
             $table = 'tt_address';
-        } else if ($whichTables & 2) {
+        } else if ($recordTypes & 2) {
             $table = 'fe_users';
-        } else if ($userTable && ($whichTables & 4)) {
+        } else if ($userTable && ($recordTypes & 4)) {
             $table = $userTable;
         }
 
         $settings['queryTable'] = $queryTable ?: $table;
-        $settings['queryConfig'] = $queryConfig ? serialize($queryConfig) : $mailGroup['query'];
+        $settings['queryConfig'] = $queryConfig ? serialize($queryConfig) : $group['query'];
 
         if ($settings['queryTable'] != $table) {
             $settings['queryConfig'] = '';
         }
 
-        if ($settings['queryTable'] != $table || $settings['queryConfig'] != $mailGroup['query']) {
-            $whichTables = 0;
+        if ($settings['queryTable'] != $table || $settings['queryConfig'] != $group['query']) {
+            $recordTypes = 0;
             if ($settings['queryTable'] == 'tt_address') {
-                $whichTables = 1;
+                $recordTypes = 1;
             } else if ($settings['queryTable'] == 'fe_users') {
-                $whichTables = 2;
+                $recordTypes = 2;
             } else if ($settings['queryTable'] == $userTable) {
-                $whichTables = 4;
+                $recordTypes = 4;
             }
             $updateFields = [
-                'record_types' => $whichTables,
+                'record_types' => $recordTypes,
                 'query' => $settings['queryConfig'],
             ];
 
-            $connection = $this->getConnection($this->table);
+            $this->update((int)$group['uid'], $updateFields);
 
-            $connection->update(
-                $this->table, // table
-                $updateFields,
-                ['uid' => intval($mailGroup['uid'])] // where
-            );
-            $mailGroup = BackendUtility::getRecord($this->table, $mailGroup['uid']);
+            $group = BackendUtility::getRecord($this->table, $group['uid']);
         }
-        return $mailGroup;
+        return $group;
     }
 
     /**
