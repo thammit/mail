@@ -13,13 +13,13 @@
     </h1>
     <f:if condition="{data.dataPageInfo}">
         <f:then>
-            <f:render partial="Statistics/DataPageInfo" arguments="{dataPageInfo:data.dataPageInfo, lll:lll}"/>
+            <f:render partial="Report/DataPageInfo" arguments="{dataPageInfo:data.dataPageInfo, lll:lll}"/>
         </f:then>
         <f:else if="{data.dataUserInfo}">
-            <f:render partial="Statistics/DataUserInfo" arguments="{dataUserInfo:data.dataUserInfo, lll:lll}"/>
+            <f:render partial="Report/DataUserInfo" arguments="{dataUserInfo:data.dataUserInfo, lll:lll}"/>
         </f:else>
         <f:else if="{data.dataStats}">
-            <f:render partial="Statistics/DataStats" arguments="{dataStats:data.dataStats, lll:lll}"/>
+            <f:render partial="Report/DataStats" arguments="{dataStats:data.dataStats, lll:lll}"/>
         </f:else>
         <f:else if="{data.dataHook}">
             <f:format.raw>{data.dataHook}</f:format.raw>
