@@ -13,6 +13,7 @@ use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\CsvUtility as MailCsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -23,6 +24,9 @@ class RecipientService
 {
     protected int $pageId = 0;
     protected string $backendUserPermissions;
+    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,accepts_html';
+    protected array $allowedTables = ['fe_users', 'tt_address'];
+    protected string $userTable = '';
 
     public function __construct(
         protected GroupRepository $groupRepository,
@@ -41,6 +45,21 @@ class RecipientService
     }
 
     /**
+     * @param string $userTable
+     * @return void
+     */
+    public function setUserTable(string $userTable): void
+    {
+        $this->userTable = $userTable;
+        $this->allowedTables[] = $userTable;
+//        if (array_key_exists('userTable',
+//                $this->pageTSConfiguration) && isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) && is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])) {
+//            $this->userTable = $this->pageTSConfiguration['userTable'];
+//            $this->allowedTables[] = $this->userTable;
+//        }
+    }
+
+    /**
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      * @throws DBALException
@@ -52,7 +71,7 @@ class RecipientService
         if ($groups) {
             /** @var Group $group */
             foreach ($groups as $group) {
-                $result = $this->compileMailGroup([$group->getUid()], $userTable, $backendUserPermission);
+                $result = $this->compileMailGroups([$group->getUid()], $userTable, $backendUserPermission);
                 $totalRecipients = 0;
                 if (is_array($result['tt_address'] ?? false)) {
                     $totalRecipients += count($result['tt_address']);
@@ -82,7 +101,7 @@ class RecipientService
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public function compileMailGroup(array $groups, string $userTable, string $backendUserPermissions): array
+    public function compileMailGroups(array $groups, string $userTable, string $backendUserPermissions): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
         if (!count($groups)) {
@@ -172,6 +191,234 @@ class RecipientService
         }
 
         return $idLists;
+    }
+
+    /**
+     * Put all recipients uid from all table into an array
+     *
+     * @param int $groupUid Uid of the group
+     * @param string $userTable
+     * @return array List of the uid in an array
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function compileMailGroup(int $groupUid, string $userTable = ''): array
+    {
+        $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
+        $idLists = [];
+        if ($groupUid) {
+            $mailGroup = BackendUtility::getRecord('tx_mail_domain_model_group', $groupUid);
+            if (is_array($mailGroup) && $mailGroup['pid'] == $this->pageId) {
+                switch ($mailGroup['type']) {
+                    case RecipientGroupType::PAGES:
+                        // From pages
+                        // use current page if no else
+                        $thePages = $mailGroup['pages'] ?: $this->pageId;
+                        // Explode the pages
+                        $pages = GeneralUtility::intExplode(',', $thePages);
+                        $pageIdArray = [];
+                        foreach ($pages as $pageUid) {
+                            if ($pageUid > 0) {
+                                $pageinfo = BackendUtility::readPageAccess($pageUid, $this->backendUserPermissions);
+                                if (is_array($pageinfo)) {
+                                    $info['fromPages'][] = $pageinfo;
+                                    $pageIdArray[] = $pageUid;
+                                    if ($mailGroup['recursive']) {
+                                        $pageIdArray = array_merge($pageIdArray,
+                                            BackendDataUtility::getRecursiveSelect($pageUid, $this->backendUserPermissions));
+                                    }
+                                }
+                            }
+                        }
+
+                        // Remove any duplicates
+                        $pageIdArray = array_unique($pageIdArray);
+                        $pidList = implode(',', $pageIdArray);
+                        $info['recursive'] = $mailGroup['recursive'];
+
+                        // Make queries
+                        if ($pidList) {
+                            $whichTables = intval($mailGroup['record_types']);
+                            // tt_address
+                            if ($whichTables & 1) {
+                                $idLists['tt_address'] = $tempRepository
+                                    ->getIdList('tt_address', $pidList, $groupUid, $mailGroup['categories']);
+                            }
+                            // fe_users
+                            if ($whichTables & 2) {
+                                $idLists['fe_users'] = $tempRepository
+                                    ->getIdList('fe_users', $pidList, $groupUid, $mailGroup['categories']);
+                            }
+                            // user table
+                            if ($userTable && ($whichTables & 4)) {
+                                $idLists[$userTable] = $tempRepository
+                                    ->getIdList($userTable, $pidList, $groupUid, $mailGroup['categories']);
+                            }
+                            // fe_groups
+                            if ($whichTables & 8) {
+                                if (!is_array($idLists['fe_users'])) {
+                                    $idLists['fe_users'] = [];
+                                }
+                                $idLists['fe_users'] = $tempRepository
+                                    ->getIdList('fe_groups', $pidList, $groupUid, $mailGroup['categories']);
+                                $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $idLists['fe_users']));
+                            }
+                        }
+                        break;
+                    case RecipientGroupType::CSV:
+                        // List of mails
+                        if ($mailGroup['csv'] == 1) {
+                            $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
+                            $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($mailGroup['list']), $this->fieldList);
+                        } else {
+                            $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
+                        }
+                        $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($recipients);
+                        break;
+                    case RecipientGroupType::STATIC:
+                        // Static MM list
+                        $idLists['tt_address'] = $tempRepository->getStaticIdList('tt_address', $groupUid);
+                        $idLists['fe_users'] = $tempRepository->getStaticIdList('fe_users', $groupUid);
+                        $tempGroups = $tempRepository->getStaticIdList('fe_groups', $groupUid);
+                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $tempGroups));
+                        if ($userTable) {
+                            $idLists[$userTable] = $tempRepository->getStaticIdList($userTable, $groupUid);
+                        }
+                        break;
+                    case RecipientGroupType::QUERY:
+                        // Special query list
+                        $mailGroup = $this->update_SpecialQuery($mailGroup, $userTable);
+                        $whichTables = intval($mailGroup['record_types']);
+                        $table = '';
+                        if ($whichTables & 1) {
+                            $table = 'tt_address';
+                        } else {
+                            if ($whichTables & 2) {
+                                $table = 'fe_users';
+                            } else {
+                                if ($userTable && ($whichTables & 4)) {
+                                    $table = $userTable;
+                                }
+                            }
+                        }
+                        if ($table) {
+                            $idLists[$table] = $tempRepository->getSpecialQueryIdList($table, $mailGroup);
+                        }
+                        break;
+                    case RecipientGroupType::OTHER:
+                        $groups = array_unique($tempRepository->getMailGroups($mailGroup['children'],
+                            [$mailGroup['uid']], $this->backendUserPermissions));
+
+                        foreach ($groups as $group) {
+                            $collect = $this->compileMailGroup($group);
+                            if (is_array($collect['queryInfo']['id_lists'])) {
+                                $idLists = array_merge_recursive($idLists, $collect['queryInfo']['id_lists']);
+                            }
+                        }
+
+                        // Make unique entries
+                        if (is_array($idLists['tt_address'])) {
+                            $idLists['tt_address'] = array_unique($idLists['tt_address']);
+                        }
+                        if (is_array($idLists['fe_users'])) {
+                            $idLists['fe_users'] = array_unique($idLists['fe_users']);
+                        }
+                        if (is_array($idLists[$userTable]) && $userTable) {
+                            $idLists[$userTable] = array_unique($idLists[$userTable]);
+                        }
+                        if (is_array($idLists['PLAINLIST'])) {
+                            $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($idLists['PLAINLIST']);
+                        }
+                        break;
+                    default:
+                }
+            }
+        }
+        /**
+         * Hook for cmd_compileMailGroup
+         * manipulate the generated id_lists
+         */
+        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] ?? false)) {
+            $hookObjectsArr = [];
+
+            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] as $classRef) {
+                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
+            }
+            foreach ($hookObjectsArr as $hookObj) {
+                if (method_exists($hookObj, 'cmd_compileMailGroup_postProcess')) {
+                    $temporaryList = $hookObj->cmd_compileMailGroup_postProcess($idLists, $this, $mailGroup);
+                }
+            }
+
+            unset($idLists);
+            $idLists = $temporaryList;
+        }
+
+        return [
+            'queryInfo' => ['id_lists' => $idLists],
+        ];
+    }
+
+    /**
+     * Update recipient list record with a special query
+     *
+     * @param array $mailGroup DB records
+     * @param string $userTable
+     * @return array Updated DB records
+     */
+    protected function update_specialQuery(array $mailGroup, string $userTable = ''): array
+    {
+        $sysDmailGroupRepository = GeneralUtility::makeInstance(SysDmailGroupRepository::class);
+        // $this->set = is_array($parsedBody['csv'] ?? '') ? $parsedBody['csv'] : (is_array($queryParams['csv'] ?? '') ? $queryParams['csv'] : []);
+        $set = $this->set;
+        $queryTable = $set['queryTable'] ?? '';
+        $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
+
+        $recordTypes = intval($mailGroup['record_types']);
+        $table = '';
+        if ($recordTypes & 1) {
+            $table = 'tt_address';
+        } else {
+            if ($recordTypes & 2) {
+                $table = 'fe_users';
+            } else {
+                if ($userTable && ($recordTypes & 4)) {
+                    $table = $userTable;
+                }
+            }
+        }
+
+        $this->MOD_SETTINGS['queryTable'] = $queryTable ?: $table;
+        $this->MOD_SETTINGS['queryConfig'] = $queryConfig ? serialize($queryConfig) : $mailGroup['query'];
+        $this->MOD_SETTINGS['search_query_smallparts'] = 1;
+
+        if ($this->MOD_SETTINGS['queryTable'] != $table) {
+            $this->MOD_SETTINGS['queryConfig'] = '';
+        }
+
+        if ($this->MOD_SETTINGS['queryTable'] != $table || $this->MOD_SETTINGS['queryConfig'] != $mailGroup['query']) {
+            $recordTypes = 0;
+            if ($this->MOD_SETTINGS['queryTable'] == 'tt_address') {
+                $recordTypes = 1;
+            } else {
+                if ($this->MOD_SETTINGS['queryTable'] == 'fe_users') {
+                    $recordTypes = 2;
+                } else {
+                    if ($this->MOD_SETTINGS['queryTable'] == $userTable) {
+                        $recordTypes = 4;
+                    }
+                }
+            }
+
+            $sysDmailGroupRepository->update((int)$mailGroup['uid'], [
+                'record_types' => $recordTypes,
+                'query' => $this->MOD_SETTINGS['queryConfig'],
+            ]);
+            $mailGroup = BackendUtility::getRecord('tx_mail_domain_model_group', $mailGroup['uid']);
+        }
+
+        return $mailGroup;
     }
 
     /**
@@ -313,7 +560,7 @@ class RecipientService
      */
     public function getRecipientIdsOfMailGroups(array $groups, string $userTable = ''): array
     {
-        $recipientIds = $this->compileMailGroup($groups, $userTable, $this->backendUserPermissions);
+        $recipientIds = $this->compileMailGroups($groups, $userTable, $this->backendUserPermissions);
 
         // Todo: Add PSR-14 EventDispatcher to manipulate the id list (see commented hook code block below)
 

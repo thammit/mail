@@ -27,42 +27,35 @@
             <th class="col-control nowrap"></th>
         </tr>
         </thead>
-        <f:for each="{data.rows}" as="row">
+        <f:for each="{data.rows}" as="group">
             <tr>
                 <td class="col-icon nowrap">
-                    <core:iconForRecord row="{row}" table="sys_dmail_group"/>
+                    <core:iconForRecord row="{uid:group.uid, type:group.type}" table="tx_mail_domain_model_group"/>
                 </td>
                 <td class="col-title col-responsive nowrap">
-                    {row.title}
+                    {group.title}
                 </td>
                 <td class="nowrap">
-                    {row.type}
+                    {group.typeProcessed}
                 </td>
                 <td class="nowrap">
-                    {row.description}
+                    {group.description}
                 </td>
-                <td class="text-center"><span class="badge rounded-pill bg-primary pb-1">{row.count}</span></td>
+                <td class="text-center"><span class="badge rounded-pill bg-primary pb-1">{group.count}</span></td>
                 <td class="col-control nowrap">
-                    <be:link.editRecord uid="{row.uid}" table="sys_dmail_group" class="btn btn-default" title="Edit configuration">
+                    <be:link.editRecord uid="{group.uid}" table="tx_mail_domain_model_group" class="btn btn-default" title="Edit group">
                         <core:icon identifier="actions-open" size="small"/>
                     </be:link.editRecord>
-                    <f:be.link route="{settings.route}" parameters="{id:settings.mailSysFolderUid,group_uid:row.uid,cmd:'displayMailGroup', SET:{dmail_mode:'recip'}}"
-                               class="btn btn-default" title="Show recipients">
-                        <core:icon identifier="actions-view" size="small"/>
-                    </f:be.link>
+                    <f:link.action class="btn btn-default" action="show" arguments="{group: group.uid}"><core:icon identifier="actions-view" size="small"/></f:link.action>
             </tr>
         </f:for>
     </table>
 </div>
-<a href="#" class="btn btn-default text-uppercase" onClick="{data.editOnClickLink}">
-    <core:icon identifier="actions-add"/>
-    <f:translate key="{lll}recip_create_mailgroup_msg"/>
-</a>
+<be:link.newRecord table="tx_mail_domain_model_group" class="btn btn-default" title="New group">
+    <core:icon identifier="actions-add"/> <f:translate key="{lll}recip_create_mailgroup_msg"/>
+</be:link.newRecord>
 <h3>
     <f:translate key="{lll}mailgroup_import"/>
 </h3>
-<a class="btn btn-default text-uppercase" href="{data.moduleUrl}">
-    <core:icon identifier="content-csv" overlay="actions-arrow-up-alt"/>
-    <f:translate key="{lll}recip_import_mailgroup_msg"/>
-</a>
+<f:link.action class="btn btn-default" action="csvImportWizard"><core:icon identifier="content-csv" overlay="actions-arrow-up-alt"/> <f:translate key="{lll}recip_import_mailgroup_msg"/></f:link.action>
 </html>
