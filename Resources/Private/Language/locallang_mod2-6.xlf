@@ -10,13 +10,13 @@
 				<source>The specified parameters will be added to the URL used to fetch the HTML content of the mail from a TYPO3 page. If in doubt, leave it blank.</source>
 			</trans-unit>
 			<trans-unit id="configure_default_content" resname="configure_default_content">
-				<source>Default values for mail content format</source>
+				<source>Default mail content format</source>
 			</trans-unit>
 			<trans-unit id="configure_default_fetching" resname="configure_default_fetching">
-				<source>Default values for mail content fetching options</source>
+				<source>Default mail content fetching options</source>
 			</trans-unit>
 			<trans-unit id="configure_default_headers" resname="configure_default_headers">
-				<source>Default values for mails headers</source>
+				<source>Default mails headers</source>
 			</trans-unit>
 			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
 				<source>Configure mail module</source>
@@ -62,10 +62,10 @@
 				<source>Additional module options</source>
 			</trans-unit>
 			<trans-unit id="configure_options_encoding" resname="configure_options_encoding">
-				<source>Options for content transfer encoding and character set</source>
+				<source>Content transfer encoding and character set</source>
 			</trans-unit>
 			<trans-unit id="configure_options_links" resname="configure_options_links">
-				<source>Options for links in mail content</source>
+				<source>Links in mail content</source>
 			</trans-unit>
 			<trans-unit id="configure_options_links_jumpurl" resname="configure_options_links_jumpurl">
 				<source>Enable jump URL's</source>
@@ -126,19 +126,19 @@
 	If you do not specify a usergroup uid and the page has frontend user restrictions, an error will occur and no mail content will be fetched.]]></source>
 			</trans-unit>
 			<trans-unit id="configure_test_dmail_group_uids" resname="configure_test_dmail_group_uids">
-				<source>List of UID numbers of test recipient lists</source>
+				<source>Comma separated list of test recipients (group uids)</source>
 			</trans-unit>
 			<trans-unit id="configure_test_dmail_group_uids_description" resname="configure_test_dmail_group_uids_description">
-				<source>Alternatively to sending test-mails to individuals, you can choose to send to a whole list. This is the list of recipient lists UID numbers available for this action.</source>
+				<source>Alternatively to send test-mails to individuals, you can send it to this groups.</source>
 			</trans-unit>
 			<trans-unit id="configure_test_tt_address_uids" resname="configure_test_tt_address_uids">
-				<source>List of UID numbers of test recipients (tt_address)</source>
+				<source>Comma separated list of test recipients (tt_address uids)</source>
 			</trans-unit>
 			<trans-unit id="configure_test_tt_address_uids_description" resname="configure_test_tt_address_uids_description">
-				<source>Before sending mails, you should test the mail content by sending test mails to one or more test recipients. The available recipients for testing are determined by this list of UID numbers. So first, find out the UID numbers (tt_address) of the recipients you wish to use for testing, then enter them here in a comma-separated list.</source>
+				<source>Alternatively to send test-mails to individuals, you can send it to this addresses.</source>
 			</trans-unit>
 			<trans-unit id="configure_testmail" resname="configure_testmail">
-				<source>Subject for the testmail.</source>
+				<source>Subject prefix for test mails</source>
 			</trans-unit>
 			<trans-unit id="configure_testmail_description" resname="configure_testmail_description">
 				<source>This will be prepended to the test mail subject</source>
