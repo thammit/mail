@@ -4,13 +4,13 @@
         <header/>
         <body>
             <trans-unit id="mlang_labels_tabdescr">
-                <source>Shows statistics</source>
+                <source>Shows reports</source>
             </trans-unit>
             <trans-unit id="mlang_labels_tablabel">
-                <source>Statistics</source>
+                <source>Report</source>
             </trans-unit>
             <trans-unit id="mlang_tabs_tab">
-                <source>Statistics</source>
+                <source>Report</source>
             </trans-unit>
         </body>
     </file>

@@ -432,7 +432,7 @@
 				<source>Download CSV</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_header" resname="mailgroup_header">
-				<source>Recipient List</source>
+				<source>Recipients</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import" resname="mailgroup_import">
 				<source>Import CSV into tt_address database table</source>
@@ -902,7 +902,7 @@
 				<source>Delivery ended</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_header" resname="stats_overview_header">
-				<source>Mail Statistics</source>
+				<source>Reports</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_queuing" resname="stats_overview_queuing">
 				<source>queuing</source>

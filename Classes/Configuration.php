@@ -10,7 +10,9 @@ use MEDIAESSENZ\Mail\Controller\MailControllerOld;
 use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\QueueControllerOld;
 use MEDIAESSENZ\Mail\Controller\NavFrameController;
+use MEDIAESSENZ\Mail\Controller\RecipientController;
 use MEDIAESSENZ\Mail\Controller\RecipientListControllerOld;
+use MEDIAESSENZ\Mail\Controller\ReportController;
 use MEDIAESSENZ\Mail\Controller\StatisticsControllerOld;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -94,8 +96,42 @@ final class Configuration
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
             'Mail',
             'Mail',
-            'queueExtbase',
+            'recipientExtbase',
             'after:mailExtbase',
+            [
+                RecipientController::class => 'index'
+            ],
+            [
+                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'access' => 'group,user',
+                'workspaces' => 'online',
+                'iconIdentifier' => 'mail-module-recipient-list',
+                'labels' => 'LLL:EXT:mail/Resources/Private/Language/RecipientModule.xlf',
+            ]
+        );
+
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+            'Mail',
+            'Mail',
+            'reportExtbase',
+            'after:recipientExtbase',
+            [
+                ReportController::class => 'index'
+            ],
+            [
+                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'access' => 'group,user',
+                'workspaces' => 'online',
+                'iconIdentifier' => 'mail-module-statistics',
+                'labels' => 'LLL:EXT:mail/Resources/Private/Language/StatisticModule.xlf',
+            ]
+        );
+
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+            'Mail',
+            'Mail',
+            'queueExtbase',
+            'after:reportExtbase',
             [
                 QueueController::class => 'index,trigger,delete'
             ],

@@ -1,0 +1,68 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+<h3>
+    <f:translate key="{lll}recip_select_mailgroup"/>
+</h3>
+<div class="panel panel-default">
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th class="col-icon nowrap"></th>
+            <th class="col-title col-responsive nowrap">
+                <f:translate key="{lll4}LGL.title"/>
+            </th>
+            <th>
+                <f:translate key="{lll4}LGL.type"/>
+            </th>
+            <th>
+                <f:translate key="{lll4}LGL.description"/>
+            </th>
+            <th>
+                <f:translate key="{lll}recip_group_amount"/>
+            </th>
+            <th class="col-control nowrap"></th>
+        </tr>
+        </thead>
+        <f:for each="{data.rows}" as="row">
+            <tr>
+                <td class="col-icon nowrap">
+                    <core:iconForRecord row="{row}" table="sys_dmail_group"/>
+                </td>
+                <td class="col-title col-responsive nowrap">
+                    {row.title}
+                </td>
+                <td class="nowrap">
+                    {row.type}
+                </td>
+                <td class="nowrap">
+                    {row.description}
+                </td>
+                <td class="text-center"><span class="badge rounded-pill bg-primary pb-1">{row.count}</span></td>
+                <td class="col-control nowrap">
+                    <be:link.editRecord uid="{row.uid}" table="sys_dmail_group" class="btn btn-default" title="Edit configuration">
+                        <core:icon identifier="actions-open" size="small"/>
+                    </be:link.editRecord>
+                    <f:be.link route="{settings.route}" parameters="{id:settings.mailSysFolderUid,group_uid:row.uid,cmd:'displayMailGroup', SET:{dmail_mode:'recip'}}"
+                               class="btn btn-default" title="Show recipients">
+                        <core:icon identifier="actions-view" size="small"/>
+                    </f:be.link>
+            </tr>
+        </f:for>
+    </table>
+</div>
+<a href="#" class="btn btn-default text-uppercase" onClick="{data.editOnClickLink}">
+    <core:icon identifier="actions-add"/>
+    <f:translate key="{lll}recip_create_mailgroup_msg"/>
+</a>
+<h3>
+    <f:translate key="{lll}mailgroup_import"/>
+</h3>
+<a class="btn btn-default text-uppercase" href="{data.moduleUrl}">
+    <core:icon identifier="content-csv" overlay="actions-arrow-up-alt"/>
+    <f:translate key="{lll}recip_import_mailgroup_msg"/>
+</a>
+</html>
