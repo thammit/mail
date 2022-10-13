@@ -96,7 +96,6 @@ abstract class OldAbstractController
         $this->uriBuilder = $uriBuilder ?? GeneralUtility::makeInstance(UriBuilder::class);
         $this->mailerService = $mailerService ?? GeneralUtility::makeInstance(MailerService::class);
         $this->recipientService = $recipientService ?? GeneralUtility::makeInstance(RecipientService::class);
-        $this->recipientService->setPageId($this->id);
         $this->sysDmailRepository = $sysDmailRepository ?? GeneralUtility::makeInstance(SysDmailRepository::class);
         $this->sysDmailGroupRepository = $sysDmailGroupRepository ?? GeneralUtility::makeInstance(SysDmailGroupRepository::class);
         $this->sysDmailMaillogRepository = $sysDmailMaillogRepository ?? GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
@@ -130,6 +129,7 @@ abstract class OldAbstractController
         $this->setCurrentAction(Action::cast($parsedBody['cmd'] ?? $queryParams['cmd'] ?? null));
         $this->pageUid = (int)($parsedBody['pageUid'] ?? $queryParams['pageUid'] ?? 0);
         $this->mailUid = (int)($parsedBody['mailUid'] ?? $queryParams['mailUid'] ?? 0);
+        $this->recipientService->setPageId($this->id);
 
         try {
             $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();

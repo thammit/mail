@@ -239,24 +239,24 @@ class RecipientService
 
                         // Make queries
                         if ($pidList) {
-                            $whichTables = intval($mailGroup['record_types']);
+                            $recordTypes = intval($mailGroup['record_types']);
                             // tt_address
-                            if ($whichTables & 1) {
+                            if ($recordTypes & 1) {
                                 $idLists['tt_address'] = $tempRepository
                                     ->getIdList('tt_address', $pidList, $groupUid, $mailGroup['categories']);
                             }
                             // fe_users
-                            if ($whichTables & 2) {
+                            if ($recordTypes & 2) {
                                 $idLists['fe_users'] = $tempRepository
                                     ->getIdList('fe_users', $pidList, $groupUid, $mailGroup['categories']);
                             }
                             // user table
-                            if ($userTable && ($whichTables & 4)) {
+                            if ($userTable && ($recordTypes & 4)) {
                                 $idLists[$userTable] = $tempRepository
                                     ->getIdList($userTable, $pidList, $groupUid, $mailGroup['categories']);
                             }
                             // fe_groups
-                            if ($whichTables & 8) {
+                            if ($recordTypes & 8) {
                                 if (!is_array($idLists['fe_users'])) {
                                     $idLists['fe_users'] = [];
                                 }
@@ -289,15 +289,15 @@ class RecipientService
                     case RecipientGroupType::QUERY:
                         // Special query list
                         $mailGroup = $this->update_SpecialQuery($mailGroup, $userTable);
-                        $whichTables = intval($mailGroup['record_types']);
+                        $recordTypes = intval($mailGroup['record_types']);
                         $table = '';
-                        if ($whichTables & 1) {
+                        if ($recordTypes & 1) {
                             $table = 'tt_address';
                         } else {
-                            if ($whichTables & 2) {
+                            if ($recordTypes & 2) {
                                 $table = 'fe_users';
                             } else {
-                                if ($userTable && ($whichTables & 4)) {
+                                if ($userTable && ($recordTypes & 4)) {
                                     $table = $userTable;
                                 }
                             }

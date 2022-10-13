@@ -8,13 +8,9 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use MEDIAESSENZ\Mail\Enumeration\Action;
-use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Service\ImportService;
-use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
-use MEDIAESSENZ\Mail\Utility\CsvUtility as MailCsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
@@ -23,7 +19,6 @@ use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\CsvUtility;
 
@@ -141,7 +136,7 @@ class RecipientListControllerOld extends OldAbstractController
                 $type = 1;
                 break;
             case Action::RECIPIENT_LIST_MAIL_GROUP:
-                $data = $this->displayMailGroup($this->compileMailGroup($this->group_uid));
+                $data = $this->displayMailGroup($this->recipientService->compileMailGroup($this->group_uid));
                 $type = 2;
                 break;
             case Action::RECIPIENT_LIST_IMPORT:
