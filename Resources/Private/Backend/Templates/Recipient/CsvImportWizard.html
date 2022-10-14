@@ -1,0 +1,50 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Default"/>
+
+<f:section name="content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
+    <h1><f:translate key="{lll}mailgroup_import"/></h1>
+    <h2><f:translate key="{lll}mailgroup_import_header_upload"/></h2>
+    <f:form action="csvImportWizardStepConfiguration" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="recipientListUpload" class="form-label">
+                <f:translate key="{lll}mailgroup_import_upload_file"/>
+            </label>
+            <input type="file" class="form-control" id="recipientListUpload" name="upload_1"/>
+            <f:form.hidden name="file[upload][1][data]" value="1"/>
+            <f:form.hidden name="file[upload][1][target]" value="{data.upload.target}"/>
+            <f:form.hidden name="csvImport[newFile]" value="{data.upload.newFile}"/>
+            <f:form.hidden name="csvImport[newFileUid]" value="{data.upload.newFileUid}"/>
+        </div>
+        <f:if condition="{data.upload.current}">
+            <f:translate key="{lll}mailgroup_import_current_file"/>
+            <f:if condition="{data.upload.fileInfo -> f:count()}">
+                {data.upload.fileInfo.name}
+                ({data.upload.fileInfo.extension};
+                {data.upload.fileInfo.size})
+            </f:if>
+        </f:if>
+        <p><strong>
+            <f:translate key="{lll}mailgroup_import_or"/>
+        </strong></p>
+
+        <div class="mb-3">
+            <label for="receipientListPlain" class="form-label">
+                <f:translate key="{lll}mailgroup_import_paste_csv"/>
+            </label>
+            <f:form.textarea name="csvImport[csv]" id="receipientListPlain" class="form-control"
+                             rows="10">{data.upload.csv}
+            </f:form.textarea>
+        </div>
+        <f:form.hidden name="csvImport[nextStep]" value="configuration"/>
+        <f:form.button name="csvImport[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
+            <f:translate key="{lll}mailgroup_import_next"/>
+        </f:form.button>
+    </f:form>
+</f:section>
+</html>

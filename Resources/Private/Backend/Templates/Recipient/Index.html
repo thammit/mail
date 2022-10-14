@@ -12,18 +12,7 @@
     <h1>
         <f:translate key="{lll}mailgroup_header"/>
     </h1>
-    <f:if condition="{type} == 1">
-        <f:render partial="Recipient/UserInfo" arguments="{_all}" />
-    </f:if>
-    <f:if condition="{type} == 2">
-        <f:render partial="Recipient/Recipients" arguments="{_all}" />
-    </f:if>
-    <f:if condition="{type} == 4">
-        <f:render partial="Recipient/Groups" arguments="{_all}" />
-    </f:if>
-    <f:if condition="{type} == 3">
-        <f:render partial="Recipient/Import" arguments="{_all}" />
-    </f:if>
+    <f:render partial="Recipient/Groups" arguments="{_all}" />
 </f:section>
 
 </html>

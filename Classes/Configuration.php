@@ -96,10 +96,10 @@ final class Configuration
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
             'Mail',
             'Mail',
-            'recipientExtbase',
+            'recipient',
             'after:mailExtbase',
             [
-                RecipientController::class => 'index,show,csvDownload,csvImportWizard'
+                RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport'
             ],
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
@@ -113,8 +113,8 @@ final class Configuration
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
             'Mail',
             'Mail',
-            'reportExtbase',
-            'after:recipientExtbase',
+            'report',
+            'after:recipient',
             [
                 ReportController::class => 'index'
             ],
@@ -131,7 +131,7 @@ final class Configuration
             'Mail',
             'Mail',
             'queueExtbase',
-            'after:reportExtbase',
+            'after:report',
             [
                 QueueController::class => 'index,trigger,delete'
             ],

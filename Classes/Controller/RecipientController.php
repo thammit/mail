@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
+use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -14,6 +15,7 @@ use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 
@@ -67,7 +69,6 @@ class RecipientController extends AbstractController
         }
 
         $this->view->assignMultiple([
-            'type' => 4,
             'data' => $data,
         ]);
 
@@ -199,8 +200,118 @@ class RecipientController extends AbstractController
         }
     }
 
-    public function csvImportWizardAction(): void
+    /**
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws AspectNotFoundException
+     * @throws \TYPO3\CMS\Core\Resource\Exception
+     */
+    public function csvImportWizardAction(): ResponseInterface
     {
-        $this->redirect('index');
+        $requestHostOnly = $this->request->getUri()->getHost();
+        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
+
+        /* @var $importService ImportService */
+        $importService = GeneralUtility::makeInstance(ImportService::class);
+        $importService->init($this->id, $httpReferer, $requestHostOnly);
+        $data = $importService->csvImport();
+
+        $this->view->assignMultiple([
+            'data' => $data,
+        ]);
+
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param array $csvImport
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws AspectNotFoundException
+     */
+    public function csvImportWizardStepConfigurationAction(array $csvImport = []): ResponseInterface
+    {
+        $requestHostOnly = $this->request->getUri()->getHost();
+        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
+
+        /* @var $importService ImportService */
+        $importService = GeneralUtility::makeInstance(ImportService::class);
+        $importService->init($this->id, $httpReferer, $requestHostOnly);
+        $data = $importService->csvImport('configuration', $csvImport);
+
+        $this->view->assignMultiple([
+            'data' => $data,
+        ]);
+
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param array $csvImport
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws AspectNotFoundException
+     */
+    public function csvImportWizardStepMappingAction(array $csvImport = []): ResponseInterface
+    {
+        $requestHostOnly = $this->request->getUri()->getHost();
+        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
+
+        /* @var $importService ImportService */
+        $importService = GeneralUtility::makeInstance(ImportService::class);
+        $importService->init($this->id, $httpReferer, $requestHostOnly);
+        $data = $importService->csvImport('mapping', $csvImport);
+
+        $this->view->assignMultiple([
+            'data' => $data,
+        ]);
+
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param array $csvImport
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws AspectNotFoundException
+     */
+    public function csvImportWizardStepStartImportAction(array $csvImport = []): ResponseInterface
+    {
+        $requestHostOnly = $this->request->getUri()->getHost();
+        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
+
+        /* @var $importService ImportService */
+        $importService = GeneralUtility::makeInstance(ImportService::class);
+        $importService->init($this->id, $httpReferer, $requestHostOnly);
+        $data = $importService->csvImport('startImport', $csvImport);
+
+        $this->view->assignMultiple([
+            'data' => $data,
+        ]);
+
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
     }
 }

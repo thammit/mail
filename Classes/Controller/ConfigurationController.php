@@ -28,7 +28,8 @@ class ConfigurationController  extends AbstractController
         }
 
         $this->view->assignMultiple([
-            'implodedParams' => $this->implodedParams,
+            'configuration' => $this->implodedParams,
+            'charsets' => array_unique(array_values(mb_list_encodings())),
             'backendUser' => [
                 'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',

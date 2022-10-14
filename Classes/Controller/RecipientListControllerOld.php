@@ -367,7 +367,7 @@ class RecipientListControllerOld extends OldAbstractController
 
                 if (($group['type'] ?? false) == 3) {
                     if (BackendUserUtility::getBackendUser()->check('tables_modify', 'tx_mail_domain_model_group')) {
-                        $data['special'] = $this->specialQuery($group);
+                        $data['special'] = $this->specialQuery();
                     }
                 }
         }
@@ -377,11 +377,9 @@ class RecipientListControllerOld extends OldAbstractController
     /**
      * Show HTML form to make special query
      *
-     * @param array $mailGroup Recipient list DB record
-     *
      * @return array HTML form to make a special query
      */
-    protected function specialQuery(array $mailGroup): array
+    protected function specialQuery(): array
     {
         $special = [];
 

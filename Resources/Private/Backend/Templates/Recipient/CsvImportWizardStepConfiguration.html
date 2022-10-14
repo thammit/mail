@@ -1,0 +1,149 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Default"/>
+
+<f:section name="content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
+    <h1><f:translate key="{lll}mailgroup_import"/></h1>
+    <h2><f:translate key="{lll}mailgroup_import_header_conf"/></h2>
+    <f:form action="csvImportWizardStepMapping" method="post" enctype="multipart/form-data">
+        <fieldset class="form-section mb-3">
+            <table class="table table-striped table-hover">
+                <tbody>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_header_conf"/>
+                    </td>
+                    <td>
+                        <f:if condition="{data.configuration.storage -> f:count()}">
+                            <f:form.select class="form-select form-control-adapt" name="csvImport[storage]" value="{data.configuration.storageSelected}">
+                                <f:for each="{data.configuration.storage}" as="storage">
+                                    <f:form.select.option value="{storage.val}">{storage.text}</f:form.select.option>
+                                </f:for>
+                            </f:form.select>
+                        </f:if>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_remove_existing"/>
+                    </td>
+                    <td>
+                        <f:form.checkbox name="csvImport[remove_existing]" value="1"
+                                         checked="{data.configuration.remove_existing} == 1"
+                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_first_fieldnames"/>
+                    </td>
+                    <td>
+                        <f:form.checkbox name="csvImport[first_fieldname]" value="1"
+                                         checked="{data.configuration.first_fieldname} == 1"
+                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_separator"/>
+                    </td>
+                    <td>
+                        <f:if condition="{data.configuration.delimiter -> f:count()}">
+                            <f:form.select class="form-select form-control-adapt"
+                                           name="csvImport[delimiter]"
+                                           value="{data.configuration.delimiterSelected}"
+                                           disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}">
+                                <f:for each="{data.configuration.delimiter}" as="delimiter">
+                                    <f:form.select.option value="{delimiter.val}">{delimiter.text}
+                                    </f:form.select.option>
+                                </f:for>
+                            </f:form.select>
+                        </f:if>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_encapsulation"/>
+                    </td>
+                    <td>
+                        <f:if condition="{data.configuration.encapsulation -> f:count()}">
+                            <f:form.select class="form-select form-control-adapt"
+                                           name="csvImport[encapsulation]"
+                                           value="{data.configuration.encapsulationSelected}"
+                                           disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}">
+                                <f:for each="{data.configuration.encapsulation}" as="encapsulation">
+                                    <f:form.select.option value="{encapsulation.val}">{encapsulation.text}
+                                    </f:form.select.option>
+                                </f:for>
+                            </f:form.select>
+                        </f:if>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_csv_validemail-description"/>
+                    </td>
+                    <td>
+                        <f:form.checkbox name="csvImport[valid_email]" value="1"
+                                         checked="{data.configuration.valid_email} == 1"
+                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_csv_dublette-description"/>
+                    </td>
+                    <td>
+                        <f:form.checkbox name="csvImport[remove_dublette]" value="1"
+                                         checked="{data.configuration.remove_dublette} == 1"
+                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_update_unique"/>
+                    </td>
+                    <td>
+                        <f:form.checkbox name="csvImport[update_unique]" value="1"
+                                         checked="{data.configuration.update_unique} == 1"
+                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <f:translate key="{lll}mailgroup_import_record_unique"/>
+                    </td>
+                    <td>
+                        <f:if condition="{data.configuration.record_unique -> f:count()}">
+                            <f:form.select class="form-select form-control-adapt"
+                                           name="csvImport[record_unique]"
+                                           value="{data.configuration.record_uniqueSelected}"
+                                           disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}">
+                                <f:for each="{data.configuration.record_unique}" as="recordUnique">
+                                    <f:form.select.option value="{recordUnique.val}">{recordUnique.text}
+                                    </f:form.select.option>
+                                </f:for>
+                            </f:form.select>
+                        </f:if>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </fieldset>
+        <f:form.hidden name="csvImport[newFile]" value="{data.configuration.newFile}"/>
+        <f:form.hidden name="csvImport[newFileUid]" value="{data.configuration.newFileUid}"/>
+        <f:form.hidden name="csvImport[nextStep]" value="mapping"/>
+        <f:link.action action="csvImportWizard" class="btn btn-default text-uppercase">
+            <f:translate key="{lll}mailgroup_import_back"/>
+        </f:link.action>
+        <f:form.button name="csvImport[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
+            <f:translate key="{lll}mailgroup_import_next"/>
+        </f:form.button>
+    </f:form>
+</f:section>
+</html>
