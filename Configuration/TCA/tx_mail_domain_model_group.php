@@ -10,6 +10,7 @@ return [
         'type' => 'type',
         'typeicon_column' => 'type',
         'typeicon_classes' => [
+            'default' => 'mail-group',
             \MEDIAESSENZ\Mail\Enumeration\RecipientGroupType::PAGES => 'mail-group',
             \MEDIAESSENZ\Mail\Enumeration\RecipientGroupType::CSV => 'mail-group',
             \MEDIAESSENZ\Mail\Enumeration\RecipientGroupType::STATIC => 'mail-group',

@@ -1,0 +1,104 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Default"/>
+
+<f:section name="content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
+    <h1>
+        {data.title} <span class="badge rounded-pill bg-primary">{data.totalRecipients}</span>
+    </h1>
+    <f:if condition="{data.group_link_listall}">
+        <a class="btn btn-default text-uppercase" href="{data.group_link_listall}">
+            <f:translate key="{lll}mailgroup_list_all"/>
+        </a>
+    </f:if>
+    <f:if condition="{data.tables -> f:count()}">
+        <div class="panel-group" id="mail-recipient-list-panel">
+            <f:variable name="open" value="0"/>
+            <f:if condition="{data.tables -> f:count()} == 1">
+                <f:variable name="open" value="1"/>
+            </f:if>
+            <f:for each="{data.tables}" as="table" iteration="recipientTablesIterator">
+                <f:variable name="title">
+                    <f:translate key="{lll}mailgroup_table_{table.table}" default="{table.table}"/>
+                </f:variable>
+                <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: data.uid, table: table.table}" class="btn btn-default btn-sm text-uppercase">
+                    <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
+                    <f:translate key="{lll}mailgroup_download"/>
+                </f:link.action></f:variable>
+                <f:render partial="Panel"
+                          arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:recipientTablesIterator.index, open:open, counter: table.numberOfRecipients, additionalHeading:additionalHeading}"
+                          contentAs="panelBody">
+                    <f:render section="RecipientsTable" arguments="{table: table, lll:lll}"/>
+                </f:render>
+            </f:for>
+        </div>
+    </f:if>
+    <f:if condition="{data.special}">
+        <h2>
+            <f:translate key="{lll}dmail_query"/>
+        </h2>
+        <h3>
+            <f:translate key="{lll}dmail_makeQuery"/>
+        </h3>
+        <f:form action="" method="post" name="dmailform" enctype="multipart/form-data">
+            <f:if condition="{data.special.selected}">
+                {data.special.selected}
+                <div style="padding-top: 20px;"></div>
+            </f:if>
+            {data.special.selectTables -> f:format.html()}
+            <f:form.hidden name="cmd" value="displayMailGroup"/>
+            <f:form.hidden name="group_uid" value="{data.uid}"/>
+            <f:form.submit class="btn btn-primary text-uppercase"
+                           value="{f:translate(key: '{lll}dmail_updateQuery')}"/>
+        </f:form>
+    </f:if>
+</f:section>
+
+<f:section name="RecipientsTable">
+    <f:if condition="{table.recipients}">
+        <div class="panel panel-default">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th></th>
+                    <th>Email</th>
+                </tr>
+                </thead>
+                <tbody>
+                <f:for each="{table.recipients}" as="row">
+                    <tr>
+                        <td class="col-icon nowrap" style="width: 1%">
+                            <core:iconForRecord row="{row}" table="{table.table}"/>
+                        </td>
+                        <td class="col-title col-responsive nowrap">
+                            <f:if condition="{row.uid} && {table.edit}">
+                                <be:link.editRecord uid="{row.uid}" table="{table.table}" title="{f:translate(key: '{lll}dmail_edit')}">
+                                    {row.name}
+                                </be:link.editRecord>
+                            </f:if>
+                        </td>
+                        <td class="col-control nowrap">
+                            <f:if condition="{row.uid} && {table.edit}">
+                                <be:link.editRecord class="btn btn-default" uid="{row.uid}" table="{table.table}" title="{f:translate(key: '{lll}dmail_edit')}">
+                                    <core:icon identifier="actions-open"/>
+                                </be:link.editRecord>
+                            </f:if>
+                        </td>
+                        <td class="nowrap">
+                            <f:link.email email="{row.email}"/>
+                        </td>
+                    </tr>
+                </f:for>
+                </tbody>
+            </table>
+        </div>
+    </f:if>
+</f:section>
+</html>

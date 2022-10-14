@@ -274,7 +274,7 @@ class RecipientService
                         } else {
                             $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $mailGroup['list'])));
                         }
-                        $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($recipients);
+                        $idLists['tx_mail_domain_model_group'] = RecipientUtility::removeDuplicates($recipients);
                         break;
                     case RecipientGroupType::STATIC:
                         // Static MM list
@@ -327,8 +327,8 @@ class RecipientService
                         if (is_array($idLists[$userTable]) && $userTable) {
                             $idLists[$userTable] = array_unique($idLists[$userTable]);
                         }
-                        if (is_array($idLists['PLAINLIST'])) {
-                            $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($idLists['PLAINLIST']);
+                        if (is_array($idLists['tx_mail_domain_model_group'])) {
+                            $idLists['tx_mail_domain_model_group'] = RecipientUtility::removeDuplicates($idLists['tx_mail_domain_model_group']);
                         }
                         break;
                     default:

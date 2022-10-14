@@ -6,17 +6,21 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
-use MEDIAESSENZ\Mail\Enumeration\Action;
+use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 
-class RecipientController  extends AbstractController
+class RecipientController extends AbstractController
 {
+    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,accepts_html';
+
     /**
      * @return ResponseInterface
      * @throws RouteNotFoundException
@@ -44,8 +48,8 @@ class RecipientController  extends AbstractController
             if (is_array($idLists['fe_users'] ?? false)) {
                 $totalRecipients += count($idLists['fe_users']);
             }
-            if (is_array($idLists['PLAINLIST'] ?? false)) {
-                $totalRecipients += count($idLists['PLAINLIST']);
+            if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
+                $totalRecipients += count($idLists['tx_mail_domain_model_group']);
             }
             if (is_array($idLists[$this->userTable] ?? false)) {
                 $totalRecipients += count($idLists[$this->userTable]);
@@ -56,7 +60,8 @@ class RecipientController  extends AbstractController
                 'title' => $recipientGroup->getTitle(),
                 'type' => $recipientGroup->getType(),
                 'typeProcessed' => htmlspecialchars(BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $recipientGroup->getType())),
-                'description' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'description', htmlspecialchars($recipientGroup->getDescription())),
+                'description' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'description',
+                    htmlspecialchars($recipientGroup->getDescription())),
                 'count' => $totalRecipients,
             ];
         }
@@ -75,12 +80,123 @@ class RecipientController  extends AbstractController
 
     /**
      * @param Group $group
-     * @return void
-     * @throws StopActionException
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function showAction(Group $group): void
+    public function showAction(Group $group): ResponseInterface
     {
-        $this->redirect('index');
+        $result = $this->recipientService->compileMailGroup($group->getUid());
+        $totalRecipients = 0;
+        $idLists = $result['queryInfo']['id_lists'];
+        if (is_array($idLists['tt_address'] ?? false)) {
+            $totalRecipients += count($idLists['tt_address']);
+        }
+        if (is_array($idLists['fe_users'] ?? false)) {
+            $totalRecipients += count($idLists['fe_users']);
+        }
+        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
+            $totalRecipients += count($idLists['tx_mail_domain_model_group']);
+        }
+        if (is_array($idLists[$this->userTable] ?? false)) {
+            $totalRecipients += count($idLists[$this->userTable]);
+        }
+
+        $data = [
+            'uid' => $group->getUid(),
+            'title' => $group->getTitle(),
+            'totalRecipients' => $totalRecipients,
+            'tables' => [],
+            'special' => [],
+        ];
+
+        $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
+
+        if (is_array($idLists['tt_address'] ?? false)) {
+            $rows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+
+            $data['tables']['tt_address'] = [
+                'table' => 'tt_address',
+                'recipients' => $rows,
+                'numberOfRecipients' => count($rows),
+                'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tt_address'),
+                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tt_address'),
+            ];
+        }
+        if (is_array($idLists['fe_users'] ?? false)) {
+            $rows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+            $data['tables']['fe_users'] = [
+                'table' => 'fe_users',
+                'recipients' => $rows,
+                'numberOfRecipients' => count($rows),
+                'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'fe_users'),
+                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'fe_users'),
+            ];
+        }
+        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
+            $data['tables']['tx_mail_domain_model_group'] = [
+                'table' => 'tx_mail_domain_model_group',
+                'recipients' => $idLists['tx_mail_domain_model_group'],
+                'numberOfRecipients' => count($idLists['tx_mail_domain_model_group']),
+                'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tx_mail_domain_model_group'),
+                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tx_mail_domain_model_group'),
+            ];
+        }
+        if (is_array($idLists[$this->userTable] ?? false)) {
+            $rows = $tempRepository->fetchRecordsListValues($idLists[$this->userTable], $this->userTable);
+            $data['tables'][$this->userTable] = [
+                'table' => $this->userTable,
+                'recipients' => $rows,
+                'numberOfRecipients' => count($rows),
+                'show' => BackendUserUtility::getBackendUser()->check('tables_select', $this->userTable),
+                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $this->userTable),
+            ];
+        }
+
+        $this->view->assignMultiple([
+            'data' => $data,
+        ]);
+
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param Group $group
+     * @param string $table
+     * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws StopActionException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function csvDownloadAction(Group $group, string $table): void
+    {
+        $result = $this->recipientService->compileMailGroup($group->getUid());
+        $idLists = $result['queryInfo']['id_lists'];
+
+        if ($table === 'tx_mail_domain_model_group') {
+            CsvUtility::downloadCSV($idLists['tx_mail_domain_model_group']);
+        } else {
+            if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $table)) {
+                if (BackendUserUtility::getBackendUser()->check('tables_select', $table)) {
+                    $fields = $table === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
+                    $fields .= ',tstamp';
+
+                    $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
+                    $rows = $tempRepository->fetchRecordsListValues($idLists[$table], $table,
+                        GeneralUtility::trimExplode(',', $fields, true));
+                    CsvUtility::downloadCSV($rows);
+                } else {
+                    ViewUtility::addErrorToFlashMessageQueue('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
+                    $this->redirect('show');
+                }
+            }
+        }
     }
 
     public function csvImportWizardAction(): void

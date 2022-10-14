@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use MEDIAESSENZ\Mail\Repository\PagesRepository;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CsvUtility
 {
@@ -156,5 +154,33 @@ class CsvUtility
 
         return $csv;
     }
+
+    /**
+     * Send csv values as download by sending appropriate HTML header
+     *
+     * @param array $idArr Values to be put into csv
+     *
+     * @return void Sent HML header for a file download
+     */
+    public static function downloadCSV(array $idArr)
+    {
+        $lines = [];
+        if (count($idArr)) {
+            reset($idArr);
+            $lines[] = \TYPO3\CMS\Core\Utility\CsvUtility::csvValues(array_keys(current($idArr)));
+
+            reset($idArr);
+            foreach ($idArr as $rec) {
+                $lines[] = \TYPO3\CMS\Core\Utility\CsvUtility::csvValues($rec);
+            }
+        }
+
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=mail_recipients_' . date('dmy-Hi') . '.csv');
+        echo implode(CR . LF, $lines);
+        exit;
+    }
+
+
 
 }

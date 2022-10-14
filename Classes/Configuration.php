@@ -99,7 +99,7 @@ final class Configuration
             'recipientExtbase',
             'after:mailExtbase',
             [
-                RecipientController::class => 'index,show,csvImportWizard'
+                RecipientController::class => 'index,show,csvDownload,csvImportWizard'
             ],
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
