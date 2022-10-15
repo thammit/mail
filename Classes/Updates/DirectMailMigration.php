@@ -109,7 +109,6 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'recursive' => $record['recursive'],
                         'children' => $record['mail_groups'],
                         'categories' => $record['select_categories'],
-                        'sys_language_uid' => $record['sys_language_uid'],
                     ]);
             }
         }
