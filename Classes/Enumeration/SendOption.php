@@ -7,8 +7,8 @@ use TYPO3\CMS\Core\Type\Enumeration;
 
 class SendOption extends Enumeration
 {
-    const NONE = 0;
-    const PLAIN_TEXT_ONLY = 1;
-    const HTML_ONLY = 2;
-    const BOTH = 3;
+    const NONE              = 0b00000000;
+    const PLAIN_TEXT_ONLY   = 0b00000001;
+    const HTML_ONLY         = 0b00000010;
+    const BOTH              = 0b00000011;
 }

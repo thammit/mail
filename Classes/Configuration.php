@@ -116,7 +116,7 @@ final class Configuration
             'report',
             'after:recipient',
             [
-                ReportController::class => 'index,show'
+                ReportController::class => 'index,show,recalculateCache'
             ],
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',

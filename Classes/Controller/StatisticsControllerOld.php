@@ -453,9 +453,13 @@ class StatisticsControllerOld extends OldAbstractController
 
         $compactView = $this->directMail_compactView($row);
 
-        $mailResponsesGeneral = $this->mailResponsesGeneral($row['uid']);
         $tables = [];
+
+
+        // General information
+        $mailResponsesGeneral = $this->mailResponsesGeneral($row['uid']);
         $tables[1] = $mailResponsesGeneral['table'];
+
         $uniqueHtmlResponses = $mailResponsesGeneral['uniqueHtmlResponses'];
         $uniquePlainResponses = $mailResponsesGeneral['uniquePlainResponses'];
         $totalSent = $mailResponsesGeneral['totalSent'];
@@ -541,6 +545,7 @@ class StatisticsControllerOld extends OldAbstractController
             }
         }
 
+        // Responses
         $tables[2] = [
             'head' => [
                 '',
@@ -707,37 +712,6 @@ class StatisticsControllerOld extends OldAbstractController
             }
         }
 
-        $tables[5] = [
-            'head' => [
-                '',
-                'stats_HTML_link_nr',
-                'stats_plaintext_link_nr',
-                'stats_total',
-                'stats_HTML',
-                'stats_plaintext',
-                '',
-            ],
-            'body' => $tblLines,
-        ];
-
-        if ($urlCounter['total']) {
-            /**
-             * Hook for cmd_stats_linkResponses
-             */
-            if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats_linkResponses'])) {
-                $hookObjectsArr = [];
-                foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats_linkResponses'] as $classRef) {
-                    $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-                }
-
-                foreach ($hookObjectsArr as $hookObj) {
-                    if (method_exists($hookObj, 'cmd_stats_linkResponses')) {
-                        $tables[5]['body'] = $hookObj->cmd_stats_linkResponses($tblLines, $this);
-                    }
-                }
-            }
-        }
-
         // ******************
         // Returned mails
         // ******************
@@ -760,6 +734,8 @@ class StatisticsControllerOld extends OldAbstractController
         $responseResult = $this->sysDmailMaillogRepository->countReturnCode($row['uid']);
         $responseResult = $this->changekeyname($responseResult, 'counter', 'COUNT(*)');
 
+
+        // Mails returned
         $tables[4] = [
             'head' => [
                 '',
@@ -826,7 +802,38 @@ class StatisticsControllerOld extends OldAbstractController
             'url' => $thisurl,
         ];
 
-        $tempRepository = $this->tempRepository;
+
+        // table created by hooks
+        $tables[5] = [
+            'head' => [
+                '',
+                'stats_HTML_link_nr',
+                'stats_plaintext_link_nr',
+                'stats_total',
+                'stats_HTML',
+                'stats_plaintext',
+                '',
+            ],
+            'body' => $tblLines,
+        ];
+
+        if ($urlCounter['total']) {
+            /**
+             * Hook for cmd_stats_linkResponses
+             */
+            if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats_linkResponses'])) {
+                $hookObjectsArr = [];
+                foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats_linkResponses'] as $classRef) {
+                    $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
+                }
+
+                foreach ($hookObjectsArr as $hookObj) {
+                    if (method_exists($hookObj, 'cmd_stats_linkResponses')) {
+                        $tables[5]['body'] = $hookObj->cmd_stats_linkResponses($tblLines, $this);
+                    }
+                }
+            }
+        }
 
         // Find all returned mail
         if ($this->returnList || $this->returnDisable || $this->returnCSV) {
@@ -834,13 +841,13 @@ class StatisticsControllerOld extends OldAbstractController
             $idLists = $this->getIdLists($rrows);
             if ($this->returnList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['returnList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['returnList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -854,13 +861,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->returnDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['returnDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['returnDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -870,13 +877,13 @@ class StatisticsControllerOld extends OldAbstractController
             if ($this->returnCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -898,13 +905,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->unknownList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['unknownList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['unknownList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -918,13 +925,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->unknownDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['unknownDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['unknownDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -934,13 +941,13 @@ class StatisticsControllerOld extends OldAbstractController
             if ($this->unknownCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -962,13 +969,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->fullList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['fullList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['fullList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -982,13 +989,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->fullDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['fullDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['fullDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -998,13 +1005,13 @@ class StatisticsControllerOld extends OldAbstractController
             if ($this->fullCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -1026,13 +1033,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->badHostList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['badHostList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['badHostList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -1046,13 +1053,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->badHostDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['badHostDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['badHostDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -1062,14 +1069,14 @@ class StatisticsControllerOld extends OldAbstractController
             if ($this->badHostCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
 
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -1092,13 +1099,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->badHeaderList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['badHeaderList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['badHeaderList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -1112,13 +1119,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->badHeaderDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['badHeaderDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['badHeaderDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -1128,13 +1135,13 @@ class StatisticsControllerOld extends OldAbstractController
             if ($this->badHeaderCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -1157,13 +1164,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->reasonUnknownList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['reasonUnknownList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['reasonUnknownList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -1177,13 +1184,13 @@ class StatisticsControllerOld extends OldAbstractController
 
             if ($this->reasonUnknownDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $tables[6]['reasonUnknownDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $tables[6]['reasonUnknownDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -1193,13 +1200,13 @@ class StatisticsControllerOld extends OldAbstractController
             if ($this->reasonUnknownCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -1214,33 +1221,31 @@ class StatisticsControllerOld extends OldAbstractController
             }
         }
 
-        /**
-         * Hook for cmd_stats_postProcess
-         * insert a link to open extended importer
-         */
-        $output = '';
-        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats'] ?? false)) {
-            $hookObjectsArr = [];
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats'] as $classRef) {
-                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-            }
-            //@TODO
-            // assigned $output to class property to make it acesssible inside hook
-            $this->output = $output;
+//        /**
+//         * Hook for cmd_stats_postProcess
+//         * insert a link to open extended importer
+//         */
+//        $output = '';
+//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats'] ?? false)) {
+//            $hookObjectsArr = [];
+//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod4']['cmd_stats'] as $classRef) {
+//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
+//            }
+//            //@TODO
+//            // assigned $output to class property to make it acesssible inside hook
+//            $this->output = $output;
+//
+//            // and clear the former $output to collect hoot return code there
+//            $output = '';
+//
+//            foreach ($hookObjectsArr as $hookObj) {
+//                if (method_exists($hookObj, 'cmd_stats_postProcess')) {
+//                    $output .= $hookObj->cmd_stats_postProcess($row, $this);
+//                }
+//            }
+//        }
 
-            // and clear the former $output to collect hoot return code there
-            $output = '';
-
-            foreach ($hookObjectsArr as $hookObj) {
-                if (method_exists($hookObj, 'cmd_stats_postProcess')) {
-                    $output .= $hookObj->cmd_stats_postProcess($row, $this);
-                }
-            }
-        }
-
-        $this->noView = 1;
-
-        return ['out' => $output, 'compactView' => $compactView, 'thisurl' => $thisurl, 'tables' => $tables];
+        return ['compactView' => $compactView, 'thisurl' => $thisurl, 'tables' => $tables];
     }
 
     private function getIdLists($rrows): array
@@ -1348,10 +1353,10 @@ class StatisticsControllerOld extends OldAbstractController
             'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $row['priority']),
             'encoding' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'encoding', $row['encoding']),
             'charset' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'charset', $row['charset']),
-            'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'sendOptions', $row['sendOptions']) . ($row['attachment'] ? '; ' : ''),
+            'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options', $row['send_options']) . ($row['attachment'] ? '; ' : ''),
             'attachment' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'attachment', $row['attachment']),
-            'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowedFormat', $row['flowedFormat']),
-            'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'includeMedia', $row['include_media']),
+            'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowed_format', $row['flowed_format']),
+            'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $row['include_media']),
             'delBegin' => $row['scheduled_begin'] ? BackendUtility::datetime($row['scheduled_begin']) : '-',
             'delEnd' => $row['scheduled_end'] ? BackendUtility::datetime($row['scheduled_end']) : '-',
             'totalRecip' => $this->countTotalRecipientFromQueryInfo($row['query_info']),
@@ -1447,7 +1452,7 @@ class StatisticsControllerOld extends OldAbstractController
                         $recRec['response'][] = $row['tstamp'];
                         break;
                     case '0':
-                        $recRec['recieved_html'] = $row['forma_sent'] & 1;
+                        $recRec['recieved_html'] = $row['format_sent'] & 1;
                         $recRec['recieved_plain'] = $row['format_sent'] & 2;
                         $recRec['size'] = $row['size'];
                         $recRec['tstamp'] = $row['tstamp'];

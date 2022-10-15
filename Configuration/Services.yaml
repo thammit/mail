@@ -10,6 +10,9 @@ services:
   MEDIAESSENZ\Mail\Mail\Mailer:
     public: true
 
+  MEDIAESSENZ\Mail\Service\MailService:
+    public: true
+
   MEDIAESSENZ\Mail\Service\MailerService:
     public: true
 

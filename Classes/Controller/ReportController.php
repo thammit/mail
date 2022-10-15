@@ -9,6 +9,7 @@ use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 
 class ReportController extends AbstractController
 {
@@ -60,11 +61,16 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
      */
     public function showAction(Mail $mail): ResponseInterface
     {
+        $this->mailService->setMail($mail);
         $this->view->assignMultiple([
-            'data' => $data,
+            'mailInfo' => $this->mailService->getMailInfo(),
+            'generalInfo' => $this->mailService->getGeneralInfo(),
+            'responsesInfo' => $this->mailService->getResponsesInfo(),
             'backendUser' => [
                 'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
@@ -77,5 +83,14 @@ class ReportController extends AbstractController
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
         return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @throws StopActionException
+     */
+    public function recalculateCacheAction(Mail $mail): void
+    {
+        // todo add code to refresh cache
+        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 }

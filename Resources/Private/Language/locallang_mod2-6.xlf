@@ -809,7 +809,7 @@
 				<source>Count</source>
 			</trans-unit>
 			<trans-unit id="stats_direct_mail" resname="stats_direct_mail">
-				<source>Statistics for mail</source>
+				<source>Mail</source>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned" resname="stats_disable_returned">
 				<source>Disable returned recipients</source>
@@ -1008,7 +1008,7 @@
 				<source>Delivery begun/ended</source>
 			</trans-unit>
 			<trans-unit id="view_dmail" resname="view_dmail">
-				<source>Direct Mail</source>
+				<source>Source</source>
 			</trans-unit>
 			<trans-unit id="view_flowed" resname="view_flowed">
 				<source>Flowed text</source>

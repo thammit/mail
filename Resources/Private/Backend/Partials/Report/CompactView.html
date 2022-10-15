@@ -7,21 +7,21 @@
 
 <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
 
-<f:variable name="mailInfo" value="{
-        0: '{f:translate(key:\'{lll2}sys_dmail.priority\')}: {row.priority}',
-        1: '{f:translate(key:\'{lll2}sys_dmail.transfer_encoding\')}: {row.encoding};',
-        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {row.charset};'
+<f:variable name="mailFormatAttachementInfo" value="{
+        0: '{f:translate(key:\'{lll2}sys_dmail.priority\')}: {mailInfo.mail.priority}',
+        1: '{f:translate(key:\'{lll2}sys_dmail.transfer_encoding\')}: {mailInfo.mail.encoding}',
+        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {mailInfo.mail.charset}'
 }"/>
 
-<f:variable name="dmailInfo" value="{
-        0: '{f:translate(key:\'{lll}view_media\')}: {row.includeMedia}',
-        1: '{f:translate(key:\'{lll}view_flowed\')}: {row.flowedFormat};'
+<f:variable name="sourceInfo" value="{
+        0: '{f:translate(key:\'{lll}view_media\')}: {mailInfo.includeMedia}',
+        1: '{f:translate(key:\'{lll}view_flowed\')}: {mailInfo.flowedFormat}'
 }"/>
 
 <f:variable name="fromInfo" value="{
-        0: '{f:translate(key:\'{lll}view_replyto\')}: {row.replyto_name} {row.replyto_email}',
-        1: '{f:translate(key:\'{lll2}sys_dmail.organisation\')}: {row.organisation};',
-        2: '{f:translate(key:\'{lll2}sys_dmail.return_path\')}: {row.return_path}'
+        0: '{f:translate(key:\'{lll}view_replyto\')}: {mailInfo.mail.replytoName} {mailInfo.mail.replyToEmail}',
+        1: '{f:translate(key:\'{lll2}sys_dmail.organisation\')}: {mailInfo.mail.organisation}',
+        2: '{f:translate(key:\'{lll2}sys_dmail.return_path\')}: {mailInfo.mail.returnPath}'
 }"/>
 
 <h2>
@@ -32,7 +32,7 @@
         <thead>
         <tr>
             <th colspan="3">
-                <core:iconForRecord row="{row}" table="tx_mail_domain_model_mail" size="small" /> {row.subject}
+                <core:iconForRecord row="{uid: mailInfo.mail.uid, type: 0}" table="tx_mail_domain_model_mail" size="small" /> {mailInfo.mail.subject}
             </th>
         </tr>
         </thead>
@@ -40,35 +40,42 @@
             <th>
                 <f:translate key="{lll}view_from"/>
             </th>
-            <td>{row.from_name} &lt;{row.from_email}&gt;</td>
+            <td>{mailInfo.mail.fromName} &lt;{mailInfo.mail.fromEmail}&gt;</td>
             <td><f:render section="help" arguments="{fromInfo}"/></td>
         </tr>
         <tr>
             <th>
                 <f:translate key="{lll}view_dmail"/>
             </th>
-            <td>{row.type} : {row.dmailData}</td>
-            <td><f:render section="help" arguments="{dmailInfo}"/></td>
+            <td>{mailInfo.type}{mailInfo.dmailData}</td>
+            <td><f:render section="help" arguments="{sourceInfo}"/></td>
         </tr>
         <tr>
             <th>
                 <f:translate key="{lll}view_mail"/>
             </th>
-            <td>{row.sendOptions}{row.attachment}</td>
-            <td><f:render section="help" arguments="{mailInfo}"/></td>
+            <td>
+                {mailInfo.sendOptions}
+                <f:if condition="{mailInfo.mail.attachment}">
+                    <f:for each="{mailInfo.mail.attachment}" as="attachment">
+                        {attachment -> f:debug(inline:1)}
+                    </f:for>
+                </f:if>
+            </td>
+            <td><f:render section="help" arguments="{mailFormatAttachementInfo}"/></td>
         </tr>
         <tr>
             <th>
                 <f:translate key="{lll}view_delivery_begin_end"/>
             </th>
-            <td>{row.delBegin} / {row.delEnd}</td>
+            <td>{mailInfo.mail.scheduledBegin -> f:format.date(format: 'd.m.Y h:i')} / {mailInfo.mail.scheduledEnd -> f:format.date(format: 'd.m.Y h:i')}</td>
             <td>&nbsp;</td>
         </tr>
         <tr>
             <th>
                 <f:translate key="{lll}view_recipient_total_sent"/>
             </th>
-            <td>{row.totalRecip} / {row.sentRecip}</td>
+            <td>{mailInfo.recipients} / {mailInfo.sentRecipients}</td>
             <td>&nbsp;</td>
         </tr>
     </table>

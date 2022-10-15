@@ -12,29 +12,28 @@
     <h1>
         <f:translate key="{lll}stats_overview_header"/>
     </h1>
-    <p><a class="btn btn-default text-uppercase" href="{dataStats.thisurl}">
-        <core:icon identifier="actions-refresh"/>
-        <f:translate key="{lll}stats_recalculate_stats"/>
-    </a></p>
+    <p>
+        <f:link.action action="recalculateCache" arguments="{mail:mailInfo.mail.uid}" class="btn btn-default text-uppercase"><core:icon identifier="actions-refresh"/> <f:translate key="{lll}stats_recalculate_stats"/></f:link.action>
+    </p>
 
     <div class="row">
         <div class="col-12 col-lg-6 col-xxl-4">
-            <f:render partial="Report/CompactView" arguments="{row:dataStats.compactView, lll:lll}"/>
+            <f:render partial="Report/CompactView" arguments="{mailInfo:mailInfo, lll:lll}"/>
         </div>
-        <f:if condition="{dataStats.tables.1}">
+        <f:if condition="{generalInfo}">
             <div class="col-12 col-lg-6 col-xxl-4">
                 <h2>
                     <f:translate key="{lll}stats_general_information"/>
                 </h2>
-                <f:render section="table" arguments="{table:dataStats.tables.1, lll:lll}"/>
+                <f:render section="table" arguments="{table:generalInfo.table, lll:lll}"/>
             </div>
         </f:if>
-        <f:if condition="{dataStats.tables.2}">
+        <f:if condition="{responsesInfo}">
             <div class="col-12 col-lg-6 col-xxl-4">
                 <h2>
                     <f:translate key="{lll}stats_response"/>
                 </h2>
-                <f:render section="table" arguments="{table:dataStats.tables.2, lll:lll}"/>
+                <f:render section="table" arguments="{table:responsesInfo, lll:lll}"/>
             </div>
         </f:if>
         <f:if condition="{dataStats.tables.4}">
@@ -373,7 +372,6 @@
         </f:if>
     </f:if>
 
-    <f:format.raw>{dataStats.out}</f:format.raw>
 </f:section>
 
 <f:section name="table">
