@@ -82,7 +82,7 @@ final class Configuration
             'mailExtbase',
             'top',
             [
-                MailController::class => 'index,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,openMail,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete'
+                MailController::class => 'index,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,openMail,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete,noPageSelected'
             ],
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
@@ -116,7 +116,7 @@ final class Configuration
             'report',
             'after:recipient',
             [
-                ReportController::class => 'index,show,recalculateCache'
+                ReportController::class => 'index,show,showTotalReturned,disableTotalReturned,csvExportTotalReturned,showUnknown,disableUnknown,csvExportUnknown,showFull,disableFull,csvExportFull,showBadHost,disableBadHost,csvExportBadHost,showBadHeader,disableBadHeader,csvExportBadHeader,showReasonUnknown,disableReasonUnknown,csvExportReasonUnknown,recalculateCache'
             ],
             [
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',

@@ -1,0 +1,71 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<h2>
+    <f:translate key="{lll}stats_response_link"/>
+</h2>
+
+<div class="panel panel-default mb-3">
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th></th>
+            <th>
+                <f:translate key="{lll}stats_HTML_link_nr"/>
+            </th>
+            <th>
+                <f:translate key="{lll}stats_plaintext_link_nr"/>
+            </th>
+            <th>
+                <f:translate key="{lll}stats_total"/>
+            </th>
+            <th>
+                <f:translate key="{lll}stats_HTML"/>
+            </th>
+            <th>
+                <f:translate key="{lll}stats_plaintext"/>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <f:for each="{data}" as="tr">
+            <tr>
+                <f:for each="{tr}" as="td" iteration="tdIterator">
+                    <f:if condition="{tdIterator.isFirst}">
+                        <f:then>
+                            <th>
+                        </f:then>
+                        <f:else>
+                            <td>
+                        </f:else>
+                    </f:if>
+                    <f:if condition="{tdIterator.isLast}">
+                        <f:then>
+                            <a href="{td -> f:format.html()}" target="_blank">
+                                <core:icon identifier="apps-toolbar-menu-search" size="small"/>
+                            </a>
+                        </f:then>
+                        <f:else>
+                            {td -> f:format.html()}
+                        </f:else>
+                    </f:if>
+                    <f:if condition="{tdIterator.isFirst}">
+                        <f:then>
+                            </th>
+                        </f:then>
+                        <f:else>
+                            </td>
+                        </f:else>
+                    </f:if>
+                </f:for>
+            </tr>
+        </f:for>
+        </tbody>
+    </table>
+</div>
+</html>

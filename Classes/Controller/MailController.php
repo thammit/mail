@@ -13,7 +13,6 @@ use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TtContentCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
@@ -28,7 +27,6 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -46,6 +44,15 @@ class MailController extends AbstractController
 {
     private string $cshKey = '_MOD_Mail_Mail';
 
+    public function noPageSelectedAction(): ResponseInterface
+    {
+        ViewUtility::addWarningToFlashMessageQueue('Please select a mail page in the page tree.', 'No valid page selected');
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
     /**
      * @return ResponseInterface
      * @throws DBALException
@@ -54,6 +61,9 @@ class MailController extends AbstractController
      */
     public function indexAction(): ResponseInterface
     {
+        if ($this->id === 0) {
+            $this->redirect('noPageSelected');
+        }
         if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
             // the currently selected page is not a mail module sys folder
             $openMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);

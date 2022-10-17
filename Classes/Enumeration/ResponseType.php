@@ -9,7 +9,7 @@ class ResponseType extends Enumeration
 {
     const PING             = -1;
     const ALL              = 0;
-    const HREF             = 1;
+    const HTML             = 1;
     const PLAIN            = 2;
     const FAILED           = -127;
 }
