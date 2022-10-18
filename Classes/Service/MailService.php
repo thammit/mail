@@ -7,26 +7,29 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use DOMDocument;
 use DOMElement;
-use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
+use MEDIAESSENZ\Mail\Domain\Model\Address;
+use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
-use MEDIAESSENZ\Mail\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
-use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
-use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class MailService
 {
@@ -47,6 +50,7 @@ class MailService
     public function __construct(
         protected LogRepository $logRepository,
         protected AddressRepository $addressRepository,
+        protected FrontendUserRepository $frontendUserRepository,
         protected SysDmailMaillogRepository $sysDmailMaillogRepository,
         protected TempRepository $tempRepository
     ) {
@@ -61,13 +65,13 @@ class MailService
     public function init(Mail $mail): void
     {
         $this->mail = $mail;
-        $this->responseTypesTable = $this->changekeyname($this->sysDmailMaillogRepository->countSysDmailMaillogsResponseTypeByMid($this->mail->getUid()),
+        $this->responseTypesTable = $this->changeKeyName($this->sysDmailMaillogRepository->countSysDmailMaillogsResponseTypeByMid($this->mail->getUid()),
             'counter', 'COUNT(*)');
         // Plaintext/HTML
         $res = $this->sysDmailMaillogRepository->countSysDmailMaillogAllByMid($this->mail->getUid());
 
         /* this function is called to change the key from 'COUNT(*)' to 'counter' */
-        $res = $this->changekeyname($res, 'counter', 'COUNT(*)');
+        $res = $this->changeKeyName($res, 'counter', 'COUNT(*)');
 
         $textHtml = [];
         foreach ($res as $row2) {
@@ -89,7 +93,7 @@ class MailService
         $this->plainSent = (int)($textHtml['2'] ?? 0);
 
         $this->returnCodesTable = $this->sysDmailMaillogRepository->countReturnCode($this->mail->getUid());
-        $this->returnCodesTable = $this->changekeyname($this->returnCodesTable, 'counter', 'COUNT(*)');
+        $this->returnCodesTable = $this->changeKeyName($this->returnCodesTable, 'counter', 'COUNT(*)');
     }
 
     /**
@@ -190,7 +194,7 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getReturnedList(): array
+    public function getReturnedData(): array
     {
         return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid());
     }
@@ -200,7 +204,7 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getUnknownList(): array
+    public function getUnknownData(): array
     {
         return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [550, 553]);
     }
@@ -210,7 +214,7 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getFullList(): array
+    public function getMailboxFullData(): array
     {
         return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [551]);
     }
@@ -220,7 +224,7 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getBadHostList(): array
+    public function getBadHostData(): array
     {
         return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [552]);
     }
@@ -230,7 +234,7 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getBadHeaderList(): array
+    public function getBadHeaderData(): array
     {
         return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [554]);
     }
@@ -240,407 +244,52 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getReasonUnknownList(): array
+    public function getReasonUnknownData(): array
     {
         return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [-1]);
     }
 
     /**
-     * @throws Exception
-     * @throws DBALException
+     * @param array $data
+     * @return int
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
-    public function getReturnedMailsDetails(): array
+    public function disableRecipients(array $data): int
     {
-        // Find all returned mail
-        $returnedMailsDetails = [];
+        $affectedRecipients = 0;
+        $affectedRecipients += $data['addresses'] ? $this->disableAddresses($data['addresses']) : 0;
+        $affectedRecipients += $data['frontendUsers'] ? $this->disableFrontendUsers($data['frontendUsers']) : 0;
 
-        // Find all returned mail
-        if ($this->returnList || $this->returnDisable || $this->returnCSV) {
-            $rrows = $this->sysDmailMaillogRepository->findAllReturnedMail($this->mail->getUid());
-            $idLists = $this->getIdLists($rrows);
-            if ($this->returnList) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['returnList']['tt_address'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['returnList']['fe_users'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
-                    ];
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $returnedMailsDetails['returnList']['PLAINLIST'] = [
-                        'PLAINLIST' => join('</li><li>', $idLists['PLAINLIST']),
-                    ];
-                }
+        return $affectedRecipients;
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function csvDownloadRecipients(array $data): void
+    {
+        $emails = [];
+        if ($data['addresses']) {
+            /** @var Address $address */
+            foreach ($data['addresses'] as $address) {
+                $emails[] = ['uid' => $address->getUid(), 'email' => $address->getEmail(), 'name' => $address->getName()];
             }
-
-            if ($this->returnDisable) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['returnDisable']['tt_address'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['returnDisable']['fe_users'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'fe_users'),
-                    ];
-                }
+        }
+        if ($data['frontendUsers']) {
+            /** @var FrontendUser $frontendUser */
+            foreach ($data['frontendUsers'] as $frontendUser) {
+                $emails[] = ['uid' => $frontendUser->getUid(), 'email' => $frontendUser->getEmail(), 'name' => $frontendUser->getName()];
             }
-
-            if ($this->returnCSV) {
-                $emails = [];
-                if (count($idLists['tt_address'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['fe_users'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $emails = array_merge($emails, $idLists['PLAINLIST']);
-                }
-
-                $returnedMailsDetails['returnCSV'] = [
-                    'text' => htmlspecialchars(implode(LF, $emails)),
-                ];
+        }
+        if ($data['plainList']) {
+            foreach ($data['plainList'] as $value) {
+                $emails[] = ['uid' => '-', 'email' => $value, 'name' => ''];
             }
         }
 
-        // Find Unknown Recipient
-        if ($this->unknownList || $this->unknownDisable || $this->unknownCSV) {
-            $rrows = $this->sysDmailMaillogRepository->findUnknownRecipient($this->mail->getUid());
-            $idLists = $this->getIdLists($rrows);
-
-            if ($this->unknownList) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['unknownList']['tt_address'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['unknownList']['fe_users'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
-                    ];
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $returnedMailsDetails['unknownList']['PLAINLIST'] = [
-                        'PLAINLIST' => join('</li><li>', $idLists['PLAINLIST']),
-                    ];
-                }
-            }
-
-            if ($this->unknownDisable) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['unknownDisable']['tt_address'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['unknownDisable']['fe_users'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'fe_users'),
-                    ];
-                }
-            }
-
-            if ($this->unknownCSV) {
-                $emails = [];
-                if (count($idLists['tt_address'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['fe_users'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $emails = array_merge($emails, $idLists['PLAINLIST']);
-                }
-
-                $returnedMailsDetails['unknownCSV'] = [
-                    'text' => htmlspecialchars(implode(LF, $emails)),
-                ];
-            }
-        }
-
-        // Mailbox Full
-        if ($this->fullList || $this->fullDisable || $this->fullCSV) {
-            $rrows = $this->sysDmailMaillogRepository->findMailboxFull($this->mail->getUid());
-            $idLists = $this->getIdLists($rrows);
-
-            if ($this->fullList) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['fullList']['tt_address'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['fullList']['fe_users'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
-                    ];
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $returnedMailsDetails['fullList']['PLAINLIST'] = [
-                        'PLAINLIST' => join('</li><li>', $idLists['PLAINLIST']),
-                    ];
-                }
-            }
-
-            if ($this->fullDisable) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['fullDisable']['tt_address'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['fullDisable']['fe_users'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'fe_users'),
-                    ];
-                }
-            }
-
-            if ($this->fullCSV) {
-                $emails = [];
-                if (count($idLists['tt_address'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['fe_users'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $emails = array_merge($emails, $idLists['PLAINLIST']);
-                }
-
-                $returnedMailsDetails['fullCSV'] = [
-                    'text' => htmlspecialchars(implode(LF, $emails)),
-                ];
-            }
-        }
-
-        // find Bad Host
-        if ($this->badHostList || $this->badHostDisable || $this->badHostCSV) {
-            $rrows = $this->sysDmailMaillogRepository->findBadHost($this->mail->getUid());
-            $idLists = $this->getIdLists($rrows);
-
-            if ($this->badHostList) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['badHostList']['tt_address'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['badHostList']['fe_users'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
-                    ];
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $returnedMailsDetails['badHostList']['PLAINLIST'] = [
-                        'PLAINLIST' => join('</li><li>', $idLists['PLAINLIST']),
-                    ];
-                }
-            }
-
-            if ($this->badHostDisable) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['badHostDisable']['tt_address'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['badHostDisable']['fe_users'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'fe_users'),
-                    ];
-                }
-            }
-
-            if ($this->badHostCSV) {
-                $emails = [];
-                if (count($idLists['tt_address'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-
-                if (count($idLists['fe_users'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-
-                if (count($idLists['PLAINLIST'])) {
-                    $emails = array_merge($emails, $idLists['PLAINLIST']);
-                }
-
-                $returnedMailsDetails['badHostCSV'] = [
-                    'text' => htmlspecialchars(implode(LF, $emails)),
-                ];
-            }
-        }
-
-        // find Bad Header
-        if ($this->badHeaderList || $this->badHeaderDisable || $this->badHeaderCSV) {
-            $rrows = $this->sysDmailMaillogRepository->findBadHeader($this->mail->getUid());
-            $idLists = $this->getIdLists($rrows);
-
-            if ($this->badHeaderList) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['badHeaderList']['tt_address'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['badHeaderList']['fe_users'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
-                    ];
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $returnedMailsDetails['badHeaderList']['PLAINLIST'] = [
-                        'PLAINLIST' => join('</li><li>', $idLists['PLAINLIST']),
-                    ];
-                }
-            }
-
-            if ($this->badHeaderDisable) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['badHeaderDisable']['tt_address'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['badHeaderDisable']['fe_users'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'fe_users'),
-                    ];
-                }
-            }
-
-            if ($this->badHeaderCSV) {
-                $emails = [];
-                if (count($idLists['tt_address'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['fe_users'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $emails = array_merge($emails, $idLists['PLAINLIST']);
-                }
-
-                $returnedMailsDetails['badHeaderCSV'] = [
-                    'text' => htmlspecialchars(implode(LF, $emails)),
-                ];
-            }
-        }
-
-        // find Unknown Reasons
-        // TODO: list all reason
-        if ($this->reasonUnknownList || $this->reasonUnknownDisable || $this->reasonUnknownCSV) {
-            $rrows = $this->sysDmailMaillogRepository->findUnknownReasons($this->mail->getUid());
-            $idLists = $this->getIdLists($rrows);
-
-            if ($this->reasonUnknownList) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['reasonUnknownList']['tt_address'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['reasonUnknownList']['fe_users'] = [
-                        'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
-                    ];
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $returnedMailsDetails['reasonUnknownList']['PLAINLIST'] = [
-                        'PLAINLIST' => join('</li><li>', $idLists['PLAINLIST']),
-                    ];
-                }
-            }
-
-            if ($this->reasonUnknownDisable) {
-                if (count($idLists['tt_address'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    $returnedMailsDetails['reasonUnknownDisable']['tt_address'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'tt_address'),
-                    ];
-                }
-                if (count($idLists['fe_users'])) {
-                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    $returnedMailsDetails['reasonUnknownDisable']['fe_users'] = [
-                        'counter' => $this->disableRecipients($tempRows, 'fe_users'),
-                    ];
-                }
-            }
-
-            if ($this->reasonUnknownCSV) {
-                $emails = [];
-                if (count($idLists['tt_address'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['fe_users'])) {
-                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
-                    foreach ($arr as $v) {
-                        $emails[] = $v['email'];
-                    }
-                }
-                if (count($idLists['PLAINLIST'])) {
-                    $emails = array_merge($emails, $idLists['PLAINLIST']);
-                }
-
-                $returnedMailsDetails['reasonUnknownCSV'] = [
-                    'text' => htmlspecialchars(implode(LF, $emails)),
-                ];
-            }
-        }
-
-        return $returnedMailsDetails;
+        CsvUtility::downloadCSV($emails);
     }
 
     /**
@@ -653,11 +302,11 @@ class MailService
     {
         $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
         $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid());
-        $htmlUrlsTable = $this->changekeyname($htmlUrlsTable, 'counter', 'COUNT(*)');
+        $htmlUrlsTable = $this->changeKeyName($htmlUrlsTable, 'counter', 'COUNT(*)');
 
         // Most popular links, plain:
         $plainUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid(), 2);
-        $plainUrlsTable = $this->changekeyname($plainUrlsTable, 'counter', 'COUNT(*)');
+        $plainUrlsTable = $this->changeKeyName($plainUrlsTable, 'counter', 'COUNT(*)');
         $unpackedMail = unserialize(base64_decode($this->mail->getMailContent()));
         $urlCounter = [];
         $urlCounter['total'] = [];
@@ -866,11 +515,11 @@ class MailService
      * @param string $oldkey
      * @return array $array
      */
-    private function changekeyname(array $array, string $newkey, string $oldkey): array
+    private function changeKeyName(array $array, string $newkey, string $oldkey): array
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $array[$key] = $this->changekeyname($value, $newkey, $oldkey);
+                $array[$key] = $this->changeKeyName($value, $newkey, $oldkey);
             } else {
                 $array[$newkey] = $array[$oldkey];
             }
@@ -1027,98 +676,45 @@ class MailService
         return $label;
     }
 
-    private function getIdLists(array $rrows): array
-    {
-        $idLists = [
-            'tt_address' => [],
-            'fe_users' => [],
-            'PLAINLIST' => [],
-        ];
-
-        foreach ($rrows as $rrow) {
-            switch ($rrow['recipient_table']) {
-                case 't':
-                    $idLists['tt_address'][] = $rrow['recipient_uid'];
-                    break;
-                case 'f':
-                    $idLists['fe_users'][] = $rrow['recipient_uid'];
-                    break;
-                case 'P':
-                    $idLists['PLAINLIST'][] = $rrow['email'];
-                    break;
-                default:
-                    $idLists[$rrow['recipient_table']][] = $rrow['recipient_uid'];
-            }
-        }
-
-        return $idLists;
-    }
-
     /**
-     * Prepare DB record
-     *
-     * @param array $listArr All DB records to be formated
-     * @param string $table Table name
-     *
-     * @return    array        list of record
-     */
-    protected function getRecordList(array $listArr, string $table): array
-    {
-        $isAllowedDisplayTable = BackendUserUtility::getBackendUser()->check('tables_select', $table);
-        $isAllowedEditTable = BackendUserUtility::getBackendUser()->check('tables_modify', $table);
-        $output = [
-            'rows' => [],
-            'table' => $table,
-            'edit' => $isAllowedEditTable,
-            'show' => $isAllowedDisplayTable,
-        ];
-
-        $notAllowedPlaceholder = LanguageUtility::getLL('mailgroup_table_disallowed_placeholder');
-        foreach ($listArr as $row) {
-            $output['rows'][] = [
-                'uid' => $row['uid'],
-                'email' => $isAllowedDisplayTable ? htmlspecialchars($row['email']) : $notAllowedPlaceholder,
-                'name' => $isAllowedDisplayTable ? htmlspecialchars($row['name']) : '',
-            ];
-        }
-
-        return $output;
-    }
-
-    /**
-     * Set disable = 1 to all record in an array
-     *
-     * @param array $arr DB records
-     * @param string $table table name
+     * @param array $addresses array of addresses
      *
      * @return int total of disabled records
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
-    protected function disableRecipients(array $arr, string $table): int
+    protected function disableAddresses(array $addresses): int
     {
-        $count = 0;
-        if ($GLOBALS['TCA'][$table]) {
-            $values = [];
-            $enField = $GLOBALS['TCA'][$table]['ctrl']['enablecolumns']['disabled'];
-            if ($enField) {
-                $count = count($arr);
-                $uidList = array_keys($arr);
-                if (count($uidList)) {
-                    $values[$enField] = 1;
-                    //@TODO
-                    $connection = $this->getConnection($table);
-                    foreach ($uidList as $uid) {
-                        $connection->update(
-                            $table,
-                            $values,
-                            [
-                                'uid' => $uid,
-                            ]
-                        );
-                    }
-                }
-            }
+        /** @var Address $address */
+        foreach ($addresses as $address) {
+            $address->setHidden(true);
+            $this->addressRepository->update($address);
         }
-        return $count;
+
+        return count($addresses);
+    }
+
+    /**
+     * @param array $frontendUsers array of frontend users
+     *
+     * @return int total of disabled records
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
+    protected function disableFrontendUsers(array $frontendUsers): int
+    {
+        /** @var FrontendUser $frontendUser */
+        foreach ($frontendUsers as $frontendUser) {
+            $frontendUser->setDisable(true);
+            $this->addressRepository->update($frontendUser);
+        }
+
+        return count($frontendUsers);
+    }
+
+    public function getQueryBuilder($table): QueryBuilder
+    {
+        return GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
     }
 
     protected function getConnection(string $table): Connection

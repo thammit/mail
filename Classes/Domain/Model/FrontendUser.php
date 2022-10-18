@@ -9,6 +9,7 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class FrontendUser extends AbstractEntity implements RecipientInterface
 {
+    protected bool $disable = false;
 
     /**
      * @var string
@@ -69,6 +70,24 @@ class FrontendUser extends AbstractEntity implements RecipientInterface
     public function initializeObject()
     {
         $this->categories = $this->categories ?? new ObjectStorage();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDisable(): bool
+    {
+        return $this->disable;
+    }
+
+    /**
+     * @param bool $disable
+     * @return FrontendUser
+     */
+    public function setDisable(bool $disable): FrontendUser
+    {
+        $this->disable = $disable;
+        return $this;
     }
 
     /**

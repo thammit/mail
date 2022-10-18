@@ -97,18 +97,18 @@ class LogRepository extends Repository
             ->fetchAllAssociative();
 
         $idLists = [
-            'tt_address' => [],
-            'fe_users' => [],
+            'addresses' => [],
+            'frontendUsers' => [],
             'plainList' => [],
         ];
 
         foreach ($result as $row) {
             switch ($row['recipient_table']) {
                 case 't':
-                    $idLists['tt_address'][] = $row['recipient_uid'];
+                    $idLists['addresses'][] = $row['recipient_uid'];
                     break;
                 case 'f':
-                    $idLists['fe_users'][] = $row['recipient_uid'];
+                    $idLists['frontendUsers'][] = $row['recipient_uid'];
                     break;
                 case 'P':
                     $idLists['plainList'][] = $row['email'];
@@ -120,15 +120,15 @@ class LogRepository extends Repository
 
         $returnedList = [];
 
-        if (count($idLists['tt_address'])) {
+        if (count($idLists['addresses'])) {
             $addressRepository = GeneralUtility::makeInstance(AddressRepository::class);
             $demand = new Demand();
-            $demand->setSingleRecords(implode(',', $idLists['tt_address']));
+            $demand->setSingleRecords(implode(',', $idLists['addresses']));
             $returnedList['addresses'] = $addressRepository->getAddressesByCustomSorting($demand);
         }
-        if (count($idLists['fe_users'])) {
-            $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
-            $frontendUsers = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+        if (count($idLists['frontendUsers'])) {
+            $frontendUserRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
+            $frontendUsers = $frontendUserRepository->findByUidList($idLists['frontendUsers']);
             $returnedList['frontendUsers'] = $frontendUsers;
         }
         if (count($idLists['plainList'])) {

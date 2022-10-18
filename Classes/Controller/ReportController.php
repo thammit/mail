@@ -8,10 +8,13 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class ReportController extends AbstractController
 {
@@ -103,7 +106,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getReturnedList(),
+            'data' => $this->mailService->getReturnedData(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -114,18 +117,32 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
      * @throws StopActionException
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
     public function disableTotalReturnedAction(Mail $mail): void
     {
-        // todo returnDisable
+        $this->mailService->init($mail);
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedData());
+        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
-    public function csvExportTotalReturnedAction(): void
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public function csvExportTotalReturnedAction(Mail $mail): void
     {
-        // todo returnCSV
-        $this->redirect('show');
+        $this->mailService->init($mail);
+        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedData());
     }
 
     /**
@@ -140,7 +157,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getUnknownList(),
+            'data' => $this->mailService->getUnknownData(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -151,18 +168,32 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws StopActionException
+     * @throws UnknownObjectException
      */
     public function disableUnknownAction(Mail $mail): void
     {
-        // todo unknownDisable
+        $this->mailService->init($mail);
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getUnknownData());
+        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
     public function csvExportUnknownAction(Mail $mail): void
     {
-        // todo unknownCSV
-        $this->redirect('show');
+        $this->mailService->init($mail);
+        $this->mailService->csvDownloadRecipients($this->mailService->getUnknownData());
     }
 
     /**
@@ -177,7 +208,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getFullList(),
+            'data' => $this->mailService->getMailboxFullData(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -188,23 +219,32 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws StopActionException
+     * @throws UnknownObjectException
      */
     public function disableFullAction(Mail $mail): void
     {
-        // todo fullDisable
+        $this->mailService->init($mail);
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getMailboxFullData());
+        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @return void
-     * @throws StopActionException
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
      */
     public function csvExportFullAction(Mail $mail): void
     {
-        // todo fullCSV
-        $this->redirect('show');
+        $this->mailService->init($mail);
+        $this->mailService->csvDownloadRecipients($this->mailService->getMailboxFullData());
     }
 
     /**
@@ -219,7 +259,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getBadHostList(),
+            'data' => $this->mailService->getBadHostData(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -230,23 +270,32 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws StopActionException
+     * @throws UnknownObjectException
      */
     public function disableBadHostAction(Mail $mail): void
     {
-        // todo badHostDisable
+        $this->mailService->init($mail);
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getBadHostData());
+        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @return void
-     * @throws StopActionException
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
      */
     public function csvExportBadHostAction(Mail $mail): void
     {
-        // todo badHostCSV
-        $this->redirect('show');
+        $this->mailService->init($mail);
+        $this->mailService->csvDownloadRecipients($this->mailService->getBadHostData());
     }
 
     /**
@@ -261,7 +310,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getBadHeaderList(),
+            'data' => $this->mailService->getBadHeaderData(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -272,23 +321,32 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws StopActionException
+     * @throws UnknownObjectException
      */
     public function disableBadHeaderAction(Mail $mail): void
     {
-        // todo badHeaderDisable
+        $this->mailService->init($mail);
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getBadHeaderData());
+        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @return void
-     * @throws StopActionException
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
      */
     public function csvExportBadHeaderAction(Mail $mail): void
     {
-        // todo badHeaderCSV
-        $this->redirect('show');
+        $this->mailService->init($mail);
+        $this->mailService->csvDownloadRecipients($this->mailService->getBadHeaderData());
     }
 
     /**
@@ -303,7 +361,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getReasonUnknownList(),
+            'data' => $this->mailService->getReasonUnknownData(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -314,23 +372,32 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
+     * @throws DBALException
+     * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws StopActionException
+     * @throws UnknownObjectException
      */
     public function disableReasonUnknownAction(Mail $mail): void
     {
-        // todo reasonUnknownDisable
+        $this->mailService->init($mail);
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReasonUnknownData());
+        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @return void
-     * @throws StopActionException
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
      */
     public function csvExportReasonUnknownAction(Mail $mail): void
     {
-        // todo reasonUnknownCSV
-        $this->redirect('show');
+        $this->mailService->init($mail);
+        $this->mailService->csvDownloadRecipients($this->mailService->getReasonUnknownData());
     }
 
     /**
