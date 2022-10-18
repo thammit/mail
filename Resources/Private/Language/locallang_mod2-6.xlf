@@ -414,7 +414,7 @@
 				<source>mail record</source>
 			</trans-unit>
 			<trans-unit id="header_conf" resname="header_conf">
-				<source>Configuration</source>
+				<source>Mail Settings</source>
 			</trans-unit>
 			<trans-unit id="header_directmail" resname="header_directmail">
 				<source>Mail</source>
@@ -432,7 +432,7 @@
 				<source>Download CSV</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_header" resname="mailgroup_header">
-				<source>Recipients</source>
+				<source>Mail Recipients</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import" resname="mailgroup_import">
 				<source>Import CSV into tt_address database table</source>
@@ -800,7 +800,7 @@
 				<source>HTML Link #</source>
 			</trans-unit>
 			<trans-unit id="stats_HTML_mails_viewed" resname="stats_HTML_mails_viewed">
-				<source>HTML mails viewed</source>
+				<source>Mails viewed</source>
 			</trans-unit>
 			<trans-unit id="stats_bad_host" resname="stats_bad_host">
 				<source>Bad host</source>
@@ -857,7 +857,7 @@
 				<source>Error in Header</source>
 			</trans-unit>
 			<trans-unit id="stats_general_information" resname="stats_general_information">
-				<source>General information</source>
+				<source>General</source>
 			</trans-unit>
 			<trans-unit id="stats_img_link" resname="stats_img_link">
 				<source>Imagelink</source>
@@ -887,10 +887,10 @@
 				<source>Mailbox full</source>
 			</trans-unit>
 			<trans-unit id="stats_mails_returned" resname="stats_mails_returned">
-				<source>Mails returned</source>
+				<source>Delivery failed</source>
 			</trans-unit>
 			<trans-unit id="stats_mails_sent" resname="stats_mails_sent">
-				<source>Mails sent</source>
+				<source>Mails received</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_choose" resname="stats_overview_choose">
 				<source>Choose a mail</source>
@@ -902,7 +902,10 @@
 				<source>Delivery ended</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_header" resname="stats_overview_header">
-				<source>Reports</source>
+				<source>Mail Reports</source>
+			</trans-unit>
+			<trans-unit id="stats_show_header" resname="stats_show_header">
+				<source>Mail Report</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_queuing" resname="stats_overview_queuing">
 				<source>queuing</source>
@@ -1023,7 +1026,7 @@
 				<source>Include media</source>
 			</trans-unit>
 			<trans-unit id="view_recipient_total_sent" resname="view_recipient_total_sent">
-				<source>Recipient total/sent</source>
+				<source>Mails sent/received</source>
 			</trans-unit>
 			<trans-unit id="view_replyto" resname="view_replyto">
 				<source>Reply</source>

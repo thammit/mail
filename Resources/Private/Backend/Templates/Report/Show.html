@@ -10,11 +10,9 @@
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
     <h1>
-        <f:translate key="{lll}stats_overview_header"/>
+        <f:translate key="{lll}stats_show_header"/>
     </h1>
-    <p>
-        <f:link.action action="recalculateCache" arguments="{mail:mailInfo.mail.uid}" class="btn btn-default text-uppercase"><core:icon identifier="actions-refresh"/> <f:translate key="{lll}stats_recalculate_stats"/></f:link.action>
-    </p>
+    <h2><core:iconForRecord row="{uid: mailUid, type: 0}" table="tx_mail_domain_model_mail" size="default" /> {mailInfo.mail.subject} [{mailUid}]</h2>
     <div class="row">
         <div class="col-12 col-lg-6 col-xxl-4">
             <f:render partial="Report/CompactView" arguments="{data:mailInfo, lll:lll}"/>
