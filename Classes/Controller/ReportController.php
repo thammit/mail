@@ -100,7 +100,6 @@ class ReportController extends AbstractController
      */
     public function showTotalReturnedAction(Mail $mail): ResponseInterface
     {
-        // returnList
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
@@ -138,7 +137,6 @@ class ReportController extends AbstractController
      */
     public function showUnknownAction(Mail $mail): ResponseInterface
     {
-        // todo unknownList
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
@@ -176,7 +174,6 @@ class ReportController extends AbstractController
      */
     public function showFullAction(Mail $mail): ResponseInterface
     {
-        // todo fullList
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
@@ -219,7 +216,6 @@ class ReportController extends AbstractController
      */
     public function showBadHostAction(Mail $mail): ResponseInterface
     {
-        // todo badHostList
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
@@ -262,7 +258,6 @@ class ReportController extends AbstractController
      */
     public function showBadHeaderAction(Mail $mail): ResponseInterface
     {
-        // todo badHeaderList
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
@@ -305,7 +300,6 @@ class ReportController extends AbstractController
      */
     public function showReasonUnknownAction(Mail $mail): ResponseInterface
     {
-        // todo reasonUnknownList
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
