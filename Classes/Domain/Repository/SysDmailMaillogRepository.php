@@ -274,6 +274,33 @@ class SysDmailMaillogRepository extends AbstractRepository
             ->fetchAllAssociative();
     }
 
+    private function getIdLists(array $rrows): array
+    {
+        $idLists = [
+            'tt_address' => [],
+            'fe_users' => [],
+            'PLAINLIST' => [],
+        ];
+
+        foreach ($rrows as $rrow) {
+            switch ($rrow['recipient_table']) {
+                case 't':
+                    $idLists['tt_address'][] = $rrow['recipient_uid'];
+                    break;
+                case 'f':
+                    $idLists['fe_users'][] = $rrow['recipient_uid'];
+                    break;
+                case 'P':
+                    $idLists['PLAINLIST'][] = $rrow['email'];
+                    break;
+                default:
+                    $idLists[$rrow['recipient_table']][] = $rrow['recipient_uid'];
+            }
+        }
+
+        return $idLists;
+    }
+
     /**
      * @param int $mailUid
      * @return array
@@ -285,7 +312,7 @@ class SysDmailMaillogRepository extends AbstractRepository
         $queryBuilder = $this->getQueryBuilder();
 
         return $queryBuilder
-            ->select('recipient_uid', 'recipient_tablew', 'email')
+            ->select('recipient_uid', 'recipient_table', 'email')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
@@ -316,9 +343,6 @@ class SysDmailMaillogRepository extends AbstractRepository
                     $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter(553, PDO::PARAM_INT))
                 )
             )
-//            ->add('where', 'mid=' . $uid .
-//                ' AND response_type=-127' .
-//                ' AND (return_code=550 OR return_code=553)')
             ->execute()
             ->fetchAllAssociative();
     }

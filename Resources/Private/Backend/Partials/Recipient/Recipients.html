@@ -12,8 +12,8 @@
             <tr>
                 <th></th>
                 <th>Name</th>
-                <th></th>
                 <th>Email</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -34,15 +34,15 @@
                             </f:else>
                         </f:if>
                     </td>
+                    <td class="nowrap">
+                        <f:link.email email="{recipient.email}"/>
+                    </td>
                     <td class="col-control nowrap">
                         <f:if condition="{recipient.uid} && {allowEdit}">
                             <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}dmail_edit')}">
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
                         </f:if>
-                    </td>
-                    <td class="nowrap">
-                        <f:link.email email="{recipient.email}"/>
                     </td>
                 </tr>
             </f:for>

@@ -7,11 +7,14 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use DOMDocument;
 use DOMElement;
+use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -23,6 +26,7 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class MailService
 {
@@ -40,8 +44,12 @@ class MailService
     protected int $htmlSent = 0;
     protected int $plainSent = 0;
 
-    public function __construct(protected LogRepository $logRepository)
-    {
+    public function __construct(
+        protected LogRepository $logRepository,
+        protected AddressRepository $addressRepository,
+        protected SysDmailMaillogRepository $sysDmailMaillogRepository,
+        protected TempRepository $tempRepository
+    ) {
     }
 
     /**
@@ -53,10 +61,10 @@ class MailService
     public function init(Mail $mail): void
     {
         $this->mail = $mail;
-        $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
-        $this->responseTypesTable = $this->changekeyname($sysDmailMaillogRepository->countSysDmailMaillogsResponseTypeByMid($this->mail->getUid()), 'counter', 'COUNT(*)');
+        $this->responseTypesTable = $this->changekeyname($this->sysDmailMaillogRepository->countSysDmailMaillogsResponseTypeByMid($this->mail->getUid()),
+            'counter', 'COUNT(*)');
         // Plaintext/HTML
-        $res = $sysDmailMaillogRepository->countSysDmailMaillogAllByMid($this->mail->getUid());
+        $res = $this->sysDmailMaillogRepository->countSysDmailMaillogAllByMid($this->mail->getUid());
 
         /* this function is called to change the key from 'COUNT(*)' to 'counter' */
         $res = $this->changekeyname($res, 'counter', 'COUNT(*)');
@@ -68,19 +76,19 @@ class MailService
         }
 
         // Unique responses, html
-        $this->uniqueHtmlResponses = $sysDmailMaillogRepository->countSysDmailMaillogHtmlByMid($this->mail->getUid());
+        $this->uniqueHtmlResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogHtmlByMid($this->mail->getUid());
 
         // Unique responses, Plain
-        $this->uniquePlainResponses = $sysDmailMaillogRepository->countSysDmailMaillogPlainByMid($this->mail->getUid());
+        $this->uniquePlainResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPlainByMid($this->mail->getUid());
 
         // Unique responses, pings
-        $this->uniquePingResponses = $sysDmailMaillogRepository->countSysDmailMaillogPingByMid($this->mail->getUid());
+        $this->uniquePingResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPingByMid($this->mail->getUid());
 
         $this->totalSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['2'] ?? 0) + (int)($textHtml['3'] ?? 0);
         $this->htmlSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['3'] ?? 0);
         $this->plainSent = (int)($textHtml['2'] ?? 0);
 
-        $this->returnCodesTable = $sysDmailMaillogRepository->countReturnCode($this->mail->getUid());
+        $this->returnCodesTable = $this->sysDmailMaillogRepository->countReturnCode($this->mail->getUid());
         $this->returnCodesTable = $this->changekeyname($this->returnCodesTable, 'counter', 'COUNT(*)');
     }
 
@@ -115,7 +123,8 @@ class MailService
             'dmailInfo' => $dmailInfo,
             'type' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'type', $this->mail->getType()),
             'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $this->mail->getPriority()),
-            'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options', $this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
+            'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options',
+                    $this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
             'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowed_format', $this->mail->isFlowedFormat()),
             'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $this->mail->isIncludeMedia()),
             'recipients' => $recipients,
@@ -155,8 +164,10 @@ class MailService
             'plainUniqueResponses' => $this->showWithPercent($this->uniquePlainResponses, $this->plainSent ?: $this->htmlSent),
             'totalResponsesVsUniqueResponses' => ($this->uniqueHtmlResponses + $this->uniquePlainResponses ? number_format(($this->responseTypesTable['1']['counter'] + $this->responseTypesTable['2']['counter']) / ($this->uniqueHtmlResponses + $this->uniquePlainResponses),
                 2) : '-'),
-            'htmlResponsesVsUniqueResponses' => ($this->uniqueHtmlResponses ? number_format(($this->responseTypesTable['1']['counter']) / ($this->uniqueHtmlResponses), 2) : '-'),
-            'plainResponsesVsUniqueResponses' => ($this->uniquePlainResponses ? number_format(($this->responseTypesTable['2']['counter']) / ($this->uniquePlainResponses), 2) : '-'),
+            'htmlResponsesVsUniqueResponses' => ($this->uniqueHtmlResponses ? number_format(($this->responseTypesTable['1']['counter']) / ($this->uniqueHtmlResponses),
+                2) : '-'),
+            'plainResponsesVsUniqueResponses' => ($this->uniquePlainResponses ? number_format(($this->responseTypesTable['2']['counter']) / ($this->uniquePlainResponses),
+                2) : '-'),
         ];
     }
 
@@ -164,7 +175,7 @@ class MailService
     {
         $responsesFailed = (int)($this->responseTypesTable['-127']['counter'] ?? 0);
         return [
-            'total' =>  number_format($responsesFailed),
+            'total' => number_format($responsesFailed),
             'unknown' => $this->showWithPercent(($this->returnCodesTable['550']['counter'] ?? 0) + ($this->returnCodesTable['553']['counter'] ?? 0),
                 $responsesFailed),
             'full' => $this->showWithPercent(($this->returnCodesTable['551']['counter'] ?? 0), $responsesFailed),
@@ -175,30 +186,87 @@ class MailService
     }
 
     /**
+     * @throws InvalidQueryException
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getReturnedList(): array
+    {
+        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid());
+    }
+
+    /**
+     * @throws InvalidQueryException
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getUnknownList(): array
+    {
+        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [550, 553]);
+    }
+
+    /**
+     * @throws InvalidQueryException
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getFullList(): array
+    {
+        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [551]);
+    }
+
+    /**
+     * @throws InvalidQueryException
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getBadHostList(): array
+    {
+        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [552]);
+    }
+
+    /**
+     * @throws InvalidQueryException
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getBadHeaderList(): array
+    {
+        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [554]);
+    }
+
+    /**
+     * @throws InvalidQueryException
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getReasonUnknownList(): array
+    {
+        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [-1]);
+    }
+
+    /**
      * @throws Exception
      * @throws DBALException
      */
     public function getReturnedMailsDetails(): array
     {
         // Find all returned mail
-        $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
-        $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
-
         $returnedMailsDetails = [];
 
         // Find all returned mail
         if ($this->returnList || $this->returnDisable || $this->returnCSV) {
-            $rrows = $sysDmailMaillogRepository->findAllReturnedMail($this->mail->getUid());
+            $rrows = $this->sysDmailMaillogRepository->findAllReturnedMail($this->mail->getUid());
             $idLists = $this->getIdLists($rrows);
             if ($this->returnList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['returnList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['returnList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -212,13 +280,13 @@ class MailService
 
             if ($this->returnDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['returnDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['returnDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -228,13 +296,13 @@ class MailService
             if ($this->returnCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -251,18 +319,18 @@ class MailService
 
         // Find Unknown Recipient
         if ($this->unknownList || $this->unknownDisable || $this->unknownCSV) {
-            $rrows = $sysDmailMaillogRepository->findUnknownRecipient($this->mail->getUid());
+            $rrows = $this->sysDmailMaillogRepository->findUnknownRecipient($this->mail->getUid());
             $idLists = $this->getIdLists($rrows);
 
             if ($this->unknownList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['unknownList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['unknownList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -276,13 +344,13 @@ class MailService
 
             if ($this->unknownDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['unknownDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['unknownDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -292,13 +360,13 @@ class MailService
             if ($this->unknownCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -315,18 +383,18 @@ class MailService
 
         // Mailbox Full
         if ($this->fullList || $this->fullDisable || $this->fullCSV) {
-            $rrows = $sysDmailMaillogRepository->findMailboxFull($this->mail->getUid());
+            $rrows = $this->sysDmailMaillogRepository->findMailboxFull($this->mail->getUid());
             $idLists = $this->getIdLists($rrows);
 
             if ($this->fullList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['fullList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['fullList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -340,13 +408,13 @@ class MailService
 
             if ($this->fullDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['fullDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['fullDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -356,13 +424,13 @@ class MailService
             if ($this->fullCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -379,18 +447,18 @@ class MailService
 
         // find Bad Host
         if ($this->badHostList || $this->badHostDisable || $this->badHostCSV) {
-            $rrows = $sysDmailMaillogRepository->findBadHost($this->mail->getUid());
+            $rrows = $this->sysDmailMaillogRepository->findBadHost($this->mail->getUid());
             $idLists = $this->getIdLists($rrows);
 
             if ($this->badHostList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['badHostList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['badHostList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -404,13 +472,13 @@ class MailService
 
             if ($this->badHostDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['badHostDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['badHostDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -420,14 +488,14 @@ class MailService
             if ($this->badHostCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
 
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -445,18 +513,18 @@ class MailService
 
         // find Bad Header
         if ($this->badHeaderList || $this->badHeaderDisable || $this->badHeaderCSV) {
-            $rrows = $sysDmailMaillogRepository->findBadHeader($this->mail->getUid());
+            $rrows = $this->sysDmailMaillogRepository->findBadHeader($this->mail->getUid());
             $idLists = $this->getIdLists($rrows);
 
             if ($this->badHeaderList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['badHeaderList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['badHeaderList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -470,13 +538,13 @@ class MailService
 
             if ($this->badHeaderDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['badHeaderDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['badHeaderDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -486,13 +554,13 @@ class MailService
             if ($this->badHeaderCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -510,18 +578,18 @@ class MailService
         // find Unknown Reasons
         // TODO: list all reason
         if ($this->reasonUnknownList || $this->reasonUnknownDisable || $this->reasonUnknownCSV) {
-            $rrows = $sysDmailMaillogRepository->findUnknownReasons($this->mail->getUid());
+            $rrows = $this->sysDmailMaillogRepository->findUnknownReasons($this->mail->getUid());
             $idLists = $this->getIdLists($rrows);
 
             if ($this->reasonUnknownList) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['reasonUnknownList']['tt_address'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['reasonUnknownList']['fe_users'] = [
                         'returnConfig' => $this->getRecordList($tempRows, 'fe_users'),
                     ];
@@ -535,13 +603,13 @@ class MailService
 
             if ($this->reasonUnknownDisable) {
                 if (count($idLists['tt_address'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     $returnedMailsDetails['reasonUnknownDisable']['tt_address'] = [
                         'counter' => $this->disableRecipients($tempRows, 'tt_address'),
                     ];
                 }
                 if (count($idLists['fe_users'])) {
-                    $tempRows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $tempRows = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     $returnedMailsDetails['reasonUnknownDisable']['fe_users'] = [
                         'counter' => $this->disableRecipients($tempRows, 'fe_users'),
                     ];
@@ -551,13 +619,13 @@ class MailService
             if ($this->reasonUnknownCSV) {
                 $emails = [];
                 if (count($idLists['tt_address'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
                 }
                 if (count($idLists['fe_users'])) {
-                    $arr = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+                    $arr = $this->tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
                     foreach ($arr as $v) {
                         $emails[] = $v['email'];
                     }
@@ -584,11 +652,11 @@ class MailService
     public function getLinkResponses(): array
     {
         $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
-        $htmlUrlsTable = $sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid());
+        $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid());
         $htmlUrlsTable = $this->changekeyname($htmlUrlsTable, 'counter', 'COUNT(*)');
 
         // Most popular links, plain:
-        $plainUrlsTable = $sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid(), 2);
+        $plainUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid(), 2);
         $plainUrlsTable = $this->changekeyname($plainUrlsTable, 'counter', 'COUNT(*)');
         $unpackedMail = unserialize(base64_decode($this->mail->getMailContent()));
         $urlCounter = [];
@@ -959,7 +1027,7 @@ class MailService
         return $label;
     }
 
-    private function getIdLists($rrows): array
+    private function getIdLists(array $rrows): array
     {
         $idLists = [
             'tt_address' => [],
@@ -967,21 +1035,19 @@ class MailService
             'PLAINLIST' => [],
         ];
 
-        if (is_array($rrows)) {
-            foreach ($rrows as $rrow) {
-                switch ($rrow['recipient_table']) {
-                    case 't':
-                        $idLists['tt_address'][] = $rrow['recipient_uid'];
-                        break;
-                    case 'f':
-                        $idLists['fe_users'][] = $rrow['recipient_uid'];
-                        break;
-                    case 'P':
-                        $idLists['PLAINLIST'][] = $rrow['email'];
-                        break;
-                    default:
-                        $idLists[$rrow['recipient_table']][] = $rrow['recipient_uid'];
-                }
+        foreach ($rrows as $rrow) {
+            switch ($rrow['recipient_table']) {
+                case 't':
+                    $idLists['tt_address'][] = $rrow['recipient_uid'];
+                    break;
+                case 'f':
+                    $idLists['fe_users'][] = $rrow['recipient_uid'];
+                    break;
+                case 'P':
+                    $idLists['PLAINLIST'][] = $rrow['email'];
+                    break;
+                default:
+                    $idLists[$rrow['recipient_table']][] = $rrow['recipient_uid'];
             }
         }
 

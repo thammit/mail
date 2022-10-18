@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class ReportController extends AbstractController
 {
@@ -90,111 +91,251 @@ class ReportController extends AbstractController
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
-    public function showTotalReturnedAction(): void
+    /**
+     * @param Mail $mail
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public function showTotalReturnedAction(Mail $mail): ResponseInterface
     {
         // returnList
-        $this->redirect('show');
+        $this->mailService->init($mail);
+        $this->view->assignMultiple([
+            'mail' => $mail,
+            'data' => $this->mailService->getReturnedList(),
+        ]);
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
-    public function disableTotalReturnedAction(): void
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function disableTotalReturnedAction(Mail $mail): void
     {
-        // returnDisable
-        $this->redirect('show');
+        // todo returnDisable
+        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     public function csvExportTotalReturnedAction(): void
     {
-        // returnCSV
+        // todo returnCSV
         $this->redirect('show');
     }
 
-    public function showUnknownAction(): void
+    /**
+     * @param Mail $mail
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public function showUnknownAction(Mail $mail): ResponseInterface
     {
-        // unknownList
+        // todo unknownList
+        $this->mailService->init($mail);
+        $this->view->assignMultiple([
+            'mail' => $mail,
+            'data' => $this->mailService->getUnknownList(),
+        ]);
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function disableUnknownAction(Mail $mail): void
+    {
+        // todo unknownDisable
+        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+    }
+
+    public function csvExportUnknownAction(Mail $mail): void
+    {
+        // todo unknownCSV
         $this->redirect('show');
     }
 
-    public function disableUnknownAction(): void
+    /**
+     * @param Mail $mail
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public function showFullAction(Mail $mail): ResponseInterface
     {
-        // unknownDisable
+        // todo fullList
+        $this->mailService->init($mail);
+        $this->view->assignMultiple([
+            'mail' => $mail,
+            'data' => $this->mailService->getFullList(),
+        ]);
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function disableFullAction(Mail $mail): void
+    {
+        // todo fullDisable
+        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function csvExportFullAction(Mail $mail): void
+    {
+        // todo fullCSV
         $this->redirect('show');
     }
 
-    public function csvExportUnknownAction(): void
+    /**
+     * @param Mail $mail
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public function showBadHostAction(Mail $mail): ResponseInterface
     {
-        // unknownCSV
+        // todo badHostList
+        $this->mailService->init($mail);
+        $this->view->assignMultiple([
+            'mail' => $mail,
+            'data' => $this->mailService->getBadHostList(),
+        ]);
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function disableBadHostAction(Mail $mail): void
+    {
+        // todo badHostDisable
+        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function csvExportBadHostAction(Mail $mail): void
+    {
+        // todo badHostCSV
         $this->redirect('show');
     }
 
-    public function showFullAction(): void
+    /**
+     * @param Mail $mail
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public function showBadHeaderAction(Mail $mail): ResponseInterface
     {
-        // fullList
+        // todo badHeaderList
+        $this->mailService->init($mail);
+        $this->view->assignMultiple([
+            'mail' => $mail,
+            'data' => $this->mailService->getBadHeaderList(),
+        ]);
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function disableBadHeaderAction(Mail $mail): void
+    {
+        // todo badHeaderDisable
+        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function csvExportBadHeaderAction(Mail $mail): void
+    {
+        // todo badHeaderCSV
         $this->redirect('show');
     }
 
-    public function disableFullAction(): void
+    /**
+     * @param Mail $mail
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException+
+     */
+    public function showReasonUnknownAction(Mail $mail): ResponseInterface
     {
-        // fullDisable
-        $this->redirect('show');
+        // todo reasonUnknownList
+        $this->mailService->init($mail);
+        $this->view->assignMultiple([
+            'mail' => $mail,
+            'data' => $this->mailService->getReasonUnknownList(),
+        ]);
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
-    public function csvExportFullAction(): void
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function disableReasonUnknownAction(Mail $mail): void
     {
-        // fullCSV
-        $this->redirect('show');
+        // todo reasonUnknownDisable
+        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
-    public function showBadHostAction(): void
+    /**
+     * @param Mail $mail
+     * @return void
+     * @throws StopActionException
+     */
+    public function csvExportReasonUnknownAction(Mail $mail): void
     {
-        // badHostList
-        $this->redirect('show');
-    }
-
-    public function disableBadHostAction(): void
-    {
-        // badHostDisable
-        $this->redirect('show');
-    }
-
-    public function csvExportBadHostAction(): void
-    {
-        // badHostCSV
-        $this->redirect('show');
-    }
-
-    public function showBadHeaderAction(): void
-    {
-        // badHeaderList
-        $this->redirect('show');
-    }
-
-    public function disableBadHeaderAction(): void
-    {
-        // badHeaderDisable
-        $this->redirect('show');
-    }
-
-    public function csvExportBadHeaderAction(): void
-    {
-        // badHeaderCSV
-        $this->redirect('show');
-    }
-
-    public function showReasonUnknownAction(): void
-    {
-        // reasonUnknownList
-        $this->redirect('show');
-    }
-
-    public function disableReasonUnknownAction(): void
-    {
-        // reasonUnknownDisable
-        $this->redirect('show');
-    }
-
-    public function csvExportReasonUnknownAction(): void
-    {
-        // reasonUnknownCSV
+        // todo reasonUnknownCSV
         $this->redirect('show');
     }
 

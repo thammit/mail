@@ -1,0 +1,39 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Default"/>
+
+<f:section name="content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
+    <h1><f:translate key="{lll}stats_overview_header"/></h1>
+    <h2>Full</h2>
+    <f:if condition="{data.addresses}">
+        <h3>
+            <f:translate key="{lll}stats_emails"/>
+        </h3>
+        <f:render partial="Report/ReturnedTable" arguments="{data: data.addresses, table: 'tt_address', lll:lll}"/>
+    </f:if>
+    <f:if condition="{data.frontendUsers}">
+        <h3>
+            <f:translate key="{lll}stats_website_users"/>
+        </h3>
+        <f:render partial="Report/ReturnedTable" arguments="{data: data.frontendUsers, table: 'fe_users', lll:lll}"/>
+    </f:if>
+    <f:if condition="{data.plainList}">
+        <h3>
+            <f:translate key="{lll}stats_plainlist"/>
+        </h3>
+        <ul>
+            <f:for each="{data.plainList}" as="recipient">
+                <li>
+                    {recipient}
+                </li>
+            </f:for>
+        </ul>
+    </f:if>
+</f:section>
+</html>
