@@ -49,7 +49,7 @@
                 <f:variable name="mail" value="{row.mail}" />
                 <tr>
                     <td class="col-icon nowrap">
-                        <core:iconForRecord row="{uid: mail.uid}" table="sys_dmail" size="small"/>
+                        <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail"/>
                     </td>
                     <td class="col-title col-responsive nowrap">{mail.subject}</td>
                     <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y h:i')}</td>
