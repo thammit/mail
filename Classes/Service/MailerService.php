@@ -703,7 +703,6 @@ class MailerService implements LoggerAwareInterface
         $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
-//        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_begin' => time(), 'recipients' => $numberOfRecipients]);
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
@@ -732,7 +731,6 @@ class MailerService implements LoggerAwareInterface
         $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
-//        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_end' => time(), 'recipients' => $numberOfRecipients]);
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
