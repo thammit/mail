@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use FoT3\Rdct\Redirects;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
@@ -12,7 +10,6 @@ use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;

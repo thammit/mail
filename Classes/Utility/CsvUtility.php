@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use MEDIAESSENZ\Mail\Repository\PagesRepository;
-
 class CsvUtility
 {
     /**
@@ -180,7 +178,4 @@ class CsvUtility
         echo implode(CR . LF, $lines);
         exit;
     }
-
-
-
 }

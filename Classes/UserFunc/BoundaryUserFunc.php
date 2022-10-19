@@ -6,7 +6,6 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;

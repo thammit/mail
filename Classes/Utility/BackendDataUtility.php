@@ -49,6 +49,11 @@ class BackendDataUtility
             'linkAccessRestrictedPages' => true,
         ]);
     }
+
+    /**
+     * @param int $pageUid
+     * @return string
+     */
     public static function getAbsoluteBaseUrlForMailPage(int $pageUid): string
     {
         $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);

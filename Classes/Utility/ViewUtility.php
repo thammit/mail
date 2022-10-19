@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
@@ -58,20 +56,5 @@ class ViewUtility
             $severity,
             $storeInSession
         );
-    }
-
-    /**
-     * generate edit link for records
-     *
-     * @param $params
-     * @return string
-     * @throws RouteNotFoundException
-     */
-    public static function getEditOnClickLink($params): string
-    {
-        /** @var UriBuilder $uriBuilder */
-        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-
-        return 'window.location.href=' . GeneralUtility::quoteJSvalue((string)$uriBuilder->buildUriFromRoute('record_edit', $params)) . '; return false;';
     }
 }
