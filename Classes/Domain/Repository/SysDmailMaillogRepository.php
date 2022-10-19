@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Enumeration\ResponseType;
 use PDO;
 
 class SysDmailMaillogRepository extends AbstractRepository
@@ -204,7 +205,7 @@ class SysDmailMaillogRepository extends AbstractRepository
      * @throws Exception
      * @throws DBALException
      */
-    public function findMostPopularLinks(int $mailUid, int $responseType = 1): array
+    public function findMostPopularLinks(int $mailUid, int $responseType = ResponseType::HTML): array
     {
         $popularLinks = [];
         $queryBuilder = $this->getQueryBuilder();
@@ -495,13 +496,13 @@ class SysDmailMaillogRepository extends AbstractRepository
      * @param string $recipientUid Recipient ID
      * @param int $size Size of the sent email
      * @param int $parseTime Parse time of the email
-     * @param int $html Set if HTML email is sent
+     * @param int $formatSent Set if HTML email is sent
      * @param string $email Recipient's email
      *
      * @return int
      * @throws DBALException
      */
-    public function insertRecord(int $mid, string $recipientUid, int $size, int $parseTime, int $html, string $email): int
+    public function insertRecord(int $mid, string $recipientUid, int $size, int $parseTime, int $formatSent, string $email): int
     {
         [$recipientTable, $recipientUid] = explode('_', $recipientUid);
 
@@ -517,7 +518,7 @@ class SysDmailMaillogRepository extends AbstractRepository
                 'url' => '',
                 'size' => $size,
                 'parse_time' => $parseTime,
-                'format_sent' => $html,
+                'format_sent' => $formatSent,
             ])
             ->execute();
 

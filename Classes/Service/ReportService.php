@@ -15,6 +15,8 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
+use MEDIAESSENZ\Mail\Enumeration\ResponseType;
+use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -29,7 +31,7 @@ use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
-class MailService
+class ReportService
 {
     /**
      * @var Mail|null
@@ -56,8 +58,7 @@ class MailService
     public function init(Mail $mail): void
     {
         $this->mail = $mail;
-        $this->responseTypesTable = $this->changeKeyName($this->sysDmailMaillogRepository->countSysDmailMaillogsResponseTypeByMid($this->mail->getUid()),
-            'counter', 'COUNT(*)');
+        $this->responseTypesTable = $this->logRepository->findResponseTypesByMail($this->mail->getUid());
     }
 
     /**
@@ -107,55 +108,56 @@ class MailService
      */
     public function getPerformanceData(): array
     {
-        $uniqueHtmlResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogHtmlByMid($this->mail->getUid());
-        $uniquePlainResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPlainByMid($this->mail->getUid());
-        $uniquePingResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPingByMid($this->mail->getUid());
-        $res = $this->changeKeyName($this->sysDmailMaillogRepository->countSysDmailMaillogAllByMid($this->mail->getUid()), 'counter', 'COUNT(*)');
+        $formatSent = $this->logRepository->findFormatSentByMail($this->mail->getUid());
+        $totalSent = (int)($formatSent[SendFormat::PLAIN] ?? 0) + (int)($formatSent[SendFormat::HTML] ?? 0) + (int)($formatSent[SendFormat::BOTH] ?? 0);
+        $htmlSent = (int)($formatSent[SendFormat::HTML] ?? 0) + (int)($formatSent[SendFormat::BOTH] ?? 0);
+        $plainSent = (int)($formatSent[SendFormat::PLAIN] ?? 0);
 
-        $textHtml = [];
-        foreach ($res as $row2) {
-            // 0:No mail; 1:HTML; 2:TEXT; 3:HTML+TEXT
-            $textHtml[$row2['format_sent']] = $row2['counter'];
-        }
+        $uniqueHtmlResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::HTML);
+        $uniquePlainResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PLAIN);
+        $uniqueResponsesTotal = $uniqueHtmlResponses + $uniquePlainResponses;
+        $uniquePingResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PING);
 
-        $totalSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['2'] ?? 0) + (int)($textHtml['3'] ?? 0);
-        $htmlSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['3'] ?? 0);
-        $plainSent = (int)($textHtml['2'] ?? 0);
+        $htmlResponses = $this->responseTypesTable[ResponseType::HTML] ?? 0;
+        $plainResponses = $this->responseTypesTable[ResponseType::PLAIN] ?? 0;
+        $failedResponses = $this->responseTypesTable[ResponseType::FAILED] ?? 0;
+        $totalResponses = $htmlResponses + $plainResponses;
 
         return [
-            'totalSent' => $totalSent,
             'htmlSent' => $htmlSent,
             'plainSent' => $plainSent,
-            'returned' => $this->showWithPercent($this->responseTypesTable['-127']['counter'] ?? 0, $totalSent),
+            'totalSent' => $totalSent,
+            'returned' => $this->showWithPercent($failedResponses, $totalSent),
+            'htmlResponses' => $htmlResponses,
+            'plainResponses' => $plainResponses,
+            'totalResponses' => $totalResponses,
             'htmlViewed' => $this->showWithPercent($uniquePingResponses, $htmlSent),
-            'totalResponses' => ($this->responseTypesTable['1']['counter'] ?? 0) + ($this->responseTypesTable['2']['counter'] ?? 0),
-            'htmlResponses' => $this->responseTypesTable['1']['counter'] ?? '0',
-            'plainResponses' => $this->responseTypesTable['2']['counter'] ?? '0',
-            'uniqueResponsesTotal' => $this->showWithPercent($uniqueHtmlResponses + $uniquePlainResponses, $totalSent),
+            'uniqueResponsesTotal' => $this->showWithPercent($uniqueResponsesTotal, $totalSent),
             'uniqueResponsesHtml' => $this->showWithPercent($uniqueHtmlResponses, $htmlSent),
-            'uniqueResponsesPlain' => $this->showWithPercent($uniquePlainResponses, $plainSent ?: $htmlSent),
-            'totalResponsesVsUniqueResponses' => ($uniqueHtmlResponses + $uniquePlainResponses ? number_format(($this->responseTypesTable['1']['counter'] + $this->responseTypesTable['2']['counter']) / ($uniqueHtmlResponses + $uniquePlainResponses),
-                2) : '-'),
-            'htmlResponsesVsUniqueResponses' => ($uniqueHtmlResponses ? number_format(($this->responseTypesTable['1']['counter']) / ($uniqueHtmlResponses),
-                2) : '-'),
-            'plainResponsesVsUniqueResponses' => ($uniquePlainResponses ? number_format(($this->responseTypesTable['2']['counter']) / ($uniquePlainResponses),
-                2) : '-'),
+            'uniqueResponsesPlain' => $this->showWithPercent($uniquePlainResponses, $plainSent),
+            'totalResponsesVsUniqueResponses' => $uniqueResponsesTotal ? number_format($totalResponses / $uniqueResponsesTotal,2) : '-',
+            'htmlResponsesVsUniqueResponses' => $uniqueHtmlResponses ? number_format($htmlResponses / $uniqueHtmlResponses, 2) : '-',
+            'plainResponsesVsUniqueResponses' => $uniquePlainResponses ? number_format($plainResponses / $uniquePlainResponses, 2) : '-',
         ];
     }
 
+    /**
+     * @throws DBALException
+     * @throws Exception
+     */
     public function getReturnedData(): array
     {
-        $responsesFailed = (int)($this->responseTypesTable['-127']['counter'] ?? 0);
-        $returnCodesTable = $this->changeKeyName($this->sysDmailMaillogRepository->countReturnCode($this->mail->getUid()), 'counter', 'COUNT(*)');
+        $responsesFailed = (int)($this->responseTypesTable['-127'] ?? 0);
+        $returnCodesTable = $this->logRepository->findReturnCodesByMail($this->mail->getUid());
 
         return [
             'total' => number_format($responsesFailed),
-            'unknown' => $this->showWithPercent(($returnCodesTable['550']['counter'] ?? 0) + ($returnCodesTable['553']['counter'] ?? 0),
+            'unknown' => $this->showWithPercent(($returnCodesTable['550'] ?? 0) + ($returnCodesTable['553'] ?? 0),
                 $responsesFailed),
-            'full' => $this->showWithPercent(($returnCodesTable['551']['counter'] ?? 0), $responsesFailed),
-            'badHost' => $this->showWithPercent(($returnCodesTable['552']['counter'] ?? 0), $responsesFailed),
-            'headerError' => $this->showWithPercent(($returnCodesTable['554']['counter'] ?? 0), $responsesFailed),
-            'reasonUnknown' => $this->showWithPercent(($returnCodesTable['-1']['counter'] ?? 0), $responsesFailed),
+            'full' => $this->showWithPercent(($returnCodesTable['551'] ?? 0), $responsesFailed),
+            'badHost' => $this->showWithPercent(($returnCodesTable['552'] ?? 0), $responsesFailed),
+            'headerError' => $this->showWithPercent(($returnCodesTable['554'] ?? 0), $responsesFailed),
+            'reasonUnknown' => $this->showWithPercent(($returnCodesTable['-1'] ?? 0), $responsesFailed),
         ];
     }
 
@@ -220,65 +222,61 @@ class MailService
      */
     public function getResponsesData(): array
     {
-        $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid());
-        $htmlUrlsTable = $this->changeKeyName($htmlUrlsTable, 'counter', 'COUNT(*)');
-
-        // Most popular links, plain:
-        $plainUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid(), 2);
-        $plainUrlsTable = $this->changeKeyName($plainUrlsTable, 'counter', 'COUNT(*)');
-        $unpackedMail = unserialize(base64_decode($this->mail->getMailContent()));
+        $mostPopularHtmlLinks = $this->logRepository->findMostPopularLinksByMailAndResponseType($this->mail->getUid());
+        $mostPopularPlainLinks = $this->logRepository->findMostPopularLinksByMailAndResponseType($this->mail->getUid(), ResponseType::PLAIN);
+        $mailContent = unserialize(base64_decode($this->mail->getMailContent()));
         $urlCounter = [];
         $urlCounter['total'] = [];
-        // Traverse html urls:
         $urlCounter['html'] = [];
-        if (count($htmlUrlsTable) > 0) {
-            foreach ($htmlUrlsTable as $id => $c) {
-                $urlCounter['html'][$id]['counter'] = $urlCounter['total'][$id]['counter'] = $c['counter'];
+
+        if (count($mostPopularHtmlLinks) > 0) {
+            foreach ($mostPopularHtmlLinks as $urlId => $counter) {
+                $urlCounter['html'][$urlId]['counter'] = $urlCounter['total'][$urlId]['counter'] = $counter;
             }
         }
         $urlArr = [];
 
         $urlMd5Map = [];
-        if (is_array($unpackedMail['html']['hrefs'] ?? false)) {
-            foreach ($unpackedMail['html']['hrefs'] as $k => $v) {
+        if (is_array($mailContent['html']['hrefs'] ?? false)) {
+            foreach ($mailContent['html']['hrefs'] as $k => $hrefValue) {
                 // convert &amp; of query params back
-                $urlArr[$k] = html_entity_decode($v['absRef']);
-                $urlMd5Map[md5($v['absRef'])] = $k;
+                $urlArr[$k] = html_entity_decode($hrefValue['absRef']);
+                $urlMd5Map[md5($hrefValue['absRef'])] = $k;
             }
         }
-        if (is_array($unpackedMail['plain']['link_ids'] ?? false)) {
-            foreach ($unpackedMail['plain']['link_ids'] as $k => $v) {
+        if (is_array($mailContent['plain']['link_ids'] ?? false)) {
+            foreach ($mailContent['plain']['link_ids'] as $k => $v) {
                 $urlArr[-$k] = $v;
             }
         }
 
         $mappedPlainUrlsTable = [];
-        foreach ($plainUrlsTable as $id => $c) {
+        foreach ($mostPopularPlainLinks as $id => $counter) {
             $url = $urlArr[intval($id)];
             if (isset($urlMd5Map[md5($url)])) {
-                $mappedPlainUrlsTable[$urlMd5Map[md5($url)]] = $c;
+                $mappedPlainUrlsTable[$urlMd5Map[md5($url)]] = $counter;
             } else {
-                $mappedPlainUrlsTable[$id] = $c;
+                $mappedPlainUrlsTable[$id] = $counter;
             }
         }
 
         // Traverse plain urls:
         $urlCounter['plain'] = [];
-        foreach ($mappedPlainUrlsTable as $id => $c) {
+        foreach ($mappedPlainUrlsTable as $id => $counter) {
             // Look up plain url in html urls
             $htmlLinkFound = false;
             foreach ($urlCounter['html'] as $htmlId => $_) {
                 if ($urlArr[$id] == $urlArr[$htmlId]) {
                     $urlCounter['html'][$htmlId]['plainId'] = $id;
-                    $urlCounter['html'][$htmlId]['plainCounter'] = $c['counter'];
-                    $urlCounter['total'][$htmlId]['counter'] = $urlCounter['total'][$htmlId]['counter'] + $c['counter'];
+                    $urlCounter['html'][$htmlId]['plainCounter'] = $counter;
+                    $urlCounter['total'][$htmlId]['counter'] += $counter;
                     $htmlLinkFound = true;
                     break;
                 }
             }
             if (!$htmlLinkFound) {
-                $urlCounter['plain'][$id]['counter'] = $c['counter'];
-                $urlCounter['total'][$id]['counter'] = $urlCounter['total'][$id]['counter'] + $c['counter'];
+                $urlCounter['plain'][$id]['counter'] = $counter;
+                $urlCounter['total'][$id]['counter'] += $counter;
             }
         }
         arsort($urlCounter['total']);
@@ -288,11 +286,11 @@ class MailService
 
         // HTML mails
         $htmlLinks = [];
-        if ($this->mail->getSendOptions() & 0x2) {
-            $htmlContent = $unpackedMail['html']['content'];
+        if ($this->mail->isHtml()) {
+            $htmlContent = $mailContent['html']['content'];
 
-            if (is_array($unpackedMail['html']['hrefs'])) {
-                foreach ($unpackedMail['html']['hrefs'] as $jumpurlId => $data) {
+            if (is_array($mailContent['html']['hrefs'])) {
+                foreach ($mailContent['html']['hrefs'] as $jumpurlId => $data) {
                     $htmlLinks[$jumpurlId] = [
                         'url' => $data['ref'],
                         'label' => '',
@@ -314,22 +312,8 @@ class MailService
                 /* @var DOMElement $link */
                 $url = $link->getAttribute('href');
 
-                if (empty($url)) {
-                    // Drop a tags without href
-                    continue;
-                }
-
-                if (str_starts_with($url, 'mailto:')) {
-                    // Drop mail links
-                    continue;
-                }
-
-                if (str_starts_with($url, '#')) {
-                    // Drop internal anker links
-                    continue;
-                }
-
-                if (!str_contains($url, '=')) {
+                if (empty($url) || str_starts_with($url, 'mailto:') || str_starts_with($url, '#') || !str_contains($url, '=')) {
+                    // Drop tags without href / mail links / internal anker
                     continue;
                 }
 
@@ -426,78 +410,35 @@ class MailService
     }
 
     /**
-     * Switch the key of an array
-     * todo make static
-     *
-     * @param array $array
-     * @param string $newkey
-     * @param string $oldkey
-     * @return array $array
-     */
-    private function changeKeyName(array $array, string $newkey, string $oldkey): array
-    {
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $array[$key] = $this->changeKeyName($value, $newkey, $oldkey);
-            } else {
-                $array[$newkey] = $array[$oldkey];
-            }
-        }
-        unset($array[$oldkey]);
-        return $array;
-    }
-
-    /**
-     * Generates a string for the URL
-     *
-     * @param array $urlParts The parts of the URL
+     * @param string $url
      *
      * @return string The URL string
      * @throws SiteNotFoundException
      */
-    public function getUrlStr(array $urlParts): string
+    public function getUrlStr(string $url): string
     {
-        $baseUrl = $this->getBaseURL();
-
-//        $siteUrl = $request->getAttribute('normalizedParams')->getSiteUrl();
+        $urlParts = @parse_url($url);
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
         $site = $siteFinder->getSiteByPageId($this->mail->getPid());
-        $siteUrl = $site->getBase();
 
-        if ($urlParts && $siteUrl == $urlParts['host']) {
+        if ($url && $site->getBase() === $urlParts['host']) {
             $m = [];
             // do we have an id?
             if (preg_match('/(?:^|&)id=([0-9a-z_]+)/', $urlParts['query'], $m)) {
                 $isInt = MathUtility::canBeInterpretedAsInteger($m[1]);
                 if ($isInt) {
                     $uid = intval($m[1]);
+                    $rootLine = BackendUtility::BEgetRootLine($uid);
+                    // array_shift reverses the array (rootline has numeric index in the wrong order!)
+                    // $rootLine = array_reverse($rootLine);
+                    $pages = array_shift($rootLine);
+                    $query = preg_replace('/(?:^|&)id=([0-9a-z_]+)/', '', $urlParts['query']);
+                    $url = $pages['title'] . ($query ? ' / ' . $query : '');
                 }
-//                @TODO
-//                 else {
-//                     // initialize the page selector
-//                     /** @var PageRepository $sys_page */
-//                     $sys_page = GeneralUtility::makeInstance(PageRepository::class);
-//                     $sys_page->init(true);
-//                     $uid = $sys_page->getPageIdFromAlias($m[1]);
-//                 }
-                $rootLine = BackendUtility::BEgetRootLine($uid);
-                $pages = array_shift($rootLine);
-                // array_shift reverses the array (rootline has numeric index in the wrong order!)
-                $rootLine = array_reverse($rootLine);
-                $query = preg_replace('/(?:^|&)id=([0-9a-z_]+)/', '', $urlParts['query']);
-                $urlstr = GeneralUtility::fixed_lgd_cs($pages['title'], 50) . GeneralUtility::fixed_lgd_cs(($query ? ' / ' . $query : ''), 20);
-            } else {
-                $urlstr = $baseUrl . substr($urlParts['path'], 1);
-                $urlstr .= $urlParts['query'] ? '?' . $urlParts['query'] : '';
-                $urlstr .= $urlParts['fragment'] ? '#' . $urlParts['fragment'] : '';
             }
-        } else {
-            $urlstr = ($urlParts['host'] ? $urlParts['scheme'] . '://' . $urlParts['host'] : $baseUrl) . $urlParts['path'];
-            $urlstr .= $urlParts['query'] ? '?' . $urlParts['query'] : '';
-            $urlstr .= $urlParts['fragment'] ? '#' . $urlParts['fragment'] : '';
         }
 
-        return $urlstr;
+        return $url;
     }
 
     /**
@@ -534,12 +475,12 @@ class MailService
      */
     public function getLinkLabel(string $url, string $urlStr, bool $forceFetch = false, string $linkedWord = ''): string
     {
-        $pathSite = $this->getBaseURL();
+        $baseURL = $this->getBaseURL();
         $label = $linkedWord;
         $contentTitle = '';
 
         $urlParts = parse_url($url);
-        if (!$forceFetch && (str_starts_with($url, $pathSite))) {
+        if (!$forceFetch && (str_starts_with($url, $baseURL))) {
             if ($urlParts['fragment'] && (str_starts_with($urlParts['fragment'], 'c'))) {
                 // linking directly to a content
                 $elementUid = intval(substr($urlParts['fragment'], 1));
@@ -551,9 +492,9 @@ class MailService
                 $contentTitle = $this->getLinkLabel($url, $urlStr, true);
             }
         } else {
-            if (empty($urlParts['host']) && (!str_starts_with($url, $pathSite))) {
+            if (empty($urlParts['host']) && (!str_starts_with($url, $baseURL))) {
                 // it's internal
-                $url = $pathSite . $url;
+                $url = $baseURL . $url;
             }
 
             $content = GeneralUtility::getURL($url);
@@ -629,15 +570,5 @@ class MailService
         }
 
         return count($frontendUsers);
-    }
-
-    public function getQueryBuilder($table): QueryBuilder
-    {
-        return GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-    }
-
-    protected function getConnection(string $table): Connection
-    {
-        return GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
     }
 }

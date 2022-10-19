@@ -300,30 +300,6 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return bool
-     */
-    public function isHtml(): bool
-    {
-        return ($this->sendOptions & 2) !== 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPlain(): bool
-    {
-        return ($this->sendOptions & 1) !== 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPlainAndHtml(): bool
-    {
-        return ($this->sendOptions & 3) !== 0;
-    }
-
-    /**
      * @param int $sendOptions
      * @return Mail
      */
@@ -331,6 +307,40 @@ class Mail extends AbstractEntity
     {
         $this->sendOptions = $sendOptions;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPlain(): bool
+    {
+        return ($this->sendOptions & 0b00000001) !== 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHtml(): bool
+    {
+        return ($this->sendOptions & 0b00000010) !== 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPlainAndHtml(): bool
+    {
+        return ($this->sendOptions & 0b00000011) !== 0;
+    }
+
+    public function removeHtmlSendOption(): void
+    {
+        $this->sendOptions = $this->sendOptions & 0b11111101;
+    }
+
+    public function removePlainSendOption(): void
+    {
+        $this->sendOptions = $this->sendOptions & 0b11111110;
     }
 
     /**

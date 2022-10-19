@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Enumeration\Action;
+use MEDIAESSENZ\Mail\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
@@ -479,11 +480,11 @@ class StatisticsControllerOld extends OldAbstractController
         ];
 
         // Most popular links, html:
-        $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 1);
+        $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($row['uid']);
         $htmlUrlsTable = $this->changekeyname($htmlUrlsTable, 'counter', 'COUNT(*)');
 
         // Most popular links, plain:
-        $plainUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($row['uid'], 2);
+        $plainUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($row['uid'], ResponseType::PLAIN);
         $plainUrlsTable = $this->changekeyname($plainUrlsTable, 'counter', 'COUNT(*)');
 
         // Find urls:

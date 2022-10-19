@@ -12,6 +12,28 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class RepositoryUtility
 {
+
+    /**
+     * Change the key of an array
+     *
+     * @param array $array
+     * @param string $newKey
+     * @param string $oldKey
+     * @return array $array
+     */
+    public static function changeKeyName(array $array, string $newKey, string $oldKey): array
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $array[$key] = static::changeKeyName($value, $newKey, $oldKey);
+            } else {
+                $array[$newKey] = $array[$oldKey];
+            }
+        }
+        unset($array[$oldKey]);
+        return $array;
+    }
+
     /**
      * Compile the categories enables for this $row of this $table.
      *

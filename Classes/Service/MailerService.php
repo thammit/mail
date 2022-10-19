@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -554,7 +555,7 @@ class MailerService implements LoggerAwareInterface
      */
     public function sendPersonalizedMail(array $recipientData, string $tableNameChar): int
     {
-        $returnCode = 0;
+        $returnCode = SendFormat::NONE;
 
         foreach ($recipientData as $key => $value) {
             $recipientData[$key] = is_string($value) ? htmlspecialchars($value) : $value;
@@ -566,37 +567,29 @@ class MailerService implements LoggerAwareInterface
 
         if ($recipientData['email']) {
             $midRidId = 'MID' . $this->mailUid . '_' . $tableNameChar . $recipientData['uid'];
-            $uniqMsgId = md5(microtime()) . '_' . $midRidId;
-            $authCode = RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList);
 
             $additionalMarkers = [
-                // Put in the tablename of the userinformation
                 '###SYS_TABLE_NAME###' => $tableNameChar,
-                // Put in the uid of the mail-record
                 '###SYS_MAIL_ID###' => $this->mailUid,
-                '###SYS_AUTHCODE###' => $authCode,
-                // Put in the unique message id in HTML-code
-                $this->getMessageId() => $uniqMsgId,
+                '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
             ];
 
             $this->setHtmlContent('');
             if ($this->isHtml && ($recipientData['module_sys_dmail_html'] || $tableNameChar == 'P')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts,
-                    $recipientData['sys_dmail_categories_list']);
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, $recipientData['sys_dmail_categories_list']);
                 $tempContent_HTML = implode('', $contentParts);
 
                 if ($mailHasContent) {
                     $tempContent_HTML = $this->replaceMailMarkers($tempContent_HTML, $recipientData, $additionalMarkers);
                     $this->setHtmlContent($tempContent_HTML);
-                    $returnCode |= 1;
+                    $returnCode |= SendFormat::HTML;
                 }
             }
 
             // Plain
             $this->setPlainContent('');
             if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts,
-                    $recipientData['sys_dmail_categories_list']);
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, $recipientData['sys_dmail_categories_list']);
                 $plainTextContent = implode('', $contentParts);
 
                 if ($mailHasContent) {
@@ -609,7 +602,7 @@ class MailerService implements LoggerAwareInterface
                         );
                     }
                     $this->setPlainContent($plainTextContent);
-                    $returnCode |= 2;
+                    $returnCode |= SendFormat::PLAIN;
                 }
             }
 
@@ -766,26 +759,26 @@ class MailerService implements LoggerAwareInterface
 
             // write to dmail_maillog table. if it can be written, continue with sending.
             // if not, stop the script and report error
-            $returnCode = 0;
+            $formatSent = 0;
 
             // try to insert the mail to the mail log repository
             try {
                 $logUid = $this->sysDmailMaillogRepository->insertRecord($mailUid, $recipientTable . '_' . $recipientData['uid'], strlen($this->message),
-                    MailerUtility::getMilliseconds() - $pt, $returnCode, $recipientData['email']);
+                    MailerUtility::getMilliseconds() - $pt, $formatSent, $recipientData['email']);
             } catch (DBALException $exception) {
-                $message = 'Unable to update Log-Entry in table sys_dmail_maillog. Table full? Mass-Sending stopped. Delete each entries except the entries of active mailings (mid=' . $mailUid . ')';
+                $message = 'Unable to insert log-entry to tx_mail_domain_model_log table. Table full? Mass-Sending stopped. Please delete old records, except of active mailing (mail uid=' . $mailUid . ')';
                 $this->logger->critical($message);
                 throw new \Exception($message, 1663340700, $exception);
             }
 
             // Send mail to recipient
-            $returnCode = $this->sendPersonalizedMail($recipientData, $recipientTable);
+            $formatSent = $this->sendPersonalizedMail($recipientData, $recipientTable);
 
             // try to store the sending return code
             try {
-                $this->sysDmailMaillogRepository->updateRecord($logUid, strlen($this->message), MailerUtility::getMilliseconds() - $pt, $returnCode);
+                $this->sysDmailMaillogRepository->updateRecord($logUid, strlen($this->message), MailerUtility::getMilliseconds() - $pt, $formatSent);
             } catch (DBALException $exception) {
-                $message = 'Unable to update Log-Entry in table sys_dmail_maillog. Table full? Mass-Sending stopped. Delete each entries except the entries of active mailings (mid=' . $mailUid . ')';
+                $message = 'Unable to update log-entry in tx_mail_domain_model_log table. Table full? Mass-Sending stopped. Please delete old records, except of active mailing (mail uid=' . $mailUid . ')';
                 $this->logger->critical($message);
                 throw new \Exception($message, 1663340700, $exception);
             }

@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Updates;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -119,6 +120,13 @@ class DirectMailMigration implements UpgradeWizardInterface
             $alreadyMigrated = $connectionLog->count('*', 'tx_mail_domain_model_log', ['uid' => $record['uid']]);
             if ($alreadyMigrated === 0) {
                 $recipientTable = $record['rtbl'] === 'f' ? 'fe_users' : ($record['rtbl'] === 't' ? 'tt_address' : 'tx_mail_domain_model_recipient');
+                // Change plain and html format to match send options of mail table
+                $formatSent = match ($record['html_sent']) {
+                    1 => SendFormat::HTML,
+                    2 => SendFormat::PLAIN,
+                    3 => SendFormat::BOTH,
+                    default => SendFormat::NONE,
+                };
                 $connectionLog->insert('tx_mail_domain_model_log',
                     [
                         'uid' => $record['uid'],
@@ -132,7 +140,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'size' => $record['size'],
                         'parse_time' => $record['parsetime'],
                         'response_type' => $record['response_type'],
-                        'format_sent' => $record['html_sent'],
+                        'format_sent' => $formatSent,
                         'url_id' => $record['url_id'],
                         'return_content' => $record['return_content'],
                         'return_code' => $record['return_code'],

@@ -7,7 +7,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Service\MailerService;
-use MEDIAESSENZ\Mail\Service\MailService;
+use MEDIAESSENZ\Mail\Service\ReportService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -41,7 +41,7 @@ abstract class AbstractController extends ActionController
         protected ModuleTemplateFactory $moduleTemplateFactory,
         protected PageRenderer $pageRenderer,
         protected SiteFinder $siteFinder,
-        protected MailService $mailService,
+        protected ReportService $mailService,
         protected MailerService $mailerService,
         protected RecipientService $recipientService,
         protected MailRepository $mailRepository,

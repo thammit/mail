@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
-use MEDIAESSENZ\Mail\Enumeration\SendOption;
+use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
@@ -143,7 +143,7 @@ class MailFactory
         if (!$htmlContentUrl || $urlParts === false || !$urlParts['host']) {
             $mail->setHtmlParams('');
             // deactivate html mail sending option
-            $mail->setSendOptions($mail->getSendOptions() & 253);
+            $mail->removeHtmlSendOption();
         } else {
             $htmlUrl = MailerUtility::getUrlForExternalPage($mail->getHtmlParams());
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
@@ -160,13 +160,13 @@ class MailFactory
         if (!$plainContentUrl || $urlParts === false || !$urlParts['host']) {
             $mail->setPlainParams('');
             // deactivate plain text mail sending option
-            $mail->setSendOptions($mail->getSendOptions() & 254);
+            $mail->removePlainSendOption();
         } else {
             $plainTextUrl = MailerUtility::getUrlForExternalPage($mail->getHtmlParams());
             $plainTextContent = $this->fetchPlainTextContent($plainTextUrl);
         }
 
-        if ($mail->getSendOptions() === SendOption::NONE) {
+        if ($mail->getSendOptions() === SendFormat::NONE) {
             return null;
         }
 
@@ -206,7 +206,7 @@ class MailFactory
             ->setFromName($senderName)
             ->setFromEmail($senderEmail)
             ->setSubject($subject)
-            ->setSendOptions(SendOption::PLAIN_TEXT_ONLY)
+            ->setSendOptions(SendFormat::PLAIN)
             ->setEncoding($this->pageTSConfiguration['quick_mail_encoding'] ?? 'quoted-printable')
             ->setCharset($this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8');
 
