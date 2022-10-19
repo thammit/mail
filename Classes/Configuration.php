@@ -79,7 +79,7 @@ final class Configuration
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
             'Mail',
             'Mail',
-            'mailExtbase',
+            'mail',
             'top',
             [
                 MailController::class => 'index,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,openMail,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete,noPageSelected'
@@ -88,7 +88,7 @@ final class Configuration
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
                 'access' => 'group,user',
                 'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-start',
+                'iconIdentifier' => 'mail-module-mail',
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/MailModule.xlf',
             ]
         );
@@ -97,7 +97,7 @@ final class Configuration
             'Mail',
             'Mail',
             'recipient',
-            'after:mailExtbase',
+            'after:mail',
             [
                 RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport'
             ],
@@ -105,7 +105,7 @@ final class Configuration
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
                 'access' => 'group,user',
                 'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-recipient-list',
+                'iconIdentifier' => 'mail-module-recipient',
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/RecipientModule.xlf',
             ]
         );
@@ -122,7 +122,7 @@ final class Configuration
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
                 'access' => 'group,user',
                 'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-statistics',
+                'iconIdentifier' => 'mail-module-report',
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/StatisticModule.xlf',
             ]
         );
@@ -130,7 +130,7 @@ final class Configuration
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
             'Mail',
             'Mail',
-            'queueExtbase',
+            'queue',
             'after:report',
             [
                 QueueController::class => 'index,trigger,delete'
@@ -139,7 +139,7 @@ final class Configuration
                 'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
                 'access' => 'group,user',
                 'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-status',
+                'iconIdentifier' => 'mail-module-queue',
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
             ]
         );
@@ -147,8 +147,8 @@ final class Configuration
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
             'Mail',
             'Mail',
-            'configurationExtbase',
-            'after:queueExtbase',
+            'configuration',
+            'after:queue',
             [
                 ConfigurationController::class => 'index,update'
             ],
@@ -158,96 +158,6 @@ final class Configuration
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-configuration',
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
-            ]
-        );
-
-        ExtensionManagementUtility::addModule(
-            'Mail',
-            'Mail',
-            'bottom',
-            '',
-            [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => MailControllerOld::class . '::indexAction',
-                'access' => 'group,user',
-                'name' => 'Mail_Mail',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-start',
-                'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/MailModule.xlf',
-                ],
-            ]
-        );
-
-        ExtensionManagementUtility::addModule(
-            'Mail',
-            'RecipientList',
-            'bottom',
-            '',
-            [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => RecipientListControllerOld::class . '::indexAction',
-                'access' => 'group,user',
-                'name' => 'Mail_RecipientList',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-recipient-list',
-                'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/RecipientModule.xlf',
-                ],
-            ]
-        );
-
-        ExtensionManagementUtility::addModule(
-            'Mail',
-            'Statistics',
-            'bottom',
-            '',
-            [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => StatisticsControllerOld::class . '::indexAction',
-                'access' => 'group,user',
-                'name' => 'Mail_Statistics',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-statistics',
-                'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/StatisticModule.xlf',
-                ],
-            ]
-        );
-
-        ExtensionManagementUtility::addModule(
-            'Mail',
-            'Status',
-            'bottom',
-            '',
-            [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => QueueControllerOld::class . '::indexAction',
-                'access' => 'group,user',
-                'name' => 'Mail_Status',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-status',
-                'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
-                ],
-            ]
-        );
-
-        ExtensionManagementUtility::addModule(
-            'Mail',
-            'Configuration',
-            'bottom',
-            '',
-            [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
-                'routeTarget' => ConfigurationControllerOld::class . '::indexAction',
-                'access' => 'group,user',
-                'name' => 'Mail_Configuration',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-configuration',
-                'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
-                ],
             ]
         );
 

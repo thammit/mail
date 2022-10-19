@@ -19,14 +19,6 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/attachment.svg'
     ],
-    'mail-list' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/list.svg'
-    ],
-    'mail-category' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/category.svg'
-    ],
     'mail-group' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/group.svg'
@@ -34,10 +26,6 @@ return [
     'mail-log' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/mail.svg'
-    ],
-    'mail-folder-mails-inactive' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/files-folder-mails.svg'
     ],
     'mail-new-mail' => [
         'provider' => SvgIconProvider::class,
@@ -55,24 +43,24 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/module-main.svg'
     ],
+    'mail-module-mail' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/module-mail.svg'
+    ],
+    'mail-module-recipient' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/module-recipient.svg'
+    ],
+    'mail-module-report' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/module-report.svg'
+    ],
+    'mail-module-queue' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/module-queue.svg'
+    ],
     'mail-module-configuration' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/module-configuration.svg'
-    ],
-    'mail-module-recipient-list' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/module-recipient-list.svg'
-    ],
-    'mail-module-start' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/module-start.svg'
-    ],
-    'mail-module-statistics' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/module-statistics.svg'
-    ],
-    'mail-module-status' => [
-        'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/module-status.svg'
     ],
 ];
