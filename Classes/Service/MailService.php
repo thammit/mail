@@ -15,10 +15,8 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
-use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
-use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -39,13 +37,6 @@ class MailService
     protected ?Mail $mail;
 
     protected array $responseTypesTable = [];
-    protected array $returnCodesTable = [];
-    protected int $uniqueHtmlResponses = 0;
-    protected int $uniquePlainResponses = 0;
-    protected int $uniquePingResponses = 0;
-    protected int $totalSent = 0;
-    protected int $htmlSent = 0;
-    protected int $plainSent = 0;
 
     public function __construct(
         protected LogRepository $logRepository,
@@ -67,33 +58,6 @@ class MailService
         $this->mail = $mail;
         $this->responseTypesTable = $this->changeKeyName($this->sysDmailMaillogRepository->countSysDmailMaillogsResponseTypeByMid($this->mail->getUid()),
             'counter', 'COUNT(*)');
-        // Plaintext/HTML
-        $res = $this->sysDmailMaillogRepository->countSysDmailMaillogAllByMid($this->mail->getUid());
-
-        /* this function is called to change the key from 'COUNT(*)' to 'counter' */
-        $res = $this->changeKeyName($res, 'counter', 'COUNT(*)');
-
-        $textHtml = [];
-        foreach ($res as $row2) {
-            // 0:No mail; 1:HTML; 2:TEXT; 3:HTML+TEXT
-            $textHtml[$row2['format_sent']] = $row2['counter'];
-        }
-
-        // Unique responses, html
-        $this->uniqueHtmlResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogHtmlByMid($this->mail->getUid());
-
-        // Unique responses, Plain
-        $this->uniquePlainResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPlainByMid($this->mail->getUid());
-
-        // Unique responses, pings
-        $this->uniquePingResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPingByMid($this->mail->getUid());
-
-        $this->totalSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['2'] ?? 0) + (int)($textHtml['3'] ?? 0);
-        $this->htmlSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['3'] ?? 0);
-        $this->plainSent = (int)($textHtml['2'] ?? 0);
-
-        $this->returnCodesTable = $this->sysDmailMaillogRepository->countReturnCode($this->mail->getUid());
-        $this->returnCodesTable = $this->changeKeyName($this->returnCodesTable, 'counter', 'COUNT(*)');
     }
 
     /**
@@ -138,26 +102,43 @@ class MailService
     /**
      *
      * @return array
+     * @throws DBALException
+     * @throws Exception
      */
     public function getPerformanceData(): array
     {
+        $uniqueHtmlResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogHtmlByMid($this->mail->getUid());
+        $uniquePlainResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPlainByMid($this->mail->getUid());
+        $uniquePingResponses = $this->sysDmailMaillogRepository->countSysDmailMaillogPingByMid($this->mail->getUid());
+        $res = $this->changeKeyName($this->sysDmailMaillogRepository->countSysDmailMaillogAllByMid($this->mail->getUid()), 'counter', 'COUNT(*)');
+
+        $textHtml = [];
+        foreach ($res as $row2) {
+            // 0:No mail; 1:HTML; 2:TEXT; 3:HTML+TEXT
+            $textHtml[$row2['format_sent']] = $row2['counter'];
+        }
+
+        $totalSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['2'] ?? 0) + (int)($textHtml['3'] ?? 0);
+        $htmlSent = (int)($textHtml['1'] ?? 0) + (int)($textHtml['3'] ?? 0);
+        $plainSent = (int)($textHtml['2'] ?? 0);
+
         return [
-            'totalSent' => $this->totalSent,
-            'htmlSent' => $this->htmlSent,
-            'plainSent' => $this->plainSent,
-            'returned' => $this->showWithPercent($this->responseTypesTable['-127']['counter'] ?? 0, $this->totalSent),
-            'htmlViewed' => $this->showWithPercent($this->uniquePingResponses, $this->htmlSent),
+            'totalSent' => $totalSent,
+            'htmlSent' => $htmlSent,
+            'plainSent' => $plainSent,
+            'returned' => $this->showWithPercent($this->responseTypesTable['-127']['counter'] ?? 0, $totalSent),
+            'htmlViewed' => $this->showWithPercent($uniquePingResponses, $htmlSent),
             'totalResponses' => ($this->responseTypesTable['1']['counter'] ?? 0) + ($this->responseTypesTable['2']['counter'] ?? 0),
             'htmlResponses' => $this->responseTypesTable['1']['counter'] ?? '0',
             'plainResponses' => $this->responseTypesTable['2']['counter'] ?? '0',
-            'uniqueResponsesTotal' => $this->showWithPercent($this->uniqueHtmlResponses + $this->uniquePlainResponses, $this->totalSent),
-            'uniqueResponsesHtml' => $this->showWithPercent($this->uniqueHtmlResponses, $this->htmlSent),
-            'uniqueResponsesPlain' => $this->showWithPercent($this->uniquePlainResponses, $this->plainSent ?: $this->htmlSent),
-            'totalResponsesVsUniqueResponses' => ($this->uniqueHtmlResponses + $this->uniquePlainResponses ? number_format(($this->responseTypesTable['1']['counter'] + $this->responseTypesTable['2']['counter']) / ($this->uniqueHtmlResponses + $this->uniquePlainResponses),
+            'uniqueResponsesTotal' => $this->showWithPercent($uniqueHtmlResponses + $uniquePlainResponses, $totalSent),
+            'uniqueResponsesHtml' => $this->showWithPercent($uniqueHtmlResponses, $htmlSent),
+            'uniqueResponsesPlain' => $this->showWithPercent($uniquePlainResponses, $plainSent ?: $htmlSent),
+            'totalResponsesVsUniqueResponses' => ($uniqueHtmlResponses + $uniquePlainResponses ? number_format(($this->responseTypesTable['1']['counter'] + $this->responseTypesTable['2']['counter']) / ($uniqueHtmlResponses + $uniquePlainResponses),
                 2) : '-'),
-            'htmlResponsesVsUniqueResponses' => ($this->uniqueHtmlResponses ? number_format(($this->responseTypesTable['1']['counter']) / ($this->uniqueHtmlResponses),
+            'htmlResponsesVsUniqueResponses' => ($uniqueHtmlResponses ? number_format(($this->responseTypesTable['1']['counter']) / ($uniqueHtmlResponses),
                 2) : '-'),
-            'plainResponsesVsUniqueResponses' => ($this->uniquePlainResponses ? number_format(($this->responseTypesTable['2']['counter']) / ($this->uniquePlainResponses),
+            'plainResponsesVsUniqueResponses' => ($uniquePlainResponses ? number_format(($this->responseTypesTable['2']['counter']) / ($uniquePlainResponses),
                 2) : '-'),
         ];
     }
@@ -165,14 +146,16 @@ class MailService
     public function getReturnedData(): array
     {
         $responsesFailed = (int)($this->responseTypesTable['-127']['counter'] ?? 0);
+        $returnCodesTable = $this->changeKeyName($this->sysDmailMaillogRepository->countReturnCode($this->mail->getUid()), 'counter', 'COUNT(*)');
+
         return [
             'total' => number_format($responsesFailed),
-            'unknown' => $this->showWithPercent(($this->returnCodesTable['550']['counter'] ?? 0) + ($this->returnCodesTable['553']['counter'] ?? 0),
+            'unknown' => $this->showWithPercent(($returnCodesTable['550']['counter'] ?? 0) + ($returnCodesTable['553']['counter'] ?? 0),
                 $responsesFailed),
-            'full' => $this->showWithPercent(($this->returnCodesTable['551']['counter'] ?? 0), $responsesFailed),
-            'badHost' => $this->showWithPercent(($this->returnCodesTable['552']['counter'] ?? 0), $responsesFailed),
-            'headerError' => $this->showWithPercent(($this->returnCodesTable['554']['counter'] ?? 0), $responsesFailed),
-            'reasonUnknown' => $this->showWithPercent(($this->returnCodesTable['-1']['counter'] ?? 0), $responsesFailed),
+            'full' => $this->showWithPercent(($returnCodesTable['551']['counter'] ?? 0), $responsesFailed),
+            'badHost' => $this->showWithPercent(($returnCodesTable['552']['counter'] ?? 0), $responsesFailed),
+            'headerError' => $this->showWithPercent(($returnCodesTable['554']['counter'] ?? 0), $responsesFailed),
+            'reasonUnknown' => $this->showWithPercent(($returnCodesTable['-1']['counter'] ?? 0), $responsesFailed),
         ];
     }
 
@@ -181,59 +164,9 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getReturnedDetailsData(): array
+    public function getReturnedDetailsData(array $returnCodes = []): array
     {
-        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid());
-    }
-
-    /**
-     * @throws InvalidQueryException
-     * @throws Exception
-     * @throws DBALException
-     */
-    public function getUnknownData(): array
-    {
-        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [550, 553]);
-    }
-
-    /**
-     * @throws InvalidQueryException
-     * @throws Exception
-     * @throws DBALException
-     */
-    public function getMailboxFullData(): array
-    {
-        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [551]);
-    }
-
-    /**
-     * @throws InvalidQueryException
-     * @throws Exception
-     * @throws DBALException
-     */
-    public function getBadHostData(): array
-    {
-        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [552]);
-    }
-
-    /**
-     * @throws InvalidQueryException
-     * @throws Exception
-     * @throws DBALException
-     */
-    public function getBadHeaderData(): array
-    {
-        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [554]);
-    }
-
-    /**
-     * @throws InvalidQueryException
-     * @throws Exception
-     * @throws DBALException
-     */
-    public function getReasonUnknownData(): array
-    {
-        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), [-1]);
+        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), $returnCodes);
     }
 
     /**
@@ -287,7 +220,6 @@ class MailService
      */
     public function getResponsesData(): array
     {
-        $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
         $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid());
         $htmlUrlsTable = $this->changeKeyName($htmlUrlsTable, 'counter', 'COUNT(*)');
 
@@ -708,61 +640,4 @@ class MailService
     {
         return GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
     }
-
-    /**
-     * @return array
-     */
-    public function getResponseTypesTable(): array
-    {
-        return $this->responseTypesTable;
-    }
-
-    /**
-     * @return int
-     */
-    public function getUniqueHtmlResponses(): int
-    {
-        return $this->uniqueHtmlResponses;
-    }
-
-    /**
-     * @return int
-     */
-    public function getUniquePlainResponses(): int
-    {
-        return $this->uniquePlainResponses;
-    }
-
-    /**
-     * @return int
-     */
-    public function getUniquePingResponses(): int
-    {
-        return $this->uniquePingResponses;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTotalSent(): int
-    {
-        return $this->totalSent;
-    }
-
-    /**
-     * @return int
-     */
-    public function getHtmlSent(): int
-    {
-        return $this->htmlSent;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPlainSent(): int
-    {
-        return $this->plainSent;
-    }
-
 }

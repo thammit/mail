@@ -6,7 +6,7 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
-use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Enumeration\ReturnCodes;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
@@ -146,7 +146,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getUnknownData(),
+            'data' => $this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -167,7 +167,7 @@ class ReportController extends AbstractController
     public function disableUnknownAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getUnknownData());
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
         ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -182,7 +182,7 @@ class ReportController extends AbstractController
     public function csvExportUnknownAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $this->mailService->csvDownloadRecipients($this->mailService->getUnknownData());
+        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
     }
 
     /**
@@ -197,7 +197,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getMailboxFullData(),
+            'data' => $this->mailService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -218,7 +218,7 @@ class ReportController extends AbstractController
     public function disableFullAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getMailboxFullData());
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]));
         ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -233,7 +233,7 @@ class ReportController extends AbstractController
     public function csvExportFullAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $this->mailService->csvDownloadRecipients($this->mailService->getMailboxFullData());
+        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]));
     }
 
     /**
@@ -248,7 +248,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getBadHostData(),
+            'data' => $this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -269,7 +269,7 @@ class ReportController extends AbstractController
     public function disableBadHostAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getBadHostData());
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]));
         ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -284,7 +284,7 @@ class ReportController extends AbstractController
     public function csvExportBadHostAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $this->mailService->csvDownloadRecipients($this->mailService->getBadHostData());
+        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]));
     }
 
     /**
@@ -299,7 +299,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getBadHeaderData(),
+            'data' => $this->mailService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -320,7 +320,7 @@ class ReportController extends AbstractController
     public function disableBadHeaderAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getBadHeaderData());
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]));
         ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -335,7 +335,7 @@ class ReportController extends AbstractController
     public function csvExportBadHeaderAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $this->mailService->csvDownloadRecipients($this->mailService->getBadHeaderData());
+        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]));
     }
 
     /**
@@ -350,7 +350,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getReasonUnknownData(),
+            'data' => $this->mailService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -371,7 +371,7 @@ class ReportController extends AbstractController
     public function disableReasonUnknownAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReasonUnknownData());
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
         ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -386,6 +386,6 @@ class ReportController extends AbstractController
     public function csvExportReasonUnknownAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $this->mailService->csvDownloadRecipients($this->mailService->getReasonUnknownData());
+        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
     }
 }
