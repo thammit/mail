@@ -24,6 +24,11 @@ class MailRepository extends Repository
         $this->setDefaultQuerySettings($querySettings);
     }
 
+    public function persist(): void
+    {
+        $this->persistenceManager->persistAll();
+    }
+
     /**
      * @param int $pid
      * @return object[]|QueryResultInterface

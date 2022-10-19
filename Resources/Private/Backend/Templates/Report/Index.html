@@ -46,9 +46,9 @@
                     <td class="col-title col-responsive nowrap">
                         <f:link.action action="show" arguments="{mail: mail.uid}">{mail.subject}</f:link.action>
                     </td>
-                    <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y h:i')}</td>
-                    <td class="nowrap">{mail.scheduled_begin -> f:format.date(format: 'd.m.Y h:i')}</td>
-                    <td class="nowrap">{mail.scheduled_end -> f:format.date(format: 'd.m.Y h:i')}</td>
+                    <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y H:i')}</td>
+                    <td class="nowrap">{mail.scheduled_begin -> f:format.date(format: 'd.m.Y H:i')}</td>
+                    <td class="nowrap">{mail.scheduled_end -> f:format.date(format: 'd.m.Y H:i')}</td>
                     <td class="nowrap">
                         <div class="progress">
                             <f:if condition="{mail.percentOfSent} == 100">

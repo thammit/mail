@@ -5,20 +5,18 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
-use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
-use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -35,6 +33,7 @@ use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class MailerService implements LoggerAwareInterface
 {
@@ -85,6 +84,7 @@ class MailerService implements LoggerAwareInterface
 
     public function __construct(
         protected CharsetConverter $charsetConverter,
+        protected MailRepository $mailRepository,
         protected SysDmailMaillogRepository $sysDmailMaillogRepository
     ) {
     }
@@ -271,133 +271,6 @@ class MailerService implements LoggerAwareInterface
             // Mailer engine parameters
         $this->sendPerCycle = $sendPerCycle;
         $this->backendUserLanguage = $backendUserLanguage;
-    }
-
-    /**
-     * @param array $mailData
-     * @param array $params
-     * @return bool returns false if an error occurred
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     */
-    public function assemble(array $mailData, array $params): bool
-    {
-        $fetchPlainTextContent = ConfigurationUtility::shouldFetchPlainText($mailData);
-        $fetchHtmlContent = ConfigurationUtility::shouldFetchHtml($mailData);
-
-        if (!$fetchPlainTextContent && !$fetchHtmlContent) {
-            ViewUtility::addInfoToFlashMessageQueue('', LanguageUtility::getLL('dmail_no_mail_content_format_selected'));
-            return false;
-        }
-
-        $this->start();
-        $this->setCharset($mailData['charset']);
-        $this->setIncludeMedia((bool)$mailData['include_media']);
-
-
-        if ($fetchPlainTextContent) {
-            $plainTextUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['plain_params']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
-                $mailData['plain_params']);
-            $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $params);
-            try {
-                $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
-                if ($plainContent === false) {
-                    ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_plain_uri_is_invalid'),
-                        LanguageUtility::getLL('dmail_error'));
-                    return false;
-                } else {
-                    if (!MailerUtility::contentContainsBoundaries($plainContent)) {
-                        ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_boundaries'),
-                            LanguageUtility::getLL('dmail_warning'));
-                    }
-                    $this->setPlainContent($plainContent);
-                }
-            } catch (RequestException|ConnectException $exception) {
-                ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
-                    LanguageUtility::getLL('dmail_error'));
-                return false;
-            }
-        }
-
-        if ($fetchHtmlContent) {
-            $htmlUrl = (int)$mailData['type'] === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mailData['html_params']) : BackendDataUtility::getUrlForInternalPage($mailData['page'],
-                $mailData['html_params']);
-            $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $params);
-            try {
-                $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
-                if ($htmlContent === false) {
-                    ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid'),
-                        LanguageUtility::getLL('dmail_error'));
-                    return false;
-                } else {
-                    if ((int)$mailData['type'] == MailType::EXTERNAL) {
-                        // Try to auto-detect the charset of the message
-                        $matches = [];
-                        $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m',
-                            $htmlContent, $matches);
-                        if ($res === 1) {
-                            $this->setCharset($matches[1]);
-                        } else {
-                            if (isset($params['direct_mail_charset'])) {
-                                $this->setCharset($params['direct_mail_charset']);
-                            } else {
-                                $this->setCharset('iso-8859-1');
-                            }
-                        }
-                    }
-                    if (MailerUtility::contentContainsFrameTag($htmlContent)) {
-                        ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_frames_not allowed'), LanguageUtility::getLL('dmail_error'));
-                        return false;
-                    }
-                    if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
-                        ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_html_boundaries'),
-                            LanguageUtility::getLL('dmail_warning'));
-                    }
-                    // $baseUrl = $this->theParts['html']['path']
-                    $htmlHyperLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
-                    $this->setHtmlHyperLinks($htmlHyperLinks);
-
-                    if ($htmlHyperLinks) {
-                        $baseUrl = BackendDataUtility::getAbsoluteBaseUrlForMailPage((int)$mailData['page']);
-                        $glue = str_contains($baseUrl, '?') ? '&' : '?';
-                        $jumpUrlPrefix = '';
-                        $jumpUrlUseId = false;
-                        if ($params['enable_jump_url'] ?? false) {
-                            $jumpUrlPrefix = $baseUrl . $glue .
-                                'mid=###SYS_MAIL_ID###' .
-                                ($params['jumpurl_tracking_privacy'] ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
-                                '&aC=###SYS_AUTHCODE###' .
-                                '&jumpurl=';
-                            $jumpUrlUseId = true;
-                        }
-                        $jumpUrlUseMailto = (bool)($params['enable_mailto_jump_url'] ?? false);
-
-                        $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $htmlHyperLinks, $jumpUrlPrefix, $jumpUrlUseId, $jumpUrlUseMailto);
-                    }
-                    $this->setHtmlContent($htmlContent);
-                }
-            } catch (RequestException $exception) {
-                ViewUtility::addErrorToFlashMessageQueue(' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
-                    LanguageUtility::getLL('dmail_no_html_content'));
-                return false;
-            }
-        }
-
-        // Update the record:
-        // $this->setMailPart('messageid', $this->getMessageId());
-        $mailContent = base64_encode(serialize($this->getMailParts()));
-
-        $updateData = [
-            'sent' => 0,
-            'charset' => $this->getCharset(),
-            'mail_content' => $mailContent,
-            'renderedSize' => strlen($mailContent),
-            'redirect_url' => $baseUrl,
-        ];
-
-        GeneralUtility::makeInstance(SysDmailRepository::class)->update((int)$mailData['uid'], $updateData);
-
-        return true;
     }
 
     /**
@@ -824,7 +697,13 @@ class MailerService implements LoggerAwareInterface
     {
         $numberOfRecipients = MailerUtility::getNumberOfRecipients($mailUid);
 
-        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_begin' => time(), 'recipients' => $numberOfRecipients]);
+        /** @var Mail $mail */
+        $mail = $this->mailRepository->findByUid($mailUid);
+        $mail->setScheduledBegin(new \DateTimeImmutable('now'));
+        $mail->setRecipients($numberOfRecipients);
+        $this->mailRepository->update($mail);
+        $this->mailRepository->persist();
+//        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_begin' => time(), 'recipients' => $numberOfRecipients]);
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
@@ -847,7 +726,13 @@ class MailerService implements LoggerAwareInterface
     {
         $numberOfRecipients = MailerUtility::getNumberOfRecipients($mailUid);
 
-        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_end' => time(), 'recipients' => $numberOfRecipients]);
+        /** @var Mail $mail */
+        $mail = $this->mailRepository->findByUid($mailUid);
+        $mail->setScheduledEnd(new \DateTimeImmutable('now'));
+        $mail->setRecipients($numberOfRecipients);
+        $this->mailRepository->update($mail);
+        $this->mailRepository->persist();
+//        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_end' => time(), 'recipients' => $numberOfRecipients]);
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(

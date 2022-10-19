@@ -52,9 +52,9 @@
                         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail"/>
                     </td>
                     <td class="col-title col-responsive nowrap">{mail.subject}</td>
-                    <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y h:i')}</td>
-                    <td class="nowrap">{mail.scheduledBegin -> f:format.date(format: 'd.m.Y h:i')}</td>
-                    <td class="nowrap">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y h:i')}</td>
+                    <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y H:i')}</td>
+                    <td class="nowrap">{mail.scheduledBegin -> f:format.date(format: 'd.m.Y H:i')}</td>
+                    <td class="nowrap">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y H:i')}</td>
                     <td class="nowrap">
                         <div class="progress">
                             <f:if condition="{row.percentOfSent} == 100">
