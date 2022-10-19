@@ -12,29 +12,24 @@
     <h1>
         <f:translate key="{lll}stats_show_header"/>
     </h1>
-    <h2><core:iconForRecord row="{uid: mailUid, type: 0}" table="tx_mail_domain_model_mail" size="default" /> {mailInfo.mail.subject} [{mailUid}]</h2>
+    <h2><core:iconForRecord row="{uid: mail.uid, type: 0}" table="tx_mail_domain_model_mail" size="default" /> {mail.subject} [{mail.uid}]</h2>
     <div class="row">
         <div class="col-12 col-lg-6 col-xxl-4">
-            <f:render partial="Report/CompactView" arguments="{data:mailInfo, lll:lll}"/>
+            <f:render partial="Report/General" arguments="{data:general, lll:lll}"/>
         </div>
-        <f:if condition="{generalInfo}">
+        <f:if condition="{performance}">
             <div class="col-12 col-lg-6 col-xxl-4">
-                <f:render partial="Report/General" arguments="{data:generalInfo, lll:lll}"/>
+                <f:render partial="Report/Performance" arguments="{data:performance, lll:lll}"/>
             </div>
         </f:if>
-        <f:if condition="{responsesInfo}">
+        <f:if condition="{returned}">
             <div class="col-12 col-lg-6 col-xxl-4">
-                <f:render partial="Report/Responses" arguments="{data:responsesInfo, lll:lll}"/>
+                <f:render partial="Report/Returned" arguments="{data:returned, mail:mail, lll:lll}"/>
             </div>
         </f:if>
-        <f:if condition="{returnedMails}">
+        <f:if condition="{responses}">
             <div class="col-12 col-lg-6 col-xxl-4">
-                <f:render partial="Report/ReturnedMails" arguments="{data:returnedMails, mailUid:mailUid, lll:lll}"/>
-            </div>
-        </f:if>
-        <f:if condition="{linkResponses}">
-            <div class="col-12 col-lg-6 col-xxl-4">
-                <f:render partial="Report/LinkResponses" arguments="{data:linkResponses, lll:lll}"/>
+                <f:render partial="Report/Responses" arguments="{data:responses, lll:lll}"/>
             </div>
         </f:if>
     </div>

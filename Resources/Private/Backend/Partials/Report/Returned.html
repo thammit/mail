@@ -20,13 +20,13 @@
             <td class="col-control nowrap">
                 <f:if condition="{data.total}">
                     <div class="btn-group">
-                        <f:link.action action="showTotalReturned" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned')}">
+                        <f:link.action action="showTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned')}">
                             <core:icon identifier="actions-system-list-open" size="small" />
                         </f:link.action>
-                        <f:link.action action="disableTotalReturned" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned')}">
+                        <f:link.action action="disableTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned')}">
                             <core:icon identifier="actions-lock" size="small" />
                         </f:link.action>
-                        <f:link.action action="csvExportTotalReturned" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned')}">
+                        <f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned')}">
                             <core:icon identifier="actions-document-export-csv" size="small" />
                         </f:link.action>
                     </div>
@@ -41,13 +41,13 @@
             <td class="col-control nowrap">
                 <f:if condition="{data.unknown}">
                     <div class="btn-group">
-                        <f:link.action action="showUnknown" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_unknown_recipient')}">
+                        <f:link.action action="showUnknown" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_unknown_recipient')}">
                             <core:icon identifier="actions-system-list-open" size="small" />
                         </f:link.action>
-                        <f:link.action action="disableUnknown" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_unknown_recipient')}">
+                        <f:link.action action="disableUnknown" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_unknown_recipient')}">
                             <core:icon identifier="actions-lock" size="small" />
                         </f:link.action>
-                        <f:link.action action="csvExportUnknown" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_unknown_recipient')}">
+                        <f:link.action action="csvExportUnknown" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_unknown_recipient')}">
                             <core:icon identifier="actions-document-export-csv" size="small" />
                         </f:link.action>
                     </div>
@@ -62,13 +62,13 @@
             <td class="col-control nowrap">
                 <f:if condition="{data.full}">
                     <div class="btn-group">
-                        <f:link.action action="showFull" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_mailbox_full')}">
+                        <f:link.action action="showFull" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_mailbox_full')}">
                             <core:icon identifier="actions-system-list-open" size="small" />
                         </f:link.action>
-                        <f:link.action action="disableFull" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_mailbox_full')}">
+                        <f:link.action action="disableFull" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_mailbox_full')}">
                             <core:icon identifier="actions-lock" size="small" />
                         </f:link.action>
-                        <f:link.action action="csvExportFull" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_mailbox_full')}">
+                        <f:link.action action="csvExportFull" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_mailbox_full')}">
                             <core:icon identifier="actions-document-export-csv" size="small" />
                         </f:link.action>
                     </div>
@@ -83,13 +83,13 @@
             <td class="col-control nowrap">
                 <f:if condition="{data.badHost}">
                     <div class="btn-group">
-                        <f:link.action action="showBadHost" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_bad_host')}">
+                        <f:link.action action="showBadHost" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_bad_host')}">
                             <core:icon identifier="actions-system-list-open" size="small" />
                         </f:link.action>
-                        <f:link.action action="disableBadHost" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_bad_host')}">
+                        <f:link.action action="disableBadHost" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_bad_host')}">
                             <core:icon identifier="actions-lock" size="small" />
                         </f:link.action>
-                        <f:link.action action="csvExportBadHost" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_bad_host')}">
+                        <f:link.action action="csvExportBadHost" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_bad_host')}">
                             <core:icon identifier="actions-document-export-csv" size="small" />
                         </f:link.action>
                     </div>
@@ -104,13 +104,13 @@
             <td class="col-control nowrap">
                 <f:if condition="{data.headerError}">
                     <div class="btn-group">
-                        <f:link.action action="showBadHeader" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_bad_header')}">
+                        <f:link.action action="showBadHeader" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_bad_header')}">
                             <core:icon identifier="actions-system-list-open" size="small" />
                         </f:link.action>
-                        <f:link.action action="disableBadHeader" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_bad_header')}">
+                        <f:link.action action="disableBadHeader" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_bad_header')}">
                             <core:icon identifier="actions-lock" size="small" />
                         </f:link.action>
-                        <f:link.action action="csvExportBadHeader" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_bad_header')}">
+                        <f:link.action action="csvExportBadHeader" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_bad_header')}">
                             <core:icon identifier="actions-document-export-csv" size="small" />
                         </f:link.action>
                     </div>
@@ -125,13 +125,13 @@
             <td class="col-control nowrap">
                 <f:if condition="{data.reasonUnknown}">
                     <div class="btn-group">
-                        <f:link.action action="showReasonUnknown" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_reason_unknown')}">
+                        <f:link.action action="showReasonUnknown" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_list_returned_reason_unknown')}">
                             <core:icon identifier="actions-system-list-open" size="small" />
                         </f:link.action>
-                        <f:link.action action="disableReasonUnknown" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_reason_unknown')}">
+                        <f:link.action action="disableReasonUnknown" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_disable_returned_reason_unknown')}">
                             <core:icon identifier="actions-lock" size="small" />
                         </f:link.action>
-                        <f:link.action action="csvExportReasonUnknown" arguments="{mail: mailUid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_reason_unknown')}">
+                        <f:link.action action="csvExportReasonUnknown" arguments="{mail: mail.uid}" class="btn btn-default" title="{f:translate(key: '{lll}stats_CSV_returned_reason_unknown')}">
                             <core:icon identifier="actions-document-export-csv" size="small" />
                         </f:link.action>
                     </div>

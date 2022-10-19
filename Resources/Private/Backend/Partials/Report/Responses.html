@@ -6,7 +6,7 @@
       data-namespace-typo3-fluid="true">
 
 <h2>
-    <f:translate key="{lll}stats_response"/>
+    <f:translate key="{lll}stats_response_link"/>
 </h2>
 
 <div class="panel panel-default mb-3">
@@ -14,6 +14,12 @@
         <thead>
         <tr>
             <th></th>
+            <th>
+                <f:translate key="{lll}stats_HTML_link_nr"/>
+            </th>
+            <th>
+                <f:translate key="{lll}stats_plaintext_link_nr"/>
+            </th>
             <th>
                 <f:translate key="{lll}stats_total"/>
             </th>
@@ -23,35 +29,43 @@
             <th>
                 <f:translate key="{lll}stats_plaintext"/>
             </th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <th>
-                <f:translate key="{lll}stats_total_responses"/>
-            </th>
-            <td>{data.totalResponses}</td>
-            <td>{data.htmlResponses}</td>
-            <td>{data.plainResponses}</td>
-        </tr>
-        <tr>
-            <th>
-                <f:translate key="{lll}stats_unique_responses"/>
-            </th>
-            <td>{data.totalUniqueResponses}</td>
-            <td>{data.htmlUniqueResponses}</td>
-            <td>{data.plainUniqueResponses}</td>
-        </tr>
-        <tr>
-            <th>
-                <f:translate key="{lll}stats_links_clicked_per_respondent"/>
-            </th>
-            <td>{data.totalResponsesVsUniqueResponses}</td>
-            <td>{data.htmlResponsesVsUniqueResponses}</td>
-            <td>{data.plainResponsesVsUniqueResponses}</td>
-        </tr>
+        <f:for each="{data}" as="tr">
+            <tr>
+                <f:for each="{tr}" as="td" iteration="tdIterator">
+                    <f:if condition="{tdIterator.isFirst}">
+                        <f:then>
+                            <th>
+                        </f:then>
+                        <f:else>
+                            <td>
+                        </f:else>
+                    </f:if>
+                    <f:if condition="{tdIterator.isLast}">
+                        <f:then>
+                            <a href="{td -> f:format.html()}" target="_blank">
+                                <core:icon identifier="apps-toolbar-menu-search" size="small"/>
+                            </a>
+                        </f:then>
+                        <f:else>
+                            {td -> f:format.html()}
+                        </f:else>
+                    </f:if>
+                    <f:if condition="{tdIterator.isFirst}">
+                        <f:then>
+                            </th>
+                        </f:then>
+                        <f:else>
+                            </td>
+                        </f:else>
+                    </f:if>
+                </f:for>
+            </tr>
+        </f:for>
         </tbody>
     </table>
 </div>
-
 </html>

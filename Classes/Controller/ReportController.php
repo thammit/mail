@@ -50,11 +50,6 @@ class ReportController extends AbstractController
         }
         $this->view->assignMultiple([
             'data' => $data,
-            'backendUser' => [
-                'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
-                'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
-                'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
-            ],
         ]);
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
@@ -74,17 +69,11 @@ class ReportController extends AbstractController
     {
         $this->mailService->init($mail);
         $this->view->assignMultiple([
-            'mailUid' => $mail->getUid(),
-            'mailInfo' => $this->mailService->getMailInfo(),
-            'generalInfo' => $this->mailService->getGeneralInfo(),
-            'responsesInfo' => $this->mailService->getResponsesInfo(),
-            'returnedMails' => $this->mailService->getReturnedMails(),
-            'linkResponses' => $this->mailService->getLinkResponses(),
-            'backendUser' => [
-                'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
-                'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
-                'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
-            ],
+            'mail' => $mail,
+            'general' => $this->mailService->getGeneralData(),
+            'performance' => $this->mailService->getPerformanceData(),
+            'returned' => $this->mailService->getReturnedData(),
+            'responses' => $this->mailService->getResponsesData(),
         ]);
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
@@ -106,7 +95,7 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->mailService->getReturnedData(),
+            'data' => $this->mailService->getReturnedDetailsData(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -127,7 +116,7 @@ class ReportController extends AbstractController
     public function disableTotalReturnedAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedData());
+        $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData());
         ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -142,7 +131,7 @@ class ReportController extends AbstractController
     public function csvExportTotalReturnedAction(Mail $mail): void
     {
         $this->mailService->init($mail);
-        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedData());
+        $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData());
     }
 
     /**

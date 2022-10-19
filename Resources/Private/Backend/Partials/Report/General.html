@@ -5,75 +5,85 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<h2>
-    <f:translate key="{lll}stats_general_information"/>
-</h2>
+<f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
 
+<f:variable name="mailFormatAttachementInfo" value="{
+        0: '{f:translate(key:\'{lll2}sys_dmail.priority\')}: {data.mail.priority}',
+        1: '{f:translate(key:\'{lll2}sys_dmail.transfer_encoding\')}: {data.mail.encoding}',
+        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {data.mail.charset}'
+}"/>
+
+<f:variable name="sourceInfo" value="{
+        0: '{f:translate(key:\'{lll}view_media\')}: {data.includeMedia}',
+        1: '{f:translate(key:\'{lll}view_flowed\')}: {data.flowedFormat}'
+}"/>
+
+<f:variable name="fromInfo" value="{
+        0: '{f:translate(key:\'{lll}view_replyto\')}: {data.mail.replytoName} {data.mail.replyToEmail}',
+        1: '{f:translate(key:\'{lll2}sys_dmail.organisation\')}: {data.mail.organisation}',
+        2: '{f:translate(key:\'{lll2}sys_dmail.return_path\')}: {data.mail.returnPath}'
+}"/>
+
+<h2>
+    <f:translate key="{lll}stats_direct_mail"/>
+</h2>
 <div class="panel panel-default mb-3">
     <table class="table table-striped table-hover">
-        <thead>
         <tr>
-            <th> </th>
             <th>
-                <f:translate key="{lll}stats_total"/>
+                <f:translate key="{lll}view_from"/>
             </th>
-            <th>
-                <f:translate key="{lll}stats_HTML"/>
-            </th>
-            <th>
-                <f:translate key="{lll}stats_plaintext"/>
-            </th>
+            <td>{data.mail.fromName} &lt;{data.mail.fromEmail}&gt;</td>
+            <td><f:render section="help" arguments="{fromInfo}"/></td>
         </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>
-                    <f:translate key="{lll}stats_mails_sent"/>
-                </th>
-                <td>
-                    {data.totalSent}
-                </td>
-                <td>
-                    {data.htmlSent}
-                </td>
-                <td>
-                    {data.plainSent}
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <f:translate key="{lll}stats_mails_returned"/>
-                </th>
-                <td colspan="3">
-                    {data.returned}
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <f:translate key="{lll}stats_HTML_mails_viewed"/>
-                </th>
-                <td> </td>
-                <td>
-                    {data.htmlViewed}
-                </td>
-                <td> </td>
-            </tr>
-            <tr>
-                <th>
-                    <f:translate key="{lll}stats_unique_responses"/>
-                </th>
-                <td>
-                    {data.uniqueResponsesTotal}
-                </td>
-                <td>
-                    {data.uniqueResponsesHtml}
-                </td>
-                <td>
-                    {data.uniqueResponsesPlain}
-                </td>
-            </tr>
-        </tbody>
+        <tr>
+            <th>
+                <f:translate key="{lll}view_dmail"/>
+            </th>
+            <td>{data.type}{data.dmailData}</td>
+            <td><f:render section="help" arguments="{sourceInfo}"/></td>
+        </tr>
+        <tr>
+            <th>
+                <f:translate key="{lll}view_mail"/>
+            </th>
+            <td>
+                {data.sendOptions}
+                <f:if condition="{data.mail.attachment}">
+                    <f:for each="{data.mail.attachment}" as="attachment">
+                        {attachment -> f:debug(inline:1)}
+                    </f:for>
+                </f:if>
+            </td>
+            <td><f:render section="help" arguments="{mailFormatAttachementInfo}"/></td>
+        </tr>
+        <tr>
+            <th>
+                <f:translate key="{lll}view_delivery_begin_end"/>
+            </th>
+            <td>{data.mail.scheduledBegin -> f:format.date(format: 'd.m.Y h:i')} / {data.mail.scheduledEnd -> f:format.date(format: 'd.m.Y h:i')}</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <th>
+                <f:translate key="{lll}view_recipient_total_sent"/>
+            </th>
+            <td>{data.recipients}</td>
+            <td>&nbsp;</td>
+        </tr>
     </table>
 </div>
 
+<f:section name="help">
+    <f:variable name="tooltip">
+        <f:for each="{_all}" as="message">
+            <f:if condition="{message}">
+                {message}<br>
+            </f:if>
+        </f:for>
+    </f:variable>
+    <span class="badge rounded-pill bg-primary mb-1 ms-1" data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="popover" data-bs-html="true" data-bs-placement="right" data-bs-content="{tooltip -> f:format.html()}">
+        i
+    </span>
+</f:section>
 </html>

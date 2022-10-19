@@ -856,8 +856,8 @@
 			<trans-unit id="stats_error_in_header" resname="stats_error_in_header">
 				<source>Error in Header</source>
 			</trans-unit>
-			<trans-unit id="stats_general_information" resname="stats_general_information">
-				<source>General</source>
+			<trans-unit id="stats_performance" resname="stats_performance">
+				<source>Performance</source>
 			</trans-unit>
 			<trans-unit id="stats_img_link" resname="stats_img_link">
 				<source>Imagelink</source>
@@ -1026,7 +1026,7 @@
 				<source>Include media</source>
 			</trans-unit>
 			<trans-unit id="view_recipient_total_sent" resname="view_recipient_total_sent">
-				<source>Mails sent/received</source>
+				<source>Recipients</source>
 			</trans-unit>
 			<trans-unit id="view_replyto" resname="view_replyto">
 				<source>Reply</source>

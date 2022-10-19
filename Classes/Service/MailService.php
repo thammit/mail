@@ -100,7 +100,7 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getMailInfo(): array
+    public function getGeneralData(): array
     {
         $dmailInfo = '';
         if ($this->mail->getType() === MailType::EXTERNAL) {
@@ -132,7 +132,6 @@ class MailService
             'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowed_format', $this->mail->isFlowedFormat()),
             'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $this->mail->isIncludeMedia()),
             'recipients' => $recipients,
-            'sentRecipients' => count($res),
         ];
     }
 
@@ -140,7 +139,7 @@ class MailService
      *
      * @return array
      */
-    public function getGeneralInfo(): array
+    public function getPerformanceData(): array
     {
         return [
             'totalSent' => $this->totalSent,
@@ -148,24 +147,12 @@ class MailService
             'plainSent' => $this->plainSent,
             'returned' => $this->showWithPercent($this->responseTypesTable['-127']['counter'] ?? 0, $this->totalSent),
             'htmlViewed' => $this->showWithPercent($this->uniquePingResponses, $this->htmlSent),
-            'uniqueResponsesTotal' => $this->showWithPercent($this->uniqueHtmlResponses + $this->uniquePlainResponses, $this->totalSent),
-            'uniqueResponsesHtml' => $this->showWithPercent($this->uniqueHtmlResponses, $this->htmlSent),
-            'uniqueResponsesPlain' => $this->showWithPercent($this->uniquePlainResponses, $this->plainSent ?: $this->htmlSent),
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function getResponsesInfo(): array
-    {
-        return [
             'totalResponses' => ($this->responseTypesTable['1']['counter'] ?? 0) + ($this->responseTypesTable['2']['counter'] ?? 0),
             'htmlResponses' => $this->responseTypesTable['1']['counter'] ?? '0',
             'plainResponses' => $this->responseTypesTable['2']['counter'] ?? '0',
-            'totalUniqueResponses' => $this->showWithPercent($this->uniqueHtmlResponses + $this->uniquePlainResponses, $this->totalSent),
-            'htmlUniqueResponses' => $this->showWithPercent($this->uniqueHtmlResponses, $this->htmlSent),
-            'plainUniqueResponses' => $this->showWithPercent($this->uniquePlainResponses, $this->plainSent ?: $this->htmlSent),
+            'uniqueResponsesTotal' => $this->showWithPercent($this->uniqueHtmlResponses + $this->uniquePlainResponses, $this->totalSent),
+            'uniqueResponsesHtml' => $this->showWithPercent($this->uniqueHtmlResponses, $this->htmlSent),
+            'uniqueResponsesPlain' => $this->showWithPercent($this->uniquePlainResponses, $this->plainSent ?: $this->htmlSent),
             'totalResponsesVsUniqueResponses' => ($this->uniqueHtmlResponses + $this->uniquePlainResponses ? number_format(($this->responseTypesTable['1']['counter'] + $this->responseTypesTable['2']['counter']) / ($this->uniqueHtmlResponses + $this->uniquePlainResponses),
                 2) : '-'),
             'htmlResponsesVsUniqueResponses' => ($this->uniqueHtmlResponses ? number_format(($this->responseTypesTable['1']['counter']) / ($this->uniqueHtmlResponses),
@@ -175,7 +162,7 @@ class MailService
         ];
     }
 
-    public function getReturnedMails(): array
+    public function getReturnedData(): array
     {
         $responsesFailed = (int)($this->responseTypesTable['-127']['counter'] ?? 0);
         return [
@@ -194,7 +181,7 @@ class MailService
      * @throws Exception
      * @throws DBALException
      */
-    public function getReturnedData(): array
+    public function getReturnedDetailsData(): array
     {
         return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid());
     }
@@ -298,7 +285,7 @@ class MailService
      * @throws Exception
      * @throws SiteNotFoundException
      */
-    public function getLinkResponses(): array
+    public function getResponsesData(): array
     {
         $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
         $htmlUrlsTable = $this->sysDmailMaillogRepository->findMostPopularLinks($this->mail->getUid());
