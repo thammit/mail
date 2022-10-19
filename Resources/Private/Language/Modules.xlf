@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="EXTmail/Resources/Private/Language/Modules/locallang_mod2-6.xlf" date="2022-01-29T120000Z" product-name="mail">
+	<file source-language="en" datatype="plaintext" original="EXTmail/Resources/Private/Language/Modules/Modules.xlf" date="2022-01-29T120000Z" product-name="mail">
 		<header />
 		<body>
             <trans-unit id="HTMLParams.description" xml:space="preserve">

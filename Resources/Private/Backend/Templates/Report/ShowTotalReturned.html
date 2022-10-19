@@ -8,7 +8,7 @@
 <f:layout name="Default"/>
 
 <f:section name="content">
-    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1><f:translate key="{lll}stats_show_header"/></h1>
     <h2><core:iconForRecord row="{uid: mail.uid, type: 0}" table="tx_mail_domain_model_mail" size="default" /> {mail.subject} [{mail.uid}]: <f:translate key="{lll}stats_mails_returned"/></h2>
     <f:render partial="Report/ReturnedPanels" arguments="{_all}" />

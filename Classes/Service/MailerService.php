@@ -904,7 +904,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         // always include locallang file
-        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
 
         $pt = MailerUtility::getMilliseconds();
 

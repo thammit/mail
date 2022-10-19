@@ -29,7 +29,7 @@ class AnalyzeBounceMailCommand extends Command
     public function __construct(private readonly LanguageServiceFactory $languageServiceFactory, private readonly Context $context, string $name = null)
     {
         $this->languageService = $this->languageServiceFactory->create('default');
-        $this->languageService->includeLLFile('EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf');
+        $this->languageService->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         parent::__construct($name);
     }
 
