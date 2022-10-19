@@ -1,0 +1,58 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div class="panel-group" id="mail-recipient-list-panel">
+    <f:variable name="open" value="1"/>
+    <f:if condition="{data.addresses}">
+        <f:variable name="title"><f:translate key="{lll}mailgroup_table_tt_address"/></f:variable>
+        <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
+            <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
+            <f:translate key="{lll}mailgroup_download"/>
+        </f:link.action></f:variable>
+        <f:variable name="counter" value="{data.addresses -> f:count()}"/>
+        <f:render partial="Panel"
+                  arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:0, open:open, counter: counter, additionalHeading:additionalHeading}"
+                  contentAs="panelBody">
+            <f:render partial="Report/ReturnedTable" arguments="{data: data.addresses, table: 'tt_address', lll:lll}"/>
+        </f:render>
+        <f:variable name="open" value="0"/>
+    </f:if>
+    <f:if condition="{data.frontendUsers}">
+        <f:variable name="title"><f:translate key="{lll}mailgroup_table_fe_users"/></f:variable>
+        <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
+            <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
+            <f:translate key="{lll}mailgroup_download"/>
+        </f:link.action></f:variable>
+        <f:variable name="counter" value="{data.frontendUsers -> f:count()}"/>
+        <f:render partial="Panel"
+                  arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:1, open:open, counter: counter, additionalHeading:additionalHeading}"
+                  contentAs="panelBody">
+            <f:render partial="Report/ReturnedTable" arguments="{data: data.frontendUsers, table: 'fe_users', lll:lll}"/>
+        </f:render>
+        <f:variable name="open" value="0"/>
+    </f:if>
+    <f:if condition="{data.plainList}">
+        <f:variable name="title"><f:translate key="{lll}mailgroup_plain_list"/></f:variable>
+        <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
+            <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
+            <f:translate key="{lll}mailgroup_download"/>
+        </f:link.action></f:variable>
+        <f:variable name="counter" value="{data.plainList -> f:count()}"/>
+        <f:render partial="Panel"
+                  arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:2, open:open, counter: counter, additionalHeading:additionalHeading}"
+                  contentAs="panelBody">
+            <ul>
+                <f:for each="{data.plainList}" as="recipient">
+                    <li>
+                        {recipient}
+                    </li>
+                </f:for>
+            </ul>
+        </f:render>
+    </f:if>
+</div>
+</html>
