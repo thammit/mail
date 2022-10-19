@@ -5,6 +5,8 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Enumeration\MailType;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
@@ -79,6 +81,40 @@ class MailRepository extends Repository
         );
         $query->setOrderings(['scheduled' => QueryInterface::ORDER_DESCENDING]);
         return $query->execute();
+    }
+
+    /**
+     * @throws InvalidQueryException
+     */
+    public function findMailToSend(): ?Mail
+    {
+        $query = $this->createQuery();
+        $query->getQuerySettings()->setIgnoreEnableFields(true);
+        $query->matching(
+            $query->logicalAnd([
+                $query->logicalNot($query->equals('scheduled', 0)),
+                $query->lessThan('scheduled', new \DateTimeImmutable('now')),
+                $query->equals('scheduledEnd', 0),
+                $query->logicalNot($query->in('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL]))
+            ])
+        );
+        $query->setOrderings(['scheduled' => QueryInterface::ORDER_ASCENDING]);
+
+        return $query->execute()->getFirst();
+
+//        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
+//        return $queryBuilder
+//            ->select('*')
+//            ->from($this->table)
+//            ->where(
+//                $queryBuilder->expr()->neq('scheduled', 0),
+//                $queryBuilder->expr()->lt('scheduled', time()),
+//                $queryBuilder->expr()->eq('scheduled_end', 0),
+//                $queryBuilder->expr()->notIn('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL])
+//            )
+//            ->orderBy('scheduled')
+//            ->execute()
+//            ->fetchAssociative();
     }
 
     public function getQueryBuilder(): QueryBuilder

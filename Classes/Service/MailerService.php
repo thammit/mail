@@ -687,18 +687,16 @@ class MailerService implements LoggerAwareInterface
     /**
      * Set job begin and send a notification to admin if activated in extension settings (notificationJob = 1)
      *
-     * @param int $mailUid mail uid
+     * @param Mail $mail
      *
      * @return void
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function setJobBegin(int $mailUid): void
+    protected function setJobBegin(Mail $mail): void
     {
-        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mailUid);
+        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail->getUid());
 
-        /** @var Mail $mail */
-        $mail = $this->mailRepository->findByUid($mailUid);
         $mail->setScheduledBegin(new \DateTimeImmutable('now'));
         $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
@@ -706,7 +704,7 @@ class MailerService implements LoggerAwareInterface
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_begin'),
+                LanguageUtility::getLL('dmailer_mid') . ' ' . $mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_begin'),
                 LanguageUtility::getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s')
             );
         }
@@ -715,18 +713,16 @@ class MailerService implements LoggerAwareInterface
     /**
      *Set job end and send a notification to admin if activated in extension settings (notificationJob = 1)
      *
-     * @param int $mailUid mail uid
+     * @param Mail $mail
      *
      * @return void
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function setJobEnd(int $mailUid): void
+    protected function setJobEnd(Mail $mail): void
     {
-        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mailUid);
+        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail->getUid());
 
-        /** @var Mail $mail */
-        $mail = $this->mailRepository->findByUid($mailUid);
         $mail->setScheduledEnd(new \DateTimeImmutable('now'));
         $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
@@ -734,7 +730,7 @@ class MailerService implements LoggerAwareInterface
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_end'),
+                LanguageUtility::getLL('dmailer_mid') . ' ' . $mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_end'),
                 LanguageUtility::getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s')
             );
         }
@@ -792,19 +788,19 @@ class MailerService implements LoggerAwareInterface
         $pt = MailerUtility::getMilliseconds();
 
         $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
+        $mailToSend = $this->mailRepository->findMailToSend();
+        if ($mailToSend instanceof Mail) {
+            $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $mailToSend->getUid() . ', \'' . $mailToSend->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
+            $this->prepare($mailToSend->getUid());
+            $query_info = unserialize($mailToSend->getQueryInfo());
 
-        if ($row = GeneralUtility::makeInstance(SysDmailRepository::class)->findMailsToSend()) {
-            $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $row['uid'] . ', \'' . $row['subject'] . '\'' . LanguageUtility::getLL('dmailer_processed'));
-            $this->prepare($row['uid']);
-            $query_info = unserialize($row['query_info']);
-
-            if (!$row['scheduled_begin']) {
+            if (!$mailToSend->getScheduledBegin()) {
                 // Hook to alter the list of recipients
                 if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['queryInfoHook'])) {
                     $queryInfoHook =& $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['queryInfoHook'];
                     if (is_array($queryInfoHook)) {
                         $hookParameters = [
-                            'row' => $row,
+                            'mail' => $mailToSend,
                             'query_info' => &$query_info,
                         ];
                         $hookReference = &$this;
@@ -813,13 +809,13 @@ class MailerService implements LoggerAwareInterface
                         }
                     }
                 }
-                $this->setJobBegin((int)$row['uid']);
+                $this->setJobBegin($mailToSend);
             }
 
-            $finished = !is_array($query_info['id_lists']) || $this->massSend($query_info['id_lists'], $row['uid']);
+            $finished = !is_array($query_info['id_lists']) || $this->massSend($query_info['id_lists'], $mailToSend->getUid());
 
             if ($finished) {
-                $this->setJobEnd((int)$row['uid']);
+                $this->setJobEnd($mailToSend);
             }
         } else {
             $this->logger->debug(LanguageUtility::getLL('dmailer_nothing_to_do'));
