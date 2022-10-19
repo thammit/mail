@@ -218,7 +218,7 @@ class MailController extends AbstractController
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
 
-        if ($mail->getType() === MailType::EXTERNAL) {
+        if ($mail->isExternal()) {
             // it's a quick/external mail
             if (str_starts_with($mail->getHtmlParams(), 'http') || str_starts_with($mail->getPlainParams(), 'http')) {
                 // it's an external mail -> fetch content again
@@ -598,7 +598,7 @@ class MailController extends AbstractController
     protected function hideCategoryStep(Mail $mail = null): bool
     {
         $userTSConfig = TypoScriptUtility::getUserTSConfig();
-        return (($mail ?? false) && $mail->getType() === MailType::EXTERNAL) || (isset($userTSConfig['tx_directmail.']['hideSteps']) && $userTSConfig['tx_directmail.']['hideSteps'] === 'cat');
+        return (($mail ?? false) && $mail->isExternal()) || (isset($userTSConfig['tx_directmail.']['hideSteps']) && $userTSConfig['tx_directmail.']['hideSteps'] === 'cat');
     }
 
     protected function getNavigation(int $currentStep, bool $hideCategoryStep): array

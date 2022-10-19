@@ -88,7 +88,7 @@ class MailFactory
 
         $htmlContent = '';
         $htmlLinks = [];
-        if (($mail->getSendOptions() & 2) !== 0) {
+        if ($mail->isHtml()) {
             $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams());
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             $htmlLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
@@ -98,7 +98,7 @@ class MailFactory
         }
 
         $plainTextContent = '';
-        if (($mail->getSendOptions() & 1) !== 0) {
+        if ($mail->isPlain()) {
             $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams());
             $plainTextContent = $this->fetchPlainTextContent($plainTextUrl);
         }

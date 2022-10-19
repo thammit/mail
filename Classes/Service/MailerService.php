@@ -18,6 +18,7 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -678,7 +679,7 @@ class MailerService implements LoggerAwareInterface
                             ->where($queryBuilder->expr()->in('uid', $idList))
                             ->setMaxResults($this->sendPerCycle + 1);
                         if ($sentMails) {
-                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', implode(',', $sentMails)));
+                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $sentMails));
                         }
 
                         $statement = $queryBuilder->execute();
@@ -818,55 +819,73 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Set job begin and end time. And send this to admin
+     * Set job begin and send a notification to admin if activated in extension settings (notificationJob = 1)
      *
-     * @param int $mailUid Sys_dmail UID
-     * @param string $key Begin or end
+     * @param int $mailUid mail uid
      *
      * @return void
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function setBeginEnd(int $mailUid, string $key): void
+    protected function setJobBegin(int $mailUid): void
     {
-        $subject = '';
-        $message = '';
-
         $numberOfRecipients = MailerUtility::getNumberOfRecipients($mailUid);
 
-        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_' . $key => time(), 'recipients' => $numberOfRecipients]);
-
-        switch ($key) {
-            case 'begin':
-                $subject = LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_begin');
-                $message = LanguageUtility::getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s');
-                break;
-            case 'end':
-                $subject = LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_end');
-                $message = LanguageUtility::getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s');
-                break;
-            default:
-                // do nothing
-        }
-
-        $this->logger->debug($subject . ': ' . $message);
+        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_begin' => time(), 'recipients' => $numberOfRecipients]);
 
         if ($this->notificationJob === true) {
-            $fromName = $this->charsetConverter->conv($this->fromName, $this->charset, $this->backendCharset) ?? '';
-            $mail = GeneralUtility::makeInstance(MailMessage::class);
-            $mail
-                ->setSiteIdentifier($this->siteIdentifier)
-                ->setTo($this->fromEmail, $fromName)
-                ->setFrom($this->fromEmail, $fromName)
-                ->setSubject($subject);
-
-            if ($this->replyToEmail !== '') {
-                $mail->setReplyTo($this->replyToEmail);
-            }
-
-            $mail->text($message);
-            $mail->send();
+            $this->notifySenderAboutJobState(
+                LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_begin'),
+                LanguageUtility::getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s')
+            );
         }
+    }
+
+    /**
+     *Set job end and send a notification to admin if activated in extension settings (notificationJob = 1)
+     *
+     * @param int $mailUid mail uid
+     *
+     * @return void
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
+     */
+    protected function setJobEnd(int $mailUid): void
+    {
+        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mailUid);
+
+        GeneralUtility::makeInstance(SysDmailRepository::class)->update($mailUid, ['scheduled_end' => time(), 'recipients' => $numberOfRecipients]);
+
+        if ($this->notificationJob === true) {
+            $this->notifySenderAboutJobState(
+                LanguageUtility::getLL('dmailer_mid') . ' ' . $mailUid . ' ' . LanguageUtility::getLL('dmailer_job_end'),
+                LanguageUtility::getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s')
+            );
+        }
+    }
+
+    /**
+     * @param string $subject
+     * @param string $body
+     * @throws TransportExceptionInterface
+     * @throws \TYPO3\CMS\Core\Exception
+     */
+    protected function notifySenderAboutJobState(string $subject, string $body): void
+    {
+        $fromName = $this->charsetConverter->conv($this->fromName, $this->charset, $this->backendCharset) ?? '';
+        $mail = GeneralUtility::makeInstance(MailMessage::class);
+        $mail
+            ->setSiteIdentifier($this->siteIdentifier)
+            ->setTo($this->fromEmail, $fromName)
+            ->setFrom($this->fromEmail, $fromName)
+            ->setSubject($subject);
+
+        if ($this->replyToEmail !== '') {
+            $mail->setReplyTo($this->replyToEmail);
+        }
+
+        $mail->text($body);
+        $mail->send();
     }
 
     /**
@@ -918,13 +937,13 @@ class MailerService implements LoggerAwareInterface
                         }
                     }
                 }
-                $this->setBeginEnd((int)$row['uid'], 'begin');
+                $this->setJobBegin((int)$row['uid']);
             }
 
             $finished = !is_array($query_info['id_lists']) || $this->massSend($query_info['id_lists'], $row['uid']);
 
             if ($finished) {
-                $this->setBeginEnd((int)$row['uid'], 'end');
+                $this->setJobEnd((int)$row['uid']);
             }
         } else {
             $this->logger->debug(LanguageUtility::getLL('dmailer_nothing_to_do'));

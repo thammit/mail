@@ -68,6 +68,22 @@ class Mail extends AbstractEntity
     }
 
     /**
+     * @return bool
+     */
+    public function isInternal(): bool
+    {
+        return $this->type === MailType::INTERNAL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExternal(): bool
+    {
+        return $this->type === MailType::EXTERNAL;
+    }
+
+    /**
      * @param int $type
      * @return Mail
      */
@@ -281,6 +297,30 @@ class Mail extends AbstractEntity
     public function getSendOptions(): int
     {
         return $this->sendOptions;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHtml(): bool
+    {
+        return ($this->sendOptions & 2) !== 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPlain(): bool
+    {
+        return ($this->sendOptions & 1) !== 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPlainAndHtml(): bool
+    {
+        return ($this->sendOptions & 3) !== 0;
     }
 
     /**

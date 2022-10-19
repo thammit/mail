@@ -311,6 +311,12 @@ return [
                 'type' => 'passthrough'
             ]
         ],
+        'recipients' => [
+            'label' => 'Recipients',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
         'tstamp' => [
             'label' => 'Last modified',
             'config' => [

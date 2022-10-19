@@ -97,41 +97,41 @@ class MailService
     }
 
     /**
-     * @throws Exception
-     * @throws DBALException
+     * @return array
      */
     public function getGeneralData(): array
     {
-        $dmailInfo = '';
-        if ($this->mail->getType() === MailType::EXTERNAL) {
-            $dmailData = $this->mail->getPlainParams() . ', ' . $this->mail->getHtmlParams();
-        } else {
-            $page = BackendUtility::getRecord('pages', $this->mail->getPage(), 'title');
-            $dmailData = ' ' . $this->mail->getPage() . ', ' . htmlspecialchars($page['title']);
-            $dmailInfo = TcaUtility::getTranslatedLabelOfTcaField('plain_params') . ' ' . htmlspecialchars($this->mail->getPlainParams() . LF . TcaUtility::getTranslatedLabelOfTcaField('html_params') . $this->mail->getHtmlParams()) . '; ' . LF;
+        $plainSource = '';
+        $htmlSource = '';
+        if ($this->mail->isHtml()) {
+            if ($this->mail->isExternal()) {
+                $htmlSource = $this->mail->getHtmlParams();
+            } else {
+                $htmlSource = BackendUtility::getRecord('pages', $this->mail->getPage(), 'title')['title'];
+                if ($this->mail->getHtmlParams()) {
+                    $htmlSource .= '; ' . $this->mail->getHtmlParams();
+                }
+            }
         }
-
-        $res = $this->logRepository->findAllByMailUid((int)$this->mail->getUid());
-
-        $recipients = 0;
-        $idLists = unserialize($this->mail->getQueryInfo());
-        if (is_array($idLists)) {
-            foreach ($idLists['id_lists'] as $idArray) {
-                $recipients += count($idArray);
+        if ($this->mail->isPlain()) {
+            if ($this->mail->isExternal()) {
+                $plainSource = $this->mail->getPlainParams();
+            } else {
+                $plainSource = BackendUtility::getRecord('pages', $this->mail->getPage(), 'title')['title'];
+                if ($this->mail->getPlainParams()) {
+                    $plainSource .= '; ' .  $this->mail->getPlainParams();
+                }
             }
         }
 
         return [
-            'mail' => $this->mail,
-            'dmailData' => $dmailData,
-            'dmailInfo' => $dmailInfo,
+            'source' => rtrim(($plainSource ? $plainSource . ' / ': '') . ($htmlSource ? $htmlSource . ' / ' : ''), ' /'),
             'type' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'type', $this->mail->getType()),
             'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $this->mail->getPriority()),
             'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options',
                     $this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
             'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowed_format', $this->mail->isFlowedFormat()),
             'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $this->mail->isIncludeMedia()),
-            'recipients' => $recipients,
         ];
     }
 

@@ -652,9 +652,7 @@ class MailerUtility
         if ($mail['query_info'] ?? false) {
             $queryInfo = unserialize($mail['query_info']);
             if (isset($queryInfo['id_lists'])) {
-                foreach ($queryInfo['id_lists'] as $uids) {
-                    $numberOfRecipients += count($uids);
-                }
+                $numberOfRecipients = array_sum(array_map('count', $queryInfo['id_lists']));
             }
         }
 

@@ -8,9 +8,9 @@
 <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
 
 <f:variable name="mailFormatAttachementInfo" value="{
-        0: '{f:translate(key:\'{lll2}sys_dmail.priority\')}: {data.mail.priority}',
-        1: '{f:translate(key:\'{lll2}sys_dmail.transfer_encoding\')}: {data.mail.encoding}',
-        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {data.mail.charset}'
+        0: '{f:translate(key:\'{lll2}sys_dmail.priority\')}: {mail.priority}',
+        1: '{f:translate(key:\'{lll2}sys_dmail.transfer_encoding\')}: {mail.encoding}',
+        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {mail.charset}'
 }"/>
 
 <f:variable name="sourceInfo" value="{
@@ -19,9 +19,9 @@
 }"/>
 
 <f:variable name="fromInfo" value="{
-        0: '{f:translate(key:\'{lll}view_replyto\')}: {data.mail.replytoName} {data.mail.replyToEmail}',
-        1: '{f:translate(key:\'{lll2}sys_dmail.organisation\')}: {data.mail.organisation}',
-        2: '{f:translate(key:\'{lll2}sys_dmail.return_path\')}: {data.mail.returnPath}'
+        0: '{f:translate(key:\'{lll}view_replyto\')}: {mail.replytoName} {mail.replyToEmail}',
+        1: '{f:translate(key:\'{lll2}sys_dmail.organisation\')}: {mail.organisation}',
+        2: '{f:translate(key:\'{lll2}sys_dmail.return_path\')}: {mail.returnPath}'
 }"/>
 
 <h2>
@@ -33,14 +33,16 @@
             <th>
                 <f:translate key="{lll}view_from"/>
             </th>
-            <td>{data.mail.fromName} &lt;{data.mail.fromEmail}&gt;</td>
+            <td>{mail.fromName} &lt;{mail.fromEmail}&gt;</td>
             <td><f:render section="help" arguments="{fromInfo}"/></td>
         </tr>
         <tr>
             <th>
                 <f:translate key="{lll}view_dmail"/>
             </th>
-            <td>{data.type}{data.dmailData}</td>
+            <td>{data.type}<f:if condition="{mail.internal}">
+            	[{mail.page}]
+            </f:if> / {data.source}</td>
             <td><f:render section="help" arguments="{sourceInfo}"/></td>
         </tr>
         <tr>
@@ -49,8 +51,8 @@
             </th>
             <td>
                 {data.sendOptions}
-                <f:if condition="{data.mail.attachment}">
-                    <f:for each="{data.mail.attachment}" as="attachment">
+                <f:if condition="{mail.attachment}">
+                    <f:for each="{mail.attachment}" as="attachment">
                         {attachment -> f:debug(inline:1)}
                     </f:for>
                 </f:if>
@@ -61,14 +63,14 @@
             <th>
                 <f:translate key="{lll}view_delivery_begin_end"/>
             </th>
-            <td>{data.mail.scheduledBegin -> f:format.date(format: 'd.m.Y h:i')} / {data.mail.scheduledEnd -> f:format.date(format: 'd.m.Y h:i')}</td>
+            <td>{mail.scheduledBegin -> f:format.date(format: 'd.m.Y h:i')} / {mail.scheduledEnd -> f:format.date(format: 'd.m.Y h:i')}</td>
             <td>&nbsp;</td>
         </tr>
         <tr>
             <th>
                 <f:translate key="{lll}view_recipient_total_sent"/>
             </th>
-            <td>{data.recipients}</td>
+            <td>{mail.recipients}</td>
             <td>&nbsp;</td>
         </tr>
     </table>
