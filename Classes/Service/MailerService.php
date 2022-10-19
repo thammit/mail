@@ -9,7 +9,6 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
@@ -282,28 +281,29 @@ class MailerService implements LoggerAwareInterface
      */
     public function prepare(int $mailUid): void
     {
-        $mailData = GeneralUtility::makeInstance(SysDmailRepository::class)->findByUid($mailUid);
+        /** @var Mail $mail */
+        $mail = $this->mailRepository->findByUid($mailUid);
 
-        $this->mailUid = $mailData['uid'];
-        $this->charset = (string)((int)$mailData['type'] === MailType::INTERNAL ? 'utf-8' : $mailData['charset']);
-        $this->subject = $this->charsetConverter->conv($mailData['subject'], $this->backendCharset, $this->charset);
-        $this->fromName = ($mailData['from_name'] ? $this->charsetConverter->conv($mailData['from_name'], $this->backendCharset, $this->charset) : '');
-        $this->fromEmail = $mailData['from_email'];
-        $this->replyToName = ($mailData['reply_to_name'] ? $this->charsetConverter->conv($mailData['reply_to_name'], $this->backendCharset, $this->charset) : '');
-        $this->replyToEmail = ($mailData['reply_to_email'] ?: '');
-        $this->returnPath = (string)($mailData['return_path'] ?? '');
-        $this->organisation = ($mailData['organisation'] ? $this->charsetConverter->conv($mailData['organisation'], $this->backendCharset, $this->charset) : '');
-        $this->priority = MathUtility::forceIntegerInRange((int)$mailData['priority'], 1, 5);
-        $this->mailParts = unserialize(base64_decode($mailData['mail_content']));
+        $this->mailUid = $mailUid;
+        $this->charset = (string)($mail->getType() === MailType::INTERNAL ? 'utf-8' : $mailData['charset']);
+        $this->subject = $this->charsetConverter->conv($mail->getSubject(), $this->backendCharset, $this->charset);
+        $this->fromName = ($mail->getFromName() ? $this->charsetConverter->conv($mail->getFromName(), $this->backendCharset, $this->charset) : '');
+        $this->fromEmail = $mail->getFromEmail();
+        $this->replyToName = ($mail->getReplyToName() ? $this->charsetConverter->conv($mail->getReplyToName(), $this->backendCharset, $this->charset) : '');
+        $this->replyToEmail = $mail->getReplyToEmail();
+        $this->returnPath = $mail->getReturnPath();
+        $this->organisation = ($mail->getOrganisation() ? $this->charsetConverter->conv($mail->getOrganisation(), $this->backendCharset, $this->charset) : '');
+        $this->priority = MathUtility::forceIntegerInRange($mail->getPriority(), 1, 5);
+        $this->mailParts = unserialize(base64_decode($mail->getMailContent()));
         $this->isHtml = (bool)($this->getHtmlContent() ?? false);
         $this->isPlain = (bool)($this->getPlainContent() ?? false);
-        $this->flowedFormat = (bool)($mailData['flowed_format'] ?? false);
-        $this->includeMedia = (bool)$mailData['include_media'];
-        $this->authCodeFieldList = ($mailData['auth_code_fields'] ?: 'uid');
-        $this->redirect = (bool)($mailData['redirect'] ?? false);
-        $this->redirectAll = (bool)($mailData['redirect_all'] ?? false);
-        $this->redirectUrl = (string)($mailData['redirect_url'] ?? '');
-        $this->attachment = (int)($mailData['attachment'] ?? 0);
+        $this->flowedFormat = $mail->isFlowedFormat();
+        $this->includeMedia = $mail->isIncludeMedia();
+        $this->authCodeFieldList = ($mail->getAuthCodeFields() ?: 'uid');
+        $this->redirect = $mail->isRedirect();
+        $this->redirectAll = $mail->isRedirectAll();
+        $this->redirectUrl = $mail->getRedirectUrl();
+        $this->attachment = $mail->getAttachment()->count();
 
         $this->htmlBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->getHtmlContent());
         foreach ($this->htmlBoundaryParts as $bKey => $bContent) {
@@ -695,7 +695,7 @@ class MailerService implements LoggerAwareInterface
      */
     protected function setJobBegin(Mail $mail): void
     {
-        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail->getUid());
+        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail);
 
         $mail->setScheduledBegin(new \DateTimeImmutable('now'));
         $mail->setRecipients($numberOfRecipients);
@@ -721,7 +721,7 @@ class MailerService implements LoggerAwareInterface
      */
     protected function setJobEnd(Mail $mail): void
     {
-        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail->getUid());
+        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail);
 
         $mail->setScheduledEnd(new \DateTimeImmutable('now'));
         $mail->setRecipients($numberOfRecipients);

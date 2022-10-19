@@ -6,7 +6,7 @@ namespace MEDIAESSENZ\Mail\Utility;
 use FoT3\Rdct\Redirects;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailRepository;
+use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
@@ -639,15 +639,14 @@ class MailerUtility
     }
 
     /**
-     * @param int $uid
+     * @param Mail $mail
      * @return int
      */
-    public static function getNumberOfRecipients(int $uid): int
+    public static function getNumberOfRecipients(Mail $mail): int
     {
         $numberOfRecipients = 0;
-        $mail = GeneralUtility::makeInstance(SysDmailRepository::class)->findByUid($uid);
-        if ($mail['query_info'] ?? false) {
-            $queryInfo = unserialize($mail['query_info']);
+        if ($mail->getQueryInfo() ?? false) {
+            $queryInfo = unserialize($mail->getQueryInfo());
             if (isset($queryInfo['id_lists'])) {
                 $numberOfRecipients = array_sum(array_map('count', $queryInfo['id_lists']));
             }
