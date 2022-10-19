@@ -399,13 +399,4 @@ class ReportController extends AbstractController
         $this->mailService->init($mail);
         $this->mailService->csvDownloadRecipients($this->mailService->getReasonUnknownData());
     }
-
-    /**
-     * @throws StopActionException
-     */
-    public function recalculateCacheAction(Mail $mail): void
-    {
-        // todo add code to refresh cache
-        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
-    }
 }
