@@ -6,77 +6,10 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
-use PDO;
 
 class SysDmailRepository extends AbstractRepository
 {
     protected string $table = 'tx_mail_domain_model_mail';
-
-    /**
-     * @param int $uid
-     * @return array|bool
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function findById(int $uid): array|bool
-    {
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
-
-        return $queryBuilder->select('*')
-            ->from($this->table)
-            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
-            ->execute()
-            ->fetchAssociative();
-    }
-
-    /**
-     * @param int $pid
-     * @param array $fields
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function findScheduledByPid(int $pid, array $fields = ['uid', 'pid', 'subject', 'scheduled', 'scheduled_begin', 'scheduled_end', 'recipients', 'query_info']): array
-    {
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
-
-        return $queryBuilder->select(...$fields)
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->gt('scheduled', 0),
-            )
-            ->orderBy('scheduled', 'DESC')
-            ->execute()
-            ->fetchAllAssociative();
-    }
-
-    /**
-     * @param int $pageId
-     * @param string|null $orderBy
-     * @param string|null $order
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function findOpenMailsByPageId(int $pageId, string $orderBy = null, string $order = null): array
-    {
-        $orderBy = $orderBy ?? $this->getDefaultOrderBy();
-        $order = $order ?? $this->getDefaultOrder();
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
-
-        return $queryBuilder
-            ->select('uid', 'pid', 'subject', 'tstamp', 'sent', 'rendered_size', 'attachment', 'type', 'page')
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('scheduled', 0),
-                $queryBuilder->expr()->eq('sent', 0),
-            )
-            ->orderBy($orderBy, $order)
-            ->execute()
-            ->fetchAllAssociative();
-    }
 
     /**
      * @return array|bool
@@ -98,36 +31,6 @@ class SysDmailRepository extends AbstractRepository
             ->orderBy('scheduled')
             ->execute()
             ->fetchAssociative();
-    }
-
-    /**
-     * @param int $id
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function selectForPageInfo(int $id): array
-    {
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
-
-        return $queryBuilder->selectLiteral('tx_mail_domain_model_mail.uid', 'tx_mail_domain_model_mail.subject', 'tx_mail_domain_model_mail.scheduled', 'tx_mail_domain_model_mail.scheduled_begin', 'tx_mail_domain_model_mail.scheduled_end', 'tx_mail_domain_model_mail.recipients', 'COUNT(tx_mail_domain_model_log.mail) AS count')
-            ->from($this->table, $this->table)
-            ->leftJoin(
-                'tx_mail_domain_model_mail',
-                'tx_mail_domain_model_log',
-                'tx_mail_domain_model_log',
-                $queryBuilder->expr()->eq('tx_mail_domain_model_mail.uid', $queryBuilder->quoteIdentifier('tx_mail_domain_model_log.mail'))
-            )
-            ->add('where', 'tx_mail_domain_model_mail.pid = ' . $id .
-                ' AND tx_mail_domain_model_mail.type IN (0,1)' .
-                ' AND tx_mail_domain_model_mail.sent = 1' .
-                ' AND tx_mail_domain_model_log.response_type = 0' .
-                ' AND tx_mail_domain_model_log.format_sent > 0')
-            ->groupBy('tx_mail_domain_model_log.mail')
-            ->orderBy('tx_mail_domain_model_mail.scheduled', 'DESC')
-            ->addOrderBy('tx_mail_domain_model_mail.scheduled_begin', 'DESC')
-            ->execute()
-            ->fetchAllAssociative();
     }
 
     /**

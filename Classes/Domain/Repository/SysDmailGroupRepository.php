@@ -6,71 +6,11 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
 class SysDmailGroupRepository extends AbstractRepository
 {
     protected string $table = 'tx_mail_domain_model_group';
-
-    /**
-     * @param int $pid
-     * @param string $defaultSortBy
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function selectSysDmailGroupByPid(int $pid, string $defaultSortBy): array
-    {
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
-
-        return $queryBuilder->select('uid', 'pid', 'title', 'description', 'type')
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
-            )
-            ->orderBy(
-                preg_replace(
-                    '/^(?:ORDER[[:space:]]*BY[[:space:]]*)+/i', '',
-                    $defaultSortBy
-                )
-            )
-            ->execute()
-            ->fetchAllAssociative();
-    }
-
-    /**
-     * @param int $pid
-     * @param int $sysLanguageUid
-     * @param string $defaultSortBy
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function findSysDmailGroupUidsForFinalMail(int $pid, int $sysLanguageUid, string $defaultSortBy): array
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        return $queryBuilder->select('uid', 'pid', 'title')
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
-            )
-            ->andWhere(
-                $queryBuilder->expr()->in(
-                    'sys_language_uid',
-                    '-1, ' . $sysLanguageUid
-                )
-            )
-            ->orderBy(
-                preg_replace(
-                    '/^(?:ORDER[[:space:]]*BY[[:space:]]*)+/i', '',
-                    $defaultSortBy
-                )
-            )
-            ->execute()
-            ->fetchAllAssociative();
-    }
 
     /**
      * @param array $uids

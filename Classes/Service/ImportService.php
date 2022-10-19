@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Service;
 use Doctrine\DBAL\DBALException;
 use Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
+use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryRepository;
@@ -42,6 +43,12 @@ class ImportService
     protected int $pageId;
     protected string $httpReferer;
     protected string $requestHostOnly;
+
+    public function __construct(
+        protected AddressRepository $addressRepository
+    )
+    {
+    }
 
     /**
      * Init the class
@@ -591,7 +598,7 @@ class ImportService
 
         // empty table if flag is set
         if ($this->indata['remove_existing']) {
-            GeneralUtility::makeInstance(TtAddressRepository::class)->deleteByPid((int)$this->indata['storage']);
+            $this->addressRepository->deleteByPid((int)$this->indata['storage']);
         }
 
         $mappedCSV = [];

@@ -13,9 +13,6 @@ UseHttpToFetch = 0
 # cat=basic/enable; type=boolean; label=Use implicit port in URL for fetching Newsletter-Content: Even if your TYPO3 Backend is on a non-standard-port, the URL for fetching the newsletter contents from one of your Frontend-Domains will not use the PORT you are using to access your TYPO3 Backend, but use implicit port instead (e.g. no explicit port in URL)
 UseImplicitPortToFetch = 0
 
-# cat=basic/enable; type=boolean; label=Use direct mail tables
-useDirectMailTables = 0
-
 # cat=basic; type=string; label=Direct Mail category -> sys_category mapping used by update wizard to migrate Direct Mail records to Mail records; Format: 1:2,2:3,3:4 maps Direct mail category 1 to sys_category 2 and Direct mail category 2 to sys_category 3 and so on. If categories not found or set, new categories will be added.
 directMailCategorySysCategoryMapping =
 

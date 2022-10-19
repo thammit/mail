@@ -7,10 +7,10 @@ final class Constants
 {
     const MAIL_MODULE_NAME = 'dmail';
 
-    const PANEL_INTERNAL = 'int';
-    const PANEL_EXTERNAL = 'ext';
-    const PANEL_QUICK_MAIL = 'quick';
-    const PANEL_OPEN = 'dmail';
+    const PANEL_INTERNAL = 'internal';
+    const PANEL_EXTERNAL = 'external';
+    const PANEL_QUICK_MAIL = 'quickmail';
+    const PANEL_OPEN = 'open';
 
     const CONTENT_SECTION_BOUNDARY = 'DMAILER_SECTION_BOUNDARY';
 }
