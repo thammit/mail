@@ -8,10 +8,9 @@
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:"/>
     <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
-    <f:variable name="lll3" value="LLL:EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf:"/>
     <f:if condition="{configuration -> f:count()}">
         <h1>
-            <f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:header_conf"/>
+            <f:translate key="{lll}header_conf"/>
         </h1>
         <f:form action="update" method="post" enctype="multipart/form-data">
             <div id="mail-configuration-accordion">
@@ -22,8 +21,7 @@
                     section: 'box-1',
                     title: 'configure_default_headers',
                     lll: lll,
-                    lll2: lll2,
-                    lll3: lll3
+                    lll2: lll2
                 }"
                 section="Panel"
             />
@@ -34,8 +32,7 @@
                     section: 'box-2',
                     title: 'configure_default_content',
                     lll: lll,
-                    lll2: lll2,
-                    lll3: lll3
+                    lll2: lll2
                 }"
                 section="Panel"
             />
@@ -46,8 +43,7 @@
                     section: 'box-3',
                     title: 'configure_default_fetching',
                     lll: lll,
-                    lll2: lll2,
-                    lll3: lll3
+                    lll2: lll2
                 }"
                 section="Panel"
             />
@@ -59,8 +55,7 @@
                     section: 'box-4',
                     title: 'configure_options_encoding',
                     lll: lll,
-                    lll2: lll2,
-                    lll3: lll3
+                    lll2: lll2
                 }"
                 section="Panel"
             />
@@ -71,8 +66,7 @@
                     section: 'box-5',
                     title: 'configure_options_links',
                     lll: lll,
-                    lll2: lll2,
-                    lll3: lll3
+                    lll2: lll2
                 }"
                 section="Panel"
             />
@@ -83,8 +77,7 @@
                     section: 'box-6',
                     title: 'configure_options_additional',
                     lll: lll,
-                    lll2: lll2,
-                    lll3: lll3
+                    lll2: lll2
                 }"
                 section="Panel"
             />
@@ -111,7 +104,7 @@
                 <a role="button" data-bs-toggle="collapse" href="#collapse{index}"
                    aria-expanded="true" aria-controls="collapse{index}" class="collapsed">
                     <span class="caret"></span>
-                    <f:translate key="LLL:EXT:mail/Resources/Private/Language/locallang_mod2-6.xlf:{title}"/>
+                    <f:translate key="{lll}{title}"/>
                 </a>
             </h4>
         </div>
@@ -139,43 +132,43 @@
 <f:section name="box-1">
     <div class="mb-3">
         <label for="pageTS_from_email" class="form-label">
-            <f:translate key="{lll2}sys_dmail.from_email"/><f:render section="help" arguments="{0: '{lll3}from_email.description', 1: '{lll3}from_email.details'}"/>
+            <f:translate key="{lll2}sys_dmail.from_email"/><f:render section="help" arguments="{0: '{lll}from_email.description', 1: '{lll}from_email.details'}"/>
         </label>
         <f:form.textfield type="email" id="pageTS_from_email" name="pageTS[from_email]" value="{configuration.from_email}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_from_name" class="form-label">
-            <f:translate key="{lll2}sys_dmail.from_name"/><f:render section="help" arguments="{0: '{lll3}from_name.description', 1: '{lll3}from_name.details'}"/>
+            <f:translate key="{lll2}sys_dmail.from_name"/><f:render section="help" arguments="{0: '{lll}from_name.description', 1: '{lll}from_name.details'}"/>
         </label>
         <f:form.textfield id="pageTS_from_name" name="pageTS[from_name]" value="{configuration.from_name}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_replyto_email" class="form-label">
-            <f:translate key="{lll2}sys_dmail.replyto_email"/><f:render section="help" arguments="{0: '{lll3}replyto_email.description', 1: '{lll3}replyto_email.details'}"/>
+            <f:translate key="{lll2}sys_dmail.replyto_email"/><f:render section="help" arguments="{0: '{lll}replyto_email.description', 1: '{lll}replyto_email.details'}"/>
         </label>
         <f:form.textfield id="pageTS_replyto_email" name="pageTS[replyto_email]" value="{configuration.replyto_email}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_replyto_name" class="form-label">
-            <f:translate key="{lll2}sys_dmail.replyto_name"/><f:render section="help" arguments="{0: '{lll3}replyto_name.description', 1: '{lll3}replyto_name.details'}"/>
+            <f:translate key="{lll2}sys_dmail.replyto_name"/><f:render section="help" arguments="{0: '{lll}replyto_name.description', 1: '{lll}replyto_name.details'}"/>
         </label>
         <f:form.textfield id="pageTS_replyto_name" name="pageTS[replyto_name]" value="{configuration.replyto_name}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_return_path" class="form-label">
-            <f:translate key="{lll2}sys_dmail.return_path"/><f:render section="help" arguments="{0: '{lll3}return_path.description', 1: '{lll3}return_path.details'}"/>
+            <f:translate key="{lll2}sys_dmail.return_path"/><f:render section="help" arguments="{0: '{lll}return_path.description', 1: '{lll}return_path.details'}"/>
         </label>
         <f:form.textfield id="pageTS_return_path" name="pageTS[return_path]" value="{configuration.return_path}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_organisation" class="form-label">
-            <f:translate key="{lll2}sys_dmail.organisation"/><f:render section="help" arguments="{0: '{lll3}organisation.description', 1: '{lll3}organisation.details'}"/>
+            <f:translate key="{lll2}sys_dmail.organisation"/><f:render section="help" arguments="{0: '{lll}organisation.description', 1: '{lll}organisation.details'}"/>
         </label>
         <f:form.textfield id="pageTS_organisation" name="pageTS[organisation]" value="{configuration.organisation}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_priority" class="form-label">
-            <f:translate key="{lll2}sys_dmail.priority"/><f:render section="help" arguments="{0: '{lll3}priority.description', 1: '{lll3}priority.details'}"/>
+            <f:translate key="{lll2}sys_dmail.priority"/><f:render section="help" arguments="{0: '{lll}priority.description', 1: '{lll}priority.details'}"/>
         </label>
         <f:form.select id="pageTS_priority" name="pageTS[priority]" value="{configuration.priority}" class="form-select form-control-adapt">
             <f:form.select.option value="3">
@@ -194,7 +187,7 @@
 <f:section name="box-2">
     <div class="mb-3">
         <label for="pageTS_sendOptions" class="form-label">
-            <f:translate key="{lll2}sys_dmail.sendOptions"/><f:render section="help" arguments="{0: '{lll3}sendOptions.description', 1: '{lll3}sendOptions.details'}"/>
+            <f:translate key="{lll2}sys_dmail.sendOptions"/><f:render section="help" arguments="{0: '{lll}sendOptions.description', 1: '{lll}sendOptions.details'}"/>
         </label>
         <f:form.select id="pageTS_sendOptions" name="pageTS[sendOptions]" value="{configuration.sendOptions}" class="form-select form-control-adapt">
             <f:form.select.option value="3">
@@ -211,13 +204,13 @@
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_includeMedia" class="form-check-input" name="pageTS[includeMedia]" value="1" checked="{configuration.includeMedia} == 1"/>
         <label for="pageTS_includeMedia" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.includeMedia"/><f:render section="help" arguments="{0: '{lll3}includeMedia.description', 1: '{lll3}includeMedia.details'}"/>
+            <f:translate key="{lll2}sys_dmail.includeMedia"/><f:render section="help" arguments="{0: '{lll}includeMedia.description', 1: '{lll}includeMedia.details'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_flowedFormat" class="form-check-input" name="pageTS[flowedFormat]" value="1" checked="{configuration.flowedFormat} == 1"/>
         <label for="pageTS_flowedFormat" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.flowedFormat"/><f:render section="help" arguments="{0: '{lll3}flowedFormat.description', 1: '{lll3}flowedFormat.details'}"/>
+            <f:translate key="{lll2}sys_dmail.flowedFormat"/><f:render section="help" arguments="{0: '{lll}flowedFormat.description', 1: '{lll}flowedFormat.details'}"/>
         </label>
     </div>
 </f:section>
@@ -282,13 +275,13 @@
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_use_rdct" class="form-check-input" name="pageTS[use_rdct]" value="1" checked="{configuration.use_rdct} == 1"/>
         <label for="pageTS_use_rdct" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.use_rdct"/><f:render section="help" arguments="{0: '{lll3}use_rdct.description', 1: '{lll3}use_rdct.details'}"/>
+            <f:translate key="{lll2}sys_dmail.use_rdct"/><f:render section="help" arguments="{0: '{lll}use_rdct.description', 1: '{lll}use_rdct.details'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_long_link_mode" class="form-check-input" name="pageTS[long_link_mode]" value="1" checked="{configuration.long_link_mode} == 1"/>
         <label for="pageTS_long_link_mode" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.long_link_mode"/><f:render section="help" arguments="{0: '{lll3}long_link_mode.description'}"/>
+            <f:translate key="{lll2}sys_dmail.long_link_mode"/><f:render section="help" arguments="{0: '{lll}long_link_mode.description'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
@@ -311,7 +304,7 @@
     </div>
     <div class="mb-3">
         <label for="pageTS_authcode_fieldList" class="form-label">
-            <f:translate key="{lll2}sys_dmail.authcode_fieldList"/><f:render section="help" arguments="{0: '{lll3}authcode_fieldList.description'}"/>
+            <f:translate key="{lll2}sys_dmail.authcode_fieldList"/><f:render section="help" arguments="{0: '{lll}authcode_fieldList.description'}"/>
         </label>
         <f:form.textfield id="pageTS_authcode_fieldList" name="pageTS[authcode_fieldList]" value="{configuration.authcode_fieldList}" class="form-control"/>
     </div>

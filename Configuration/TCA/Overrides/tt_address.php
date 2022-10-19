@@ -4,7 +4,7 @@ defined('TYPO3') or die();
 // tt_address modified
 $ttAddressCols = [
     'accepts_html' => [
-        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:module_sys_dmail_group.htmlemail',
+        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:accepts_html',
         'exclude' => '1',
         'config' => [
             'type' => 'check'

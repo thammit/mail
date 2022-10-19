@@ -47,18 +47,6 @@ final class Configuration
         ');
     }
 
-    public static function registerTranslations(): void
-    {
-        ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail_group', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmailg.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('sys_dmail_category', 'EXT:mail/Resources/Private/Language/locallang_csh_sysdmailcat.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Mail', 'EXT:mail/Resources/Private/Language/locallang_csh_DirectMail.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_RecipientList', 'EXT:mail/Resources/Private/Language/locallang_csh_RecipientList.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Statistics', 'EXT:mail/Resources/Private/Language/locallang_csh_Statistics.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Status', 'EXT:mail/Resources/Private/Language/locallang_csh_MailerEngine.xlf');
-        ExtensionManagementUtility::addLLrefForTCAdescr('_MOD_Mail_Configuration', 'EXT:mail/Resources/Private/Language/locallang_csh_Configuration.xlf');
-    }
-
     public static function registerBackendModules(): void
     {
         ExtensionManagementUtility::addModule(
@@ -123,7 +111,7 @@ final class Configuration
                 'access' => 'group,user',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-report',
-                'labels' => 'LLL:EXT:mail/Resources/Private/Language/StatisticModule.xlf',
+                'labels' => 'LLL:EXT:mail/Resources/Private/Language/ReportModule.xlf',
             ]
         );
 

@@ -92,14 +92,14 @@ return [
             ],
         ],
         'record_types' => [
-            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.whichtables',
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types',
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.whichtables.I.0', ''],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.whichtables.I.1', ''],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.whichtables.I.2', ''],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.whichtables.I.3', ''],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.0', ''],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.1', ''],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.2', ''],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.3', ''],
                 ],
                 'cols' => 2,
                 'default' => 1,

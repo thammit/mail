@@ -3,13 +3,10 @@
 	<file source-language="en" datatype="plaintext" original="messages" date="2016-02-05T12:03:27Z">
 		<header />
 		<body>
-		<trans-unit id="module_sys_dmail_group.category">
-			<source>Subscribe to categories</source>
+		<trans-unit id="accepts_html">
+			<source>Receiver accept HTML mails</source>
 		</trans-unit>
-		<trans-unit id="module_sys_dmail_group.htmlemail">
-			<source>Recieve e-mails as HTML?</source>
-		</trans-unit>
-		<trans-unit id="module_sys_dmail_group.newsletter">
+		<trans-unit id="newsletter">
 			<source>Activate Newsletter</source>
 		</trans-unit>
 		<trans-unit id="pages.module.I.5">
@@ -192,19 +189,19 @@
 		<trans-unit id="sys_dmail_group.type.I.4">
 			<source>From other recipient lists</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail_group.whichtables">
+		<trans-unit id="sys_dmail_group.record_types">
 			<source>Types of records</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail_group.whichtables.I.0">
+		<trans-unit id="sys_dmail_group.record_types.I.0">
 			<source>Address</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail_group.whichtables.I.1">
+		<trans-unit id="sys_dmail_group.record_types.I.1">
 			<source>Website user</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail_group.whichtables.I.2">
+		<trans-unit id="sys_dmail_group.record_types.I.2">
 			<source>From custom-defined table</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail_group.whichtables.I.3">
+		<trans-unit id="sys_dmail_group.record_types.I.3">
 			<source>Website User Group</source>
 		</trans-unit>
 		</body>
