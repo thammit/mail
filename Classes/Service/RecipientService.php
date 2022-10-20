@@ -87,7 +87,7 @@ class RecipientService
         if ($groups) {
             /** @var Group $group */
             foreach ($groups as $group) {
-                $result = $this->compileMailGroups([$group->getUid()], $userTable);
+                $result = $this->compileMailGroups([$group], $userTable);
                 $totalRecipients = 0;
                 if (is_array($result['tt_address'] ?? false)) {
                     $totalRecipients += count($result['tt_address']);
@@ -118,7 +118,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function compileMailGroups(array $groups, string $userTable): array
+    public function compileMailGroups(array $groups, string $userTable = ''): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
         if (!count($groups)) {
@@ -128,14 +128,7 @@ class RecipientService
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
         foreach ($groups as $group) {
-            // Testing to see if group ID is a valid integer, if not - skip to next group ID
-            $groupId = MathUtility::convertToPositiveInteger($group['uid'] ?? $group);
-            if (!$groupId) {
-                continue;
-            }
-
-            $recipientList = $this->getSingleMailGroup($groupId, $userTable);
-
+            $recipientList = $this->getUidListOfRecipientsGroupedByTable($group, $userTable);
             $idLists = array_merge_recursive($idLists, $recipientList);
         }
 
@@ -163,7 +156,6 @@ class RecipientService
     /**
      * @param array $groups
      * @param string $userTable
-     * @param string $backendUserPermissions
      * @return array
      * @throws DBALException
      * @throws Exception
@@ -171,24 +163,17 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getQueryInfoIdLists(array $groups, string $userTable, string $backendUserPermissions): array
+    public function getQueryInfoIdLists(array $groups, string $userTable = ''): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
-        if (!count($groups)) {
+        if (count($groups) === 0) {
             return [];
         }
 
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
         foreach ($groups as $group) {
-            // Testing to see if group ID is a valid integer, if not - skip to next group ID
-            $groupId = MathUtility::convertToPositiveInteger($group['uid'] ?? $group);
-            if (!$groupId) {
-                continue;
-            }
-
-            $recipientList = $this->getSingleMailGroup($groupId, $userTable, $backendUserPermissions);
-
+            $recipientList = $this->getUidListOfRecipientsGroupedByTable($group, $userTable);
             $idLists = array_merge_recursive($idLists, $recipientList);
         }
 
@@ -670,22 +655,18 @@ class RecipientService
                     if ($pidList) {
                         // tt_address
                         if ($mailGroup->hasAddress()) {
-                            // todo
                             $idLists['tt_address'] = $this->getIdList('tt_address', $pidList, $mailGroup->getUid(), $mailGroup->getCategories()->count());
                         }
                         // fe_users
                         if ($mailGroup->hasFrontendUser()) {
-                            // todo
                             $idLists['fe_users'] = $this->getIdList('fe_users', $pidList, $mailGroup->getUid(), $mailGroup->getCategories()->count());
                         }
                         // user table
                         if ($userTable && $mailGroup->hasCustom()) {
-                            // todo
                             $idLists[$userTable] = $this->getIdList($userTable, $pidList, $mailGroup->getUid(), $mailGroup->getCategories()->count());
                         }
                         // fe_groups
                         if ($mailGroup->hasFrontendUserGroup()) {
-                            // todo
                             $idLists['fe_users'] = $this->getIdList('fe_groups', $pidList, $mailGroup->getUid(), $mailGroup->getCategories()->count());
                             $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $idLists['fe_users']));
                         }
@@ -713,7 +694,6 @@ class RecipientService
                     break;
                 case RecipientGroupType::QUERY:
                     // Special query list
-                    // todo
                     $mailGroup = $this->updateSpecialQuery($mailGroup, $userTable);
                     $table = '';
                     if ($mailGroup->hasAddress()) {
@@ -728,7 +708,6 @@ class RecipientService
                         }
                     }
                     if ($table) {
-                        // todo
                         $idLists[$table] = $this->getSpecialQueryIdList($table, $mailGroup);
                     }
                     break;
@@ -884,7 +863,7 @@ class RecipientService
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      */
-    public function getSingleMailGroup(Group $group, string $userTable): array
+    public function getUidListOfRecipientsGroupedByTable(Group $group, string $userTable): array
     {
         $idLists = [];
 
@@ -902,7 +881,7 @@ class RecipientService
                         $pageInfo = BackendUtility::readPageAccess($pageUid, $this->backendUserPermissions);
                         if (is_array($pageInfo)) {
                             $pageIdArray[] = $pageUid;
-                            if ($group['recursive']) {
+                            if ($group->isRecursive()) {
                                 $pageIdArray = array_merge($pageIdArray, BackendDataUtility::getRecursiveSelect($pageUid, $this->backendUserPermissions));
                             }
                         }
@@ -916,19 +895,19 @@ class RecipientService
                 if ($pidList) {
                     if ($group->hasAddress()) {
                         // tt_address
-                        $idLists['tt_address'] = $this->getIdList('tt_address', $pidList, $group->getUid(), $group['categories']);
+                        $idLists['tt_address'] = $this->getIdList('tt_address', $pidList, $group->getUid(), $group->getCategories()->count());
                     }
                     if ($group->hasFrontendUser()) {
                         // fe_users
-                        $idLists['fe_users'] = $this->getIdList('fe_users', $pidList, $group->getUid(), $group['categories']);
+                        $idLists['fe_users'] = $this->getIdList('fe_users', $pidList, $group->getUid(), $group->getCategories()->count());
                     }
                     if ($userTable && $group->hasCustom()) {
                         // user table
-                        $idLists[$userTable] = $this->getIdList($userTable, $pidList, $group->getUid(), $group['categories']);
+                        $idLists[$userTable] = $this->getIdList($userTable, $pidList, $group->getUid(), $group->getCategories()->count());
                     }
                     if ($group->hasFrontendUserGroup()) {
                         // fe_groups
-                        $idLists['fe_users'] = $this->getIdList('fe_groups', $pidList, $group->getUid(), $group['categories']);
+                        $idLists['fe_users'] = $this->getIdList('fe_groups', $pidList, $group->getUid(), $group->getCategories()->count());
                         $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users']));
                     }
                 }
@@ -977,10 +956,9 @@ class RecipientService
                 }
                 break;
             case RecipientGroupType::OTHER:
-                // todo
                 $groups = $this->getAllGroupsRecursive($group);
                 foreach ($groups as $group) {
-                    $collect = $this->getSingleMailGroup($group, $userTable);
+                    $collect = $this->getUidListOfRecipientsGroupedByTable($group, $userTable);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
@@ -1047,108 +1025,35 @@ class RecipientService
         return $group;
     }
 
-    /**
-     * Get recipient ids of groups
-     *
-     * @param array $groups List of selected group IDs
-     *
-     * @return array list of the recipient ID
-     * @throws DBALException
-     * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function getRecipientIdsOfMailGroups(array $groups, string $userTable = ''): array
-    {
-        $recipientIds = $this->compileMailGroups($groups, $userTable, $this->backendUserPermissions);
-
-        // Todo: Add PSR-14 EventDispatcher to manipulate the id list (see commented hook code block below)
-
-        return $recipientIds;
-//        return [
-//            'queryInfo' => ['id_lists' => $idLists],
-//        ];
-//
-//        // If supplied with an empty array, quit instantly as there is nothing to do
-//        if (!count($groups)) {
-//            return [];
-//        }
-//
-//        // Looping through the selected array, in order to fetch recipient details
-//        $idLists = [];
-//        foreach ($groups as $groupUid) {
-//            // Testing to see if group ID is a valid integer, if not - skip to next group ID
-//            $groupUid = MathUtility::convertToPositiveInteger($groupUid);
-//            if (!$groupUid) {
-//                continue;
-//            }
-//
-//            $recipientList = $this->getSingleMailGroup($groupUid);
-//            if (!is_array($recipientList)) {
-//                continue;
-//            }
-//
-//            $idLists = array_merge_recursive($idLists, $recipientList);
-//        }
-//
-//        // Make unique entries
-//        if (is_array($idLists['tt_address'] ?? false)) {
-//            $idLists['tt_address'] = array_unique($idLists['tt_address']);
-//        }
-//
-//        if (is_array($idLists['fe_users'] ?? false)) {
-//            $idLists['fe_users'] = array_unique($idLists['fe_users']);
-//        }
-//
-//        if (is_array($idLists[$this->userTable] ?? false) && $this->userTable) {
-//            $idLists[$this->userTable] = array_unique($idLists[$this->userTable]);
-//        }
-//
-//        if (is_array($idLists['PLAINLIST'] ?? false)) {
-//            $idLists['PLAINLIST'] = MailerUtility::removeDuplicates($idLists['PLAINLIST']);
-//        }
-//
-//        /**
-//         * Hook for cmd_compileMailGroup
-//         * manipulate the generated id_lists
-//         */
-//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_compileMailGroup'] ?? false)) {
-//            $hookObjectsArr = [];
-//            $temporaryList = '';
-//
-//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod2']['cmd_compileMailGroup'] as $classRef) {
-//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-//            }
-//            foreach ($hookObjectsArr as $hookObj) {
-//                if (method_exists($hookObj, 'cmd_compileMailGroup_postProcess')) {
-//                    $temporaryList = $hookObj->cmd_compileMailGroup_postProcess($idLists, $this, $groups);
-//                }
-//            }
-//
-//            unset($idLists);
-//            $idLists = $temporaryList;
-//        }
-//
-//        return [
-//            'queryInfo' => ['id_lists' => $idLists],
-//        ];
-    }
-
     public function getConnectionPool(): ConnectionPool
     {
         return GeneralUtility::makeInstance(ConnectionPool::class);
     }
 
+    /**
+     * @param string|null $table
+     * @return \TYPO3\CMS\Core\Database\Connection
+     */
     public function getConnection(string $table = null): \TYPO3\CMS\Core\Database\Connection
     {
         return $this->getConnectionPool()->getConnectionForTable($table);
     }
 
+    /**
+     * @param string|null $table
+     * @return QueryBuilder
+     */
     public function getQueryBuilder(string $table = null): QueryBuilder
     {
         return $this->getConnectionPool()->getQueryBuilderForTable($table);
     }
 
-    public function getQueryBuilderWithoutRestrictions(string $table = null, $withDeleted = false): QueryBuilder
+    /**
+     * @param string|null $table
+     * @param bool $withDeleted
+     * @return QueryBuilder
+     */
+    public function getQueryBuilderWithoutRestrictions(string $table = null, bool $withDeleted = false): QueryBuilder
     {
         $queryBuilder = $this->getQueryBuilder($table);
         $queryBuilder

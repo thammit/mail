@@ -422,9 +422,11 @@ class MailController extends AbstractController
      * @param Mail $mail
      * @return ResponseInterface
      * @throws DBALException
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
-     * @throws InvalidQueryException
      */
     public function testMailAction(Mail $mail): ResponseInterface
     {
@@ -445,7 +447,7 @@ class MailController extends AbstractController
                 /** @var Group $testMailGroup */
                 $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
                 $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
-                $recipientGroups = $this->recipientService->getRecipientIdsOfMailGroups([$testMailGroup->getUid()]);
+                $recipientGroups = $this->recipientService->compileMailGroups([$testMailGroup]);
                 foreach ($recipientGroups as $recipientGroup => $recipients) {
                     switch ($recipientGroup) {
                         case 'fe_users':
@@ -545,7 +547,7 @@ class MailController extends AbstractController
     {
         $groups = array_keys(array_filter($groups));
         $distributionTime = new DateTimeImmutable($distributionTime);
-        $queryInfo['id_lists'] = $this->recipientService->getQueryInfoIdLists($groups, '', $this->backendUserPermissions);
+        $queryInfo['id_lists'] = $this->recipientService->getQueryInfoIdLists($this->groupRepository->findByUidList($groups)->toArray());
 
         // Update the record:
         $mail->setRecipientGroups(implode(',', $groups))
