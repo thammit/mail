@@ -3,14 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
-use MEDIAESSENZ\Mail\Domain\Repository\SysLanguageRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Domain\Repository\PageRepository;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class TcaUtility
 {

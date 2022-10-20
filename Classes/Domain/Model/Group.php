@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
+use MEDIAESSENZ\Mail\Enumeration\RecordType;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -230,6 +231,26 @@ class Group extends AbstractEntity
     public function getRecordTypes(): int
     {
         return $this->recordTypes;
+    }
+
+    public function hasAddress(): bool
+    {
+        return ($this->recordTypes & RecordType::ADDRESS) !== 0;
+    }
+
+    public function hasFrontendUser(): bool
+    {
+        return ($this->recordTypes & RecordType::FRONTEND_USER) !== 0;
+    }
+
+    public function hasCustom(): bool
+    {
+        return ($this->recordTypes & RecordType::CUSTOM) !== 0;
+    }
+
+    public function hasFrontendUserGroup(): bool
+    {
+        return ($this->recordTypes & RecordType::FRONTEND_USER_GROUP) !== 0;
     }
 
     /**

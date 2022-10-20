@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DateTimeImmutable;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -314,7 +315,7 @@ class Mail extends AbstractEntity
      */
     public function isPlain(): bool
     {
-        return ($this->sendOptions & 0b00000001) !== 0;
+        return ($this->sendOptions & SendFormat::PLAIN) !== 0;
     }
 
     /**
@@ -322,7 +323,7 @@ class Mail extends AbstractEntity
      */
     public function isHtml(): bool
     {
-        return ($this->sendOptions & 0b00000010) !== 0;
+        return ($this->sendOptions & SendFormat::HTML) !== 0;
     }
 
     /**
@@ -330,17 +331,17 @@ class Mail extends AbstractEntity
      */
     public function isPlainAndHtml(): bool
     {
-        return ($this->sendOptions & 0b00000011) !== 0;
+        return ($this->sendOptions & SendFormat::BOTH) !== 0;
     }
 
     public function removeHtmlSendOption(): void
     {
-        $this->sendOptions = $this->sendOptions & 0b11111101;
+        $this->sendOptions = $this->sendOptions & ~SendFormat::HTML;
     }
 
     public function removePlainSendOption(): void
     {
-        $this->sendOptions = $this->sendOptions & 0b11111110;
+        $this->sendOptions = $this->sendOptions & ~SendFormat::PLAIN;
     }
 
     /**

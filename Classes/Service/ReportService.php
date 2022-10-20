@@ -14,15 +14,11 @@ use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Database\Connection;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -45,7 +41,6 @@ class ReportService
         protected AddressRepository $addressRepository,
         protected FrontendUserRepository $frontendUserRepository,
         protected SysDmailMaillogRepository $sysDmailMaillogRepository,
-        protected TempRepository $tempRepository
     ) {
     }
 

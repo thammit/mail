@@ -5,7 +5,7 @@ namespace MEDIAESSENZ\Mail\Enumeration;
 
 use TYPO3\CMS\Core\Type\Enumeration;
 
-class GroupType extends Enumeration
+class RecordType extends Enumeration
 {
     const ADDRESS             = 0b00000001;
     const FRONTEND_USER       = 0b00000010;

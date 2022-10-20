@@ -6,18 +6,18 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
-use MEDIAESSENZ\Mail\Domain\Repository\TempRepository;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class RecipientController extends AbstractController
 {
@@ -25,9 +25,10 @@ class RecipientController extends AbstractController
 
     /**
      * @return ResponseInterface
-     * @throws RouteNotFoundException
      * @throws DBALException
      * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
     public function indexAction(): ResponseInterface
@@ -40,7 +41,7 @@ class RecipientController extends AbstractController
 
         /** @var Group $recipientGroup */
         foreach ($recipientGroups as $recipientGroup) {
-            $result = $this->recipientService->compileMailGroup($recipientGroup->getUid());
+            $result = $this->recipientService->compileMailGroup($recipientGroup);
             $totalRecipients = 0;
             $idLists = $result['queryInfo']['id_lists'];
 
@@ -88,7 +89,7 @@ class RecipientController extends AbstractController
      */
     public function showAction(Group $group): ResponseInterface
     {
-        $result = $this->recipientService->compileMailGroup($group->getUid());
+        $result = $this->recipientService->compileMailGroup($group);
         $totalRecipients = 0;
         $idLists = $result['queryInfo']['id_lists'];
         if (is_array($idLists['tt_address'] ?? false)) {
@@ -112,11 +113,8 @@ class RecipientController extends AbstractController
             'special' => [],
         ];
 
-        $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
-
         if (is_array($idLists['tt_address'] ?? false)) {
-            $rows = $tempRepository->fetchRecordsListValues($idLists['tt_address'], 'tt_address');
-
+            $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists['tt_address'], 'tt_address');
             $data['tables']['tt_address'] = [
                 'table' => 'tt_address',
                 'recipients' => $rows,
@@ -126,7 +124,7 @@ class RecipientController extends AbstractController
             ];
         }
         if (is_array($idLists['fe_users'] ?? false)) {
-            $rows = $tempRepository->fetchRecordsListValues($idLists['fe_users'], 'fe_users');
+            $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists['fe_users'], 'fe_users');
             $data['tables']['fe_users'] = [
                 'table' => 'fe_users',
                 'recipients' => $rows,
@@ -145,7 +143,7 @@ class RecipientController extends AbstractController
             ];
         }
         if (is_array($idLists[$this->userTable] ?? false)) {
-            $rows = $tempRepository->fetchRecordsListValues($idLists[$this->userTable], $this->userTable);
+            $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists[$this->userTable], $this->userTable);
             $data['tables'][$this->userTable] = [
                 'table' => $this->userTable,
                 'recipients' => $rows,
@@ -174,10 +172,12 @@ class RecipientController extends AbstractController
      * @throws Exception
      * @throws StopActionException
      * @throws \Doctrine\DBAL\Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
     public function csvDownloadAction(Group $group, string $table): void
     {
-        $result = $this->recipientService->compileMailGroup($group->getUid());
+        $result = $this->recipientService->compileMailGroup($group);
         $idLists = $result['queryInfo']['id_lists'];
 
         if ($table === 'tx_mail_domain_model_group') {
@@ -187,9 +187,7 @@ class RecipientController extends AbstractController
                 if (BackendUserUtility::getBackendUser()->check('tables_select', $table)) {
                     $fields = $table === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
                     $fields .= ',tstamp';
-
-                    $tempRepository = GeneralUtility::makeInstance(TempRepository::class);
-                    $rows = $tempRepository->fetchRecordsListValues($idLists[$table], $table,
+                    $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists[$table], $table,
                         GeneralUtility::trimExplode(',', $fields, true));
                     CsvUtility::downloadCSV($rows);
                 } else {

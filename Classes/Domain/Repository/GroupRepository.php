@@ -17,4 +17,10 @@ class GroupRepository extends Repository
         $this->setDefaultQuerySettings($querySettings);
         $this->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
     }
+
+    public function persist(): void
+    {
+        $this->persistenceManager->persistAll();
+    }
+
 }

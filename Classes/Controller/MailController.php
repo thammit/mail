@@ -510,6 +510,8 @@ class MailController extends AbstractController
      * @param Mail $mail
      * @return ResponseInterface
      * @throws DBALException
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
      */

@@ -50,7 +50,6 @@ abstract class AbstractController extends ActionController
         protected PageRepository $pageRepository
     ) {
         $this->id = (int)GeneralUtility::_GP('id');
-        $this->recipientService->setPageId($this->id);
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/locallang_csh_sysdmail.xlf');
         try {
@@ -62,6 +61,7 @@ abstract class AbstractController extends ActionController
 
         $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
         $this->pageInfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
+        $this->recipientService->init($this->id);
 
         // get the config from pageTS
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['mail.'] ?? [];
