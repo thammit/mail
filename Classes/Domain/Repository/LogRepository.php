@@ -7,7 +7,6 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use MEDIAESSENZ\Mail\Enumeration\ResponseType;
-use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
 use PDO;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -18,6 +17,11 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class LogRepository extends Repository
 {
+    public function persist(): void
+    {
+        $this->persistenceManager->persistAll();
+    }
+
     private string $table = 'tx_mail_domain_model_log';
 
     public function getQueryBuilder(): QueryBuilder

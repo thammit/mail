@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Service;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
@@ -32,7 +35,6 @@ use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class MailerService implements LoggerAwareInterface
 {
@@ -84,6 +86,7 @@ class MailerService implements LoggerAwareInterface
     public function __construct(
         protected CharsetConverter $charsetConverter,
         protected MailRepository $mailRepository,
+        protected LogRepository $logRepository,
         protected SysDmailMaillogRepository $sysDmailMaillogRepository
     ) {
     }
@@ -285,7 +288,7 @@ class MailerService implements LoggerAwareInterface
         $mail = $this->mailRepository->findByUid($mailUid);
 
         $this->mailUid = $mailUid;
-        $this->charset = (string)($mail->getType() === MailType::INTERNAL ? 'utf-8' : $mailData['charset']);
+        $this->charset = $mail->getType() === MailType::INTERNAL ? 'utf-8' : $mail->getCharset();
         $this->subject = $this->charsetConverter->conv($mail->getSubject(), $this->backendCharset, $this->charset);
         $this->fromName = ($mail->getFromName() ? $this->charsetConverter->conv($mail->getFromName(), $this->backendCharset, $this->charset) : '');
         $this->fromEmail = $mail->getFromEmail();
@@ -348,7 +351,7 @@ class MailerService implements LoggerAwareInterface
 
         $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipFields'), true);
         if ($addRecipientFields = ConfigurationUtility::getExtensionConfiguration('addRecipFields')) {
-            $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields), true);
+            $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields, true));
         }
 
         foreach ($rowFieldsArray as $substField) {
@@ -428,7 +431,7 @@ class MailerService implements LoggerAwareInterface
      */
     public function sendPersonalizedMail(array $recipientData, string $tableNameChar): int
     {
-        $returnCode = SendFormat::NONE;
+        $formatSent = SendFormat::NONE;
 
         foreach ($recipientData as $key => $value) {
             $recipientData[$key] = is_string($value) ? htmlspecialchars($value) : $value;
@@ -455,7 +458,7 @@ class MailerService implements LoggerAwareInterface
                 if ($mailHasContent) {
                     $tempContent_HTML = $this->replaceMailMarkers($tempContent_HTML, $recipientData, $additionalMarkers);
                     $this->setHtmlContent($tempContent_HTML);
-                    $returnCode |= SendFormat::HTML;
+                    $formatSent |= SendFormat::HTML;
                 }
             }
 
@@ -475,14 +478,14 @@ class MailerService implements LoggerAwareInterface
                         );
                     }
                     $this->setPlainContent($plainTextContent);
-                    $returnCode |= SendFormat::PLAIN;
+                    $formatSent |= SendFormat::PLAIN;
                 }
             }
 
             $this->TYPO3MID = $midRidId . '-' . md5($midRidId);
             $this->returnPath = str_replace('###XID###', $midRidId, $this->returnPath);
 
-            if ($returnCode && GeneralUtility::validEmail($recipientData['email'])) {
+            if ($formatSent && GeneralUtility::validEmail($recipientData['email'])) {
                 $this->sendMailToRecipient(
                     new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
                     $recipientData
@@ -491,7 +494,7 @@ class MailerService implements LoggerAwareInterface
 
         }
 
-        return $returnCode;
+        return $formatSent;
     }
 
     /**
@@ -627,17 +630,22 @@ class MailerService implements LoggerAwareInterface
     protected function sendSingleMailAndAddLogEntry(int $mailUid, array $recipientData, string $recipientTable): void
     {
         if ($this->isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $recipientTable) === false) {
-            $pt = MailerUtility::getMilliseconds();
+            $parseTime = MailerUtility::getMilliseconds();
             $recipientData = RecipientUtility::normalizeAddress($recipientData);
 
             // write to dmail_maillog table. if it can be written, continue with sending.
             // if not, stop the script and report error
-            $formatSent = 0;
-
             // try to insert the mail to the mail log repository
             try {
-                $logUid = $this->sysDmailMaillogRepository->insertRecord($mailUid, $recipientTable . '_' . $recipientData['uid'], strlen($this->message),
-                    MailerUtility::getMilliseconds() - $pt, $formatSent, $recipientData['email']);
+                $mail = $this->mailRepository->findByUid($mailUid);
+                $log = new Log();
+                $log->setMail($mail);
+                $log->setRecipientTable($recipientTable);
+                $log->setRecipientUid($recipientData['uid']);
+                $log->setSize(strlen($this->message));
+                $log->setEmail($recipientData['email']);
+                $this->logRepository->add($log);
+                $this->logRepository->persist();
             } catch (DBALException $exception) {
                 $message = 'Unable to insert log-entry to tx_mail_domain_model_log table. Table full? Mass-Sending stopped. Please delete old records, except of active mailing (mail uid=' . $mailUid . ')';
                 $this->logger->critical($message);
@@ -649,7 +657,10 @@ class MailerService implements LoggerAwareInterface
 
             // try to store the sending return code
             try {
-                $this->sysDmailMaillogRepository->updateRecord($logUid, strlen($this->message), MailerUtility::getMilliseconds() - $pt, $formatSent);
+                $log->setFormatSent($formatSent);
+                $log->setParseTime(MailerUtility::getMilliseconds() - $parseTime);
+                $this->logRepository->update($log);
+                $this->logRepository->persist();
             } catch (DBALException $exception) {
                 $message = 'Unable to update log-entry in tx_mail_domain_model_log table. Table full? Mass-Sending stopped. Please delete old records, except of active mailing (mail uid=' . $mailUid . ')';
                 $this->logger->critical($message);
@@ -697,7 +708,7 @@ class MailerService implements LoggerAwareInterface
     {
         $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail);
 
-        $mail->setScheduledBegin(new \DateTimeImmutable('now'));
+        $mail->setScheduledBegin(new DateTimeImmutable('now'));
         $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
@@ -723,7 +734,7 @@ class MailerService implements LoggerAwareInterface
     {
         $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail);
 
-        $mail->setScheduledEnd(new \DateTimeImmutable('now'));
+        $mail->setScheduledEnd(new DateTimeImmutable('now'));
         $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();

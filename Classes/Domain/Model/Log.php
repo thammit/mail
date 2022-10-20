@@ -13,10 +13,10 @@ class Log extends AbstractEntity
      */
     protected Mail $mail;
 
-    /**
-     * @var SimpleRecipientInterface
-     */
-    protected SimpleRecipientInterface $recipient;
+//    /**
+//     * @var SimpleRecipientInterface|null
+//     */
+//    protected ?SimpleRecipientInterface $recipient;
 
     /**
      * @var string
@@ -24,9 +24,9 @@ class Log extends AbstractEntity
     protected string $recipientTable = '';
 
     /**
-     * @var string
+     * @var int
      */
-    protected string $recipientUid = '';
+    protected int $recipientUid;
 
     /**
      * @var string
@@ -66,7 +66,7 @@ class Log extends AbstractEntity
     /**
      * @var string
      */
-    protected string $returnContent;
+    protected string $returnContent = '';
 
     /**
      * @var int
@@ -96,23 +96,23 @@ class Log extends AbstractEntity
         return $this;
     }
 
-    /**
-     * @return SimpleRecipientInterface
-     */
-    public function getRecipient(): SimpleRecipientInterface
-    {
-        return $this->recipient;
-    }
-
-    /**
-     * @param SimpleRecipientInterface $recipient
-     * @return Log
-     */
-    public function setRecipient(SimpleRecipientInterface $recipient): Log
-    {
-        $this->recipient = $recipient;
-        return $this;
-    }
+//    /**
+//     * @return SimpleRecipientInterface|null
+//     */
+//    public function getRecipient(): ?SimpleRecipientInterface
+//    {
+//        return $this->recipient;
+//    }
+//
+//    /**
+//     * @param SimpleRecipientInterface $recipient
+//     * @return Log
+//     */
+//    public function setRecipient(SimpleRecipientInterface $recipient): Log
+//    {
+//        $this->recipient = $recipient;
+//        return $this;
+//    }
 
     /**
      * @return string
@@ -133,18 +133,18 @@ class Log extends AbstractEntity
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getRecipientUid(): string
+    public function getRecipientUid(): int
     {
         return $this->recipientUid;
     }
 
     /**
-     * @param string $recipientUid
+     * @param int $recipientUid
      * @return Log
      */
-    public function setRecipientUid(string $recipientUid): Log
+    public function setRecipientUid(int $recipientUid): Log
     {
         $this->recipientUid = $recipientUid;
         return $this;
