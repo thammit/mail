@@ -301,14 +301,14 @@ class RecipientService
                         'mm_1',
                         $switchTable,
                         $switchTable,
-                        $queryBuilder->expr()->eq($switchTable . '.uid', $queryBuilder->quoteIdentifier('mm_1.uid_local'))
+                        $queryBuilder->expr()->eq($switchTable . '.uid', $queryBuilder->quoteIdentifier('mm_1.uid_foreign'))
                     )
                     ->andWhere(
                         $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
                             ->add('INSTR( CONCAT(\',\',fe_users.usergroup,\',\'),CONCAT(\',\',fe_groups.uid ,\',\') )')
-                            ->add($queryBuilder->expr()->eq('mm_1.tablenames', $queryBuilder->createNamedParameter('fe_groups')))
-                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
+                            ->add($queryBuilder->expr()->eq('mm_1.tablenames', $queryBuilder->createNamedParameter($table)))
+                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
                             ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
                             ->add(
                                 $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter(''))
@@ -328,13 +328,13 @@ class RecipientService
                         'mm_1',
                         $table,
                         $table,
-                        $queryBuilder->expr()->eq($table . '.uid', $queryBuilder->quoteIdentifier('mm_1.uid_local'))
+                        $queryBuilder->expr()->eq($table . '.uid', $queryBuilder->quoteIdentifier('mm_1.uid_foreign'))
                     )
                     ->andWhere(
                         $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
-                            ->add($queryBuilder->expr()->eq('mm_1.tablenames', $queryBuilder->createNamedParameter('fe_users')))
-                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_local')))
+                            ->add($queryBuilder->expr()->eq('mm_1.tablenames', $queryBuilder->createNamedParameter($table)))
+                            ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->quoteIdentifier('g_mm.uid_foreign')))
                             ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($groupUid, PDO::PARAM_INT)))
                             ->add(
                                 $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter(''))
