@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\ReportService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -50,6 +51,7 @@ abstract class AbstractController extends ActionController
         protected CategoryRepository $categoryRepository
     ) {
         $this->id = (int)GeneralUtility::_GP('id');
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         try {
             $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
             $this->mailerService->setSiteIdentifier($this->siteIdentifier);

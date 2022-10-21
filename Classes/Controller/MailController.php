@@ -177,7 +177,7 @@ class MailController extends AbstractController
         }
 
         ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid') . ' Requested URLs: ' . $htmlUrl . ' / ' . $plainTextUrl,
-            LanguageUtility::getLL('dmail_error'));
+            LanguageUtility::getLL('dmail_error'), true);
         $this->redirect('index');
     }
 
