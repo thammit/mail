@@ -577,7 +577,7 @@ class MailerService implements LoggerAwareInterface
     /**
      * Get the list of categories ids subscribed to by recipient $uid from table $table
      *
-     * @param string $table Tablename of the recipient
+     * @param string $table table of the recipient (tt_address or fe_users)
      * @param int $uid Uid of the recipient
      *
      * @return string        list of categories
@@ -594,19 +594,20 @@ class MailerService implements LoggerAwareInterface
 
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+
         $statement = $queryBuilder
-            ->select($relationTable . '.uid_foreign')
+            ->select($relationTable . '.uid_local')
             ->from($relationTable, $relationTable)
-            ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_local = ' . $table . '.uid')
+            ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_foreign = ' . $table . '.uid')
             ->where(
                 $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table)),
-                $queryBuilder->expr()->eq($relationTable . '.uid_local', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
             )
             ->execute();
 
         $list = '';
         while ($row = $statement->fetchAssociative()) {
-            $list .= $row['uid_foreign'] . ',';
+            $list .= $row['uid_local'] . ',';
         }
 
         return rtrim($list, ',');
