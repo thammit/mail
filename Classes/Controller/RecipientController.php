@@ -202,8 +202,7 @@ class RecipientController extends AbstractController
 
     /**
      * @return ResponseInterface
-     * @throws AspectNotFoundException
-     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws \Exception
      */
     public function csvImportWizardAction(): ResponseInterface
     {
@@ -222,16 +221,23 @@ class RecipientController extends AbstractController
     /**
      * @param array $configuration
      * @return ResponseInterface
+     * @throws AspectNotFoundException
      * @throws DBALException
      * @throws Exception
      * @throws \TYPO3\CMS\Core\Resource\Exception
-     * @throws AspectNotFoundException
+     * @throws StopActionException
+     * @throws \Exception
      */
     public function csvImportWizardStepConfigurationAction(array $configuration = []): ResponseInterface
     {
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
         $importService->init($this->id, $this->request, $configuration);
+
+        if (!$importService->uploadOrImportCsv()) {
+            ViewUtility::addErrorToFlashMessageQueue('An error occurred during csv import', 'Error');
+            $this->redirect('csvImportWizard');
+        }
 
         $this->view->assign('data', $importService->getCsvImportConfigurationData());
 
@@ -244,8 +250,7 @@ class RecipientController extends AbstractController
     /**
      * @param array $configuration
      * @return ResponseInterface
-     * @throws AspectNotFoundException
-     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws \Exception
      */
     public function csvImportWizardStepMappingAction(array $configuration = []): ResponseInterface
     {
@@ -264,9 +269,8 @@ class RecipientController extends AbstractController
     /**
      * @param array $configuration
      * @return ResponseInterface
-     * @throws AspectNotFoundException
      * @throws StopActionException
-     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws \Exception
      */
     public function csvImportWizardStepStartImportAction(array $configuration = []): ResponseInterface
     {

@@ -7,8 +7,9 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Fetch\Message;
 use Fetch\Server;
+use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
+use MEDIAESSENZ\Mail\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BounceMailUtility;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -26,7 +27,12 @@ class AnalyzeBounceMailCommand extends Command
 
     private LanguageService $languageService;
 
-    public function __construct(private readonly LanguageServiceFactory $languageServiceFactory, private readonly Context $context, string $name = null)
+    public function __construct(
+        private readonly LanguageServiceFactory $languageServiceFactory,
+        private readonly Context $context,
+        private readonly LogRepository $logRepository,
+        string $name = null
+    )
     {
         $this->languageService = $this->languageServiceFactory->create('default');
         $this->languageService->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
@@ -178,17 +184,17 @@ class AnalyzeBounceMailCommand extends Command
         // Extract text content
         $cp = BounceMailUtility::analyseReturnError($message->getMessageBody());
 
-        $row = GeneralUtility::makeInstance(SysDmailMaillogRepository::class)->selectForAnalyzeBounceMail($midArray['recipient_uid'], $midArray['recipient_table'], $midArray['mail']);
+        $row = $this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid($midArray['recipient_uid'], $midArray['recipient_table'], $midArray['mail']);
 
         // only write to log table, if we found a corresponding recipient record
         if (!empty($row)) {
-            $tableMaillog = 'tx_mail_domain_model_log';
+            $tableName = 'tx_mail_domain_model_log';
             /** @var Connection $connection */
-            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableMaillog);
+            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
             try {
                 $insertFields = [
                     'tstamp' => $this->context->getPropertyFromAspect('date', 'timestamp'),
-                    'response_type' => -127,
+                    'response_type' => ResponseType::FAILED,
                     'mail' => (int)$midArray['mail'],
                     'recipient_uid' => (int)$midArray['recipient_uid'],
                     'recipient_table' => $midArray['recipient_table'],
@@ -196,8 +202,8 @@ class AnalyzeBounceMailCommand extends Command
                     'return_content' => serialize($cp),
                     'return_code' => (int)$cp['reason'],
                 ];
-                $connection->insert($tableMaillog, $insertFields);
-                $lastInsertId = $connection->lastInsertId($tableMaillog);
+                $connection->insert($tableName, $insertFields);
+                $lastInsertId = $connection->lastInsertId($tableName);
 
                 return (bool)$lastInsertId;
             } catch (\Exception $e) {

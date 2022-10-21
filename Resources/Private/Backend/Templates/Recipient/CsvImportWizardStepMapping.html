@@ -103,25 +103,25 @@
         </h3>
         <fieldset class="form-section mb-4">
             <div class="form-check mb-4">
-                <f:form.checkbox class="form-check-input" id="csvImportHtmlAll" name="configuration[all_html]" value="1" checked="{data.all_html}"/>
-                <label class="form-check-label" for="csvImportHtmlAll">
+                <f:form.checkbox class="form-check-input" id="AllHtml" name="configuration[all_html]" value="1" checked="{data.all_html}"/>
+                <label class="form-check-label" for="AllHtml">
                     <f:translate key="{lll}mailgroup_import_mapping_all_html"/>
                 </label>
             </div>
             <f:if condition="{data.categories -> f:count()}">
-                <f:if condition="{data.showAddCategories}">
-                    <div class="form-check mb-4">
-                        <f:form.checkbox class="form-check-input" id="csvImportAddCat" name="configuration[addCategories]" value="1" checked="{data.addCategories}"/>
-                        <label class="form-check-label" for="csvImportAddCat">
+                <f:if condition="{data.showAddAllCategories}">
+                    <div class="form-check">
+                        <f:form.checkbox class="form-check-input" id="addAllCategories" name="configuration[addAllCategories]" value="1" checked="{data.addAllCategories}"/>
+                        <label class="form-check-label" for="addAllCategories">
                             <f:translate key="{lll}mailgroup_import_mapping_cats"/>
                         </label>
                     </div>
                 </f:if>
                 <f:for each="{data.categories}" as="category">
                     <div class="form-check">
-                        <f:form.checkbox class="form-check-input" id="csvImportCat{category.uid}" name="configuration[categories][{category.uid}]" value="{category.uid}"
+                        <f:form.checkbox class="form-check-input" id="category{category.uid}" name="configuration[categories][{category.uid}]" value="{category.uid}"
                                          checked="{category.checked}"/>
-                        <label class="form-check-label" for="csvImportCat{category.uid}">{category.title}</label>
+                        <label class="form-check-label" for="category{category.uid}">{category.title}</label>
                     </div>
                 </f:for>
             </f:if>
@@ -131,7 +131,7 @@
         <f:link.action action="csvImportWizardStepConfiguration" class="btn btn-default text-uppercase">
             <f:translate key="{lll}mailgroup_import_back"/>
         </f:link.action>
-        <f:form.button name="configuration[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
+        <f:form.button type="submit" class="btn btn-primary text-uppercase">
             <f:translate key="{lll}mailgroup_import_next"/>
         </f:form.button>
     </f:form>

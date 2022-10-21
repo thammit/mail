@@ -6,8 +6,9 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 
-class SysCategoryMmRepository extends AbstractRepository
+class SysCategoryMmRepository
 {
+    use RepositoryTrait;
     protected string $table = 'sys_category_record_mm';
 
     /**

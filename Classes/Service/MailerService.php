@@ -11,7 +11,6 @@ use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
@@ -86,8 +85,7 @@ class MailerService implements LoggerAwareInterface
     public function __construct(
         protected CharsetConverter $charsetConverter,
         protected MailRepository $mailRepository,
-        protected LogRepository $logRepository,
-        protected SysDmailMaillogRepository $sysDmailMaillogRepository
+        protected LogRepository $logRepository
     ) {
     }
 
@@ -523,7 +521,7 @@ class MailerService implements LoggerAwareInterface
                 };
 
                 // get already sent mails
-                $sentMails = $this->sysDmailMaillogRepository->findSentMails($mailUid, $recipientTable);
+                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($mailUid, $recipientTable);
                 if ($table === 'PLAINLIST') {
                     foreach ($listArr as $kval => $recipientData) {
                         $kval++;

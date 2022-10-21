@@ -10,15 +10,11 @@ use MEDIAESSENZ\Mail\Domain\Model\Category;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailTtAddressCategoryMmRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\TtAddressRepository;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Core\Environment;
@@ -48,9 +44,10 @@ class ImportService
 
     public function __construct(
         protected AddressRepository $addressRepository,
-        protected CategoryRepository $categoryRepository
-    )
-    {
+        protected CategoryRepository $categoryRepository,
+        protected PagesRepository $pagesRepository,
+        protected DataHandler $dataHandler
+    ) {
     }
 
     /**
@@ -60,8 +57,7 @@ class ImportService
      * @param Request $request
      * @param array $configuration
      * @return void
-     * @throws AspectNotFoundException
-     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws Exception
      */
     public function init(int $pageId, Request $request, array $configuration = []): void
     {
@@ -72,47 +68,38 @@ class ImportService
 
         // get some importer default from pageTS
         $this->pageTsConfiguration = BackendUtility::getPagesTSconfig($this->pageId)['mod.']['web_modules.']['mail.']['importer.'] ?? [];
-        $this->mergeConfigurations($configuration);
-    }
-
-    /**
-     * @param array $configuration
-     * @return void
-     * @throws AspectNotFoundException
-     * @throws \TYPO3\CMS\Core\Resource\Exception
-     * @throws Exception
-     */
-    protected function mergeConfigurations(array $configuration = []): void
-    {
         $this->configuration = $configuration + $this->pageTsConfiguration;
-
-        if (empty($this->configuration['csv']) && !empty($_FILES['upload_1']['name'])) {
-            $tempFile = $this->checkUpload();
-            $this->configuration['newFile'] = $tempFile['newFile'];
-            $this->configuration['newFileUid'] = $tempFile['newFileUid'];
-        } elseif (!empty($this->configuration['csv']) && empty($_FILES['upload_1']['name'])) {
-            unset($this->configuration['newFile']);
-            unset($this->configuration['newFileUid']);
-        }
-
-        if (strlen($this->configuration['csv'] ?? '') > 0) {
-            $this->configuration['mode'] = 'csv';
-            $tempFile = $this->writeTempFile($this->configuration['csv'] ?? '', $this->configuration['newFile'] ?? '', $this->configuration['newFileUid'] ?? 0);
-            $this->configuration['newFile'] = $tempFile['newFile'];
-            $this->configuration['newFileUid'] = $tempFile['newFileUid'];
-        } elseif (!empty($this->configuration['newFile'])) {
-            $this->configuration['mode'] = 'file';
-        }
     }
 
     public function getCsvImportUploadData(): array
     {
         $data['csv'] = htmlspecialchars($this->configuration['csv'] ?? '');
         $data['target'] = htmlspecialchars($this->importFolder());
-        $data['newFile'] = $this->configuration['newFile'] ?? null;
-        $data['newFileUid'] = $this->configuration['newFileUid'] ?? null;
 
         return $data;
+    }
+
+    /**
+     * @return bool return true if import/upload was successfully
+     * @throws AspectNotFoundException
+     * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws Exception
+     */
+    public function uploadOrImportCsv(): bool
+    {
+        unset($this->configuration['newFile']);
+        unset($this->configuration['newFileUid']);
+
+        if ($_FILES['upload_1']['name']) {
+            $this->uploadCsv();
+        } else {
+            if ($this->configuration['csv']) {
+                if (strlen($this->configuration['csv'] ?? '') > 0) {
+                    $this->createCsvFile($this->configuration['csv']);
+                }
+            }
+        }
+        return (bool)($this->configuration['newFileUid'] ?? false);
     }
 
     /**
@@ -131,7 +118,7 @@ class ImportService
         // TODO: maybe only subtree von this->id??
 
         $optStorage = [];
-        $subFolders = GeneralUtility::makeInstance(PagesRepository::class)->selectSubfolders($pagePermsClause3);
+        $subFolders = $this->pagesRepository->selectSubfolders($pagePermsClause3);
         if ($subFolders && count($subFolders)) {
             foreach ($subFolders as $subFolder) {
                 if (BackendUtility::readPageAccess($subFolder['uid'], $pagePermsClause1)) {
@@ -214,8 +201,8 @@ class ImportService
 
         $data = [
             'mapping_cats' => [],
-            'showAddCategories' => false,
-            'addCategories' => false,
+            'showAddAllCategories' => false,
+            'addAllCategories' => false,
             'table' => [],
         ];
         $data['newFile'] = $this->configuration['newFile'];
@@ -302,13 +289,12 @@ class ImportService
         // get categories
         $categoryPid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
         if (is_numeric($categoryPid)) {
-            $categoryRepository = GeneralUtility::makeInstance(CategoryRepository::class);
-            $sysCategories = $categoryRepository->findByPid((int)$categoryPid);
-            if (count($sysCategories) > 0) {
+            $sysCategories = $this->categoryRepository->findByPid((int)$categoryPid);
+            if ($sysCategories->count() > 0) {
                 // additional options
                 if ($data['update_unique']) {
-                    $data['showAddCategories'] = true;
-                    $data['addCategories'] = (bool)$this->configuration['addCategories'];
+                    $data['showAddAllCategories'] = true;
+                    $data['addAllCategories'] = (bool)($this->configuration['addAllCategories'] ?? false);
                 }
                 /** @var Category $sysCategory */
                 foreach ($sysCategories as $sysCategory) {
@@ -343,20 +329,20 @@ class ImportService
             'hiddenCat' => [],
             'tables' => [],
             'charsetSelected' => $this->configuration['charset'],
-            'newFile' =>  $this->configuration['newFile'],
-            'newFileUid' =>  $this->configuration['newFileUid'],
-            'storage' =>  $this->configuration['storage'],
-            'remove_existing' =>  $this->configuration['remove_existing'],
-            'first_fieldname' =>  $this->configuration['first_fieldname'],
-            'delimiter' =>  $this->configuration['delimiter'],
-            'encapsulation' =>  $this->configuration['encapsulation'],
-            'valid_email' =>  $this->configuration['valid_email'],
-            'remove_dublette' =>  $this->configuration['remove_dublette'],
-            'update_unique' =>  $this->configuration['update_unique'],
-            'record_unique' =>  $this->configuration['record_unique'],
-            'all_html' =>  (bool)($this->configuration['all_html'] ?? false),
-            'addCategories' =>  (bool)($this->configuration['addCategories'] ?? false),
-            'error' =>  $error ?? [],
+            'newFile' => $this->configuration['newFile'],
+            'newFileUid' => $this->configuration['newFileUid'],
+            'storage' => $this->configuration['storage'],
+            'remove_existing' => $this->configuration['remove_existing'],
+            'first_fieldname' => $this->configuration['first_fieldname'],
+            'delimiter' => $this->configuration['delimiter'],
+            'encapsulation' => $this->configuration['encapsulation'],
+            'valid_email' => $this->configuration['valid_email'],
+            'remove_dublette' => $this->configuration['remove_dublette'],
+            'update_unique' => $this->configuration['update_unique'],
+            'record_unique' => $this->configuration['record_unique'],
+            'all_html' => (bool)($this->configuration['all_html'] ?? false),
+            'addAllCategories' => (bool)($this->configuration['addAllCategories'] ?? false),
+            'error' => $error ?? [],
         ];
 
         // starting import & show errors
@@ -401,56 +387,12 @@ class ImportService
         return $data;
     }
 
-    /*****
-     * function for importing tt_address
-     *****/
-
-    /**
-     * Filter doublette from input csv data
-     *
-     * @param array $mappedCsv Mapped csv
-     *
-     * @return array Filtered csv and double csv
-     */
-    public function filterCSV(array $mappedCsv, string $uniqueKey): array
-    {
-        $cmpCsv = $mappedCsv;
-        $remove = [];
-        $filtered = [];
-        $double = [];
-
-        foreach ($mappedCsv as $k => $csvData) {
-            if (!in_array($k, $remove)) {
-                $found = 0;
-                foreach ($cmpCsv as $kk => $cmpData) {
-                    if ($k != $kk) {
-                        if ($csvData[$this->configuration['record_unique']] == $cmpData[$this->configuration['record_unique']]) {
-                            $double[] = $mappedCsv[$kk];
-                            if (!$found) {
-                                $filtered[] = $csvData;
-                            }
-                            $remove[] = $kk;
-                            $found = 1;
-                        }
-                    }
-                }
-                if (!$found) {
-                    $filtered[] = $csvData;
-                }
-            }
-        }
-        $csv['clean'] = $filtered;
-        $csv['double'] = $double;
-
-        return $csv;
-    }
-
     /**
      * Start importing users
      *
      * @param array $csvData The csv raw data
      *
-     * @return array Array containing doublette, updated and invalid-email records
+     * @return array Array containing double, updated and invalid-email records
      * @throws DBALException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
@@ -530,19 +472,22 @@ class ImportService
                             $data['tt_address'][$firstUserUid]['accepts_html'] = $this->configuration['all_html'];
                         }
                         if (isset($this->configuration['cat']) && is_array($this->configuration['cat']) && !in_array('cats', $this->configuration['map'])) {
-                            if ($this->configuration['addCategories']) {
-                                // todo use CategoryRepository
-//                                $this->categoryRepository->findByUidLocal
-                                $rows = GeneralUtility::makeInstance(SysDmailTtAddressCategoryMmRepository::class)->selectUidsByUidLocal($firstUserUid);
-                                if (is_array($rows)) {
-                                    foreach ($rows as $row) {
-                                        $data['tt_address'][$firstUserUid]['categories'][] = $row['uid_foreign'];
+                            if ($this->configuration['addAllCategories']) {
+                                // add all categories
+                                $categoryPid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
+                                if (is_numeric($categoryPid)) {
+                                    $sysCategories = $this->categoryRepository->findByPid((int)$categoryPid);
+                                    if ($sysCategories->count() > 0) {
+                                        foreach ($sysCategories as $category) {
+                                            $data['tt_address'][$firstUserUid]['categories'][] = $category->getUid();
+                                        }
                                     }
                                 }
-                            }
-                            // Add categories
-                            foreach ($this->configuration['categories'] as $category) {
-                                $data['tt_address'][$firstUserUid]['categories'][] = $category;
+                            } else {
+                                // Add selected categories
+                                foreach ($this->configuration['categories'] as $category) {
+                                    $data['tt_address'][$firstUserUid]['categories'][] = $category;
+                                }
                             }
                         }
                     } else {
@@ -575,12 +520,9 @@ class ImportService
         $resultImport['double'] = is_array($filteredCSV['double']) ? $filteredCSV['double'] : [];
 
         // start importing
-        /* @var $dataHandler DataHandler */
-        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-        $dataHandler->stripslashes_values = 0;
-        $dataHandler->enableLogging = 0;
-        $dataHandler->start($data, []);
-        $dataHandler->process_datamap();
+        $this->dataHandler->enableLogging = 0;
+        $this->dataHandler->start($data, []);
+        $this->dataHandler->process_datamap();
 
         /**
          * Hook for doImport Mail
@@ -665,7 +607,7 @@ class ImportService
             }
         }
         fclose($handle);
-        $mydata = $this->convCharset($mydata);
+        $mydata = CsvUtility::convertCharset($mydata, $this->configuration['charset']);
         ini_set('auto_detect_line_endings', false);
         return $mydata;
     }
@@ -680,34 +622,34 @@ class ImportService
      */
     public function readExampleCSV(int $records = 3): array
     {
-        $mydata = [];
+        $data = [];
 
         if ((int)$this->configuration['newFileUid'] < 1) {
-            return $mydata;
+            return $data;
         }
 
         $fileAbsolutePath = $this->getFileAbsolutePath((int)$this->configuration['newFileUid']);
 
         $i = 0;
         $delimiter = $this->configuration['delimiter'] ?: 'comma';
-        $encaps = $this->configuration['encapsulation'] ?: 'doubleQuote';
+        $encapsulation = $this->configuration['encapsulation'] ?: 'doubleQuote';
         $delimiter = ($delimiter === 'comma') ? ',' : $delimiter;
         $delimiter = ($delimiter === 'semicolon') ? ';' : $delimiter;
         $delimiter = ($delimiter === 'colon') ? ':' : $delimiter;
         $delimiter = ($delimiter === 'tab') ? "\t" : $delimiter;
-        $encaps = ($encaps === 'singleQuote') ? "'" : $encaps;
-        $encaps = ($encaps === 'doubleQuote') ? '"' : $encaps;
+        $encapsulation = ($encapsulation === 'singleQuote') ? "'" : $encapsulation;
+        $encapsulation = ($encapsulation === 'doubleQuote') ? '"' : $encapsulation;
 
         ini_set('auto_detect_line_endings', true);
         $handle = fopen($fileAbsolutePath, 'r');
         if ($handle === false) {
-            return $mydata;
+            return $data;
         }
 
-        while ((($data = fgetcsv($handle, 10000, $delimiter, $encaps)) !== false)) {
+        while ((($dataRow = fgetcsv($handle, 10000, $delimiter, $encapsulation)) !== false)) {
             // remove empty line in csv
-            if ((count($data) >= 1)) {
-                $mydata[] = $data;
+            if ((count($dataRow) >= 1)) {
+                $data[] = $dataRow;
                 $i++;
                 if ($i >= $records) {
                     break;
@@ -715,30 +657,8 @@ class ImportService
             }
         }
         fclose($handle);
-        reset($mydata);
-        $mydata = $this->convCharset($mydata);
+        $data = CsvUtility::convertCharset($data, $this->configuration['charset']);
         ini_set('auto_detect_line_endings', false);
-        return $mydata;
-    }
-
-    /**
-     * Convert charset if necessary
-     *
-     * @param array $data Contains values to convert
-     *
-     * @return    array    array of charset-converted values
-     * @see \TYPO3\CMS\Core\Charset\CharsetConverter::conv[]
-     */
-    public function convCharset(array $data): array
-    {
-        // todo check database charset
-        $dbCharset = 'utf-8';
-        if ($dbCharset !== strtolower($this->configuration['charset'])) {
-            $converter = GeneralUtility::makeInstance(CharsetConverter::class);
-            foreach ($data as $k => $v) {
-                $data[$k] = $converter->conv($v, strtolower($this->configuration['charset']), $dbCharset);
-            }
-        }
         return $data;
     }
 
@@ -746,16 +666,12 @@ class ImportService
      * Write CSV Data to a temporary file and will be used for the import
      *
      * @param string $csv
-     * @param string $newFile
-     * @param int $newFileUid
-     * @return array        path and uid of the temp file
+     * @return void
      * @throws AspectNotFoundException
      * @throws \TYPO3\CMS\Core\Resource\Exception
      */
-    public function writeTempFile(string $csv, string $newFile, int $newFileUid): array
+    public function createCsvFile(string $csv): void
     {
-        $newfile = ['newFile' => '', 'newFileUid' => 0];
-
         $userPermissions = BackendUserUtility::getBackendUser()->getFilePermissions();
         // Initializing:
         /* @var $extendedFileUtility ExtendedFileUtility */
@@ -764,53 +680,53 @@ class ImportService
         //https://docs.typo3.org/c/typo3/cms-core/11.5/en-us/Changelog/7.4/Deprecation-63603-ExtendedFileUtilitydontCheckForUniqueIsDeprecated.html
         $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
 
-        if (empty($this->configuration['newFile'])) {
-            // Checking referer / executing:
-            if ($this->requestHost != $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
-                $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$this->refererHost, $this->requestHost]);
-            } else {
-                // new file
-                $file['newfile']['target'] = $this->importFolder();
-                $file['newfile']['data'] = 'import_' . $this->getTimestampFromAspect() . '.txt';
-                $extendedFileUtility->start($file);
-                $newfileObj = $extendedFileUtility->func_newfile($file['newfile']);
-                if (is_object($newfileObj)) {
-                    $storageConfig = $newfileObj->getStorage()->getConfiguration();
-                    $newfile['newFile'] = $storageConfig['basePath'] . ltrim($newfileObj->getIdentifier(), '/');
-                    $newfile['newFileUid'] = $newfileObj->getUid();
+        // Checking referer / executing:
+        if ($this->requestHost != $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
+            $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$this->refererHost, $this->requestHost]);
+        } else {
+            // new file
+            $fileConfiguration['newfile']['target'] = $this->importFolder();
+            $fileConfiguration['newfile']['data'] = 'import_' . $this->getTimestampFromAspect() . '.csv';
+            $extendedFileUtility->start($fileConfiguration);
+            $newFile = $extendedFileUtility->func_newfile($fileConfiguration['newfile']);
+            if ($newFile instanceof File) {
+                $storageConfig = $newFile->getStorage()->getConfiguration();
+                $newFilePath = $storageConfig['basePath'] . ltrim($newFile->getIdentifier(), '/');
+                $newFileUid = $newFile->getUid();
+                if ($newFilePath) {
+                    $csvFile = [
+                        'data' => $csv,
+                        'target' => $newFilePath,
+                    ];
+                    // write csv data to new created file
+                    if ($extendedFileUtility->func_edit($csvFile)) {
+                        $this->configuration['newFile'] = $newFilePath;
+                        $this->configuration['newFileUid'] = $newFileUid;
+                        return;
+                    }
                 }
             }
-        } else {
-            $newfile = ['newFile' => $newFile, 'newFileUid' => $newFileUid];
         }
-
-        if ($newfile['newFile']) {
-            $csvFile = [
-                'data' => $csv,
-                'target' => $newfile['newFile'],
-            ];
-            $write = $extendedFileUtility->func_edit($csvFile);
-        }
-        return $newfile;
+        $this->configuration['newFile'] = '';
+        $this->configuration['newFileUid'] = 0;
     }
 
     /**
-     * Checks if a file has been uploaded and returns the complete physical fileinfo if so.
+     * Upload file and set $this->configuration['newFile'] and $this->configuration['newFileUid']
      *
-     * @return    array    \TYPO3\CMS\Core\Resource\File    the complete physical file name, including path info.
+     * @return void
      * @throws Exception
      */
-    public function checkUpload(): array
+    public function uploadCsv(): void
     {
-        $newfile = ['newFile' => '', 'newFileUid' => 0];
+        $this->configuration['newFile'] = '';
+        $this->configuration['newFileUid'] = 0;
 
-        // Initializing:
         /* @var $extendedFileUtility ExtendedFileUtility */
         $extendedFileUtility = GeneralUtility::makeInstance(ExtendedFileUtility::class);
         $extendedFileUtility->setActionPermissions();
         $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
 
-        // Checking referer / executing:
         if ($this->requestHost != $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
             $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$this->refererHost, $this->requestHost]);
         } else {
@@ -819,20 +735,15 @@ class ImportService
             $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::cast(DuplicationBehavior::REPLACE));
             $tempFile = $extendedFileUtility->func_upload($file['upload']['1']);
 
-            if (is_object($tempFile[0])) {
+            if ($tempFile[0] instanceof File) {
                 $storageConfig = $tempFile[0]->getStorage()->getConfiguration();
-                $newfile = [
-                    'newFile' => rtrim($storageConfig['basePath'], '/') . '/' . ltrim($tempFile[0]->getIdentifier(), '/'),
-                    'newFileUid' => $tempFile[0]->getUid(),
-                ];
+                $this->configuration['newFile'] = rtrim($storageConfig['basePath'], '/') . '/' . ltrim($tempFile[0]->getIdentifier(), '/');
+                $this->configuration['newFileUid'] = $tempFile[0]->getUid();
             }
         }
-
-        return $newfile;
     }
 
     /**
-     *
      * @param int $fileUid
      * @return File|bool
      */
@@ -848,7 +759,6 @@ class ImportService
     }
 
     /**
-     *
      * @param int $fileUid
      * @return string
      */
@@ -858,7 +768,8 @@ class ImportService
         if (!is_object($file)) {
             return '';
         }
-        return Environment::getPublicPath() . '/' . str_replace('//', '/', $file->getStorage()->getConfiguration()['basePath'] . $file->getProperty('identifier'));
+        return Environment::getPublicPath() . '/' . str_replace('//', '/',
+                $file->getStorage()->getConfiguration()['basePath'] . $file->getProperty('identifier'));
     }
 
     /**
@@ -874,7 +785,6 @@ class ImportService
     }
 
     /**
-     *
      * @return int
      * @throws AspectNotFoundException
      */

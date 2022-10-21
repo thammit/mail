@@ -6,16 +6,13 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
@@ -32,11 +29,10 @@ class QueueController extends AbstractController
     {
         $data = [];
         // todo replace with extbase repository
-        $sysDmailMaillogRepository = GeneralUtility::makeInstance(SysDmailMaillogRepository::class);
         $scheduledMails = $this->mailRepository->findScheduledByPid($this->id)->toArray();
         /** @var Mail $mail */
         foreach ($scheduledMails as $mail) {
-            $sent = $sysDmailMaillogRepository->countByUid($mail->getUid());
+            $sent = $this->logRepository->countByMailUid($mail->getUid());
             [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend($sent, $mail->getRecipients());
 
             $data[] = [

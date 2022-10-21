@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use TYPO3\CMS\Core\Charset\CharsetConverter;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 class CsvUtility
 {
     /**
@@ -151,6 +154,26 @@ class CsvUtility
         $csv['double'] = $double;
 
         return $csv;
+    }
+
+    /**
+     * Convert charset if necessary
+     *
+     * @param array $data Contains values to convert
+     *
+     * @return array array of charset-converted values
+     * @see \TYPO3\CMS\Core\Charset\CharsetConverter::conv[]
+     */
+    public static function convertCharset(array $data, $targetCharset, $dbCharset = 'utf-8'): array
+    {
+        // todo check database charset
+        if ($dbCharset !== strtolower($targetCharset)) {
+            $converter = GeneralUtility::makeInstance(CharsetConverter::class);
+            foreach ($data as $k => $v) {
+                $data[$k] = $converter->conv($v, strtolower($targetCharset), $dbCharset);
+            }
+        }
+        return $data;
     }
 
     /**

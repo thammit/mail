@@ -7,9 +7,6 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Enumeration\MailType;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
@@ -19,6 +16,9 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class MailRepository extends Repository
 {
+    use RepositoryTrait;
+    protected string $table = 'tx_mail_domain_model_mail';
+
     public function initializeObject()
     {
         $querySettings = GeneralUtility::makeInstance(Typo3QuerySettings::class);
@@ -117,28 +117,12 @@ class MailRepository extends Repository
 //            ->fetchAssociative();
     }
 
-    public function getQueryBuilder(): QueryBuilder
-    {
-        return GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_mail_domain_model_mail');
-    }
-
-    public function getQueryBuilderWithoutRestrictions($withDeleted = false): QueryBuilder
-    {
-        $queryBuilder = $this->getQueryBuilder();
-        $queryBuilder
-            ->getRestrictions()
-            ->removeAll();
-        if (!$withDeleted) {
-            $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-        }
-        return $queryBuilder;
-    }
-
     /**
      * @param int $pid
      * @return array
      * @throws DBALException
      * @throws Exception
+     * todo build query with extbase
      */
     public function findSentByPid(int $pid): array
     {
@@ -163,6 +147,4 @@ class MailRepository extends Repository
             ->execute()
             ->fetchAllAssociative();
     }
-
-
 }

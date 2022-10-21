@@ -13,7 +13,6 @@ use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\SysDmailMaillogRepository;
 use MEDIAESSENZ\Mail\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
@@ -39,8 +38,7 @@ class ReportService
     public function __construct(
         protected LogRepository $logRepository,
         protected AddressRepository $addressRepository,
-        protected FrontendUserRepository $frontendUserRepository,
-        protected SysDmailMaillogRepository $sysDmailMaillogRepository,
+        protected FrontendUserRepository $frontendUserRepository
     ) {
     }
 

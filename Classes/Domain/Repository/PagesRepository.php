@@ -7,8 +7,9 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
 
-class PagesRepository extends AbstractRepository
+class PagesRepository
 {
+    use RepositoryTrait;
     protected string $table = 'pages';
 
     /**
@@ -67,7 +68,7 @@ class PagesRepository extends AbstractRepository
         return $connection->update(
             $this->table,
             ['TSconfig' => $tsConf],
-            ['uid' => $pageUid] // where
+            ['uid' => $pageUid]
         );
     }
 }

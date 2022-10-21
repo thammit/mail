@@ -7,8 +7,9 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use PDO;
 
-class TtContentRepository extends AbstractRepository
+class TtContentRepository
 {
+    use RepositoryTrait;
     protected string $table = 'tt_content';
 
     /**

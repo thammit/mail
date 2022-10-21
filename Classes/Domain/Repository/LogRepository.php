@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use MEDIAESSENZ\Mail\Enumeration\ResponseType;
+use MEDIAESSENZ\Mail\Enumeration\SendFormat;
 use PDO;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -17,12 +18,14 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class LogRepository extends Repository
 {
+    use RepositoryTrait;
+    protected string $table = 'tx_mail_domain_model_log';
+
     public function persist(): void
     {
         $this->persistenceManager->persistAll();
     }
 
-    private string $table = 'tx_mail_domain_model_log';
 
     public function getQueryBuilder(): QueryBuilder
     {
@@ -146,6 +149,54 @@ class LogRepository extends Repository
 
     /**
      * @param int $mailUid
+     * @return int
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function countByMailUid(int $mailUid): int
+    {
+        $queryBuilder = $this->getQueryBuilder();
+
+        return $queryBuilder
+            ->count('*')
+            ->from($this->table)
+            ->where(
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
+                $queryBuilder->expr()->gt('format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, PDO::PARAM_INT))
+            )
+            ->executeQuery()
+            ->fetchOne();
+    }
+
+    /**
+     * Get array of recipient ids, which has been sent
+     *
+     * @param int $mailUid Newsletter ID. UID of the sys_dmail record
+     * @param string $recipientTable Recipient table
+     *
+     * @return array list of recipients
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findRecipientsByMailUidAndRecipientTable(int $mailUid, string $recipientTable): array
+    {
+        $queryBuilder = $this->getQueryBuilder();
+
+        return array_column($queryBuilder
+            ->select('recipient_uid')
+            ->from($this->table)
+            ->where(
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientTable)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
+            )
+            ->execute()
+            ->fetchAllAssociative(), 'recipient_uid');
+    }
+
+    /**
+     * @param int $mailUid
      * @return array
      * @throws DBALException
      * @throws Exception
@@ -172,6 +223,32 @@ class LogRepository extends Repository
         }
 
         return $formatSent;
+    }
+
+    /**
+     * @param int $recipientUid
+     * @param string $recipientTable
+     * @param int $mailUid
+     * @return bool|array
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findOneByRecipientUidAndRecipientTableAndMailUid(int $recipientUid, string $recipientTable, int $mailUid): bool|array
+    {
+        $queryBuilder = $this->getQueryBuilder();
+
+        return $queryBuilder
+            ->select('uid', 'email')
+            ->from($this->table)
+            ->where(
+                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientTable)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
+            )
+            ->setMaxResults(1)
+            ->execute()
+            ->fetchAssociative();
     }
 
     /**

@@ -9,9 +9,12 @@ use PDO;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Object\ObjectManagerInterface;
+use TYPO3\CMS\Extbase\Persistence\PersistenceManagerInterface;
 
 class AddressRepository extends \FriendsOfTYPO3\TtAddress\Domain\Repository\AddressRepository
 {
+    use RepositoryTrait;
     protected string $table = 'tt_address';
 
     public function getConnectionPool(): ConnectionPool
