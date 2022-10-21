@@ -85,6 +85,8 @@ class RecipientController extends AbstractController
      * @return ResponseInterface
      * @throws DBALException
      * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
     public function showAction(Group $group): ResponseInterface
@@ -200,115 +202,86 @@ class RecipientController extends AbstractController
 
     /**
      * @return ResponseInterface
-     * @throws DBALException
-     * @throws Exception
      * @throws AspectNotFoundException
      * @throws \TYPO3\CMS\Core\Resource\Exception
      */
     public function csvImportWizardAction(): ResponseInterface
     {
-        $requestHostOnly = $this->request->getUri()->getHost();
-        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
-
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
-        $importService->init($this->id, $httpReferer, $requestHostOnly);
-        $data = $importService->csvImport();
+        $importService->init($this->id, $this->request);
 
-        $this->view->assignMultiple([
-            'data' => $data,
-        ]);
+        $this->view->assign('data', $importService->getCsvImportUploadData());
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
     /**
-     * @param array $csvImport
+     * @param array $configuration
      * @return ResponseInterface
      * @throws DBALException
      * @throws Exception
      * @throws \TYPO3\CMS\Core\Resource\Exception
      * @throws AspectNotFoundException
      */
-    public function csvImportWizardStepConfigurationAction(array $csvImport = []): ResponseInterface
+    public function csvImportWizardStepConfigurationAction(array $configuration = []): ResponseInterface
     {
-        $requestHostOnly = $this->request->getUri()->getHost();
-        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
-
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
-        $importService->init($this->id, $httpReferer, $requestHostOnly);
-        $data = $importService->csvImport('configuration', $csvImport);
+        $importService->init($this->id, $this->request, $configuration);
 
-        $this->view->assignMultiple([
-            'data' => $data,
-        ]);
+        $this->view->assign('data', $importService->getCsvImportConfigurationData());
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
     /**
-     * @param array $csvImport
+     * @param array $configuration
      * @return ResponseInterface
-     * @throws DBALException
-     * @throws Exception
-     * @throws \TYPO3\CMS\Core\Resource\Exception
      * @throws AspectNotFoundException
+     * @throws \TYPO3\CMS\Core\Resource\Exception
      */
-    public function csvImportWizardStepMappingAction(array $csvImport = []): ResponseInterface
+    public function csvImportWizardStepMappingAction(array $configuration = []): ResponseInterface
     {
-        $requestHostOnly = $this->request->getUri()->getHost();
-        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
-
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
-        $importService->init($this->id, $httpReferer, $requestHostOnly);
-        $data = $importService->csvImport('mapping', $csvImport);
+        $importService->init($this->id, $this->request, $configuration);
 
-        $this->view->assignMultiple([
-            'data' => $data,
-        ]);
+        $this->view->assign('data', $importService->getCsvImportMappingData());
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
     /**
-     * @param array $csvImport
+     * @param array $configuration
      * @return ResponseInterface
-     * @throws DBALException
-     * @throws Exception
-     * @throws \TYPO3\CMS\Core\Resource\Exception
      * @throws AspectNotFoundException
+     * @throws StopActionException
+     * @throws \TYPO3\CMS\Core\Resource\Exception
      */
-    public function csvImportWizardStepStartImportAction(array $csvImport = []): ResponseInterface
+    public function csvImportWizardStepStartImportAction(array $configuration = []): ResponseInterface
     {
-        $requestHostOnly = $this->request->getUri()->getHost();
-        $httpReferer = $this->request->getServerParams()['HTTP_REFERER'];
-
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
-        $importService->init($this->id, $httpReferer, $requestHostOnly);
-        $data = $importService->csvImport('startImport', $csvImport);
+        $importService->init($this->id, $this->request, $configuration);
 
-        $this->view->assignMultiple([
-            'data' => $data,
-        ]);
+        if (!$importService->validateMapping()) {
+            $this->redirect('csvImportWizardStepMapping', null, null, ['configuration' => $configuration]);
+        }
+
+        $this->view->assign('data', $importService->startCsvImport());
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }

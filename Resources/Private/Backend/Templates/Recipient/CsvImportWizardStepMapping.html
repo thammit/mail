@@ -11,43 +11,30 @@
     <h1><f:translate key="{lll}mailgroup_import"/></h1>
     <h2><f:translate key="{lll}mailgroup_import_mapping_charset"/></h2>
     <f:form action="csvImportWizardStepMapping" method="post" enctype="multipart/form-data">
-        <f:if condition="{data.mapping.charset -> f:count()}">
+        <f:if condition="{data.charset -> f:count()}">
             <fieldset class="form-section mb-4 pb-3">
                 <label for="csvImportCharset" class="form-label">
                     <f:translate key="{lll}mailgroup_import_mapping_charset_choose"/>
                 </label>
-                <f:form.select class="form-select mb-2" id="csvImportCharset" name="csvImport[charset]"
-                               value="{data.mapping.charsetSelected}">
-                    <f:for each="{data.mapping.charset}" as="cs">
+                <f:form.select class="form-select mb-2" id="csvImportCharset" name="configuration[charset]" value="{data.charsetSelected}">
+                    <f:for each="{data.charset}" as="cs">
                         <f:form.select.option value="{cs.val}">{cs.text}</f:form.select.option>
                     </f:for>
                 </f:form.select>
-                <f:form.hidden name="csvImport[newFile]" value="{data.mapping.newFile}"/>
-                <f:form.hidden name="csvImport[newFileUid]" value="{data.mapping.newFileUid}"/>
-                <f:form.hidden name="csvImport[storage]" value="{data.mapping.storage}"/>
-                <f:form.hidden name="csvImport[remove_existing]" value="{data.mapping.remove_existing}"/>
-                <f:form.hidden name="csvImport[first_fieldname]" value="{data.mapping.first_fieldname}"/>
-                <f:form.hidden name="csvImport[valid_email]" value="{data.mapping.valid_email}"/>
-                <f:form.hidden name="csvImport[remove_dublette]" value="{data.mapping.remove_dublette}"/>
-                <f:form.hidden name="csvImport[update_unique]" value="{data.mapping.update_unique}"/>
-                <f:form.hidden name="csvImport[delimiter]" value="{data.mapping.delimiter}"/>
-                <f:form.hidden name="csvImport[encapsulation]" value="{data.mapping.encapsulation}"/>
-                <f:form.hidden name="csvImport[record_unique]" value="{data.mapping.record_unique}"/>
-                <f:form.hidden name="csvImport[charsetSelected]" value="{data.mapping.charsetSelected}"/>
-                <f:form.submit name="csvImport[update]"
-                               value="{f:translate(key: '{lll}mailgroup_import_update')}"
-                               class="btn btn-primary text-uppercase"/>
+                <f:render section="commonHiddenFields" arguments="{_all}" />
+                <f:form.hidden name="configuration[charsetSelected]" value="{data.charsetSelected}"/>
+                <f:form.submit name="configuration[update]" value="{f:translate(key: '{lll}mailgroup_import_update')}" class="btn btn-primary text-uppercase"/>
             </fieldset>
         </f:if>
     </f:form>
     <f:form action="csvImportWizardStepStartImport" method="post" enctype="multipart/form-data">
-        <f:if condition="{data.mapping.error -> f:count()}">
+        <f:if condition="{data.error -> f:count()}">
             <h3>
                 <f:translate key="{lll}mailgroup_import_mapping_error"/>
             </h3>
             <f:translate key="{lll}mailgroup_import_mapping_error_detail"/>
             <ul>
-                <f:for each="{data.mapping.error}" as="error">
+                <f:for each="{data.error}" as="error">
                     <li>
                         <f:translate key="{lll}mailgroup_import_mapping_error_{error}"/>
                     </li>
@@ -76,17 +63,17 @@
                 </tr>
                 </thead>
                 <tbody>
-                <f:if condition="{data.mapping.table -> f:count()}">
-                    <f:for each="{data.mapping.table}" iteration="iterator" as="row">
+                <f:if condition="{data.table -> f:count()}">
+                    <f:for each="{data.table}" iteration="iterator" as="row">
                         <tr>
                             <td>{iterator.cycle}</td>
                             <td>
                                 {row.mapping_description -> f:format.html()}
                             </td>
                             <td>
-                                <f:if condition="{data.mapping.fields -> f:count()}">
-                                    <f:form.select class="form-select form-control-adapt" name="csvImport[map][{row.mapping_i}]" value="{row.mapping_mappingSelected}">
-                                        <f:for each="{data.mapping.fields}" as="field">
+                                <f:if condition="{data.fields -> f:count()}">
+                                    <f:form.select class="form-select form-control-adapt" name="configuration[map][{row.mapping_i}]" value="{row.mapping_mappingSelected}">
+                                        <f:for each="{data.fields}" as="field">
                                             <f:form.select.option value="{field.0}">{field.1}</f:form.select.option>
                                         </f:for>
                                     </f:form.select>
@@ -116,48 +103,51 @@
         </h3>
         <fieldset class="form-section mb-4">
             <div class="form-check mb-4">
-                <f:form.checkbox class="form-check-input" id="csvImportHtmlAll" name="csvImport[all_html]" value="1" checked="{data.mapping.all_html} == 1"/>
+                <f:form.checkbox class="form-check-input" id="csvImportHtmlAll" name="configuration[all_html]" value="1" checked="{data.all_html}"/>
                 <label class="form-check-label" for="csvImportHtmlAll">
                     <f:translate key="{lll}mailgroup_import_mapping_all_html"/>
                 </label>
             </div>
-            <f:if condition="{data.mapping.categories -> f:count()}">
-                <f:if condition="{data.mapping.showAddCategories}">
+            <f:if condition="{data.categories -> f:count()}">
+                <f:if condition="{data.showAddCategories}">
                     <div class="form-check mb-4">
-                        <f:form.checkbox class="form-check-input" id="csvImportAddCat" name="csvImport[addCategories]" value="1" checked="{data.mapping.addCategories}"/>
+                        <f:form.checkbox class="form-check-input" id="csvImportAddCat" name="configuration[addCategories]" value="1" checked="{data.addCategories}"/>
                         <label class="form-check-label" for="csvImportAddCat">
                             <f:translate key="{lll}mailgroup_import_mapping_cats"/>
                         </label>
                     </div>
                 </f:if>
-                <f:for each="{data.mapping.categories}" as="category">
+                <f:for each="{data.categories}" as="category">
                     <div class="form-check">
-                        <f:form.checkbox class="form-check-input" id="csvImportCat{category.uid}" name="csvImport[categories][{category.uid}]" value="{category.uid}"
+                        <f:form.checkbox class="form-check-input" id="csvImportCat{category.uid}" name="configuration[categories][{category.uid}]" value="{category.uid}"
                                          checked="{category.checked}"/>
                         <label class="form-check-label" for="csvImportCat{category.uid}">{category.title}</label>
                     </div>
                 </f:for>
             </f:if>
         </fieldset>
-
-        <f:form.hidden name="csvImport[newFile]" value="{data.mapping.newFile}"/>
-        <f:form.hidden name="csvImport[newFileUid]" value="{data.mapping.newFileUid}"/>
-        <f:form.hidden name="csvImport[storage]" value="{data.mapping.storage}"/>
-        <f:form.hidden name="csvImport[remove_existing]" value="{data.mapping.remove_existing}"/>
-        <f:form.hidden name="csvImport[first_fieldname]" value="{data.mapping.first_fieldname}"/>
-        <f:form.hidden name="csvImport[valid_email]" value="{data.mapping.valid_email}"/>
-        <f:form.hidden name="csvImport[remove_dublette]" value="{data.mapping.remove_dublette}"/>
-        <f:form.hidden name="csvImport[update_unique]" value="{data.mapping.update_unique}"/>
-        <f:form.hidden name="csvImport[delimiter]" value="{data.mapping.delimiter}"/>
-        <f:form.hidden name="csvImport[encapsulation]" value="{data.mapping.encapsulation}"/>
-        <f:form.hidden name="csvImport[record_unique]" value="{data.mapping.record_unique}"/>
-        <f:form.hidden name="csvImport[charset]" value="{data.mapping.charsetSelected}"/>
+        <f:render section="commonHiddenFields" arguments="{_all}" />
+        <f:form.hidden name="configuration[charset]" value="{data.charsetSelected}"/>
         <f:link.action action="csvImportWizardStepConfiguration" class="btn btn-default text-uppercase">
             <f:translate key="{lll}mailgroup_import_back"/>
         </f:link.action>
-        <f:form.button name="csvImport[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
+        <f:form.button name="configuration[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
             <f:translate key="{lll}mailgroup_import_next"/>
         </f:form.button>
     </f:form>
+</f:section>
+
+<f:section name="commonHiddenFields">
+    <f:form.hidden name="configuration[newFile]" value="{data.newFile}"/>
+    <f:form.hidden name="configuration[newFileUid]" value="{data.newFileUid}"/>
+    <f:form.hidden name="configuration[storage]" value="{data.storage}"/>
+    <f:form.hidden name="configuration[remove_existing]" value="{data.remove_existing}"/>
+    <f:form.hidden name="configuration[first_fieldname]" value="{data.first_fieldname}"/>
+    <f:form.hidden name="configuration[valid_email]" value="{data.valid_email}"/>
+    <f:form.hidden name="configuration[remove_dublette]" value="{data.remove_dublette}"/>
+    <f:form.hidden name="configuration[update_unique]" value="{data.update_unique}"/>
+    <f:form.hidden name="configuration[delimiter]" value="{data.delimiter}"/>
+    <f:form.hidden name="configuration[encapsulation]" value="{data.encapsulation}"/>
+    <f:form.hidden name="configuration[record_unique]" value="{data.record_unique}"/>
 </f:section>
 </html>

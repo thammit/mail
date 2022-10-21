@@ -17,18 +17,10 @@
             </label>
             <input type="file" class="form-control" id="recipientListUpload" name="upload_1"/>
             <f:form.hidden name="file[upload][1][data]" value="1"/>
-            <f:form.hidden name="file[upload][1][target]" value="{data.upload.target}"/>
-            <f:form.hidden name="csvImport[newFile]" value="{data.upload.newFile}"/>
-            <f:form.hidden name="csvImport[newFileUid]" value="{data.upload.newFileUid}"/>
+            <f:form.hidden name="file[upload][1][target]" value="{data.target}"/>
+            <f:form.hidden name="configuration[newFile]" value="{data.newFile}"/>
+            <f:form.hidden name="configuration[newFileUid]" value="{data.newFileUid}"/>
         </div>
-        <f:if condition="{data.upload.current}">
-            <f:translate key="{lll}mailgroup_import_current_file"/>
-            <f:if condition="{data.upload.fileInfo -> f:count()}">
-                {data.upload.fileInfo.name}
-                ({data.upload.fileInfo.extension};
-                {data.upload.fileInfo.size})
-            </f:if>
-        </f:if>
         <p><strong>
             <f:translate key="{lll}mailgroup_import_or"/>
         </strong></p>
@@ -37,12 +29,11 @@
             <label for="receipientListPlain" class="form-label">
                 <f:translate key="{lll}mailgroup_import_paste_csv"/>
             </label>
-            <f:form.textarea name="csvImport[csv]" id="receipientListPlain" class="form-control"
-                             rows="10">{data.upload.csv}
+            <f:form.textarea name="configuration[csv]" id="receipientListPlain" class="form-control"
+                             rows="10">{data.csv}
             </f:form.textarea>
         </div>
-        <f:form.hidden name="csvImport[nextStep]" value="configuration"/>
-        <f:form.button name="csvImport[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
+        <f:form.button type="submit" class="btn btn-primary text-uppercase">
             <f:translate key="{lll}mailgroup_import_next"/>
         </f:form.button>
     </f:form>

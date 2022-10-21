@@ -19,9 +19,9 @@
                         <f:translate key="{lll}mailgroup_import_header_conf"/>
                     </td>
                     <td>
-                        <f:if condition="{data.configuration.storage -> f:count()}">
-                            <f:form.select class="form-select form-control-adapt" name="csvImport[storage]" value="{data.configuration.storageSelected}">
-                                <f:for each="{data.configuration.storage}" as="storage">
+                        <f:if condition="{data.storage -> f:count()}">
+                            <f:form.select class="form-select form-control-adapt" name="configuration[storage]" value="{data.storageSelected}">
+                                <f:for each="{data.storage}" as="storage">
                                     <f:form.select.option value="{storage.val}">{storage.text}</f:form.select.option>
                                 </f:for>
                             </f:form.select>
@@ -33,9 +33,9 @@
                         <f:translate key="{lll}mailgroup_import_remove_existing"/>
                     </td>
                     <td>
-                        <f:form.checkbox name="csvImport[remove_existing]" value="1"
-                                         checked="{data.configuration.remove_existing} == 1"
-                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                        <f:form.checkbox name="configuration[remove_existing]" value="1"
+                                         checked="{data.remove_existing} == 1"
+                                         disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}"/>
                     </td>
                 </tr>
                 <tr>
@@ -43,9 +43,9 @@
                         <f:translate key="{lll}mailgroup_import_first_fieldnames"/>
                     </td>
                     <td>
-                        <f:form.checkbox name="csvImport[first_fieldname]" value="1"
-                                         checked="{data.configuration.first_fieldname} == 1"
-                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                        <f:form.checkbox name="configuration[first_fieldname]" value="1"
+                                         checked="{data.first_fieldname} == 1"
+                                         disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}"/>
                     </td>
                 </tr>
                 <tr>
@@ -53,12 +53,12 @@
                         <f:translate key="{lll}mailgroup_import_separator"/>
                     </td>
                     <td>
-                        <f:if condition="{data.configuration.delimiter -> f:count()}">
+                        <f:if condition="{data.delimiter -> f:count()}">
                             <f:form.select class="form-select form-control-adapt"
-                                           name="csvImport[delimiter]"
-                                           value="{data.configuration.delimiterSelected}"
-                                           disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}">
-                                <f:for each="{data.configuration.delimiter}" as="delimiter">
+                                           name="configuration[delimiter]"
+                                           value="{data.delimiterSelected}"
+                                           disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}">
+                                <f:for each="{data.delimiter}" as="delimiter">
                                     <f:form.select.option value="{delimiter.val}">{delimiter.text}
                                     </f:form.select.option>
                                 </f:for>
@@ -71,12 +71,12 @@
                         <f:translate key="{lll}mailgroup_import_encapsulation"/>
                     </td>
                     <td>
-                        <f:if condition="{data.configuration.encapsulation -> f:count()}">
+                        <f:if condition="{data.encapsulation -> f:count()}">
                             <f:form.select class="form-select form-control-adapt"
-                                           name="csvImport[encapsulation]"
-                                           value="{data.configuration.encapsulationSelected}"
-                                           disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}">
-                                <f:for each="{data.configuration.encapsulation}" as="encapsulation">
+                                           name="configuration[encapsulation]"
+                                           value="{data.encapsulationSelected}"
+                                           disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}">
+                                <f:for each="{data.encapsulation}" as="encapsulation">
                                     <f:form.select.option value="{encapsulation.val}">{encapsulation.text}
                                     </f:form.select.option>
                                 </f:for>
@@ -89,9 +89,9 @@
                         <f:translate key="{lll}mailgroup_import_csv_validemail-description"/>
                     </td>
                     <td>
-                        <f:form.checkbox name="csvImport[valid_email]" value="1"
-                                         checked="{data.configuration.valid_email} == 1"
-                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                        <f:form.checkbox name="configuration[valid_email]" value="1"
+                                         checked="{data.valid_email} == 1"
+                                         disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}"/>
                     </td>
                 </tr>
                 <tr>
@@ -99,9 +99,9 @@
                         <f:translate key="{lll}mailgroup_import_csv_dublette-description"/>
                     </td>
                     <td>
-                        <f:form.checkbox name="csvImport[remove_dublette]" value="1"
-                                         checked="{data.configuration.remove_dublette} == 1"
-                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                        <f:form.checkbox name="configuration[remove_dublette]" value="1"
+                                         checked="{data.remove_dublette} == 1"
+                                         disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}"/>
                     </td>
                 </tr>
                 <tr>
@@ -109,9 +109,9 @@
                         <f:translate key="{lll}mailgroup_import_update_unique"/>
                     </td>
                     <td>
-                        <f:form.checkbox name="csvImport[update_unique]" value="1"
-                                         checked="{data.configuration.update_unique} == 1"
-                                         disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}"/>
+                        <f:form.checkbox name="configuration[update_unique]" value="1"
+                                         checked="{data.update_unique} == 1"
+                                         disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}"/>
                     </td>
                 </tr>
                 <tr>
@@ -119,12 +119,12 @@
                         <f:translate key="{lll}mailgroup_import_record_unique"/>
                     </td>
                     <td>
-                        <f:if condition="{data.configuration.record_unique -> f:count()}">
+                        <f:if condition="{data.record_unique -> f:count()}">
                             <f:form.select class="form-select form-control-adapt"
-                                           name="csvImport[record_unique]"
-                                           value="{data.configuration.record_uniqueSelected}"
-                                           disabled="{f:if(condition: '{data.configuration.disableInput}', then: 'disabled')}">
-                                <f:for each="{data.configuration.record_unique}" as="recordUnique">
+                                           name="configuration[record_unique]"
+                                           value="{data.record_uniqueSelected}"
+                                           disabled="{f:if(condition: '{data.disableInput}', then: 'disabled')}">
+                                <f:for each="{data.record_unique}" as="recordUnique">
                                     <f:form.select.option value="{recordUnique.val}">{recordUnique.text}
                                     </f:form.select.option>
                                 </f:for>
@@ -135,13 +135,13 @@
                 </tbody>
             </table>
         </fieldset>
-        <f:form.hidden name="csvImport[newFile]" value="{data.configuration.newFile}"/>
-        <f:form.hidden name="csvImport[newFileUid]" value="{data.configuration.newFileUid}"/>
-        <f:form.hidden name="csvImport[nextStep]" value="mapping"/>
+        <f:form.hidden name="configuration[newFile]" value="{data.newFile}"/>
+        <f:form.hidden name="configuration[newFileUid]" value="{data.newFileUid}"/>
+        <f:form.hidden name="configuration[nextStep]" value="mapping"/>
         <f:link.action action="csvImportWizard" class="btn btn-default text-uppercase">
             <f:translate key="{lll}mailgroup_import_back"/>
         </f:link.action>
-        <f:form.button name="csvImport[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
+        <f:form.button name="configuration[next]" value="1" type="submit" class="btn btn-primary text-uppercase">
             <f:translate key="{lll}mailgroup_import_next"/>
         </f:form.button>
     </f:form>
