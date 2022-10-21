@@ -353,7 +353,6 @@ class MailController extends AbstractController
                     $colPos = (int)$contentElementData['colPos'];
                 }
 
-//                $ttContentCategories = RepositoryUtility::makeCategories('tt_content', $contentElementData, $this->sysLanguageUid);
                 $ttContentCategories = RepositoryUtility::getCategories('tt_content', $contentElementData, $this->sysLanguageUid);
                 reset($ttContentCategories);
                 $categories = [];
@@ -371,7 +370,7 @@ class MailController extends AbstractController
                     'CType' => $contentElementData['CType'],
                     'list_type' => $contentElementData['list_type'],
                     'bodytext' => empty($contentElementData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($contentElementData['bodytext']), 200),
-                    'hasCategory' => (bool)$contentElementData['module_sys_dmail_category'],
+                    'hasCategory' => (bool)$contentElementData['categories'],
                     'categories' => $categories,
                 ];
             }
