@@ -62,7 +62,7 @@ class PagesRepository
      * @param string $tsConf
      * @return int
      */
-    public function updatePageTSconfig(int $pageUid, string $tsConf): int
+    public function updatePageTsConfig(int $pageUid, string $tsConf): int
     {
         $connection = $this->getConnection();
         return $connection->update(

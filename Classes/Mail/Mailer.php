@@ -15,6 +15,7 @@
 
 namespace MEDIAESSENZ\Mail\Mail;
 
+use Exception;
 use RuntimeException;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use TYPO3\CMS\Core\Exception as CoreException;
@@ -39,7 +40,7 @@ class Mailer extends \TYPO3\CMS\Core\Mail\Mailer
 
         try {
             $this->initializeTransport();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new CoreException($e->getMessage(), 1291068569);
         }
     }
@@ -53,7 +54,7 @@ class Mailer extends \TYPO3\CMS\Core\Mail\Mailer
             try {
                 $site = $siteFinder->getSiteByIdentifier($siteIdentifier);
                 $siteMailSettings = $site->getConfiguration()['mail'] ?? [];
-            } catch (SiteNotFoundException $exception) {
+            } catch (SiteNotFoundException) {
                 // Site is not found -> use mail settings from TYPO3_CONF_VARS
             }
         } else {

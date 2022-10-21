@@ -23,7 +23,7 @@ class BackendDataUtility
                 $base = $site->getBase();
 
                 return sprintf('%s://%s', $base->getScheme(), $base->getHost());
-            } catch (SiteNotFoundException $exception) {
+            } catch (SiteNotFoundException) {
             }
         }
 

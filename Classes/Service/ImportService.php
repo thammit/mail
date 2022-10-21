@@ -177,7 +177,7 @@ class ImportService
         // update the record instead renaming the new one
         $data['update_unique'] = (bool)($this->configuration['update_unique'] ?? false);
 
-        // which field should be use to show uniqueness of the records
+        // which field should be used to show uniqueness of the records
         $data['record_unique'] = $optUnique;
         $data['record_uniqueSelected'] = $this->configuration['record_unique'] ?? '';
 
@@ -237,12 +237,12 @@ class ImportService
         // show mapping form
         if ($this->configuration['first_fieldname']) {
             // read csv
-            $csvData = $this->readExampleCSV(4);
+            $csvData = $this->readCSV(4);
             $columnNames = $csvData[0];
             $csvData = array_slice($csvData, 1);
         } else {
             // read csv
-            $csvData = $this->readExampleCSV(3);
+            $csvData = $this->readCSV(3);
             $fieldsAmount = count($csvData[0] ?? []);
             for ($i = 0; $i < $fieldsAmount; $i++) {
                 $columnNames[] = 'field_' . $i;
@@ -321,6 +321,11 @@ class ImportService
         return true;
     }
 
+    /**
+     * @return array
+     * @throws DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     */
     public function startCsvImport(): array
     {
         $data = [
@@ -355,7 +360,7 @@ class ImportService
 
         // show not imported record and reasons,
         $result = $this->doImport($csvData);
-        ViewUtility::addOkToFlashMessageQueue(LanguageUtility::getLL('mailgroup_import_done'), '');
+        ViewUtility::addOkToFlashMessageQueue(LanguageUtility::getLL('mailgroup_import_done'));
 
         $resultOrder = [];
         if (!empty($this->pageTsConfiguration['resultOrder'])) {
@@ -422,7 +427,7 @@ class ImportService
                         } else {
                             $tempCats = explode(',', $fieldData);
                             foreach ($tempCats as $catC => $tempCat) {
-                                $tempData['module_sys_dmail_category'][$catC] = $tempCat;
+                                $tempData['categories'][$catC] = $tempCat;
                             }
                         }
                     }
@@ -492,9 +497,9 @@ class ImportService
                         }
                     } else {
                         // which one to update? all?
-                        foreach ($foundUser as $kk => $_) {
-                            $data['tt_address'][$userID[$foundUser[$kk]]] = $dataArray;
-                            $data['tt_address'][$userID[$foundUser[$kk]]]['pid'] = $this->configuration['storage'];
+                        foreach ($foundUser as $user) {
+                            $data['tt_address'][$userID[$user]] = $dataArray;
+                            $data['tt_address'][$userID[$user]]['pid'] = $this->configuration['storage'];
                         }
                     }
                     $resultImport['update'][] = $dataArray;
@@ -575,52 +580,7 @@ class ImportService
      *
      * @return    array        file content in array
      */
-    public function readCSV(): array
-    {
-        $mydata = [];
-
-        if ((int)$this->configuration['newFileUid'] < 1) {
-            return $mydata;
-        }
-
-        $fileAbsolutePath = $this->getFileAbsolutePath((int)$this->configuration['newFileUid']);
-
-        $delimiter = $this->configuration['delimiter'] ?: 'comma';
-        $encaps = $this->configuration['encapsulation'] ?: 'doubleQuote';
-        $delimiter = ($delimiter === 'comma') ? ',' : $delimiter;
-        $delimiter = ($delimiter === 'semicolon') ? ';' : $delimiter;
-        $delimiter = ($delimiter === 'colon') ? ':' : $delimiter;
-        $delimiter = ($delimiter === 'tab') ? "\t" : $delimiter;
-        $encaps = ($encaps === 'singleQuote') ? "'" : $encaps;
-        $encaps = ($encaps === 'doubleQuote') ? '"' : $encaps;
-
-        ini_set('auto_detect_line_endings', true);
-        $handle = fopen($fileAbsolutePath, 'r');
-        if ($handle === false) {
-            return $mydata;
-        }
-
-        while (($data = fgetcsv($handle, 10000, $delimiter, $encaps)) !== false) {
-            // remove empty line in csv
-            if ((count($data) >= 1)) {
-                $mydata[] = $data;
-            }
-        }
-        fclose($handle);
-        $mydata = CsvUtility::convertCharset($mydata, $this->configuration['charset']);
-        ini_set('auto_detect_line_endings', false);
-        return $mydata;
-    }
-
-    /**
-     * Read in the given CSV file. Only showed a couple of the CSV values as example
-     * Removes first the first data row if the CSV has fieldnames.
-     *
-     * @param int $records Number of example values
-     *
-     * @return    array File content in array
-     */
-    public function readExampleCSV(int $records = 3): array
+    public function readCSV($max = 0): array
     {
         $data = [];
 
@@ -630,7 +590,6 @@ class ImportService
 
         $fileAbsolutePath = $this->getFileAbsolutePath((int)$this->configuration['newFileUid']);
 
-        $i = 0;
         $delimiter = $this->configuration['delimiter'] ?: 'comma';
         $encapsulation = $this->configuration['encapsulation'] ?: 'doubleQuote';
         $delimiter = ($delimiter === 'comma') ? ',' : $delimiter;
@@ -646,12 +605,11 @@ class ImportService
             return $data;
         }
 
-        while ((($dataRow = fgetcsv($handle, 10000, $delimiter, $encapsulation)) !== false)) {
+        while (($dataRow = fgetcsv($handle, 10000, $delimiter, $encapsulation)) !== false) {
             // remove empty line in csv
-            if ((count($dataRow) >= 1)) {
+            if (count($dataRow) >= 1) {
                 $data[] = $dataRow;
-                $i++;
-                if ($i >= $records) {
+                if ($max !== 0 && count($data) >= $max) {
                     break;
                 }
             }
@@ -752,7 +710,7 @@ class ImportService
         $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
         try {
             return $resourceFactory->getFileObject($fileUid);
-        } catch (FileDoesNotExistException $e) {
+        } catch (FileDoesNotExistException) {
 
         }
         return false;

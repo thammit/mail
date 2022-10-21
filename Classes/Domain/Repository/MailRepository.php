@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
@@ -93,7 +94,7 @@ class MailRepository extends Repository
         $query->matching(
             $query->logicalAnd([
                 $query->logicalNot($query->equals('scheduled', 0)),
-                $query->lessThan('scheduled', new \DateTimeImmutable('now')),
+                $query->lessThan('scheduled', new DateTimeImmutable('now')),
                 $query->equals('scheduledEnd', 0),
                 $query->logicalNot($query->in('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL]))
             ])

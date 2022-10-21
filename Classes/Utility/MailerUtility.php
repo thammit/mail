@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use Exception;
 use FoT3\Rdct\Redirects;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
@@ -31,7 +32,7 @@ class MailerUtility
         $requestFactory = GeneralUtility::makeInstance(RequestFactory::class);
         try {
             $response = $requestFactory->request($url);
-        } catch (\Exception $exception) {
+        } catch (Exception) {
             return false;
         }
         return $response->getBody()->getContents();
@@ -173,7 +174,7 @@ class MailerUtility
     }
 
     /**
-     * Extracts all hyper-links from given content
+     * Extracts all hyperlinks from given content
      *
      * @param string $content
      * @param string $path
@@ -429,9 +430,9 @@ class MailerUtility
      */
 
     /**
-     * Fetches the attachment files referenced in the sys_dmail record.
+     * Fetches the attachment files referenced in the mail record.
      *
-     * @param int $uid The uid of the sys_dmail record to fetch the records for
+     * @param int $uid The uid of the mail record to fetch the records for
      * @return array An array of FileReferences
      */
     public static function getAttachments(int $uid): array

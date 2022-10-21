@@ -17,7 +17,7 @@ class TcaUtility
 
     /**
      * Get translated label of table column
-     * default table: sys_dmail
+     * default table: tx_mail_domain_model_mail
      *
      * @param string $columnName
      * @param string $table

@@ -86,7 +86,7 @@ class BounceMailUtility
             }
             $cp['content'] = trim($parts[0]);
             $parts = explode('>:', $cp['content'], 2);
-            $cp['reason_text'] = trim($parts[1])?trim($parts[1]):$cp['content'];
+            $cp['reason_text'] = trim($parts[1])?:$cp['content'];
             $cp['mailserver'] = 'Qmail';
             $cp['reason'] = self::extractReason($cp['reason_text']);
         } elseif (str_contains($c, 'The Postfix program')) {
@@ -139,11 +139,11 @@ class BounceMailUtility
      * Try to match reason found in the returned email
      * with the defined reasons (see $reason_text)
      *
-     * @param string  $text Content of the returned email
+     * @param string $text Content of the returned email
      *
      * @return int  The error code.
      */
-    public static function extractReason($text)
+    public static function extractReason(string $text): int
     {
         $reason = -1;
         foreach (self::REASONS as $case => $value) {

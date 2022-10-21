@@ -20,8 +20,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class MailFactory
 {
-    // todo factory to build a mail object from different aspects (internal page, external page, quick mail)
-
     private int $storageFolder;
     /**
      * @var array|mixed
@@ -46,7 +44,7 @@ class MailFactory
     public function __construct(int $storageFolder)
     {
         $this->storageFolder = $storageFolder;
-        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($storageFolder)['mod.']['web_modules.']['dmail.'] ?? [];
+        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($storageFolder)['mod.']['web_modules.']['mail.'] ?? [];
     }
 
     /**
@@ -252,8 +250,8 @@ class MailFactory
             ->setReplyToName($this->pageTSConfiguration['replyto_name'] ?? '')
             ->setReturnPath($this->pageTSConfiguration['return_path'] ?? '')
             ->setPriority((int)($this->pageTSConfiguration['priority'] ?? 3))
-            ->setRedirect((bool)($this->pageTSConfiguration['use_rdct'] ?? false))
-            ->setRedirectAll((bool)($this->pageTSConfiguration['long_link_mode'] ?? false))
+            ->setRedirect((bool)($this->pageTSConfiguration['redirect'] ?? false))
+            ->setRedirectAll((bool)($this->pageTSConfiguration['redirect_all'] ?? false))
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
             ->setAuthCodeFields($this->pageTSConfiguration['auth_code_fields'] ?? '')
             ->setSendOptions((int)($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))

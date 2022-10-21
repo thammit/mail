@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use JetBrains\PhpStorm\NoReturn;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -44,20 +45,20 @@ class CsvUtility
     public function rearrangeCsvValues(array $lines, string $fieldList = ''): array
     {
         $out = [];
-        if (is_array($lines) && count($lines) > 0) {
+        if (count($lines) > 0) {
             // Analyse if first line is fieldnames.
             // Required is it that every value is either
             // 1) found in the list fieldsList in this class,
             // 2) the value is empty (value omitted then) or
             // 3) the field starts with "user_".
-            // In addition fields may be prepended with "[code]".
+            // In addition, fields may be prepended with "[code]".
             // This is used if the incoming value is true in which case '+[value]'
             // adds that number to the field value (accummulation) and '=[value]'
             // overrides any existing value in the field
             $first = $lines[0];
             $fieldListArr = explode(',', $fieldList);
-            if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['addRecipFields']) {
-                $fieldListArr = array_merge($fieldListArr, explode(',', $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['addRecipFields']));
+            if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['mail']['addRecipFields']) {
+                $fieldListArr = array_merge($fieldListArr, explode(',', $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['mail']['addRecipFields']));
             }
             $fieldName = 1;
             $fieldOrder = [];
@@ -67,7 +68,7 @@ class CsvUtility
                 $fName = trim($fName);
                 $fConf = trim($fConf);
                 $fieldOrder[] = [$fName, $fConf];
-                if ($fName && substr($fName, 0, 5) != 'user_' && !in_array($fName, $fieldListArr)) {
+                if ($fName && !str_starts_with($fName, 'user_') && !in_array($fName, $fieldListArr)) {
                     $fieldName = 0;
                     break;
                 }
@@ -97,10 +98,10 @@ class CsvUtility
                             if ($fN[1]) {
                                 // If is true
                                 if (trim($data[$kk])) {
-                                    if (substr($fN[1], 0, 1) == '=') {
+                                    if (str_starts_with($fN[1], '=')) {
                                         $out[$c][$fN[0]] = trim(substr($fN[1], 1));
-                                    } else if (substr($fN[1], 0, 1) == '+') {
-                                        $out[$c][$fN[0]] += substr($fN[1], 1);
+                                    } else if (str_starts_with($fN[1], '+')) {
+                                        $out[$c][$fN[0]] .= substr($fN[1], 1);
                                     }
                                 }
                             } else {
@@ -183,14 +184,13 @@ class CsvUtility
      *
      * @return void Sent HML header for a file download
      */
-    public static function downloadCSV(array $idArr)
+    #[NoReturn] public static function downloadCSV(array $idArr): void
     {
         $lines = [];
         if (count($idArr)) {
             reset($idArr);
             $lines[] = \TYPO3\CMS\Core\Utility\CsvUtility::csvValues(array_keys(current($idArr)));
 
-            reset($idArr);
             foreach ($idArr as $rec) {
                 $lines[] = \TYPO3\CMS\Core\Utility\CsvUtility::csvValues($rec);
             }

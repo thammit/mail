@@ -376,7 +376,7 @@ class RecipientService
         // See comment above
         // $usergroupInList = ' AND ('.$field.' LIKE \'%,\'||'.$command.'||\',%\' OR '.$field.' LIKE '.$command.'||\',%\' OR '.$field.' LIKE \'%,\'||'.$command.' OR '.$field.'='.$command.')';
 
-        // for fe_users and fe_group, only activated modulde_sys_dmail_newsletter
+        // for fe_users and fe_group, only activated newsletter
         if ($switchTable == 'fe_users') {
             $addWhere = $queryBuilder->expr()->eq(
                 $switchTable . '.newsletter',
@@ -490,7 +490,7 @@ class RecipientService
 
                 // fetch all fe_users from these subgroups
                 $queryBuilder = $this->getQueryBuilder($table);
-                // for fe_users and fe_group, only activated modulde_sys_dmail_newsletter
+                // for fe_users and fe_group, only activated newsletter
                 if ($switchTable == 'fe_users') {
                     $addWhere = $queryBuilder->expr()->eq(
                         $switchTable . '.newsletter',
@@ -803,7 +803,7 @@ class RecipientService
     {
         // todo
         // $this->set = is_array($parsedBody['csv'] ?? '') ? $parsedBody['csv'] : (is_array($queryParams['csv'] ?? '') ? $queryParams['csv'] : []);
-        $set = $this->set;
+//        $set = $this->set;
         $queryTable = $set['queryTable'] ?? '';
         $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
 

@@ -449,8 +449,8 @@ class MailerService implements LoggerAwareInterface
             ];
 
             $this->setHtmlContent('');
-            if ($this->isHtml && ($recipientData['module_sys_dmail_html'] || $tableNameChar == 'P')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, $recipientData['sys_dmail_categories_list']);
+            if ($this->isHtml && ($recipientData['accepts_html'] || $tableNameChar == 'P')) {
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, $recipientData['categories_list']);
                 $tempContent_HTML = implode('', $contentParts);
 
                 if ($mailHasContent) {
@@ -463,7 +463,7 @@ class MailerService implements LoggerAwareInterface
             // Plain
             $this->setPlainContent('');
             if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, $recipientData['sys_dmail_categories_list']);
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, $recipientData['categories_list']);
                 $plainTextContent = implode('', $contentParts);
 
                 if ($mailHasContent) {
@@ -498,8 +498,8 @@ class MailerService implements LoggerAwareInterface
     /**
      * Mass send to recipient in the list
      *
-     * @param array $groupedRecipientIds List of recipients' ID in the sys_dmail table
-     * @param int $mailUid Directmail ID. UID of the sys_dmail table
+     * @param array $groupedRecipientIds
+     * @param int $mailUid
      * @return boolean
      * @throws DBALException
      * @throws Exception
@@ -552,7 +552,7 @@ class MailerService implements LoggerAwareInterface
                         $statement = $queryBuilder->execute();
 
                         while ($recipientData = $statement->fetchAssociative()) {
-                            $recipientData['sys_dmail_categories_list'] = $this->getListOfRecipientCategories($table, $recipientData['uid']);
+                            $recipientData['categories_list'] = $this->getListOfRecipientCategories($table, $recipientData['uid']);
 
                             if ($numberOfSentMails >= $this->sendPerCycle) {
                                 $finished = false;
@@ -615,7 +615,7 @@ class MailerService implements LoggerAwareInterface
     /**
      * Sending the email and write to log.
      *
-     * @param int $mailUid Newsletter ID. UID of the sys_dmail table
+     * @param int $mailUid
      * @param array $recipientData Recipient's data array
      * @param string $recipientTable Table name
      *
@@ -631,46 +631,34 @@ class MailerService implements LoggerAwareInterface
             $parseTime = MailerUtility::getMilliseconds();
             $recipientData = RecipientUtility::normalizeAddress($recipientData);
 
-            // write to dmail_maillog table. if it can be written, continue with sending.
+            // write to log table. if it can be written, continue with sending.
             // if not, stop the script and report error
             // try to insert the mail to the mail log repository
-            try {
-                $mail = $this->mailRepository->findByUid($mailUid);
-                $log = new Log();
-                $log->setMail($mail);
-                $log->setRecipientTable($recipientTable);
-                $log->setRecipientUid($recipientData['uid']);
-                $log->setSize(strlen($this->message));
-                $log->setEmail($recipientData['email']);
-                $this->logRepository->add($log);
-                $this->logRepository->persist();
-            } catch (DBALException $exception) {
-                $message = 'Unable to insert log-entry to tx_mail_domain_model_log table. Table full? Mass-Sending stopped. Please delete old records, except of active mailing (mail uid=' . $mailUid . ')';
-                $this->logger->critical($message);
-                throw new \Exception($message, 1663340700, $exception);
-            }
+            $mail = $this->mailRepository->findByUid($mailUid);
+            $log = new Log();
+            $log->setMail($mail);
+            $log->setRecipientTable($recipientTable);
+            $log->setRecipientUid($recipientData['uid']);
+            $log->setSize(strlen($this->message));
+            $log->setEmail($recipientData['email']);
+            $this->logRepository->add($log);
+            $this->logRepository->persist();
 
             // Send mail to recipient
             $formatSent = $this->sendPersonalizedMail($recipientData, $recipientTable);
 
             // try to store the sending return code
-            try {
-                $log->setFormatSent($formatSent);
-                $log->setParseTime(MailerUtility::getMilliseconds() - $parseTime);
-                $this->logRepository->update($log);
-                $this->logRepository->persist();
-            } catch (DBALException $exception) {
-                $message = 'Unable to update log-entry in tx_mail_domain_model_log table. Table full? Mass-Sending stopped. Please delete old records, except of active mailing (mail uid=' . $mailUid . ')';
-                $this->logger->critical($message);
-                throw new \Exception($message, 1663340700, $exception);
-            }
+            $log->setFormatSent($formatSent);
+            $log->setParseTime(MailerUtility::getMilliseconds() - $parseTime);
+            $this->logRepository->update($log);
+            $this->logRepository->persist();
         }
     }
 
     /**
      * Find out, if an email has been sent to a recipient
      *
-     * @param int $mailUid Newsletter ID. UID of the sys_dmail record
+     * @param int $mailUid
      * @param int $recipientUid Recipient UID
      * @param string $table Recipient table
      *
@@ -787,7 +775,7 @@ class MailerService implements LoggerAwareInterface
 
         if (!is_object(LanguageUtility::getLanguageService())) {
             $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageService::class);
-            $language = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['cron_language'] ?: $this->backendUserLanguage;
+            $language = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['mail']['cron_language'] ?: $this->backendUserLanguage;
             LanguageUtility::getLanguageService()->init(trim($language));
         }
 

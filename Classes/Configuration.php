@@ -4,18 +4,13 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail;
 
 use MEDIAESSENZ\Mail\Controller\ConfigurationController;
-use MEDIAESSENZ\Mail\Controller\ConfigurationControllerOld;
 use MEDIAESSENZ\Mail\Controller\MailController;
-use MEDIAESSENZ\Mail\Controller\MailControllerOld;
 use MEDIAESSENZ\Mail\Controller\QueueController;
-use MEDIAESSENZ\Mail\Controller\QueueControllerOld;
-use MEDIAESSENZ\Mail\Controller\NavFrameController;
 use MEDIAESSENZ\Mail\Controller\RecipientController;
-use MEDIAESSENZ\Mail\Controller\RecipientListControllerOld;
 use MEDIAESSENZ\Mail\Controller\ReportController;
-use MEDIAESSENZ\Mail\Controller\StatisticsControllerOld;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
 final class Configuration
 {
@@ -34,15 +29,9 @@ final class Configuration
     {
         // Category field disabled by default in backend forms.
         ExtensionManagementUtility::addPageTSConfig('
-    	TCEFORM.tt_content.module_sys_dmail_category.disabled = 1
-    	TCEFORM.tt_address.module_sys_dmail_category.disabled = 1
-    	TCEFORM.fe_users.module_sys_dmail_category.disabled = 1
-    	TCEFORM.sys_dmail_group.select_categories.disabled = 1
-        ');
-        ExtensionManagementUtility::addPageTSConfig('
-    	TCEFORM.tt_content.module_mail_category.disabled = 1
-    	TCEFORM.tt_address.module_mail_category.disabled = 1
-    	TCEFORM.fe_users.module_mail_category.disabled = 1
+    	TCEFORM.tt_content.categories.disabled = 1
+    	TCEFORM.tt_address.categories.disabled = 1
+    	TCEFORM.fe_users.categories.disabled = 1
     	TCEFORM.tx_mail_domain_model_group.categories.disabled = 1
         ');
     }
@@ -64,7 +53,7 @@ final class Configuration
             ]
         );
 
-        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+        ExtensionUtility::registerModule(
             'Mail',
             'Mail',
             'mail',
@@ -81,7 +70,7 @@ final class Configuration
             ]
         );
 
-        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+        ExtensionUtility::registerModule(
             'Mail',
             'Mail',
             'recipient',
@@ -98,7 +87,7 @@ final class Configuration
             ]
         );
 
-        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+        ExtensionUtility::registerModule(
             'Mail',
             'Mail',
             'report',
@@ -115,7 +104,7 @@ final class Configuration
             ]
         );
 
-        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+        ExtensionUtility::registerModule(
             'Mail',
             'Mail',
             'queue',
@@ -132,7 +121,7 @@ final class Configuration
             ]
         );
 
-        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
+        ExtensionUtility::registerModule(
             'Mail',
             'Mail',
             'configuration',
@@ -154,8 +143,6 @@ final class Configuration
 
     public static function directMailMigration(): void
     {
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail']
-            = DirectMailMigration::class;
-
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail'] = DirectMailMigration::class;
     }
 }

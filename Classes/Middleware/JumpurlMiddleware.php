@@ -4,7 +4,6 @@ namespace MEDIAESSENZ\Mail\Middleware;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
 use Psr\Http\Message\ResponseInterface;

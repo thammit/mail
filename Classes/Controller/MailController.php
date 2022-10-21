@@ -14,11 +14,9 @@ use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
-use MEDIAESSENZ\Mail\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
-use MEDIAESSENZ\Mail\Utility\RepositoryUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
@@ -321,6 +319,7 @@ class MailController extends AbstractController
      * @param Mail $mail
      * @return ResponseInterface
      * @throws DBALException
+     * @throws InvalidQueryException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function categoriesAction(Mail $mail): ResponseInterface
@@ -339,7 +338,6 @@ class MailController extends AbstractController
             $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
             foreach ($rows as $contentElementData) {
                 $categoriesRow = [];
-//                $resCat = $ttContentCategoryMmRepository->selectUidForeignByUid($contentElementData['uid']);
                 $contentElementCategories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName($contentElementData['uid'], 'tt_content');
 
                 foreach ($contentElementCategories as $contentElementCategory) {
@@ -353,15 +351,21 @@ class MailController extends AbstractController
                     $colPos = (int)$contentElementData['colPos'];
                 }
 
-                $ttContentCategories = RepositoryUtility::getCategories('tt_content', $contentElementData, $this->sysLanguageUid);
-                reset($ttContentCategories);
                 $categories = [];
-                foreach ($ttContentCategories as $categoryUid => $categoryTitle) {
-                    $categories[] = [
-                        'uid' => $categoryUid,
-                        'checked' => in_array($categoryUid, $categoriesRow),
-                        'title' => $categoryTitle,
-                    ];
+                $pageTsConfig = BackendUtility::getTCEFORM_TSconfig('tt_content', $contentElementData);
+                if (is_array($pageTsConfig['categories'])) {
+                    $pidCsvList = $pageTsConfig['categories']['PAGE_TSCONFIG_IDLIST'] ?? [];
+                    if ($pidCsvList) {
+                        $pidList = GeneralUtility::intExplode(',', $pidCsvList, true);
+                        $ttContentCategories = $this->categoryRepository->findByPidList($pidList)->toArray();
+                        foreach ($ttContentCategories as $category) {
+                            $categories[] = [
+                                'uid' => $category->getUid(),
+                                'title' => $category->getTitle(),
+                                'checked' => in_array($category->getUid(), $categoriesRow),
+                            ];
+                        }
+                    }
                 }
 
                 $data['rows'][] = [
@@ -520,7 +524,7 @@ class MailController extends AbstractController
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
-            'data' => $this->recipientService->getFinalSendingGroups($this->userTable, $this->backendUserPermissions),
+            'data' => $this->recipientService->getFinalSendingGroups($this->userTable),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mailUid' => $mail->getUid(),
         ]);

@@ -14,15 +14,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 trait RepositoryTrait
 {
-    /**
-     * @param string $table
-     * @return void
-     */
-    protected function setTable(string $table): void
-    {
-        $this->table = $table;
-    }
-
     public function getConnectionPool(): ConnectionPool
     {
         return GeneralUtility::makeInstance(ConnectionPool::class);

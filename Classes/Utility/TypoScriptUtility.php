@@ -88,7 +88,7 @@ class TypoScriptUtility
                 $tsLines = array_reverse($tsLines);
 
                 // store those changes
-                $done = GeneralUtility::makeInstance(PagesRepository::class)->updatePageTSconfig($pageId, implode(LF, $tsLines));
+                $done = GeneralUtility::makeInstance(PagesRepository::class)->updatePageTsConfig($pageId, implode(LF, $tsLines));
             }
         }
 

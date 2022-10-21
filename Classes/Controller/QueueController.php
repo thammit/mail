@@ -46,7 +46,7 @@ class QueueController extends AbstractController
         $this->view->assignMultiple([
             'id' => $this->id,
             'data' => $data,
-            'trigger' => !(isset($this->pageTSConfiguration['menu.']['dmail_mode.']['mailengine.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['dmail_mode.']['mailengine.']['disable_trigger'])
+            'trigger' => !(isset($this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger'])
         ]);
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);

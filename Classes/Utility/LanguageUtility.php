@@ -41,7 +41,7 @@ class LanguageUtility
             if ((int)$lang['uid'] > 0) {
                 $langRow = GeneralUtility::makeInstance(PagesRepository::class)->selectPageByL10nAndSysLanguageUid($pageUid, $lang['uid']);
 
-                if (!$langRow || empty($langRow)) {
+                if (empty($langRow)) {
                     continue;
                 }
             }

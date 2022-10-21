@@ -129,7 +129,7 @@ class LogRepository extends Repository
     /**
      * Get array of recipient ids, which has been sent
      *
-     * @param int $mailUid Newsletter ID. UID of the sys_dmail record
+     * @param int $mailUid UID of the mail record
      * @param string $recipientTable Recipient table
      *
      * @return array list of recipients
