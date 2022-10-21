@@ -319,7 +319,38 @@ class RecipientService
                     ->addOrderBy($switchTable . '.email')
                     ->execute();
             } else {
-                $res = $queryBuilder
+                // todo add filter for categories selected by user
+                /*
+                 * SELECT DISTINCT
+                        tt_address.uid,
+                        tt_address.email
+                    FROM
+                        `tx_mail_domain_model_group` `tx_mail_domain_model_group`,
+                        `sys_category_record_mm` `g_mm`,
+                        `sys_category_record_mm` `mm_1`
+                        LEFT JOIN `tt_address` `tt_address` ON ( `tt_address`.`uid` = `mm_1`.`uid_foreign` )
+                        AND ((
+                                `tt_address`.`deleted` = 0
+                                )
+                            AND ( `tt_address`.`hidden` = 0 )
+                            AND ( `tt_address`.`starttime` <= 1666381800 )
+                            AND ((
+                                    `tt_address`.`endtime` = 0
+                                    )
+                            OR ( `tt_address`.`endtime` > 1666381800 )))
+                    WHERE
+                        ((
+                                `tt_address`.`pid` IN (146))
+                            AND ( `mm_1`.`tablenames` = 'tt_address' )
+                            AND ( `tx_mail_domain_model_group`.`uid` = `g_mm`.`uid_foreign` )
+                            AND ( `tx_mail_domain_model_group`.`uid` = 4 )
+                        AND ( `tt_address`.`email` <> '' ))
+                        AND ( `tx_mail_domain_model_group`.`deleted` = 0 )
+                    ORDER BY
+                        `tt_address`.`uid` ASC,
+                        `tt_address`.`email` ASC
+                 */
+                $statement = $queryBuilder
                     ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
                     ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
                     ->from('sys_category_record_mm', 'g_mm')
@@ -343,7 +374,10 @@ class RecipientService
                     )
                     ->orderBy($switchTable . '.uid')
                     ->addOrderBy($switchTable . '.email')
-                    ->execute();
+                    ;
+                // $query = $statement->getSQL();
+                $res = $statement->executeQuery();
+
             }
         }
         $outArr = [];
