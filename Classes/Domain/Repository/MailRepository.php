@@ -122,7 +122,7 @@ class MailRepository extends Repository
      * @return array
      * @throws DBALException
      * @throws Exception
-     * todo build query with extbase
+     * todo rebuild query with extbase
      */
     public function findSentByPid(int $pid): array
     {

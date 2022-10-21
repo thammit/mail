@@ -17,21 +17,12 @@ class AddressRepository extends \FriendsOfTYPO3\TtAddress\Domain\Repository\Addr
     use RepositoryTrait;
     protected string $table = 'tt_address';
 
-    public function getConnectionPool(): ConnectionPool
-    {
-        return GeneralUtility::makeInstance(ConnectionPool::class);
-    }
-
-
-    public function getQueryBuilder(string $table = null): QueryBuilder
-    {
-        return $this->getConnectionPool()->getQueryBuilderForTable($table ?? $this->table);
-    }
-
     /**
+     * @param int $pid
+     * @return int
      * @throws DBALException
      */
-    public function deleteByPid(int $pid): int|Result
+    public function deleteByPid(int $pid): int
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -40,7 +31,7 @@ class AddressRepository extends \FriendsOfTYPO3\TtAddress\Domain\Repository\Addr
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
             )
-            ->execute();
+            ->executeStatement();
     }
 
 }
