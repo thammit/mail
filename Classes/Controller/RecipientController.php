@@ -10,6 +10,7 @@ use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -41,22 +42,7 @@ class RecipientController extends AbstractController
 
         /** @var Group $recipientGroup */
         foreach ($recipientGroups as $recipientGroup) {
-            $result = $this->recipientService->compileMailGroup($recipientGroup);
-            $totalRecipients = 0;
-            $idLists = $result['queryInfo']['id_lists'];
-
-            if (is_array($idLists['tt_address'] ?? false)) {
-                $totalRecipients += count($idLists['tt_address']);
-            }
-            if (is_array($idLists['fe_users'] ?? false)) {
-                $totalRecipients += count($idLists['fe_users']);
-            }
-            if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
-                $totalRecipients += count($idLists['tx_mail_domain_model_group']);
-            }
-            if (is_array($idLists[$this->userTable] ?? false)) {
-                $totalRecipients += count($idLists[$this->userTable]);
-            }
+            $totalRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($recipientGroup), $this->userTable);
 
             $data['rows'][] = [
                 'uid' => $recipientGroup->getUid(),
@@ -91,21 +77,8 @@ class RecipientController extends AbstractController
      */
     public function showAction(Group $group): ResponseInterface
     {
-        $result = $this->recipientService->compileMailGroup($group);
-        $totalRecipients = 0;
-        $idLists = $result['queryInfo']['id_lists'];
-        if (is_array($idLists['tt_address'] ?? false)) {
-            $totalRecipients += count($idLists['tt_address']);
-        }
-        if (is_array($idLists['fe_users'] ?? false)) {
-            $totalRecipients += count($idLists['fe_users']);
-        }
-        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
-            $totalRecipients += count($idLists['tx_mail_domain_model_group']);
-        }
-        if (is_array($idLists[$this->userTable] ?? false)) {
-            $totalRecipients += count($idLists[$this->userTable]);
-        }
+        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group);
+        $totalRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($idLists, $this->userTable);
 
         $data = [
             'uid' => $group->getUid(),
@@ -179,8 +152,7 @@ class RecipientController extends AbstractController
      */
     public function csvDownloadAction(Group $group, string $table): void
     {
-        $result = $this->recipientService->compileMailGroup($group);
-        $idLists = $result['queryInfo']['id_lists'];
+        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group);
 
         if ($table === 'tx_mail_domain_model_group') {
             CsvUtility::downloadCSV($idLists['tx_mail_domain_model_group']);
@@ -269,6 +241,8 @@ class RecipientController extends AbstractController
     /**
      * @param array $configuration
      * @return ResponseInterface
+     * @throws DBALException
+     * @throws Exception
      * @throws StopActionException
      * @throws \Exception
      */

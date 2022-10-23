@@ -75,6 +75,27 @@ trait RepositoryTrait
     }
 
     /**
+     * @param array $uidList
+     * @param array $fields
+     * @param bool $withoutRestrictions
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findRecordByUidList(array $uidList, array $fields = ['*'], bool $withoutRestrictions = false): array
+    {
+        $queryBuilder = $withoutRestrictions ? $this->getQueryBuilderWithoutRestrictions() : $this->getQueryBuilder();
+
+        return $queryBuilder
+            ->select(...$fields)
+            ->where(
+                $queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidList, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY))
+            )
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
+
+    /**
      * @param int $pid
      * @param array $fields
      * @param bool $withoutRestrictions
@@ -90,6 +111,27 @@ trait RepositoryTrait
             ->select(...$fields)
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
+            )
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
+
+    /**
+     * @param array $pidList
+     * @param array $fields
+     * @param bool $withoutRestrictions
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findRecordByPidList(array $pidList, array $fields = ['*'], bool $withoutRestrictions = false): array
+    {
+        $queryBuilder = $withoutRestrictions ? $this->getQueryBuilderWithoutRestrictions() : $this->getQueryBuilder();
+
+        return $queryBuilder
+            ->select(...$fields)
+            ->where(
+                $queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($pidList, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY))
             )
             ->executeQuery()
             ->fetchAllAssociative();

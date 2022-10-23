@@ -450,7 +450,7 @@ class MailController extends AbstractController
                 /** @var Group $testMailGroup */
                 $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
                 $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
-                $recipientGroups = $this->recipientService->compileMailGroups([$testMailGroup]);
+                $recipientGroups = $this->recipientService->getRecipientsUidListsGroupedByTables([$testMailGroup]);
                 foreach ($recipientGroups as $recipientGroup => $recipients) {
                     switch ($recipientGroup) {
                         case 'fe_users':
@@ -550,7 +550,7 @@ class MailController extends AbstractController
     {
         $groups = array_keys(array_filter($groups));
         $distributionTime = new DateTimeImmutable($distributionTime);
-        $queryInfo['id_lists'] = $this->recipientService->getQueryInfoIdLists($this->groupRepository->findByUidList($groups)->toArray());
+        $queryInfo['id_lists'] = $this->recipientService->getRecipientsUidListsGroupedByTables($this->groupRepository->findByUidList($groups)->toArray());
 
         // Update the record:
         $mail->setRecipientGroups(implode(',', $groups))
