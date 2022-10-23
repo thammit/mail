@@ -282,6 +282,29 @@ class RecipientService
     }
 
     /**
+     * @param Group $group
+     * @param string $pidList
+     * @param array $idLists
+     * @param string $userTable
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     */
+    protected function getUidListOfRecipients(Group $group, string $pidList, array $idLists, string $userTable): array
+    {
+        if ($group->hasAddress()) {
+            $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pidList, $group);
+        }
+        if ($group->hasFrontendUser()) {
+            $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pidList, $group);
+        }
+        if ($userTable && $group->hasCustom()) {
+            $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pidList, $group);
+        }
+        return $idLists;
+    }
+
+    /**
      * Return all uids from $table where the $pid is in $pidList.
      * If $cat is 0 or empty, then all entries (with pid $pid) is returned else only
      * entire which are subscribing to the categories of the group with uid $group_uid is returned.
@@ -361,29 +384,6 @@ class RecipientService
             }
             return $recipients;
         }
-    }
-
-    /**
-     * @param Group $group
-     * @param string $pidList
-     * @param array $idLists
-     * @param string $userTable
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    protected function getUidListOfRecipients(Group $group, string $pidList, array $idLists, string $userTable): array
-    {
-        if ($group->hasAddress()) {
-            $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pidList, $group);
-        }
-        if ($group->hasFrontendUser()) {
-            $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pidList, $group);
-        }
-        if ($userTable && $group->hasCustom()) {
-            $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pidList, $group);
-        }
-        return $idLists;
     }
 
     /**
