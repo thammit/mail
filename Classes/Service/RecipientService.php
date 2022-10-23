@@ -17,7 +17,7 @@ use MEDIAESSENZ\Mail\Enumeration\RecordType;
 use MEDIAESSENZ\Mail\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
-use MEDIAESSENZ\Mail\Utility\CsvUtility as MailCsvUtility;
+use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -208,7 +208,7 @@ class RecipientService
             case RecipientGroupType::CSV:
                 // List of mails
                 if ($group->isCsv()) {
-                    $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
+                    $dmCsvUtility = GeneralUtility::makeInstance(CsvUtility::class);
                     $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($group->getList()));
                 } else {
                     $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
