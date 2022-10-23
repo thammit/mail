@@ -84,24 +84,14 @@ class RecipientService
     {
         $mailGroups = [];
         $groups = $this->groupRepository->findByPid($this->pageId);
-        if ($groups) {
+        if ($groups->count() > 0) {
             /** @var Group $group */
             foreach ($groups as $group) {
-                $result = $this->getRecipientsUidListsGroupedByTables([$group], $userTable);
-                $totalRecipients = 0;
-                if (is_array($result['tt_address'] ?? false)) {
-                    $totalRecipients += count($result['tt_address']);
-                }
-                if (is_array($result['fe_users'] ?? false)) {
-                    $totalRecipients += count($result['fe_users']);
-                }
-                if (is_array($result['PLAINLIST'] ?? false)) {
-                    $totalRecipients += count($result['PLAINLIST']);
-                }
-                if (is_array($result[$userTable] ?? false)) {
-                    $totalRecipients += count($result[$userTable]);
-                }
-                $mailGroups[] = ['uid' => $group->getUid(), 'title' => $group->getTitle(), 'receiver' => $totalRecipients];
+                $mailGroups[] = [
+                    'uid' => $group->getUid(),
+                    'title' => $group->getTitle(),
+                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTables([$group], $userTable), $userTable)
+                ];
             }
         }
 
