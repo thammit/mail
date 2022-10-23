@@ -72,7 +72,7 @@ class RecipientService
 //        }
     }
     /**
-     * @param string|int $userTable
+     * @param string $userTable
      * @return array
      * @throws DBALException
      * @throws Exception
@@ -80,7 +80,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getFinalSendingGroups(string|int $userTable): array
+    public function getFinalSendingGroups(string $userTable = ''): array
     {
         $mailGroups = [];
         $groups = $this->groupRepository->findByPid($this->pageId);
