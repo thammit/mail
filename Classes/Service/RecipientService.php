@@ -399,7 +399,6 @@ class RecipientService
     protected function getSpecialQueryIdList(string $table, Group $group): array
     {
         $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
-        $outArr = [];
         if ($group->getQuery()) {
             $queryGenerator->init('dmail_queryConfig', $table);
             $queryGenerator->queryConfig = $queryGenerator->cleanUpQueryConfig(unserialize($group->getQuery()));
@@ -408,13 +407,10 @@ class RecipientService
             $select = $queryGenerator->getSelectQuery();
             /** @var Connection $connection */
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-            $recipients = $connection->executeQuery($select)->fetchAllAssociative();
 
-            foreach ($recipients as $recipient) {
-                $outArr[] = $recipient['uid'];
-            }
+            return array_column($connection->executeQuery($select)->fetchAllAssociative(), 'uid');
         }
-        return $outArr;
+        return [];
     }
 
     /**
@@ -622,13 +618,13 @@ class RecipientService
 
         if ($queryTable != $table || $queryConfig != $group->getQuery()) {
             $recordTypes = 0;
-            if ($queryTable == 'tt_address') {
+            if ($queryTable === 'tt_address') {
                 $recordTypes = RecordType::ADDRESS;
             } else {
-                if ($queryTable == 'fe_users') {
+                if ($queryTable === 'fe_users') {
                     $recordTypes = RecordType::FRONTEND_USER;
                 } else {
-                    if ($queryTable == $userTable) {
+                    if ($queryTable === $userTable) {
                         $recordTypes = RecordType::CUSTOM;
                     }
                 }
@@ -652,7 +648,6 @@ class RecipientService
      */
     protected function getRecursiveGroups(Group $group, int $recursion = 0): array
     {
-//        $groups = array_unique($tempRepository->getMailGroups($mailGroup->getChildren()), [$mailGroup->getUid()]);
         $groups = [$group];
         $recursion++;
         if ($recursion > 20) {
@@ -662,8 +657,10 @@ class RecipientService
         if ($group->getType() === RecipientGroupType::OTHER && $childGroups->count() > 0) {
             /** @var Group $childGroup */
             foreach ($childGroups as $childGroup) {
-                $groups[] = $childGroup->getType() === RecipientGroupType::OTHER && $childGroup->getChildren()->count() > 0 ? $this->getRecursiveGroups($childGroup,
-                    $recursion) : $childGroup;
+                $collect = $this->getRecursiveGroups($childGroup, $recursion);
+                $groups = array_merge_recursive($groups, $collect);
+//                $groups[] = $childGroup->getType() === RecipientGroupType::OTHER && $childGroup->getChildren()->count() > 0 ? $this->getRecursiveGroups($childGroup,
+//                    $recursion) : $childGroup;
             }
         }
 
