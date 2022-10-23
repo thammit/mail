@@ -156,6 +156,13 @@ class DirectMailMigration implements UpgradeWizardInterface
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
             $directMailCategorySysCategoryMappings = [];
         }
+        try {
+            $directMailCategorySysCategoryParentCategory = (int)(GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('mail',
+                'directMailCategorySysCategoryParentCategory'));
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
+            $directMailCategorySysCategoryParentCategory = 0;
+        }
+
 
         foreach ($this->getSysDmailCategoryRecordsToMigrate() as $record) {
             $sysCategoryUid = $directMailCategorySysCategoryMappings[$record['uid']] ?? 0;
@@ -169,6 +176,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                     'tstamp' => time(),
                     'crdate' => time(),
                     'title' => $record['category'],
+                    'parent' => $directMailCategorySysCategoryParentCategory ?? 0,
                     'deleted' => $record['deleted'],
                     'hidden' => $record['hidden'],
                     'sorting' => $record['sorting'],
