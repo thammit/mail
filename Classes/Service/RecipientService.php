@@ -139,16 +139,305 @@ class RecipientService
     }
 
     /**
-     * Return all uid's from $table for a static direct mail group.
+     * @param array $groups
+     * @param string $userTable
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getRecipientsUidListsGroupedByTables(array $groups, string $userTable = ''): array
+    {
+        // If supplied with an empty array, quit instantly as there is nothing to do
+        if (count($groups) === 0) {
+            return [];
+        }
+
+        // Looping through the selected array, in order to fetch recipient details
+        $idLists = [];
+        foreach ($groups as $group) {
+            $recipientList = $this->getRecipientsUidListsGroupedByTable($group, $userTable);
+            $idLists = array_merge_recursive($idLists, $recipientList);
+        }
+
+        // Make unique entries
+        if (is_array($idLists['tt_address'] ?? false)) {
+            $idLists['tt_address'] = array_unique($idLists['tt_address']);
+        }
+
+        if (is_array($idLists['fe_users'] ?? false)) {
+            $idLists['fe_users'] = array_unique($idLists['fe_users']);
+        }
+
+        if (is_array($idLists[$userTable] ?? false) && $userTable) {
+            $idLists[$userTable] = array_unique($idLists[$userTable]);
+        }
+
+        if (is_array($idLists['PLAINLIST'] ?? false)) {
+            $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($idLists['PLAINLIST']);
+        }
+
+        return $idLists;
+    }
+
+    /**
+     * Fetches recipient IDs from a given group ID
+     * Most of the functionality from cmd_compileMailGroup in order to use multiple recipient lists when sending
+     *
+     * @param Group $group Recipient group ID
+     * @param string $userTable
+     * @return array List of recipient IDs
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
+    public function getRecipientsUidListsGroupedByTable(Group $group, string $userTable = ''): array
+    {
+        $idLists = [];
+        switch ($group->getType()) {
+            case RecipientGroupType::PAGES:
+                // From pages
+                // use current page if not set in mail group
+                $thePages = $group->getPages();
+                // Explode the pages
+                $pidList = $this->getRecursivePagesList($thePages, $group);
+
+                // Make queries
+                if ($pidList) {
+                    $idLists = $this->getUidListOfRecipients($group, $pidList, $idLists, $userTable);
+                    if ($group->hasFrontendUserGroup()) {
+                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pidList, $group);
+                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users']));
+                    }
+                }
+                break;
+            case RecipientGroupType::CSV:
+                // List of mails
+                if ($group->isCsv()) {
+                    $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
+                    $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($group->getList()));
+                } else {
+                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
+                }
+                $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($recipients);
+                break;
+            case RecipientGroupType::STATIC:
+                // Static MM list
+                $idLists['tt_address'] = $this->getStaticIdListByTableAndGroupUid('tt_address', $group->getUid());
+                $idLists['fe_users'] = $this->getStaticIdListByTableAndGroupUid('fe_users', $group->getUid());
+                $tempGroups = $this->getStaticIdListByTableAndGroupUid('fe_groups', $group->getUid());
+                $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $tempGroups));
+                if ($userTable) {
+                    $idLists[$userTable] = $this->getStaticIdListByTableAndGroupUid($userTable, $group->getUid());
+                }
+                break;
+            case RecipientGroupType::QUERY:
+                // Special query list
+                // Todo Remove that shit!
+                $queryTable = GeneralUtility::_GP('SET')['queryTable'];
+                $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
+                $this->updateGroupQueryConfig($group, $userTable, $queryTable, $queryConfig);
+
+                $table = '';
+                if ($group->hasAddress()) {
+                    $table = 'tt_address';
+                } else {
+                    if ($group->hasFrontendUser()) {
+                        $table = 'fe_users';
+                    } else {
+                        if ($userTable && $group->hasCustom()) {
+                            $table = $userTable;
+                        }
+                    }
+                }
+                if ($table) {
+                    $idLists[$table] = $this->getSpecialQueryIdList($table, $group);
+                }
+                break;
+            case RecipientGroupType::OTHER:
+                $groups = $this->getRecursiveGroups($group);
+                foreach ($groups as $recursiveGroup) {
+                    $collect = $this->getRecipientsUidListsGroupedByTable($recursiveGroup, $userTable);
+                    $idLists = array_merge_recursive($idLists, $collect);
+                }
+                break;
+            default:
+        }
+
+//        /**
+//         * Hook for cmd_compileMailGroup
+//         * manipulate the generated id_lists
+//         */
+//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] ?? false)) {
+//            $hookObjectsArr = [];
+//
+//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] as $classRef) {
+//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
+//            }
+//            foreach ($hookObjectsArr as $hookObj) {
+//                if (method_exists($hookObj, 'cmd_compileMailGroup_postProcess')) {
+//                    $temporaryList = $hookObj->cmd_compileMailGroup_postProcess($idLists, $this, $group);
+//                }
+//            }
+//
+//            unset($idLists);
+//            $idLists = $temporaryList;
+//        }
+
+        return $idLists;
+    }
+
+    /**
+     * Return all uids from $table where the $pid is in $pidList.
+     * If $cat is 0 or empty, then all entries (with pid $pid) is returned else only
+     * entire which are subscribing to the categories of the group with uid $group_uid is returned.
+     * The relation between the recipients in $table and sys_dmail_categories is a true MM relation
+     * (Must be correctly defined in TCA).
+     *
+     * @param string $table The table to select from
+     * @param string $pidList The pidList
+     * @param Group $group The group
+     *
+     * @return array The resulting array of uids
+     * @throws Exception
+     * @throws DBALException
+     */
+    protected function getRecipientUidListByTableAndPageUidListAndGroup(string $table, string $pidList, Group $group): array
+    {
+        $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
+        $pidArray = GeneralUtility::intExplode(',', $pidList, true);
+        $queryBuilder = $this->getQueryBuilder($table);
+
+        $addWhere = '';
+        if ($switchTable === 'fe_users') {
+            $addWhere = $queryBuilder->expr()->eq('fe_users.newsletter', 1);
+        }
+
+        if ($group->getCategories()->count() === 0) {
+            // get recipients without category restriction
+            if ($table === 'fe_groups') {
+                return array_column($queryBuilder
+                    ->selectLiteral('DISTINCT fe_users.uid', 'fe_users.email')
+                    ->from('fe_users', 'fe_users')
+                    ->from('fe_groups', 'fe_groups')
+                    ->where(
+                        $queryBuilder->expr()->and()
+                            ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
+                            ->add($queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true))
+                            ->add($queryBuilder->expr()->neq( 'fe_users.email', $queryBuilder->createNamedParameter('')))
+                            ->add($queryBuilder->expr()->eq('fe_users.newsletter', 1))
+                    )
+                    ->orderBy('fe_users.uid')
+                    ->addOrderBy('fe_users.email')
+                    ->executeQuery()
+                    ->fetchAllAssociative(), 'uid');
+            } else {
+                return array_column($queryBuilder
+                    ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
+                    ->from($switchTable)
+                    ->where(
+                        $queryBuilder->expr()->and()
+                            ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
+                            ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
+                            ->add($addWhere)
+                    )
+                    ->orderBy($switchTable . '.uid')
+                    ->addOrderBy($switchTable . '.email')
+                    ->executeQuery()
+                    ->fetchAllAssociative(), 'uid');
+            }
+        } else {
+            // get recipients with same categories set in group
+            $recipients = [];
+            $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pidArray, ['uid']), 'uid') : [];
+            /** @var Category $category */
+            foreach ($group->getCategories() as $category) {
+                // collect all recipients containing at least one category of the given group
+                $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
+                foreach($recipientCollection as $recipient) {
+                    if (!in_array($recipient['uid'], $recipients) &&
+                        in_array($recipient['pid'], $pidArray) &&
+                        ($switchTable === 'tt_address' || $recipient['newsletter']) &&
+                        ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
+                    ) {
+                        // add it to the list if all constrains fulfilled
+                        $recipients[] = $recipient['uid'];
+                    }
+                }
+            }
+            return $recipients;
+        }
+    }
+
+    /**
+     * @param Group $group
+     * @param string $pidList
+     * @param array $idLists
+     * @param string $userTable
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     */
+    protected function getUidListOfRecipients(Group $group, string $pidList, array $idLists, string $userTable): array
+    {
+        if ($group->hasAddress()) {
+            $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pidList, $group);
+        }
+        if ($group->hasFrontendUser()) {
+            $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pidList, $group);
+        }
+        if ($userTable && $group->hasCustom()) {
+            $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pidList, $group);
+        }
+        return $idLists;
+    }
+
+    /**
+     * Construct the array of uids from $table selected
+     * by special query of mail group of such type
+     *
+     * @param string $table The table to select from
+     * @param Group $group
+     *
+     * @return array The resulting query.
+     * @throws \Doctrine\DBAL\Exception|Exception
+     */
+    protected function getSpecialQueryIdList(string $table, Group $group): array
+    {
+        $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
+        $outArr = [];
+        if ($group->getQuery()) {
+            $queryGenerator->init('dmail_queryConfig', $table);
+            $queryGenerator->queryConfig = $queryGenerator->cleanUpQueryConfig(unserialize($group->getQuery()));
+
+            $queryGenerator->extFieldLists['queryFields'] = 'uid';
+            $select = $queryGenerator->getSelectQuery();
+            /** @var Connection $connection */
+            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
+            $recipients = $connection->executeQuery($select)->fetchAllAssociative();
+
+            foreach ($recipients as $recipient) {
+                $outArr[] = $recipient['uid'];
+            }
+        }
+        return $outArr;
+    }
+
+    /**
+     * Return all uids from $table for a static mail group.
      *
      * @param string $table The table to select from
      * @param int $mailGroupUid The uid of the mail group
      *
-     * @return array The resulting array of uid's
+     * @return array The resulting array of uids
      * @throws Exception
      * @throws DBALException
      */
-    public function getStaticIdListByTableAndGroupUid(string $table, int $mailGroupUid): array
+    protected function getStaticIdListByTableAndGroupUid(string $table, int $mailGroupUid): array
     {
         $switchTable = $table == 'fe_groups' ? 'fe_users' : $table;
 
@@ -161,13 +450,10 @@ class RecipientService
         // See comment above
         // $usergroupInList = ' AND ('.$field.' LIKE \'%,\'||'.$command.'||\',%\' OR '.$field.' LIKE '.$command.'||\',%\' OR '.$field.' LIKE \'%,\'||'.$command.' OR '.$field.'='.$command.')';
 
-        // for fe_users and fe_group, only activated newsletter
         $addWhere = '';
         if ($switchTable == 'fe_users') {
-            $addWhere = $queryBuilder->expr()->eq(
-                $switchTable . '.newsletter',
-                1
-            );
+            // for fe_users and fe_group, only activated newsletter
+            $addWhere = $queryBuilder->expr()->eq($switchTable . '.newsletter', 1);
         }
 
         if ($table == 'fe_groups') {
@@ -278,10 +564,7 @@ class RecipientService
                 $queryBuilder = $this->getQueryBuilder($table);
                 // for fe_users and fe_group, only activated newsletter
                 if ($switchTable == 'fe_users') {
-                    $addWhere = $queryBuilder->expr()->eq(
-                        $switchTable . '.newsletter',
-                        1
-                    );
+                    $addWhere = $queryBuilder->expr()->eq($switchTable . '.newsletter', 1);
                 }
 
                 $res = $queryBuilder
@@ -311,374 +594,22 @@ class RecipientService
         return $outArr;
     }
 
-    /**
-     * Construct the array of uid's from $table selected
-     * by special query of mail group of such type
-     *
-     * @param string $table The table to select from
-     * @param Group $group
-     *
-     * @return array The resulting query.
-     * @throws \Doctrine\DBAL\Exception|Exception
-     */
-    public function getSpecialQueryIdList(string $table, Group $group): array
-    {
-        $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
-        $outArr = [];
-        if ($group->getQuery()) {
-            $queryGenerator->init('dmail_queryConfig', $table);
-            $queryGenerator->queryConfig = $queryGenerator->cleanUpQueryConfig(unserialize($group->getQuery()));
-
-            $queryGenerator->extFieldLists['queryFields'] = 'uid';
-            $select = $queryGenerator->getSelectQuery();
-            /** @var Connection $connection */
-            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-            $recipients = $connection->executeQuery($select)->fetchAllAssociative();
-
-            foreach ($recipients as $recipient) {
-                $outArr[] = $recipient['uid'];
-            }
-        }
-        return $outArr;
-    }
-
-    /**
-     * @param Group $group
-     * @param string $pidList
-     * @param array $idLists
-     * @param string $userTable
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     */
-    protected function getUidListOfRecipients(Group $group, string $pidList, array $idLists, string $userTable): array
-    {
-        if ($group->hasAddress()) {
-            $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pidList, $group);
-        }
-        if ($group->hasFrontendUser()) {
-            $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pidList, $group);
-        }
-        if ($userTable && $group->hasCustom()) {
-            $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pidList, $group);
-        }
-        return $idLists;
-    }
-
-    /**
-     * @param array $groups
-     * @param string $userTable
-     * @return array
-     * @throws DBALException
-     * @throws Exception
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function getRecipientsUidListsGroupedByTables(array $groups, string $userTable = ''): array
-    {
-        // If supplied with an empty array, quit instantly as there is nothing to do
-        if (count($groups) === 0) {
-            return [];
-        }
-
-        // Looping through the selected array, in order to fetch recipient details
-        $idLists = [];
-        foreach ($groups as $group) {
-            $recipientList = $this->getRecipientsUidListsGroupedByTable($group, $userTable);
-            $idLists = array_merge_recursive($idLists, $recipientList);
-        }
-
-        // Make unique entries
-        if (is_array($idLists['tt_address'] ?? false)) {
-            $idLists['tt_address'] = array_unique($idLists['tt_address']);
-        }
-
-        if (is_array($idLists['fe_users'] ?? false)) {
-            $idLists['fe_users'] = array_unique($idLists['fe_users']);
-        }
-
-        if (is_array($idLists[$userTable] ?? false) && $userTable) {
-            $idLists[$userTable] = array_unique($idLists[$userTable]);
-        }
-
-        if (is_array($idLists['PLAINLIST'] ?? false)) {
-            $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($idLists['PLAINLIST']);
-        }
-
-        return $idLists;
-    }
-
-    /**
-     * Fetches recipient IDs from a given group ID
-     * Most of the functionality from cmd_compileMailGroup in order to use multiple recipient lists when sending
-     *
-     * @param Group $group Recipient group ID
-     * @param string $userTable
-     * @return array List of recipient IDs
-     * @throws DBALException
-     * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
-    public function getRecipientsUidListsGroupedByTable(Group $group, string $userTable = ''): array
-    {
-        $idLists = [];
-        switch ($group->getType()) {
-            case RecipientGroupType::PAGES:
-                // From pages
-                // use current page if not set in mail group
-                $thePages = $group->getPages();
-                // Explode the pages
-                $pidList = $this->getRecursivePagesList($thePages, $group);
-
-                // Make queries
-                if ($pidList) {
-                    $idLists = $this->getUidListOfRecipients($group, $pidList, $idLists, $userTable);
-                    if ($group->hasFrontendUserGroup()) {
-                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pidList, $group);
-                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users']));
-                    }
-                }
-                break;
-            case RecipientGroupType::CSV:
-                // List of mails
-                if ($group->isCsv()) {
-                    $dmCsvUtility = GeneralUtility::makeInstance(MailCsvUtility::class);
-                    $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($group->getList()));
-                } else {
-                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
-                }
-                $idLists['PLAINLIST'] = RecipientUtility::removeDuplicates($recipients);
-                break;
-            case RecipientGroupType::STATIC:
-                // Static MM list
-                $idLists['tt_address'] = $this->getStaticIdListByTableAndGroupUid('tt_address', $group->getUid());
-                $idLists['fe_users'] = $this->getStaticIdListByTableAndGroupUid('fe_users', $group->getUid());
-                $tempGroups = $this->getStaticIdListByTableAndGroupUid('fe_groups', $group->getUid());
-                $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $tempGroups));
-                if ($userTable) {
-                    $idLists[$userTable] = $this->getStaticIdListByTableAndGroupUid($userTable, $group->getUid());
-                }
-                break;
-            case RecipientGroupType::QUERY:
-                // Special query list
-                // Todo Remove that shit!
-                $queryTable = GeneralUtility::_GP('SET')['queryTable'];
-                $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
-
-                $group = $this->updateMailGroup($group, $userTable, $queryTable, $queryConfig);
-                $table = '';
-                if ($group->hasAddress()) {
-                    $table = 'tt_address';
-                } else {
-                    if ($group->hasFrontendUser()) {
-                        $table = 'fe_users';
-                    } else {
-                        if ($userTable && $group->hasCustom()) {
-                            $table = $userTable;
-                        }
-                    }
-                }
-                if ($table) {
-                    $idLists[$table] = $this->getSpecialQueryIdList($table, $group);
-                }
-                break;
-            case RecipientGroupType::OTHER:
-                $groups = $this->getRecursiveGroups($group);
-                foreach ($groups as $recursiveGroup) {
-                    $collect = $this->getRecipientsUidListsGroupedByTable($recursiveGroup, $userTable);
-                    $idLists = array_merge_recursive($idLists, $collect);
-                }
-                break;
-            default:
-        }
-
-//        /**
-//         * Hook for cmd_compileMailGroup
-//         * manipulate the generated id_lists
-//         */
-//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] ?? false)) {
-//            $hookObjectsArr = [];
-//
-//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] as $classRef) {
-//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-//            }
-//            foreach ($hookObjectsArr as $hookObj) {
-//                if (method_exists($hookObj, 'cmd_compileMailGroup_postProcess')) {
-//                    $temporaryList = $hookObj->cmd_compileMailGroup_postProcess($idLists, $this, $group);
-//                }
-//            }
-//
-//            unset($idLists);
-//            $idLists = $temporaryList;
-//        }
-
-        return $idLists;
-    }
-
-    /**
-     * Return all uid's from $table where the $pid is in $pidList.
-     * If $cat is 0 or empty, then all entries (with pid $pid) is returned else only
-     * entire which are subscribing to the categories of the group with uid $group_uid is returned.
-     * The relation between the recipients in $table and sys_dmail_categories is a true MM relation
-     * (Must be correctly defined in TCA).
-     *
-     * @param string $table The table to select from
-     * @param string $pidList The pidList
-     * @param Group $group The group
-     *
-     * @return array The resulting array of uid's
-     * @throws Exception
-     * @throws DBALException
-     */
-    public function getRecipientUidListByTableAndPageUidListAndGroup(string $table, string $pidList, Group $group): array
-    {
-        $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
-        $pidArray = GeneralUtility::intExplode(',', $pidList, true);
-        $queryBuilder = $this->getQueryBuilder($table);
-
-        $addWhere = '';
-        if ($switchTable === 'fe_users') {
-            $addWhere = $queryBuilder->expr()->eq('fe_users.newsletter', 1);
-        }
-
-        if ($group->getCategories()->count() === 0) {
-            // get recipients without category restriction
-            if ($table === 'fe_groups') {
-                return array_column($queryBuilder
-                    ->selectLiteral('DISTINCT fe_users.uid', 'fe_users.email')
-                    ->from('fe_users', 'fe_users')
-                    ->from('fe_groups', 'fe_groups')
-                    ->where(
-                        $queryBuilder->expr()->and()
-                            ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
-                            ->add($queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true))
-                            ->add($queryBuilder->expr()->neq( 'fe_users.email', $queryBuilder->createNamedParameter('')))
-                            ->add($queryBuilder->expr()->eq('fe_users.newsletter', 1))
-                    )
-                    ->orderBy('fe_users.uid')
-                    ->addOrderBy('fe_users.email')
-                    ->executeQuery()
-                    ->fetchAllAssociative(), 'uid');
-            } else {
-                return array_column($queryBuilder
-                    ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
-                    ->from($switchTable)
-                    ->where(
-                        $queryBuilder->expr()->and()
-                            ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
-                            ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                            ->add($addWhere)
-                    )
-                    ->orderBy($switchTable . '.uid')
-                    ->addOrderBy($switchTable . '.email')
-                    ->executeQuery()
-                    ->fetchAllAssociative(), 'uid');
-            }
-        } else {
-            // get recipients with same categories set in group
-            $recipients = [];
-            $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pidArray, ['uid']), 'uid') : [];
-            /** @var Category $category */
-            foreach ($group->getCategories() as $category) {
-                // collect all recipients containing at least one category of the given group
-                $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
-                foreach($recipientCollection as $recipient) {
-                    if (!in_array($recipient['uid'], $recipients) &&
-                        in_array($recipient['pid'], $pidArray) &&
-                        ($switchTable === 'tt_address' || $recipient['newsletter']) &&
-                        ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
-                    ) {
-                        // add it to the list if all constrains fulfilled
-                        $recipients[] = $recipient['uid'];
-                    }
-                }
-            }
-            return $recipients;
-        }
-    }
-
 
     /*
      * U P D A T E S
      */
 
     /**
-     * Update the mail group DB record
-     *
-     * @param Group $group mail group
-     * @param string $userTable
-     * @param string $queryTable
-     * @param $queryConfig
-     * @return Group updated mail group
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
-    protected function updateMailGroup(Group $group, string $userTable, string $queryTable, $queryConfig): Group
-    {
-        $recordTypes = $group->getRecordTypes();
-        $table = '';
-        if ($recordTypes & RecordType::ADDRESS) {
-            $table = 'tt_address';
-        } else {
-            if ($recordTypes & RecordType::FRONTEND_USER) {
-                $table = 'fe_users';
-            } else {
-                if ($userTable && ($recordTypes & RecordType::CUSTOM)) {
-                    $table = $userTable;
-                }
-            }
-        }
-
-        $queryTable = $queryTable ?: $table;
-        $queryConfig = $queryConfig ? serialize($queryConfig) : $group->getQuery();
-
-        if ($queryTable !== $table) {
-            $queryConfig = '';
-        }
-
-        if ($queryTable !== $table || $queryConfig !== $group->getQuery()) {
-            $recordTypes = 0;
-            if ($queryTable === 'tt_address') {
-                $recordTypes = RecordType::ADDRESS;
-            } else {
-                if ($queryTable === 'fe_users') {
-                    $recordTypes = RecordType::FRONTEND_USER;
-                } else {
-                    if ($queryTable === $userTable) {
-                        $recordTypes = RecordType::CUSTOM;
-                    }
-                }
-            }
-
-            $group->setRecordTypes($recordTypes);
-            $group->setQuery($queryConfig);
-            $this->groupRepository->update($group);
-            $this->groupRepository->persist();
-        }
-
-        return $group;
-    }
-
-    /**
-     * Update recipient list record with a special query
-     *
      * @param Group $group
      * @param string $userTable
-     * @return Group Updated DB records
+     * @param mixed $queryTable
+     * @param mixed $queryConfig
+     * @return void
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      */
-    protected function updateSpecialQuery(Group $group, string $userTable = ''): Group
+    protected function updateGroupQueryConfig(Group $group, string $userTable, mixed $queryTable, mixed $queryConfig): void
     {
-        // todo
-        // $this->set = is_array($parsedBody['csv'] ?? '') ? $parsedBody['csv'] : (is_array($queryParams['csv'] ?? '') ? $queryParams['csv'] : []);
-//        $set = $this->set;
-        $queryTable = $set['queryTable'] ?? '';
-        $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
-
         $table = '';
         if ($group->hasAddress()) {
             $table = 'tt_address';
@@ -686,7 +617,7 @@ class RecipientService
             if ($group->hasFrontendUser()) {
                 $table = 'fe_users';
             } else {
-                if ($userTable && $group->hasCustom()) {
+                if ($userTable && ($group->hasCustom())) {
                     $table = $userTable;
                 }
             }
@@ -718,8 +649,6 @@ class RecipientService
             $this->groupRepository->update($group);
             $this->groupRepository->persist();
         }
-
-        return $group;
     }
 
     /*
@@ -756,7 +685,7 @@ class RecipientService
      * @param Group $group
      * @return string
      */
-    public function getRecursivePagesList(string $thePages, Group $group): string
+    protected function getRecursivePagesList(string $thePages, Group $group): string
     {
         $pages = GeneralUtility::intExplode(',', $thePages);
         $pageIdArray = [];
@@ -778,7 +707,7 @@ class RecipientService
     }
 
     /**
-     * Get all subsgroups recursively.
+     * Get all subgroups recursively.
      *
      * @param int $groupId Parent fe usergroup
      *
@@ -837,25 +766,16 @@ class RecipientService
      * D A T A B A S E
      */
 
-    public function getConnectionPool(): ConnectionPool
+    protected function getConnectionPool(): ConnectionPool
     {
         return GeneralUtility::makeInstance(ConnectionPool::class);
     }
 
     /**
      * @param string|null $table
-     * @return \TYPO3\CMS\Core\Database\Connection
-     */
-    public function getConnection(string $table = null): \TYPO3\CMS\Core\Database\Connection
-    {
-        return $this->getConnectionPool()->getConnectionForTable($table);
-    }
-
-    /**
-     * @param string|null $table
      * @return QueryBuilder
      */
-    public function getQueryBuilder(string $table = null): QueryBuilder
+    protected function getQueryBuilder(string $table = null): QueryBuilder
     {
         return $this->getConnectionPool()->getQueryBuilderForTable($table);
     }
@@ -865,7 +785,7 @@ class RecipientService
      * @param bool $withDeleted
      * @return QueryBuilder
      */
-    public function getQueryBuilderWithoutRestrictions(string $table = null, bool $withDeleted = false): QueryBuilder
+    protected function getQueryBuilderWithoutRestrictions(string $table = null, bool $withDeleted = false): QueryBuilder
     {
         $queryBuilder = $this->getQueryBuilder($table);
         $queryBuilder
