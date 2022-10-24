@@ -516,13 +516,13 @@ class MailerService implements LoggerAwareInterface
                 // Find tKey
                 $recipientTable = match ($table) {
                     'tt_address', 'fe_users' => substr($table, 0, 1),
-                    'PLAINLIST' => 'P',
+                    'tx_mail_domain_model_group' => 'P',
                     default => 'u',
                 };
 
                 // get already sent mails
                 $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($mailUid, $recipientTable);
-                if ($table === 'PLAINLIST') {
+                if ($table === 'tx_mail_domain_model_group') {
                     foreach ($listArr as $kval => $recipientData) {
                         $kval++;
                         if (!in_array($kval, $sentMails)) {
@@ -586,7 +586,7 @@ class MailerService implements LoggerAwareInterface
      */
     public function getListOfRecipientCategories(string $table, int $uid): string
     {
-        if ($table === 'PLAINLIST') {
+        if ($table === 'tx_mail_domain_model_group') {
             return '';
         }
 
