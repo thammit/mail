@@ -45,7 +45,7 @@ class CsvUtility
             // This is used if the incoming value is true in which case '+[value]'
             // adds that number to the field value (accumulation) and '=[value]'
             // overrides any existing value in the field
-            $first = $lines[0];
+            $firstRow = $lines[0];
             try {
                 $fieldList = array_merge($fieldList, explode(',', ConfigurationUtility::getExtensionConfiguration('addRecipFields')));
             } catch (ExtensionConfigurationPathDoesNotExistException|ExtensionConfigurationExtensionNotConfiguredException) {
@@ -53,10 +53,14 @@ class CsvUtility
             $fieldName = 1;
             $fieldOrder = [];
 
-            foreach ($first as $v) {
-                [$fName, $fConf] = preg_split('|[\[\]]|', $v);
-                $fName = trim($fName);
-                $fConf = trim($fConf);
+            foreach ($firstRow as $value) {
+                $fName = '';
+                $probe = preg_split('|[\[\]]|', $value);
+                if (is_array($probe)) {
+                    [$fName, $fConf] = count($probe) === 2 ? $probe : [$probe[0], ''];
+                }
+                $fName = trim($fName ?? '');
+                $fConf = trim($fConf ?? '');
                 $fieldOrder[] = [$fName, $fConf];
                 if ($fName && !str_starts_with($fName, 'user_') && !in_array($fName, $fieldList)) {
                     $fieldName = 0;
@@ -84,7 +88,7 @@ class CsvUtility
                     // Traverse fieldOrder and map values over
                     foreach ($fieldOrder as $kk => $fN) {
                         if ($fN[0]) {
-                            if ($fN[1]) {
+                            if ($fN[1] ?? false) {
                                 // If is true
                                 if (trim($data[$kk])) {
                                     if (str_starts_with($fN[1], '=')) {
