@@ -21,6 +21,7 @@ use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Backend\Tree\View\PageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -32,8 +33,6 @@ use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class RecipientService
 {
-    protected int $pageId = 0;
-    protected $pageInfo;
     protected string $backendUserPermissions;
     protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,accepts_html';
     protected array $allowedTables = ['fe_users', 'tt_address'];
@@ -50,28 +49,6 @@ class RecipientService
 
     /**
      * @param int $pageId
-     */
-    public function init(int $pageId): void
-    {
-        $this->pageId = $pageId;
-        $this->pageInfo = BackendUtility::readPageAccess($this->pageId, $this->backendUserPermissions);
-    }
-
-    /**
-     * @param string $userTable
-     * @return void
-     */
-    public function setUserTable(string $userTable): void
-    {
-        $this->userTable = $userTable;
-        $this->allowedTables[] = $userTable;
-//        if (array_key_exists('userTable',
-//                $this->pageTSConfiguration) && isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) && is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])) {
-//            $this->userTable = $this->pageTSConfiguration['userTable'];
-//            $this->allowedTables[] = $this->userTable;
-//        }
-    }
-    /**
      * @param string $userTable
      * @return array
      * @throws DBALException
@@ -80,17 +57,17 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getFinalSendingGroups(string $userTable = ''): array
+    public function getFinalSendingGroups(int $pageId, string $userTable = ''): array
     {
         $mailGroups = [];
-        $groups = $this->groupRepository->findByPid($this->pageId);
+        $groups = $this->groupRepository->findByPid($pageId);
         if ($groups->count() > 0) {
             /** @var Group $group */
             foreach ($groups as $group) {
                 $mailGroups[] = [
                     'uid' => $group->getUid(),
                     'title' => $group->getTitle(),
-                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTables([$group], $userTable), $userTable)
+                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTable($group, $userTable), $userTable)
                 ];
             }
         }
@@ -173,8 +150,7 @@ class RecipientService
     }
 
     /**
-     * Fetches recipient IDs from a given group ID
-     * Most of the functionality from cmd_compileMailGroup in order to use multiple recipient lists when sending
+     * collects all recipient uids from a given group respecting there categories
      *
      * @param Group $group Recipient group ID
      * @param string $userTable
@@ -191,16 +167,13 @@ class RecipientService
         switch ($group->getType()) {
             case RecipientGroupType::PAGES:
                 // From pages
-                // use current page if not set in mail group
-                $thePages = $group->getPages();
-                // Explode the pages
-                $pidList = $this->getRecursivePagesList($thePages, $group);
+                $pages = $this->getRecursivePagesList($group->getPages(), $group);
 
                 // Make queries
-                if ($pidList) {
-                    $idLists = $this->getUidListOfRecipients($group, $pidList, $idLists, $userTable);
+                if ($pages) {
+                    $idLists = $this->getUidListOfRecipients($group, $pages, $idLists, $userTable);
                     if ($group->hasFrontendUserGroup()) {
-                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pidList, $group);
+                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pages, $group);
                         $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users']));
                     }
                 }
@@ -208,8 +181,7 @@ class RecipientService
             case RecipientGroupType::CSV:
                 // List of mails
                 if ($group->isCsv()) {
-                    $dmCsvUtility = GeneralUtility::makeInstance(CsvUtility::class);
-                    $recipients = $dmCsvUtility->rearrangeCsvValues($dmCsvUtility->getCsvValues($group->getList()));
+                    $recipients = CsvUtility::rearrangeCsvValues($group->getList());
                 } else {
                     $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
                 }
@@ -219,15 +191,14 @@ class RecipientService
                 // Static MM list
                 $idLists['tt_address'] = $this->getStaticIdListByTableAndGroupUid('tt_address', $group->getUid());
                 $idLists['fe_users'] = $this->getStaticIdListByTableAndGroupUid('fe_users', $group->getUid());
-                $tempGroups = $this->getStaticIdListByTableAndGroupUid('fe_groups', $group->getUid());
-                $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $tempGroups));
+                $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $this->getStaticIdListByTableAndGroupUid('fe_groups', $group->getUid())));
                 if ($userTable) {
                     $idLists[$userTable] = $this->getStaticIdListByTableAndGroupUid($userTable, $group->getUid());
                 }
                 break;
             case RecipientGroupType::QUERY:
                 // Special query list
-                // Todo Remove that shit!
+                // Todo add functionality again
                 $queryTable = GeneralUtility::_GP('SET')['queryTable'];
                 $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
                 $this->updateGroupQueryConfig($group, $userTable, $queryTable, $queryConfig);
@@ -258,71 +229,50 @@ class RecipientService
             default:
         }
 
-//        /**
-//         * Hook for cmd_compileMailGroup
-//         * manipulate the generated id_lists
-//         */
-//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] ?? false)) {
-//            $hookObjectsArr = [];
-//
-//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['mod3']['cmd_compileMailGroup'] as $classRef) {
-//                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-//            }
-//            foreach ($hookObjectsArr as $hookObj) {
-//                if (method_exists($hookObj, 'cmd_compileMailGroup_postProcess')) {
-//                    $temporaryList = $hookObj->cmd_compileMailGroup_postProcess($idLists, $this, $group);
-//                }
-//            }
-//
-//            unset($idLists);
-//            $idLists = $temporaryList;
-//        }
+        // todo add event dispatcher to manipulate the returned idLists
 
         return $idLists;
     }
 
     /**
      * @param Group $group
-     * @param string $pidList
+     * @param array $pages
      * @param array $idLists
      * @param string $userTable
      * @return array
      * @throws DBALException
      * @throws Exception
      */
-    protected function getUidListOfRecipients(Group $group, string $pidList, array $idLists, string $userTable): array
+    protected function getUidListOfRecipients(Group $group, array $pages, array $idLists, string $userTable): array
     {
         if ($group->hasAddress()) {
-            $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pidList, $group);
+            $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pages, $group);
         }
         if ($group->hasFrontendUser()) {
-            $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pidList, $group);
+            $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pages, $group);
         }
         if ($userTable && $group->hasCustom()) {
-            $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pidList, $group);
+            $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pages, $group);
         }
         return $idLists;
     }
 
     /**
-     * Return all uids from $table where the $pid is in $pidList.
-     * If $cat is 0 or empty, then all entries (with pid $pid) is returned else only
-     * entire which are subscribing to the categories of the group with uid $group_uid is returned.
-     * The relation between the recipients in $table and sys_dmail_categories is a true MM relation
-     * (Must be correctly defined in TCA).
+     * Return uid list from $table where the $pid is in $pages.
+     * If no group categories set, all entries (within the given pages) will be returned,
+     * otherwise only entries with matching categories will be returned.
      *
-     * @param string $table The table to select from
-     * @param string $pidList The pidList
-     * @param Group $group The group
+     * @param string $table source table
+     * @param array $pages uid list of pages
+     * @param Group $group mail group
      *
      * @return array The resulting array of uids
      * @throws Exception
      * @throws DBALException
      */
-    protected function getRecipientUidListByTableAndPageUidListAndGroup(string $table, string $pidList, Group $group): array
+    protected function getRecipientUidListByTableAndPageUidListAndGroup(string $table, array $pages, Group $group): array
     {
         $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
-        $pidArray = GeneralUtility::intExplode(',', $pidList, true);
         $queryBuilder = $this->getQueryBuilder($table);
 
         $addWhere = '';
@@ -339,7 +289,7 @@ class RecipientService
                     ->from('fe_groups', 'fe_groups')
                     ->where(
                         $queryBuilder->expr()->and()
-                            ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
+                            ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true))
                             ->add($queryBuilder->expr()->neq( 'fe_users.email', $queryBuilder->createNamedParameter('')))
                             ->add($queryBuilder->expr()->eq('fe_users.newsletter', 1))
@@ -354,7 +304,7 @@ class RecipientService
                     ->from($switchTable)
                     ->where(
                         $queryBuilder->expr()->and()
-                            ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pidArray, Connection::PARAM_INT_ARRAY)))
+                            ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
                             ->add($addWhere)
                     )
@@ -366,14 +316,14 @@ class RecipientService
         } else {
             // get recipients with same categories set in group
             $recipients = [];
-            $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pidArray, ['uid']), 'uid') : [];
+            $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pages, ['uid']), 'uid') : [];
             /** @var Category $category */
             foreach ($group->getCategories() as $category) {
                 // collect all recipients containing at least one category of the given group
                 $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
                 foreach($recipientCollection as $recipient) {
                     if (!in_array($recipient['uid'], $recipients) &&
-                        in_array($recipient['pid'], $pidArray) &&
+                        in_array($recipient['pid'], $pages) &&
                         ($switchTable === 'tt_address' || $recipient['newsletter']) &&
                         ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
                     ) {
@@ -577,7 +527,7 @@ class RecipientService
             }
         }
 
-        return $outArr;
+        return array_unique($outArr);
     }
 
 
@@ -668,29 +618,37 @@ class RecipientService
     }
 
     /**
-     * @param string $thePages
+     * @param string $pagesCSV
      * @param Group $group
-     * @return string
+     * @return array
      */
-    protected function getRecursivePagesList(string $thePages, Group $group): string
+    protected function getRecursivePagesList(string $pagesCSV, Group $group): array
     {
-        $pages = GeneralUtility::intExplode(',', $thePages);
+        $pages = GeneralUtility::intExplode(',', $pagesCSV);
+
+        if (!$group->isRecursive()) {
+            return $pages;
+        }
+
         $pageIdArray = [];
 
         foreach ($pages as $pageUid) {
             if ($pageUid > 0) {
-                $pageInfo = BackendUtility::readPageAccess($pageUid, $this->backendUserPermissions);
+                $backendUserPermissions = BackendUserUtility::backendUserPermissions();
+                $pageInfo = BackendUtility::readPageAccess($pageUid, $backendUserPermissions);
                 if (is_array($pageInfo)) {
                     $pageIdArray[] = $pageUid;
-                    if ($group->isRecursive()) {
-                        $pageIdArray = array_merge($pageIdArray, BackendDataUtility::getRecursiveSelect($pageUid, $this->backendUserPermissions));
-                    }
+                    // Finding tree and offer setting of values recursively.
+                    $tree = GeneralUtility::makeInstance(PageTreeView::class);
+                    $tree->init('AND ' . $backendUserPermissions);
+                    $tree->makeHTML = 0;
+                    $tree->setRecs = 0;
+                    $tree->getTree($pageUid, 10000);
+                    $pageIdArray = array_merge($pageIdArray, $tree->ids);
                 }
             }
         }
-        // Remove any duplicates
-        $pageIdArray = array_unique($pageIdArray);
-        return implode(',', $pageIdArray);
+        return array_unique($pageIdArray);
     }
 
     /**

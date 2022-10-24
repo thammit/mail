@@ -450,7 +450,7 @@ class MailController extends AbstractController
                 /** @var Group $testMailGroup */
                 $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
                 $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
-                $recipientGroups = $this->recipientService->getRecipientsUidListsGroupedByTables([$testMailGroup]);
+                $recipientGroups = $this->recipientService->getRecipientsUidListsGroupedByTable($testMailGroup);
                 foreach ($recipientGroups as $recipientGroup => $recipients) {
                     switch ($recipientGroup) {
                         case 'fe_users':
@@ -524,7 +524,7 @@ class MailController extends AbstractController
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
-            'data' => $this->recipientService->getFinalSendingGroups($this->userTable),
+            'data' => $this->recipientService->getFinalSendingGroups($this->id, $this->userTable),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mailUid' => $mail->getUid(),
         ]);

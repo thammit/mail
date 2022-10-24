@@ -61,7 +61,6 @@ abstract class AbstractController extends ActionController
 
         $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
         $this->pageInfo = BackendUtility::readPageAccess($this->id, $this->backendUserPermissions);
-        $this->recipientService->init($this->id);
 
         // get the config from pageTS
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['mail.'] ?? [];

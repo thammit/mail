@@ -38,20 +38,17 @@ class RecipientController extends AbstractController
             'rows' => [],
         ];
 
-        $recipientGroups = $this->groupRepository->findByPid($this->id);
+        $groups = $this->groupRepository->findByPid($this->id);
 
-        /** @var Group $recipientGroup */
-        foreach ($recipientGroups as $recipientGroup) {
-            $totalRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($recipientGroup), $this->userTable);
-
+        /** @var Group $group */
+        foreach ($groups as $group) {
             $data['rows'][] = [
-                'uid' => $recipientGroup->getUid(),
-                'title' => $recipientGroup->getTitle(),
-                'type' => $recipientGroup->getType(),
-                'typeProcessed' => htmlspecialchars(BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $recipientGroup->getType())),
-                'description' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'description',
-                    htmlspecialchars($recipientGroup->getDescription())),
-                'count' => $totalRecipients,
+                'uid' => $group->getUid(),
+                'title' => $group->getTitle(),
+                'description' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'description', $group->getDescription()),
+                'type' => $group->getType(),
+                'typeProcessed' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $group->getType()),
+                'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group), $this->userTable),
             ];
         }
 

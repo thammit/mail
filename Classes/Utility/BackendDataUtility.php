@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use TYPO3\CMS\Backend\Tree\View\PageTreeView;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
@@ -63,25 +62,5 @@ class BackendDataUtility
             'forceAbsoluteUrl' => true,
             'linkAccessRestrictedPages' => true,
         ]);
-    }
-
-    /**
-     * Get the ID of page in a tree
-     *
-     * @param int $id Page ID
-     * @param string $perms_clause Select query clause
-     * @return array the page ID, recursively
-     */
-    public static function getRecursiveSelect(int $id, string $perms_clause): array
-    {
-        // Finding tree and offer setting of values recursively.
-        $tree = GeneralUtility::makeInstance(PageTreeView::class);
-        $tree->init('AND ' . $perms_clause);
-        $tree->makeHTML = 0;
-        $tree->setRecs = 0;
-        $getLevels = 10000;
-        $tree->getTree($id, $getLevels);
-
-        return $tree->ids;
     }
 }

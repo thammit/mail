@@ -5,60 +5,50 @@ namespace MEDIAESSENZ\Mail\Utility;
 
 use JetBrains\PhpStorm\NoReturn;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CsvUtility
 {
     /**
-     * Parsing csv-formated text to an array
+     * Parse CSV lines into array form
      *
      * @param string $str String in csv-format
-     * @param string $sep Separator
-     *
-     * @return array Parsed csv in an array
+     * @param string $separator Separator
+     * @param array $fieldList
+     * @return array parsed CSV values
      */
-    public function getCsvValues(string $str, string $sep = ','): array
+    public static function rearrangeCsvValues(string $str, string $separator = ',', array $fieldList = []): array
     {
         $fh = tmpfile();
         fwrite($fh, trim($str));
         fseek($fh, 0);
         $lines = [];
-        if ($sep == 'tab') {
-            $sep = "\t";
+        if ($separator == 'tab') {
+            $separator = "\t";
         }
-        while ($data = fgetcsv($fh, 1000, $sep)) {
+        while ($data = fgetcsv($fh, 1000, $separator)) {
             $lines[] = $data;
         }
 
         fclose($fh);
-        return $lines;
-    }
 
-    /**
-     * Parse CSV lines into array form
-     *
-     * @param array $lines CSV lines
-     * @param string $fieldList List of the fields
-     *
-     * @return array parsed CSV values
-     */
-    public function rearrangeCsvValues(array $lines, string $fieldList = ''): array
-    {
         $out = [];
         if (count($lines) > 0) {
-            // Analyse if first line is fieldnames.
+            // Analyse if first line contains field names.
             // Required is it that every value is either
             // 1) found in the list fieldsList in this class,
             // 2) the value is empty (value omitted then) or
             // 3) the field starts with "user_".
             // In addition, fields may be prepended with "[code]".
             // This is used if the incoming value is true in which case '+[value]'
-            // adds that number to the field value (accummulation) and '=[value]'
+            // adds that number to the field value (accumulation) and '=[value]'
             // overrides any existing value in the field
             $first = $lines[0];
-            $fieldListArr = explode(',', $fieldList);
-            if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['mail']['addRecipFields']) {
-                $fieldListArr = array_merge($fieldListArr, explode(',', $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['mail']['addRecipFields']));
+            try {
+                $fieldList = array_merge($fieldList, explode(',', ConfigurationUtility::getExtensionConfiguration('addRecipFields')));
+            } catch (ExtensionConfigurationPathDoesNotExistException|ExtensionConfigurationExtensionNotConfiguredException) {
             }
             $fieldName = 1;
             $fieldOrder = [];
@@ -68,7 +58,7 @@ class CsvUtility
                 $fName = trim($fName);
                 $fConf = trim($fConf);
                 $fieldOrder[] = [$fName, $fConf];
-                if ($fName && !str_starts_with($fName, 'user_') && !in_array($fName, $fieldListArr)) {
+                if ($fName && !str_starts_with($fName, 'user_') && !in_array($fName, $fieldList)) {
                     $fieldName = 0;
                     break;
                 }
@@ -81,7 +71,6 @@ class CsvUtility
                 ];
             }
             // Re-map values
-            reset($lines);
             if ($fieldName) {
                 // Advance pointer if the first line was field names
                 next($lines);
