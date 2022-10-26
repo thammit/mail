@@ -339,7 +339,7 @@ class MailerService implements LoggerAwareInterface
      * @param array $recipient Recipient's data array
      * @param array $markers Existing markers that are mail-specific, not user-specific
      *
-     * @return string Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
+     * @return string content with replaced markers
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
