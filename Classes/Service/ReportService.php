@@ -13,8 +13,8 @@ use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
-use MEDIAESSENZ\Mail\Enumeration\ResponseType;
-use MEDIAESSENZ\Mail\Enumeration\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -87,7 +87,7 @@ class ReportService
             'type' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'type', $this->mail->getType()),
             'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $this->mail->getPriority()),
             'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options',
-                    $this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
+                (string)$this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
             'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowed_format', $this->mail->isFlowedFormat()),
             'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $this->mail->isIncludeMedia()),
         ];

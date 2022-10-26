@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DateTimeImmutable;
-use MEDIAESSENZ\Mail\Enumeration\MailType;
-use MEDIAESSENZ\Mail\Enumeration\SendFormat;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -28,7 +28,7 @@ class Mail extends AbstractEntity
     protected int $priority = 3;
     protected string $encoding = 'quoted-printable';
     protected string $charset = 'iso-8859-1';
-    protected int $sendOptions = 0;
+    protected SendFormat $sendOptions;
     protected bool $includeMedia = false;
     protected bool $flowedFormat = false;
     protected string $htmlParams = '';
@@ -53,11 +53,13 @@ class Mail extends AbstractEntity
     public function __construct()
     {
         $this->attachment = new ObjectStorage();
+        $this->sendOptions = new SendFormat(SendFormat::NONE);
     }
 
     public function initializeObject(): void
     {
         $this->attachment = $this->attachment ?? new ObjectStorage();
+        $this->sendOptions = $this->sendOptions ?? new SendFormat(SendFormat::NONE);
     }
 
     /**
@@ -293,18 +295,18 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return int
+     * @return SendFormat
      */
-    public function getSendOptions(): int
+    public function getSendOptions(): SendFormat
     {
         return $this->sendOptions;
     }
 
     /**
-     * @param int $sendOptions
+     * @param SendFormat $sendOptions
      * @return Mail
      */
-    public function setSendOptions(int $sendOptions): Mail
+    public function setSendOptions(SendFormat $sendOptions): Mail
     {
         $this->sendOptions = $sendOptions;
         return $this;
@@ -315,7 +317,7 @@ class Mail extends AbstractEntity
      */
     public function isPlain(): bool
     {
-        return ($this->sendOptions & SendFormat::PLAIN) !== 0;
+        return $this->sendOptions->get(SendFormat::PLAIN);
     }
 
     /**
@@ -323,7 +325,7 @@ class Mail extends AbstractEntity
      */
     public function isHtml(): bool
     {
-        return ($this->sendOptions & SendFormat::HTML) !== 0;
+        return $this->sendOptions->get(SendFormat::HTML);
     }
 
     /**
@@ -331,17 +333,17 @@ class Mail extends AbstractEntity
      */
     public function isPlainAndHtml(): bool
     {
-        return ($this->sendOptions & SendFormat::BOTH) !== 0;
+        return $this->sendOptions->isBoth();
     }
 
     public function removeHtmlSendOption(): void
     {
-        $this->sendOptions = $this->sendOptions & ~SendFormat::HTML;
+        $this->sendOptions->unset(SendFormat::HTML);
     }
 
     public function removePlainSendOption(): void
     {
-        $this->sendOptions = $this->sendOptions & ~SendFormat::PLAIN;
+        $this->sendOptions->unset(SendFormat::PLAIN);
     }
 
     /**

@@ -8,7 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use Fetch\Message;
 use Fetch\Server;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
-use MEDIAESSENZ\Mail\Enumeration\ResponseType;
+use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BounceMailUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

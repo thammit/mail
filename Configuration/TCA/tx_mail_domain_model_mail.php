@@ -10,10 +10,10 @@ return [
         'type' => 'type',
         'typeicon_column' => 'type',
         'typeicon_classes' => [
-            \MEDIAESSENZ\Mail\Enumeration\MailType::INTERNAL => 'mail-record',
-            \MEDIAESSENZ\Mail\Enumeration\MailType::EXTERNAL => 'mail-record',
-            \MEDIAESSENZ\Mail\Enumeration\MailType::DRAFT_INTERNAL => 'mail-record',
-            \MEDIAESSENZ\Mail\Enumeration\MailType::DRAFT_EXTERNAL => 'mail-record',
+            \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL => 'mail-record',
+            \MEDIAESSENZ\Mail\Type\Enumeration\MailType::EXTERNAL => 'mail-record',
+            \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_INTERNAL => 'mail-record',
+            \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_EXTERNAL => 'mail-record',
         ],
         'useColumnsForDefaultValues' => 'from_email,from_name,reply_to_email,reply_to_name,organisation,priority,encoding,charset,send_options,type',
         'languageField' => 'sys_language_uid',
@@ -145,7 +145,7 @@ return [
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.sendOptions.I.1', ''],
                 ],
                 'cols' => '2',
-                'default' => '3',
+                'default' => \MEDIAESSENZ\Mail\Type\Bitmask\SendFormat::BOTH,
             ],
         ],
         'include_media' => [
@@ -329,32 +329,32 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.0', \MEDIAESSENZ\Mail\Enumeration\MailType::INTERNAL],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.1', \MEDIAESSENZ\Mail\Enumeration\MailType::EXTERNAL],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.2', \MEDIAESSENZ\Mail\Enumeration\MailType::DRAFT_INTERNAL],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.3', \MEDIAESSENZ\Mail\Enumeration\MailType::DRAFT_EXTERNAL],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.0', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.1', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::EXTERNAL],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.2', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_INTERNAL],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.type.I.3', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_EXTERNAL],
                 ],
-                'default' => \MEDIAESSENZ\Mail\Enumeration\MailType::INTERNAL,
+                'default' => \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL,
             ],
         ],
     ],
     'types' => [
-        \MEDIAESSENZ\Mail\Enumeration\MailType::INTERNAL => ['showitem' => '
+        \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL => ['showitem' => '
 			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab1, type,sys_language_uid, page, plain_params, html_params, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab2, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority, encoding,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab3, send_options, include_media, flowed_format, redirect, redirect_all, auth_code_fields, scheduled, recipient_groups
 		'],
-        \MEDIAESSENZ\Mail\Enumeration\MailType::EXTERNAL => ['showitem' => '
+        \MEDIAESSENZ\Mail\Type\Enumeration\MailType::EXTERNAL => ['showitem' => '
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab1, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.HTMLParams.ALT.1, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab2, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority, encoding,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab3, send_options, include_media, flowed_format, redirect, redirect_all, auth_code_fields, scheduled, recipient_groups
 		'],
-        \MEDIAESSENZ\Mail\Enumeration\MailType::DRAFT_INTERNAL => ['showitem' => '
+        \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_INTERNAL => ['showitem' => '
 			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab1, type,sys_language_uid, page, plain_params, html_params, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab2, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority, encoding,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab3, send_options, include_media, flowed_format, redirect, redirect_all, auth_code_fields, scheduled, recipient_groups
 		'],
-        \MEDIAESSENZ\Mail\Enumeration\MailType::DRAFT_EXTERNAL => ['showitem' => '
+        \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_EXTERNAL => ['showitem' => '
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab1, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.HTMLParams.ALT.1, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab2, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority, encoding,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.tab3, send_options, include_media, flowed_format, redirect, redirect_all, auth_code_fields, scheduled, recipient_groups

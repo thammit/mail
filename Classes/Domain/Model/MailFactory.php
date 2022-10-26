@@ -6,8 +6,8 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
-use MEDIAESSENZ\Mail\Enumeration\MailType;
-use MEDIAESSENZ\Mail\Enumeration\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
@@ -164,7 +164,7 @@ class MailFactory
             $plainTextContent = $this->fetchPlainTextContent($plainTextUrl);
         }
 
-        if ($mail->getSendOptions() === SendFormat::NONE) {
+        if ($mail->getSendOptions()->isNone()) {
             return null;
         }
 
@@ -204,7 +204,7 @@ class MailFactory
             ->setFromName($senderName)
             ->setFromEmail($senderEmail)
             ->setSubject($subject)
-            ->setSendOptions(SendFormat::PLAIN)
+            ->setSendOptions(new SendFormat(SendFormat::PLAIN))
             ->setEncoding($this->pageTSConfiguration['quick_mail_encoding'] ?? 'quoted-printable')
             ->setCharset($this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8');
 
@@ -254,7 +254,7 @@ class MailFactory
             ->setRedirectAll((bool)($this->pageTSConfiguration['redirect_all'] ?? false))
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
             ->setAuthCodeFields($this->pageTSConfiguration['auth_code_fields'] ?? '')
-            ->setSendOptions((int)($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))
+            ->setSendOptions(new SendFormat($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))
             ->setIncludeMedia((bool)($this->pageTSConfiguration['includeMedia'] ?? false))
             ->setFlowedFormat((bool)($this->pageTSConfiguration['flowed_format'] ?? false))
             ->setPid($this->storageFolder);

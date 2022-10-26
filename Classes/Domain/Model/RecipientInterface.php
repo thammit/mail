@@ -9,7 +9,7 @@ interface RecipientInterface extends SimpleRecipientInterface
 {
     /**
      * m=male;f=female;v=various;empty=unknown
-     * See MEDIAESSENZ\Mail\Enumeration\Gender
+     * See MEDIAESSENZ\Mail\Type\Enumeration\Gender
      * @return string
      */
     public function getGender(): string;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
-use MEDIAESSENZ\Mail\Enumeration\Gender;
+use MEDIAESSENZ\Mail\Type\Enumeration\Gender;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Address extends \FriendsOfTYPO3\TtAddress\Domain\Model\Address implements RecipientInterface

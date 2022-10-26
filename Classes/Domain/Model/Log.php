@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DateTimeImmutable;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Log extends AbstractEntity
@@ -54,9 +55,9 @@ class Log extends AbstractEntity
     protected int $responseType = 0;
 
     /**
-     * @var int
+     * @var SendFormat
      */
-    protected int $formatSent = 0;
+    protected SendFormat $formatSent;
 
     /**
      * @var int
@@ -77,6 +78,15 @@ class Log extends AbstractEntity
      * @var DateTimeImmutable|null
      */
     protected ?DateTimeImmutable $lastChange;
+
+    public function __construct()
+    {
+        $this->formatSent = new SendFormat(SendFormat::NONE);
+    }
+    public function initializeObject(): void
+    {
+        $this->formatSent = $this->formatSent ?? new SendFormat(SendFormat::NONE);
+    }
 
     /**
      * @return Mail
@@ -241,18 +251,18 @@ class Log extends AbstractEntity
     }
 
     /**
-     * @return int
+     * @return SendFormat
      */
-    public function getFormatSent(): int
+    public function getFormatSent(): SendFormat
     {
         return $this->formatSent;
     }
 
     /**
-     * @param int $formatSent
+     * @param SendFormat $formatSent
      * @return Log
      */
-    public function setFormatSent(int $formatSent): Log
+    public function setFormatSent(SendFormat $formatSent): Log
     {
         $this->formatSent = $formatSent;
         return $this;

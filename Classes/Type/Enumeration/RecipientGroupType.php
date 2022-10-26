@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace MEDIAESSENZ\Mail\Enumeration;
+namespace MEDIAESSENZ\Mail\Type\Enumeration;
 
 use TYPO3\CMS\Core\Type\Enumeration;
 

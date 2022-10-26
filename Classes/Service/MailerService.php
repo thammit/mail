@@ -11,8 +11,8 @@ use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
-use MEDIAESSENZ\Mail\Enumeration\MailType;
-use MEDIAESSENZ\Mail\Enumeration\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -423,13 +423,14 @@ class MailerService implements LoggerAwareInterface
      * @param array $recipientData Recipient's data array
      * @param string $tableNameChar Table name, from which the recipient come from
      *
-     * @return int Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
+     * @return SendFormat Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function sendPersonalizedMail(array $recipientData, string $tableNameChar): int
+    public function sendPersonalizedMail(array $recipientData, string $tableNameChar): SendFormat
     {
-        $formatSent = SendFormat::NONE;
+//        $formatSent = SendFormat::NONE;
+        $formatSent = new SendFormat(SendFormat::NONE);
 
         foreach ($recipientData as $key => $value) {
             $recipientData[$key] = is_string($value) ? htmlspecialchars($value) : $value;
@@ -451,12 +452,11 @@ class MailerService implements LoggerAwareInterface
             $this->setHtmlContent('');
             if ($this->isHtml && ($recipientData['accepts_html'] || $tableNameChar == 'P')) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, $recipientData['categories_list']);
-                $tempContent_HTML = implode('', $contentParts);
 
                 if ($mailHasContent) {
-                    $tempContent_HTML = $this->replaceMailMarkers($tempContent_HTML, $recipientData, $additionalMarkers);
-                    $this->setHtmlContent($tempContent_HTML);
-                    $formatSent |= SendFormat::HTML;
+                    $this->setHtmlContent($this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers));
+//                    $formatSent |= SendFormat::HTML;
+                    $formatSent->set(SendFormat::HTML);
                 }
             }
 
@@ -464,10 +464,9 @@ class MailerService implements LoggerAwareInterface
             $this->setPlainContent('');
             if ($this->isPlain) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, $recipientData['categories_list']);
-                $plainTextContent = implode('', $contentParts);
 
                 if ($mailHasContent) {
-                    $plainTextContent = $this->replaceMailMarkers($plainTextContent, $recipientData, $additionalMarkers);
+                    $plainTextContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
                     if ($this->redirect || $this->redirectAll) {
                         $plainTextContent = MailerUtility::shortUrlsInPlainText(
                             $plainTextContent,
@@ -476,14 +475,15 @@ class MailerService implements LoggerAwareInterface
                         );
                     }
                     $this->setPlainContent($plainTextContent);
-                    $formatSent |= SendFormat::PLAIN;
+//                    $formatSent |= SendFormat::PLAIN;
+                    $formatSent->set(SendFormat::PLAIN);
                 }
             }
 
             $this->TYPO3MID = $midRidId . '-' . md5($midRidId);
             $this->returnPath = str_replace('###XID###', $midRidId, $this->returnPath);
 
-            if ($formatSent && GeneralUtility::validEmail($recipientData['email'])) {
+            if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
                 $this->sendMailToRecipient(
                     new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
                     $recipientData
@@ -783,14 +783,14 @@ class MailerService implements LoggerAwareInterface
         // always include locallang file
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
 
-        $pt = MailerUtility::getMilliseconds();
+        $startTime = MailerUtility::getMilliseconds();
 
         $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
         $mailToSend = $this->mailRepository->findMailToSend();
         if ($mailToSend instanceof Mail) {
             $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $mailToSend->getUid() . ', \'' . $mailToSend->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
             $this->prepare($mailToSend->getUid());
-            $query_info = unserialize($mailToSend->getQueryInfo());
+            $queryInfo = unserialize($mailToSend->getQueryInfo());
 
             if (!$mailToSend->getScheduledBegin()) {
                 // Hook to alter the list of recipients
@@ -799,7 +799,7 @@ class MailerService implements LoggerAwareInterface
                     if (is_array($queryInfoHook)) {
                         $hookParameters = [
                             'mail' => $mailToSend,
-                            'query_info' => &$query_info,
+                            'query_info' => &$queryInfo,
                         ];
                         $hookReference = &$this;
                         foreach ($queryInfoHook as $hookFunction) {
@@ -810,7 +810,7 @@ class MailerService implements LoggerAwareInterface
                 $this->setJobBegin($mailToSend);
             }
 
-            $finished = !is_array($query_info['id_lists']) || $this->massSend($query_info['id_lists'], $mailToSend->getUid());
+            $finished = !is_array($queryInfo['id_lists']) || $this->massSend($queryInfo['id_lists'], $mailToSend->getUid());
 
             if ($finished) {
                 $this->setJobEnd($mailToSend);
@@ -819,8 +819,8 @@ class MailerService implements LoggerAwareInterface
             $this->logger->debug(LanguageUtility::getLL('dmailer_nothing_to_do'));
         }
 
-        $parsetime = MailerUtility::getMilliseconds() - $pt;
-        $this->logger->debug(LanguageUtility::getLL('dmailer_ending') . ' ' . $parsetime . ' ms');
+        $parseTime = MailerUtility::getMilliseconds() - $startTime;
+        $this->logger->debug(LanguageUtility::getLL('dmailer_ending') . ' ' . $parseTime . ' ms');
     }
 
     /**
@@ -915,6 +915,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         // Hook to edit or add the mail headers
+        // todo replace by PSR-14 Event
         if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'])) {
             $mailHeadersHook =& $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'];
             if (is_array($mailHeadersHook)) {

@@ -14,6 +14,7 @@ use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
@@ -291,9 +292,13 @@ class MailController extends AbstractController
                     ];
                 } else {
                     if (method_exists($mail, $getter)) {
+                        $rawValue = $mail->$getter();
+                        if ($rawValue instanceof SendFormat) {
+                            $rawValue = (string)$rawValue;
+                        }
                         $data[$groupName][] = [
                             'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $table),
-                            'value' => htmlspecialchars((string)BackendUtility::getProcessedValue($tableName, $columnName, ($mail->$getter() ?? false))),
+                            'value' => htmlspecialchars((string)BackendUtility::getProcessedValue($tableName, $columnName, $rawValue)),
                         ];
                     }
                 }

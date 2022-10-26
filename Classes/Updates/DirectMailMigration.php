@@ -5,7 +5,7 @@ namespace MEDIAESSENZ\Mail\Updates;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use MEDIAESSENZ\Mail\Enumeration\SendFormat;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
