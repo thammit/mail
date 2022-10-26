@@ -10,6 +10,7 @@ use MEDIAESSENZ\Mail\Events\MailRenderedEvent;
 use MEDIAESSENZ\Mail\Utility\FrontendUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use RuntimeException;
+use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ControllerContext;
@@ -54,7 +55,7 @@ final class MailService
         /** @var MailMessage $msg */
         $msg = GeneralUtility::makeInstance(MailMessage::class);
 
-        $msg->setFrom([$this->config->senderEmail => $this->config->senderName]);
+        $msg->from(new Address($this->config->senderEmail, $this->config->senderName));
         if ($this->config->cc) {
             $msg->setCc([$this->config->cc]);
         }
@@ -62,7 +63,7 @@ final class MailService
             $msg->setBcc([$this->config->bcc]);
         }
         if ($this->config->replyTo) {
-            $msg->setReplyTo([$this->config->replyTo]);
+            $msg->replyTo(new Address($this->config->replyToEmail, $this->config->replyToName));
         }
         if ($this->config->organization) {
             $msg->getHeaders()->addTextHeader('Organization', $this->config->organization);

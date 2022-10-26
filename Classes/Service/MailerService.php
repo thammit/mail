@@ -11,6 +11,8 @@ use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
+use MEDIAESSENZ\Mail\Mail\MailConfiguration;
+use MEDIAESSENZ\Mail\Mail\MailService;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
@@ -26,7 +28,6 @@ use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -424,7 +425,6 @@ class MailerService implements LoggerAwareInterface
      * @param string $tableName Table name, from which the recipient come from
      *
      * @return SendFormat Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
     public function sendPersonalizedMail(array $recipientData, string $tableName): SendFormat
@@ -614,7 +614,6 @@ class MailerService implements LoggerAwareInterface
      *
      * @return void
      * @throws DBALException
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      * @throws \Exception
      */
@@ -827,9 +826,8 @@ class MailerService implements LoggerAwareInterface
         // iterate through the media array and embed them
         if ($this->includeMedia && !empty($this->getHtmlContent())) {
             // extract all media path from the mail message
-            $this->mailParts['html']['media'] = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
-            foreach ($this->mailParts['html']['media'] as $media) {
-                // TODO: why are there table related tags here?
+            $medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
+            foreach ($medias as $media) {
                 if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && $media['tag'] === 'img') {
                     if (ini_get('allow_url_fopen')) {
                         $mailMessage->embed(fopen($media['absRef'], 'r'), basename($media['absRef']));
@@ -857,8 +855,9 @@ class MailerService implements LoggerAwareInterface
             $files = MailerUtility::getAttachments($this->mailUid);
             /** @var FileReference $file */
             foreach ($files as $file) {
-                $filePath = Environment::getPublicPath() . '/' . $file->getPublicUrl();
-                $mailMessage->attachFromPath($filePath);
+//                $filePath = Environment::getPublicPath() . '/' . $file->getPublicUrl();
+//                $mailMessage->attachFromPath($filePath);
+                $mailMessage->attachFromPath($file->getForLocalProcessing(false));
             }
         }
     }
@@ -869,11 +868,67 @@ class MailerService implements LoggerAwareInterface
      * @param string|Address $recipient The recipient to send the mail to
      * @param array|null $recipientData Recipient's data array
      * @return void
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
     protected function sendMailToRecipient(Address|string $recipient, array $recipientData = null): void
     {
+        $mailConfig = new MailConfiguration();
+        $mailConfig->layoutPaths = ['EXT:mail/Resources/Private/Layouts/'];
+        $mailConfig->templatePaths = ['EXT:mail/Resources/Private/Templates/'];
+        $mailConfig->partialPaths = ['EXT:mail/Resources/Private/Partials/'];
+        $mailConfig->controllerName = 'Mail';
+        $mailConfig->extensionName = 'Mail';
+        $mailConfig->pluginName = 'Mail';
+        $mailConfig->allowedLanguages = ['en', 'de'];
+        $mailConfig->setAutoSubmittedHeader = true;
+        $mailConfig->senderEmail = $this->fromEmail;
+        $mailConfig->senderName = $this->fromName;
+        if ($this->replyToEmail) {
+            $mailConfig->replyToEmail = $this->replyToEmail;
+            $mailConfig->replyToName = $this->replyToName;
+        } else {
+            $mailConfig->replyToEmail = $this->fromEmail;
+            $mailConfig->replyToName = $this->fromName;
+        }
+        if ($this->organisation) {
+            $mailConfig->organization = $this->organisation;
+        }
+
+        $mailService = GeneralUtility::makeInstance(MailService::class, $mailConfig);
+        $msg = $mailService->createMessage();
+        $msg->setSiteIdentifier($this->siteIdentifier);
+
+        $mailView = $mailService->createMailView($msg);
+        $mailView->assign('data', 'Hello Mail');
+
+        $msg->priority($this->priority);
+        if (GeneralUtility::validEmail($this->returnPath)) {
+            $msg->sender($this->returnPath);
+        }
+
+        $msg->setContent($mailService->renderMail($mailView, 'Default', 'de'));
+        $msg->subject($this->subject);
+        $msg->to($recipient);
+
+        if ($this->attachment > 0) {
+            $files = MailerUtility::getAttachments($this->mailUid);
+            foreach ($files as $file) {
+                $msg->attachFromPath($file->getForLocalProcessing(false));
+            }
+        }
+
+        $header = $msg->getHeaders();
+        if ($this->TYPO3MID) {
+            $header->addTextHeader(Constants::MAIL_HEADER_IDENTIFIER, $this->TYPO3MID);
+        }
+
+        $msg->send();
+
+
+        /*
+         * OWN MAILER
+         */
+
         /** @var MailMessage $mailer */
         $mailer = GeneralUtility::makeInstance(MailMessage::class);
         $mailer
@@ -906,21 +961,21 @@ class MailerService implements LoggerAwareInterface
             $header->addTextHeader('Organization', $this->organisation);
         }
 
+        // todo add PSR-14 Event to modify mail headers
         // Hook to edit or add the mail headers
-        // todo replace by PSR-14 Event
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'])) {
-            $mailHeadersHook =& $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'];
-            if (is_array($mailHeadersHook)) {
-                $hookParameters = [
-                    'row' => &$recipientData,
-                    'header' => &$header,
-                ];
-                $hookReference = &$this;
-                foreach ($mailHeadersHook as $hookFunction) {
-                    GeneralUtility::callUserFunction($hookFunction, $hookParameters, $hookReference);
-                }
-            }
-        }
+//        if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'])) {
+//            $mailHeadersHook =& $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'];
+//            if (is_array($mailHeadersHook)) {
+//                $hookParameters = [
+//                    'row' => &$recipientData,
+//                    'header' => &$header,
+//                ];
+//                $hookReference = &$this;
+//                foreach ($mailHeadersHook as $hookFunction) {
+//                    GeneralUtility::callUserFunction($hookFunction, $hookParameters, $hookReference);
+//                }
+//            }
+//        }
 
         $mailer->send();
         unset($mailer);

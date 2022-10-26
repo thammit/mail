@@ -33,11 +33,9 @@ class MailMessage extends \TYPO3\CMS\Core\Mail\MailMessage implements LoggerAwar
      * a Mailer instance which can be used via Mailer->send($message);
      *
      * @return bool whether the message was accepted or not
-     * @throws Exception
      */
     public function send(): bool
     {
-        $this->initializeMailer();
         $accepted = false;
         try {
             $this->initializeMailer();

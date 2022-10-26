@@ -12,6 +12,8 @@ final class MailConfiguration
     public string $cc = '';
     public string $bcc = '';
     public string $replyTo = '';
+    public string $replyToName = '';
+    public string $replyToEmail = '';
     public string $organization = '';
 
     public string $extensionName = '';

@@ -10,4 +10,31 @@ module.tx_mail {
             10 = EXT:mail/Resources/Private/Backend/Layouts/
         }
     }
+    settings {
+        view {
+            templateRootPaths {
+                10 = EXT:mail/Resources/Private/Templates/
+            }
+            partialRootPaths {
+                10 = EXT:mail/Resources/Private/Partials/
+            }
+            layoutRootPaths {
+                10 = EXT:mail/Resources/Private/Layouts/
+            }
+        }
+    }
+}
+
+plugin.tx_mail {
+    view {
+        templateRootPaths {
+            10 = EXT:mail/Resources/Private/Templates/
+        }
+        partialRootPaths {
+            10 = EXT:mail/Resources/Private/Partials/
+        }
+        layoutRootPaths {
+            10 = EXT:mail/Resources/Private/Layouts/
+        }
+    }
 }
