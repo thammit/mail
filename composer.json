@@ -15,7 +15,8 @@
         "typo3/cms-core": "^11.5",
         "friendsoftypo3/tt-address": "^6.0",
         "friendsoftypo3/rdct": "^2.1",
-        "tedivm/fetch": "^0.7"
+        "tedivm/fetch": "^0.7",
+        "league/html-to-markdown": "^5"
     },
     "extra": {
         "typo3/cms": {

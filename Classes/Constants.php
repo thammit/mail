@@ -13,4 +13,6 @@ final class Constants
     const PANEL_OPEN = 'open';
 
     const CONTENT_SECTION_BOUNDARY = 'DMAILER_SECTION_BOUNDARY';
+
+    const MAIL_HEADER_IDENTIFIER = 'X-TYPO3MID';
 }

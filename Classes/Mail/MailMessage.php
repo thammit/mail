@@ -3,12 +3,16 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Mail;
 
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Throwable;
 
-class MailMessage extends \TYPO3\CMS\Core\Mail\MailMessage
+class MailMessage extends \TYPO3\CMS\Core\Mail\MailMessage implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     protected string $siteIdentifier = '';
 
     protected int $scheduled = 0;
@@ -30,18 +34,45 @@ class MailMessage extends \TYPO3\CMS\Core\Mail\MailMessage
      *
      * @return bool whether the message was accepted or not
      * @throws Exception
-     * @throws TransportExceptionInterface
      */
     public function send(): bool
     {
         $this->initializeMailer();
-        $this->sent = false;
-        $this->mailer->send($this);
-        $sentMessage = $this->mailer->getSentMessage();
-        if ($sentMessage) {
-            $this->sent = true;
+        $accepted = false;
+        try {
+            $this->initializeMailer();
+            $this->mailer->send($this);
+            $sentMessage = $this->mailer->getSentMessage();
+            if ($sentMessage) {
+                $accepted = true;
+            }
+        } catch (Throwable $e) {
+            $data['message'] = [
+                'to' => $this->getTo() ? $this->getTo()[0]->toString() : '[not-set]',
+                'subject' => $this->getSubject()
+            ];
+            $data['exception'] = $e;
+            $this->logger->critical('Email sending caused exception', $data);
         }
-        return $this->sent;
+        return $accepted;
+    }
+
+    /**
+     * Shorthand method to set mail content based on pre-rendered data
+     *
+     * @param MailContent $mailContent
+     * @return $this
+     */
+    public function setContent(MailContent $mailContent): self
+    {
+        $this->subject($mailContent->subject);
+        if ($mailContent->text) {
+            $this->text($mailContent->text);
+        }
+        if ($mailContent->html) {
+            $this->html($mailContent->html);
+        }
+        return $this;
     }
 
     public function setSiteIdentifier(string $siteIdentifier): self

@@ -11,9 +11,9 @@ return [
         'delete' => '',
         'typeicon_column' => 'recipient_table',
         'typeicon_classes' => [
-            'f' => 'mail-log',
-            't' => 'mail-log',
-            'P' => 'mail-log',
+            'fe_users' => 'mail-log',
+            'tt_address' => 'mail-log',
+            'tx_mail_domain_model_group' => 'mail-log',
         ],
     ],
     'columns' => [
@@ -28,24 +28,6 @@ return [
             'config' => [
                 'type' => 'passthrough'
             ]
-        ],
-        'recipient' => [
-            'label' => 'Recipient',
-            'config' => [
-                'type' => 'group',
-                'allowed' => 'fe_users,tt_address,tx_mail_domain_model_recipient',
-                'fieldControl' => [
-                    'editPopup' => [
-                        'disabled' => false,
-                    ],
-                    'addRecord' => [
-                        'disabled' => false,
-                    ],
-                    'listModule' => [
-                        'disabled' => false,
-                    ],
-                ],
-            ],
         ],
         'recipient_uid' => [
             'label' => 'Recipient Uid',

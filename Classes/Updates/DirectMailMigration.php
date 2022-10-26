@@ -119,7 +119,6 @@ class DirectMailMigration implements UpgradeWizardInterface
         foreach ($this->getSysDmailLogRecordsToMigrate() as $record) {
             $alreadyMigrated = $connectionLog->count('*', 'tx_mail_domain_model_log', ['uid' => $record['uid']]);
             if ($alreadyMigrated === 0) {
-                $recipientTable = $record['rtbl'] === 'f' ? 'fe_users' : ($record['rtbl'] === 't' ? 'tt_address' : 'tx_mail_domain_model_recipient');
                 // Change plain and html format to match send options of mail table
                 $formatSent = match ($record['html_sent']) {
                     1 => SendFormat::HTML,
@@ -127,12 +126,18 @@ class DirectMailMigration implements UpgradeWizardInterface
                     3 => SendFormat::BOTH,
                     default => SendFormat::NONE,
                 };
+                $table = match ($record['rtbl']) {
+                    't' => 'tt_address',
+                    'f' => 'fe_users',
+                    'P' => 'tx_mail_domain_model_group',
+                    default => $record['rtbl'],
+                };
                 $connectionLog->insert('tx_mail_domain_model_log',
                     [
                         'uid' => $record['uid'],
                         'mail' => $record['mid'],
-                        'recipient' => $recipientTable . '_' . $record['rid'],
-                        'recipient_table' => $record['rtbl'],
+//                        'recipient_table' => $record['rtbl'],
+                        'recipient_table' => $table,
                         'recipient_uid' => $record['rid'],
                         'email' => $record['email'],
                         'tstamp' => $record['tstamp'],

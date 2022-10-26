@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Fetch\Message;
 use Fetch\Server;
+use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BounceMailUtility;
@@ -174,7 +175,7 @@ class AnalyzeBounceMailCommand extends Command
      */
     private function processBounceMail(Message $message): bool
     {
-        $midArray = BounceMailUtility::searchForHeaderData($message, 'X-TYPO3MID:');
+        $midArray = BounceMailUtility::searchForHeaderData($message, Constants::MAIL_HEADER_IDENTIFIER);
 
         if (!$midArray) {
             // no mid, rid and rtbl found - exit

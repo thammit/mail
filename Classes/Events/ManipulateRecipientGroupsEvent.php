@@ -5,6 +5,11 @@ namespace MEDIAESSENZ\Mail\Events;
 
 class ManipulateRecipientGroupsEvent
 {
+    /**
+     * @param AfterMailerInitializationEvent $event
+     * @return void
+     * todo
+     */
     public function __invoke(AfterMailerInitializationEvent $event): void
     {
         $event->getMailer()->injectMailSettings(['transport' => 'null']);

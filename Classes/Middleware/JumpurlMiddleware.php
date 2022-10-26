@@ -4,6 +4,7 @@ namespace MEDIAESSENZ\Mail\Middleware;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -27,10 +28,6 @@ class JumpurlMiddleware implements MiddlewareInterface
 
     public const RECIPIENT_TABLE_TTADDRESS = 'tt_address';
     public const RECIPIENT_TABLE_FEUSER = 'fe_users';
-
-    public const RESPONSE_TYPE_URL = -1;
-    public const RESPONSE_TYPE_HREF = 1;
-    public const RESPONSE_TYPE_PLAIN = 2;
 
     /**
      * @var int
@@ -100,7 +97,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                 // functionality was used to count the number of "opened mails" received (url, dmailerping)
 
                 if ($this->isAllowedJumpUrlTarget($jumpurl)) {
-                    $this->responseType = self::RESPONSE_TYPE_URL;
+                    $this->responseType = ResponseType::PING;
                 }
 
                 // to count the dmailerping correctly, we need something unique
@@ -114,7 +111,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                     'url' => $jumpurl,
                     'response_type' => $this->responseType,
                     'url_id' => (int)$urlId,
-                    'recipient_table' => mb_substr($this->recipientTable, 0, 1),
+                    'recipient_table' => $this->recipientTable,
                     'recipient_uid' => (int)($recipientUid ?? $this->recipientRecord['uid']),
                 ];
                 if ($this->hasRecentLog($mailLogParams) === false) {
@@ -254,11 +251,11 @@ class JumpurlMiddleware implements MiddlewareInterface
             );
             if ($targetIndex >= 0) {
                 // Link (number)
-                $this->responseType = self::RESPONSE_TYPE_HREF;
+                $this->responseType = ResponseType::HTML;
                 $targetUrl = $mailContent['html']['hrefs'][$targetIndex]['absRef'];
             } else {
                 // Link (number, plaintext)
-                $this->responseType = self::RESPONSE_TYPE_PLAIN;
+                $this->responseType = ResponseType::PLAIN;
                 $targetUrl = $mailContent['plain']['link_ids'][abs($targetIndex)];
             }
             $targetUrl = htmlspecialchars_decode(urldecode($targetUrl));
@@ -283,8 +280,8 @@ class JumpurlMiddleware implements MiddlewareInterface
         }
 
         $this->recipientTable = match ($recipientTable) {
-            't' => self::RECIPIENT_TABLE_TTADDRESS,
-            'f' => self::RECIPIENT_TABLE_FEUSER,
+            'tt_address' => self::RECIPIENT_TABLE_TTADDRESS,
+            'fe_users' => self::RECIPIENT_TABLE_FEUSER,
             default => '',
         };
 

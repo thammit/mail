@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use Fetch\Message;
+use MEDIAESSENZ\Mail\Constants;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class BounceMailUtility
@@ -15,7 +16,7 @@ class BounceMailUtility
         '554' => 'error in header|header error|invalid message|invalid structure|header line format error'
     ];
 
-    public static function searchForHeaderData(Message $message, $header = 'X-TYPO3MID:'): bool|array
+    public static function searchForHeaderData(Message $message, $header = Constants::MAIL_HEADER_IDENTIFIER): bool|array
     {
         // get attachment
         $attachments = $message->getAttachments();
@@ -24,7 +25,7 @@ class BounceMailUtility
             // search in attachment
             foreach ($attachments as $attachment) {
                 // Find mail id
-                $midArray = BounceMailUtility::getHeaderData($attachment->getData());
+                $midArray = MailerUtility::decodeMailIdentifierHeader($attachment->getData(), $header);
                 if ($midArray) {
                     // if mid, rid and rtbl are found, then stop looping
                     break;
@@ -32,35 +33,11 @@ class BounceMailUtility
             }
         } else {
             // search in MessageBody (see rfc822-headers as Attachments placed )
-            $midArray = BounceMailUtility::getHeaderData($message->getMessageBody());
+            $midArray = MailerUtility::decodeMailIdentifierHeader($message->getMessageBody(), $header);
         }
 
         return $midArray;
     }
-
-    /**
-     * @param string $content Mail (header) content
-     * @param string $header Header key with colon: e.g. "X-TYPO3MID:"
-     * @return array|bool If "X-Typo3MID" header is found and integrity is OK,
-     */
-    public static function getHeaderData(string $content, string $header = ''): array|bool
-    {
-        if (str_contains($content, $header)) {
-            $p = explode($header, $content, 2);
-            $l = explode(LF, $p[1], 2);
-            [$mid, $hash] = GeneralUtility::trimExplode('-', $l[0]);
-            if (md5($mid) == $hash) {
-                $moreParts = explode('_', substr($mid, 3));
-                return [
-                    'mail' => $moreParts[0],
-                    'recipient_table' => substr($moreParts[1], 0, 1),
-                    'recipient_uid' => substr($moreParts[1], 1)
-                ];
-            }
-        }
-        return false;
-    }
-
 
     /**
      * Analyses the return-mail content for the Dmailer module

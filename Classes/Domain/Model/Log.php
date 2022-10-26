@@ -14,11 +14,6 @@ class Log extends AbstractEntity
      */
     protected Mail $mail;
 
-//    /**
-//     * @var SimpleRecipientInterface|null
-//     */
-//    protected ?SimpleRecipientInterface $recipient;
-
     /**
      * @var string
      */
@@ -105,24 +100,6 @@ class Log extends AbstractEntity
         $this->mail = $mail;
         return $this;
     }
-
-//    /**
-//     * @return SimpleRecipientInterface|null
-//     */
-//    public function getRecipient(): ?SimpleRecipientInterface
-//    {
-//        return $this->recipient;
-//    }
-//
-//    /**
-//     * @param SimpleRecipientInterface $recipient
-//     * @return Log
-//     */
-//    public function setRecipient(SimpleRecipientInterface $recipient): Log
-//    {
-//        $this->recipient = $recipient;
-//        return $this;
-//    }
 
     /**
      * @return string

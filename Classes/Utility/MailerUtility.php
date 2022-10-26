@@ -430,6 +430,42 @@ class MailerUtility
      */
 
     /**
+     * @param $mailUid
+     * @param $tableName
+     * @param $recipientUid
+     * @return string
+     */
+    public static function buildMailIdentifierHeader($mailUid, $tableName, $recipientUid): string
+    {
+        $midRidId = 'MID' . $mailUid . '-' . $tableName . '-' . $recipientUid;
+        return $midRidId . '-' . md5($midRidId);
+    }
+
+    /**
+     * @param $content
+     * @param $header
+     * @return array|bool
+     */
+    public static function decodeMailIdentifierHeader($content, $header): array|bool
+    {
+        if (str_contains($content, $header)) {
+            $p = explode($header, $content, 2);
+            $l = explode(LF, $p[1], 2);
+            [$mailUid, $hash] = GeneralUtility::trimExplode('-', $l[0]);
+            if (md5($mailUid) === $hash) {
+                // remove "MID" prefix and separate mailUid, tableName and recipientUid
+                $moreParts = explode('-', substr($mailUid, 3));
+                return [
+                    'mail' => $moreParts[0],
+                    'recipient_table' => $moreParts[1],
+                    'recipient_uid' => $moreParts[2],
+                ];
+            }
+        }
+        return false;
+    }
+
+    /**
      * Fetches the attachment files referenced in the mail record.
      *
      * @param int $uid The uid of the mail record to fetch the records for

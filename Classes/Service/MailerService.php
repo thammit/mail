@@ -421,15 +421,14 @@ class MailerService implements LoggerAwareInterface
      * Replace the marker with recipient data and then send it
      *
      * @param array $recipientData Recipient's data array
-     * @param string $tableNameChar Table name, from which the recipient come from
+     * @param string $tableName Table name, from which the recipient come from
      *
      * @return SendFormat Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
      * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function sendPersonalizedMail(array $recipientData, string $tableNameChar): SendFormat
+    public function sendPersonalizedMail(array $recipientData, string $tableName): SendFormat
     {
-//        $formatSent = SendFormat::NONE;
         $formatSent = new SendFormat(SendFormat::NONE);
 
         foreach ($recipientData as $key => $value) {
@@ -441,21 +440,19 @@ class MailerService implements LoggerAwareInterface
         $recipientData['email'] = trim($recipientData['email']);
 
         if ($recipientData['email']) {
-            $midRidId = 'MID' . $this->mailUid . '_' . $tableNameChar . $recipientData['uid'];
 
             $additionalMarkers = [
-                '###SYS_TABLE_NAME###' => $tableNameChar,
+                '###SYS_TABLE_NAME###' => $tableName,
                 '###SYS_MAIL_ID###' => $this->mailUid,
                 '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
             ];
 
             $this->setHtmlContent('');
-            if ($this->isHtml && ($recipientData['accepts_html'] || $tableNameChar == 'P')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, $recipientData['categories_list']);
+            if ($this->isHtml && ($recipientData['accepts_html'] || $tableName == 'tx_mail_domain_model_group')) {
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, $recipientData['categories']);
 
                 if ($mailHasContent) {
                     $this->setHtmlContent($this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers));
-//                    $formatSent |= SendFormat::HTML;
                     $formatSent->set(SendFormat::HTML);
                 }
             }
@@ -463,7 +460,7 @@ class MailerService implements LoggerAwareInterface
             // Plain
             $this->setPlainContent('');
             if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, $recipientData['categories_list']);
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, $recipientData['categories']);
 
                 if ($mailHasContent) {
                     $plainTextContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
@@ -475,13 +472,14 @@ class MailerService implements LoggerAwareInterface
                         );
                     }
                     $this->setPlainContent($plainTextContent);
-//                    $formatSent |= SendFormat::PLAIN;
                     $formatSent->set(SendFormat::PLAIN);
                 }
             }
 
-            $this->TYPO3MID = $midRidId . '-' . md5($midRidId);
-            $this->returnPath = str_replace('###XID###', $midRidId, $this->returnPath);
+            $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($this->mailUid, $tableName, $recipientData['uid']);
+
+            // todo what is this for?
+            $this->returnPath = str_replace('###XID###', explode('-', $this->TYPO3MID)[0], $this->returnPath);
 
             if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
                 $this->sendMailToRecipient(
@@ -513,15 +511,9 @@ class MailerService implements LoggerAwareInterface
         foreach ($groupedRecipientIds as $table => $listArr) {
             if (is_array($listArr)) {
                 $numberOfSentMailsOfGroup = 0;
-                // Find tKey
-                $recipientTable = match ($table) {
-                    'tt_address', 'fe_users' => substr($table, 0, 1),
-                    'tx_mail_domain_model_group' => 'P',
-                    default => 'u',
-                };
 
                 // get already sent mails
-                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($mailUid, $recipientTable);
+                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($mailUid, $table);
                 if ($table === 'tx_mail_domain_model_group') {
                     foreach ($listArr as $kval => $recipientData) {
                         $kval++;
@@ -531,7 +523,7 @@ class MailerService implements LoggerAwareInterface
                                 break;
                             }
                             $recipientData['uid'] = $kval;
-                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
+                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $table);
                             $numberOfSentMailsOfGroup++;
                             $numberOfSentMails++;
                         }
@@ -552,7 +544,7 @@ class MailerService implements LoggerAwareInterface
                         $statement = $queryBuilder->execute();
 
                         while ($recipientData = $statement->fetchAssociative()) {
-                            $recipientData['categories_list'] = $this->getListOfRecipientCategories($table, $recipientData['uid']);
+                            $recipientData['categories'] = $this->getListOfRecipientCategories($table, $recipientData['uid']);
 
                             if ($numberOfSentMails >= $this->sendPerCycle) {
                                 $finished = false;
@@ -560,7 +552,7 @@ class MailerService implements LoggerAwareInterface
                             }
 
                             // We are NOT finished!
-                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $recipientTable);
+                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $table);
                             $numberOfSentMailsOfGroup++;
                             $numberOfSentMails++;
                         }
@@ -907,7 +899,7 @@ class MailerService implements LoggerAwareInterface
         // organization and TYPO3MID
         $header = $mailer->getHeaders();
         if ($this->TYPO3MID) {
-            $header->addTextHeader('X-TYPO3MID', $this->TYPO3MID);
+            $header->addTextHeader(Constants::MAIL_HEADER_IDENTIFIER, $this->TYPO3MID);
         }
 
         if ($this->organisation) {

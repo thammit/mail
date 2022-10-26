@@ -286,13 +286,13 @@ class LogRepository extends Repository
 
         foreach ($result as $row) {
             switch ($row['recipient_table']) {
-                case 't':
+                case 'tt_address':
                     $idLists['addresses'][] = $row['recipient_uid'];
                     break;
-                case 'f':
+                case 'fe_users':
                     $idLists['frontendUsers'][] = $row['recipient_uid'];
                     break;
-                case 'P':
+                case 'tx_mail_domain_model_group':
                     $idLists['plainList'][] = $row['email'];
                     break;
                 default:
