@@ -5,8 +5,10 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<f:be.infobox state="-1">
-    <mail:help table="_MOD_Mail_Mail" field="{field}"/>
+<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+<f:be.infobox state="-1" title="{f:translate(key:'{lll}{field}.alttitle')}">
+    <p><f:translate key="{lll}{field}.description" /></p>
+    <f:translate key="{lll}{field}.details" />
 </f:be.infobox>
 
 </html>

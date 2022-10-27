@@ -721,9 +721,6 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="mailgroup_table_disallowed_csv" resname="mailgroup_table_disallowed_csv">
 				<source>CSV export failed. Insufficient access right.</source>
 			</trans-unit>
-			<trans-unit id="nl_cat" resname="nl_cat">
-				<source>Assign categories to content elements</source>
-			</trans-unit>
 			<trans-unit id="restrictToCategories" resname="restrictToCategories">
 				<source>Restrict to categories</source>
 			</trans-unit>
@@ -776,7 +773,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Type</source>
 			</trans-unit>
 			<trans-unit id="nl_l_update" resname="nl_l_update">
-				<source>Update category settings</source>
+				<source>Save category restrictions</source>
 			</trans-unit>
 			<trans-unit id="nl_l_warning" resname="nl_l_warning">
 				<source>There are already %s mails based on this mail. Are you sure you want to create another one?</source>
@@ -1114,7 +1111,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="testmail_simple_msg" resname="testmail_simple_msg" xmlspace="preserve">
 				<source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.<br>
-				Beware The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
+				Beware: The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
 			</trans-unit>
 			<trans-unit id="view_delivery_begin_end" resname="view_delivery_begin_end">
 				<source>Delivery begun/ended</source>
@@ -1197,6 +1194,95 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="mod.no_recipients" resname="mod.no_recipients">
 				<source>no recipients</source>
 			</trans-unit>
+            <trans-unit id="assign_categories.alttitle" resname="assign_categories.alttitle">
+                <source>Assign categories to content elements</source>
+            </trans-unit>
+            <trans-unit id="assign_categories.description" xml:space="preserve">
+			<source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
+			Content elements without category restrictions will appear for in all mails.]]></source>
+		</trans-unit>
+            <trans-unit id="create_directmail_from_nl.alttitle">
+                <source>Create a new direct mail from newsletter</source>
+            </trans-unit>
+            <trans-unit id="create_directmail_from_nl.description">
+                <source>No direct mail has been created using the content of the following newsletters. Click on the one you want to use to create a new direct mail.</source>
+            </trans-unit>
+            <trans-unit id="create_directmail_from_url.alttitle">
+                <source>Create a new mailing from external pages</source>
+            </trans-unit>
+            <trans-unit id="create_directmail_from_url.description">
+                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+            </trans-unit>
+            <trans-unit id="create_newsletter.alttitle">
+                <source>Create a newsletter</source>
+            </trans-unit>
+            <trans-unit id="create_newsletter.description">
+                <source>Click on this link if you want to create a new newsletter.</source>
+            </trans-unit>
+            <trans-unit id="create_newsletter.details" xml:space="preserve">
+			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the Direct Mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
+
+You may personalize the direct mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
+
+###USER_uid### (the unique id of the recipient)
+###USER_name### (full name)
+###USER_firstname### (first name calculated)
+###USER_NAME### and ###USER_FIRSTNAME### will insert uppercase versions of the equivalents
+###USER_title###
+###USER_email###
+###USER_phone###
+###USER_www###
+###USER_address###
+###USER_company###
+###USER_city###
+###USER_zip###
+###USER_country###
+###USER_fax###
+###SYS_TABLE_NAME###
+###SYS_MAIL_ID###
+###SYS_AUTHCODE###]]></source>
+		</trans-unit>
+            <trans-unit id="directmail_actions.alttitle">
+                <source>Mail options menu</source>
+            </trans-unit>
+            <trans-unit id="directmail_actions.description">
+                <source>Select the action you want to perform on this mail.</source>
+            </trans-unit>
+            <trans-unit id="directmail_actions.details" xml:space="preserve">
+			<source><![CDATA[Possible actions are the following, but their availability vary depending on the current state of the direct mail:
+
+1. Fetch and compile mail content: this option lets you fetch or acquire the content of the direct mail which will be compiled in a special format for later mailing; this action must be performed before any other action may be taken; you should review the properties of the direct mail as presented on the screen, and edit them, if required, before fetching content.
+
+2. Send a testmail: this option lets you send a test mail to make sure that the email messages that will be sent to the recipient list look as expected when received in a client email application.
+
+3. Mass-send mail: this option lets you schedule the actual sending of the direct mail to a specific recipient list.
+
+4. See statistics of this mail: this option lets you review statistics on the direct mail and the responses, and take action on returned mails; this option is available only after mass-sending the mail has been initiated.]]></source>
+		</trans-unit>
+            <trans-unit id="folders.alttitle">
+                <source>Available mail folders</source>
+            </trans-unit>
+            <trans-unit id="folders.description">
+                <source>Select the mail folder you wish to work with.</source>
+            </trans-unit>
+            <trans-unit id="folders.details">
+                <source>Each mail folder is a specifically configured work area for the Direct Mail module.</source>
+            </trans-unit>
+            <trans-unit id="select_directmail.description">
+                <source>The following mails have not yet been sent. Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+            </trans-unit>
+            <trans-unit id="select_newsletter.alttitle">
+                <source>Select an internal page to create a mailing</source>
+            </trans-unit>
+            <trans-unit id="select_newsletter.description">
+                <source>Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+            </trans-unit>
+            <trans-unit id="quick_mail.alttitle">
+                <source>Create a quick mailing</source>
+            </trans-unit>
+            <trans-unit id="quick_mail.description">
+                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+            </trans-unit>
 		</body>
 	</file>
 </xliff>

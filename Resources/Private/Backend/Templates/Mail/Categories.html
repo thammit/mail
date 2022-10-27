@@ -13,7 +13,6 @@
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2><f:translate key="{lll}dmail_wiz3_cats"/></h2>
     <f:form action="updateCategories" arguments="{mail:mailUid}" method="post" enctype="multipart/form-data">
-        <h4><f:translate key="{lll}nl_cat" /></h4>
         <f:render partial="InfoBox" arguments="{field: 'assign_categories'}" />
         <f:if condition="{data.rows}">
             <div class="panel panel-default">
