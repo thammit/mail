@@ -226,7 +226,7 @@ return [
             ],
         ],
         'redirect_url' => [
-            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.long_link_rdct_url',
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.redirect_url',
             'config' => [
                 'type' => 'input',
                 'size' => '15',

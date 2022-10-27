@@ -377,11 +377,11 @@ class MailerUtility
     public static function replaceHrefsInContent(string $content, array $hrefs, string $jumpUrlPrefix, bool $jumpUrlUseId, bool $jumpUrlUseMailto): string
     {
         foreach ($hrefs as $urlId => $val) {
-            if (isset($val['no_jumpurl'])) {
+            if ($val['no_jumpurl'] ?? false) {
                 // A tag attribute "no_jumpurl=1" allows to disable jumpurl for custom links
                 $substVal = $val['absRef'];
             } else {
-                if ($jumpUrlPrefix && ($val['tag'] != 'form') && (!str_contains($val['ref'], 'mailto:'))) {
+                if ($jumpUrlPrefix && ($val['tag'] !== 'form') && (!str_contains($val['ref'], 'mailto:'))) {
                     // Form elements cannot use jumpurl!
                     if ($jumpUrlUseId) {
                         $substVal = $jumpUrlPrefix . $urlId;

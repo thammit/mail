@@ -45,10 +45,10 @@
 		<trans-unit id="sys_dmail.issent">
 			<source>Is sent</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail.long_link_mode">
+		<trans-unit id="sys_dmail.redirect_all">
 			<source>Redirect not only links longer than 76 characters but ALL links</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail.long_link_rdct_url">
+		<trans-unit id="sys_dmail.redirect_url">
 			<source>Long links redirection url</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.organisation">

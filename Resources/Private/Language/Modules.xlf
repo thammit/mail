@@ -44,8 +44,8 @@ When the Direct Mail is of type 'External URL', this field should contain the co
 			<source><![CDATA[If the option is set, images and other media are encoded and incorporated into the messages. Sent messages will be heavier to transport.
 If the option is not set, images and media are included in HTML content by absolute reference (href) to their location on the site where they reside.]]></source>
 		    </trans-unit>
-            <trans-unit id="long_link_mode.description">
-                <source>If set and if use_rdct is set, all links in plain text content will be redirected, not only links longer than 76 characters.</source>
+            <trans-unit id="redirect_all.description">
+                <source>If set and if redirect is set, all links in plain text content will be redirected, not only links longer than 76 characters.</source>
             </trans-unit>
             <trans-unit id="organisation.description">
                 <source>Enter the name of the sending organization.</source>
@@ -105,10 +105,10 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
                     URL'.
                 </source>
             </trans-unit>
-            <trans-unit id="use_rdct.description">
+            <trans-unit id="redirect.description">
                 <source>Redirect long links found in plain text content.</source>
             </trans-unit>
-            <trans-unit id="use_rdct.details">
+            <trans-unit id="redirect.details">
                 <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be substituted with ?RDCT=[md5hash] parameters.
                 </source>
             </trans-unit>

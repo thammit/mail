@@ -16,8 +16,11 @@ use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -342,8 +345,7 @@ class ReportService
             $id = abs(intval($id));
             $url = $htmlLinks[$id]['url'] ?: $urlArr[$origId];
             // a link to this host?
-            $uParts = @parse_url($url);
-            $urlstr = $this->getUrlStr($uParts);
+            $urlstr = $this->getUrlStr($url);
             $label = $this->getLinkLabel($url, $urlstr, false, $htmlLinks[$id]['label']);
             if (isset($urlCounter['html'][$id]['plainId'])) {
                 $tblLines[] = [
@@ -361,9 +363,9 @@ class ReportService
                     $label,
                     ($html ? $id : '-'),
                     ($html ? '-' : $id),
-                    ($html ? $urlCounter['html'][$id]['counter'] : $urlCounter['plain'][$origId]['counter']),
-                    $urlCounter['html'][$id]['counter'],
-                    $urlCounter['plain'][$origId]['counter'],
+                    ($html ? $urlCounter['html'][$id]['counter'] ?? 0 : $urlCounter['plain'][$origId]['counter'] ?? 0),
+                    $urlCounter['html'][$id]['counter'] ?? 0,
+                    $urlCounter['plain'][$origId]['counter'] ?? 0,
                     $urlstr,
                 ];
             }
@@ -374,8 +376,7 @@ class ReportService
         foreach ($urlArr as $id => $link) {
             if (!in_array($id, $clickedLinks) && (isset($htmlLinks['id']))) {
                 // a link to this host?
-                $uParts = @parse_url($link);
-                $urlstr = $this->getUrlStr($uParts);
+                $urlstr = $this->getUrlStr($link);
                 $label = $htmlLinks[$id]['label'] . ' (' . ($urlstr ?: '/') . ')';
                 $tblLines[] = [
                     $label,
@@ -414,7 +415,7 @@ class ReportService
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
         $site = $siteFinder->getSiteByPageId($this->mail->getPid());
 
-        if ($url && $site->getBase() === $urlParts['host']) {
+        if ($url && $site->getBase() === ($urlParts['host'] ?? '')) {
             $m = [];
             // do we have an id?
             if (preg_match('/(?:^|&)id=([0-9a-z_]+)/', $urlParts['query'], $m)) {
@@ -439,15 +440,15 @@ class ReportService
      * force http if UseHttpToFetch is set
      *
      * @return string the baseURL
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function getBaseURL(): string
     {
-//        $baseUrl = $this->siteUrl;
-//        $baseUrl = $this->mail->getRedirectUrl();
         $baseUrl = BackendDataUtility::getBaseUrl($this->mail->getPage() ?: $this->mail->getPid());
 
         // if fetching the newsletter using http, set the url to http here
-        if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['UseHttpToFetch'] == 1) {
+        if (ConfigurationUtility::getExtensionConfiguration('UseHttpToFetch')) {
             $baseUrl = str_replace('https', 'http', $baseUrl);
         }
 
@@ -502,11 +503,11 @@ class ReportService
         }
 
         $pageTSConfiguration = BackendUtility::getPagesTSconfig($this->mail->getPid())['mod.']['web_modules.']['mail.'] ?? [];
-        if ($pageTSConfiguration['showContentTitle'] == 1) {
+        if ($pageTSConfiguration['showContentTitle'] ?? false) {
             $label = $contentTitle;
         }
 
-        if ($pageTSConfiguration['prependContentTitle'] == 1) {
+        if ($pageTSConfiguration['prependContentTitle'] ?? false) {
             $label = $contentTitle . ' (' . $linkedWord . ')';
         }
 

@@ -273,15 +273,15 @@
 
 <f:section name="box-5">
     <div class="form-check mb-3">
-        <f:form.checkbox id="pageTS_use_rdct" class="form-check-input" name="pageTS[use_rdct]" value="1" checked="{configuration.use_rdct} == 1"/>
-        <label for="pageTS_use_rdct" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.use_rdct"/><f:render section="help" arguments="{messages: '{0: \'{lll}use_rdct.description\', 1: \'{lll}use_rdct.details\'}'}"/>
+        <f:form.checkbox id="pageTS_redirect" class="form-check-input" name="pageTS[redirect]" value="1" checked="{configuration.redirect} == 1"/>
+        <label for="pageTS_redirect" class="form-check-label">
+            <f:translate key="{lll2}sys_dmail.use_rdct"/><f:render section="help" arguments="{messages: '{0: \'{lll}redirect.description\', 1: \'{lll}redirect.details\'}'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
-        <f:form.checkbox id="pageTS_long_link_mode" class="form-check-input" name="pageTS[long_link_mode]" value="1" checked="{configuration.long_link_mode} == 1"/>
-        <label for="pageTS_long_link_mode" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.long_link_mode"/><f:render section="help" arguments="{messages: '{0: \'{lll}long_link_mode.description\'}'}"/>
+        <f:form.checkbox id="pageTS_redirect_all" class="form-check-input" name="pageTS[redirect_all]" value="1" checked="{configuration.redirect_all} == 1"/>
+        <label for="pageTS_redirect_all" class="form-check-label">
+            <f:translate key="{lll2}sys_dmail.redirect_all"/><f:render section="help" arguments="{messages: '{0: \'{lll}redirect_all.description\'}'}"/>
         </label>
     </div>
     <div class="form-check mb-3">

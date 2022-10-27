@@ -5,12 +5,15 @@ namespace MEDIAESSENZ\Mail\Middleware;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -52,7 +55,7 @@ class JumpurlMiddleware implements MiddlewareInterface
     /**
      * @var array
      */
-    protected array $directMailRecord;
+    protected array $mailRecord;
 
     /**
      * This is a preprocessor for the actual jumpurl extension to allow counting of clicked links
@@ -69,14 +72,14 @@ class JumpurlMiddleware implements MiddlewareInterface
 
         if ($this->shouldProcess()) {
             $mailId = $this->request->getQueryParams()['mail'];
-            $submittedRecipient = $this->request->getQueryParams()['recipient_uid'];
+            $submittedRecipient = $this->request->getQueryParams()['rid'];
             $submittedAuthCode = $this->request->getQueryParams()['aC'];
             $jumpurl = $this->request->getQueryParams()['jumpurl'];
 
             $urlId = 0;
             if (MathUtility::canBeInterpretedAsInteger($jumpurl)) {
                 $urlId = $jumpurl;
-                $this->initDirectMailRecord($mailId);
+                $this->initMailRecord($mailId);
                 $this->initRecipientRecord($submittedRecipient);
                 $jumpurl = $this->getTargetUrl($jumpurl);
 
@@ -104,7 +107,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                 $recipientUid = $submittedAuthCode;
             }
 
-            if ($this->responseType !== 0) {
+            if ($this->responseType !== ResponseType::ALL) {
                 $mailLogParams = [
                     'mail' => (int)$mailId,
                     'tstamp' => time(),
@@ -214,7 +217,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      * @param int $mailId
      * @throws DBALException|Exception
      */
-    protected function initDirectMailRecord(int $mailId): void
+    protected function initMailRecord(int $mailId): void
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -231,7 +234,7 @@ class JumpurlMiddleware implements MiddlewareInterface
             ->execute()
             ->fetchAssociative();
 
-        $this->directMailRecord = $result;
+        $this->mailRecord = $result;
     }
 
     /**
@@ -244,9 +247,9 @@ class JumpurlMiddleware implements MiddlewareInterface
     {
         $targetUrl = null;
 
-        if (!empty($this->directMailRecord)) {
+        if (!empty($this->mailRecord)) {
             $mailContent = unserialize(
-                base64_decode($this->directMailRecord['mail_content']),
+                base64_decode($this->mailRecord['mail_content']),
                 ['allowed_classes' => false]
             );
             if ($targetIndex >= 0) {
@@ -276,7 +279,7 @@ class JumpurlMiddleware implements MiddlewareInterface
         $recipientTable = '';
         $recipientUid = '';
         if (!empty($combinedRecipient)) {
-            [$recipientTable, $recipientUid] = explode('_', $combinedRecipient);
+            [$recipientTable, $recipientUid] = explode('-', $combinedRecipient);
         }
 
         $this->recipientTable = match ($recipientTable) {
@@ -300,7 +303,7 @@ class JumpurlMiddleware implements MiddlewareInterface
     {
         $authCodeToMatch = RecipientUtility::stdAuthCode(
             $this->recipientRecord,
-            ($this->directMailRecord['auth_code_fields'] ?: 'uid')
+            ($this->mailRecord['auth_code_fields'] ?: 'uid')
         );
 
         if (!empty($submittedAuthCode) && $submittedAuthCode !== $authCodeToMatch) {
@@ -316,6 +319,8 @@ class JumpurlMiddleware implements MiddlewareInterface
      *
      * @param string $targetUrl
      * @return string
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     protected function substituteMarkersFromTargetUrl(string $targetUrl): string
     {
@@ -330,20 +335,16 @@ class JumpurlMiddleware implements MiddlewareInterface
      *
      * @param string $targetUrl
      * @return string
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     protected function substituteUserMarkersFromTargetUrl(string $targetUrl): string
     {
-        $rowFieldsArray = explode(
-            ',',
-            $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['defaultRecipFields']
-        );
-        if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['addRecipFields']) {
+        $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipFields'), true);
+        if (ConfigurationUtility::getExtensionConfiguration('addRecipFields')) {
             $rowFieldsArray = array_merge(
                 $rowFieldsArray,
-                explode(
-                    ',',
-                    $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail']['addRecipFields']
-                )
+                GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('addRecipFields'), true)
             );
         }
 
@@ -380,16 +381,16 @@ class JumpurlMiddleware implements MiddlewareInterface
 
     /**
      * Auto Login an FE User, only possible if we're allowed to set the $_POST variables and
-     * in the authcode_fieldlist the field "password" is computed in as well
+     * in the auth_code_fields the field "password" is computed in as well
      *
      * TODO: Is this still valid?
      */
     protected function performFeUserAutoLogin()
     {
-        // TODO: add a switch in Direct Mail configuration to decide if this option should be enabled by default
+        // TODO: add a switch in mail configuration to decide if this option should be enabled by default
         if ($this->recipientTable === 'fe_users' &&
             GeneralUtility::inList(
-                $this->directMailRecord['auth_code_fields'],
+                $this->mailRecord['auth_code_fields'],
                 'password'
             )) {
             $_POST['user'] = $this->recipientRecord['username'];
@@ -433,7 +434,7 @@ class JumpurlMiddleware implements MiddlewareInterface
             $allowed = true;
         } else if (GeneralUtility::isValidUrl($target)) {
             // if it's a valid URL, throw exception
-            throw new \Exception('direct_mail: Invalid target.', 1578347190);
+            throw new \Exception('mail: Invalid target.', 1578347190);
         }
 
         return $allowed;

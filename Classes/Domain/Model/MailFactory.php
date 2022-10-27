@@ -301,8 +301,8 @@ class MailFactory
         $jumpUrlUseId = false;
         if ($this->pageTSConfiguration['enable_jump_url'] ?? false) {
             $jumpUrlPrefix = $baseUrl . $glue .
-                'mid=###SYS_MAIL_ID###' .
-                ($this->pageTSConfiguration['jumpurl_tracking_privacy'] ? '' : '&rid=###SYS_TABLE_NAME###_###USER_uid###') .
+                'mail=###SYS_MAIL_ID###' .
+                (($this->pageTSConfiguration['jumpurl_tracking_privacy'] ?? false) ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
                 '&aC=###SYS_AUTHCODE###' .
                 '&jumpurl=';
             $jumpUrlUseId = true;
