@@ -118,7 +118,7 @@
 
 <f:section name="help">
     <f:variable name="tooltip">
-    <f:for each="{_all}" as="message">
+    <f:for each="{messages}" as="message">
         <f:if condition="{message}">
             <f:translate key="{message}" default="{message}"/><br>
         </f:if>
@@ -132,43 +132,43 @@
 <f:section name="box-1">
     <div class="mb-3">
         <label for="pageTS_from_email" class="form-label">
-            <f:translate key="{lll2}sys_dmail.from_email"/><f:render section="help" arguments="{0: '{lll}from_email.description', 1: '{lll}from_email.details'}"/>
+            <f:translate key="{lll2}sys_dmail.from_email"/><f:render section="help" arguments="{messages: '{0: \'{lll}from_email.description\', 1: \'{lll}from_email.details\'}'}"/>
         </label>
         <f:form.textfield type="email" id="pageTS_from_email" name="pageTS[from_email]" value="{configuration.from_email}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_from_name" class="form-label">
-            <f:translate key="{lll2}sys_dmail.from_name"/><f:render section="help" arguments="{0: '{lll}from_name.description', 1: '{lll}from_name.details'}"/>
+            <f:translate key="{lll2}sys_dmail.from_name"/><f:render section="help" arguments="{messages: '{0: \'{lll}from_name.description\', 1: \'{lll}from_name.details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_from_name" name="pageTS[from_name]" value="{configuration.from_name}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_replyto_email" class="form-label">
-            <f:translate key="{lll2}sys_dmail.replyto_email"/><f:render section="help" arguments="{0: '{lll}replyto_email.description', 1: '{lll}replyto_email.details'}"/>
+            <f:translate key="{lll2}sys_dmail.replyto_email"/><f:render section="help" arguments="{messages: '{0: \'{lll}replyto_email.description\', 1: \'{lll}replyto_email.details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_replyto_email" name="pageTS[replyto_email]" value="{configuration.replyto_email}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_replyto_name" class="form-label">
-            <f:translate key="{lll2}sys_dmail.replyto_name"/><f:render section="help" arguments="{0: '{lll}replyto_name.description', 1: '{lll}replyto_name.details'}"/>
+            <f:translate key="{lll2}sys_dmail.replyto_name"/><f:render section="help" arguments="{messages: '{0: \'{lll}replyto_name.description\', 1: \'{lll}replyto_name.details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_replyto_name" name="pageTS[replyto_name]" value="{configuration.replyto_name}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_return_path" class="form-label">
-            <f:translate key="{lll2}sys_dmail.return_path"/><f:render section="help" arguments="{0: '{lll}return_path.description', 1: '{lll}return_path.details'}"/>
+            <f:translate key="{lll2}sys_dmail.return_path"/><f:render section="help" arguments="{messages: '{0: \'{lll}return_path.description\', 1: \'{lll}return_path.details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_return_path" name="pageTS[return_path]" value="{configuration.return_path}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_organisation" class="form-label">
-            <f:translate key="{lll2}sys_dmail.organisation"/><f:render section="help" arguments="{0: '{lll}organisation.description', 1: '{lll}organisation.details'}"/>
+            <f:translate key="{lll2}sys_dmail.organisation"/><f:render section="help" arguments="{messages: '{0: \'{lll}organisation.description\', 1: \'{lll}organisation.details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_organisation" name="pageTS[organisation]" value="{configuration.organisation}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_priority" class="form-label">
-            <f:translate key="{lll2}sys_dmail.priority"/><f:render section="help" arguments="{0: '{lll}priority.description', 1: '{lll}priority.details'}"/>
+            <f:translate key="{lll2}sys_dmail.priority"/><f:render section="help" arguments="{messages: '{0: \'{lll}priority.description\', 1: \'{lll}priority.details\'}'}"/>
         </label>
         <f:form.select id="pageTS_priority" name="pageTS[priority]" value="{configuration.priority}" class="form-select form-control-adapt">
             <f:form.select.option value="3">
@@ -187,7 +187,7 @@
 <f:section name="box-2">
     <div class="mb-3">
         <label for="pageTS_sendOptions" class="form-label">
-            <f:translate key="{lll2}sys_dmail.sendOptions"/><f:render section="help" arguments="{0: '{lll}sendOptions.description', 1: '{lll}sendOptions.details'}"/>
+            <f:translate key="{lll2}sys_dmail.sendOptions"/><f:render section="help" arguments="{messages: '{0: \'{lll}sendOptions.description\', 1: \'{lll}sendOptions.details\'}'}"/>
         </label>
         <f:form.select id="pageTS_sendOptions" name="pageTS[sendOptions]" value="{configuration.sendOptions}" class="form-select form-control-adapt">
             <f:form.select.option value="3">
@@ -204,13 +204,13 @@
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_includeMedia" class="form-check-input" name="pageTS[includeMedia]" value="1" checked="{configuration.includeMedia} == 1"/>
         <label for="pageTS_includeMedia" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.includeMedia"/><f:render section="help" arguments="{0: '{lll}includeMedia.description', 1: '{lll}includeMedia.details'}"/>
+            <f:translate key="{lll2}sys_dmail.includeMedia"/><f:render section="help" arguments="{messages: '{0: \'{lll}includeMedia.description\', 1: \'{lll}includeMedia.details\'}'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_flowedFormat" class="form-check-input" name="pageTS[flowedFormat]" value="1" checked="{configuration.flowedFormat} == 1"/>
         <label for="pageTS_flowedFormat" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.flowedFormat"/><f:render section="help" arguments="{0: '{lll}flowedFormat.description', 1: '{lll}flowedFormat.details'}"/>
+            <f:translate key="{lll2}sys_dmail.flowedFormat"/><f:render section="help" arguments="{messages: '{0: \'{lll}flowedFormat.description\', 1: \'{lll}flowedFormat.details\'}'}"/>
         </label>
     </div>
 </f:section>
@@ -218,13 +218,13 @@
 <f:section name="box-3">
     <div class="mb-3">
         <label for="pageTS_HTMLParams" class="form-label">
-            <f:translate key="{lll2}sys_dmail.HTMLParams"/><f:render section="help" arguments="{0: '{lll}configure_HTMLParams_description', 1: '{lll}configure_HTMLParams_details'}"/>
+            <f:translate key="{lll2}sys_dmail.HTMLParams"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_HTMLParams_description\', 1: \'{lll}configure_HTMLParams_details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_HTMLParams" name="pageTS[HTMLParams]" value="{configuration.HTMLParams}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_plainParams" class="form-label">
-            <f:translate key="{lll2}sys_dmail.plainParams"/><f:render section="help" arguments="{0: '{lll}configure_plainParams_description', 1: '{lll}configure_plainParams_details'}"/>
+            <f:translate key="{lll2}sys_dmail.plainParams"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_plainParams_description\', 1: \'{lll}configure_plainParams_details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_plainParams" name="pageTS[plainParams]" value="{configuration.plainParams}" class="form-control"/>
     </div>
@@ -233,21 +233,21 @@
 <f:section name="box-4">
     <div class="mb-3">
         <label for="pageTS_quick_mail_encoding" class="form-label">
-            <f:translate key="{lll}configure_quickmail_encoding"/><f:render section="help" arguments="{0: '{lll}configure_quickmail_encoding'}"/>
+            <f:translate key="{lll}configure_quickmail_encoding"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_quickmail_encoding\'}'}"/>
         </label>
         <f:form.select id="pageTS_quick_mail_encoding" name="pageTS[quick_mail_encoding]" options="{quoted-printable: 'quoted-printable', base64: 'base64'}"
                        value="{configuration.quick_mail_encoding}" class="form-select form-control-adapt"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_direct_mail_encoding" class="form-label">
-            <f:translate key="{lll}configure_directmail_encoding"/><f:render section="help" arguments="{0: '{lll}configure_directmail_encoding_description'}"/>
+            <f:translate key="{lll}configure_directmail_encoding"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_directmail_encoding_description\'}'}"/>
         </label>
         <f:form.select id="pageTS_direct_mail_encoding" name="pageTS[direct_mail_encoding]" options="{quoted-printable:'quoted-printable', base64:'base64', 8bit:'8bit'}"
                        value="{configuration.direct_mail_encoding}" class="form-select form-control-adapt"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_quick_mail_charset" class="form-label">
-            <f:translate key="{lll}configure_quickmail_charset"/><f:render section="help" arguments="{0: '{lll}configure_quickmail_charset_description'}"/>
+            <f:translate key="{lll}configure_quickmail_charset"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_quickmail_charset_description\'}'}"/>
         </label>
         <f:form.select id="pageTS_quick_mail_charset" name="pageTS[quick_mail_charset]" value="{configuration.quick_mail_charset}" class="form-select form-control-adapt">
             <f:for each="{charsets}" as="charset">
@@ -259,7 +259,7 @@
     </div>
     <div class="mb-3">
         <label for="pageTS_direct_mail_charset" class="form-label">
-            <f:translate key="{lll}configure_directmail_charset"/><f:render section="help" arguments="{0: '{lll}configure_directmail_charset_description'}"/>
+            <f:translate key="{lll}configure_directmail_charset"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_directmail_charset_description\'}'}"/>
         </label>
         <f:form.select id="pageTS_direct_mail_charset" name="pageTS[direct_mail_charset]" value="{configuration.direct_mail_charset}" class="form-select form-control-adapt">
             <f:for each="{charsets}" as="charset">
@@ -275,36 +275,36 @@
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_use_rdct" class="form-check-input" name="pageTS[use_rdct]" value="1" checked="{configuration.use_rdct} == 1"/>
         <label for="pageTS_use_rdct" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.use_rdct"/><f:render section="help" arguments="{0: '{lll}use_rdct.description', 1: '{lll}use_rdct.details'}"/>
+            <f:translate key="{lll2}sys_dmail.use_rdct"/><f:render section="help" arguments="{messages: '{0: \'{lll}use_rdct.description\', 1: \'{lll}use_rdct.details\'}'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_long_link_mode" class="form-check-input" name="pageTS[long_link_mode]" value="1" checked="{configuration.long_link_mode} == 1"/>
         <label for="pageTS_long_link_mode" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.long_link_mode"/><f:render section="help" arguments="{0: '{lll}long_link_mode.description'}"/>
+            <f:translate key="{lll2}sys_dmail.long_link_mode"/><f:render section="help" arguments="{messages: '{0: \'{lll}long_link_mode.description\'}'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_enable_jump_url" class="form-check-input" name="pageTS[enable_jump_url]" value="1" checked="{configuration.enable_jump_url} == 1"/>
         <label for="pageTS_enable_jump_url" class="form-check-label">
-            <f:translate key="{lll}configure_options_links_jumpurl"/><f:render section="help" arguments="{0: '{lll}configure_options_links_jumpurl_description'}"/>
+            <f:translate key="{lll}configure_options_links_jumpurl"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_options_links_jumpurl_description\'}'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_jumpurl_tracking_privacy" class="form-check-input" name="pageTS[jumpurl_tracking_privacy]" value="1" checked="{configuration.jumpurl_tracking_privacy} == 1"/>
         <label for="pageTS_jumpurl_tracking_privacy" class="form-check-label">
-            <f:translate key="{lll}configure_jumpurl_tracking_privacy"/><f:render section="help" arguments="{0: '{lll}configure_jumpurl_tracking_privacy_description'}"/>
+            <f:translate key="{lll}configure_jumpurl_tracking_privacy"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_jumpurl_tracking_privacy_description\'}'}"/>
         </label>
     </div>
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_enable_mailto_jump_url" class="form-check-input" name="pageTS[enable_mailto_jump_url]" value="1" checked="{configuration.enable_mailto_jump_url} == 1"/>
         <label for="pageTS_enable_mailto_jump_url" class="form-check-label">
-            <f:translate key="{lll}configure_options_mailto_jumpurl"/><f:render section="help" arguments="{0: '{lll}configure_options_mailto_jumpurl_description'}"/>
+            <f:translate key="{lll}configure_options_mailto_jumpurl"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_options_mailto_jumpurl_description\'}'}"/>
         </label>
     </div>
     <div class="mb-3">
         <label for="pageTS_authcode_fieldList" class="form-label">
-            <f:translate key="{lll2}sys_dmail.authcode_fieldList"/><f:render section="help" arguments="{0: '{lll}authcode_fieldList.description'}"/>
+            <f:translate key="{lll2}sys_dmail.authcode_fieldList"/><f:render section="help" arguments="{messages: '{0: \'{lll}authcode_fieldList.description\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_authcode_fieldList" name="pageTS[authcode_fieldList]" value="{configuration.authcode_fieldList}" class="form-control"/>
     </div>
@@ -313,43 +313,43 @@
 <f:section name="box-6">
     <div class="mb-3">
         <label for="pageTS_http_username" class="form-label">
-            <f:translate key="{lll}configure_http_username"/><f:render section="help" arguments="{0: '{lll}configure_http_username_description', 1: '{lll}configure_http_username_details'}"/>
+            <f:translate key="{lll}configure_http_username"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_http_username_description\', 1: \'{lll}configure_http_username_details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_http_username" name="pageTS[http_username]" value="{configuration.http_username}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_http_password" class="form-label">
-            <f:translate key="{lll}configure_http_password"/><f:render section="help" arguments="{0: '{lll}configure_http_password_description'}"/>
+            <f:translate key="{lll}configure_http_password"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_http_password_description\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_http_password" name="pageTS[http_password]" value="{configuration.http_password}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_simulate_usergroup" class="form-label">
-            <f:translate key="{lll}configure_simulate_usergroup"/><f:render section="help" arguments="{0: '{lll}configure_simulate_usergroup_description', 1: '{lll}configure_simulate_usergroup_details'}"/>
+            <f:translate key="{lll}configure_simulate_usergroup"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_simulate_usergroup_description\', 1: \'{lll}configure_simulate_usergroup_details\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_simulate_usergroup" name="pageTS[simulate_usergroup]" value="{configuration.simulate_usergroup}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_userTable" class="form-label">
-            <f:translate key="{lll}configure_user_table"/><f:render section="help" arguments="{0: '{lll}configure_user_table_description'}"/>
+            <f:translate key="{lll}configure_user_table"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_user_table_description\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_userTable" name="pageTS[userTable]" value="{configuration.userTable}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_test_tt_address_uids" class="form-label">
-            <f:translate key="{lll}configure_test_tt_address_uids"/><f:render section="help" arguments="{0: '{lll}configure_test_tt_address_uids_description'}"/>
+            <f:translate key="{lll}configure_test_tt_address_uids"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_test_tt_address_uids_description\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_test_tt_address_uids" name="pageTS[test_tt_address_uids]" value="{configuration.test_tt_address_uids}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_test_dmail_group_uids" class="form-label">
-            <f:translate key="{lll}configure_test_dmail_group_uids"/><f:render section="help" arguments="{0: '{lll}configure_test_dmail_group_uids_description'}"/>
+            <f:translate key="{lll}configure_test_dmail_group_uids"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_test_dmail_group_uids_description\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_test_dmail_group_uids" name="pageTS[test_dmail_group_uids]" value="{configuration.test_dmail_group_uids}" class="form-control"/>
     </div>
     <div class="mb-3">
         <label for="pageTS_testmail" class="form-label">
-            <f:translate key="{lll}configure_testmail"/><f:render section="help" arguments="{0: '{lll}configure_testmail_description'}"/>
+            <f:translate key="{lll}configure_testmail"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_testmail_description\'}'}"/>
         </label>
         <f:form.textfield id="pageTS_testmail" name="pageTS[testmail]" value="{configuration.testmail}" class="form-control"/>
     </div>

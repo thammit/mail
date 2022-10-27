@@ -4,10 +4,14 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use DateTimeImmutable;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
+use PDO;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
@@ -129,22 +133,33 @@ class MailRepository extends Repository
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
-        return $queryBuilder->selectLiteral('tx_mail_domain_model_mail.uid', 'tx_mail_domain_model_mail.subject', 'tx_mail_domain_model_mail.scheduled', 'tx_mail_domain_model_mail.scheduled_begin', 'tx_mail_domain_model_mail.scheduled_end', 'tx_mail_domain_model_mail.recipients', 'COUNT(tx_mail_domain_model_log.mail) AS count')
-            ->from('tx_mail_domain_model_mail', 'tx_mail_domain_model_mail')
-            ->leftJoin(
-                'tx_mail_domain_model_mail',
-                'tx_mail_domain_model_log',
-                'tx_mail_domain_model_log',
-                $queryBuilder->expr()->eq('tx_mail_domain_model_mail.uid', $queryBuilder->quoteIdentifier('tx_mail_domain_model_log.mail'))
+        return $queryBuilder
+            ->selectLiteral(
+            'm.uid',
+            'm.subject',
+            'm.scheduled',
+            'm.scheduled_begin',
+            'm.scheduled_end',
+            'm.recipients',
+            'COUNT(l.mail) AS count'
             )
-            ->add('where', 'tx_mail_domain_model_mail.pid = ' . $pid .
-                ' AND tx_mail_domain_model_mail.type IN (0,1)' .
-                ' AND tx_mail_domain_model_mail.sent = 1' .
-                ' AND tx_mail_domain_model_log.response_type = 0' .
-                ' AND tx_mail_domain_model_log.format_sent > 0')
-            ->groupBy('tx_mail_domain_model_log.mail')
-            ->orderBy('tx_mail_domain_model_mail.scheduled', 'DESC')
-            ->addOrderBy('tx_mail_domain_model_mail.scheduled_begin', 'DESC')
+            ->from('tx_mail_domain_model_mail', 'm')
+            ->leftJoin(
+                'm',
+                'tx_mail_domain_model_log',
+                'l',
+                $queryBuilder->expr()->eq('m.uid', $queryBuilder->quoteIdentifier('l.mail'))
+            )
+            ->where(
+                $queryBuilder->expr()->eq('m.pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], Connection::PARAM_INT_ARRAY)),
+                $queryBuilder->expr()->eq('m.sent', $queryBuilder->createNamedParameter(1, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('l.response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
+                $queryBuilder->expr()->neq('l.format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, PDO::PARAM_INT)),
+            )
+            ->groupBy('l.mail')
+            ->orderBy('m.scheduled', 'DESC')
+            ->addOrderBy('m.scheduled_begin', 'DESC')
             ->execute()
             ->fetchAllAssociative();
     }

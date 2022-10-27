@@ -408,7 +408,7 @@ class ImportService
 
         // empty table if flag is set
         if ($this->configuration['remove_existing']) {
-            $this->addressRepository->deleteByPid((int)$this->configuration['storage']);
+            $this->addressRepository->deleteRecordByPid((int)$this->configuration['storage']);
         }
 
         $mappedCSV = [];
