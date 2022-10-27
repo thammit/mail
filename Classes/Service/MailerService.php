@@ -30,6 +30,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -86,7 +87,8 @@ class MailerService implements LoggerAwareInterface
     public function __construct(
         protected CharsetConverter $charsetConverter,
         protected MailRepository $mailRepository,
-        protected LogRepository $logRepository
+        protected LogRepository $logRepository,
+        protected RequestFactory $requestFactory
     ) {
     }
 
@@ -826,15 +828,16 @@ class MailerService implements LoggerAwareInterface
         // iterate through the media array and embed them
         if ($this->includeMedia && !empty($this->getHtmlContent())) {
             // extract all media path from the mail message
-            $medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
+            //$medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
+            $medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->redirectUrl);
             foreach ($medias as $media) {
-                if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && $media['tag'] === 'img') {
-                    if (ini_get('allow_url_fopen')) {
-                        $mailMessage->embed(fopen($media['absRef'], 'r'), basename($media['absRef']));
-                    } else {
-                        $mailMessage->embed(GeneralUtility::getUrl($media['absRef']), basename($media['absRef']));
+                if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && ($media['tag'] ?? '') === 'img') {
+                    $response = $this->requestFactory->request($media['absRef']);
+                    if ($response->getStatusCode() === 200) {
+                        $baseName = basename($media['absRef']);
+                        $mailMessage->embed($response->getBody()->getContents(), $baseName, $response->getHeaderLine('Content-Type'));
+                        $this->setHtmlContent(str_replace($media['subst_str'], $media['quotes'] . 'cid:' . $baseName . $media['quotes'], $this->getHtmlContent()));
                     }
-                    $this->setHtmlContent(str_replace($media['subst_str'], 'cid:' . basename($media['absRef']), $this->getHtmlContent()));
                 }
             }
             // remove ` do_not_embed="1"` attributes
@@ -872,6 +875,7 @@ class MailerService implements LoggerAwareInterface
      */
     protected function sendMailToRecipient(Address|string $recipient, array $recipientData = null): void
     {
+        /*
         $mailConfig = new MailConfiguration();
         $mailConfig->layoutPaths = ['EXT:mail/Resources/Private/Layouts/'];
         $mailConfig->templatePaths = ['EXT:mail/Resources/Private/Templates/'];
@@ -923,6 +927,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         $msg->send();
+        */
 
 
         /*
