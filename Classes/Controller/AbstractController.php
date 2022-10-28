@@ -30,6 +30,7 @@ abstract class AbstractController extends ActionController
     protected string $siteIdentifier;
     protected string $backendUserPermissions = '';
     protected array $pageTSConfiguration = [];
+    protected array $userTSConfiguration = [];
     protected array $implodedParams = [];
     protected string $userTable = '';
     protected array $allowedTables = [];
@@ -67,11 +68,15 @@ abstract class AbstractController extends ActionController
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
         $this->pageTSConfiguration['pid'] = $this->id;
 
-        if (array_key_exists('userTable',
-                $this->pageTSConfiguration) && isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) && is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])) {
+        if (array_key_exists('userTable', $this->pageTSConfiguration) &&
+            isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) &&
+            is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])
+        ) {
             $this->userTable = $this->pageTSConfiguration['userTable'];
             $this->allowedTables[] = $this->userTable;
         }
+
+        $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
     }
 
     protected function getDataHandler(): DataHandler

@@ -41,8 +41,6 @@ use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 
 class MailController extends AbstractController
 {
-    private string $cshKey = '_MOD_Mail_Mail';
-
     public function noPageSelectedAction(): ResponseInterface
     {
         ViewUtility::addWarningToFlashMessageQueue('Please select a mail page in the page tree.', 'No valid page selected');
@@ -79,19 +77,22 @@ class MailController extends AbstractController
         }
 
         $panels = [Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL, Constants::PANEL_OPEN];
-        if (isset($userTSConfig['tx_directmail.']['hideTabs'])) {
-            $hidePanel = GeneralUtility::trimExplode(',', $userTSConfig['tx_directmail.']['hideTabs']);
+        if ($this->userTSConfiguration['hideTabs'] ?? false) {
+            $hidePanel = GeneralUtility::trimExplode(',', $this->userTSConfiguration['hideTabs']);
             foreach ($hidePanel as $hideTab) {
                 $panels = ArrayUtility::removeArrayEntryByValue($panels, $hideTab);
             }
         }
-        if (!isset($userTSConfig['tx_directmail.']['defaultTab'])) {
-            $userTSConfig['tx_directmail.']['defaultTab'] = Constants::PANEL_OPEN;
+        $defaultTab = Constants::PANEL_OPEN;
+        if ($this->userTSConfiguration['defaultTab'] ?? false) {
+            if (in_array($this->userTSConfiguration['defaultTab'], $panels)) {
+                $defaultTab = $this->userTSConfiguration['defaultTab'];
+            }
         }
 
         $panelData = [];
         foreach ($panels as $panel) {
-            $open = $userTSConfig['tx_directmail.']['defaultTab'] == $panel;
+            $open = $defaultTab == $panel;
             switch ($panel) {
                 case Constants::PANEL_OPEN:
                     $panelData['open'] = [
@@ -334,7 +335,6 @@ class MailController extends AbstractController
 
         if ($rows) {
             $data = [
-                'subtitle' => BackendUtility::cshItem($this->cshKey, 'assign_categories'),
                 'rows' => [],
             ];
 
@@ -609,8 +609,7 @@ class MailController extends AbstractController
 
     protected function hideCategoryStep(Mail $mail = null): bool
     {
-        $userTSConfig = TypoScriptUtility::getUserTSConfig();
-        return (($mail ?? false) && $mail->isExternal()) || (isset($userTSConfig['tx_directmail.']['hideSteps']) && $userTSConfig['tx_directmail.']['hideSteps'] === 'cat');
+        return (($mail ?? false) && $mail->isExternal()) || (isset($this->userTSConfiguration['hideSteps']) && $this->userTSConfiguration['hideSteps'] === 'categories');
     }
 
     protected function getNavigation(int $currentStep, bool $hideCategoryStep): array

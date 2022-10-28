@@ -16,7 +16,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class MarkdownMiddleware implements MiddlewareInterface
 {
 
-    public function __construct(private ResponseFactoryInterface $responseFactory)
+    public function __construct(private readonly ResponseFactoryInterface $responseFactory)
     {
     }
 
@@ -35,9 +35,11 @@ class MarkdownMiddleware implements MiddlewareInterface
         }
         $response = $handler->handle($request);
         $responseBody = $response->getBody();
-        $size = $responseBody->getSize();
         $markDownResponse = $this->responseFactory->createResponse()->withHeader('Content-Type', 'text/plain');
-        $markDownResponse->getBody()->write($this->convertHtml2Markdown((string)$responseBody));
+        $markDownContent = $this->convertHtml2Markdown((string)$responseBody);
+        $markDownContent = preg_replace("/(\n){2,}/","\n", $markDownContent);
+        $markDownContent = preg_replace("/( \n \n){2,}/","\n", $markDownContent);
+        $markDownResponse->getBody()->write($markDownContent);
         return $markDownResponse;
     }
 
@@ -45,8 +47,9 @@ class MarkdownMiddleware implements MiddlewareInterface
     {
         $converter = new HtmlConverter([
             'strip_tags' => true,
+            'hard_break' => true,
             'strip_placeholder_links' => true,
-            'remove_nodes' => 'head nav footer',
+            'remove_nodes' => 'head nav footer img figure',
             'preserve_category_comments' => true
         ]);
         $converter->getEnvironment()->addConverter(new CategoryCommentConverter());

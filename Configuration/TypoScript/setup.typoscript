@@ -1,100 +1,40 @@
-// In html content
-tt_content.stdWrap.postUserFunc = MEDIAESSENZ\Mail\UserFunc\BoundaryUserFunc->insertContentBoundaries
-
-// In old plaintext content static tenmplate
-lib.alt_plaintext.renderObj.userProc < tt_content.stdWrap.postUserFunc
-lib.alt_plaintext.renderObj.userProc.useParentCObj = 1
-
-// In new direct mail plain text plugin
-plugin.tx_mail_pi1.userProc < tt_content.stdWrap.postUserFunc
-plugin.tx_mail_pi1.userProc.useParentCObj = 1
-
-// Enable the insertion of content boundaries
-config.insertContentBoundaries = 1
-
-
-//boundaries for the sitemap
-tt_content.menu.20.3.renderObj {
-	outerWrap.cObject = USER
-	outerWrap.cObject {
-		userFunc = MEDIAESSENZ\Mail\UserFunc\BoundaryUserFunc->insertSitemapBoundaries
-	}
-}
-
-# Content (needs fluid_styled_content loaded before) to render content elements of newsletters
-
-[getTSFE().type == 1666968244]
-    lib {
-        contentElement {
-            templateRootPaths {
-                100 = EXT:mail/Resources/Private/Templates/Content/
-            }
-
-            partialRootPaths {
-                100 = EXT:mail/Resources/Private/Partials/
-            }
-
-            layoutRootPaths {
-                100 = EXT:mail/Resources/Private/Layouts/
-            }
+module.tx_mail {
+    view {
+        templateRootPaths {
+            10 = EXT:mail/Resources/Private/Backend/Templates/
         }
-
-        // Use absolute URL for all kind of links within fluidStyledMailContent
-        // (absRefPrefix is also used for absolute images paths - see ext_localconf.php)
-        parseFunc {
-            tags {
-                a.typolink.forceAbsoluteUrl = 1
-                link.typolink.forceAbsoluteUrl = 1
-            }
+        partialRootPaths {
+            10 = EXT:mail/Resources/Private/Backend/Partials/
         }
-
-        parseFunc_RTE {
-            tags {
-                a.typolink.forceAbsoluteUrl = 1
-                link.typolink.forceAbsoluteUrl = 1
-            }
+        layoutRootPaths {
+            10 = EXT:mail/Resources/Private/Backend/Layouts/
         }
     }
-
-    // Settings for EXT:news
-    plugin.tx_news {
+    settings {
         view {
             templateRootPaths {
-                10 = EXT:mail/Resources/Private/Templates/Content/
+                10 = EXT:mail/Resources/Private/Templates/
             }
-
+            partialRootPaths {
+                10 = EXT:mail/Resources/Private/Partials/
+            }
             layoutRootPaths {
                 10 = EXT:mail/Resources/Private/Layouts/
             }
         }
     }
-[end]
+}
 
-mailContent = PAGE
-mailContent {
-    typeNum = 1666968244
-
-    config {
-        no_cache = 0
-        disableAllHeaderCode = 0
-        disablePrefixComment = 1
-        xhtml_cleaning = 0
-        admPanel = 0
-        debug = 0
-        linkVars =
-    }
-
-    # Add some css for frontend view
-    cssInline {
-        10 = TEXT
-        10.value (
-        html {
-            width: 1024px;
-            margin: auto;
+plugin.tx_mail {
+    view {
+        templateRootPaths {
+            10 = EXT:mail/Resources/Private/Templates/
         }
-        )
+        partialRootPaths {
+            10 = EXT:mail/Resources/Private/Partials/
+        }
+        layoutRootPaths {
+            10 = EXT:mail/Resources/Private/Layouts/
+        }
     }
-
-    # Add content
-    10 < styles.content.get
 }

@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\ViewHelpers;
 use Closure;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
@@ -44,7 +45,7 @@ class PreviewLinksViewHelper extends AbstractViewHelper
         Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
     ): array {
-        $pageTSConfiguration = BackendUtility::getPagesTSconfig($arguments['pageId'])['mod.']['web_modules.']['dmail.'] ?? [];
+        $pageTSConfiguration = BackendUtility::getPagesTSconfig($arguments['pageId'])['mod.']['web_modules.']['mail.'] ?? [];
         $implodedParams = TypoScriptUtility::implodeTSParams($pageTSConfiguration);
         $row = $arguments['data'];
         try {
@@ -88,8 +89,8 @@ class PreviewLinksViewHelper extends AbstractViewHelper
         }
 
         return match ($pageTSConfiguration['sendOptions'] ?? 0) {
-            1 => ['textPreview' => $previewTextLinkAttributes],
-            2 => ['htmlPreview' => $previewHTMLLinkAttributes],
+            SendFormat::PLAIN => ['textPreview' => $previewTextLinkAttributes],
+            SendFormat::HTML => ['htmlPreview' => $previewHTMLLinkAttributes],
             default => ['htmlPreview' => $previewHTMLLinkAttributes, 'textPreview' => $previewTextLinkAttributes],
         };
     }
