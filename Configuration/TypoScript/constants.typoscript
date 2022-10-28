@@ -1,0 +1,4 @@
+styles.content.textmedia {
+  maxW = 1024
+  maxWInText = 1024
+}

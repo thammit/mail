@@ -18,7 +18,7 @@ class BoundaryUserFunc
     /**
      * @var ContentObjectRenderer
      */
-    protected $contentObjectRenderer;
+    protected ContentObjectRenderer $contentObjectRenderer;
 
     /**
      * https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.4/Deprecation-94956-PublicCObj.html
@@ -32,7 +32,7 @@ class BoundaryUserFunc
 
     /**
      * This function wraps HTML comments around the content.
-     * The comments contain the uids of assigned direct mail categories.
+     * The comments contain the uids of assigned categories.
      * It is called as "USER_FUNC" from TS.
      *
      * @param string $content Incoming HTML code which will be wrapped
@@ -41,31 +41,32 @@ class BoundaryUserFunc
      * @return    string        content of the email with dmail boundaries
      * @throws DBALException|Exception
      */
-    public function insertContentBoundaries(string $content, ?array $conf = [])
+    public function insertContentBoundaries(string $content, ?array $conf = []): string
     {
+        if (!($GLOBALS['TSFE']->config['config']['insertContentBoundaries'] ?? false) || empty($content) || empty($this->contentObjectRenderer->data['categories'])) {
+            return $content;
+        }
+
         if (isset($conf['useParentCObj']) && $conf['useParentCObj']) {
             $this->contentObjectRenderer = $conf['parentObj']->cObj;
         }
 
-        if ($GLOBALS['TSFE']->config['config']['insertDmailerBoundaries'] && $content && (int)$this->contentObjectRenderer->data['categories'] > 0) {
-            // if content type is shortcut -> use boundaries from included records
-            if ($this->contentObjectRenderer->data['CType'] == 'shortcut') {
-                $content = $this->stripInnerBoundaries($content);
-            }
-
-            // get categories from tt_content element
-            $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
-            $contentElementCategories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName((int)$this->contentObjectRenderer->data['uid'], 'tt_content');
-
-            $categoryList = [];
-            foreach ($contentElementCategories as $contentElementCategory) {
-                $categoryList[] = $contentElementCategory['uid_local'];
-            }
-
-            // wrap boundaries around content
-            $content = $this->contentObjectRenderer->wrap(implode(',', $categoryList), $this->boundaryStartWrap) . $content . $this->boundaryEnd;
+        // if content type is shortcut -> use boundaries from included records
+        if ($this->contentObjectRenderer->data['CType'] == 'shortcut') {
+            $content = $this->stripInnerBoundaries($content);
         }
-        return $content;
+
+        // get categories from tt_content element
+        $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
+        $contentElementCategories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName((int)$this->contentObjectRenderer->data['uid'], 'tt_content');
+
+        $categoryList = [];
+        foreach ($contentElementCategories as $contentElementCategory) {
+            $categoryList[] = $contentElementCategory['uid_local'];
+        }
+
+        // wrap boundaries around content
+        return $this->contentObjectRenderer->wrap(implode(',', $categoryList), $this->boundaryStartWrap) . $content . $this->boundaryEnd;
     }
 
     /**
@@ -75,7 +76,7 @@ class BoundaryUserFunc
      *
      * @return string the content without boundaries
      */
-    public function stripInnerBoundaries(string $content): string
+    protected function stripInnerBoundaries(string $content): string
     {
         // only dummy code at the moment
         $searchString = $this->contentObjectRenderer->wrap('[\d,]*', $this->boundaryStartWrap);
@@ -120,7 +121,8 @@ class BoundaryUserFunc
             foreach ($categories as $category) {
                 $categoryList[] = $category['uid_local'];
             }
-            $content = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_' . implode(',', $categoryList) . '-->|<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
+            $content = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_' . implode(',',
+                    $categoryList) . '-->|<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
         }
 
         return $content;
