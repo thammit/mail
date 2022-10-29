@@ -394,7 +394,6 @@ class MailerService implements LoggerAwareInterface
      * @param string $addressList list of recipient address, comma list of emails
      *
      * @return void
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
     public function sendSimpleMail(string $addressList): void

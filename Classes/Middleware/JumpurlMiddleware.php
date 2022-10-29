@@ -74,24 +74,23 @@ class JumpurlMiddleware implements MiddlewareInterface
             $mailId = $this->request->getQueryParams()['mail'];
             $submittedRecipient = $this->request->getQueryParams()['rid'];
             $submittedAuthCode = $this->request->getQueryParams()['aC'];
-            $jumpurl = $this->request->getQueryParams()['jumpurl'];
+            $jumpUrl = $this->request->getQueryParams()['jumpurl'];
 
             $urlId = 0;
-            if (MathUtility::canBeInterpretedAsInteger($jumpurl)) {
-                $urlId = $jumpurl;
+            if (MathUtility::canBeInterpretedAsInteger($jumpUrl)) {
+                $urlId = (int)$jumpUrl;
                 $this->initMailRecord($mailId);
                 $this->initRecipientRecord($submittedRecipient);
-                $jumpurl = $this->getTargetUrl($jumpurl);
+                $jumpUrl = $this->getTargetUrl($jumpUrl);
 
                 // try to build the ready-to-use target url
                 if (!empty($this->recipientRecord)) {
                     $this->validateAuthCode($submittedAuthCode);
-                    $jumpurl = $this->substituteMarkersFromTargetUrl($jumpurl);
-
+                    $jumpUrl = $this->substituteMarkersFromTargetUrl($jumpUrl);
                     $this->performFeUserAutoLogin();
                 }
                 // jumpUrl generation failed. Early exit here
-                if (empty($jumpurl)) {
+                if (empty($jumpUrl)) {
                     die('Error: No further link. Please report error to the mail sender.');
                 }
 
@@ -99,7 +98,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                 // jumpUrl is not an integer -- then this is a URL, that means that the "dmailerping"
                 // functionality was used to count the number of "opened mails" received (url, dmailerping)
 
-                if ($this->isAllowedJumpUrlTarget($jumpurl)) {
+                if ($this->isAllowedJumpUrlTarget($jumpUrl)) {
                     $this->responseType = ResponseType::PING;
                 }
 
@@ -111,7 +110,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                 $mailLogParams = [
                     'mail' => (int)$mailId,
                     'tstamp' => time(),
-                    'url' => $jumpurl,
+                    'url' => $jumpUrl,
                     'response_type' => $this->responseType,
                     'url_id' => (int)$urlId,
                     'recipient_table' => $this->recipientTable,
@@ -126,9 +125,9 @@ class JumpurlMiddleware implements MiddlewareInterface
         }
 
         // finally - finish preprocessing of the jumpurl params
-        if (!empty($jumpurl)) {
-            $queryParamsToPass['juHash'] = $this->calculateJumpUrlHash($jumpurl);
-            $queryParamsToPass['jumpurl'] = $jumpurl;
+        if (!empty($jumpUrl)) {
+            $queryParamsToPass['juHash'] = $this->calculateJumpUrlHash($jumpUrl);
+            $queryParamsToPass['jumpurl'] = $jumpUrl;
         }
 
         return $handler->handle($request->withQueryParams($queryParamsToPass));

@@ -91,7 +91,7 @@ class MailFactory
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             $htmlLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
             if ($htmlLinks) {
-                $htmlContent = $this->replaceHyperLinks($htmlContent, $htmlLinks, BackendDataUtility::getAbsoluteBaseUrlForMailPage($mail->getPage()));
+                $htmlContent = $this->replaceHyperLinks($htmlContent, $htmlLinks, BackendDataUtility::getBaseUrl($mail->getPage()));
             }
         }
 

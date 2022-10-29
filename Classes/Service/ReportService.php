@@ -466,6 +466,8 @@ class ReportService
      * @param string $linkedWord The word to be linked
      *
      * @return string The label for the passed $url parameter
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function getLinkLabel(string $url, string $urlStr, bool $forceFetch = false, string $linkedWord = ''): string
     {
@@ -475,7 +477,7 @@ class ReportService
 
         $urlParts = parse_url($url);
         if (!$forceFetch && (str_starts_with($url, $baseURL))) {
-            if ($urlParts['fragment'] && (str_starts_with($urlParts['fragment'], 'c'))) {
+            if (($urlParts['fragment'] ?? false) && (str_starts_with($urlParts['fragment'], 'c'))) {
                 // linking directly to a content
                 $elementUid = intval(substr($urlParts['fragment'], 1));
                 $row = BackendUtility::getRecord('tt_content', $elementUid);
