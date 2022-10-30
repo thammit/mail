@@ -88,6 +88,7 @@ lib {
     }
 [end]
 
+
 mailContent = PAGE
 mailContent {
     typeNum = 1666968244
@@ -103,16 +104,25 @@ mailContent {
     }
 
     # Add some css for frontend view
-    cssInline {
-        10 = TEXT
-        10.value (
-        html {
-            width: 1024px;
-            margin: auto;
-        }
-        )
-    }
+#    cssInline {
+#        10 = TEXT
+#        10.value (
+#        html {
+#            width: 100%;
+#            margin: auto;
+#        }
+#        )
+#    }
 
     # Add content
-    10 < styles.content.get
+    //10 < styles.content.get
+    10 =< page.10
+    10.templateName = Mail
 }
+
+[traverse(request.getQueryParams(), 'plain')  == 1]
+page.10.templateName >
+page.10.templateName = PlainMail
+[end]
+tt_content.textpic.templateName >
+tt_content.textpic.templateName = Textpic

@@ -11,8 +11,6 @@ use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
-use MEDIAESSENZ\Mail\Mail\MailConfiguration;
-use MEDIAESSENZ\Mail\Mail\MailService;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
@@ -870,69 +868,9 @@ class MailerService implements LoggerAwareInterface
      * @param string|Address $recipient The recipient to send the mail to
      * @param array|null $recipientData Recipient's data array
      * @return void
-     * @throws \TYPO3\CMS\Core\Exception
      */
     protected function sendMailToRecipient(Address|string $recipient, array $recipientData = null): void
     {
-        /*
-        $mailConfig = new MailConfiguration();
-        $mailConfig->layoutPaths = ['EXT:mail/Resources/Private/Layouts/'];
-        $mailConfig->templatePaths = ['EXT:mail/Resources/Private/Templates/'];
-        $mailConfig->partialPaths = ['EXT:mail/Resources/Private/Partials/'];
-        $mailConfig->controllerName = 'Mail';
-        $mailConfig->extensionName = 'Mail';
-        $mailConfig->pluginName = 'Mail';
-        $mailConfig->allowedLanguages = ['en', 'de'];
-        $mailConfig->setAutoSubmittedHeader = true;
-        $mailConfig->senderEmail = $this->fromEmail;
-        $mailConfig->senderName = $this->fromName;
-        if ($this->replyToEmail) {
-            $mailConfig->replyToEmail = $this->replyToEmail;
-            $mailConfig->replyToName = $this->replyToName;
-        } else {
-            $mailConfig->replyToEmail = $this->fromEmail;
-            $mailConfig->replyToName = $this->fromName;
-        }
-        if ($this->organisation) {
-            $mailConfig->organization = $this->organisation;
-        }
-
-        $mailService = GeneralUtility::makeInstance(MailService::class, $mailConfig);
-        $msg = $mailService->createMessage();
-        $msg->setSiteIdentifier($this->siteIdentifier);
-
-        $mailView = $mailService->createMailView($msg);
-        $mailView->assign('data', 'Hello Mail');
-
-        $msg->priority($this->priority);
-        if (GeneralUtility::validEmail($this->returnPath)) {
-            $msg->sender($this->returnPath);
-        }
-
-        $msg->setContent($mailService->renderMail($mailView, 'Default', 'de'));
-        $msg->subject($this->subject);
-        $msg->to($recipient);
-
-        if ($this->attachment > 0) {
-            $files = MailerUtility::getAttachments($this->mailUid);
-            foreach ($files as $file) {
-                $msg->attachFromPath($file->getForLocalProcessing(false));
-            }
-        }
-
-        $header = $msg->getHeaders();
-        if ($this->TYPO3MID) {
-            $header->addTextHeader(Constants::MAIL_HEADER_IDENTIFIER, $this->TYPO3MID);
-        }
-
-        $msg->send();
-        */
-
-
-        /*
-         * OWN MAILER
-         */
-
         /** @var MailMessage $mailer */
         $mailer = GeneralUtility::makeInstance(MailMessage::class);
         $mailer

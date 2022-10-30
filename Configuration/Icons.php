@@ -3,9 +3,9 @@
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 
 return [
-    'app-pagetree-folder-contains-mails' => [
+    'app-pagetree-folder-contains-mail' => [
         'provider' => SvgIconProvider::class,
-        'source' => 'EXT:mail/Resources/Public/Icons/app-pagetree-folder-contains-mails.svg'
+        'source' => 'EXT:mail/Resources/Public/Icons/app-pagetree-folder-contains-mail.svg'
     ],
     'mail-module' => [
         'provider' => SvgIconProvider::class,

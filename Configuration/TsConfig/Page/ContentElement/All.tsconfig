@@ -1,0 +1,23 @@
+# remove all not supported elements
+mod.wizards.newContentElement.wizardItems.menu >
+mod.wizards.newContentElement.wizardItems.forms >
+mod.wizards.newContentElement.wizardItems.plugins.elements.domaincheck >
+mod.wizards.newContentElement.wizardItems.interactive >
+mod.wizards.newContentElement.wizardItems.media.elements.audio >
+mod.wizards.newContentElement.wizardItems.media.elements.card_group >
+mod.wizards.newContentElement.wizardItems.media.elements.external_media >
+mod.wizards.newContentElement.wizardItems.media.elements.gallery >
+mod.wizards.newContentElement.wizardItems.media.elements.icon_group >
+mod.wizards.newContentElement.wizardItems.media.elements.media >
+mod.wizards.newContentElement.wizardItems.media.elements.tab >
+mod.wizards.newContentElement.wizardItems.media.elements.uploads >
+mod.wizards.newContentElement.wizardItems.text.elements.card_group >
+mod.wizards.newContentElement.wizardItems.text.elements.listgroup >
+mod.wizards.newContentElement.wizardItems.text.elements.panel >
+mod.wizards.newContentElement.wizardItems.text.elements.quote >
+mod.wizards.newContentElement.wizardItems.text.elements.textcolumn >
+mod.wizards.newContentElement.wizardItems.text.elements.texticon >
+mod.wizards.newContentElement.wizardItems.text.elements.textteaser >
+mod.wizards.newContentElement.wizardItems.social >
+mod.wizards.newContentElement.wizardItems.data.elements.csv >
+mod.wizards.newContentElement.wizardItems.container >

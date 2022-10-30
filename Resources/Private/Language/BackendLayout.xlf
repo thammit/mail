@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2022-10-30T19:31:39Z"
+    product-name="mail">
+        <header />
+        <body>
+            <trans-unit id="backend_layout.mail">
+                <source>Mail</source>
+            </trans-unit>
+            <trans-unit id="backend_layout.column.border">
+                <source>Border</source>
+            </trans-unit>
+            <trans-unit id="backend_layout.column.contentbefore">
+                <source>Before Content</source>
+            </trans-unit>
+            <trans-unit id="backend_layout.column.normal">
+                <source>Normal</source>
+            </trans-unit>
+            <trans-unit id="backend_layout.column.contentafter">
+                <source>After Content</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
+
