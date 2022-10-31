@@ -22,12 +22,7 @@ img:not(.small) {
     width: 100%;
     max-width: 100%;
 }
-img.small {
-    width: 24px;
-}
-img.small.small50 {
-    width: 50px;
-}
+
 .float-right {
     float: right;
 }

@@ -141,6 +141,13 @@ final class Configuration
         $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';
     }
 
+    public static function addTypoScripContentObject(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
+            'EMOGRIFIER' => \MEDIAESSENZ\Mail\ContentObject\EmogrifierContentObject::class
+        ]);
+    }
+
     public static function directMailMigration(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail'] = DirectMailMigration::class;

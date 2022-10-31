@@ -1,6 +1,6 @@
 <?php
 
-namespace MEDIAESSENZ\Mail\UserFunc;
+namespace MEDIAESSENZ\Mail\UserFunctions;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
