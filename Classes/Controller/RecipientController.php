@@ -43,8 +43,11 @@ class RecipientController extends AbstractController
         /** @var Group $group */
         foreach ($groups as $group) {
             $data['rows'][] = [
+                'group' => $group,
                 'uid' => $group->getUid(),
                 'title' => $group->getTitle(),
+                'recordTypes' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'record_types', $group->getRecordTypes()),
+                'categories' => $group->getCategories(),
                 'description' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'description', $group->getDescription()),
                 'type' => $group->getType(),
                 'typeProcessed' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $group->getType()),
