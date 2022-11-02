@@ -1,15 +1,37 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
-<table class="body" data-made-with-foundation="">
+<table bgcolor="#8a8a8a" class="wrapper header" align="center">
+    <tbody>
+    <tr>
+        <td class="wrapper-inner">
+            <table align="center" class="container">
+                <tbody>
+                <tr>
+                    <td>
+                        <table class="row collapse">
+                            <tbody>
+                            <tr>
+                                <th class="small-6 large-6 columns first" style="padding-bottom:0;" valign="middle">
+                                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 3, slide: '-1'}" />
+                                </th>
+                                <th class="small-6 large-6 columns last" style="padding-bottom:0;vertical-align:middle; padding-right:16px" valign="middle">
+                                    <p class="text-right">NEWSLETTER</p>
+                                </th>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<table class="body">
     <tr>
         <td class="float-center" align="center" valign="top">
             <center data-parsed="">
-                <table class="spacer float-center">
-                    <tbody>
-                    <tr>
-                        <td height="16px" style="font-size:16px;line-height:16px;">&#xA0;</td>
-                    </tr>
-                    </tbody>
-                </table>
+                <f:render partial="Spacer" arguments="{height:16}" />
                 <table align="center" class="container header float-center">
                     <tbody>
                     <tr>
@@ -20,7 +42,10 @@
                                     <th class="small-12 large-12 columns first last">
                                         <table>
                                             <tr>
-                                                <td><f:image src="EXT:mail/Resources/Public/Images/Instagram.png" alt="logo" width="200" style="width:200px;" /></td>
+                                                <td>
+                                                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 3, slide: '{theme.pagelayout.{pagelayout}.colPos.3.slide}'}" />
+                                                    <f:image src="EXT:mail/Resources/Public/Images/Instagram.png" alt="logo" width="200" style="width:200px;" />
+                                                </td>
                                                 <td class="expander"></td>
                                             </tr>
                                         </table>
@@ -36,21 +61,9 @@
                     <tbody>
                     <tr>
                         <td>
-                            <table class="spacer">
-                                <tbody>
-                                <tr>
-                                    <td height="16px" style="font-size:16px;line-height:16px;">&#xA0;</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                            <f:render partial="Spacer" arguments="{height:16}" />
                             <center data-parsed=""><f:image src="EXT:mail/Resources/Public/Images/Instagram.png" alt="logo" width="300" style="width:300px;" class="float-center" additionalAttributes="{align:'center'}" /></center>
-                            <table class="spacer">
-                                <tbody>
-                                <tr>
-                                    <td height="16px" style="font-size:16px;line-height:16px;">&#xA0;</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                            <f:render partial="Spacer" arguments="{height:16}" />
                             <table class="row">
                                 <tbody>
                                 <tr>
@@ -58,8 +71,7 @@
                                         <table>
                                             <tr>
                                                 <td>
-                                                    <h4 class="text-center">Company newsletter</h4>
-                                                    <p class="text-center">COMPANY CLAIM</p>
+                                                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 8, slide: '{theme.pagelayout.{pagelayout}.colPos.8.slide}'}" />
                                                 </td>
                                                 <td class="expander"></td>
                                             </tr>
@@ -68,7 +80,9 @@
                                 </tr>
                                 </tbody>
                             </table>
+                            <br>
                             <hr>
+                            <br>
                             <table class="row">
                                 <tbody>
                                 <tr>
@@ -76,10 +90,7 @@
                                         <table>
                                             <tr>
                                                 <td>
-                                                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 3, slide: '{theme.pagelayout.{pagelayout}.colPos.3.slide}'}" />
-                                                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 8, slide: '{theme.pagelayout.{pagelayout}.colPos.8.slide}'}" />
                                                     <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 0, slide: '{theme.pagelayout.{pagelayout}.colPos.0.slide}'}" />
-                                                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 9, slide: '{theme.pagelayout.{pagelayout}.colPos.9.slide}'}" />
                                                 </td>
                                                 <th class="expander"></th>
                                             </tr>
@@ -95,15 +106,15 @@
                                         <table>
                                             <tr>
                                                 <td>
-                                                    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
-
+                                                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 9, slide: '{theme.pagelayout.{pagelayout}.colPos.9.slide}'}" />
                                                     <center data-parsed="">
-                                                        <table class="button success float-center">
+                                                        <f:render partial="Spacer" arguments="{height:8}" />
+                                                        <table class="button primary float-center">
                                                             <tr>
                                                                 <td>
                                                                     <table>
                                                                         <tr>
-                                                                            <td><a href="https://">Want to get help with TYPO3?</a></td>
+                                                                            <td><a href="https://typo3.org">What you are waiting for?</a></td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -125,14 +136,7 @@
                                         <table>
                                             <tr>
                                                 <td>
-                                                    <table class="spacer">
-                                                        <tbody>
-                                                        <tr>
-                                                            <td height="16px" style="font-size:16px;line-height:16px;">&#xA0;</td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-
+                                                    <f:render partial="Spacer" arguments="{height:16}" />
                                                     <p class="text-center">
                                                         &copy; Copyright <f:format.date format="Y">now</f:format.date><br>
                                                     </p>

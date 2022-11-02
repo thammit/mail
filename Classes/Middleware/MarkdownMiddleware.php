@@ -38,8 +38,8 @@ class MarkdownMiddleware implements MiddlewareInterface
         $markDownResponse = $this->responseFactory->createResponse()->withHeader('Content-Type', 'text/plain');
         $markDownContent = $this->convertHtml2Markdown((string)$responseBody);
         // do not allow more than two line brakes
+        $markDownContent = preg_replace("/( \n)/","\n", $markDownContent);
         $markDownContent = preg_replace("/(\n){2,}/","\n\n", $markDownContent);
-        // $markDownContent = preg_replace("/( \n \n){2,}/","\n", $markDownContent);
         $markDownResponse->getBody()->write($markDownContent);
         return $markDownResponse;
     }

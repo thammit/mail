@@ -21,7 +21,7 @@
 		<f:if condition="{data.imageorient} == 0 || {data.imageorient} == 1 || {data.imageorient} == 2">
 			<tr>
 				<td class="float-center" valign="top">
-					<f:render section="ImageContainer" arguments="{_all}" />
+					<f:render partial="Image" section="ImageContainer" arguments="{_all}" />
 				</td>
 			</tr>
 		</f:if>
@@ -40,7 +40,7 @@
 								<table>
 									<tr>
 										<f:if condition="{data.imageorient} == 18 || {data.imageorient} == 26">
-											<td width="33%" style="padding-right: 20px;"><f:render section="ImageContainer" arguments="{_all}" /></td>
+											<td width="33%" style="padding-right: 20px;"><f:render partial="Image" section="ImageContainer" arguments="{_all}" /></td>
 										</f:if>
 
 										<td width="66%">
@@ -48,7 +48,7 @@
 										</td>
 
 										<f:if condition="{data.imageorient} == 17 || {data.imageorient} == 25">
-											<td width="33%" style="padding-left: 20px;"><f:render section="ImageContainer" arguments="{_all}" /></td>
+											<td width="33%" style="padding-left: 20px;"><f:render partial="Image" section="ImageContainer" arguments="{_all}" /></td>
 										</f:if>
 									</tr>
 								</table>
@@ -73,45 +73,9 @@
 		<f:if condition="{data.imageorient} == 8 || {data.imageorient} == 9 || {data.imageorient} == 10">
 			<tr>
 				<td class="float-center" valign="top">
-					<f:render section="ImageContainer" arguments="{_all}" />
+					<f:render partial="Image" section="ImageContainer" arguments="{_all}" />
 				</td>
 			</tr>
 		</f:if>
 	</f:if>
-</f:section>
-
-
-
-
-
-<f:section name="ImageContainer">
-	<f:for each="{gallery.rows}" as="row">
-		<f:for each="{row.columns}" as="column">
-			<f:if condition="{column.media} && {column.media.type} == 2">
-				<f:alias map="{file:column.media,dimensions:column.dimensions}">
-					<f:if condition="{file.link}">
-						<f:then>
-							<f:link.typolink parameter="{file.link}" title="{file.title}">
-								<f:render section="Image" arguments="{_all}" />
-							</f:link.typolink>
-						</f:then>
-						<f:else>
-							<f:render section="Image" arguments="{_all}" />
-						</f:else>
-					</f:if>
-					<f:if condition="{file.description}">
-						<br>
-						{file.description}
-					</f:if>
-				</f:alias>
-			</f:if>
-		</f:for>
-	</f:for>
-</f:section>
-
-
-
-
-<f:section name="Image">
-	<f:media class="image-embed-item" file="{file}" width="{dimensions.width}" height="{dimensions.height}" alt="{file.alternative}" title="{file.title}" />
 </f:section>

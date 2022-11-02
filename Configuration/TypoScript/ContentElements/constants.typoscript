@@ -1,4 +1,5 @@
 styles.content.textmedia {
-  maxW = 1024
-  maxWInText = 1024
+  maxW = 550
+  maxWInText = 165
 }
+page.fluidtemplate.templateRootPath = EXT:mail/Resources/Private/Templates/Page/

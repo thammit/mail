@@ -1,4 +1,49 @@
+<f:switch expression="{data.space_before_class}">
+    <f:case value="extra-small">
+        <f:render partial="Spacer" arguments="{height:4}" />
+    </f:case>
+    <f:case value="small">
+        <f:render partial="Spacer" arguments="{height:8}" />
+    </f:case>
+    <f:case value="medium">
+        <f:render partial="Spacer" arguments="{height:16}" />
+    </f:case>
+    <f:case value="large">
+        <f:render partial="Spacer" arguments="{height:24}" />
+    </f:case>
+    <f:case value="extra-large">
+        <f:render partial="Spacer" arguments="{height:32}" />
+    </f:case>
+    <f:defaultCase>
+        <f:render partial="Spacer" arguments="{height:16}" />
+    </f:defaultCase>
+</f:switch>
+<f:if condition="{data.frame_class} == 'ruler-before'">
+    <hr>
+</f:if>
 <table id="c{data.uid}">
 	<f:render section="Content" />
 </table>
-<p>&nbsp;</p>
+<f:if condition="{data.frame_class} == 'ruler-after'">
+    <hr>
+</f:if>
+<f:switch expression="{data.space_after_class}">
+    <f:case value="extra-small">
+        <f:render partial="Spacer" arguments="{height:4}" />
+    </f:case>
+    <f:case value="small">
+        <f:render partial="Spacer" arguments="{height:8}" />
+    </f:case>
+    <f:case value="medium">
+        <f:render partial="Spacer" arguments="{height:16}" />
+    </f:case>
+    <f:case value="large">
+        <f:render partial="Spacer" arguments="{height:24}" />
+    </f:case>
+    <f:case value="extra-large">
+        <f:render partial="Spacer" arguments="{height:32}" />
+    </f:case>
+    <f:defaultCase>
+        <f:render partial="Spacer" arguments="{height:16}" />
+    </f:defaultCase>
+</f:switch>

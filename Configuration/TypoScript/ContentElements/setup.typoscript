@@ -86,6 +86,7 @@ mail {
         html = FLUIDTEMPLATE
         html {
             file = EXT:mail/Resources/Private/Templates/Page/Mail.html
+            partialRootPaths.200 = EXT:mail/Resources/Private/Partials/
             variables {
                 impressumPid = TEXT
                 impressumPid.value = {$impressumPid}

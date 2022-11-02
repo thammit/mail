@@ -447,8 +447,8 @@ class MailerService implements LoggerAwareInterface
             ];
 
             $this->setHtmlContent('');
-            if ($this->isHtml && ($recipientData['accepts_html'] || $tableName == 'tx_mail_domain_model_group')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, $recipientData['categories']);
+            if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName == 'tx_mail_domain_model_group')) {
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
 
                 if ($mailHasContent) {
                     $this->setHtmlContent($this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers));
@@ -459,7 +459,7 @@ class MailerService implements LoggerAwareInterface
             // Plain
             $this->setPlainContent('');
             if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, $recipientData['categories']);
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, ($recipientData['categories'] ?? ''));
 
                 if ($mailHasContent) {
                     $plainTextContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);

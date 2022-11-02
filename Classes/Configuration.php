@@ -25,6 +25,11 @@ final class Configuration
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['fluid']['namespaces']['mail'] = ['MEDIAESSENZ\Mail\ViewHelpers'];
     }
 
+    public static function addModuleTypoScript(): void
+    {
+        ExtensionManagementUtility::addTypoScriptSetup('<INCLUDE_TYPOSCRIPT: source="FILE:EXT:mail/Configuration/TypoScript/Backend/setup.typoscript">');
+    }
+
     public static function addPageTSConfig(): void
     {
         // Category field disabled by default in backend forms.
