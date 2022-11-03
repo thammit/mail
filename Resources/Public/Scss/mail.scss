@@ -1,0 +1,79 @@
+/**
+ * Individual CSS which overwrites Zurb Foundation CSS
+ */
+
+body,
+html,
+.body {
+    background-color: $body-background-color;
+}
+
+.head-wrap {
+    background-color: $header-background-color;
+    .container {
+        background-color: $header-background-color;
+    }
+}
+.footer-wrap {
+    background-color: $footer-background-color;
+    .container {
+        background-color: $footer-background-color;
+    }
+}
+
+img:not(.small) {
+    height: auto;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+.float-right {
+    float: right;
+}
+
+table {
+    &.primary {
+        background-color: $primary-color;
+    }
+}
+.container {
+    display: block !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    clear: both !important;
+    background-color: $container-background-color;
+}
+.content {
+    padding: $global-padding;
+    max-width: $global-width;
+    margin: 0 auto;
+    display: block;
+}
+.content table,
+table.head-wrap,
+table.body-wrap,
+table.footer-wrap {
+    width: 100%;
+}
+table.footer-wrap {
+    clear: both !important;
+}
+.collapse {
+    margin: 0;
+    padding: 0;
+}
+
+.header.container {
+    & > .content {
+        padding: 0;
+    }
+    td, th {
+        vertical-align: middle;
+        text-transform: uppercase;
+        h6 {
+            font-weight: bold;
+            color: $white;
+        }
+    }
+}

@@ -151,6 +151,9 @@ final class Configuration
         $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
             'EMOGRIFIER' => \MEDIAESSENZ\Mail\ContentObject\EmogrifierContentObject::class
         ]);
+        $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
+            'SCSS' => \MEDIAESSENZ\Mail\ContentObject\ScssContentObject::class
+        ]);
     }
 
     public static function directMailMigration(): void

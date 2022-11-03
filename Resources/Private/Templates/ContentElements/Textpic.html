@@ -1,6 +1,6 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
 <f:layout name="MailContent" />
-
-
 
 <f:section name="Content">
 	<f:comment>
@@ -9,7 +9,7 @@
 	<f:if condition="{data.header}">
 		<tr>
 			<td class="float-center" valign="top">
-				<f:render partial="Header" arguments="{_all}" />
+				<f:render partial="ContentElements/Header" arguments="{_all}" />
 			</td>
 		</tr>
 	</f:if>
@@ -21,7 +21,7 @@
 		<f:if condition="{data.imageorient} == 0 || {data.imageorient} == 1 || {data.imageorient} == 2">
 			<tr>
 				<td class="float-center" valign="top">
-					<f:render partial="Image" section="ImageContainer" arguments="{_all}" />
+					<f:render partial="ContentElements/Image" section="ImageContainer" arguments="{_all}" />
                     <f:render partial="Spacer" arguments="{height:16}" />
 				</td>
 			</tr>
@@ -41,26 +41,26 @@
 								<table>
 									<tr>
 										<f:if condition="{data.imageorient} == 18 || {data.imageorient} == 26">
-											<td width="33%" style="padding-right: 20px;"><f:render partial="Image" section="ImageContainer" arguments="{_all}" /></td>
+											<td width="33%" style="padding-right: 20px;"><f:render partial="ContentElements/Image" section="ImageContainer" arguments="{_all}" /></td>
 										</f:if>
 
 										<td width="66%">
-											<f:render partial="Bodytext" arguments="{_all}" />
+											<f:render partial="ContentElements/Bodytext" arguments="{_all}" />
 										</td>
 
 										<f:if condition="{data.imageorient} == 17 || {data.imageorient} == 25">
-											<td width="33%" style="padding-left: 20px;"><f:render partial="Image" section="ImageContainer" arguments="{_all}" /></td>
+											<td width="33%" style="padding-left: 20px;"><f:render partial="ContentElements/Image" section="ImageContainer" arguments="{_all}" /></td>
 										</f:if>
 									</tr>
 								</table>
 							</f:then>
 							<f:else>
-								<f:render partial="Bodytext" arguments="{_all}" />
+								<f:render partial="ContentElements/Bodytext" arguments="{_all}" />
 							</f:else>
 						</f:if>
 					</f:then>
 					<f:else>
-						<f:render partial="Bodytext" arguments="{_all}" />
+						<f:render partial="ContentElements/Bodytext" arguments="{_all}" />
 					</f:else>
 				</f:if>
 			</td>
@@ -75,9 +75,10 @@
 			<tr>
 				<td class="float-center" valign="top">
                     <f:render partial="Spacer" arguments="{height:16}" />
-					<f:render partial="Image" section="ImageContainer" arguments="{_all}" />
+					<f:render partial="ContentElements/Image" section="ImageContainer" arguments="{_all}" />
 				</td>
 			</tr>
 		</f:if>
 	</f:if>
 </f:section>
+</html>

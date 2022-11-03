@@ -1,3 +1,4 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
 <f:switch expression="{data.space_before_class}">
     <f:case value="extra-small">
         <f:render partial="Spacer" arguments="{height:4}" />
@@ -18,9 +19,11 @@
 <f:if condition="{data.frame_class} == 'ruler-before'">
     <hr>
 </f:if>
-<table id="c{data.uid}">
+<div class="content">
+    <table id="c{data.uid}">
 	<f:render section="Content" />
-</table>
+    </table>
+</div>
 <f:if condition="{data.frame_class} == 'ruler-after'">
     <hr>
 </f:if>
@@ -41,3 +44,4 @@
         <f:render partial="Spacer" arguments="{height:32}" />
     </f:case>
 </f:switch>
+</html>

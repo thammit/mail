@@ -1,27 +1,21 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
 <f:layout name="MailContent" />
 
-
-
 <f:section name="Content">
-	<f:comment>
-		Header
-	</f:comment>
 	<f:if condition="{data.header}">
 		<tr>
 			<td class="float-center" valign="top">
-				<f:render partial="Header" arguments="{_all}" />
+				<f:render partial="ContentElements/Header" arguments="{_all}" />
 			</td>
 		</tr>
 	</f:if>
-
-	<f:comment>
-		Images
-	</f:comment>
 	<f:if condition="{gallery.rows}">
 		<tr>
 			<td class="float-center" valign="top">
-				<f:render partial="Image" section="ImageContainer" arguments="{_all}" />
+				<f:render partial="ContentElements/Image" section="ImageContainer" arguments="{_all}" />
 			</td>
 		</tr>
 	</f:if>
 </f:section>
+</html>

@@ -71,22 +71,24 @@ mail {
         extractContent = 1
         css = COA
         css {
-            10 = FLUIDTEMPLATE
-            10.file = EXT:mail/Resources/Public/Css/zurb.css
-            20 = FLUIDTEMPLATE
-            20.file = EXT:mail/Resources/Public/Css/mail.css
+#            10 = FLUIDTEMPLATE
+#            10.file = EXT:mail/Resources/Public/Css/zurb.css
+            10 = SCSS
+            10.file = EXT:mail/Resources/Public/Scss/foundation-emails.scss
+            20 = SCSS
+            20.file = EXT:mail/Resources/Public/Scss/mail.scss
         }
         html = FLUIDTEMPLATE
         html {
-            templateName = Mail
-            templateRootPaths.200 = EXT:mail/Resources/Private/Templates/Page/
+            templateName = Html
+            templateRootPaths.200 = EXT:mail/Resources/Private/Templates/Mail/
             partialRootPaths.200 = EXT:mail/Resources/Private/Partials/
             layoutRootPaths.200 = EXT:mail/Resources/Private/Layouts/
             variables {
-                impressumPid = TEXT
-                impressumPid.value = {$impressumPid}
-                loginPid = TEXT
-                loginPid.value = {$loginPid}
+                termsPid = TEXT
+                termsPid.value = {$termsPid}
+                privacyPid = TEXT
+                privacyPid.value = {$privacyPid}
                 currentPid = TEXT
                 currentPid.data = TSFE:id
                 showGeneralSalutation < tmp.showGeneralSalutation
@@ -97,7 +99,7 @@ mail {
 
 [traverse(request.getQueryParams(), 'plain')  == 1]
     // do no use table markup for plain text since conversation is done by league/html-to-markdown package
-    mail.10.html.templateName = PlainMail
+    mail.10.html.templateName = Plain
     lib.contentElement.layoutRootPaths.200 >
     lib.contentElement.templateRootPaths.200 >
     lib.contentElement.partialRootPaths.200 >

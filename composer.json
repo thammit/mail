@@ -18,7 +18,8 @@
         "friendsoftypo3/jumpurl": "^8",
         "tedivm/fetch": "^0.7",
         "league/html-to-markdown": "^5",
-        "pelago/emogrifier": "^6"
+        "pelago/emogrifier": "^6",
+        "scssphp/scssphp": "^1.8.1"
     },
     "extra": {
         "typo3/cms": {

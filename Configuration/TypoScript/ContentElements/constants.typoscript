@@ -1,8 +1,91 @@
 styles {
     content {
         textmedia {
-          maxW = 550
-          maxWInText = 165
+            maxW = 550
+            maxWInText = 165
         }
     }
+}
+
+termsPid = 122
+privacyPid = 138
+
+plugin.mail.settings.scss {
+    # cat=mail: styling/mail_001/001; type=color; label=Primary color, used with components that support the `.primary` class.
+    primary-color = #037eab
+
+    # cat=mail: styling/mail_001/002; type=color; label=Secondary color, used with components that support the `.secondary` class.
+    secondary-color = #777777
+
+    # cat=mail: styling/mail_001/003; type=color; label=Color to indicate a positive status or action, used with the `.success` class.
+    success-color = #3adb76
+
+    # cat=mail: styling/mail_001/004; type=color; label=Color to indicate a caution status or action, used with the `.warning` class.
+    warning-color = #ffae00
+
+    # cat=mail: styling/mail_001/005; type=color; label=Color to indicate a negative status or action, used with the `.alert` class.
+    alert-color = #ec5840
+
+    # cat=mail: styling/mail_001/006; type=color; label=Color used for light gray UI items within Foundation.
+    light-gray = #f3f3f3
+
+    # cat=mail: styling/mail_001/007; type=color; label=Color used for medium gray UI items within Foundation.
+    medium-gray = #cacaca
+
+    # cat=mail: styling/mail_001/008; type=color; label=Color used for dark gray UI items within Foundation.
+    dark-gray = #8a8a8a
+
+    # cat=mail: styling/mail_001/009; type=color; label=Color used for black ui items within Foundation
+    black = #0a0a0a
+
+    # cat=mail: styling/mail_001/010; type=color; label=Color used for white ui items within Foundation
+    white = #fefefe
+
+    # cat=mail: styling/mail_001/011; type=color; label=Color used code.
+    pre-color = #ff6908
+
+    # cat=mail: styling/mail_001/012; type=color; label=Color used for headlines.
+    header-color = #444444
+
+    # cat=mail: styling/mail_001/013; type=color; label=Color used for text.
+    global-font-color = #444444
+
+    # cat=mail: styling/mail_002/001; type=color; label=Background color used for mail header.
+    header-background-color = #037eab
+
+    # cat=mail: styling/mail_002/002; type=string; label=Body background color.
+    body-background-color = $light-gray
+
+    # cat=mail: styling/mail_002/003; type=string; label=Color for the container background
+    container-background-color = $white
+
+    # cat=mail: styling/mail_002/004; type=string; label=Body background color.
+    footer-background-color = $light-gray
+
+    # cat=mail: styling/mail_003/001; type=dims; label=Width of the container.
+    global-width = 600px
+
+    # cat=mail: styling/mail_003/002; type=dims; label=Width of the container on small screens.
+    global-width-small = 95%
+
+    # cat=mail: styling/mail_003/003; type=dims; label=Gutter for grid elements.
+    global-gutter = 20px
+
+    # cat=mail: styling/mail_003/004; type=string; label=Gutter for grid elements on small screens.
+    global-gutter-small = $global-gutter
+
+    # cat=mail: styling/mail_003/005; type=dims; label=Global padding.
+    global-padding = 20px
+
+    # cat=mail: styling/mail_003/006; type=dims; label=Global margin. Margin requires a capital 'M' to workin Outlook.com
+    global-margin = 16px
+
+    # cat=mail: styling/mail_003/007; type=dims; label=Global radius of radius-corners.
+    global-radius = 3px
+
+    # cat=mail: styling/mail_003/008; type=dims; label=Global rounded radius of rounded-corners.
+    global-rounded = 500px
+
+    # cat=mail: styling/mail_003/009; type=string; label=Global media query to switch from desktop to mobile styles.
+    global-breakpoint = $global-width + $global-gutter
 }

@@ -1,0 +1,25 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Mail" />
+
+<f:section name="Header">
+    <f:render partial="Mail/Header" arguments="{_all}" />
+</f:section>
+
+<f:section name="Body">
+    <table class="body-wrap body" bgcolor="">
+        <tr>
+            <td></td>
+            <td class="container" align="" bgcolor="#FFFFFF">
+                <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 0, slide: 0}" />
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</f:section>
+
+<f:section name="Footer">
+<f:render partial="Mail/Footer" arguments="{_all}" />
+</f:section>
+
+</html>
