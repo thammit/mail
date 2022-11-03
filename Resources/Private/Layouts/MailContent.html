@@ -14,9 +14,6 @@
     <f:case value="extra-large">
         <f:render partial="Spacer" arguments="{height:32}" />
     </f:case>
-    <f:defaultCase>
-        <f:render partial="Spacer" arguments="{height:16}" />
-    </f:defaultCase>
 </f:switch>
 <f:if condition="{data.frame_class} == 'ruler-before'">
     <hr>
@@ -43,7 +40,4 @@
     <f:case value="extra-large">
         <f:render partial="Spacer" arguments="{height:32}" />
     </f:case>
-    <f:defaultCase>
-        <f:render partial="Spacer" arguments="{height:16}" />
-    </f:defaultCase>
 </f:switch>
