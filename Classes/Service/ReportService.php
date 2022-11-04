@@ -286,9 +286,9 @@ class ReportService
             $htmlContent = $mailContent['html']['content'];
 
             if (is_array($mailContent['html']['hrefs'])) {
-                foreach ($mailContent['html']['hrefs'] as $jumpurlId => $data) {
+                foreach ($mailContent['html']['hrefs'] as $jumpurlId => $jumpurlData) {
                     $htmlLinks[$jumpurlId] = [
-                        'url' => $data['ref'],
+                        'url' => $jumpurlData['ref'],
                         'label' => '',
                     ];
                 }
@@ -325,21 +325,17 @@ class ReportService
 
                 $title = $link->getAttribute('title');
 
-                if (!empty($title)) {
-                    // no title attribute
-                    $label = '<span title="' . $title . '">' . GeneralUtility::fixed_lgd_cs(substr($targetUrl, -40), 40) . '</span>';
-                } else {
-                    $label = '<span title="' . $targetUrl . '">' . GeneralUtility::fixed_lgd_cs(substr($targetUrl, -40), 40) . '</span>';
-                }
-
-                $htmlLinks[$jumpurlId]['label'] = $label;
+                $htmlLinks[$jumpurlId]['label'] = $targetUrl;
+                $htmlLinks[$jumpurlId]['title'] = !empty($title) ? $title : $targetUrl;
             }
         }
 
-        $tblLines = [];
+        $data = [];
         $html = false;
 
-        foreach ($urlCounter['total'] as $id => $_) {
+        $clickedLinks = array_keys($urlCounter['total']);
+
+        foreach ($clickedLinks as $id) {
             // $id is the jumpurl ID
             $origId = $id;
             $id = abs(intval($id));
@@ -348,49 +344,45 @@ class ReportService
             $urlstr = $this->getUrlStr($url);
             $label = $this->getLinkLabel($url, $urlstr, false, $htmlLinks[$id]['label']);
             if (isset($urlCounter['html'][$id]['plainId'])) {
-                $tblLines[] = [
-                    $label,
-                    $id,
-                    $urlCounter['html'][$id]['plainId'],
-                    $urlCounter['total'][$origId]['counter'],
-                    $urlCounter['html'][$id]['counter'],
-                    $urlCounter['html'][$id]['plainCounter'],
-                    $urlstr,
+                $data[] = [
+                    'label' => $label,
+                    'title' => $htmlLinks[$id]['title'],
+                    'totalCounter' => $urlCounter['total'][$origId]['counter'],
+                    'htmlCounter' => $urlCounter['html'][$id]['counter'],
+                    'plainCounter' => $urlCounter['html'][$id]['plainCounter'],
+                    'url' => $urlstr,
                 ];
             } else {
                 $html = !empty($urlCounter['html'][$id]['counter']);
-                $tblLines[] = [
-                    $label,
-                    ($html ? $id : '-'),
-                    ($html ? '-' : $id),
-                    ($html ? $urlCounter['html'][$id]['counter'] ?? 0 : $urlCounter['plain'][$origId]['counter'] ?? 0),
-                    $urlCounter['html'][$id]['counter'] ?? 0,
-                    $urlCounter['plain'][$origId]['counter'] ?? 0,
-                    $urlstr,
+                $data[] = [
+                    'label' => $label,
+                    'title' => $htmlLinks[$id]['title'],
+                    'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] ?? 0 : $urlCounter['plain'][$origId]['counter'] ?? 0),
+                    'htmlCounter' => $urlCounter['html'][$id]['counter'] ?? 0,
+                    'plainCounter' => $urlCounter['plain'][$origId]['counter'] ?? 0,
+                    'url' => $urlstr,
                 ];
             }
         }
 
         // go through all links that were not clicked yet and that have a label
-        $clickedLinks = array_keys($urlCounter['total']);
         foreach ($urlArr as $id => $link) {
             if (!in_array($id, $clickedLinks) && (isset($htmlLinks['id']))) {
                 // a link to this host?
                 $urlstr = $this->getUrlStr($link);
                 $label = $htmlLinks[$id]['label'] . ' (' . ($urlstr ?: '/') . ')';
-                $tblLines[] = [
-                    $label,
-                    ($html ? $id : '-'),
-                    ($html ? '-' : abs($id)),
-                    ($html ? $urlCounter['html'][$id]['counter'] : $urlCounter['plain'][$id]['counter']),
-                    $urlCounter['html'][$id]['counter'],
-                    $urlCounter['plain'][$id]['counter'],
-                    $link,
+                $data[] = [
+                    'label' => $label,
+                    'title' => $htmlLinks[$id]['title'],
+                    'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] : $urlCounter['plain'][$id]['counter']),
+                    'htmlCounter' => $urlCounter['html'][$id]['counter'],
+                    'plainCounter' => $urlCounter['plain'][$id]['counter'],
+                    'url' => $link,
                 ];
             }
         }
 
-        return $tblLines;
+        return $data;
     }
 
     // todo make static
