@@ -15,12 +15,17 @@ use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\Entity\SiteInterface;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class MailFactory
 {
-    private int $storageFolder;
+    private SiteInterface $site;
+
     /**
      * @var array|mixed
      */
@@ -34,27 +39,32 @@ class MailFactory
     {
         return GeneralUtility::makeInstance(
             static::class,
-            $uid
+            $uid,
+            GeneralUtility::makeInstance(Context::class),
+            GeneralUtility::makeInstance(SiteFinder::class)
         );
     }
 
     /**
      * @param int $storageFolder
+     * @param Context $context
+     * @param SiteFinder $siteFinder
+     * @throws SiteNotFoundException
      */
-    public function __construct(int $storageFolder)
+    public function __construct(private readonly int $storageFolder, private readonly Context $context, private readonly SiteFinder $siteFinder)
     {
-        $this->storageFolder = $storageFolder;
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($storageFolder)['mod.']['web_modules.']['mail.'] ?? [];
+        $this->site = $this->siteFinder->getSiteByPageId($storageFolder);
     }
 
     /**
      * @param int $pageUid
-     * @param int $sysLanguageUid
+     * @param int $languageUid
      * @return Mail|null
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function fromInternalPage(int $pageUid, int $sysLanguageUid = 0): ?Mail
+    public function fromInternalPage(int $pageUid, int $languageUid = 0): ?Mail
     {
         $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
         $pageRecord = $pageRepository->getPage($pageUid);
@@ -71,14 +81,14 @@ class MailFactory
             ->setEncoding($this->pageTSConfiguration['direct_mail_encoding'] ?? 'quoted-printable')
             ->setCharset($this->pageTSConfiguration['direct_mail_charset'] ?? 'iso-8859-1');
 
-        if ($sysLanguageUid > 0) {
-            $mail->setSysLanguageUid($sysLanguageUid);
+        if ($languageUid > 0) {
+            $mail->setSysLanguageUid($languageUid);
             // todo is this working with new route handling?
-            $langParam = $this->pageTSConfiguration['langParams.'][$sysLanguageUid] ?? '&L=' . $sysLanguageUid;
+            $langParam = $this->pageTSConfiguration['langParams.'][$languageUid] ?? '&L=' . $languageUid;
             $mail->setPlainParams($mail->getPlainParams() . $langParam);
             $mail->setHtmlParams($mail->getHtmlParams() . $langParam);
             // get page title from translated page
-            $pageRecordOverlay = $pageRepository->getPageOverlay($pageRecord, $sysLanguageUid);
+            $pageRecordOverlay = $pageRepository->getPageOverlay($pageRecord, $languageUid);
             if ($pageRecordOverlay) {
                 $mail->setSubject($pageRecordOverlay['title']);
             }
@@ -91,7 +101,7 @@ class MailFactory
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             $htmlLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
             if ($htmlLinks) {
-                $htmlContent = $this->replaceHyperLinks($htmlContent, $htmlLinks, BackendDataUtility::getBaseUrl($mail->getPage()));
+                $htmlContent = $this->replaceHyperLinks($htmlContent, $htmlLinks, BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid));
             }
         }
 
@@ -209,11 +219,13 @@ class MailFactory
             ->setCharset($this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8');
 
         $message = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_-->' . $message . '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
+        // shorten urls is done in mailer service sendPersonalizedMail method as well, but is necessary here as well, to not break links due to following wordwrap
         if ($mail->isRedirect()) {
             $message = MailerUtility::shortUrlsInPlainText(
                 $message,
                 $mail->isRedirectAll() ? 0 : 76,
-                BackendDataUtility::getBaseUrl($this->storageFolder)
+                BackendDataUtility::getBaseUrl($this->storageFolder),
+                $this->site->getLanguageById($mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
             );
         }
         if ($breakLines) {

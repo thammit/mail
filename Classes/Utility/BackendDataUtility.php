@@ -12,7 +12,7 @@ use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 class BackendDataUtility
 {
-    public static function getBaseUrl(int $pageId): string
+    public static function getBaseUrl(int $pageId, int $languageUid = 0): string
     {
         if ($pageId > 0) {
             /** @var SiteFinder $siteFinder */
@@ -20,6 +20,13 @@ class BackendDataUtility
             try {
                 $site = $siteFinder->getSiteByPageId($pageId);
                 $base = $site->getBase();
+                if ($languageUid > 0) {
+                    $siteLanguage = $site->getLanguageById($languageUid);
+                    $languagePath = rtrim($siteLanguage->getBase()->getPath(), '/');
+                    if ($languagePath) {
+                        return sprintf('%s://%s/%s', $base->getScheme(), $base->getHost(), $languagePath);
+                    }
+                }
 
                 return sprintf('%s://%s', $base->getScheme(), $base->getHost());
             } catch (SiteNotFoundException) {

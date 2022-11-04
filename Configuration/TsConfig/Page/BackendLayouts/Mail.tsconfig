@@ -9,27 +9,9 @@ mod {
                 config {
                     backend_layout {
                         colCount = 12
-                        rowCount = 4
+                        rowCount = 1
                         rows {
                             1 {
-                                columns {
-                                    1 {
-                                        name = LLL:EXT:mail/Resources/Private/Language/BackendLayout.xlf:backend_layout.column.border
-                                        colPos = 3
-                                        colspan = 12
-                                    }
-                                }
-                            }
-                            2 {
-                                columns {
-                                    1 {
-                                        name = LLL:EXT:mail/Resources/Private/Language/BackendLayout.xlf:backend_layout.column.contentbefore
-                                        colPos = 8
-                                        colspan = 12
-                                    }
-                                }
-                            }
-                            3 {
                                 columns {
                                     1 {
                                         name = LLL:EXT:mail/Resources/Private/Language/BackendLayout.xlf:backend_layout.column.normal
@@ -38,19 +20,10 @@ mod {
                                     }
                                 }
                             }
-                            4 {
-                                columns {
-                                    1 {
-                                        name = LLL:EXT:mail/Resources/Private/Language/BackendLayout.xlf:backend_layout.column.contentafter
-                                        colPos = 9
-                                        colspan = 12
-                                    }
-                                }
-                            }
                         }
                     }
                 }
-                icon = EXT:mail/Resources/Public/Icons/mail.svg
+                icon = EXT:mail/Resources/Public/Icons/mail-page.svg
             }
         }
     }

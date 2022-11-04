@@ -26,11 +26,15 @@ use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Resource\FileReference;
+use TYPO3\CMS\Core\Site\Entity\Site;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\MathUtility;
@@ -49,6 +53,7 @@ class MailerService implements LoggerAwareInterface
     /*
      * @var array the mail parts (HTML and Plain, incl. href and link to media)
      */
+    protected Mail $mail;
     protected int $mailUid = 0;
     protected array $mailParts = [];
     protected int $sendPerCycle = 50;
@@ -81,12 +86,15 @@ class MailerService implements LoggerAwareInterface
     protected array $htmlBoundaryParts = [];
     protected array $plainBoundaryParts = [];
     protected string $siteIdentifier = '';
+    protected Site $site;
 
     public function __construct(
         protected CharsetConverter $charsetConverter,
         protected MailRepository $mailRepository,
         protected LogRepository $logRepository,
-        protected RequestFactory $requestFactory
+        protected RequestFactory $requestFactory,
+        protected Context $context,
+        protected SiteFinder $siteFinder,
     ) {
     }
 
@@ -100,10 +108,12 @@ class MailerService implements LoggerAwareInterface
 
     /**
      * @param string $siteIdentifier
+     * @throws SiteNotFoundException
      */
     public function setSiteIdentifier(string $siteIdentifier): void
     {
         $this->siteIdentifier = $siteIdentifier;
+        $this->site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
     }
 
     public function setMailPart($part, $value): void
@@ -284,28 +294,28 @@ class MailerService implements LoggerAwareInterface
     public function prepare(int $mailUid): void
     {
         /** @var Mail $mail */
-        $mail = $this->mailRepository->findByUid($mailUid);
+        $this->mail = $this->mailRepository->findByUid($mailUid);
 
         $this->mailUid = $mailUid;
-        $this->charset = $mail->getType() === MailType::INTERNAL ? 'utf-8' : $mail->getCharset();
-        $this->subject = $this->charsetConverter->conv($mail->getSubject(), $this->backendCharset, $this->charset);
-        $this->fromName = ($mail->getFromName() ? $this->charsetConverter->conv($mail->getFromName(), $this->backendCharset, $this->charset) : '');
-        $this->fromEmail = $mail->getFromEmail();
-        $this->replyToName = ($mail->getReplyToName() ? $this->charsetConverter->conv($mail->getReplyToName(), $this->backendCharset, $this->charset) : '');
-        $this->replyToEmail = $mail->getReplyToEmail();
-        $this->returnPath = $mail->getReturnPath();
-        $this->organisation = ($mail->getOrganisation() ? $this->charsetConverter->conv($mail->getOrganisation(), $this->backendCharset, $this->charset) : '');
-        $this->priority = MathUtility::forceIntegerInRange($mail->getPriority(), 1, 5);
-        $this->mailParts = unserialize(base64_decode($mail->getMailContent()));
+        $this->charset = $this->mail->getType() === MailType::INTERNAL ? 'utf-8' : $this->mail->getCharset();
+        $this->subject = $this->charsetConverter->conv($this->mail->getSubject(), $this->backendCharset, $this->charset);
+        $this->fromName = ($this->mail->getFromName() ? $this->charsetConverter->conv($this->mail->getFromName(), $this->backendCharset, $this->charset) : '');
+        $this->fromEmail = $this->mail->getFromEmail();
+        $this->replyToName = ($this->mail->getReplyToName() ? $this->charsetConverter->conv($this->mail->getReplyToName(), $this->backendCharset, $this->charset) : '');
+        $this->replyToEmail = $this->mail->getReplyToEmail();
+        $this->returnPath = $this->mail->getReturnPath();
+        $this->organisation = ($this->mail->getOrganisation() ? $this->charsetConverter->conv($this->mail->getOrganisation(), $this->backendCharset, $this->charset) : '');
+        $this->priority = MathUtility::forceIntegerInRange($this->mail->getPriority(), 1, 5);
+        $this->mailParts = unserialize(base64_decode($this->mail->getMailContent()));
         $this->isHtml = (bool)($this->getHtmlContent() ?? false);
         $this->isPlain = (bool)($this->getPlainContent() ?? false);
-        $this->flowedFormat = $mail->isFlowedFormat();
-        $this->includeMedia = $mail->isIncludeMedia();
-        $this->authCodeFieldList = ($mail->getAuthCodeFields() ?: 'uid');
-        $this->redirect = $mail->isRedirect();
-        $this->redirectAll = $mail->isRedirectAll();
-        $this->redirectUrl = $mail->getRedirectUrl();
-        $this->attachment = $mail->getAttachment()->count();
+        $this->flowedFormat = $this->mail->isFlowedFormat();
+        $this->includeMedia = $this->mail->isIncludeMedia();
+        $this->authCodeFieldList = ($this->mail->getAuthCodeFields() ?: 'uid');
+        $this->redirect = $this->mail->isRedirect();
+        $this->redirectAll = $this->mail->isRedirectAll();
+        $this->redirectUrl = $this->mail->getRedirectUrl();
+        $this->attachment = $this->mail->getAttachment()->count();
 
         $this->htmlBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->getHtmlContent());
         foreach ($this->htmlBoundaryParts as $bKey => $bContent) {
@@ -392,7 +402,6 @@ class MailerService implements LoggerAwareInterface
      * @param string $addressList list of recipient address, comma list of emails
      *
      * @return void
-     * @throws \TYPO3\CMS\Core\Exception
      */
     public function sendSimpleMail(string $addressList): void
     {
@@ -447,7 +456,7 @@ class MailerService implements LoggerAwareInterface
             ];
 
             $this->setHtmlContent('');
-            if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName == 'tx_mail_domain_model_group')) {
+            if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
 
                 if ($mailHasContent) {
@@ -467,7 +476,8 @@ class MailerService implements LoggerAwareInterface
                         $plainTextContent = MailerUtility::shortUrlsInPlainText(
                             $plainTextContent,
                             $this->redirectAll ? 0 : 76,
-                            $this->redirectUrl
+                            $this->redirectUrl,
+                            $this->site->getLanguageById($this->mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
                         );
                     }
                     $this->setPlainContent($plainTextContent);

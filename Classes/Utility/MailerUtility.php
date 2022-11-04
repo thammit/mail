@@ -4,17 +4,18 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use Exception;
-use FoT3\Rdct\Redirects;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 
 class MailerUtility
 {
@@ -310,20 +311,70 @@ class MailerUtility
      *
      * @param string $message Message content
      * @param int $lengthLimit Length limit; Default = 76 or 0 for all
-     * @param string $index_script_url URL of index script (see makeRedirectUrl())
+     * @param string $baseUrl
+     * @param string $sourceHost
      * @return string Processed message content
      */
-    public static function shortUrlsInPlainText(string $message, int $lengthLimit = 76, string $index_script_url = ''): string
+    public static function shortUrlsInPlainText(string $message, int $lengthLimit, string $baseUrl, string $sourceHost = '*'): string
     {
-        return preg_replace_callback(
+        $messageWithReplacedLinks = preg_replace_callback(
             '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
-            function (array $matches) use ($lengthLimit, $index_script_url) {
-                $redirects = GeneralUtility::makeInstance(Redirects::class);
-                return $redirects->makeRedirectUrl($matches[0], $lengthLimit, $index_script_url);
+            function (array $matches) use ($lengthLimit, $baseUrl, $sourceHost) {
+                return $baseUrl . static::createRedirect($matches[0], $lengthLimit, $sourceHost);
             },
             $message
         );
+
+        if ($message !== $messageWithReplacedLinks) {
+            GeneralUtility::makeInstance(RedirectCacheService::class)->rebuildForHost($sourceHost);
+        }
+
+        return $messageWithReplacedLinks;
     }
+
+    /**
+     * @return string The created redirect url
+     */
+    public static function createRedirect(string $targetLink, int $lengthLimit, string $sourceHost): string
+    {
+        if (strlen($targetLink) <= $lengthLimit) {
+            return $targetLink;
+        }
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect');
+
+        $sourcePath = '/redirect-' . substr(md5($targetLink), 0, 20);
+
+        if ($connection->count('*', 'sys_redirect', ['source_path' => $sourcePath, 'source_host' => $sourceHost]) > 0) {
+            return $sourcePath;
+        }
+
+        $record = [
+            'pid' => 0,
+            'updatedon' => time(),
+            'createdon' => time(),
+            'createdby' => 0,
+            'deleted' => 0,
+            'disabled' => 0,
+            'starttime' => 0,
+            'endtime' => 0,
+            'source_host' => $sourceHost,
+            'source_path' => $sourcePath,
+            'is_regexp' => 0,
+            'force_https' => 0,
+            'respect_query_parameters' => 0,
+            'target' => $targetLink,
+            'target_statuscode' => 307,
+            'hitcount' => 0,
+            'lasthiton' => 0,
+            'disable_hitcount' => 0,
+            'protected' => 1,
+        ];
+
+        $connection->insert('sys_redirect', $record);
+        return $sourcePath;
+    }
+
 
     /**
      * This substitutes the http:// urls in plain text with links
