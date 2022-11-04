@@ -19,10 +19,8 @@ use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
-use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -339,7 +337,6 @@ class MailController extends AbstractController
             ];
 
             $colPos = 9999;
-//            $ttContentCategoryMmRepository = GeneralUtility::makeInstance(OldTtContentCategoryMmRepository::class);
             $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
             foreach ($rows as $contentElementData) {
                 $categoriesRow = [];
@@ -494,7 +491,6 @@ class MailController extends AbstractController
      * @param Mail $mail
      * @param string $recipients
      * @throws StopActionException
-     * @throws TransportExceptionInterface
      * @throws Exception
      */
     public function sendTestMailAction(Mail $mail, string $recipients = ''): void

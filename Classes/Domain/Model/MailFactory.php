@@ -318,7 +318,6 @@ class MailFactory
      */
     protected function fetchPlainTextContent(string $plainTextUrl): bool|string
     {
-        // $plainTextUrl = $mail->getType() === MailType::EXTERNAL ? MailerUtility::getUrlForExternalPage($mail->getPlainParams()) : BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams());
         $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $this->pageTSConfiguration);
         try {
             $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
