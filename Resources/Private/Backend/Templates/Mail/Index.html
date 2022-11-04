@@ -85,7 +85,7 @@
                         </f:if>
                     </td>
                     <td class="col-control nowrap">
-                        <f:link.action action="openMail" arguments="{mail:row.uid}" class="btn btn-primary text-uppercase">NEXT</f:link.action>
+                        <f:link.action action="openMail" arguments="{mail:row.uid}" class="btn btn-mail-theme text-uppercase">NEXT</f:link.action>
                     </td>
                 </tr>
             </f:for>
@@ -148,7 +148,7 @@
                                 </f:for>
                             </td>
                             <td class="col-control nowrap">
-                                <f:link.action action="createMailFromInternalPage" arguments="{page: row.uid}" class="btn btn-primary text-uppercase">NEXT</f:link.action>
+                                <f:link.action action="createMailFromInternalPage" arguments="{page: row.uid}" class="btn btn-mail-theme text-uppercase">NEXT</f:link.action>
                             </td>
                         </tr>
                     </f:for>
@@ -179,7 +179,7 @@
             <label for="subjectForExternalMail" class="form-label"><f:translate key="{lll}dmail_subject"/></label>
             <f:form.textfield id="subjectForExternalMail" type="text" placeholder="{f:translate(key: '{lll}dmail_write_subject')}" property="subject" name="subject" class="form-control" required="1" />
         </div>
-        <button class="btn btn-primary text-uppercase" type="submit"><f:translate key="{lll}dmail_wiz_next" /></button>
+        <button class="btn btn-mail-theme text-uppercase" type="submit"><f:translate key="{lll}dmail_wiz_next" /></button>
     </f:form>
 </f:section>
 
@@ -206,7 +206,7 @@
             <f:form.checkbox id="quickmailBreakLines" class="form-check-input mt-1" name="breakLines" value="1" />
             <label for="quickmailBreakLines" class="form-check-label"><f:translate key="{lll}quickmail_break_lines"/></label>
         </div>
-        <button class="btn btn-primary text-uppercase" type="Submit"><f:translate key="{lll}dmail_wiz_next" /></button>
+        <button class="btn btn-mail-theme text-uppercase" type="Submit"><f:translate key="{lll}dmail_wiz_next" /></button>
     </f:form>
 </f:section>
 </html>

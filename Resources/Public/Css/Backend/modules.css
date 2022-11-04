@@ -1,12 +1,12 @@
 :root {
-    --mail-primary: #0078e6;
-    --mail-primary-rgb: 0,120,230;
-    --mail-background-color: #0078e6;
-    --mail-background-color2: #00386b;
-    --mail-active-bg: #0060b8;
-    --mail-border-color: #005db3;
-    --mail-hover-border-color: #004380;
-    --mail-active-border-color: #004686;
+    --mail-primary: #037eab;
+    --mail-primary-rgb: 3,126,171;
+    --mail-background-color: #037eab;
+    --mail-background-color2: #01729b;
+    --mail-active-bg: #0394c8;
+    --mail-border-color: #048dc0;
+    --mail-hover-border-color: #02688e;
+    --mail-active-border-color: #016c92;
     --mail-color: #ffffff;
 }
 

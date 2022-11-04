@@ -23,7 +23,7 @@
                 </f:form.select>
                 <f:render section="commonHiddenFields" arguments="{_all}" />
                 <f:form.hidden name="configuration[charsetSelected]" value="{data.charsetSelected}"/>
-                <f:form.submit name="configuration[update]" value="{f:translate(key: '{lll}mailgroup_import_update')}" class="btn btn-primary text-uppercase"/>
+                <f:form.submit name="configuration[update]" value="{f:translate(key: '{lll}mailgroup_import_update')}" class="btn btn-mail-theme text-uppercase"/>
             </fieldset>
         </f:if>
     </f:form>
@@ -131,7 +131,7 @@
         <f:link.action action="csvImportWizardStepConfiguration" class="btn btn-default text-uppercase">
             <f:translate key="{lll}mailgroup_import_back"/>
         </f:link.action>
-        <f:form.button type="submit" class="btn btn-primary text-uppercase">
+        <f:form.button type="submit" class="btn btn-mail-theme text-uppercase">
             <f:translate key="{lll}mailgroup_import_next"/>
         </f:form.button>
     </f:form>

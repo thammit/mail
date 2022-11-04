@@ -9,7 +9,7 @@
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1>
-        {data.title} <span class="badge rounded-pill bg-primary">{data.totalRecipients}</span>
+        {data.title}
     </h1>
     <f:if condition="{data.tables -> f:count()}">
         <div class="panel-group" id="mail-recipient-list-panel">

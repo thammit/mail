@@ -29,7 +29,7 @@
                             </label>
                             <ul>
                                 <li title="{group.uid}">{group.title}
-                                    <f:if condition="{group.receiver}"><span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span></f:if>
+                                    <f:if condition="{group.receiver}"><span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span></f:if>
                                 </li>
                             </ul>
                         </f:then>
@@ -44,7 +44,7 @@
                                             <f:form.hidden name="groups[{group.uid}]" value="0" />
                                             <f:form.checkbox class="form-check-input" name="groups[{group.uid}]" value="1" id="mailgroups-{group.uid}"/>
                                             <label class="form-check-label" for="mailgroups-{group.uid}">
-                                                {group.title} <span class="badge rounded-pill bg-primary ms-1 pb-1">{group.receiver}</span>
+                                                {group.title} <span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
                                             </label>
                                         </div>
                                     </f:for>
@@ -91,7 +91,7 @@
                     </label>
                 </div>
             </f:comment>
-            <f:form.button class="btn btn-lg btn-primary text-uppercase" type="Submit">
+            <f:form.button class="btn btn-lg btn-mail-theme text-uppercase" type="Submit">
                 <f:translate key="{lll}schedule_finish"/>
             </f:form.button>
         </div>
