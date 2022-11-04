@@ -84,6 +84,17 @@ mail {
             templateRootPaths.200 = EXT:mail/Resources/Private/Templates/Mail/
             partialRootPaths.200 = EXT:mail/Resources/Private/Partials/
             layoutRootPaths.200 = EXT:mail/Resources/Private/Layouts/
+            settings {
+                header {
+                    title = {$plugin.mail.settings.header.title}
+                    image {
+                        src = {$plugin.mail.settings.header.image.src}
+                        alt = {$plugin.mail.settings.header.image.alt}
+                        width = {$plugin.mail.settings.header.image.width}
+                        height = {$plugin.mail.settings.header.image.height}
+                    }
+                }
+            }
             variables {
                 termsPid = TEXT
                 termsPid.value = {$termsPid}

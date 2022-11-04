@@ -10,6 +10,17 @@ styles {
 termsPid = 122
 privacyPid = 138
 
+plugin.mail.settings {
+    header {
+        title = Newsletter
+        image {
+            src = EXT:mail/Resources/Public/Images/Logo.png
+            alt = Logo
+            width = 300
+        }
+    }
+}
+
 plugin.mail.settings.scss {
     # cat=mail: styling/mail_001/001; type=color; label=Primary color, used with components that support the `.primary` class.
     primary-color = #037eab
