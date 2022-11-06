@@ -12,6 +12,7 @@ use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use pQuery;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -99,10 +100,52 @@ class MailFactory
         if ($mail->isHtml()) {
             $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams());
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
-            $htmlLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
-            if ($htmlLinks) {
-                $htmlContent = $this->replaceHyperLinks($htmlContent, $htmlLinks, BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid));
+
+            $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
+            $glue = str_contains($baseUrl, '?') ? '&' : '?';
+            $enableJumpUrl = (bool)($this->pageTSConfiguration['enable_jump_url'] ?? false);
+            $enableMailToJumpUrl = (bool)($this->pageTSConfiguration['enable_mailto_jump_url'] ?? false);
+            $jumpUrlTrackingPrivacy = (bool)($this->pageTSConfiguration['jumpurl_tracking_privacy'] ?? false);
+            $jumpUrlPrefix = $baseUrl . $glue .
+                'mail=###SYS_MAIL_ID###' .
+                ($jumpUrlTrackingPrivacy ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
+                '&aC=###SYS_AUTHCODE###' .
+                '&jumpurl=';
+
+            $dom = pQuery::parseStr($htmlContent);
+            /** @var pQuery\IQuery $element */
+            foreach($dom->query('a,form,area') as $element) {
+                $hyperLinkAttribute = match ($element->tagName()) {
+                    'form' => 'action',
+                    default => 'href',
+                };
+                $originalHyperLink = $element->attr($hyperLinkAttribute);
+                if (!str_starts_with(trim($originalHyperLink), '#')) {
+                    $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
+                    if ($enableJumpUrl && !$element->attr('no_jumpurl') && (!str_starts_with($originalHyperLink, 'mailto:') || $enableMailToJumpUrl)) {
+                        $hyperLink = array_search($originalHyperLink, array_column($htmlLinks, 'ref'));
+                        if ($hyperLink === false) {
+                            $htmlLinks[] = [
+                                'tag' => $element->tagName(),
+                                'ref' => $originalHyperLink,
+                                'absRef' => $absoluteHyperlink,
+//                            'subst_str' => $newHyperlink,
+//                            'no_jumpurl' => $element->attr('no_jumpurl') ? 1 : 0,
+                            ];
+                            end($htmlLinks);
+                            $hyperLink = key($htmlLinks);
+                        }
+                        $absoluteHyperlink = $jumpUrlPrefix . (string)$hyperLink;
+                    }
+                    $element->attr($hyperLinkAttribute, $absoluteHyperlink);
+                    // $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $htmlLinks, $jumpUrlPrefix, $enableJumpUrl, $enableMailToJumpUrl);
+                }
             }
+            $htmlContent = $dom->html();
+//            $htmlLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
+//            if ($htmlLinks) {
+//                $htmlContent = $this->replaceHyperLinks($htmlContent, $htmlLinks, BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid));
+//            }
         }
 
         $plainTextContent = '';
@@ -310,18 +353,17 @@ class MailFactory
     {
         $glue = str_contains($baseUrl, '?') ? '&' : '?';
         $jumpUrlPrefix = '';
-        $jumpUrlUseId = false;
-        if ($this->pageTSConfiguration['enable_jump_url'] ?? false) {
+        $enableJumpUrl = (bool)($this->pageTSConfiguration['enable_jump_url'] ?? false);
+        if ($enableJumpUrl) {
             $jumpUrlPrefix = $baseUrl . $glue .
                 'mail=###SYS_MAIL_ID###' .
                 (($this->pageTSConfiguration['jumpurl_tracking_privacy'] ?? false) ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
                 '&aC=###SYS_AUTHCODE###' .
                 '&jumpurl=';
-            $jumpUrlUseId = true;
         }
         $jumpUrlUseMailto = (bool)($this->pageTSConfiguration['enable_mailto_jump_url'] ?? false);
 
-        return MailerUtility::replaceHrefsInContent($htmlContent, $hyperLinks, $jumpUrlPrefix, $jumpUrlUseId, $jumpUrlUseMailto);
+        return MailerUtility::replaceHrefsInContent($htmlContent, $hyperLinks, $jumpUrlPrefix, $enableJumpUrl, $jumpUrlUseMailto);
     }
 
     /**

@@ -80,7 +80,7 @@ class MailerUtility
     {
         $mediaLinks = [];
 
-        $attribRegex = static::tagRegex(['img', 'table', 'td', 'tr', 'body', 'iframe', 'script', 'input', 'embed']);
+        $attribRegex = static::tagRegex(['img']);
         $imageList = '';
 
         // split the document by the beginning of the above tags
@@ -98,11 +98,11 @@ class MailerUtility
             $imageData = [];
 
             // Finds the src or background attribute
-            $imageData['ref'] = ($attributes['src'] ?? $attributes['background'] ?? '');
+            $imageData['ref'] = $attributes['src'] ?? '';
             if ($imageData['ref']) {
                 // find out if the value had quotes around it
                 $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
-                // subst_str is the string to look for, when substituting lateron
+                // subst_str is the string to look for, when substituting later-on
                 $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
                 if (!str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
                     $imageList .= '|' . $imageData['subst_str'] . '|';
@@ -202,7 +202,7 @@ class MailerUtility
             $attributes = static::getTagAttributes($reg[0], false);
             $hrefData = [];
             $hrefData['ref'] = ($attributes['href'] ?? '') ?: ($attributes['action'] ?? '');
-            $quotes = (str_starts_with($hrefData['ref'], '"')) ? '"' : '';
+            $quotes = str_starts_with($hrefData['ref'], '"') ? '"' : '';
             $hrefData['ref'] = trim($hrefData['ref'], '"');
             if ($hrefData['ref']) {
                 // Finds out if the value had quotes around it
@@ -218,33 +218,35 @@ class MailerUtility
                 }
             }
         }
+        // todo remove, after matomo integration is finished
         // Extracts TYPO3 specific links made by the openPic() JS function
-        $codeParts = explode("onClick=\"openPic('", $content);
-        $pieces = count($codeParts);
-        for ($i = 1; $i < $pieces; $i++) {
-            $showpicArray = explode("'", $codeParts[$i]);
-            $hrefData['ref'] = $showpicArray[0];
-            if ($hrefData['ref']) {
-                $hrefData['quotes'] = "'";
-                // subst_str is the string to look for, when substituting lateron
-                $hrefData['subst_str'] = $hrefData['quotes'] . $hrefData['ref'] . $hrefData['quotes'];
-                if (!str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
-                    $linkList .= '|' . $hrefData['subst_str'] . '|';
-                    $hrefData['absRef'] = static::absRef($hrefData['ref'], $path);
-                    $hyperLinks[] = $hrefData;
-                }
-            }
-        }
+//        $codeParts = explode("onClick=\"openPic('", $content);
+//        $pieces = count($codeParts);
+//        for ($i = 1; $i < $pieces; $i++) {
+//            $showpicArray = explode("'", $codeParts[$i]);
+//            $hrefData['ref'] = $showpicArray[0];
+//            if ($hrefData['ref']) {
+//                $hrefData['quotes'] = "'";
+//                // subst_str is the string to look for, when substituting lateron
+//                $hrefData['subst_str'] = $hrefData['quotes'] . $hrefData['ref'] . $hrefData['quotes'];
+//                if (!str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
+//                    $linkList .= '|' . $hrefData['subst_str'] . '|';
+//                    $hrefData['absRef'] = static::absRef($hrefData['ref'], $path);
+//                    $hyperLinks[] = $hrefData;
+//                }
+//            }
+//        }
 
+        // todo remove, after matomo integration is finished
         // substitute dmailerping URL
         // get all media and search for use_jumpurl then add it to the hrefs array
-        $mediaLinks = static::extractMediaLinks($content, $path);
-
-        foreach ($mediaLinks as $mediaLink) {
-            if (isset($mediaLink['use_jumpurl']) && $mediaLink['use_jumpurl'] === 1) {
-                $hyperLinks[$mediaLink['ref']] = $mediaLink;
-            }
-        }
+//        $mediaLinks = static::extractMediaLinks($content, $path);
+//
+//        foreach ($mediaLinks as $mediaLink) {
+//            if (isset($mediaLink['use_jumpurl']) && $mediaLink['use_jumpurl'] === 1) {
+//                $hyperLinks[$mediaLink['ref']] = $mediaLink;
+//            }
+//        }
 
         return $hyperLinks;
     }
@@ -421,11 +423,11 @@ class MailerUtility
      * @param string $content
      * @param array $hrefs
      * @param string $jumpUrlPrefix
-     * @param bool $jumpUrlUseId
+     * @param bool $enableJumpUrl
      * @param bool $jumpUrlUseMailto
      * @return string
      */
-    public static function replaceHrefsInContent(string $content, array $hrefs, string $jumpUrlPrefix, bool $jumpUrlUseId, bool $jumpUrlUseMailto): string
+    public static function replaceHrefsInContent(string $content, array $hrefs, string $jumpUrlPrefix, bool $enableJumpUrl, bool $jumpUrlUseMailto): string
     {
         foreach ($hrefs as $urlId => $val) {
             if ($val['no_jumpurl'] ?? false) {
@@ -434,14 +436,14 @@ class MailerUtility
             } else {
                 if ($jumpUrlPrefix && ($val['tag'] !== 'form') && (!str_contains($val['ref'], 'mailto:'))) {
                     // Form elements cannot use jumpurl!
-                    if ($jumpUrlUseId) {
+                    if ($enableJumpUrl) {
                         $substVal = $jumpUrlPrefix . $urlId;
                     } else {
                         $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
                     }
                 } else {
                     if (strstr($val['ref'], 'mailto:') && $jumpUrlUseMailto) {
-                        if ($jumpUrlUseId) {
+                        if ($enableJumpUrl) {
                             $substVal = $jumpUrlPrefix . $urlId;
                         } else {
                             $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
@@ -629,21 +631,19 @@ class MailerUtility
         if (preg_match('/^\//', $ref)) {
             // if ref is an absolute link
             $addr = parse_url($path);
-            $ref = $addr['scheme'] . '://' . $addr['host'] . (($addr['port'] ?? false) ? ':' . $addr['port'] : '') . $ref;
-        } else {
-            // If the reference is relative, the path is added,
-            // in order for us to fetch the content
-            if (str_ends_with($path, '/')) {
-                // if the last char is a /, then prepend the ref
-                $ref = $path . $ref;
-            } else {
-                // if the last char not a /, then assume it's an absolute
-                $addr = parse_url($path);
-                $ref = $addr['scheme'] . '://' . $addr['host'] . ($addr['port'] ? ':' . $addr['port'] : '') . '/' . $ref;
-            }
+            return $addr['scheme'] . '://' . $addr['host'] . (($addr['port'] ?? false) ? ':' . $addr['port'] : '') . $ref;
         }
 
-        return $ref;
+        // If the reference is relative, the path is added,
+        // in order for us to fetch the content
+        if (str_ends_with($path, '/')) {
+            // if the last char is a /, then prepend the ref
+            return $path . $ref;
+        }
+
+        // if the last char not a /, then assume it's an absolute
+        $addr = parse_url($path);
+        return $addr['scheme'] . '://' . $addr['host'] . ($addr['port'] ? ':' . $addr['port'] : '') . '/' . $ref;
     }
 
     /**

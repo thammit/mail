@@ -125,7 +125,7 @@ class JumpurlMiddleware implements MiddlewareInterface
         }
 
         // finally - finish preprocessing of the jumpurl params
-        if (!empty($jumpUrl)) {
+            if (!empty($jumpUrl)) {
             $queryParamsToPass['juHash'] = $this->calculateJumpUrlHash($jumpUrl);
             $queryParamsToPass['jumpurl'] = $jumpUrl;
         }
@@ -237,7 +237,7 @@ class JumpurlMiddleware implements MiddlewareInterface
     }
 
     /**
-     * Fetches the target url from the direct mail record
+     * Fetches the target url from the mail record
      *
      * @param int $targetIndex
      * @return string|null

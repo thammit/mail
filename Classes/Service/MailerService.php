@@ -19,6 +19,7 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
+use pQuery;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -824,18 +825,38 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Set the content from $this->theParts['html'] or $this->theParts['plain'] to the mailbody
+     * Set the content from $this->theParts['html'] or $this->theParts['plain'] to the mail body
      *
      * @return void
      * @var MailMessage $mailMessage Mailer Message Object
      */
     protected function setContent(MailMessage $mailMessage): void
     {
-        // todo: css??
         // iterate through the media array and embed them
-        if ($this->includeMedia && !empty($this->getHtmlContent())) {
-            // extract all media path from the mail message
+        if ($this->getHtmlContent()) {
+            if ($this->includeMedia) {
+                // extract all media path from the mail message
+                $dom = pQuery::parseStr($this->getHtmlContent());
+                /** @var pQuery\IQuery $element */
+                foreach($dom->query('img[!do_not_embed]') as $element) {
+                    $absoluteImagePath = MailerUtility::absRef($element->attr('src'), $this->redirectUrl);
+                    // change image src to absolute path in case fetch and embed fails
+                    $element->attr('src', $absoluteImagePath);
+                    // fetch image from absolute url
+                    $response = $this->requestFactory->request($absoluteImagePath);
+                    if ($response->getStatusCode() === 200) {
+                        $baseName = basename($absoluteImagePath);
+                        // embed image into mail
+                        $mailMessage->embed($response->getBody()->getContents(), $baseName, $response->getHeaderLine('Content-Type'));
+                        // set image src to embed cid
+                        $element->attr('src',  'cid:' . $baseName);
+                    }
+                }
+                $this->setHtmlContent($dom->html());
+            }
+
             //$medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
+            /*
             $medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->redirectUrl);
             foreach ($medias as $media) {
                 if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && ($media['tag'] ?? '') === 'img') {
@@ -849,14 +870,14 @@ class MailerService implements LoggerAwareInterface
             }
             // remove ` do_not_embed="1"` attributes
             $this->setHtmlContent(str_replace(' do_not_embed="1"', '', $this->getHtmlContent()));
-        }
+            */
 
-        // set the html content
-        if ($this->getHtmlContent()) {
+            // add html content part to mail
             $mailMessage->html($this->getHtmlContent());
         }
-        // set the plain content as alt part
+
         if ($this->getPlainContent()) {
+            // add plain content part to mail
             $mailMessage->text($this->getPlainContent());
         }
 
