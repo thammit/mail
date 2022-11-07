@@ -5,8 +5,7 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use DOMDocument;
-use DOMElement;
+use JetBrains\PhpStorm\NoReturn;
 use MEDIAESSENZ\Mail\Domain\Model\Address;
 use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
@@ -186,7 +185,7 @@ class ReportService
      * @param array $data
      * @return void
      */
-    public function csvDownloadRecipients(array $data): void
+    #[NoReturn] public function csvDownloadRecipients(array $data): void
     {
         $emails = [];
         if ($data['addresses']) {
@@ -214,6 +213,8 @@ class ReportService
      * @return array
      * @throws DBALException
      * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws SiteNotFoundException
      */
     public function getResponsesData(): array
@@ -233,16 +234,17 @@ class ReportService
         $urlArr = [];
 
         $urlMd5Map = [];
-        if (is_array($mailContent['html']['hrefs'] ?? false)) {
-            foreach ($mailContent['html']['hrefs'] as $k => $hrefValue) {
+        if ($htmlLinks = $this->mail->getHtmlLinks()) {
+            foreach ($htmlLinks as $htmlLinkId => $htmlLink) {
                 // convert &amp; of query params back
-                $urlArr[$k] = html_entity_decode($hrefValue['absRef']);
-                $urlMd5Map[md5($hrefValue['absRef'])] = $k;
+                $urlArr[$htmlLinkId] = html_entity_decode($htmlLink['absRef']);
+                $urlMd5Map[md5($htmlLink['absRef'])] = $htmlLinkId;
             }
         }
-        if (is_array($mailContent['plain']['link_ids'] ?? false)) {
-            foreach ($mailContent['plain']['link_ids'] as $k => $v) {
-                $urlArr[-$k] = $v;
+
+        if ($plainLinks = $this->mail->getPlainLinks()) {
+            foreach ($plainLinks as $plainLinkId => $plainLink) {
+                $urlArr[-$plainLinkId] = $plainLink;
             }
         }
 
@@ -283,8 +285,10 @@ class ReportService
         // HTML mails
         $htmlLinks = [];
         if ($this->mail->isHtml()) {
-            $htmlContent = $mailContent['html']['content'];
+            $htmlLinks = $this->mail->getHtmlLinks();
 
+            /*
+            $htmlContent = $mailContent['html']['content'];
             if (is_array($mailContent['html']['hrefs'])) {
                 foreach ($mailContent['html']['hrefs'] as $jumpurlId => $jumpurlData) {
                     $htmlLinks[$jumpurlId] = [
@@ -297,15 +301,14 @@ class ReportService
             // Parse mail body
             $dom = new DOMDocument;
             @$dom->loadHTML($htmlContent);
-            $links = [];
+            $htmlLinks = [];
             // Get all links
             foreach ($dom->getElementsByTagName('a') as $node) {
-                $links[] = $node;
+                $htmlLinks[] = $node;
             }
 
             // Process all links found
-            foreach ($links as $link) {
-                /* @var DOMElement $link */
+            foreach ($htmlLinks as $link) {
                 $url = $link->getAttribute('href');
 
                 if (empty($url) || str_starts_with($url, 'mailto:') || str_starts_with($url, '#') || !str_contains($url, '=')) {
@@ -328,6 +331,7 @@ class ReportService
                 $htmlLinks[$jumpurlId]['label'] = $targetUrl;
                 $htmlLinks[$jumpurlId]['title'] = !empty($title) ? $title : $targetUrl;
             }
+            */
         }
 
         $data = [];
@@ -339,10 +343,10 @@ class ReportService
             // $id is the jumpurl ID
             $origId = $id;
             $id = abs(intval($id));
-            $url = $htmlLinks[$id]['url'] ?: $urlArr[$origId];
+            $url = $htmlLinks[$id]['ref'] ?: $urlArr[$origId];
             // a link to this host?
             $urlstr = $this->getUrlStr($url);
-            $label = $this->getLinkLabel($url, $urlstr, false, $htmlLinks[$id]['label']);
+            $label = $this->getLinkLabel($url, $urlstr, false, $htmlLinks[$id]['ref']);
             if (isset($urlCounter['html'][$id]['plainId'])) {
                 $data[] = [
                     'label' => $label,
@@ -356,7 +360,7 @@ class ReportService
                 $html = !empty($urlCounter['html'][$id]['counter']);
                 $data[] = [
                     'label' => $label,
-                    'title' => $htmlLinks[$id]['title'],
+                    'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
                     'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] ?? 0 : $urlCounter['plain'][$origId]['counter'] ?? 0),
                     'htmlCounter' => $urlCounter['html'][$id]['counter'] ?? 0,
                     'plainCounter' => $urlCounter['plain'][$origId]['counter'] ?? 0,
@@ -373,7 +377,7 @@ class ReportService
                 $label = $htmlLinks[$id]['label'] . ' (' . ($urlstr ?: '/') . ')';
                 $data[] = [
                     'label' => $label,
-                    'title' => $htmlLinks[$id]['title'],
+                    'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
                     'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] : $urlCounter['plain'][$id]['counter']),
                     'htmlCounter' => $urlCounter['html'][$id]['counter'],
                     'plainCounter' => $urlCounter['plain'][$id]['counter'],
@@ -504,13 +508,6 @@ class ReportService
         if ($pageTSConfiguration['prependContentTitle'] ?? false) {
             $label = $contentTitle . ' (' . $linkedWord . ')';
         }
-
-//        if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['getLinkLabel'])) {
-//            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXT']['directmail']['getLinkLabel'] as $funcRef) {
-//                $params = ['pObj' => &$this, 'url' => $url, 'urlStr' => $urlStr, 'label' => $label];
-//                $label = GeneralUtility::callUserFunction($funcRef, $params, $this);
-//            }
-//        }
 
         // Fallback to url
         if ($label === '') {

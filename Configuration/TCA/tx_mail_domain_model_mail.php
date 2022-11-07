@@ -305,6 +305,36 @@ return [
                 'type' => 'passthrough'
             ]
         ],
+        'message_id' => [
+            'label' => 'message id',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
+        'html_content' => [
+            'label' => 'html content',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
+        'plain_content' => [
+            'label' => 'plain content',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
+        'html_links' => [
+            'label' => 'html links',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
+        'plain_links' => [
+            'label' => 'plain links',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
         'query_info' => [
             'label' => 'Query info',
             'config' => [

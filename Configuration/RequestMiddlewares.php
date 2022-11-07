@@ -14,7 +14,7 @@ return [
         'mail/jumpurl' => [
             'target' => \MEDIAESSENZ\Mail\Middleware\JumpurlMiddleware::class,
             'before' => [
-                'friends-of-typo3/rdct/send-redirect',
+                'friends-of-typo3/jumpurl',
             ],
         ],
         'mail/plain' => [

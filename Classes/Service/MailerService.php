@@ -22,7 +22,6 @@ use PDO;
 use pQuery;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -56,32 +55,22 @@ class MailerService implements LoggerAwareInterface
      */
     protected Mail $mail;
     protected int $mailUid = 0;
-    protected array $mailParts = [];
     protected int $sendPerCycle = 50;
     protected bool $isHtml = false;
     protected bool $isPlain = false;
-    protected bool $includeMedia = false;
-    protected bool $flowedFormat = false;
     protected string $backendUserLanguage = 'default';
     protected bool $isTestMail = false;
     protected string $charset = 'utf-8';
     protected string $subject = '';
-    protected string $fromEmail = '';
     protected string $fromName = '';
     protected string $organisation = '';
-    protected string $replyToEmail = '';
     protected string $replyToName = '';
-    protected string $returnPath = '';
     protected int $priority = 3;
     protected string $authCodeFieldList = '';
     protected string $backendCharset = 'utf-8';
     protected string $message = '';
     protected bool $notificationJob = false;
-    protected string $jumpUrlPrefix = '';
-    protected bool $jumpUrlUseMailto = false;
-    protected bool $jumpUrlUseId = false;
     protected bool $redirect = false;
-    protected bool $redirectAll = false;
     protected string $redirectUrl = '';
     protected int $attachment = 0;
     protected array $htmlBoundaryParts = [];
@@ -117,94 +106,12 @@ class MailerService implements LoggerAwareInterface
         $this->site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
     }
 
-    public function setMailPart($part, $value): void
-    {
-        $this->mailParts[$part] = $value;
-    }
-
-    /**
-     * @return array
-     */
-    public function getMailParts(): array
-    {
-        return $this->mailParts;
-    }
-
-    /**
-     * @param string $part
-     * @return mixed
-     */
-    public function getMailPart(string $part): mixed
-    {
-        return $this->mailParts[$part] ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getMessageId(): string
-    {
-        return $this->mailParts['messageid'];
-    }
-
-    /**
-     * @param string $messageId
-     * @return void
-     */
-    public function setMessageId(string $messageId): void
-    {
-        $this->mailParts['messageid'] = $messageId;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isTestMail(): bool
-    {
-        return $this->isTestMail;
-    }
-
     /**
      * @param bool $isTestMail
      */
     public function setTestMail(bool $isTestMail): void
     {
         $this->isTestMail = $isTestMail;
-    }
-
-    public function getJumpUrlPrefix(): string
-    {
-        return $this->jumpUrlPrefix;
-    }
-
-    public function setJumpUrlPrefix(string $value): void
-    {
-        $this->jumpUrlPrefix = $value;
-    }
-
-    public function getJumpUrlUseId(): bool
-    {
-        return $this->jumpUrlUseId;
-    }
-
-    public function setJumpUrlUseId(bool $value): void
-    {
-        $this->jumpUrlUseId = $value;
-    }
-
-    public function getJumpUrlUseMailto(): bool
-    {
-        return $this->jumpUrlUseMailto;
-    }
-
-    public function setJumpUrlUseMailto(bool $value): void
-    {
-        $this->jumpUrlUseMailto = $value;
-    }
-
-    public function setIncludeMedia(bool $value): void
-    {
-        $this->includeMedia = $value;
     }
 
     /**
@@ -223,51 +130,6 @@ class MailerService implements LoggerAwareInterface
         $this->charset = $charset;
     }
 
-    public function setPlainLinkIds($array): void
-    {
-        $this->mailParts['plain']['link_ids'] = $array;
-    }
-
-    public function setPlainContent(string $content): void
-    {
-        $this->mailParts['plain']['content'] = $content;
-    }
-
-    public function getPlainContent(): string
-    {
-        return $this->mailParts['plain']['content'] ?? '';
-    }
-
-    public function setHtmlContent(string $content): void
-    {
-        $this->mailParts['html']['content'] = $content;
-    }
-
-    public function getHtmlContent(): string
-    {
-        return $this->mailParts['html']['content'] ?? '';
-    }
-
-    public function setHtmlPath(string $path): void
-    {
-        $this->mailParts['html']['path'] = $path;
-    }
-
-    public function getHtmlPath(): string
-    {
-        return $this->mailParts['html']['path'] ?? '';
-    }
-
-    public function setHtmlHyperLinks(array $hrefs): void
-    {
-        $this->mailParts['html']['hrefs'] = $hrefs;
-    }
-
-    public function getHtmlHyperLinks(): array
-    {
-        return $this->mailParts['html']['hrefs'] ?? [];
-    }
-
     /**
      * Initializing the MailMessage class and setting the first global variables. Write to log file if it's a cronjob
      *
@@ -278,9 +140,6 @@ class MailerService implements LoggerAwareInterface
      */
     public function start(int $sendPerCycle = 50, string $backendUserLanguage = 'en'): void
     {
-        $this->setMessageId(MailerUtility::generateMessageId());
-
-            // Mailer engine parameters
         $this->sendPerCycle = $sendPerCycle;
         $this->backendUserLanguage = $backendUserLanguage;
     }
@@ -294,40 +153,31 @@ class MailerService implements LoggerAwareInterface
      */
     public function prepare(int $mailUid): void
     {
+        $this->mailUid = $mailUid;
         /** @var Mail $mail */
         $this->mail = $this->mailRepository->findByUid($mailUid);
 
-        $this->mailUid = $mailUid;
         $this->charset = $this->mail->getType() === MailType::INTERNAL ? 'utf-8' : $this->mail->getCharset();
         $this->subject = $this->charsetConverter->conv($this->mail->getSubject(), $this->backendCharset, $this->charset);
         $this->fromName = ($this->mail->getFromName() ? $this->charsetConverter->conv($this->mail->getFromName(), $this->backendCharset, $this->charset) : '');
-        $this->fromEmail = $this->mail->getFromEmail();
         $this->replyToName = ($this->mail->getReplyToName() ? $this->charsetConverter->conv($this->mail->getReplyToName(), $this->backendCharset, $this->charset) : '');
-        $this->replyToEmail = $this->mail->getReplyToEmail();
-        $this->returnPath = $this->mail->getReturnPath();
         $this->organisation = ($this->mail->getOrganisation() ? $this->charsetConverter->conv($this->mail->getOrganisation(), $this->backendCharset, $this->charset) : '');
         $this->priority = MathUtility::forceIntegerInRange($this->mail->getPriority(), 1, 5);
-        $this->mailParts = unserialize(base64_decode($this->mail->getMailContent()));
-        $this->isHtml = (bool)($this->getHtmlContent() ?? false);
-        $this->isPlain = (bool)($this->getPlainContent() ?? false);
-        $this->flowedFormat = $this->mail->isFlowedFormat();
-        $this->includeMedia = $this->mail->isIncludeMedia();
-        $this->authCodeFieldList = ($this->mail->getAuthCodeFields() ?: 'uid');
-        $this->redirect = $this->mail->isRedirect();
-        $this->redirectAll = $this->mail->isRedirectAll();
-        $this->redirectUrl = $this->mail->getRedirectUrl();
+        $this->isHtml = (bool)($this->mail->getHtmlContent() ?? false);
+        $this->isPlain = (bool)($this->mail->getPlainContent() ?? false);
+        $this->authCodeFieldList = $this->mail->getAuthCodeFields() ?: 'uid';
         $this->attachment = $this->mail->getAttachment()->count();
+        $this->htmlBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getHtmlContent());
 
-        $this->htmlBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->getHtmlContent());
         foreach ($this->htmlBoundaryParts as $bKey => $bContent) {
             $this->htmlBoundaryParts[$bKey] = explode('-->', $bContent, 2);
 
-            // Remove useless HTML comments
+            // remove useless HTML comments
             if (substr($this->htmlBoundaryParts[$bKey][0], 1) == 'END') {
                 $this->htmlBoundaryParts[$bKey][1] = MailerUtility::removeHtmlComments($this->htmlBoundaryParts[$bKey][1]);
             }
 
-            // Now, analyzing which media files are used in this part of the mail:
+            // analyzing which media files are used in this part of the mail:
             $mediaParts = explode('cid:part', $this->htmlBoundaryParts[$bKey][1]);
             next($mediaParts);
             if (!isset($this->htmlBoundaryParts[$bKey]['mediaList'])) {
@@ -337,10 +187,115 @@ class MailerService implements LoggerAwareInterface
                 $this->htmlBoundaryParts[$bKey]['mediaList'] .= ',' . strtok($part, '.');
             }
         }
-        $this->plainBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->getPlainContent());
+        $this->plainBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getPlainContent());
         foreach ($this->plainBoundaryParts as $bKey => $bContent) {
             $this->plainBoundaryParts[$bKey] = explode('-->', $bContent, 2);
         }
+    }
+
+    /**
+     * Send a simple email (without personalizing)
+     *
+     * @param string $addressList list of recipient address, comma list of emails
+     *
+     * @return void
+     */
+    public function sendSimpleMail(string $addressList): void
+    {
+        $plainContent = '';
+        if ($this->mail->getPlainContent() ?? false) {
+            [$contentParts] = MailerUtility::getBoundaryParts($this->plainBoundaryParts);
+            $plainContent = implode('', $contentParts);
+        }
+        $this->mail->setPlainContent($plainContent);
+
+        $htmlContent = '';
+        if ($this->mail->getHtmlContent() ?? false) {
+            [$contentParts] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts);
+            $htmlContent = implode('', $contentParts);
+        }
+        $this->mail->setHtmlContent($htmlContent);
+
+        $recipients = explode(',', $addressList);
+
+        foreach ($recipients as $recipient) {
+            $this->sendMailToRecipient($recipient);
+        }
+    }
+
+    /**
+     * Replace the marker with recipient data and then send it
+     *
+     * @param array $recipientData Recipient's data array
+     * @param string $tableName Table name, from which the recipient come from
+     *
+     * @return SendFormat Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
+     * @throws \TYPO3\CMS\Core\Exception
+     */
+    public function sendPersonalizedMail(array $recipientData, string $tableName): SendFormat
+    {
+        $formatSent = new SendFormat(SendFormat::NONE);
+
+        foreach ($recipientData as $key => $value) {
+            $recipientData[$key] = is_string($value) ? htmlspecialchars($value) : $value;
+        }
+
+        // Workaround for strict checking of email addresses in TYPO3
+        // (trailing newline = invalid address)
+        $recipientData['email'] = trim($recipientData['email']);
+
+        if ($recipientData['email']) {
+
+            $additionalMarkers = [
+                '###SYS_TABLE_NAME###' => $tableName,
+                '###SYS_MAIL_ID###' => $this->mailUid,
+                '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
+            ];
+
+            $this->mail->setHtmlContent('');
+            if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
+
+                if ($mailHasContent) {
+                    $this->mail->setHtmlContent($this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers));
+                    $formatSent->set(SendFormat::HTML);
+                }
+            }
+
+            // Plain
+            $this->mail->setPlainContent('');
+            if ($this->isPlain) {
+                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, ($recipientData['categories'] ?? ''));
+
+                if ($mailHasContent) {
+                    $plainTextContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
+                    if ($this->mail->isRedirect() || $this->mail->isRedirectAll()) {
+                        $plainTextContent = MailerUtility::shortUrlsInPlainText(
+                            $plainTextContent,
+                            $this->mail->isRedirectAll() ? 0 : 76,
+                            $this->mail->getRedirectUrl(),
+                            $this->site->getLanguageById($this->mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
+                        );
+                    }
+                    $this->mail->setPlainContent($plainTextContent);
+                    $formatSent->set(SendFormat::PLAIN);
+                }
+            }
+
+            $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($this->mailUid, $tableName, $recipientData['uid']);
+
+            // todo what is this for?
+            $this->mail->setReturnPath(str_replace('###XID###', explode('-', $this->TYPO3MID)[0], $this->mail->getReturnPath()));
+
+            if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
+                $this->sendMailToRecipient(
+                    new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset))
+                );
+            }
+
+        }
+
+        return $formatSent;
     }
 
     /**
@@ -398,112 +353,6 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Send a simple email (without personalizing)
-     *
-     * @param string $addressList list of recipient address, comma list of emails
-     *
-     * @return void
-     */
-    public function sendSimpleMail(string $addressList): void
-    {
-        $plainContent = '';
-        if ($this->getPlainContent() ?? false) {
-            [$contentParts] = MailerUtility::getBoundaryParts($this->plainBoundaryParts);
-            $plainContent = implode('', $contentParts);
-        }
-        $this->setPlainContent($plainContent);
-
-        $htmlContent = '';
-        if ($this->getHtmlContent() ?? false) {
-            [$contentParts] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts);
-            $htmlContent = implode('', $contentParts);
-        }
-        $this->setHtmlContent($htmlContent);
-
-        $recipients = explode(',', $addressList);
-
-        foreach ($recipients as $recipient) {
-            $this->sendMailToRecipient($recipient);
-        }
-    }
-
-    /**
-     * Replace the marker with recipient data and then send it
-     *
-     * @param array $recipientData Recipient's data array
-     * @param string $tableName Table name, from which the recipient come from
-     *
-     * @return SendFormat Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
-     * @throws \TYPO3\CMS\Core\Exception
-     */
-    public function sendPersonalizedMail(array $recipientData, string $tableName): SendFormat
-    {
-        $formatSent = new SendFormat(SendFormat::NONE);
-
-        foreach ($recipientData as $key => $value) {
-            $recipientData[$key] = is_string($value) ? htmlspecialchars($value) : $value;
-        }
-
-        // Workaround for strict checking of email addresses in TYPO3
-        // (trailing newline = invalid address)
-        $recipientData['email'] = trim($recipientData['email']);
-
-        if ($recipientData['email']) {
-
-            $additionalMarkers = [
-                '###SYS_TABLE_NAME###' => $tableName,
-                '###SYS_MAIL_ID###' => $this->mailUid,
-                '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
-            ];
-
-            $this->setHtmlContent('');
-            if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
-
-                if ($mailHasContent) {
-                    $this->setHtmlContent($this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers));
-                    $formatSent->set(SendFormat::HTML);
-                }
-            }
-
-            // Plain
-            $this->setPlainContent('');
-            if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, ($recipientData['categories'] ?? ''));
-
-                if ($mailHasContent) {
-                    $plainTextContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
-                    if ($this->redirect || $this->redirectAll) {
-                        $plainTextContent = MailerUtility::shortUrlsInPlainText(
-                            $plainTextContent,
-                            $this->redirectAll ? 0 : 76,
-                            $this->redirectUrl,
-                            $this->site->getLanguageById($this->mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
-                        );
-                    }
-                    $this->setPlainContent($plainTextContent);
-                    $formatSent->set(SendFormat::PLAIN);
-                }
-            }
-
-            $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($this->mailUid, $tableName, $recipientData['uid']);
-
-            // todo what is this for?
-            $this->returnPath = str_replace('###XID###', explode('-', $this->TYPO3MID)[0], $this->returnPath);
-
-            if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
-                $this->sendMailToRecipient(
-                    new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
-                    $recipientData
-                );
-            }
-
-        }
-
-        return $formatSent;
-    }
-
-    /**
      * Mass send to recipient in the list
      *
      * @param array $groupedRecipientIds
@@ -511,7 +360,6 @@ class MailerService implements LoggerAwareInterface
      * @return boolean
      * @throws DBALException
      * @throws Exception
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
     protected function massSend(array $groupedRecipientIds, int $mailUid): bool
@@ -637,11 +485,10 @@ class MailerService implements LoggerAwareInterface
             // if not, stop the script and report error
             // try to insert the mail to the mail log repository
             $mail = $this->mailRepository->findByUid($mailUid);
-            $log = new Log();
+            $log = GeneralUtility::makeInstance(Log::class);
             $log->setMail($mail);
             $log->setRecipientTable($recipientTable);
             $log->setRecipientUid($recipientData['uid']);
-            $log->setSize(strlen($this->message));
             $log->setEmail($recipientData['email']);
             $this->logRepository->add($log);
             $this->logRepository->persist();
@@ -689,7 +536,6 @@ class MailerService implements LoggerAwareInterface
      * @param Mail $mail
      *
      * @return void
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
     protected function setJobBegin(Mail $mail): void
@@ -715,7 +561,6 @@ class MailerService implements LoggerAwareInterface
      * @param Mail $mail
      *
      * @return void
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
     protected function setJobEnd(Mail $mail): void
@@ -738,25 +583,23 @@ class MailerService implements LoggerAwareInterface
     /**
      * @param string $subject
      * @param string $body
-     * @throws TransportExceptionInterface
-     * @throws \TYPO3\CMS\Core\Exception
      */
     protected function notifySenderAboutJobState(string $subject, string $body): void
     {
         $fromName = $this->charsetConverter->conv($this->fromName, $this->charset, $this->backendCharset) ?? '';
-        $mail = GeneralUtility::makeInstance(MailMessage::class);
-        $mail
+        $mailMessage = GeneralUtility::makeInstance(MailMessage::class);
+        $mailMessage
             ->setSiteIdentifier($this->siteIdentifier)
-            ->setTo($this->fromEmail, $fromName)
-            ->setFrom($this->fromEmail, $fromName)
+            ->setTo($this->mail->getFromEmail(), $fromName)
+            ->setFrom($this->mail->getFromEmail(), $fromName)
             ->setSubject($subject);
 
-        if ($this->replyToEmail !== '') {
-            $mail->setReplyTo($this->replyToEmail);
+        if ($this->mail->getReplyToEmail() !== '') {
+            $mailMessage->setReplyTo($this->mail->getReplyToEmail());
         }
 
-        $mail->text($body);
-        $mail->send();
+        $mailMessage->text($body);
+        $mailMessage->send();
     }
 
     /**
@@ -768,7 +611,6 @@ class MailerService implements LoggerAwareInterface
      * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws TransportExceptionInterface
      * @throws \TYPO3\CMS\Core\Exception
      */
     public function handleQueue(): void
@@ -833,13 +675,13 @@ class MailerService implements LoggerAwareInterface
     protected function setContent(MailMessage $mailMessage): void
     {
         // iterate through the media array and embed them
-        if ($this->getHtmlContent()) {
-            if ($this->includeMedia) {
+        if ($this->mail->getHtmlContent()) {
+            if ($this->mail->isIncludeMedia()) {
                 // extract all media path from the mail message
-                $dom = pQuery::parseStr($this->getHtmlContent());
+                $dom = pQuery::parseStr($this->mail->getHtmlContent());
                 /** @var pQuery\IQuery $element */
                 foreach($dom->query('img[!do_not_embed]') as $element) {
-                    $absoluteImagePath = MailerUtility::absRef($element->attr('src'), $this->redirectUrl);
+                    $absoluteImagePath = MailerUtility::absRef($element->attr('src'), $this->mail->getRedirectUrl());
                     // change image src to absolute path in case fetch and embed fails
                     $element->attr('src', $absoluteImagePath);
                     // fetch image from absolute url
@@ -852,12 +694,12 @@ class MailerService implements LoggerAwareInterface
                         $element->attr('src',  'cid:' . $baseName);
                     }
                 }
-                $this->setHtmlContent($dom->html());
+                $this->mail->setHtmlContent($dom->html());
             }
 
             //$medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
             /*
-            $medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->redirectUrl);
+            $medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->mail->getRedirectUrl());
             foreach ($medias as $media) {
                 if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && ($media['tag'] ?? '') === 'img') {
                     $response = $this->requestFactory->request($media['absRef']);
@@ -873,12 +715,12 @@ class MailerService implements LoggerAwareInterface
             */
 
             // add html content part to mail
-            $mailMessage->html($this->getHtmlContent());
+            $mailMessage->html($this->mail->getHtmlContent());
         }
 
-        if ($this->getPlainContent()) {
+        if ($plainContent = $this->mail->getPlainContent()) {
             // add plain content part to mail
-            $mailMessage->text($this->getPlainContent());
+            $mailMessage->text($plainContent);
         }
 
         // handle FAL attachments
@@ -886,8 +728,6 @@ class MailerService implements LoggerAwareInterface
             $files = MailerUtility::getAttachments($this->mailUid);
             /** @var FileReference $file */
             foreach ($files as $file) {
-//                $filePath = Environment::getPublicPath() . '/' . $file->getPublicUrl();
-//                $mailMessage->attachFromPath($filePath);
                 $mailMessage->attachFromPath($file->getForLocalProcessing(false));
             }
         }
@@ -897,28 +737,27 @@ class MailerService implements LoggerAwareInterface
      * Send of the email using php mail function.
      *
      * @param string|Address $recipient The recipient to send the mail to
-     * @param array|null $recipientData Recipient's data array
      * @return void
      */
-    protected function sendMailToRecipient(Address|string $recipient, array $recipientData = null): void
+    protected function sendMailToRecipient(Address|string $recipient): void
     {
         /** @var MailMessage $mailer */
         $mailer = GeneralUtility::makeInstance(MailMessage::class);
         $mailer
             ->setSiteIdentifier($this->siteIdentifier)
-            ->from(new Address($this->fromEmail, $this->fromName))
+            ->from(new Address($this->mail->getFromEmail(), $this->fromName))
             ->to($recipient)
             ->subject($this->subject)
             ->priority($this->priority);
 
-        if ($this->replyToEmail) {
-            $mailer->replyTo(new Address($this->replyToEmail, $this->replyToName));
+        if ($this->mail->getReplyToEmail()) {
+            $mailer->replyTo(new Address($this->mail->getReplyToEmail(), $this->replyToName));
         } else {
-            $mailer->replyTo(new Address($this->fromEmail, $this->fromName));
+            $mailer->replyTo(new Address($this->mail->getFromEmail(), $this->fromName));
         }
 
-        if (GeneralUtility::validEmail($this->returnPath)) {
-            $mailer->sender($this->returnPath);
+        if (GeneralUtility::validEmail($this->mail->getReturnPath())) {
+            $mailer->sender($this->mail->getReturnPath());
         }
 
         $this->setContent($mailer);
@@ -935,20 +774,6 @@ class MailerService implements LoggerAwareInterface
         }
 
         // todo add PSR-14 Event to modify mail headers
-        // Hook to edit or add the mail headers
-//        if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'])) {
-//            $mailHeadersHook =& $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailHeadersHook'];
-//            if (is_array($mailHeadersHook)) {
-//                $hookParameters = [
-//                    'row' => &$recipientData,
-//                    'header' => &$header,
-//                ];
-//                $hookReference = &$this;
-//                foreach ($mailHeadersHook as $hookFunction) {
-//                    GeneralUtility::callUserFunction($hookFunction, $hookParameters, $hookReference);
-//                }
-//            }
-//        }
 
         $mailer->send();
         unset($mailer);

@@ -37,11 +37,6 @@ class Log extends AbstractEntity
     /**
      * @var int
      */
-    protected int $size = 0;
-
-    /**
-     * @var int
-     */
     protected int $parseTime = 0;
 
     /**
@@ -170,24 +165,6 @@ class Log extends AbstractEntity
     public function setUrl(string $url): Log
     {
         $this->url = $url;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getSize(): int
-    {
-        return $this->size;
-    }
-
-    /**
-     * @param int $size
-     * @return Log
-     */
-    public function setSize(int $size): Log
-    {
-        $this->size = $size;
         return $this;
     }
 

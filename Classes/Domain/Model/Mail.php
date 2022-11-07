@@ -37,6 +37,19 @@ class Mail extends AbstractEntity
     protected int $recipients = 0;
     protected int $renderedSize = 0;
     protected string $mailContent = '';
+    protected string $messageId = '';
+    protected string $htmlContent = '';
+    protected string $plainContent = '';
+    /**
+     * html links (do not delete this annotation block!)
+     * @var string
+     */
+    protected string $htmlLinks = '[]';
+    /**
+     * plain links (do not delete this annotation block!)
+     * @var string
+     */
+    protected string $plainLinks = '[]';
     protected string $queryInfo = '';
     protected ?DateTimeImmutable $scheduled = null;
     protected ?DateTimeImmutable $scheduledBegin = null;
@@ -472,6 +485,11 @@ class Mail extends AbstractEntity
         return $this;
     }
 
+    public function recalculateRenderSize(): void
+    {
+        $this->renderedSize = strlen($this->htmlContent) + strlen($this->plainContent);
+    }
+
     /**
      * @return string
      */
@@ -487,6 +505,96 @@ class Mail extends AbstractEntity
     public function setMailContent(string $mailContent): Mail
     {
         $this->mailContent = $mailContent;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessageId(): string
+    {
+        return $this->messageId;
+    }
+
+    /**
+     * @param string $messageId
+     * @return Mail
+     */
+    public function setMessageId(string $messageId): Mail
+    {
+        $this->messageId = $messageId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlContent(): string
+    {
+        return $this->htmlContent;
+    }
+
+    /**
+     * @param string $htmlContent
+     * @return Mail
+     */
+    public function setHtmlContent(string $htmlContent): Mail
+    {
+        $this->htmlContent = $htmlContent;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlainContent(): string
+    {
+        return $this->plainContent;
+    }
+
+    /**
+     * @param string $plainContent
+     * @return Mail
+     */
+    public function setPlainContent(string $plainContent): Mail
+    {
+        $this->plainContent = $plainContent;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHtmlLinks(): array
+    {
+        return json_decode($this->htmlLinks, true, 512,  JSON_OBJECT_AS_ARRAY);
+    }
+
+    /**
+     * @param array $htmlLinks
+     * @return Mail
+     */
+    public function setHtmlLinks(array $htmlLinks): Mail
+    {
+        $this->htmlLinks = json_encode($htmlLinks);
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPlainLinks(): array
+    {
+        return json_decode($this->plainLinks, true, 512,  JSON_OBJECT_AS_ARRAY);
+    }
+
+    /**
+     * @param array $plainLinks
+     * @return Mail
+     */
+    public function setPlainLinks(array $plainLinks): Mail
+    {
+        $this->plainLinks = json_encode($plainLinks);
         return $this;
     }
 

@@ -95,7 +95,6 @@ class MailFactory
             }
         }
 
-        $htmlContent = '';
         $htmlLinks = [];
         if ($mail->isHtml()) {
             $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams());
@@ -129,8 +128,7 @@ class MailFactory
                                 'tag' => $element->tagName(),
                                 'ref' => $originalHyperLink,
                                 'absRef' => $absoluteHyperlink,
-//                            'subst_str' => $newHyperlink,
-//                            'no_jumpurl' => $element->attr('no_jumpurl') ? 1 : 0,
+                                'title' => $element->attr('title') ?: $originalHyperLink,
                             ];
                             end($htmlLinks);
                             $hyperLink = key($htmlLinks);
@@ -138,36 +136,20 @@ class MailFactory
                         $absoluteHyperlink = $jumpUrlPrefix . (string)$hyperLink;
                     }
                     $element->attr($hyperLinkAttribute, $absoluteHyperlink);
-                    // $htmlContent = MailerUtility::replaceHrefsInContent($htmlContent, $htmlLinks, $jumpUrlPrefix, $enableJumpUrl, $enableMailToJumpUrl);
                 }
             }
-            $htmlContent = $dom->html();
-//            $htmlLinks = MailerUtility::extractHyperLinks($htmlContent, $htmlUrl);
-//            if ($htmlLinks) {
-//                $htmlContent = $this->replaceHyperLinks($htmlContent, $htmlLinks, BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid));
-//            }
+
+            $mail->setHtmlContent($dom->html());
+            $mail->setHtmlLinks($htmlLinks);
         }
 
-        $plainTextContent = '';
         if ($mail->isPlain()) {
             $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams());
-            $plainTextContent = $this->fetchPlainTextContent($plainTextUrl);
+            $mail->setPlainContent($this->fetchPlainTextContent($plainTextUrl));
         }
 
-        $mailParts = [
-            'messageid' => MailerUtility::generateMessageId(),
-            'plain' => [
-                'content' => $plainTextContent
-            ],
-            'html' => [
-                'content' => $htmlContent,
-                'hrefs' => $htmlLinks,
-            ],
-        ];
-        $mailContent = base64_encode(serialize($mailParts));
-
-        $mail->setMailContent($mailContent);
-        $mail->setRenderedSize(strlen($mailContent));
+        $mail->setMessageId(MailerUtility::generateMessageId());
+        $mail->recalculateRenderSize();
 
         return $mail;
     }
@@ -206,7 +188,7 @@ class MailFactory
         }
 
         // validate plain text content url syntax
-        $plainTextContent = '';
+        $plainContent = '';
         $urlParts = @parse_url($plainContentUrl);
         if (!$plainContentUrl || $urlParts === false || !$urlParts['host']) {
             $mail->setPlainParams('');
@@ -214,41 +196,32 @@ class MailFactory
             $mail->removePlainSendOption();
         } else {
             $plainTextUrl = MailerUtility::getUrlForExternalPage($mail->getHtmlParams());
-            $plainTextContent = $this->fetchPlainTextContent($plainTextUrl);
+            $plainContent = $this->fetchPlainTextContent($plainTextUrl);
         }
 
         if ($mail->getSendOptions()->isNone()) {
             return null;
         }
 
-        $mailParts = [
-            'messageid' => MailerUtility::generateMessageId(),
-            'plain' => [
-                'content' => $plainTextContent
-            ],
-            'html' => [
-                'content' => $htmlContent
-            ],
-        ];
-        $mailContent = base64_encode(serialize($mailParts));
-
-        $mail->setMailContent($mailContent);
-        $mail->setRenderedSize(strlen($mailContent));
+        $mail->setMessageId(MailerUtility::generateMessageId());
+        $mail->setPlainContent($plainContent);
+        $mail->setHtmlContent($htmlContent);
+        $mail->recalculateRenderSize();
 
         return $mail;
     }
 
     /**
      * @param string $subject
-     * @param string $message
+     * @param string $plainContent
      * @param string $senderName
      * @param string $senderEmail
      * @param bool $breakLines
      * @return Mail|null
      */
-    public function fromText(string $subject, string $message, string $senderName, string $senderEmail, bool $breakLines = true): ?Mail
+    public function fromText(string $subject, string $plainContent, string $senderName, string $senderEmail, bool $breakLines = true): ?Mail
     {
-        if (!trim($message)) {
+        if (!trim($plainContent)) {
             return null;
         }
 
@@ -261,33 +234,23 @@ class MailFactory
             ->setEncoding($this->pageTSConfiguration['quick_mail_encoding'] ?? 'quoted-printable')
             ->setCharset($this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8');
 
-        $message = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_-->' . $message . '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
+        $plainContent = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_-->' . $plainContent . '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
         // shorten urls is done in mailer service sendPersonalizedMail method as well, but is necessary here as well, to not break links due to following wordwrap
         if ($mail->isRedirect()) {
-            $message = MailerUtility::shortUrlsInPlainText(
-                $message,
+            $plainContent = MailerUtility::shortUrlsInPlainText(
+                $plainContent,
                 $mail->isRedirectAll() ? 0 : 76,
                 BackendDataUtility::getBaseUrl($this->storageFolder),
                 $this->site->getLanguageById($mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
             );
         }
         if ($breakLines) {
-            $message = wordwrap($message, 76);
+            $plainContent = wordwrap($plainContent, 76);
         }
 
-        $mailParts = [
-            'messageid' => MailerUtility::generateMessageId(),
-            'plain' => [
-                'content' => $message
-            ],
-            'html' => [
-                'content' => ''
-            ]
-        ];
-        $mailContent = base64_encode(serialize($mailParts));
-
-        $mail->setMailContent($mailContent);
-        $mail->setRenderedSize(strlen($mailContent));
+        $mail->setMessageId(MailerUtility::generateMessageId());
+        $mail->setPlainContent($plainContent);
+        $mail->recalculateRenderSize();
 
         return $mail;
     }
@@ -297,7 +260,7 @@ class MailFactory
      */
     protected function newMailFromPageTSConfiguration(): Mail
     {
-        $mail = new Mail();
+        $mail = GeneralUtility::makeInstance(Mail::class);
         $mail
             ->setFromEmail($this->pageTSConfiguration['from_email'] ?? '')
             ->setFromName($this->pageTSConfiguration['from_name'] ?? '')
@@ -347,23 +310,6 @@ class MailFactory
                 LanguageUtility::getLL('dmail_no_html_content'));
             return false;
         }
-    }
-
-    protected function replaceHyperLinks(string $htmlContent, array $hyperLinks, string $baseUrl): string
-    {
-        $glue = str_contains($baseUrl, '?') ? '&' : '?';
-        $jumpUrlPrefix = '';
-        $enableJumpUrl = (bool)($this->pageTSConfiguration['enable_jump_url'] ?? false);
-        if ($enableJumpUrl) {
-            $jumpUrlPrefix = $baseUrl . $glue .
-                'mail=###SYS_MAIL_ID###' .
-                (($this->pageTSConfiguration['jumpurl_tracking_privacy'] ?? false) ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
-                '&aC=###SYS_AUTHCODE###' .
-                '&jumpurl=';
-        }
-        $jumpUrlUseMailto = (bool)($this->pageTSConfiguration['enable_mailto_jump_url'] ?? false);
-
-        return MailerUtility::replaceHrefsInContent($htmlContent, $hyperLinks, $jumpUrlPrefix, $enableJumpUrl, $jumpUrlUseMailto);
     }
 
     /**

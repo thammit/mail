@@ -223,8 +223,17 @@ class MailController extends AbstractController
                 $newMail = $mailFactory->fromExternalUrls($mail->getSubject(), $mail->getHtmlParams(), $mail->getPlainParams());
                 if ($newMail instanceof Mail) {
                     // copy new fetch content and charset to current mail record
-                    $mail->setMailContent($newMail->getMailContent());
-                    $mail->setRenderedSize($newMail->getRenderedSize());
+
+                    // old
+//                    $mail->setMailContent($newMail->getMailContent());
+//                    $mail->setRenderedSize($newMail->getRenderedSize());
+
+                    // new
+                    $mail->setMessageId($newMail->getMessageId());
+                    $mail->setPlainContent($newMail->getPlainContent());
+                    $mail->setHtmlContent($newMail->getHtmlContent());
+                    $mail->recalculateRenderSize();
+
                     $mail->setCharset($newMail->getCharset());
                     $this->mailRepository->update($mail);
                 }
@@ -234,8 +243,17 @@ class MailController extends AbstractController
             $newMail = $mailFactory->fromInternalPage($mail->getPage(), $mail->getSysLanguageUid());
             if ($newMail instanceof Mail) {
                 // copy new fetch content and charset to current mail record
-                $mail->setMailContent($newMail->getMailContent());
-                $mail->setRenderedSize($newMail->getRenderedSize());
+
+                // old
+//                $mail->setMailContent($newMail->getMailContent());
+//                $mail->setRenderedSize($newMail->getRenderedSize());
+
+                // new
+                $mail->setMessageId($newMail->getMessageId());
+                $mail->setPlainContent($newMail->getPlainContent());
+                $mail->setHtmlContent($newMail->getHtmlContent());
+                $mail->recalculateRenderSize();
+
                 $this->mailRepository->update($mail);
                 $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
             }

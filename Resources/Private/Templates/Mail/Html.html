@@ -2,24 +2,20 @@
 
 <f:layout name="Mail" />
 
-<f:section name="Header">
-    <f:render partial="Mail/Header" arguments="{_all}" />
-</f:section>
+<f:section name="Header"><f:spaceless><f:render partial="Mail/Header" arguments="{_all}" /></f:spaceless></f:section>
 
-<f:section name="Body">
+<f:section name="Body"><f:spaceless>
     <table class="body-wrap body" bgcolor="">
         <tr>
             <td></td>
-            <td class="container" align="" bgcolor="#FFFFFF">
+            <td class="container" align="" bgcolor="#FFFFFF"><f:spaceless>
                 <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: data.uid, colPos: 0, slide: 0}" />
-            </td>
+            </f:spaceless></td>
             <td></td>
         </tr>
     </table>
-</f:section>
+</f:spaceless></f:section>
 
-<f:section name="Footer">
-<f:render partial="Mail/Footer" arguments="{_all}" />
-</f:section>
+<f:section name="Footer"><f:spaceless><f:render partial="Mail/Footer" arguments="{_all}" /></f:spaceless></f:section>
 
 </html>

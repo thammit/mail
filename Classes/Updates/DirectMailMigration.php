@@ -46,6 +46,7 @@ class DirectMailMigration implements UpgradeWizardInterface
         foreach ($this->getSysDmailRecordsToMigrate() as $record) {
             $alreadyMigrated = $connectionMail->count('*', 'tx_mail_domain_model_mail', ['uid' => $record['uid']]);
             if ($alreadyMigrated === 0) {
+                $mailContent = unserialize(base64_decode($record['mailContent']));
                 $connectionMail->insert('tx_mail_domain_model_mail',
                     [
                         'uid' => $record['uid'],
@@ -71,8 +72,12 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'html_params' => $record['HTMLParams'],
                         'plain_params' => $record['plainParams'],
                         'sent' => $record['issent'],
-                        'rendered_size' => $record['renderedsize'],
-                        'mail_content' => $record['mailContent'],
+                        'rendered_size' => strlen($mailContent['html']['content']) + strlen($mailContent['plain']['content']),
+                        'message_id' => $mailContent['messageid'],
+                        'html_content' => $mailContent['html']['content'] ?? '',
+                        'plain_content' => $mailContent['plain']['content'] ?? '',
+                        'html_links' => json_encode($mailContent['html']['href'] ?? []),
+                        'plain_links' => json_encode($mailContent['plain']['link_ids'] ?? []),
                         'query_info' => $record['query_info'],
                         'scheduled' => $record['scheduled'],
                         'scheduled_begin' => $record['scheduled_begin'],
@@ -142,7 +147,6 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'email' => $record['email'],
                         'tstamp' => $record['tstamp'],
                         'url' => $record['url'],
-                        'size' => $record['size'],
                         'parse_time' => $record['parsetime'],
                         'response_type' => $record['response_type'],
                         'format_sent' => $formatSent,
