@@ -47,12 +47,6 @@ return [
                 'type' => 'passthrough'
             ]
         ],
-        'size' => [
-            'label' => 'Size',
-            'config' => [
-                'type' => 'passthrough'
-            ]
-        ],
         'parse_time' => [
             'label' => 'Parse time',
             'config' => [

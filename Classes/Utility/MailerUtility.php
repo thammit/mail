@@ -70,188 +70,6 @@ class MailerUtility
      */
 
     /**
-     * Extracts all media-links from given content
-     *
-     * @param string $content
-     * @param string $path
-     * @return array
-     */
-    public static function extractMediaLinks(string $content, string $path): array
-    {
-        $mediaLinks = [];
-
-        $attribRegex = static::tagRegex(['img']);
-        $imageList = '';
-
-        // split the document by the beginning of the above tags
-        $codeParts = preg_split($attribRegex, $content);
-        $len = strlen($codeParts[0]);
-        $pieces = count($codeParts);
-        $reg = [];
-        for ($i = 1; $i < $pieces; $i++) {
-            $tag = strtolower(strtok(substr($content, $len + 1, 10), ' '));
-            $len += strlen($tag) + strlen($codeParts[$i]) + 2;
-            preg_match('/[^>]*/', $codeParts[$i], $reg);
-
-            // Fetches the attributes for the tag
-            $attributes = static::getTagAttributes($reg[0]);
-            $imageData = [];
-
-            // Finds the src or background attribute
-            $imageData['ref'] = $attributes['src'] ?? '';
-            if ($imageData['ref']) {
-                // find out if the value had quotes around it
-                $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
-                // subst_str is the string to look for, when substituting later-on
-                $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-                if (!str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
-                    $imageList .= '|' . $imageData['subst_str'] . '|';
-                    $imageData['absRef'] = static::absRef($imageData['ref'], $path);
-                    $imageData['tag'] = $tag;
-                    $imageData['use_jumpurl'] = (isset($attributes['dmailerping']) && $attributes['dmailerping']) ? 1 : 0;
-                    $imageData['do_not_embed'] = !empty($attributes['do_not_embed']);
-                    $mediaLinks[] = $imageData;
-                }
-            }
-        }
-
-        // Extracting stylesheets
-        $attribRegex = static::tagRegex(['link']);
-        // Split the document by the beginning of the above tags
-        $codeParts = preg_split($attribRegex, $content);
-        $pieces = count($codeParts);
-        for ($i = 1; $i < $pieces; $i++) {
-            preg_match('/[^>]*/', $codeParts[$i], $reg);
-            // fetches the attributes for the tag
-            $attributes = static::getTagAttributes($reg[0]);
-            $imageData = [];
-            if (strtolower($attributes['rel']) == 'stylesheet' && $attributes['href']) {
-                // Finds the src or background attribute
-                $imageData['ref'] = $attributes['href'];
-                // Finds out if the value had quotes around it
-                $imageData['quotes'] = (substr($codeParts[$i], strpos($codeParts[$i], $imageData['ref']) - 1, 1) == '"') ? '"' : '';
-                // subst_str is the string to look for, when substituting lateron
-                $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-                if (!str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
-                    $imageList .= '|' . $imageData['subst_str'] . '|';
-                    $imageData['absRef'] = static::absRef($imageData['ref'], $path);
-                    $mediaLinks[] = $imageData;
-                }
-            }
-        }
-
-        // fixes javascript rollovers
-        $codeParts = explode('.src', $content);
-        $pieces = count($codeParts);
-        $expr = '/^[^' . quotemeta('"') . quotemeta("'") . ']*/';
-        for ($i = 1; $i < $pieces; $i++) {
-            $temp = $codeParts[$i];
-            $temp = trim(str_replace('=', '', trim($temp)));
-            preg_match($expr, substr($temp, 1, strlen($temp)), $reg);
-            $imageData['ref'] = $reg[0];
-            $imageData['quotes'] = substr($temp, 0, 1);
-            // subst_str is the string to look for, when substituting lateron
-            $imageData['subst_str'] = $imageData['quotes'] . $imageData['ref'] . $imageData['quotes'];
-            $theInfo = GeneralUtility::split_fileref($imageData['ref']);
-
-            switch ($theInfo['fileext']) {
-                case 'gif':
-                    // do like jpg
-                case 'jpeg':
-                    // do like jpg
-                case 'jpg':
-                    if ($imageData['ref'] && !str_contains($imageList, '|' . $imageData['subst_str'] . '|')) {
-                        $imageList .= '|' . $imageData['subst_str'] . '|';
-                        $imageData['absRef'] = static::absRef($imageData['ref'], $path);
-                        $mediaLinks[] = $imageData;
-                    }
-                    break;
-                default:
-                    // do nothing
-            }
-        }
-
-        return $mediaLinks;
-    }
-
-    /**
-     * Extracts all hyperlinks from given content
-     *
-     * @param string $content
-     * @param string $path
-     * @return array
-     */
-    public static function extractHyperLinks(string $content, string $path): array
-    {
-        $hyperLinks = [];
-        $linkList = '';
-
-        $attribRegex = static::tagRegex(['a', 'form', 'area']);
-
-        // Splits the document by the beginning of the above tags
-        $codeParts = preg_split($attribRegex, $content);
-        $len = strlen($codeParts[0]);
-        $pieces = count($codeParts);
-        $reg = [];
-        for ($i = 1; $i < $pieces; $i++) {
-            $tag = strtolower(strtok(substr($content, $len + 1, 10), ' '));
-            $len += strlen($tag) + strlen($codeParts[$i]) + 2;
-            preg_match('/[^>]*/', $codeParts[$i], $reg);
-
-            // Fetches the attributes for the tag
-            $attributes = static::getTagAttributes($reg[0], false);
-            $hrefData = [];
-            $hrefData['ref'] = ($attributes['href'] ?? '') ?: ($attributes['action'] ?? '');
-            $quotes = str_starts_with($hrefData['ref'], '"') ? '"' : '';
-            $hrefData['ref'] = trim($hrefData['ref'], '"');
-            if ($hrefData['ref']) {
-                // Finds out if the value had quotes around it
-                $hrefData['quotes'] = $quotes;
-                // subst_str is the string to look for when substituting later on
-                $hrefData['subst_str'] = $quotes . $hrefData['ref'] . $quotes;
-                if (!str_starts_with(trim($hrefData['ref']), '#') && !str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
-                    $linkList .= '|' . $hrefData['subst_str'] . '|';
-                    $hrefData['absRef'] = static::absRef($hrefData['ref'], $path);
-                    $hrefData['tag'] = $tag;
-                    $hrefData['no_jumpurl'] = intval(trim(($attributes['no_jumpurl'] ?? ''), '"')) ? 1 : 0;
-                    $hyperLinks[] = $hrefData;
-                }
-            }
-        }
-        // todo remove, after matomo integration is finished
-        // Extracts TYPO3 specific links made by the openPic() JS function
-//        $codeParts = explode("onClick=\"openPic('", $content);
-//        $pieces = count($codeParts);
-//        for ($i = 1; $i < $pieces; $i++) {
-//            $showpicArray = explode("'", $codeParts[$i]);
-//            $hrefData['ref'] = $showpicArray[0];
-//            if ($hrefData['ref']) {
-//                $hrefData['quotes'] = "'";
-//                // subst_str is the string to look for, when substituting lateron
-//                $hrefData['subst_str'] = $hrefData['quotes'] . $hrefData['ref'] . $hrefData['quotes'];
-//                if (!str_contains($linkList, '|' . $hrefData['subst_str'] . '|')) {
-//                    $linkList .= '|' . $hrefData['subst_str'] . '|';
-//                    $hrefData['absRef'] = static::absRef($hrefData['ref'], $path);
-//                    $hyperLinks[] = $hrefData;
-//                }
-//            }
-//        }
-
-        // todo remove, after matomo integration is finished
-        // substitute dmailerping URL
-        // get all media and search for use_jumpurl then add it to the hrefs array
-//        $mediaLinks = static::extractMediaLinks($content, $path);
-//
-//        foreach ($mediaLinks as $mediaLink) {
-//            if (isset($mediaLink['use_jumpurl']) && $mediaLink['use_jumpurl'] === 1) {
-//                $hyperLinks[$mediaLink['ref']] = $mediaLink;
-//            }
-//        }
-
-        return $hyperLinks;
-    }
-
-    /**
      * This function checks which content elements are supposed to be sent to the recipient.
      * tslib_content inserts dmail boundary markers in the content specifying which elements are intended for which categories,
      * this functions check if the recipient is subscribing to any of these categories and
@@ -307,6 +125,20 @@ class MailerUtility
      */
 
     /**
+     * Removes html comments when outside script and style pairs
+     *
+     * @param string $content The email content
+     *
+     * @return string HTML content without comments
+     */
+    public static function removeHtmlComments(string $content): string
+    {
+        $content = preg_replace('/\/\*<!\[CDATA\[\*\/[\t\v\n\r\f]*<!--/', '/*<![CDATA[*/', $content);
+        $content = preg_replace('/[\t\v\n\r\f]*<!(?:--[^\[<>][\s\S]*?--\s*)?>[\t\v\n\r\f]*/', '', $content);
+        return preg_replace('/\/\*<!\[CDATA\[\*\//', '/*<![CDATA[*/<!--', $content);
+    }
+
+    /**
      * Takes a clear-text message body for a plain text email, finds all 'http://' links and if they are longer than 76 chars they are converted to a shorter URL with a hash parameter.
      * The real parameter is stored in the database and the hash-parameter/URL will be redirected to the real parameter when the link is clicked.
      * This function is about preserving long links in messages.
@@ -334,6 +166,11 @@ class MailerUtility
         return $messageWithReplacedLinks;
     }
 
+
+    /*
+     * MIXED HELPERS
+     */
+
     /**
      * @return string The created redirect url
      */
@@ -342,8 +179,7 @@ class MailerUtility
         if (strlen($targetLink) <= $lengthLimit) {
             return $targetLink;
         }
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('sys_redirect');
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_redirect');
 
         $sourcePath = '/redirect-' . substr(md5($targetLink), 0, 20);
 
@@ -376,111 +212,6 @@ class MailerUtility
         $connection->insert('sys_redirect', $record);
         return $sourcePath;
     }
-
-
-    /**
-     * This substitutes the http:// urls in plain text with links
-     *
-     * @param string $content
-     * @param string $jumpUrlPrefix
-     * @param bool $jumpUrlUseId
-     * @return array The changed content and plain link ids
-     */
-    public static function replaceUrlsInPlainText(string $content, string $jumpUrlPrefix, bool $jumpUrlUseId): array
-    {
-        $jumpUrlCounter = 1;
-        $plainLinkIds = [];
-        $contentWithReplacedUrls = preg_replace_callback(
-            '/https?:\/\/\S+/',
-            function ($urlMatches) use ($jumpUrlPrefix, $jumpUrlUseId, &$jumpUrlCounter, &$plainLinkIds) {
-                $url = $urlMatches[0];
-                if (str_contains($url, '&no_jumpurl=1')) {
-                    // A link parameter "&no_jumpurl=1" allows to disable jumpurl for plain text links
-                    $url = str_replace('&no_jumpurl=1', '', $url);
-                } else {
-                    if ($jumpUrlUseId) {
-                        $plainLinkIds[$jumpUrlCounter] = $url;
-                        $url = $jumpUrlPrefix . '-' . $jumpUrlCounter;
-                        $jumpUrlCounter++;
-                    } else {
-                        $url = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($url));
-                    }
-                }
-                return $url;
-            },
-            $content
-        );
-
-        return [
-            $contentWithReplacedUrls,
-            $plainLinkIds,
-        ];
-    }
-
-    /**
-     * replace hrefs in $content
-     *
-     * @param string $content
-     * @param array $hrefs
-     * @param string $jumpUrlPrefix
-     * @param bool $enableJumpUrl
-     * @param bool $jumpUrlUseMailto
-     * @return string
-     */
-    public static function replaceHrefsInContent(string $content, array $hrefs, string $jumpUrlPrefix, bool $enableJumpUrl, bool $jumpUrlUseMailto): string
-    {
-        foreach ($hrefs as $urlId => $val) {
-            if ($val['no_jumpurl'] ?? false) {
-                // A tag attribute "no_jumpurl=1" allows to disable jumpurl for custom links
-                $substVal = $val['absRef'];
-            } else {
-                if ($jumpUrlPrefix && ($val['tag'] !== 'form') && (!str_contains($val['ref'], 'mailto:'))) {
-                    // Form elements cannot use jumpurl!
-                    if ($enableJumpUrl) {
-                        $substVal = $jumpUrlPrefix . $urlId;
-                    } else {
-                        $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
-                    }
-                } else {
-                    if (strstr($val['ref'], 'mailto:') && $jumpUrlUseMailto) {
-                        if ($enableJumpUrl) {
-                            $substVal = $jumpUrlPrefix . $urlId;
-                        } else {
-                            $substVal = $jumpUrlPrefix . str_replace('%2F', '/', rawurlencode($val['absRef']));
-                        }
-                    } else {
-                        $substVal = $val['absRef'];
-                    }
-                }
-            }
-            $content = str_replace(
-                $val['subst_str'],
-                $val['quotes'] . $substVal . $val['quotes'],
-                $content
-            );
-        }
-
-        return $content;
-    }
-
-    /**
-     * Removes html comments when outside script and style pairs
-     *
-     * @param string $content The email content
-     *
-     * @return string HTML content without comments
-     */
-    public static function removeHtmlComments(string $content): string
-    {
-        $content = preg_replace('/\/\*<!\[CDATA\[\*\/[\t\v\n\r\f]*<!--/', '/*<![CDATA[*/', $content);
-        $content = preg_replace('/[\t\v\n\r\f]*<!(?:--[^\[<>][\s\S]*?--\s*)?>[\t\v\n\r\f]*/', '', $content);
-        return preg_replace('/\/\*<!\[CDATA\[\*\//', '/*<![CDATA[*/<!--', $content);
-    }
-
-
-    /*
-     * MIXED HELPERS
-     */
 
     /**
      * @param $mailUid
@@ -644,76 +375,6 @@ class MailerUtility
         // if the last char not a /, then assume it's an absolute
         $addr = parse_url($path);
         return $addr['scheme'] . '://' . $addr['host'] . ($addr['port'] ? ':' . $addr['port'] : '') . '/' . $ref;
-    }
-
-    /**
-     * This function analyzes an HTML tag
-     * If an attribute is empty (like OPTION) the value of that key is just empty.
-     * Check it with is_set();
-     *
-     * @param string $tag Tag is either like this "<TAG OPTION ATTRIB=VALUE>" or
-     *                 this " OPTION ATTRIB=VALUE>" which means you can omit the tag-name
-     * @param boolean $removeQuotes When TRUE (default) quotes around a value will get removed
-     *
-     * @return array array with attributes as keys in lower-case
-     */
-    public static function getTagAttributes(string $tag, bool $removeQuotes = true): array
-    {
-        $attributes = [];
-        $tag = ltrim(preg_replace('/^<[^ ]*/', '', trim($tag)));
-        $tagLen = strlen($tag);
-        $safetyCounter = 100;
-        // Find attribute
-        while ($tag) {
-            $value = '';
-            $reg = preg_split('/[[:space:]=>]/', $tag, 2);
-            $attrib = $reg[0];
-
-            $tag = ltrim(substr($tag, strlen($attrib), $tagLen));
-            if (str_starts_with($tag, '=')) {
-                $tag = ltrim(substr($tag, 1, $tagLen));
-                if (str_starts_with($tag, '"') && $removeQuotes) {
-                    // Quotes around the value
-                    $reg = explode('"', substr($tag, 1, $tagLen), 2);
-                    $tag = ltrim($reg[1]);
-                    $value = $reg[0];
-                } else {
-                    // No quotes around value
-                    preg_match('/^([^[:space:]>]*)(.*)/', $tag, $reg);
-                    $value = trim($reg[1]);
-                    $tag = ltrim($reg[2]);
-                    if (str_starts_with($tag, '>')) {
-                        $tag = '';
-                    }
-                }
-            }
-            $attributes[strtolower($attrib)] = $value;
-            $safetyCounter--;
-            if ($safetyCounter < 0) {
-                break;
-            }
-        }
-        return $attributes;
-    }
-
-    /**
-     * Creates a regular expression out of a list of tags
-     *
-     * @param array|string $tags Array the list of tags
-     *        (either as array or string if it is one tag)
-     *
-     * @return string the regular expression
-     */
-    public static function tagRegex(array|string $tags): string
-    {
-        $tags = !is_array($tags) ? [$tags] : $tags;
-        $regexp = '/';
-        $c = count($tags);
-        foreach ($tags as $tag) {
-            $c--;
-            $regexp .= '<' . $tag . '[[:space:]]' . (($c) ? '|' : '');
-        }
-        return $regexp . '/i';
     }
 
     /**

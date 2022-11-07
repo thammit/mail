@@ -179,6 +179,8 @@ class MailFactory
             $mail->removeHtmlSendOption();
         } else {
             $htmlUrl = MailerUtility::getUrlForExternalPage($mail->getHtmlParams());
+            // todo only add domain with scheme
+            $mail->setRedirectUrl($htmlUrl);
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             $matches = [];
             $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', $htmlContent, $matches);

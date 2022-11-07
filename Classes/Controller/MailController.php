@@ -215,48 +215,28 @@ class MailController extends AbstractController
     public function openMailAction(Mail $mail): void
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
-
+        $newMail = null;
         if ($mail->isExternal()) {
             // it's a quick/external mail
             if (str_starts_with($mail->getHtmlParams(), 'http') || str_starts_with($mail->getPlainParams(), 'http')) {
                 // it's an external mail -> fetch content again
                 $newMail = $mailFactory->fromExternalUrls($mail->getSubject(), $mail->getHtmlParams(), $mail->getPlainParams());
-                if ($newMail instanceof Mail) {
-                    // copy new fetch content and charset to current mail record
-
-                    // old
-//                    $mail->setMailContent($newMail->getMailContent());
-//                    $mail->setRenderedSize($newMail->getRenderedSize());
-
-                    // new
-                    $mail->setMessageId($newMail->getMessageId());
-                    $mail->setPlainContent($newMail->getPlainContent());
-                    $mail->setHtmlContent($newMail->getHtmlContent());
-                    $mail->recalculateRenderSize();
-
-                    $mail->setCharset($newMail->getCharset());
-                    $this->mailRepository->update($mail);
-                }
-            }
-            $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
-        } else {
-            $newMail = $mailFactory->fromInternalPage($mail->getPage(), $mail->getSysLanguageUid());
-            if ($newMail instanceof Mail) {
-                // copy new fetch content and charset to current mail record
-
-                // old
-//                $mail->setMailContent($newMail->getMailContent());
-//                $mail->setRenderedSize($newMail->getRenderedSize());
-
-                // new
-                $mail->setMessageId($newMail->getMessageId());
-                $mail->setPlainContent($newMail->getPlainContent());
-                $mail->setHtmlContent($newMail->getHtmlContent());
-                $mail->recalculateRenderSize();
-
-                $this->mailRepository->update($mail);
+            } else {
                 $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
             }
+        } else {
+            $newMail = $mailFactory->fromInternalPage($mail->getPage(), $mail->getSysLanguageUid());
+        }
+        if ($newMail instanceof Mail) {
+            // copy new fetch content and charset to current mail record
+            $mail->setMessageId($newMail->getMessageId());
+            $mail->setPlainContent($newMail->getPlainContent());
+            $mail->setHtmlContent($newMail->getHtmlContent());
+            $mail->recalculateRenderSize();
+            $mail->setCharset($newMail->getCharset());
+
+            $this->mailRepository->update($mail);
+            $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
         }
         $this->redirect('index');
     }

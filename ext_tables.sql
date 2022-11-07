@@ -72,7 +72,6 @@ CREATE TABLE tx_mail_domain_model_log (
   email varchar(255) DEFAULT '' NOT NULL,
   tstamp int(11) unsigned DEFAULT '0' NOT NULL,
   url tinyblob NULL,
-  size int(11) unsigned DEFAULT '0' NOT NULL,
   parse_time int(11) unsigned DEFAULT '0' NOT NULL,
   response_type tinyint(4) DEFAULT '0' NOT NULL,
   format_sent tinyint(4) DEFAULT '0' NOT NULL,

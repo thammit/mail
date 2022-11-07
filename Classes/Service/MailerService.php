@@ -697,23 +697,6 @@ class MailerService implements LoggerAwareInterface
                 $this->mail->setHtmlContent($dom->html());
             }
 
-            //$medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->getHtmlPath());
-            /*
-            $medias = MailerUtility::extractMediaLinks($this->getHtmlContent(), $this->mail->getRedirectUrl());
-            foreach ($medias as $media) {
-                if (!($media['do_not_embed'] ?? false) && !($media['use_jumpurl'] ?? false) && ($media['tag'] ?? '') === 'img') {
-                    $response = $this->requestFactory->request($media['absRef']);
-                    if ($response->getStatusCode() === 200) {
-                        $baseName = basename($media['absRef']);
-                        $mailMessage->embed($response->getBody()->getContents(), $baseName, $response->getHeaderLine('Content-Type'));
-                        $this->setHtmlContent(str_replace($media['subst_str'], $media['quotes'] . 'cid:' . $baseName . $media['quotes'], $this->getHtmlContent()));
-                    }
-                }
-            }
-            // remove ` do_not_embed="1"` attributes
-            $this->setHtmlContent(str_replace(' do_not_embed="1"', '', $this->getHtmlContent()));
-            */
-
             // add html content part to mail
             $mailMessage->html($this->mail->getHtmlContent());
         }
