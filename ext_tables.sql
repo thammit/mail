@@ -23,7 +23,6 @@ CREATE TABLE tx_mail_domain_model_mail (
    plain_params varchar(80) DEFAULT '' NOT NULL,
    sent tinyint(4) unsigned DEFAULT '0' NOT NULL,
    rendered_size int(11) unsigned DEFAULT '0' NOT NULL,
-   mail_content mediumblob,
    message_id varchar(100),
    html_content mediumblob,
    plain_content mediumblob,
