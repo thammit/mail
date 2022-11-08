@@ -66,7 +66,7 @@ class PreviewLinksViewHelper extends AbstractViewHelper
             $attributes = PreviewUriBuilder::create($row['uid'], '')
                 ->withRootLine(BackendUtility::BEgetRootLine($row['uid']))
                 ->withAdditionalQueryParameters($htmlParams)
-                ->buildDispatcherDataAttributes([]);
+                ->buildDispatcherDataAttributes(['windowFeatures' => 'width=700,height=800']);
 
             $previewHTMLLinkAttributes[$languageUid] = [
                 'title' => htmlentities(LanguageUtility::getLL('nl_viewPage_HTML') . $langTitle),
@@ -78,7 +78,7 @@ class PreviewLinksViewHelper extends AbstractViewHelper
             $attributes = PreviewUriBuilder::create($row['uid'], '')
                 ->withRootLine(BackendUtility::BEgetRootLine($row['uid']))
                 ->withAdditionalQueryParameters($plainParams)
-                ->buildDispatcherDataAttributes([]);
+                ->buildDispatcherDataAttributes(['windowFeatures' => 'width=700,height=800']);
 
             $previewTextLinkAttributes[$languageUid] = [
                 'title' => htmlentities(LanguageUtility::getLL('nl_viewPage_TXT') . $langTitle),
