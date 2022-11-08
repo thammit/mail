@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 use DateTimeImmutable;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -34,7 +35,6 @@ class Mail extends AbstractEntity
     protected string $htmlParams = '';
     protected string $plainParams = '';
     protected bool $sent = false;
-    protected int $recipients = 0;
     protected int $renderedSize = 0;
     protected string $messageId = '';
     protected string $htmlContent = '';
@@ -49,7 +49,11 @@ class Mail extends AbstractEntity
      * @var string
      */
     protected string $plainLinks = '[]';
-    protected string $queryInfo = '';
+    /**
+     * query info (do not delete this annotation block!)
+     * @var string
+     */
+    protected string $recipients = '[]';
     protected ?DateTimeImmutable $scheduled = null;
     protected ?DateTimeImmutable $scheduledBegin = null;
     protected ?DateTimeImmutable $scheduledEnd = null;
@@ -448,22 +452,13 @@ class Mail extends AbstractEntity
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getRecipients(): int
+    public function getNumberOfRecipients(): int
     {
-        return $this->recipients;
-    }
-
-    /**
-     * @param int $recipients
-     * @return Mail
-     */
-    public function setRecipients(int $recipients): Mail
-    {
-        $this->recipients = $recipients;
-        return $this;
+        $numberOfRecipients = 0;
+        if ($recipients = $this->getRecipients()) {
+            $numberOfRecipients = array_sum(array_map('count', $recipients));
+        }
+        return $numberOfRecipients;
     }
 
     /**
@@ -572,20 +567,20 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getQueryInfo(): string
+    public function getRecipients(): array
     {
-        return $this->queryInfo;
+        return json_decode($this->recipients, true, 512,  JSON_OBJECT_AS_ARRAY);
     }
 
     /**
-     * @param string $queryInfo
+     * @param array $recipients
      * @return Mail
      */
-    public function setQueryInfo(string $queryInfo): Mail
+    public function setRecipients(array $recipients): Mail
     {
-        $this->queryInfo = $queryInfo;
+        $this->recipients = json_encode($recipients);
         return $this;
     }
 

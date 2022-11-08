@@ -33,7 +33,7 @@ class QueueController extends AbstractController
         /** @var Mail $mail */
         foreach ($scheduledMails as $mail) {
             $sent = $this->logRepository->countByMailUid($mail->getUid());
-            [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend($sent, $mail->getRecipients());
+            [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend($sent, $mail->getNumberOfRecipients());
 
             $data[] = [
                 'mail' => $mail,

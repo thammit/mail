@@ -388,23 +388,6 @@ class MailerUtility
     }
 
     /**
-     * @param Mail $mail
-     * @return int
-     */
-    public static function getNumberOfRecipients(Mail $mail): int
-    {
-        $numberOfRecipients = 0;
-        if ($mail->getQueryInfo() ?? false) {
-            $queryInfo = unserialize($mail->getQueryInfo());
-            if (isset($queryInfo['id_lists'])) {
-                $numberOfRecipients = array_sum(array_map('count', $queryInfo['id_lists']));
-            }
-        }
-
-        return $numberOfRecipients;
-    }
-
-    /**
      * @param int $sent
      * @param int $numberOfRecipients
      * @return array

@@ -28,7 +28,7 @@ CREATE TABLE tx_mail_domain_model_mail (
    plain_content mediumblob,
    html_links text,
    plain_links text,
-   query_info mediumblob,
+   recipients text,
    scheduled int(10) unsigned DEFAULT '0' NOT NULL,
    scheduled_begin int(10) unsigned DEFAULT '0' NOT NULL,
    scheduled_end int(10) unsigned DEFAULT '0' NOT NULL,
@@ -38,7 +38,6 @@ CREATE TABLE tx_mail_domain_model_mail (
    redirect_url varchar(2048) DEFAULT '' NOT NULL,
    auth_code_fields varchar(80) DEFAULT '' NOT NULL,
    recipient_groups varchar(80) DEFAULT '' NOT NULL,
-   recipients int(11) unsigned DEFAULT '0' NOT NULL,
    PRIMARY KEY (uid)
 );
 

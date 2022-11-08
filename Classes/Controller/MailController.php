@@ -548,12 +548,12 @@ class MailController extends AbstractController
     {
         $groups = array_keys(array_filter($groups));
         $distributionTime = new DateTimeImmutable($distributionTime);
-        $queryInfo['id_lists'] = $this->recipientService->getRecipientsUidListsGroupedByTables($this->groupRepository->findByUidList($groups)->toArray());
+        $queryInfo = $this->recipientService->getRecipientsUidListsGroupedByTables($this->groupRepository->findByUidList($groups)->toArray());
 
         // Update the record:
         $mail->setRecipientGroups(implode(',', $groups))
             ->setScheduled($distributionTime)
-            ->setQueryInfo(serialize($queryInfo))
+            ->setRecipients($queryInfo)
             ->setSent(true);
 
 //        if (false && $this->isTestMail) {

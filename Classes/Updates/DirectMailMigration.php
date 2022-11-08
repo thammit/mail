@@ -78,7 +78,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'plain_content' => $mailContent['plain']['content'] ?? '',
                         'html_links' => json_encode($mailContent['html']['href'] ?? []),
                         'plain_links' => json_encode($mailContent['plain']['link_ids'] ?? []),
-                        'query_info' => $record['query_info'],
+                        'recipients' => json_encode(unserialize($record['query_info'])['id_lists'] ?? []),
                         'scheduled' => $record['scheduled'],
                         'scheduled_begin' => $record['scheduled_begin'],
                         'scheduled_end' => $record['scheduled_end'],

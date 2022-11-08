@@ -540,10 +540,7 @@ class MailerService implements LoggerAwareInterface
      */
     protected function setJobBegin(Mail $mail): void
     {
-        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail);
-
         $mail->setScheduledBegin(new DateTimeImmutable('now'));
-        $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
@@ -565,10 +562,7 @@ class MailerService implements LoggerAwareInterface
      */
     protected function setJobEnd(Mail $mail): void
     {
-        $numberOfRecipients = MailerUtility::getNumberOfRecipients($mail);
-
         $mail->setScheduledEnd(new DateTimeImmutable('now'));
-        $mail->setRecipients($numberOfRecipients);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
@@ -629,34 +623,21 @@ class MailerService implements LoggerAwareInterface
         $startTime = MailerUtility::getMilliseconds();
 
         $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
-        $mailToSend = $this->mailRepository->findMailToSend();
-        if ($mailToSend instanceof Mail) {
-            $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $mailToSend->getUid() . ', \'' . $mailToSend->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
-            $this->prepare($mailToSend->getUid());
-            $queryInfo = unserialize($mailToSend->getQueryInfo());
+        $mail = $this->mailRepository->findMailToSend();
+        if ($mail instanceof Mail) {
+            $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
+            $this->prepare($mail->getUid());
+            $recipients = $mail->getRecipients();
 
-            if (!$mailToSend->getScheduledBegin()) {
-                // Hook to alter the list of recipients
-                if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['queryInfoHook'])) {
-                    $queryInfoHook =& $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['queryInfoHook'];
-                    if (is_array($queryInfoHook)) {
-                        $hookParameters = [
-                            'mail' => $mailToSend,
-                            'query_info' => &$queryInfo,
-                        ];
-                        $hookReference = &$this;
-                        foreach ($queryInfoHook as $hookFunction) {
-                            GeneralUtility::callUserFunction($hookFunction, $hookParameters, $hookReference);
-                        }
-                    }
-                }
-                $this->setJobBegin($mailToSend);
+            if (!$mail->getScheduledBegin()) {
+                // todo add psr-15 event to manipulate mail before send
+                $this->setJobBegin($mail);
             }
 
-            $finished = !is_array($queryInfo['id_lists']) || $this->massSend($queryInfo['id_lists'], $mailToSend->getUid());
+            $finished = $this->massSend($recipients, $mail->getUid());
 
             if ($finished) {
-                $this->setJobEnd($mailToSend);
+                $this->setJobEnd($mail);
             }
         } else {
             $this->logger->debug(LanguageUtility::getLL('dmailer_nothing_to_do'));
