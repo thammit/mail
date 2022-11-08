@@ -43,11 +43,12 @@ final class Configuration
 
     public static function registerBackendModules(): void
     {
-        ExtensionManagementUtility::addModule(
+        ExtensionUtility::registerModule(
             'Mail',
+            'mail',
             '',
             '',
-            '',
+            [],
             [
                 'access' => 'group,user',
                 'name' => 'Mail',
@@ -55,7 +56,7 @@ final class Configuration
                 'labels' => [
                     'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/MainModule.xlf',
                 ],
-            ]
+            ],
         );
 
         ExtensionUtility::registerModule(
