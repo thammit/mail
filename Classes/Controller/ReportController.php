@@ -5,11 +5,14 @@ namespace MEDIAESSENZ\Mail\Controller;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use JetBrains\PhpStorm\NoReturn;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
@@ -65,6 +68,8 @@ class ReportController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws SiteNotFoundException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function showAction(Mail $mail): ResponseInterface
     {
@@ -129,7 +134,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      */
-    public function csvExportTotalReturnedAction(Mail $mail): void
+    #[NoReturn] public function csvExportTotalReturnedAction(Mail $mail): void
     {
         $this->mailService->init($mail);
         $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData());
@@ -180,7 +185,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      */
-    public function csvExportUnknownAction(Mail $mail): void
+    #[NoReturn] public function csvExportUnknownAction(Mail $mail): void
     {
         $this->mailService->init($mail);
         $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
@@ -231,7 +236,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      */
-    public function csvExportFullAction(Mail $mail): void
+    #[NoReturn] public function csvExportFullAction(Mail $mail): void
     {
         $this->mailService->init($mail);
         $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]));
@@ -282,7 +287,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      */
-    public function csvExportBadHostAction(Mail $mail): void
+    #[NoReturn] public function csvExportBadHostAction(Mail $mail): void
     {
         $this->mailService->init($mail);
         $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]));
@@ -333,7 +338,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      */
-    public function csvExportBadHeaderAction(Mail $mail): void
+    #[NoReturn] public function csvExportBadHeaderAction(Mail $mail): void
     {
         $this->mailService->init($mail);
         $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]));
@@ -384,7 +389,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      */
-    public function csvExportReasonUnknownAction(Mail $mail): void
+    #[NoReturn] public function csvExportReasonUnknownAction(Mail $mail): void
     {
         $this->mailService->init($mail);
         $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
