@@ -27,7 +27,8 @@ class ReportController extends AbstractController
         $rows = $this->mailRepository->findSentByPid($this->id);
         $data = [];
         foreach ($rows as $row) {
-            [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend((int)$row['count'], (int)$row['recipients']);
+            $numberOfRecipients = array_sum(array_map('count', json_decode($row['recipients'], true, 512,  JSON_OBJECT_AS_ARRAY)));
+            [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend((int)$row['count'], (int)$numberOfRecipients);
             $status = 'queuing';
             if (!empty($row['scheduled_begin'])) {
                 if (!empty($row['scheduled_end'])) {

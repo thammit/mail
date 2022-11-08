@@ -452,15 +452,6 @@ class Mail extends AbstractEntity
         return $this;
     }
 
-    public function getNumberOfRecipients(): int
-    {
-        $numberOfRecipients = 0;
-        if ($recipients = $this->getRecipients()) {
-            $numberOfRecipients = array_sum(array_map('count', $recipients));
-        }
-        return $numberOfRecipients;
-    }
-
     /**
      * @return int
      */
@@ -582,6 +573,15 @@ class Mail extends AbstractEntity
     {
         $this->recipients = json_encode($recipients);
         return $this;
+    }
+
+    public function getNumberOfRecipients(): int
+    {
+        $numberOfRecipients = 0;
+        if ($recipients = $this->getRecipients()) {
+            $numberOfRecipients = array_sum(array_map('count', $recipients));
+        }
+        return $numberOfRecipients;
     }
 
     /**
