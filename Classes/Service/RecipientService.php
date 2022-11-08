@@ -15,7 +15,6 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecordType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
-use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
@@ -36,7 +35,6 @@ class RecipientService
     protected string $backendUserPermissions;
     protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,accepts_html';
     protected array $allowedTables = ['fe_users', 'tt_address'];
-    protected string $userTable = '';
 
     public function __construct(
         protected GroupRepository $groupRepository,
@@ -609,8 +607,6 @@ class RecipientService
             foreach ($childGroups as $childGroup) {
                 $collect = $this->getRecursiveGroups($childGroup, $recursion);
                 $groups = array_merge_recursive($groups, $collect);
-//                $groups[] = $childGroup->getType() === RecipientGroupType::OTHER && $childGroup->getChildren()->count() > 0 ? $this->getRecursiveGroups($childGroup,
-//                    $recursion) : $childGroup;
             }
         }
 
