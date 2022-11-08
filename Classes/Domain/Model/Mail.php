@@ -36,7 +36,6 @@ class Mail extends AbstractEntity
     protected bool $sent = false;
     protected int $recipients = 0;
     protected int $renderedSize = 0;
-    protected string $mailContent = '';
     protected string $messageId = '';
     protected string $htmlContent = '';
     protected string $plainContent = '';
@@ -475,37 +474,9 @@ class Mail extends AbstractEntity
         return $this->renderedSize;
     }
 
-    /**
-     * @param int $renderedSize
-     * @return Mail
-     */
-    public function setRenderedSize(int $renderedSize): Mail
-    {
-        $this->renderedSize = $renderedSize;
-        return $this;
-    }
-
     public function recalculateRenderSize(): void
     {
         $this->renderedSize = strlen($this->htmlContent) + strlen($this->plainContent);
-    }
-
-    /**
-     * @return string
-     */
-    public function getMailContent(): string
-    {
-        return $this->mailContent;
-    }
-
-    /**
-     * @param string $mailContent
-     * @return Mail
-     */
-    public function setMailContent(string $mailContent): Mail
-    {
-        $this->mailContent = $mailContent;
-        return $this;
     }
 
     /**
@@ -541,6 +512,7 @@ class Mail extends AbstractEntity
     public function setHtmlContent(string $htmlContent): Mail
     {
         $this->htmlContent = $htmlContent;
+        $this->recalculateRenderSize();
         return $this;
     }
 
@@ -559,6 +531,7 @@ class Mail extends AbstractEntity
     public function setPlainContent(string $plainContent): Mail
     {
         $this->plainContent = $plainContent;
+        $this->recalculateRenderSize();
         return $this;
     }
 

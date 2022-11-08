@@ -149,7 +149,6 @@ class MailFactory
         }
 
         $mail->setMessageId(MailerUtility::generateMessageId());
-        $mail->recalculateRenderSize();
 
         return $mail;
     }
@@ -208,7 +207,6 @@ class MailFactory
         $mail->setMessageId(MailerUtility::generateMessageId());
         $mail->setPlainContent($plainContent);
         $mail->setHtmlContent($htmlContent);
-        $mail->recalculateRenderSize();
 
         return $mail;
     }
@@ -252,7 +250,6 @@ class MailFactory
 
         $mail->setMessageId(MailerUtility::generateMessageId());
         $mail->setPlainContent($plainContent);
-        $mail->recalculateRenderSize();
 
         return $mail;
     }

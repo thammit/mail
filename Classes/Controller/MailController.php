@@ -232,7 +232,6 @@ class MailController extends AbstractController
             $mail->setMessageId($newMail->getMessageId());
             $mail->setPlainContent($newMail->getPlainContent());
             $mail->setHtmlContent($newMail->getHtmlContent());
-            $mail->recalculateRenderSize();
             $mail->setCharset($newMail->getCharset());
 
             $this->mailRepository->update($mail);

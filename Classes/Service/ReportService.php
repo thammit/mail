@@ -221,7 +221,6 @@ class ReportService
     {
         $mostPopularHtmlLinks = $this->logRepository->findMostPopularLinksByMailAndResponseType($this->mail->getUid());
         $mostPopularPlainLinks = $this->logRepository->findMostPopularLinksByMailAndResponseType($this->mail->getUid(), ResponseType::PLAIN);
-        $mailContent = unserialize(base64_decode($this->mail->getMailContent()));
         $urlCounter = [];
         $urlCounter['total'] = [];
         $urlCounter['html'] = [];
