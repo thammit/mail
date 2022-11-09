@@ -6,7 +6,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 use DateTimeImmutable;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -62,7 +62,12 @@ class Mail extends AbstractEntity
      * @var string
      */
     protected string $recipients = '[]';
-    protected int $numberOfSent = 0;
+    /**
+     * numberOfSent (do not change this annotation block or the property definition!)
+     * see https://forge.typo3.org/issues/98224
+     * @Transient
+     */
+    protected $numberOfSent;
     protected string $recipientGroups = '';
     protected int $sysLanguageUid = 0;
     protected ?DateTimeImmutable $lastModified = null;
@@ -590,7 +595,7 @@ class Mail extends AbstractEntity
      */
     public function getNumberOfSent(): int
     {
-        return $this->numberOfSent;
+        return $this->numberOfSent ?? 0;
     }
 
     /**
