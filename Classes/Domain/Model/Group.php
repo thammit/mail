@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
+use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecordType;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -12,22 +13,22 @@ class Group extends AbstractEntity
     /**
      * @var int
      */
-    protected int $type;
+    protected int $type = RecipientGroupType::PAGES;
 
     /**
      * @var string
      */
-    protected string $title;
+    protected string $title = '';
 
     /**
      * @var string
      */
-    protected string $description;
+    protected string $description = '';
 
     /**
      * @var string
      */
-    protected string $query;
+    protected string $query = '';
 
     /**
      * @var int
@@ -37,7 +38,7 @@ class Group extends AbstractEntity
     /**
      * @var string
      */
-    protected string $list;
+    protected string $list = '';
 
     /**
      * @var bool
@@ -47,12 +48,12 @@ class Group extends AbstractEntity
     /**
      * @var string
      */
-    protected string $pages;
+    protected string $pages = '';
 
     /**
      * @var int
      */
-    protected int $recordTypes;
+    protected int $recordTypes = 0;
 
     /**
      * @var bool
@@ -140,7 +141,7 @@ class Group extends AbstractEntity
      */
     public function getQuery(): string
     {
-        return $this->query;
+        return $this->query ?? '';
     }
 
     /**

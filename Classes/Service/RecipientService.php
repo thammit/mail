@@ -197,7 +197,7 @@ class RecipientService
             case RecipientGroupType::QUERY:
                 // Special query list
                 // Todo add functionality again
-                $queryTable = GeneralUtility::_GP('SET')['queryTable'];
+                $queryTable = GeneralUtility::_GP('SET')['queryTable'] ?? '';
                 $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
                 $this->updateGroupQueryConfig($group, $userTable, $queryTable, $queryConfig);
 
