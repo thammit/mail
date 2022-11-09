@@ -107,20 +107,6 @@ class MailRepository extends Repository
         $query->setOrderings(['scheduled' => QueryInterface::ORDER_ASCENDING]);
 
         return $query->execute()->getFirst();
-
-//        $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
-//        return $queryBuilder
-//            ->select('*')
-//            ->from($this->table)
-//            ->where(
-//                $queryBuilder->expr()->neq('scheduled', 0),
-//                $queryBuilder->expr()->lt('scheduled', time()),
-//                $queryBuilder->expr()->eq('scheduled_end', 0),
-//                $queryBuilder->expr()->notIn('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL])
-//            )
-//            ->orderBy('scheduled')
-//            ->execute()
-//            ->fetchAssociative();
     }
 
     /**
