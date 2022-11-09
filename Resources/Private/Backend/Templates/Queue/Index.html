@@ -61,8 +61,8 @@
                                 <f:variable name="finished" value="bg-success"/>
                             </f:if>
                             <div class="progress-bar {finished}" role="progressbar" style="width: {row.percentOfSent}%"
-                                 aria-valuenow="{row.sent}" aria-valuemin="0" aria-valuemax="{row.numberOfRecipients}">
-                                {row.sent}/{row.numberOfRecipients}
+                                 aria-valuenow="{row.sent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">
+                                {row.sent}/{mail.numberOfRecipients}
                             </div>
                         </div>
                     </td>

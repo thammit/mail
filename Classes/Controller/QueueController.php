@@ -28,19 +28,16 @@ class QueueController extends AbstractController
     public function indexAction(): ResponseInterface
     {
         $data = [];
-        // todo replace with extbase repository
         $scheduledMails = $this->mailRepository->findScheduledByPid($this->id)->toArray();
         /** @var Mail $mail */
         foreach ($scheduledMails as $mail) {
             $sent = $this->logRepository->countByMailUid($mail->getUid());
-            [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend($sent, $mail->getNumberOfRecipients());
 
             $data[] = [
                 'mail' => $mail,
                 'sent' => $sent,
-                'numberOfRecipients' => $numberOfRecipients,
-                'percentOfSent' => $percentOfSent,
-                'delete' => $mail->getScheduledBegin() === 0 || $mail->getScheduledEnd() === 0,
+                'percentOfSent' => MailerUtility::calculatePercentOfSend($sent, $mail->getNumberOfRecipients()),
+                'delete' => !$mail->getScheduledBegin() || !$mail->getScheduledEnd(),
             ];
         }
         $this->view->assignMultiple([

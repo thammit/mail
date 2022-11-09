@@ -27,34 +27,7 @@ class ReportController extends AbstractController
      */
     public function indexAction(): ResponseInterface
     {
-        $rows = $this->mailRepository->findSentByPid($this->id);
-        $data = [];
-        foreach ($rows as $row) {
-            $numberOfRecipients = array_sum(array_map('count', json_decode($row['recipients'], true, 512,  JSON_OBJECT_AS_ARRAY)));
-            [$percentOfSent, $numberOfRecipients] = MailerUtility::calculatePercentOfSend((int)$row['count'], (int)$numberOfRecipients);
-            $status = 'queuing';
-            if (!empty($row['scheduled_begin'])) {
-                if (!empty($row['scheduled_end'])) {
-                    $status = 'sent';
-                } else {
-                    $status = 'sending';
-                }
-            }
-            $data[] = [
-                'uid' => $row['uid'],
-                'subject' => $row['subject'],
-                'scheduled' => $row['scheduled'],
-                'scheduled_begin' => $row['scheduled_begin'],
-                'scheduled_end' => $row['scheduled_end'],
-                'sent' => $row['count'],
-                'percentOfSent' => $percentOfSent,
-                'numberOfRecipients' => $numberOfRecipients,
-                'status' => $status,
-            ];
-        }
-        $this->view->assignMultiple([
-            'data' => $data,
-        ]);
+        $this->view->assign('mails', $this->mailRepository->findSentByPid($this->id));
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());

@@ -347,6 +347,12 @@ return [
                 'type' => 'passthrough'
             ]
         ],
+        'number_of_sent' => [
+            'label' => 'number of sent',
+            'config' => [
+                'type' => 'none'
+            ]
+        ],
         'tstamp' => [
             'label' => 'Last modified',
             'config' => [

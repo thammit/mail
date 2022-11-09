@@ -14,6 +14,7 @@ use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use PDO;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
@@ -127,13 +128,12 @@ class MailRepository extends Repository
      * @return array
      * @throws DBALException
      * @throws Exception
-     * todo rebuild query with extbase
      */
     public function findSentByPid(int $pid): array
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions();
 
-        return $queryBuilder
+        return GeneralUtility::makeInstance(DataMapper::class)->map(Mail::class, $queryBuilder
             ->selectLiteral(
             'm.uid',
             'm.subject',
@@ -141,7 +141,7 @@ class MailRepository extends Repository
             'm.scheduled_begin',
             'm.scheduled_end',
             'm.recipients',
-            'COUNT(l.mail) AS count'
+            'COUNT(l.mail) AS number_of_sent'
             )
             ->from('tx_mail_domain_model_mail', 'm')
             ->leftJoin(
@@ -161,6 +161,7 @@ class MailRepository extends Repository
             ->orderBy('m.scheduled', 'DESC')
             ->addOrderBy('m.scheduled_begin', 'DESC')
             ->execute()
-            ->fetchAllAssociative();
+            ->fetchAllAssociative()
+        );
     }
 }

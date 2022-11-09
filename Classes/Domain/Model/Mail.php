@@ -49,11 +49,6 @@ class Mail extends AbstractEntity
      * @var string
      */
     protected string $plainLinks = '[]';
-    /**
-     * query info (do not delete this annotation block!)
-     * @var string
-     */
-    protected string $recipients = '[]';
     protected ?DateTimeImmutable $scheduled = null;
     protected ?DateTimeImmutable $scheduledBegin = null;
     protected ?DateTimeImmutable $scheduledEnd = null;
@@ -62,6 +57,12 @@ class Mail extends AbstractEntity
     protected bool $redirectAll = false;
     protected string $redirectUrl = '';
     protected string $authCodeFields = '';
+    /**
+     * query info (do not delete this annotation block!)
+     * @var string
+     */
+    protected string $recipients = '[]';
+    protected int $numberOfSent = 0;
     protected string $recipientGroups = '';
     protected int $sysLanguageUid = 0;
     protected ?DateTimeImmutable $lastModified = null;
@@ -582,6 +583,39 @@ class Mail extends AbstractEntity
             $numberOfRecipients = array_sum(array_map('count', $recipients));
         }
         return $numberOfRecipients;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumberOfSent(): int
+    {
+        return $this->numberOfSent;
+    }
+
+    /**
+     * @param int $numberOfSent
+     * @return Mail
+     */
+    public function setNumberOfSent(int $numberOfSent): Mail
+    {
+        $this->numberOfSent = $numberOfSent;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPercentOfSent(): int
+    {
+        $percentOfSent = 100 / $this->getNumberOfRecipients() * $this->getNumberOfSent();
+        if ($percentOfSent > 100) {
+            $percentOfSent = 100;
+        }
+        if ($percentOfSent < 0) {
+            $percentOfSent = 0;
+        }
+        return (int)$percentOfSent;
     }
 
     /**

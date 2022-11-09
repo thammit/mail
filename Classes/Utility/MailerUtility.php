@@ -390,22 +390,17 @@ class MailerUtility
     /**
      * @param int $sent
      * @param int $numberOfRecipients
-     * @return array
+     * @return int
      */
-    public static function calculatePercentOfSend(int $sent, int $numberOfRecipients): array
+    public static function calculatePercentOfSend(int $sent, int $numberOfRecipients): int
     {
-        if ($numberOfRecipients) {
-            $percentOfSent = 100 / $numberOfRecipients * $sent;
-            if ($percentOfSent > 100) {
-                $percentOfSent = 100;
-            }
-            if ($percentOfSent < 0) {
-                $percentOfSent = 0;
-            }
-        } else {
-            $percentOfSent = $sent ? 100 : 0;
-            $numberOfRecipients = $sent;
+        $percentOfSent = 100 / $numberOfRecipients * $sent;
+        if ($percentOfSent > 100) {
+            $percentOfSent = 100;
         }
-        return [$percentOfSent, $numberOfRecipients];
+        if ($percentOfSent < 0) {
+            $percentOfSent = 0;
+        }
+        return (int)$percentOfSent;
     }
 }

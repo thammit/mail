@@ -38,7 +38,7 @@
                 </th>
             </tr>
             </thead>
-            <f:for each="{data}" as="mail">
+            <f:for each="{mails}" as="mail">
                 <tr class="db_list_normal">
                     <td class="col-icon nowrap">
                         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="small" />
@@ -47,26 +47,29 @@
                         <f:link.action action="show" arguments="{mail: mail.uid}">{mail.subject}</f:link.action>
                     </td>
                     <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y H:i')}</td>
-                    <td class="nowrap">{mail.scheduled_begin -> f:format.date(format: 'd.m.Y H:i')}</td>
-                    <td class="nowrap">{mail.scheduled_end -> f:format.date(format: 'd.m.Y H:i')}</td>
+                    <td class="nowrap">{mail.scheduledBegin -> f:format.date(format: 'd.m.Y H:i')}</td>
+                    <td class="nowrap">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y H:i')}</td>
                     <td class="nowrap">
                         <div class="progress">
                             <f:if condition="{mail.percentOfSent} == 100">
                                 <f:variable name="finished" value="bg-success" />
                             </f:if>
-                            <div class="progress-bar {finished}" role="progressbar" style="width: {mail.percentOfSent}%"  aria-valuenow="{mail.sent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">{mail.sent}/{mail.numberOfRecipients}</div>
+                            <div class="progress-bar {finished}" role="progressbar" style="width: {mail.percentOfSent}%"  aria-valuenow="{mail.numberOfSent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">{mail.numberOfSent}/{mail.numberOfRecipients}</div>
                         </div>
                     </td>
                     <td class="nowrap text-center">
-                        <f:if condition="{mail.status} == 'sent'">
-                            <core:icon identifier="status-dialog-ok"/>
+                        <f:variable name="identifier" value="actions-clock" />
+                        <f:if condition="{mail.scheduledBegin}">
+                            <f:if condition="{mail.scheduledEnd}">
+                                <f:then>
+                                    <f:variable name="identifier" value="status-dialog-ok" />
+                                </f:then>
+                                <f:else>
+                                    <f:variable name="identifier" value="spinner-circle" />
+                                </f:else>
+                            </f:if>
                         </f:if>
-                        <f:if condition="{mail.status} == sending">
-                            <core:icon identifier="spinner-circle"/>
-                        </f:if>
-                        <f:if condition="{mail.status} == queuing">
-                            <core:icon identifier="actions-clock"/>
-                        </f:if>
+                        <core:icon identifier="{identifier}"/>
                     </td>
                 </tr>
             </f:for>
