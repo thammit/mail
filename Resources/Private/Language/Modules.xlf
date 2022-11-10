@@ -3,18 +3,8 @@
 	<file source-language="en" datatype="plaintext" original="EXTmail/Resources/Private/Language/Modules/Modules.xlf" date="2022-01-29T120000Z" product-name="mail">
 		<header />
 		<body>
-            <trans-unit id="HTMLParams.description" xml:space="preserve">
-			<source><![CDATA[If the Direct mail is of type 'TYPO3 Page', enter the additional URL parameters used to fetch the HTML content.
-
-If the Direct Mail is of type 'External URL',enter the complete URL used to fetch the HTML content.]]></source>
-		    </trans-unit>
-            <trans-unit id="HTMLParams.details" xml:space="preserve">
-			<source><![CDATA[When the Direct mail is of type 'TYPO3 Page', the specified parameters will be added to the URL used to fetch the HTML content of the direct mail. If in doubt, leave it blank.
-
-When the Direct Mail is of type 'External URL', this field should contain the complete URL used to fetch the HTML content.]]></source>
-		    </trans-unit>
             <trans-unit id="authcode_fieldList.description">
-                <source>List of fields used in the computation of the authentication code included in unsubscribe links and jump URL's in direct mails.</source>
+                <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
             </trans-unit>
             <trans-unit id="flowedFormat.description">
                 <source>Set this option if you want to use normally flowing text inside the plain text mail content.</source>
@@ -29,20 +19,20 @@ When the Direct Mail is of type 'External URL', this field should contain the co
                 <source>Enter the sender email address. (Required)</source>
             </trans-unit>
             <trans-unit id="from_email.details">
-                <source>This email address will appear as the originating address or sender address in the direct mails received by the recipients.</source>
+                <source>This email address will appear as the originating address or sender address in the mails received by the recipients.</source>
             </trans-unit>
             <trans-unit id="from_name.description">
                 <source>Enter the sender name. (Required)</source>
             </trans-unit>
             <trans-unit id="from_name.details">
-                <source>This name will appear as the name of the author or sender in the direct mails received by the recipients.</source>
+                <source>This name will appear as the name of the author or sender in the mails received by the recipients.</source>
             </trans-unit>
             <trans-unit id="includeMedia.description">
-                <source>Set this option if you want to incorporate images and other media inside the HTML mail content.</source>
+                <source>Set this option if you want to embed images in HTML mails.</source>
             </trans-unit>
             <trans-unit id="includeMedia.details" xml:space="preserve">
-			<source><![CDATA[If the option is set, images and other media are encoded and incorporated into the messages. Sent messages will be heavier to transport.
-If the option is not set, images and media are included in HTML content by absolute reference (href) to their location on the site where they reside.]]></source>
+			<source><![CDATA[If the option is set, images are encoded and embed into the messages. Sent messages will be heavier to transport.
+If the option is not set, images are included in HTML content by absolute reference (href) to their location on the site where they reside.]]></source>
 		    </trans-unit>
             <trans-unit id="redirect_all.description">
                 <source>If set and if redirect is set, all links in plain text content will be redirected, not only links longer than 76 characters.</source>
@@ -53,16 +43,6 @@ If the option is not set, images and media are included in HTML content by absol
             <trans-unit id="organisation.details">
                 <source>The name of the organization will appear in the headers of the mails sent to subscribers.</source>
             </trans-unit>
-            <trans-unit id="plainParams.description" xml:space="preserve">
-			<source><![CDATA[If the Direct mail is of type 'TYPO3 Page', enter the additional URL parameters used to fetch the plain text content of the direct mail.
-
-If the Direct Mail is of type 'External URL',enter the complete URL used to fetch the plain text content.]]></source>
-		    </trans-unit>
-            <trans-unit id="plainParams.details" xml:space="preserve">
-			<source><![CDATA[When the Direct mail is of type 'TYPO3 Page', the specified parameters will be added to the URL used to fetch the plain text content of the direct mail. If in doubt, set it either to '&type=99' or, when using TemplaVoila, to '&print=1'.
-
-When the Direct Mail is of type 'External URL', this field should contain the complete URL used to fetch the plain text content.]]></source>
-		    </trans-unit>
             <trans-unit id="priority.description">
                 <source>Enter the email delivery priority.</source>
             </trans-unit>
@@ -109,7 +89,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
                 <source>Redirect long links found in plain text content.</source>
             </trans-unit>
             <trans-unit id="redirect.details">
-                <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be substituted with ?RDCT=[md5hash] parameters.
+                <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the core redirect module.
                 </source>
             </trans-unit>
             <trans-unit id="configure_HTMLParams_description" resname="configure_HTMLParams_description">
@@ -119,13 +99,13 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>The specified parameters will be added to the URL used to fetch the HTML content of the mail from a TYPO3 page. If in doubt, leave it blank.</source>
 			</trans-unit>
 			<trans-unit id="configure_default_content" resname="configure_default_content">
-				<source>Default mail content format</source>
+				<source>Default content format</source>
 			</trans-unit>
 			<trans-unit id="configure_default_fetching" resname="configure_default_fetching">
-				<source>Default mail content fetching options</source>
+				<source>Default content fetching options</source>
 			</trans-unit>
 			<trans-unit id="configure_default_headers" resname="configure_default_headers">
-				<source>Default mails headers</source>
+				<source>Default headers</source>
 			</trans-unit>
 			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
 				<source>Configure mail module</source>
@@ -195,7 +175,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Enter the additional URL parameters used to fetch the plain text content from a TYPO3 page.</source>
 			</trans-unit>
 			<trans-unit id="configure_plainParams_details" resname="configure_plainParams_details">
-				<source>The specified parameters will be added to the URL used to fetch the plain text content of the mail from a TYPO3 page. If in doubt, set it either to '&amp;type=99' or, when using TemplaVoila, to '&amp;print=1'.</source>
+				<source>The specified parameters will be added to the URL used to fetch the plain text content of the mail from a TYPO3 page. If in doubt, set it to '&amp;plain=1'.</source>
 			</trans-unit>
 			<trans-unit id="configure_plain_and_html" resname="configure_plain_and_html">
 				<source>Plain text and HTML</source>
@@ -1208,10 +1188,10 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			Content elements without category restrictions will appear for in all mails.]]></source>
 		</trans-unit>
             <trans-unit id="create_directmail_from_nl.alttitle">
-                <source>Create a new direct mail from newsletter</source>
+                <source>Create a new mail from newsletter</source>
             </trans-unit>
             <trans-unit id="create_directmail_from_nl.description">
-                <source>No direct mail has been created using the content of the following newsletters. Click on the one you want to use to create a new direct mail.</source>
+                <source>No mail has been created using the content of the following newsletters. Click on the one you want to use to create a new mail.</source>
             </trans-unit>
             <trans-unit id="create_directmail_from_url.alttitle">
                 <source>Create a new mailing from external pages</source>
@@ -1228,7 +1208,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
             <trans-unit id="create_newsletter.details" xml:space="preserve">
 			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the Direct Mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
 
-You may personalize the direct mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
+You may personalize the mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
 
 ###USER_uid### (the unique id of the recipient)
 ###USER_name### (full name)
@@ -1255,15 +1235,15 @@ You may personalize the direct mails that will be sent to each recipient by inse
                 <source>Select the action you want to perform on this mail.</source>
             </trans-unit>
             <trans-unit id="directmail_actions.details" xml:space="preserve">
-			<source><![CDATA[Possible actions are the following, but their availability vary depending on the current state of the direct mail:
+			<source><![CDATA[Possible actions are the following, but their availability vary depending on the current state of the mail:
 
-1. Fetch and compile mail content: this option lets you fetch or acquire the content of the direct mail which will be compiled in a special format for later mailing; this action must be performed before any other action may be taken; you should review the properties of the direct mail as presented on the screen, and edit them, if required, before fetching content.
+1. Fetch and compile mail content: this option lets you fetch or acquire the content of the mail which will be compiled in a special format for later mailing; this action must be performed before any other action may be taken; you should review the properties of the mail as presented on the screen, and edit them, if required, before fetching content.
 
 2. Send a testmail: this option lets you send a test mail to make sure that the email messages that will be sent to the recipient list look as expected when received in a client email application.
 
-3. Mass-send mail: this option lets you schedule the actual sending of the direct mail to a specific recipient list.
+3. Mass-send mail: this option lets you schedule the actual sending of the mail to a specific recipient list.
 
-4. See statistics of this mail: this option lets you review statistics on the direct mail and the responses, and take action on returned mails; this option is available only after mass-sending the mail has been initiated.]]></source>
+4. See statistics of this mail: this option lets you review statistics on the mail and the responses, and take action on returned mails; this option is available only after mass-sending the mail has been initiated.]]></source>
 		</trans-unit>
             <trans-unit id="folders.alttitle">
                 <source>Available mail folders</source>

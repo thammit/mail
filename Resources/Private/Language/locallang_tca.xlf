@@ -40,7 +40,7 @@
 			<source>Sender name</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.includeMedia">
-			<source>Include images and other media in HTML content</source>
+			<source>Include images in HTML content</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.issent">
 			<source>Is sent</source>
