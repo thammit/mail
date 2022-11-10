@@ -40,6 +40,7 @@ class MarkdownMiddleware implements MiddlewareInterface
         // do not allow more than two line brakes
         $markDownContent = preg_replace("/( \n)/","\n", $markDownContent);
         $markDownContent = preg_replace("/(\n){2,}/","\n\n", $markDownContent);
+        $markDownContent = preg_replace("/(\\\_)/","_", $markDownContent);
         $markDownResponse->getBody()->write($markDownContent);
         return $markDownResponse;
     }
