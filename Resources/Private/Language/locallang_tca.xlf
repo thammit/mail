@@ -204,9 +204,6 @@
 		<trans-unit id="sys_dmail_group.record_types.I.3">
 			<source>Website User Group</source>
 		</trans-unit>
-		<trans-unit id="sys_dmail_group.query">
-			<source>Query</source>
-		</trans-unit>
 		</body>
 	</file>
 </xliff>

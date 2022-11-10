@@ -373,24 +373,17 @@ class RecipientService
      */
     protected function getStaticIdListByTableAndGroupUid(string $table, int $mailGroupUid): array
     {
-        $switchTable = $table == 'fe_groups' ? 'fe_users' : $table;
+        $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
 
         $queryBuilder = $this->getQueryBuilder($table);
 
-        // fe user group uid should be in list of fe users list of user groups
-        // $field = $switchTable.'.usergroup';
-        // $command = $table.'.uid';
-
-        // See comment above
-        // $usergroupInList = ' AND ('.$field.' LIKE \'%,\'||'.$command.'||\',%\' OR '.$field.' LIKE '.$command.'||\',%\' OR '.$field.' LIKE \'%,\'||'.$command.' OR '.$field.'='.$command.')';
-
-        $addWhere = '';
-        if ($switchTable == 'fe_users') {
+        $newsletterExpression = '';
+        if ($switchTable === 'fe_users') {
             // for fe_users and fe_group, only activated newsletter
-            $addWhere = $queryBuilder->expr()->eq($switchTable . '.newsletter', 1);
+            $newsletterExpression = $queryBuilder->expr()->eq($switchTable . '.newsletter', 1);
         }
 
-        if ($table == 'fe_groups') {
+        if ($table === 'fe_groups') {
             $res = $queryBuilder
                 ->selectLiteral('DISTINCT fe_users.uid', 'fe_users.email')
                 ->from('tx_mail_group_mm', 'tx_mail_group_mm')
@@ -418,7 +411,7 @@ class RecipientService
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                         ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
                         ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
-                        ->add($addWhere)
+                        ->add($newsletterExpression)
                 )
                 ->orderBy('fe_users.uid')
                 ->addOrderBy('fe_users.email')
@@ -445,7 +438,7 @@ class RecipientService
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
                         ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
-                        ->add($addWhere)
+                        ->add($newsletterExpression)
                 )
                 ->orderBy($switchTable . '.uid')
                 ->addOrderBy($switchTable . '.email')
@@ -460,9 +453,9 @@ class RecipientService
 
         if ($table === 'fe_groups') {
             // get the uid of the current fe_group
-            $queryBuilder = $this->getQueryBuilder('fe_groups');
+//            $queryBuilder = $this->getQueryBuilder('fe_groups');
 
-            $res = $queryBuilder
+            $res = $queryBuilder->resetQueryParts()
                 ->selectLiteral('DISTINCT fe_groups.uid')
                 ->from('fe_groups', 'fe_groups')
                 ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
@@ -480,47 +473,40 @@ class RecipientService
                 )
                 ->execute();
 
-            [$groupId] = $res->fetchAllAssociative();
+            @[$groupId] = $res->fetchAllAssociative();
 
             // recursively get all subgroups of this fe_group
             if (is_integer($groupId)) {
                 $subgroups = $this->getRecursiveFrontendUserGroups($groupId);
-            }
 
-            if (!empty($subgroups)) {
-                $usergroupInList = null;
-                foreach ($subgroups as $subgroup) {
-                    $usergroupInList .= (($usergroupInList == null) ? null : ' OR') . ' INSTR( CONCAT(\',\',fe_users.usergroup,\',\'),CONCAT(\',' . intval($subgroup) . ',\') )';
-                }
-                $usergroupInList = '(' . $usergroupInList . ')';
+                if ($subgroups) {
+                    $subGroupExpressions = [];
+                    foreach ($subgroups as $subgroup) {
+                        $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', $subgroup, true);
+                    }
 
-                // fetch all fe_users from these subgroups
-                $queryBuilder = $this->getQueryBuilder($table);
-                // for fe_users and fe_group, only activated newsletter
-                if ($switchTable == 'fe_users') {
-                    $addWhere = $queryBuilder->expr()->eq($switchTable . '.newsletter', 1);
-                }
+                    // fetch all fe_users from these subgroups
+                    $res = $queryBuilder->resetQueryParts()
+                        ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
+                        ->from($table, $table)
+                        ->innerJoin(
+                            $table,
+                            $switchTable,
+                            $switchTable
+                        )
+                        ->orWhere(...$subGroupExpressions)
+                        ->andWhere(
+                            $queryBuilder->expr()->and()
+                                ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
+                                ->add($newsletterExpression)
+                        )
+                        ->orderBy($switchTable . '.uid')
+                        ->addOrderBy($switchTable . '.email')
+                        ->execute();
 
-                $res = $queryBuilder
-                    ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
-                    ->from($table, $table)
-                    ->innerJoin(
-                        $table,
-                        $switchTable,
-                        $switchTable
-                    )
-                    ->orWhere($usergroupInList)
-                    ->andWhere(
-                        $queryBuilder->expr()->and()
-                            ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                            ->add($addWhere)
-                    )
-                    ->orderBy($switchTable . '.uid')
-                    ->addOrderBy($switchTable . '.email')
-                    ->execute();
-
-                while ($row = $res->fetchAssociative()) {
-                    $outArr[] = $row['uid'];
+                    while ($row = $res->fetchAssociative()) {
+                        $outArr[] = $row['uid'];
+                    }
                 }
             }
         }

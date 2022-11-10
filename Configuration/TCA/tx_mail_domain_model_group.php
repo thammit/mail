@@ -45,7 +45,6 @@ return [
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.0', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::PAGES],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.1', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::CSV],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.2', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.3', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.4', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER],
                 ],
                 'default' => '0',
@@ -58,6 +57,8 @@ return [
                 'internal_type' => 'db',
                 'allowed' => 'tt_address,fe_users,fe_groups',
                 'MM' => 'tx_mail_group_mm',
+                'MM_hasUidField' => true,
+                'foreign_table' => 'tt_address',
                 'size' => '20',
                 'maxitems' => '100000',
                 'minitems' => '0',
@@ -131,20 +132,11 @@ return [
                 'type' => 'category',
             ],
         ],
-        'query' => [
-            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.query',
-            'config' => [
-                'type' => 'text',
-                'cols' => '48',
-                'rows' => '10',
-            ],
-        ],
     ],
     'types' => [
         \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::PAGES => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,pages,recursive,record_types,categories'],
         \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::CSV => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,list,csv'],
         \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,static_list'],
-        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY => ['showitem' => 'type, sys_language_uid, title, query, description'],
         \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,children'],
     ],
 ];

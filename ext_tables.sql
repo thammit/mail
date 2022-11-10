@@ -49,7 +49,6 @@ CREATE TABLE tx_mail_domain_model_group (
     type tinyint(4) unsigned DEFAULT '0' NOT NULL,
     title tinytext NOT NULL,
     description text NOT NULL,
-    query blob,
     static_list int(11) DEFAULT '0' NOT NULL,
     list mediumblob,
     csv tinyint(4) DEFAULT '0' NOT NULL,
@@ -60,6 +59,20 @@ CREATE TABLE tx_mail_domain_model_group (
     categories int(11) DEFAULT '0' NOT NULL,
     PRIMARY KEY (uid),
     KEY parent (pid)
+);
+
+#
+# Table structure for table 'tx_mail_group_mm'
+# needed since automatic generation is buggy
+# see https://forge.typo3.org/issues/99035
+#
+CREATE TABLE tx_mail_group_mm (
+    uid_local int(11) unsigned DEFAULT '0' NOT NULL,
+    uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
+    tablenames varchar(50) DEFAULT '' NOT NULL,
+    sorting int(11) unsigned DEFAULT '0' NOT NULL,
+    KEY uid_local (uid_local),
+    KEY uid_foreign (uid_foreign)
 );
 
 CREATE TABLE tx_mail_domain_model_log (
