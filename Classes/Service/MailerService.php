@@ -675,11 +675,11 @@ class MailerService implements LoggerAwareInterface
                         $element->attr('src',  'cid:' . $baseName);
                     }
                 }
-                $this->mail->setHtmlContent($dom->html());
+                $mailMessage->html($dom->html());
+            } else {
+                // add html content part to mail
+                $mailMessage->html($this->mail->getHtmlContent());
             }
-
-            // add html content part to mail
-            $mailMessage->html($this->mail->getHtmlContent());
         }
 
         if ($plainContent = $this->mail->getPlainContent()) {
