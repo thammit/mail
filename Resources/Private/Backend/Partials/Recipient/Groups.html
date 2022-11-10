@@ -22,9 +22,6 @@
                 <f:translate key="{llg}LGL.type"/>
             </th>
             <th>
-                <f:translate key="{lll}recip_group_record_types"/>
-            </th>
-            <th>
                 <f:translate key="{lll}recip_group_categories"/>
             </th>
             <th class="col-control nowrap"></th>
@@ -34,31 +31,30 @@
             <tr>
                 <td class="col-icon nowrap">
                     <span class="position-relative">
-                        <core:iconForRecord row="{uid:group.uid, type:group.type}" table="tx_mail_domain_model_group"/>
+                        <core:iconForRecord row="{uid:group.group.uid, type:group.group.type}" table="tx_mail_domain_model_group"/>
                         <span class="position-absolute top-25 start-100 translate-middle badge rounded-pill bg-mail-theme pb-1">{group.count}</span>
                     </span>
                 </td>
                 <td class="col-title col-responsive nowrap">
-                    <f:link.action class="btn btn-link" action="show" arguments="{group: group.uid}">{group.title}</f:link.action>
+                    <f:link.action class="btn btn-link" action="show" arguments="{group: group.group.uid}">{group.group.title}</f:link.action>
                 </td>
                 <td class="col-responsive nowrap">
-                    {group.description}
+                    {group.group.description}
                 </td>
                 <td class="nowrap">
                     {group.typeProcessed}
                 </td>
-                <td class="nowrap">{group.recordTypes}</td>
                 <td class="nowrap"><f:for each="{group.categories}" as="category" iteration="categoryIterator">{category.title}<f:if condition="{categoryIterator.isLast}"><f:else>, </f:else></f:if> </f:for></td>
                 <td class="col-control nowrap">
-                    <be:link.editRecord uid="{group.uid}" table="tx_mail_domain_model_group" class="btn btn-default" title="Edit group">
+                    <be:link.editRecord uid="{group.group.uid}" table="tx_mail_domain_model_group" class="btn btn-default" title="Edit group">
                         <core:icon identifier="actions-cog" size="small"/>
                     </be:link.editRecord>
-                    <f:link.action class="btn btn-default" action="show" arguments="{group: group.uid}"><core:icon identifier="actions-caret-right" size="small"/></f:link.action>
+                    <f:link.action class="btn btn-default" action="show" arguments="{group: group.group.uid}"><core:icon identifier="actions-caret-right" size="small"/></f:link.action>
             </tr>
         </f:for>
     </table>
 </div>
-<be:link.newRecord table="tx_mail_domain_model_group" class="btn btn-default text-uppercase" title="New group">
+<be:link.newRecord pid="{pid}" table="tx_mail_domain_model_group" class="btn btn-default text-uppercase" title="New group">
     <core:icon identifier="actions-add"/> <f:translate key="{lll}recip_create_mailgroup_msg"/>
 </be:link.newRecord>
 <h3>

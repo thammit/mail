@@ -7,6 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Service\ImportService;
+use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -40,19 +41,24 @@ class RecipientController extends AbstractController
 
         /** @var Group $group */
         foreach ($groups as $group) {
+            $typeProcessed = BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $group->getType());
+            switch ($group->getType()) {
+                case RecipientGroupType::PAGES:
+                    $typeProcessed .= ' (' . BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'record_types', $group->getRecordTypes()) . ')';
+                    break;
+                case RecipientGroupType::STATIC:
+                    $typeProcessed .= ' (' . $group->getStaticList() . ' Records)';
+                    break;
+            }
             $data[] = [
                 'group' => $group,
-                'uid' => $group->getUid(),
-                'title' => $group->getTitle(),
-                'recordTypes' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'record_types', $group->getRecordTypes()),
-                'categories' => $group->getCategories(),
-                'description' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'description', $group->getDescription()),
-                'type' => $group->getType(),
-                'typeProcessed' => BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $group->getType()),
+                'typeProcessed' => $typeProcessed,
+                'categories' => $group->getType() === RecipientGroupType::PAGES ? $group->getCategories() : [],
                 'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group), $this->userTable),
             ];
         }
 
+        $this->view->assign('pid', $this->id);
         $this->view->assign('data', $data);
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);

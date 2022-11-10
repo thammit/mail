@@ -57,8 +57,6 @@ return [
                 'internal_type' => 'db',
                 'allowed' => 'tt_address,fe_users,fe_groups',
                 'MM' => 'tx_mail_group_mm',
-                'MM_hasUidField' => true,
-                'foreign_table' => 'tt_address',
                 'size' => '20',
                 'maxitems' => '100000',
                 'minitems' => '0',
