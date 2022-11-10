@@ -106,7 +106,6 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'type' => $record['type'],
                         'title' => $record['title'],
                         'description' => $record['description'],
-                        'query' => $record['query'],
                         'static_list' => $record['static_list'],
                         'list' => $record['list'],
                         'csv' => $record['csv'],
