@@ -34,15 +34,13 @@ class RecipientController extends AbstractController
      */
     public function indexAction(): ResponseInterface
     {
-        $data = [
-            'rows' => [],
-        ];
+        $data = [];
 
         $groups = $this->groupRepository->findByPid($this->id);
 
         /** @var Group $group */
         foreach ($groups as $group) {
-            $data['rows'][] = [
+            $data[] = [
                 'group' => $group,
                 'uid' => $group->getUid(),
                 'title' => $group->getTitle(),
@@ -55,9 +53,7 @@ class RecipientController extends AbstractController
             ];
         }
 
-        $this->view->assignMultiple([
-            'data' => $data,
-        ]);
+        $this->view->assign('data', $data);
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
@@ -128,9 +124,7 @@ class RecipientController extends AbstractController
             ];
         }
 
-        $this->view->assignMultiple([
-            'data' => $data,
-        ]);
+        $this->view->assign('data', $data);
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
