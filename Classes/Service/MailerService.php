@@ -282,10 +282,11 @@ class MailerService implements LoggerAwareInterface
                 }
             }
 
-            $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($this->mailUid, $tableName, $recipientData['uid']);
+            $mailIdentifierHeaderWithoutHash = MailerUtility::buildMailIdentifierHeaderWithoutHash($this->mailUid, $tableName, (int)$recipientData['uid']);
+            $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($mailIdentifierHeaderWithoutHash);
 
             // todo what is this for?
-            $this->mail->setReturnPath(str_replace('###XID###', explode('-', $this->TYPO3MID)[0], $this->mail->getReturnPath()));
+            $this->mail->setReturnPath(str_replace('###XID###', $mailIdentifierHeaderWithoutHash, $this->mail->getReturnPath()));
 
             if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
                 $this->sendMailToRecipient(
@@ -648,12 +649,58 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Set the content from $this->theParts['html'] or $this->theParts['plain'] to the mail body
+     * Send of the email using php mail function.
+     *
+     * @param string|Address $recipient The recipient to send the mail to
+     * @return void
+     */
+    protected function sendMailToRecipient(Address|string $recipient): void
+    {
+        /** @var MailMessage $mailMessage */
+        $mailMessage = GeneralUtility::makeInstance(MailMessage::class);
+        $mailMessage
+            ->setSiteIdentifier($this->siteIdentifier)
+            ->from(new Address($this->mail->getFromEmail(), $this->fromName))
+            ->to($recipient)
+            ->subject($this->subject)
+            ->priority($this->priority);
+
+        if ($this->mail->getReplyToEmail()) {
+            $mailMessage->replyTo(new Address($this->mail->getReplyToEmail(), $this->replyToName));
+        } else {
+            $mailMessage->replyTo(new Address($this->mail->getFromEmail(), $this->fromName));
+        }
+
+        if (GeneralUtility::validEmail($this->mail->getReturnPath())) {
+            $mailMessage->sender($this->mail->getReturnPath());
+        }
+
+        $this->addHtmlPlainTextAndAttachmentsToMailMessage($mailMessage);
+
+        // setting additional header
+        // organization and TYPO3MID
+        $header = $mailMessage->getHeaders();
+        if ($this->TYPO3MID) {
+            $header->addTextHeader(Constants::MAIL_HEADER_IDENTIFIER, $this->TYPO3MID);
+        }
+
+        if ($this->organisation) {
+            $header->addTextHeader('Organization', $this->organisation);
+        }
+
+        // todo add PSR-14 Event to modify mail headers
+
+        $mailMessage->send();
+        unset($mailMessage);
+    }
+
+    /**
+     * Add html, plaintext and attachments to mail message
      *
      * @return void
      * @var MailMessage $mailMessage Mailer Message Object
      */
-    protected function setContent(MailMessage $mailMessage): void
+    protected function addHtmlPlainTextAndAttachmentsToMailMessage(MailMessage $mailMessage): void
     {
         // iterate through the media array and embed them
         if ($this->mail->getHtmlContent()) {
@@ -696,51 +743,4 @@ class MailerService implements LoggerAwareInterface
             }
         }
     }
-
-    /**
-     * Send of the email using php mail function.
-     *
-     * @param string|Address $recipient The recipient to send the mail to
-     * @return void
-     */
-    protected function sendMailToRecipient(Address|string $recipient): void
-    {
-        /** @var MailMessage $mailer */
-        $mailer = GeneralUtility::makeInstance(MailMessage::class);
-        $mailer
-            ->setSiteIdentifier($this->siteIdentifier)
-            ->from(new Address($this->mail->getFromEmail(), $this->fromName))
-            ->to($recipient)
-            ->subject($this->subject)
-            ->priority($this->priority);
-
-        if ($this->mail->getReplyToEmail()) {
-            $mailer->replyTo(new Address($this->mail->getReplyToEmail(), $this->replyToName));
-        } else {
-            $mailer->replyTo(new Address($this->mail->getFromEmail(), $this->fromName));
-        }
-
-        if (GeneralUtility::validEmail($this->mail->getReturnPath())) {
-            $mailer->sender($this->mail->getReturnPath());
-        }
-
-        $this->setContent($mailer);
-
-        // setting additional header
-        // organization and TYPO3MID
-        $header = $mailer->getHeaders();
-        if ($this->TYPO3MID) {
-            $header->addTextHeader(Constants::MAIL_HEADER_IDENTIFIER, $this->TYPO3MID);
-        }
-
-        if ($this->organisation) {
-            $header->addTextHeader('Organization', $this->organisation);
-        }
-
-        // todo add PSR-14 Event to modify mail headers
-
-        $mailer->send();
-        unset($mailer);
-    }
-
 }

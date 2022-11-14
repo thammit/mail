@@ -214,35 +214,42 @@ class MailerUtility
     }
 
     /**
-     * @param $mailUid
-     * @param $tableName
-     * @param $recipientUid
+     * @param int $mailUid
+     * @param string $tableName
+     * @param int $recipientUid
      * @return string
      */
-    public static function buildMailIdentifierHeader($mailUid, $tableName, $recipientUid): string
+    public static function buildMailIdentifierHeaderWithoutHash(int $mailUid, string $tableName, int $recipientUid): string
     {
-        $midRidId = 'MID' . $mailUid . '-' . $tableName . '-' . $recipientUid;
-        return $midRidId . '-' . md5($midRidId);
+        return 'MID' . $mailUid . '-' . $tableName . '-' . $recipientUid;
     }
 
     /**
-     * @param $content
+     * @param string $mailIdentifierHeader
+     * @return string
+     */
+    public static function buildMailIdentifierHeader(string $mailIdentifierHeader): string
+    {
+        return $mailIdentifierHeader . '-' . md5($mailIdentifierHeader);
+    }
+
+    /**
+     * @param $rawHeaders
      * @param $header
      * @return array|bool
      */
-    public static function decodeMailIdentifierHeader($content, $header): array|bool
+    public static function decodeMailIdentifierHeader($rawHeaders, $header): array|bool
     {
-        if (str_contains($content, $header)) {
-            $p = explode($header, $content, 2);
+        if (str_contains($rawHeaders, $header)) {
+            $p = explode($header . ':', $rawHeaders, 2);
             $l = explode(LF, $p[1], 2);
-            [$mailUid, $hash] = GeneralUtility::trimExplode('-', $l[0]);
-            if (md5($mailUid) === $hash) {
-                // remove "MID" prefix and separate mailUid, tableName and recipientUid
-                $moreParts = explode('-', substr($mailUid, 3));
+            [$mailUid, $tableName, $recipientUid, $hash] = GeneralUtility::trimExplode('-', $l[0]);
+            $mailUid = (int)ltrim($mailUid, 'MID');
+            if (md5(self::buildMailIdentifierHeaderWithoutHash($mailUid, $tableName, (int)$recipientUid)) === $hash) {
                 return [
-                    'mail' => $moreParts[0],
-                    'recipient_table' => $moreParts[1],
-                    'recipient_uid' => $moreParts[2],
+                    'mail' => $mailUid,
+                    'recipient_table' => $tableName,
+                    'recipient_uid' => (int)$recipientUid,
                 ];
             }
         }

@@ -7,7 +7,6 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Fetch\Message;
 use Fetch\Server;
-use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BounceMailUtility;
@@ -89,7 +88,6 @@ class AnalyzeBounceMailCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws DBALException
      * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
