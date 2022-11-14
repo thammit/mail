@@ -139,28 +139,41 @@ class AnalyzeBounceMailCommand extends Command
         }
 
         // try to connect to mail server
-        $mailServer = $this->connectMailServer($server, $port, $type, $user, $password, $io);
-        if ($mailServer instanceof Server) {
-            // we are connected to mail server
-            // get unread mails
-            $messages = $mailServer->search('UNSEEN', $count);
-            if (count($messages)) {
-                /** @var Message $message The message object */
-                foreach ($messages as $message) {
-                    // process the mail
-                    if ($this->processBounceMail($message)) {
-                        //$io->writeln($message->getSubject());
-                        // set delete
-                        $message->delete();
-                    } else {
-                        $message->setFlag('SEEN');
+        try {
+            /** @var Server $mailServer */
+            $mailServer = GeneralUtility::makeInstance(
+                Server::class,
+                $server,
+                $port,
+                $type
+            );
+
+            $mailServer->setAuthentication($user, $password);
+            $mailServer->getImapStream();
+            if ($mailServer instanceof Server) {
+                // we are connected to mail server
+                // get unread mails
+                $messages = $mailServer->search('UNSEEN', $count);
+                if (count($messages)) {
+                    /** @var Message $message The message object */
+                    foreach ($messages as $message) {
+                        // process the mail
+                        if ($this->processBounceMail($message)) {
+                            //$io->writeln($message->getSubject());
+                            // set delete
+                            $message->delete();
+                        } else {
+                            $message->setFlag('SEEN');
+                        }
                     }
                 }
+                // expunge to delete permanently
+                $mailServer->expunge();
+                imap_close($mailServer->getImapStream());
+                return Command::SUCCESS;
             }
-            // expunge to delete permanently
-            $mailServer->expunge();
-            imap_close($mailServer->getImapStream());
-            return Command::SUCCESS;
+        } catch (\Exception $e) {
+            $io->error($this->languageService->getLL('scheduler.bounceMail.dataVerification') . $e->getMessage());
         }
 
         return Command::FAILURE;
@@ -210,40 +223,5 @@ class AnalyzeBounceMailCommand extends Command
         }
 
         return false;
-    }
-
-    /**
-     * Create connection to mail server.
-     * Return mailServer object or false on error
-     *
-     * @param string $server
-     * @param int $port
-     * @param string $type
-     * @param string $user
-     * @param string $password
-     * @param SymfonyStyle $io
-     * @return bool|Server
-     */
-    private function connectMailServer(string $server, int $port, string $type, string $user, string $password, SymfonyStyle $io): bool|Server
-    {
-        // check if we can connect using the given data
-        /** @var Server $mailServer */
-        $mailServer = GeneralUtility::makeInstance(
-            Server::class,
-            $server,
-            $port,
-            $type
-        );
-
-        // set mail username and password
-        $mailServer->setAuthentication($user, $password);
-
-        try {
-            $mailServer->getImapStream();
-            return $mailServer;
-        } catch (\Exception $e) {
-            $io->error($this->languageService->getLL('scheduler.bounceMail.dataVerification') . $e->getMessage());
-            return false;
-        }
     }
 }
