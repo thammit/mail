@@ -16,7 +16,7 @@ class BounceMailUtility
         '554' => 'error in header|header error|invalid message|invalid structure|header line format error'
     ];
 
-    public static function searchForHeaderData(Message $message, $header = Constants::MAIL_HEADER_IDENTIFIER): bool|array
+    public static function getMailDataFromHeader(Message $message, $header = Constants::MAIL_HEADER_IDENTIFIER): bool|array
     {
         // get attachment
         $attachments = $message->getAttachments();
@@ -40,76 +40,74 @@ class BounceMailUtility
     }
 
     /**
-     * Analyses the return-mail content for the Dmailer module
-     * used to find what reason there was for rejecting the mail
-     * Used by the Dmailer, but not exclusively.
+     * Analyse returned mail content to find reason why it was rejected
      *
-     * @param string $c Message Body/text
+     * @param string $content mail content
      *
-     * @return array  key/value pairs with analysis result.
-     *  Eg. "reason", "content", "reason_text", "mailserver" etc.
+     * @return array  key/value pairs with analyse result
+     * e.g. "reason", "content", "reason_text", "mailserver" etc.
      */
-    public static function analyseReturnError(string $c): array
+    public static function analyseReturnError(string $content): array
     {
-        $cp = [];
+        $result = [];
         // QMAIL
-        if (preg_match('/' . preg_quote('--- Below this line is a copy of the message.') . '|' . preg_quote('------ This is a copy of the message, including all the headers.') . '/i', $c)) {
-            if (preg_match('/' . preg_quote('--- Below this line is a copy of the message.') . '/i', $c)) {
+        if (preg_match('/' . preg_quote('--- Below this line is a copy of the message.') . '|' . preg_quote('------ This is a copy of the message, including all the headers.') . '/i', $content)) {
+            if (preg_match('/' . preg_quote('--- Below this line is a copy of the message.') . '/i', $content)) {
                 // Splits by the QMAIL divider
-                $parts = explode('-- Below this line is a copy of the message.', $c, 2);
+                $parts = explode('-- Below this line is a copy of the message.', $content, 2);
             } else {
                 // Splits by the QMAIL divider
-                $parts = explode('------ This is a copy of the message, including all the headers.', $c, 2);
+                $parts = explode('------ This is a copy of the message, including all the headers.', $content, 2);
             }
-            $cp['content'] = trim($parts[0]);
-            $parts = explode('>:', $cp['content'], 2);
-            $cp['reason_text'] = trim($parts[1])?:$cp['content'];
-            $cp['mailserver'] = 'Qmail';
-            $cp['reason'] = self::extractReason($cp['reason_text']);
-        } elseif (str_contains($c, 'The Postfix program')) {
+            $result['content'] = trim($parts[0]);
+            $parts = explode('>:', $result['content'], 2);
+            $result['reason_text'] = trim($parts[1])?:$result['content'];
+            $result['mailserver'] = 'Qmail';
+            $result['reason'] = self::extractReason($result['reason_text']);
+        } elseif (str_contains($content, 'The Postfix program')) {
             // Postfix
-            $cp['content'] = trim($c);
-            $parts = explode('>:', $c, 2);
-            $cp['reason_text'] = trim($parts[1]);
-            $cp['mailserver'] = 'Postfix';
-            if (stristr($cp['reason_text'], '550')) {
+            $result['content'] = trim($content);
+            $parts = explode('>:', $content, 2);
+            $result['reason_text'] = trim($parts[1]);
+            $result['mailserver'] = 'Postfix';
+            if (stristr($result['reason_text'], '550')) {
                 // 550 Invalid recipient, User unknown
-                $cp['reason'] = 550;
-            } elseif (stristr($cp['reason_text'], '553')) {
+                $result['reason'] = 550;
+            } elseif (stristr($result['reason_text'], '553')) {
                 // No such user
-                $cp['reason'] = 553;
-            } elseif (stristr($cp['reason_text'], '551')) {
+                $result['reason'] = 553;
+            } elseif (stristr($result['reason_text'], '551')) {
                 // Mailbox full
-                $cp['reason'] = 551;
-            } elseif (stristr($cp['reason_text'], 'recipient storage full')) {
+                $result['reason'] = 551;
+            } elseif (stristr($result['reason_text'], 'recipient storage full')) {
                 // Mailbox full
-                $cp['reason'] = 551;
+                $result['reason'] = 551;
             } else {
-                $cp['reason'] = -1;
+                $result['reason'] = -1;
             }
-        } elseif (str_contains($c, 'Your message cannot be delivered to the following recipients:')) {
+        } elseif (str_contains($content, 'Your message cannot be delivered to the following recipients:')) {
             // whoever this is...
-            $cp['content'] = trim($c);
-            $cp['reason_text'] = trim(strstr($cp['content'], 'Your message cannot be delivered to the following recipients:'));
-            $cp['reason_text'] = trim(substr($cp['reason_text'], 0, 500));
-            $cp['mailserver'] = 'unknown';
-            $cp['reason'] = self::extractReason($cp['reason_text']);
-        } elseif (str_contains($c, 'Diagnostic-Code: X-Notes')) {
+            $result['content'] = trim($content);
+            $result['reason_text'] = trim(strstr($result['content'], 'Your message cannot be delivered to the following recipients:'));
+            $result['reason_text'] = trim(substr($result['reason_text'], 0, 500));
+            $result['mailserver'] = 'unknown';
+            $result['reason'] = self::extractReason($result['reason_text']);
+        } elseif (str_contains($content, 'Diagnostic-Code: X-Notes')) {
             // Lotus Notes
-            $cp['content'] = trim($c);
-            $cp['reason_text'] = trim(strstr($cp['content'], 'Diagnostic-Code: X-Notes'));
-            $cp['reason_text'] = trim(substr($cp['reason_text'], 0, 200));
-            $cp['mailserver'] = 'Notes';
-            $cp['reason'] = self::extractReason($cp['reason_text']);
+            $result['content'] = trim($content);
+            $result['reason_text'] = trim(strstr($result['content'], 'Diagnostic-Code: X-Notes'));
+            $result['reason_text'] = trim(substr($result['reason_text'], 0, 200));
+            $result['mailserver'] = 'Notes';
+            $result['reason'] = self::extractReason($result['reason_text']);
         } else {
             // No-named:
-            $cp['content'] = trim($c);
-            $cp['reason_text'] = trim(substr($c, 0, 1000));
-            $cp['mailserver'] = 'unknown';
-            $cp['reason'] = self::extractReason($cp['reason_text']);
+            $result['content'] = trim($content);
+            $result['reason_text'] = trim(substr($content, 0, 1000));
+            $result['mailserver'] = 'unknown';
+            $result['reason'] = self::extractReason($result['reason_text']);
         }
 
-        return $cp;
+        return $result;
     }
 
     /**

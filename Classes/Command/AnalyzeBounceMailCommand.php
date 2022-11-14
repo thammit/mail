@@ -175,20 +175,18 @@ class AnalyzeBounceMailCommand extends Command
      */
     private function processBounceMail(Message $message): bool
     {
-        $midArray = BounceMailUtility::searchForHeaderData($message, Constants::MAIL_HEADER_IDENTIFIER);
+        $mailData = BounceMailUtility::getMailDataFromHeader($message);
 
-        if (!$midArray) {
+        if (!$mailData) {
             // no mid, rid and rtbl found - exit
             return false;
         }
 
-        // Extract text content
-        $cp = BounceMailUtility::analyseReturnError($message->getMessageBody());
+        $analyzeResult = BounceMailUtility::analyseReturnError($message->getMessageBody());
 
-        $row = $this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid($midArray['recipient_uid'], $midArray['recipient_table'], $midArray['mail']);
+        $row = $this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid($mailData['recipient_uid'], $mailData['recipient_table'], $mailData['mail']);
 
-        // only write to log table, if we found a corresponding recipient record
-        if (!empty($row)) {
+        if ($row) {
             $tableName = 'tx_mail_domain_model_log';
             /** @var Connection $connection */
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
@@ -196,12 +194,12 @@ class AnalyzeBounceMailCommand extends Command
                 $insertFields = [
                     'tstamp' => $this->context->getPropertyFromAspect('date', 'timestamp'),
                     'response_type' => ResponseType::FAILED,
-                    'mail' => (int)$midArray['mail'],
-                    'recipient_uid' => (int)$midArray['recipient_uid'],
-                    'recipient_table' => $midArray['recipient_table'],
+                    'mail' => (int)$mailData['mail'],
+                    'recipient_uid' => (int)$mailData['recipient_uid'],
+                    'recipient_table' => $mailData['recipient_table'],
                     'email' => $row['email'],
-                    'return_content' => serialize($cp),
-                    'return_code' => (int)$cp['reason'],
+                    'return_content' => json_encode($analyzeResult),
+                    'return_code' => (int)$analyzeResult['reason'],
                 ];
                 $connection->insert($tableName, $insertFields);
                 $lastInsertId = $connection->lastInsertId($tableName);

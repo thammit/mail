@@ -150,7 +150,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'response_type' => $record['response_type'],
                         'format_sent' => $formatSent,
                         'url_id' => $record['url_id'],
-                        'return_content' => $record['return_content'],
+                        'return_content' => json_encode(unserialize($record['return_content']) ?? []),
                         'return_code' => $record['return_code'],
                     ]);
             }
