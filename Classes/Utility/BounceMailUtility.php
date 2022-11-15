@@ -31,6 +31,7 @@ class BounceMailUtility
             }
         }
 
+        // search in message raw header
         $midArray = MailerUtility::decodeMailIdentifierHeader($message->getRawHeaders(), $header);
 
 //        $midArray = [
@@ -39,7 +40,6 @@ class BounceMailUtility
 //            'recipient_uid' => 32,
 //        ];
 
-        // search in message raw header
         return $midArray;
     }
 
