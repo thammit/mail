@@ -482,7 +482,7 @@ class RecipientService
                 if ($subgroups) {
                     $subGroupExpressions = [];
                     foreach ($subgroups as $subgroup) {
-                        $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', $subgroup, true);
+                        $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', $subgroup);
                     }
 
                     // fetch all fe_users from these subgroups
