@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-01-29T120000Z" product-name="mail">
+	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-01-29T120000Z" product-name="mail">
 		<header />
 		<body>
             <trans-unit id="authcode_fieldList.description">
@@ -17,15 +17,18 @@
             </trans-unit>
             <trans-unit id="from_email.description">
                 <source>Enter the sender email address. (Required)</source>
+                <target state="translated">E-Mail-Adresse des Senders. (Pflichtfeld)</target>
             </trans-unit>
             <trans-unit id="from_email.details">
                 <source>This email address will appear as the originating address or sender address in the mails received by the recipients.</source>
             </trans-unit>
             <trans-unit id="from_name.description">
                 <source>Enter the sender name. (Required)</source>
+                <target state="translated">Namen des Senders eingeben. (Pflichtfeld)</target>
             </trans-unit>
             <trans-unit id="from_name.details">
                 <source>This name will appear as the name of the author or sender in the mails received by the recipients.</source>
+                <target state="translated">Dieser Name wird als Name des Authors oder Absenders in den E-Mails beim Empfänger erscheinen.</target>
             </trans-unit>
             <trans-unit id="includeMedia.description">
                 <source>Set this option if you want to embed images in HTML mails.</source>
@@ -42,24 +45,30 @@ If the option is not set, images are included in HTML content by absolute refere
             </trans-unit>
             <trans-unit id="organisation.details">
                 <source>The name of the organization will appear in the headers of the mails sent to subscribers.</source>
+                <target state="translated">Der Name der Organisation wird in dem Header der E-Mails an die Abonnenten erscheinen.</target>
             </trans-unit>
             <trans-unit id="priority.description">
                 <source>Enter the email delivery priority.</source>
+                <target state="translated">Gib die E-Mail Priorität ein.</target>
             </trans-unit>
             <trans-unit id="priority.details">
                 <source>The delivery priority will be set in the headers of the mails sent to subscribers.</source>
             </trans-unit>
             <trans-unit id="replyto_email.description">
                 <source>Enter the email address to which replys are sent. (Optional)</source>
+                <target state="translated">Gib die Antwortadresse ein auf welche die Antworten gesendet werden sollen. (Optional)</target>
             </trans-unit>
             <trans-unit id="replyto_email.details">
                 <source>If no reply address is specified, the sender email address will be used.</source>
+                <target state="translated">Die Senderadresse wird benutzt, wenn keine Antwortadresse konfiguriert wurde.</target>
             </trans-unit>
             <trans-unit id="replyto_name.description">
                 <source>Enter the name of the 'Reply To' email address. (Optional)</source>
+                <target state="translated">Gib den Namen der Antwortadresse an. (Optional)</target>
             </trans-unit>
             <trans-unit id="replyto_name.details">
                 <source>If no reply name is specified, the sender name will be used.</source>
+                <target state="translated">Der Sendername wird benutzt, wenn keine Antwortadresse konfiguriert wurde.</target>
             </trans-unit>
             <trans-unit id="return_path.description">
                 <source>Enter the return path email address here.</source>
@@ -71,6 +80,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 		    </trans-unit>
             <trans-unit id="sendOptions.description">
                 <source>Select the format of mail content.</source>
+                <target state="translated">Wähle das Format des E-Mail-Inhalts aus.</target>
             </trans-unit>
             <trans-unit id="sendOptions.details">
                 <source>If in doubt, set it to both Plain text and HTML. The messages will then be sent with both formats included, and the recipients are normally able to select
@@ -78,7 +88,8 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
                 </source>
             </trans-unit>
             <trans-unit id="type.description">
-                <source>Type of source of the Direct mail</source>
+                <source>Type of source of the mail</source>
+                <target state="translated">Quelltyp der Mail</target>
             </trans-unit>
             <trans-unit id="type.details">
                 <source>The Direct mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External
@@ -87,6 +98,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
             </trans-unit>
             <trans-unit id="redirect.description">
                 <source>Redirect long links found in plain text content.</source>
+                <target state="translated">Lange Links aus dem Klartext-Inhalt weiterleiten.</target>
             </trans-unit>
             <trans-unit id="redirect.details">
                 <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the core redirect module.
@@ -94,320 +106,423 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
             </trans-unit>
             <trans-unit id="configure_HTMLParams_description" resname="configure_HTMLParams_description">
 				<source>Enter the additional URL parameters used to fetch the HTML content from a TYPO3 page.</source>
+                <target state="translated">Zusätzliche URL-Parameter, die für das Auslesen der HTML-Inhalten einer TYPO3 Seite benötigt werden.</target>
 			</trans-unit>
 			<trans-unit id="configure_HTMLParams_details" resname="configure_HTMLParams_details">
 				<source>The specified parameters will be added to the URL used to fetch the HTML content of the mail from a TYPO3 page. If in doubt, leave it blank.</source>
+                <target state="translated">Die eingegebene Parameter werden der URL hinzugefügt, um die HTML Inhalte für die Mail von einer TYPO3 Seite auszulesen. Im Zweifel leer lassen.</target>
 			</trans-unit>
 			<trans-unit id="configure_default_content" resname="configure_default_content">
 				<source>Default content format</source>
+                <target state="translated">Standard Inhaltsformat</target>
 			</trans-unit>
 			<trans-unit id="configure_default_fetching" resname="configure_default_fetching">
 				<source>Default content fetching options</source>
+                <target state="translated">Standardwerte für das Auslesen der Inhalte</target>
 			</trans-unit>
 			<trans-unit id="configure_default_headers" resname="configure_default_headers">
 				<source>Default headers</source>
+				<target>Standardwerte des Mailkopfs</target>
 			</trans-unit>
 			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
 				<source>Configure mail module</source>
+				<target>Mail-Modul-Konfiguration</target>
 			</trans-unit>
 			<trans-unit id="configure_directmail_charset" resname="configure_directmail_charset">
 				<source>Default character set for mails built from external pages</source>
+                <target state="translated">Standard Zeichensatz für Mails, die auf externe Seiten basieren</target>
 			</trans-unit>
 			<trans-unit id="configure_directmail_charset_description" resname="configure_directmail_charset_description">
 				<source>Specify the character set used in mails when they are built from external pages and character set cannot be auto-detected.</source>
+                <target state="translated">Wähle den Zeichensatz für Mails die auf externe Seite basieren, bei denen der Zeichensatz nicht automatisch bestimmt werden kann.</target>
 			</trans-unit>
 			<trans-unit id="configure_directmail_encoding" resname="configure_directmail_encoding">
 				<source>Default encoding of mails</source>
+                <target state="translated">Standardkodierung für Mails</target>
 			</trans-unit>
 			<trans-unit id="configure_directmail_encoding_description" resname="configure_directmail_encoding_description">
 				<source>Select the default content transfer encoding of mails.</source>
+                <target state="translated">Wähle die Standardtransportkodierung für Mails</target>
 			</trans-unit>
 			<trans-unit id="configure_html_only" resname="configure_html_only">
 				<source>HTML only</source>
+				<target>Nur HTML</target>
 			</trans-unit>
 			<trans-unit id="configure_http_password" resname="configure_http_password">
 				<source>HTTP Password</source>
+				<target>HTTP Passwort</target>
 			</trans-unit>
 			<trans-unit id="configure_http_password_description" resname="configure_http_password_description">
 				<source>If mail content is protected by HTTP authentication, enter the password here.</source>
+                <target state="translated">Wenn die Mail-Inhalte mit HTTP Authentifikation geschützt sind, gibt hier das Kennwort ein.</target>
 			</trans-unit>
 			<trans-unit id="configure_http_username" resname="configure_http_username">
 				<source>HTTP Username</source>
+				<target>HTTP Benutzername</target>
 			</trans-unit>
 			<trans-unit id="configure_http_username_description" resname="configure_http_username_description">
 				<source>If mail content is protected by HTTP authentication, enter the username here.</source>
+                <target state="translated">Wenn die Mail-Inhalte mit HTTP Authentifikation geschützt sind, gibt den Benutzername ein.</target>
 			</trans-unit>
 			<trans-unit id="configure_http_username_details" resname="configure_http_username_details" xmlspace="preserve">
 				<source><![CDATA[The username and password is used to fetch mail content. They are NOT sent in the mail!
 	If you do not specify a username and password and the mail pages happen to be protected, an error will occur and no mail content will be fetched.]]></source>
+                <target state="translated">Benutzername und Kennwort werden nur benutzt, um Mail-Inhalte auszulesen. Sie werden NICHT in der Mail verschickt!
+                    Wenn Benutzername und Kennwort nicht angegeben sind, die auszulesende Seite aber mit einem Kennwort geschützt ist, wird es einen Fehler geben und keine Inhalten werden ausgelesen.</target>
 			</trans-unit>
 			<trans-unit id="configure_jumpurl_tracking_privacy" resname="configure_jumpurl_tracking_privacy">
 				<source>Privacy jumpurl</source>
+                <target state="translated">Anonyme jumpurl</target>
 			</trans-unit>
 			<trans-unit id="configure_jumpurl_tracking_privacy_description" resname="configure_jumpurl_tracking_privacy_description">
-				<source>Set this option, to anonymize click statistics </source>
+				<source>Set this option, to anonymize click statistics</source>
+                <target state="translated">Setze diese Option, um die Klick-Statistiken zu anonymisieren</target>
 			</trans-unit>
 			<trans-unit id="configure_options_additional" resname="configure_options_additional">
 				<source>Additional module options</source>
+                <target state="translated">Zusätzliche Moduleinstellungen</target>
 			</trans-unit>
 			<trans-unit id="configure_options_encoding" resname="configure_options_encoding">
 				<source>Content transfer encoding and character set</source>
+                <target state="translated">Versandkodierung und Zeichensatz</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links" resname="configure_options_links">
 				<source>Links in mail content</source>
+                <target state="translated">Links in Mailinhalten</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links_jumpurl" resname="configure_options_links_jumpurl">
 				<source>Enable jump URL's</source>
+				<target>Aktiviere jump URL's</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links_jumpurl_description" resname="configure_options_links_jumpurl_description">
 				<source>Check this option to enable jump URL's and the collection of click statistics.</source>
+                <target state="translated">Aktiviere diese Option, um Jump URL's für Klick-Statistiken zu aktivieren.</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links_rdct" resname="configure_options_links_rdct">
 				<source>This configuration determines how QuickMails are handled and further sets the default value for mails.</source>
+                <target state="translated">Diese Einstellung legt Standardwerte für Mails und Quickmails fest.</target>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl" resname="configure_options_mailto_jumpurl">
 				<source>Enable jump URL's for mailto links</source>
+				<target>Aktiviere jump URL's für mailto links</target>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl_description" resname="configure_options_mailto_jumpurl_description">
 				<source>Check this option to enable jump URL's for mailto links.</source>
+				<target>Aktiviere diese Option um jump URL's für mailto links zu aktivieren.</target>
 			</trans-unit>
 			<trans-unit id="configure_plainParams_description" resname="configure_plainParams_description">
 				<source>Enter the additional URL parameters used to fetch the plain text content from a TYPO3 page.</source>
+                <target state="translated">Gib hier die zusätzlichen URL-Parameter ein, die benötigt werden, um den reinen Textinhalt von einer TYPO3-Seite zu holen.</target>
 			</trans-unit>
 			<trans-unit id="configure_plainParams_details" resname="configure_plainParams_details">
 				<source>The specified parameters will be added to the URL used to fetch the plain text content of the mail from a TYPO3 page. If in doubt, set it to '&amp;plain=1'.</source>
+				<target>Die angegebenen Parameter werden der URL hinzugefügt, die verwendet wird, um den reinen Textinhalt der E-Mail von einer TYPO3-Seite abzurufen. Im Zweifelsfall auf '&amp;plain=1' setzten.</target>
 			</trans-unit>
 			<trans-unit id="configure_plain_and_html" resname="configure_plain_and_html">
 				<source>Plain text and HTML</source>
+				<target>Reiner Text und HTML</target>
 			</trans-unit>
 			<trans-unit id="configure_plain_only" resname="configure_plain_only">
 				<source>Plain text only</source>
+				<target>Nur reiner Text</target>
 			</trans-unit>
 			<trans-unit id="configure_priority_high" resname="configure_priority_high">
 				<source>High</source>
+				<target>Hoch</target>
 			</trans-unit>
 			<trans-unit id="configure_priority_low" resname="configure_priority_low">
 				<source>Low</source>
+				<target>Niedrig</target>
 			</trans-unit>
 			<trans-unit id="configure_priority_normal" resname="configure_priority_normal">
 				<source>Normal</source>
+				<target>Normal</target>
 			</trans-unit>
 			<trans-unit id="configure_quickmail_charset" resname="configure_quickmail_charset">
 				<source>Character set for quick mails</source>
+				<target>Zeichensatz für Kurznachrichten</target>
 			</trans-unit>
 			<trans-unit id="configure_quickmail_charset_description" resname="configure_quickmail_charset_description">
 				<source>Specify the character set to use when sending quick mails.</source>
+				<target>Geben Sie den Zeichensatz an, der beim Senden von Kurznachrichten verwendet werden soll.</target>
 			</trans-unit>
 			<trans-unit id="configure_quickmail_encoding" resname="configure_quickmail_encoding">
 				<source>Encoding for quick mails</source>
+				<target>Encoding für Kurznachrichten</target>
 			</trans-unit>
 			<trans-unit id="configure_quickmail_encoding_description" resname="configure_quickmail_encoding_description">
 				<source>Select the content transfer encoding to use when sending quick mails.</source>
+				<target>Wählen Sie die Kodierung für die Übertragung von Inhalten, die beim Versand von Kurznachrichten verwendet werden soll.</target>
 			</trans-unit>
 			<trans-unit id="configure_simulate_usergroup" resname="configure_simulate_usergroup">
 				<source>Frontend User Group</source>
+				<target>Frontend-Benutzergruppe</target>
 			</trans-unit>
 			<trans-unit id="configure_simulate_usergroup_description" resname="configure_simulate_usergroup_description">
 				<source>If mail content is protected by Frontend user authentication, enter the user group here.</source>
+				<target>Wenn der E-Mail-Inhalt durch Frontend-Benutzerauthentifizierung geschützt ist, gibt hier die Benutzergruppe ein.</target>
 			</trans-unit>
 			<trans-unit id="configure_simulate_usergroup_details" resname="configure_simulate_usergroup_details" xmlspace="preserve">
 				<source><![CDATA[The usergroup with the uid specified is used to to fetch the mail content.
 	If you do not specify a usergroup uid and the page has frontend user restrictions, an error will occur and no mail content will be fetched.]]></source>
+                <target state="translated">Die Benutzergruppe mit der angegebenen UID wird zum Abrufen des E-Mail-Inhalts verwendet.
+                    Wenn Sie keine Benutzergruppen-UID angeben und die Seite Einschränkungen für Frontend-Benutzer aufweist, tritt ein Fehler auf und es wird kein E-Mail-Inhalt abgerufen.</target>
 			</trans-unit>
 			<trans-unit id="configure_test_dmail_group_uids" resname="configure_test_dmail_group_uids">
 				<source>Comma separated list of test recipients (group uids)</source>
+                <target state="translated">Komma separierte Liste Testempfängern (Benutzergruppen-Uids)</target>
 			</trans-unit>
 			<trans-unit id="configure_test_dmail_group_uids_description" resname="configure_test_dmail_group_uids_description">
 				<source>Alternatively to send test-mails to individuals, you can send it to this groups.</source>
+                <target state="translated">Alternativ zum Senden von Test-Mails an einzelne Personen, können diese an die hier festgelegte Gruppe(n) gesendet werden.</target>
 			</trans-unit>
 			<trans-unit id="configure_test_tt_address_uids" resname="configure_test_tt_address_uids">
 				<source>Comma separated list of test recipients (tt_address uids)</source>
+				<target>Durch Kommata getrennte Liste von Testempfängern (tt_address uids)</target>
 			</trans-unit>
 			<trans-unit id="configure_test_tt_address_uids_description" resname="configure_test_tt_address_uids_description">
 				<source>Alternatively to send test-mails to individuals, you can send it to this addresses.</source>
+				<target>Alternativ können Sie Test-E-Mails an Einzelpersonen auch an diese Adressen senden.</target>
 			</trans-unit>
 			<trans-unit id="configure_testmail" resname="configure_testmail">
 				<source>Subject prefix for test mails</source>
+				<target>Betreff-Präfix für Test-Mails</target>
 			</trans-unit>
 			<trans-unit id="configure_testmail_description" resname="configure_testmail_description">
 				<source>This will be prepended to the test mail subject</source>
+				<target>Dies wird dem Betreff der Test-Mail vorangestellt</target>
 			</trans-unit>
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
 				<source>Save</source>
+				<target>Speichern</target>
 			</trans-unit>
 			<trans-unit id="configure_update_configuration_success" resname="configure_update_configuration_success">
 				<source>The configuration was successfully saved to the selected page</source>
+				<target>Die Konfiguration wurde erfolgreich auf der ausgewählten Seite gespeichert</target>
 			</trans-unit>
 			<trans-unit id="configure_user_table" resname="configure_user_table">
 				<source>Custom-defined table</source>
+				<target>Benutzerdefinierte Tabelle</target>
 			</trans-unit>
 			<trans-unit id="configure_user_table_description" resname="configure_user_table_description">
 				<source>Enter the name of a custom-defined table, with compatible columns defined, which may also be used for mails distribution.</source>
+				<target>Geben Sie den Namen einer benutzerdefinierten Tabelle ein, in der kompatible Spalten definiert sind, die auch für die Verteilung von E-Mails verwendet werden können.</target>
 			</trans-unit>
 			<trans-unit id="dmail_HTML_url" resname="dmail_HTML_url">
 				<source>URL of HTML content</source>
+				<target>URL des HTML Inhalts</target>
 			</trans-unit>
 			<trans-unit id="dmail_cancel" resname="dmail_cancel">
 				<source>Cancel</source>
+				<target>Abbrechen</target>
 			</trans-unit>
 			<trans-unit id="dmail_createMail" resname="dmail_createMail">
 				<source>Create mail</source>
+				<target>Mail anlegen</target>
 			</trans-unit>
 			<trans-unit id="dmail_dovsk_crFromNL" resname="dmail_dovsk_crFromNL">
 				<source>Create a new mail from a internal page</source>
+				<target>Erstelle eine neue ail von einer internen Seite</target>
 			</trans-unit>
 			<trans-unit id="dmail_dovsk_crFromUrl" resname="dmail_dovsk_crFromUrl">
 				<source>Create a new mail from an external URL</source>
+				<target>Erstelle eine neue Mail von einer externen URL</target>
 			</trans-unit>
 			<trans-unit id="dmail_edit" resname="dmail_edit">
 				<source>Edit</source>
+				<target>Bearbeiten</target>
 			</trans-unit>
 			<trans-unit id="dmail_edit_info" resname="dmail_edit_info">
 				<source>Edit sender data</source>
+				<target>Absenderdaten bearbeiten</target>
 			</trans-unit>
 			<trans-unit id="dmail_error" resname="dmail_error">
 				<source>An error has occurred</source>
+				<target>Es ist ein Fehler aufgetreten</target>
 			</trans-unit>
 			<trans-unit id="dmail_warning" resname="dmail_warning">
 				<source>A warning has occurred</source>
+				<target>Eine Warnung ist aufgetreten</target>
 			</trans-unit>
 			<trans-unit id="dmail_folders" resname="dmail_folders">
 				<source>Available mail folders</source>
+				<target>Verfügbare E-Mail-Ordner</target>
 			</trans-unit>
 			<trans-unit id="dmail_frames_not allowed" resname="dmail_frames_not allowed">
 				<source>Pages with HTML frames may not be fetched.</source>
+				<target>Seiten mit HTML-Frames können nicht abgerufen werden.</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_caution" resname="dmail_mailerengine_cron_caution">
 				<source>Caution</source>
+				<target>Vorsicht</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_caution_msg" resname="dmail_mailerengine_cron_caution_msg">
 				<source>Please check the cronjob or cronjob is not set.</source>
+				<target>Bitte überprüfen Sie den Cronjob oder der Cronjob ist nicht eingestellt.</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_lastrun" resname="dmail_mailerengine_cron_lastrun">
 				<source>Last run </source>
+				<target>Letzter Durchlauf </target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_ok" resname="dmail_mailerengine_cron_ok">
 				<source>OK</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_ok_msg" resname="dmail_mailerengine_cron_ok_msg">
 				<source>Cronjob is running.</source>
+				<target>Cronjob läuft.</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_status" resname="dmail_mailerengine_cron_status">
 				<source>Cron job status</source>
+				<target>Cron job Zustand</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_warning" resname="dmail_mailerengine_cron_warning">
 				<source>Warning</source>
+				<target>Warnung</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_cron_warning_msg" resname="dmail_mailerengine_cron_warning_msg">
 				<source>Please check the cronjob.</source>
+				<target>Bitte überprüfen Sie den Cronjob.</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_current_time" resname="dmail_mailerengine_current_time">
 				<source>Current time</source>
+				<target>Aktuelle Zeit</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_delete" resname="dmail_mailerengine_delete">
 				<source>Delete</source>
+				<target>Löschen</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_delivery_begun" resname="dmail_mailerengine_delivery_begun">
 				<source>Delivery begun</source>
+				<target>Versand gestartet</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_delivery_ended" resname="dmail_mailerengine_delivery_ended">
 				<source>Delivery ended</source>
+                <target>Versand beendet</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_invoke_now" resname="dmail_mailerengine_invoke_now">
 				<source>Start sending manually</source>
+				<target>Versand manuell starten</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_invoked" resname="dmail_mailerengine_invoked">
 				<source>Manual sending started!</source>
+				<target>Manueller Versand gestartet!</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_explain" resname="dmail_mailerengine_manual_explain">
 				<source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can start the sending manually.</source>
+				<target>Wenn TYPO3 nicht für den Versand von Mails mit dem mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand manuell starten.</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_invoke" resname="dmail_mailerengine_manual_invoke">
 				<source>Manually Invoke Engine</source>
+				<target>Manuellen Versand anstossen</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_number_sent" resname="dmail_mailerengine_number_sent">
 				<source># sent</source>
+				<target># versandt</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_scheduled" resname="dmail_mailerengine_scheduled">
 				<source>Scheduled</source>
+				<target>Geplant</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_status" resname="dmail_mailerengine_status">
 				<source>Mail Engine Status</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_subject" resname="dmail_mailerengine_subject">
 				<source>Subject</source>
+				<target>Thema</target>
 			</trans-unit>
 			<trans-unit id="dmail_makeQuery" resname="dmail_makeQuery">
 				<source>Make query</source>
 			</trans-unit>
 			<trans-unit id="dmail_menuItems_testmail" resname="dmail_menuItems_testmail">
 				<source>Send a testmail</source>
+				<target>Sende eine Testmail</target>
 			</trans-unit>
 			<trans-unit id="dmail_menu_conf" resname="dmail_menu_conf">
 				<source>Module configuration</source>
+				<target>Modul-Konfiguration</target>
 			</trans-unit>
 			<trans-unit id="dmail_menu_convert_categories" resname="dmail_menu_convert_categories">
 				<source>Categories Conversion</source>
+				<target>Kategorien Konvertierung</target>
 			</trans-unit>
 			<trans-unit id="dmail_menu_quickMail" resname="dmail_menu_quickMail">
 				<source>QuickMail</source>
+				<target>Kurznachricht</target>
 			</trans-unit>
 			<trans-unit id="dmail_mails" resname="dmail_mails">
 				<source>Mail Extension</source>
+				<target>Mail Erweiterung</target>
 			</trans-unit>
 			<trans-unit id="dmail_no" resname="dmail_no">
 				<source>NO</source>
+				<target>NEIN</target>
 			</trans-unit>
 			<trans-unit id="dmail_noCreateAccess" resname="dmail_noCreateAccess">
 				<source>You cannot create mails using pages that are hidden or access-restricted.</source>
+				<target>Sie können keine E-Mails über Seiten erstellen, die versteckt oder zugangsbeschränkt sind.</target>
 			</trans-unit>
 			<trans-unit id="dmail_noEdit_isSent" resname="dmail_noEdit_isSent">
 				<source>Cannot edit - mail has been sent</source>
+				<target>Kann nicht bearbeitet werden - Mail bereits versandt</target>
 			</trans-unit>
 			<trans-unit id="dmail_noEdit_noPerms" resname="dmail_noEdit_noPerms">
 				<source>You don't have permissions to change mail settings.</source>
+				<target>Sie haben keine Berechtigung zum Ändern der E-Mail-Einstellungen.</target>
 			</trans-unit>
 			<trans-unit id="dmail_noRegular" resname="dmail_noRegular">
 				<source>This type of page cannot be used to create mails. Please select a mail page.</source>
+				<target>Diese Art von Seite kann nicht zum Erstellen von Mails verwendet werden. Bitte wählen Sie eine Mail-Seite.</target>
 			</trans-unit>
 			<trans-unit id="dmail_no_html_boundaries" resname="dmail_no_html_boundaries">
 				<source>The HTML content does not contain any mail boundaries.</source>
+				<target>Der HTML-Inhalt enthält keine Mail-Abgrenzungen.</target>
 			</trans-unit>
 			<trans-unit id="dmail_no_html_content" resname="dmail_no_html_content">
 				<source>The HTML content could not be fetched.</source>
+				<target>Der HTML-Inhalt konnte nicht abgerufen werden.</target>
 			</trans-unit>
 			<trans-unit id="dmail_no_plain_boundaries" resname="dmail_no_plain_boundaries">
 				<source>The plain text content does not contain any mail boundaries.</source>
+				<target>Der reine Textinhalt enthält keine Mail-Abgrenzungen.</target>
 			</trans-unit>
 			<trans-unit id="dmail_no_plain_content" resname="dmail_no_plain_content">
 				<source>The plain text content could not be fetched.</source>
+				<target>Der reine Textinhalt konnte nicht abgerufen werden.</target>
 			</trans-unit>
 			<trans-unit id="dmail_no_mail_content_format_selected" resname="dmail_no_mail_content_format_selected">
 				<source>No mail content format selected.</source>
+				<target>Kein Mail-Inhaltsformat ausgewählt.</target>
 			</trans-unit>
 			<trans-unit id="dmail_no_valid_url" resname="dmail_no_valid_url">
 				<source>Enter at least one valid URL!</source>
+				<target>Geben Sie mindestens eine gültige URL ein!</target>
 			</trans-unit>
 			<trans-unit id="dmail_external_html_uri_is_invalid" resname="dmail_external_html_uri_is_invalid">
 				<source>The external HTML Url is invalid!</source>
+				<target>Die externe HTML Url ist ungültig!</target>
 			</trans-unit>
 			<trans-unit id="dmail_external_plain_uri_is_invalid" resname="dmail_external_plain_uri_is_invalid">
 				<source>The external plain Url is invalid!</source>
+				<target>Die externe Url für den reinen Textinhalt ist ungültig!</target>
 			</trans-unit>
 			<trans-unit id="dmail_number_records" resname="dmail_number_records">
 				<source>Number of records</source>
+				<target>Anzahl der Datensätze</target>
 			</trans-unit>
 			<trans-unit id="dmail_plaintext_url" resname="dmail_plaintext_url">
 				<source>URL of plain text content</source>
+				<target>URL des reinen Textinhalts</target>
 			</trans-unit>
 			<trans-unit id="dmail_query" resname="dmail_query">
 				<source>Query</source>
 			</trans-unit>
 			<trans-unit id="dmail_send" resname="dmail_send">
 				<source>Send</source>
+				<target>Senden</target>
 			</trans-unit>
 			<trans-unit id="dmail_subject" resname="dmail_subject">
 				<source>Subject</source>
+				<target>Thema</target>
 			</trans-unit>
 			<trans-unit id="dmail_updateQuery" resname="dmail_updateQuery">
 				<source>Update query</source>
@@ -417,60 +532,77 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="dmail_warning" resname="dmail_warning">
 				<source>Warning</source>
+				<target>Warnung</target>
 			</trans-unit>
 			<trans-unit id="dmail_wizard_title" resname="dmail_wizard_title">
 				<source>Mail Wizard</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_external_page" resname="dmail_wiz1_external_page">
 				<source>External Page</source>
+				<target>Externe Seite</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_internal_page" resname="dmail_wiz1_internal_page">
 				<source>Internal Page</source>
+				<target>Interne Seite</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_dmail" resname="dmail_wiz1_list_dmail">
 				<source>Open Mails</source>
+				<target>Offene Mails</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_list_header" resname="dmail_wiz1_list_header">
 				<source>Select a mail to continue sending</source>
+				<target>Wählen Sie eine Mail aus, um den Versand fortzusetzen</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_new_mail" resname="dmail_wiz1_new_mail">
 				<source>Step 1</source>
+				<target>Schritt 1</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_quickmail" resname="dmail_wiz1_quickmail">
 				<source>Quick Mail</source>
+				<target>Kurznachricht</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_quickmail_header" resname="dmail_wiz1_quickmail_header">
 				<source>New Quickmail</source>
+                <target>Neue Kurznachricht</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
 				<source>Mail source</source>
+				<target>Mail Quelle</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
 				<source>Step 2 - Mail settings</source>
+				<target>Schritt 2 - Mail Einstellungen</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
 				<source>The page was fetched successfully.</source>
+				<target>Die Seite wurde erfolgreich ausgelesen.</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz3_cats" resname="dmail_wiz3_cats">
 				<source>Categories</source>
+				<target>Kategorien</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz4_testmail" resname="dmail_wiz4_testmail">
 				<source>Test Mail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz5_sendmass" resname="dmail_wiz5_sendmass">
 				<source>Schedule sending</source>
+				<target>Versandplanung</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz_back" resname="dmail_wiz_back">
 				<source>Back</source>
+				<target>Zurück</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz_next" resname="dmail_wiz_next">
 				<source>Next</source>
+				<target>Weiter</target>
 			</trans-unit>
 			<trans-unit id="dmail_write_subject" resname="dmail_write_subject">
 				<source>Subject</source>
+				<target>Thema</target>
 			</trans-unit>
 			<trans-unit id="dmail_yes" resname="dmail_yes">
 				<source>YES</source>
+				<target>JA</target>
 			</trans-unit>
 			<trans-unit id="dmailer_ending" resname="dmailer_ending">
 				<source>Ending, parsetime</source>
@@ -504,123 +636,159 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="header_conf" resname="header_conf">
 				<source>Mail Settings</source>
+				<target>Mail Einstellungen</target>
 			</trans-unit>
 			<trans-unit id="header_directmail" resname="header_directmail">
 				<source>Mail</source>
 			</trans-unit>
 			<trans-unit id="header_mailer" resname="header_mailer">
 				<source>Mail Queue</source>
+				<target>Mail Warteschlange</target>
 			</trans-unit>
 			<trans-unit id="header_recip" resname="header_recip">
 				<source>Recipient Lists</source>
+				<target>Empfänger Listen</target>
 			</trans-unit>
 			<trans-unit id="header_stat" resname="header_stat">
-				<source>Statistics</source>
+				<source>Reports</source>
+				<target>Reporte</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_download" resname="mailgroup_download">
 				<source>Download CSV</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_header" resname="mailgroup_header">
 				<source>Mail Recipients</source>
+				<target>Mail Empfänger</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import" resname="mailgroup_import">
 				<source>Import CSV into tt_address database table</source>
+				<target>Importiere CSV in tt_address Datenbanktabelle</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_back" resname="mailgroup_import_back">
 				<source>Back</source>
+				<target>Zurück</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_csv_dublette-description" resname="mailgroup_import_csv_dublette-description">
 				<source>Filter email dublettes from csv data. If a dublette is found, only the first entry is imported.</source>
+				<target>Filtere E-Mail-Dubletten aus CSV-Daten. Wenn eine Dublette gefunden wird, wird nur der erste Eintrag importiert.</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_csv_validemail-description" resname="mailgroup_import_csv_validemail-description">
 				<source>Only update/import valid emails from csv data.</source>
+				<target>Nur gültige E-Mails aus csv-Daten aktualisieren/importieren.</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_current_file" resname="mailgroup_import_current_file">
 				<source>Current file</source>
+				<target>Aktuelle Datei</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_done" resname="mailgroup_import_done">
 				<source>CSV import successfully finished.</source>
+				<target>CSV-Import erfolgreich abgeschlossen.</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_encapsulation" resname="mailgroup_import_encapsulation">
 				<source>Field encapsulation character (data fields are encapsed with...)</source>
+				<target>Feldkapselungszeichen (Datenfelder sind gekapselt mit...)</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_first_fieldnames" resname="mailgroup_import_first_fieldnames">
 				<source>First row of import file has fieldnames</source>
+				<target>Die erste Zeile der Importdatei enthält Feldnamen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_header_conf" resname="mailgroup_import_header_conf">
 				<source>Import settings</source>
+				<target>Import Einstellungen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_header_upload" resname="mailgroup_import_header_upload">
 				<source>Upload CSV</source>
+				<target>CSV Hochladen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_import" resname="mailgroup_import_import">
 				<source>Import</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_all_html" resname="mailgroup_import_mapping_all_html">
 				<source>All recipients receive HTML mail</source>
+				<target>Alle Empfänger erhalten HTML-Mails</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_categories" resname="mailgroup_import_mapping_categories">
 				<source>Categories</source>
+				<target>Kategorien</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_cats" resname="mailgroup_import_mapping_cats">
 				<source>Assign the following categories to all recipients</source>
+				<target>Weisen Sie allen Empfängern die folgenden Kategorien zu</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_cats_add" resname="mailgroup_import_mapping_cats_add">
 				<source>Add categories</source>
+				<target>Kategorien hinzufügen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_charset" resname="mailgroup_import_mapping_charset">
 				<source>Settings</source>
+				<target>Einstellungen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_charset_choose" resname="mailgroup_import_mapping_charset_choose">
 				<source>Please select the character set of the import file</source>
+				<target>Bitte wählen Sie den Zeichensatz der Importdatei</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_conf" resname="mailgroup_import_mapping_conf">
 				<source>Field mapping</source>
+				<target>Feldzuordnung</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_conf_add" resname="mailgroup_import_mapping_conf_add">
 				<source>Additional options</source>
+				<target>Zusätzliche Optionen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_description" resname="mailgroup_import_mapping_description">
 				<source>Description</source>
+				<target>Beschreibung</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_error" resname="mailgroup_import_mapping_error">
 				<source>Mapping error</source>
+				<target>Zuordnungsfehler</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_error_detail" resname="mailgroup_import_mapping_error_detail">
 				<source>Please fix following error(s)</source>
+				<target>Bitte beheben Sie folgende(n) Fehler</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_error_email" resname="mailgroup_import_mapping_error_email">
 				<source>&quot;Email&quot; field has to be mapped.</source>
+				<target>&quot;Email&quot; Feld muss zugeordnet werden.</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_error_noMap" resname="mailgroup_import_mapping_error_noMap">
 				<source>No mapping is found. You have to map at least &quot;email&quot; field.</source>
+				<target>Es wurde keine Zuordnung gefunden. Sie müssen mindestens das Feld &quot;E-Mail&quot; zuordnen.</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_mapTo" resname="mailgroup_import_mapping_mapTo">
 				<source>Maps to ...</source>
+				<target>gehört zu ...</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_mapping" resname="mailgroup_import_mapping_mapping">
 				<source>Mapping</source>
+				<target>Zuordnung</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_number" resname="mailgroup_import_mapping_number">
 				<source>#</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_mapping_value" resname="mailgroup_import_mapping_value">
 				<source>Value</source>
+				<target>Wert</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_next" resname="mailgroup_import_next">
 				<source>Next</source>
+				<target>Weiter</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_or" resname="mailgroup_import_or">
 				<source>OR</source>
+				<target>ODER</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_overwrite" resname="mailgroup_import_overwrite">
 				<source>Overwrite existing file </source>
+				<target>Überschreibe existierende Datei </target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_paste_csv" resname="mailgroup_import_paste_csv">
 				<source>Paste the CSV data</source>
+				<target>CSV Daten einfügen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_ready_import" resname="mailgroup_import_ready_import">
 				<source>Ready to import</source>
+				<target>Bereit zum importieren</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_ready_import_label" resname="mailgroup_import_ready_import_label" xmlspace="preserve">
 				<source><![CDATA[All necessary information for the import have been entered.
