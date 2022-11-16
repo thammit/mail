@@ -648,7 +648,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Field delimiter (data fields are separated by...)</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator_colon" resname="mailgroup_import_separator_colon">
-				<source>colon []</source>
+				<source>colon [:]</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator_comma" resname="mailgroup_import_separator_comma">
 				<source>comma [,]</source>
@@ -660,13 +660,13 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>horizontal tab [TAB]</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_storage" resname="mailgroup_import_storage">
-				<source>Please select the storage folder for the users to be imported</source>
+				<source>Please select the storage folder for the addresses to be imported.</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_update" resname="mailgroup_import_update">
 				<source>update</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_update_unique" resname="mailgroup_import_update_unique">
-				<source>Update existing (unique) user</source>
+				<source>Update existing (unique) addresses</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_upload_file" resname="mailgroup_import_upload_file">
 				<source>Choose a csv file from your local computer</source>
@@ -710,9 +710,6 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="nl_create" resname="nl_create">
 				<source>Create a mail</source>
 			</trans-unit>
-			<trans-unit id="nl_create_msg1" resname="nl_create_msg1">
-				<source>Click here to create a new page that you can later send as a mail.</source>
-			</trans-unit>
 			<trans-unit id="nl_editPage" resname="nl_editPage">
 				<source>Edit page</source>
 			</trans-unit>
@@ -730,9 +727,6 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="nl_l_lastM" resname="nl_l_lastM">
 				<source>Last modified</source>
-			</trans-unit>
-			<trans-unit id="nl_l_sent" resname="nl_l_sent">
-				<source>Sent?</source>
 			</trans-unit>
 			<trans-unit id="nl_l_size" resname="nl_l_size">
 				<source>Size</source>
@@ -754,9 +748,6 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="nl_l_update" resname="nl_l_update">
 				<source>Save category restrictions</source>
-			</trans-unit>
-			<trans-unit id="nl_l_warning" resname="nl_l_warning">
-				<source>There are already %s mails based on this mail. Are you sure you want to create another one?</source>
 			</trans-unit>
 			<trans-unit id="nl_select" resname="nl_select">
 				<source>Select a mail</source>
@@ -843,14 +834,11 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="send_recipients" resname="send_recipients">
 				<source>Recipient(s)</source>
 			</trans-unit>
-			<trans-unit id="send_sending" resname="send_sending">
-				<source>Sending mail</source>
-			</trans-unit>
 			<trans-unit id="send_was_scheduled" resname="send_was_scheduled">
 				<source>Mail scheduled for distribution</source>
 			</trans-unit>
 			<trans-unit id="send_was_scheduled_for" resname="send_was_scheduled_for">
-				<source>The mail "%s" was successfully scheduled for distribution at %s</source>
+				<source>The mail "%s" was successfully scheduled for distribution at %s.</source>
 			</trans-unit>
             <trans-unit id="testMailSent" resname="testMailSent">
                 <source>Test mail successfully sent</source>
@@ -868,7 +856,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>The mail was sent to %s recipients.</source>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned" resname="stats_CSV_returned">
-				<source>CSV of returned recipients</source>
+				<source>CSV of recipients of returned mails</source>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned_bad_header" resname="stats_CSV_returned_bad_header">
 				<source>CSV of returned recipients with error in header</source>

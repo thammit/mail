@@ -796,262 +796,333 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="mailgroup_import_record_unique" resname="mailgroup_import_record_unique">
 				<source>Specify the field which determines the uniqueness of imported users</source>
+				<target>Geben Sie das Feld an, das die Einzigartigkeit der importierten Benutzer bestimmt</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_remove_existing" resname="mailgroup_import_remove_existing">
 				<source>Remove all Addresses in the storage folder before importing</source>
+				<target>Alle Adressen im Speicherordner vor dem Importieren entfernen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_double" resname="mailgroup_import_report_double">
 				<source>Duplicate addresses</source>
+				<target>Doppelte Adressen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_invalid_email" resname="mailgroup_import_report_invalid_email">
 				<source>NOT imported/update addresses (invalid email)</source>
+				<target>Nicht importierte/aktualisierte Adressen (ungültige E-Mail)</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_new" resname="mailgroup_import_report_new">
 				<source>Imported addresses</source>
+				<target>Importierte Adressen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_report_update" resname="mailgroup_import_report_update">
 				<source>Updated addresses</source>
+				<target>Aktualisierte Adressen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator" resname="mailgroup_import_separator">
 				<source>Field delimiter (data fields are separated by...)</source>
+				<target>Feldtrenner (Datenfelder werden separiert von ..)</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator_colon" resname="mailgroup_import_separator_colon">
-				<source>colon []</source>
+				<source>colon [:]</source>
+				<target>Doppelpunkt [:]</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator_comma" resname="mailgroup_import_separator_comma">
 				<source>comma [,]</source>
+				<target>Komma [,]</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator_semicolon" resname="mailgroup_import_separator_semicolon">
 				<source>semicolon [;]</source>
+				<target>Semicolon [;]</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_separator_tab" resname="mailgroup_import_separator_tab">
 				<source>horizontal tab [TAB]</source>
+				<target>Tabulator [TAB]</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_storage" resname="mailgroup_import_storage">
-				<source>Please select the storage folder for the users to be imported</source>
+				<source>Please select the storage folder for the addresses to be imported.</source>
+				<target>Bitte wählen Sie den Speicherordner für die zu importierenden Adressen.</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_update" resname="mailgroup_import_update">
 				<source>update</source>
+				<target>Aktualisieren</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_update_unique" resname="mailgroup_import_update_unique">
-				<source>Update existing (unique) user</source>
+				<source>Update existing (unique) addresses</source>
+				<target>Eindeutige Adressen aktualisieren</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import_upload_file" resname="mailgroup_import_upload_file">
 				<source>Choose a csv file from your local computer</source>
+				<target>Wählen Sie eine CSV-Datei von Ihrem lokalen Computer</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_list_all" resname="mailgroup_list_all">
 				<source>List all</source>
+				<target>Alle anzeigen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_plain_list" resname="mailgroup_plain_list">
 				<source>Plain List</source>
+				<target>Reine Liste</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_recip_from" resname="mailgroup_recip_from">
 				<source>Recipients from recipient list</source>
+				<target>Empfänger aus der Empfängerliste</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_recip_number" resname="mailgroup_recip_number">
 				<source>Number of recipients</source>
+				<target>Anzahl von Empfängern</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_address" resname="mailgroup_table_address">
 				<source>Address Table (tt_address)</source>
+				<target>Adressen Tabelle (tt_address)</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_tt_address" resname="mailgroup_table_tt_address">
 				<source>Address Table [tt_address]</source>
+				<target>Adressen Tabelle [tt_address]</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_custom" resname="mailgroup_table_custom">
 				<source>Custom Table</source>
+				<target>Benutzerdefinierte Tabelle</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_fe_users" resname="mailgroup_table_fe_users">
 				<source>Website User [fe_users]</source>
+				<target>Webseitenbenutzer [fe_users]</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_disallowed_placeholder" resname="mailgroup_table_disallowed_placeholder">
 				<source>Missing permission to display data</source>
+				<target>Fehlende Erlaubnis zur Anzeige von Daten</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_table_disallowed_csv" resname="mailgroup_table_disallowed_csv">
 				<source>CSV export failed. Insufficient access right.</source>
+				<target>CSV-Export fehlgeschlagen. Unzureichendes Zugriffsrecht.</target>
 			</trans-unit>
 			<trans-unit id="restrictToCategories" resname="restrictToCategories">
 				<source>Restrict to categories</source>
+				<target>Auf Kategorien einschränken</target>
 			</trans-unit>
 			<trans-unit id="nl_cat_msg1" resname="nl_cat_msg1">
 				<source>There are no content elements on the page.</source>
+				<target>Es gibt keine Inhaltselemente auf der Seite.</target>
 			</trans-unit>
 			<trans-unit id="nl_create" resname="nl_create">
 				<source>Create a mail</source>
-			</trans-unit>
-			<trans-unit id="nl_create_msg1" resname="nl_create_msg1">
-				<source>Click here to create a new page that you can later send as a mail.</source>
+				<target>Mail anlegen</target>
 			</trans-unit>
 			<trans-unit id="nl_editPage" resname="nl_editPage">
 				<source>Edit page</source>
+				<target>Seite bearbeiten</target>
 			</trans-unit>
 			<trans-unit id="nl_l_ALL" resname="nl_l_ALL">
 				<source>ALL</source>
+				<target>ALLE</target>
 			</trans-unit>
 			<trans-unit id="nl_l_ONLY" resname="nl_l_ONLY">
 				<source>ONLY</source>
+				<target>NUR</target>
 			</trans-unit>
 			<trans-unit id="nl_l_attach" resname="nl_l_attach">
 				<source>Attachment</source>
+				<target>Anhang</target>
 			</trans-unit>
 			<trans-unit id="nl_l_column" resname="nl_l_column">
 				<source>Column</source>
+				<target>Spalte</target>
 			</trans-unit>
 			<trans-unit id="nl_l_lastM" resname="nl_l_lastM">
 				<source>Last modified</source>
-			</trans-unit>
-			<trans-unit id="nl_l_sent" resname="nl_l_sent">
-				<source>Sent?</source>
+				<target>Zuletzt geändert</target>
 			</trans-unit>
 			<trans-unit id="nl_l_size" resname="nl_l_size">
 				<source>Size</source>
+				<target>Größe</target>
 			</trans-unit>
 			<trans-unit id="nl_l_subject" resname="nl_l_subject">
 				<source>Subject</source>
+				<target>Thema</target>
 			</trans-unit>
 			<trans-unit id="nl_l_tDraft" resname="nl_l_tDraft">
 				<source>Draft</source>
+				<target>Entwurf</target>
 			</trans-unit>
 			<trans-unit id="nl_l_tPage" resname="nl_l_tPage">
 				<source>Internal Page</source>
+				<target>Interne Seite</target>
 			</trans-unit>
 			<trans-unit id="nl_l_tUrl" resname="nl_l_tUrl">
 				<source>External Page</source>
+				<target>Externe Seite</target>
 			</trans-unit>
 			<trans-unit id="nl_l_type" resname="nl_l_type">
 				<source>Type</source>
+				<target>Typ</target>
 			</trans-unit>
 			<trans-unit id="nl_l_update" resname="nl_l_update">
 				<source>Save category restrictions</source>
-			</trans-unit>
-			<trans-unit id="nl_l_warning" resname="nl_l_warning">
-				<source>There are already %s mails based on this mail. Are you sure you want to create another one?</source>
+				<target>Kategorie-Einschränkungen speichern</target>
 			</trans-unit>
 			<trans-unit id="nl_select" resname="nl_select">
 				<source>Select a mail</source>
+				<target>Mail auswählen</target>
 			</trans-unit>
 			<trans-unit id="nl_select_msg1" resname="nl_select_msg1">
 				<source>There are no pages in the mail module.</source>
+				<target>Es gibt keine Seiten im Mail-Modul.</target>
 			</trans-unit>
 			<trans-unit id="nl_viewPage_HTML" resname="nl_viewPage_HTML">
 				<source>View page in HTML format</source>
+				<target>Seite im HTML-Format anzeigen</target>
 			</trans-unit>
 			<trans-unit id="nl_viewPage_TXT" resname="nl_viewPage_TXT">
 				<source>View page in Text format</source>
+				<target>Seite im Text-Format anzeigen</target>
 			</trans-unit>
 			<trans-unit id="quickmail_break_lines" resname="quickmail_break_lines">
 				<source>Break lines to 76 char</source>
+				<target>Zeilenumbruch auf 76 Zeichen</target>
 			</trans-unit>
 			<trans-unit id="quickmail_message" resname="quickmail_message">
 				<source>Message</source>
+				<target>Nachricht</target>
 			</trans-unit>
 			<trans-unit id="quickmail_sender_email" resname="quickmail_sender_email">
 				<source>Sender Email</source>
+				<target>Absender E-Mail</target>
 			</trans-unit>
 			<trans-unit id="quickmail_sender_name" resname="quickmail_sender_name">
 				<source>Sender Name</source>
+				<target>Absender Name</target>
 			</trans-unit>
 			<trans-unit id="recip_create_mailgroup" resname="recip_create_mailgroup">
 				<source>New recipient list</source>
+				<target>Neue Empfängerliste</target>
 			</trans-unit>
 			<trans-unit id="recip_create_mailgroup_msg" resname="recip_create_mailgroup_msg">
 				<source>New group</source>
+				<target>Neue Gruppe</target>
 			</trans-unit>
 			<trans-unit id="recip_group_amount" resname="recip_group_amount">
 				<source>Recipients</source>
+				<target>Empfänger</target>
 			</trans-unit>
             <trans-unit id="recip_group_record_types" resname="recip_group_record_types">
                 <source>Types of records</source>
+                <target>Datensatztypen</target>
             </trans-unit>
             <trans-unit id="recip_group_categories" resname="recip_group_categories">
                 <source>Categories</source>
+                <target>Kategorien</target>
             </trans-unit>
             <trans-unit id="recip_import_mailgroup_msg" resname="recip_import_mailgroup_msg">
 				<source>Import CSV</source>
+				<target>CSV importieren</target>
 			</trans-unit>
 			<trans-unit id="recip_select_mailgroup" resname="recip_select_mailgroup">
 				<source>Select a recipient group</source>
+				<target>Empfängergruppe auswählen</target>
 			</trans-unit>
 			<trans-unit id="schedule_draft" resname="schedule_draft">
 				<source>Save mail settings for recurring mailings</source>
+				<target>Mail-Einstellungen für wiederkehrende Mailings speichern</target>
 			</trans-unit>
 			<trans-unit id="schedule_mailgroup" resname="schedule_mailgroup">
 				<source>Recipient group</source>
+				<target>Empfängergruppe</target>
 			</trans-unit>
 			<trans-unit id="schedule_mailgroups" resname="schedule_mailgroups">
 				<source>Recipient groups</source>
+				<target>Empfängergruppen</target>
 			</trans-unit>
 			<trans-unit id="schedule_select_mailgroup" resname="schedule_select_mailgroup">
 				<source>Select recipients and time of sending</source>
+				<target>Empfänger und Zeitpunkt des Versands auswählen</target>
 			</trans-unit>
 			<trans-unit id="schedule_select_mailgroup2" resname="schedule_select_mailgroup2" xmlspace="preserve">
 				<source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
 				After pressing FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending starts at the given distribution time.]]></source>
+                <target><![CDATA[Hier müssen Sie mindestens eine Empfängergruppe und den Zeitpunkt der Verteilung auswählen.
+				Nach dem Drücken von FINISH wird die Mail in die Mail-Warteschlange aufgenommen. Dort kann sie gelöscht werden, bevor der endgültige Versand zur angegebenen Zeit beginnt.]]></target>
 			</trans-unit>
 			<trans-unit id="schedule_send_all" resname="schedule_send_all">
 				<source>Send mail to all selected groups</source>
+				<target>E-Mail an alle ausgewählten Gruppen senden</target>
 			</trans-unit>
 			<trans-unit id="schedule_finish" resname="schedule_finish">
 				<source>Finish</source>
+				<target>Fertigstellen</target>
 			</trans-unit>
 			<trans-unit id="schedule_testmail" resname="schedule_testmail">
 				<source>Send this as test mail</source>
+				<target>Als Test-Mail senden</target>
 			</trans-unit>
 			<trans-unit id="schedule_time" resname="schedule_time">
 				<source>Distribution time (hh:mm dd-mm-yyyy)</source>
+				<target>Versand Zeitpunkt (hh:mm dd-mm-yyyy)</target>
 			</trans-unit>
 			<trans-unit id="select_folder" resname="select_folder">
 				<source>Please select mail folder.</source>
+				<target>Bitte einen Mail-Ordner auswählen.</target>
 			</trans-unit>
 			<trans-unit id="send_draft_saved" resname="send_draft_saved">
 				<source>Mail saved as draft</source>
+				<target>Mail als Entwurf gespeichert</target>
 			</trans-unit>
 			<trans-unit id="send_draft_scheduler" resname="send_draft_scheduler">
 				<source>The mail "%s" was successfully saved as draft for recurring sending within the scheduler.</source>
+				<target>Die E-Mail "%s" wurde erfolgreich als Entwurf für den wiederholten Versand im Planer gespeichert.</target>
 			</trans-unit>
 			<trans-unit id="send_recipients" resname="send_recipients">
 				<source>Recipient(s)</source>
-			</trans-unit>
-			<trans-unit id="send_sending" resname="send_sending">
-				<source>Sending mail</source>
+				<target>Empfänger</target>
 			</trans-unit>
 			<trans-unit id="send_was_scheduled" resname="send_was_scheduled">
 				<source>Mail scheduled for distribution</source>
+				<target>Mail für Versand eingeplant</target>
 			</trans-unit>
 			<trans-unit id="send_was_scheduled_for" resname="send_was_scheduled_for">
-				<source>The mail "%s" was successfully scheduled for distribution at %s</source>
+				<source>The mail "%s" was successfully scheduled for distribution at %s.</source>
+				<target>Die E-Mail "%s" wurde erfolgreich für den Versand am %s eingeplant.</target>
 			</trans-unit>
             <trans-unit id="testMailSent" resname="testMailSent">
                 <source>Test mail successfully sent</source>
+                <target>Test Mail erfolgreich versandt</target>
             </trans-unit>
 			<trans-unit id="testMailSentTo" resname="testMailSentTo">
 				<source>The test mail was sent to %s.</source>
+				<target>Die Test Mail wurde an %s versandt.</target>
 			</trans-unit>
 			<trans-unit id="send_was_sent" resname="send_was_sent">
 				<source>The mail was sent.</source>
+				<target>Die Mail wurde versandt.</target>
 			</trans-unit>
 			<trans-unit id="send_was_sent_to_name" resname="send_was_sent_to_name">
 				<source>The mail was sent to %s.</source>
+				<target>Die Mail wurde an %s versandt.</target>
 			</trans-unit>
 			<trans-unit id="send_was_sent_to_number" resname="send_was_sent_to_number">
 				<source>The mail was sent to %s recipients.</source>
+				<target>Die Mail wurde an %s Empfänger versandt.</target>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned" resname="stats_CSV_returned">
-				<source>CSV of returned recipients</source>
+				<source>CSV of recipients of returned mails</source>
+				<target>CSV der Empfänger von zurückgesendeten Mails</target>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned_bad_header" resname="stats_CSV_returned_bad_header">
 				<source>CSV of returned recipients with error in header</source>
+				<target>CSV der Empfänger von zurückgesendeten Mails mit Fehlern im Header</target>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned_bad_host" resname="stats_CSV_returned_bad_host">
 				<source>CSV of returned recipients with bad host</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit Fehler "Bad host"</target>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned_mailbox_full" resname="stats_CSV_returned_mailbox_full">
 				<source>CSV of returned recipients with mailbox full</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit Fehler "Mailbox voll"</target>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned_reason_unknown" resname="stats_CSV_returned_reason_unknown">
 				<source>CSV of returned recipients for unknown reason</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Fehler</target>
 			</trans-unit>
 			<trans-unit id="stats_CSV_returned_unknown_recipient" resname="stats_CSV_returned_unknown_recipient">
 				<source>CSV of returned recipients with unknown recipient</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Empfänger</target>
 			</trans-unit>
 			<trans-unit id="stats_HTML" resname="stats_HTML">
 				<source>HTML</source>
@@ -1061,18 +1132,21 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="stats_HTML_mails_viewed" resname="stats_HTML_mails_viewed">
 				<source>Mails viewed</source>
+				<target>Mails angesehen</target>
 			</trans-unit>
 			<trans-unit id="stats_bad_host" resname="stats_bad_host">
 				<source>Bad host</source>
 			</trans-unit>
 			<trans-unit id="stats_count" resname="stats_count">
 				<source>Count</source>
+				<target>Anzahl</target>
 			</trans-unit>
 			<trans-unit id="stats_direct_mail" resname="stats_direct_mail">
 				<source>Mail</source>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned" resname="stats_disable_returned">
 				<source>Disable returned recipients</source>
+				<target>Empfänger deaktivieren</target>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned_bad_header" resname="stats_disable_returned_bad_header">
 				<source>Disable returned recipients with error in header</source>
