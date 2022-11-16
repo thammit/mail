@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-01-29T120000Z" product-name="mail">
+	<file source-language="en" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-11-01T12:00:00Z" product-name="mail">
 		<header />
 		<body>
             <trans-unit id="authcode_fieldList.description">
@@ -913,25 +913,25 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>List of recipients from tt_address table</source>
 			</trans-unit>
 			<trans-unit id="stats_emails_disabled" resname="stats_emails_disabled">
-				<source>adresses disabled</source>
+				<source>addresses disabled</source>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_bad_header_list" resname="stats_emails_returned_bad_header_list">
-				<source>Email adresses of returned mails with error in header</source>
+				<source>Email addresses of returned mails with error in header</source>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_bad_host_list" resname="stats_emails_returned_bad_host_list">
-				<source>Email adresses of returned mails with bad host</source>
+				<source>Email addresses of returned mails with bad host</source>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_list" resname="stats_emails_returned_list">
-				<source>Email adresses of returned mails</source>
+				<source>Email addresses of returned mails</source>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_mailbox_full_list" resname="stats_emails_returned_mailbox_full_list">
-				<source>Email adresses of returned mails with mailbox full</source>
+				<source>Email addresses of returned mails with mailbox full</source>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_reason_unknown_list" resname="stats_emails_returned_reason_unknown_list">
-				<source>Email adresses of returned mails for unknown reason</source>
+				<source>Email addresses of returned mails for unknown reason</source>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_unknown_recipient_list" resname="stats_emails_returned_unknown_recipient_list">
-				<source>Email adresses of returned mails with unknown recipient</source>
+				<source>Email addresses of returned mails with unknown recipient</source>
 			</trans-unit>
 			<trans-unit id="stats_error_in_header" resname="stats_error_in_header">
 				<source>Error in Header</source>
@@ -946,22 +946,22 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Total responses/Unique responses</source>
 			</trans-unit>
 			<trans-unit id="stats_list_returned" resname="stats_list_returned">
-				<source>List returned recipients</source>
+				<source>Returned recipients</source>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_bad_header" resname="stats_list_returned_bad_header">
-				<source>List returned recipients with error in header</source>
+				<source>Returned recipients with error in header</source>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_bad_host" resname="stats_list_returned_bad_host">
-				<source>List returned recipients with bad host</source>
+				<source>Returned recipients with bad host</source>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_mailbox_full" resname="stats_list_returned_mailbox_full">
-				<source>List returned recipients with mailbox full</source>
+				<source>Returned recipients with mailbox full</source>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_reason_unknown" resname="stats_list_returned_reason_unknown">
-				<source>List returned recipients for unknown reason</source>
+				<source>Returned recipients for unknown reason</source>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_unknown_recipient" resname="stats_list_returned_unknown_recipient">
-				<source>List returned recipients with unknown recipient</source>
+				<source>Returned recipients with unknown recipient</source>
 			</trans-unit>
 			<trans-unit id="stats_mailbox_full" resname="stats_mailbox_full">
 				<source>Mailbox full</source>
@@ -1051,28 +1051,10 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>List of recipients from fe_users</source>
 			</trans-unit>
 			<trans-unit id="stats_website_users_disabled" resname="stats_website_users_disabled">
-				<source>website users disabled</source>
-			</trans-unit>
-			<trans-unit id="subscriber_info" resname="subscriber_info">
-				<source>Subscriber Info</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile" resname="subscriber_profile">
-				<source>Subscriber Profile</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile_htmlemail" resname="subscriber_profile_htmlemail">
-				<source>Receive HTML based mails</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile_instructions" resname="subscriber_profile_instructions">
-				<source>Set categories of interest for the subscriber.</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile_update" resname="subscriber_profile_update">
-				<source>Update profile settings</source>
+				<source>Website users disabled</source>
 			</trans-unit>
 			<trans-unit id="testmail_individual" resname="testmail_individual">
 				<source>Individual</source>
-			</trans-unit>
-			<trans-unit id="testmail_individual_msg" resname="testmail_individual_msg">
-				<source>Select a recipient of the testmail. The mail will be generated based on the profile of the recipient you select.</source>
 			</trans-unit>
 			<trans-unit id="testmail_mailgroup" resname="testmail_mailgroup">
 				<source>Recipient group</source>
@@ -1172,15 +1154,9 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
                 <source>Assign categories to content elements</source>
             </trans-unit>
             <trans-unit id="assign_categories.description" xml:space="preserve">
-			<source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
+			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
 			Content elements without category restrictions will appear for in all mails.]]></source>
-		</trans-unit>
-            <trans-unit id="create_directmail_from_nl.alttitle">
-                <source>Create a new mail from newsletter</source>
-            </trans-unit>
-            <trans-unit id="create_directmail_from_nl.description">
-                <source>No mail has been created using the content of the following newsletters. Click on the one you want to use to create a new mail.</source>
-            </trans-unit>
+		    </trans-unit>
             <trans-unit id="create_directmail_from_url.alttitle">
                 <source>Create a new mailing from external pages</source>
             </trans-unit>
@@ -1215,36 +1191,7 @@ You may personalize the mails that will be sent to each recipient by inserting t
 ###SYS_TABLE_NAME###
 ###SYS_MAIL_ID###
 ###SYS_AUTHCODE###]]></source>
-		</trans-unit>
-            <trans-unit id="directmail_actions.alttitle">
-                <source>Mail options menu</source>
-            </trans-unit>
-            <trans-unit id="directmail_actions.description">
-                <source>Select the action you want to perform on this mail.</source>
-            </trans-unit>
-            <trans-unit id="directmail_actions.details" xml:space="preserve">
-			<source><![CDATA[Possible actions are the following, but their availability vary depending on the current state of the mail:
-
-1. Fetch and compile mail content: this option lets you fetch or acquire the content of the mail which will be compiled in a special format for later mailing; this action must be performed before any other action may be taken; you should review the properties of the mail as presented on the screen, and edit them, if required, before fetching content.
-
-2. Send a testmail: this option lets you send a test mail to make sure that the email messages that will be sent to the recipient list look as expected when received in a client email application.
-
-3. Mass-send mail: this option lets you schedule the actual sending of the mail to a specific recipient list.
-
-4. See statistics of this mail: this option lets you review statistics on the mail and the responses, and take action on returned mails; this option is available only after mass-sending the mail has been initiated.]]></source>
-		</trans-unit>
-            <trans-unit id="folders.alttitle">
-                <source>Available mail folders</source>
-            </trans-unit>
-            <trans-unit id="folders.description">
-                <source>Select the mail folder you wish to work with.</source>
-            </trans-unit>
-            <trans-unit id="folders.details">
-                <source>Each mail folder is a specifically configured work area for the Direct Mail module.</source>
-            </trans-unit>
-            <trans-unit id="select_directmail.description">
-                <source>The following mails have not yet been sent. Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
-            </trans-unit>
+		    </trans-unit>
             <trans-unit id="select_newsletter.alttitle">
                 <source>Select an internal page to create a mailing</source>
             </trans-unit>

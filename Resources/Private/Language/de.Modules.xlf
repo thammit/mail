@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-01-29T120000Z" product-name="mail">
+	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-11-01T12:00:00Z" product-name="mail">
 		<header />
 		<body>
             <trans-unit id="authcode_fieldList.description">
@@ -1150,302 +1150,369 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="stats_disable_returned_bad_header" resname="stats_disable_returned_bad_header">
 				<source>Disable returned recipients with error in header</source>
+				<target>Deaktivieren Sie zurückgesendete Empfänger mit Fehler in der Kopfzeile</target>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned_bad_host" resname="stats_disable_returned_bad_host">
 				<source>Disable returned recipients with bad host</source>
+				<target>Deaktiviere Empfänger mit falschem Host</target>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned_mailbox_full" resname="stats_disable_returned_mailbox_full">
 				<source>Disable returned recipients with mailbox full</source>
+				<target>Deaktiviere Empfängern mit vollem Postfach</target>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned_reason_unknown" resname="stats_disable_returned_reason_unknown">
 				<source>Disable returned recipients for unknown reason</source>
+				<target>Deaktiviere Empfängern mit unbekannten Grund</target>
 			</trans-unit>
 			<trans-unit id="stats_disable_returned_unknown_recipient" resname="stats_disable_returned_unknown_recipient">
 				<source>Disable returned recipients with unknown recipient</source>
+				<target>Deaktiviere Empfängern mit unbekannten Empfänger</target>
 			</trans-unit>
 			<trans-unit id="stats_emails" resname="stats_emails">
 				<source>List of recipients from tt_address table</source>
+				<target>Liste der Empfänger von tt_address Tabelle</target>
 			</trans-unit>
 			<trans-unit id="stats_emails_disabled" resname="stats_emails_disabled">
-				<source>adresses disabled</source>
+				<source>addresses disabled</source>
+				<target>Adressen deaktiviert</target>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_bad_header_list" resname="stats_emails_returned_bad_header_list">
-				<source>Email adresses of returned mails with error in header</source>
+				<source>Email addresses of returned mails with error in header</source>
+				<target>E-Mail-Adressen von zurückgesendeten E-Mails mit Fehler im Header</target>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_bad_host_list" resname="stats_emails_returned_bad_host_list">
-				<source>Email adresses of returned mails with bad host</source>
+				<source>Email addresses of returned mails with bad host</source>
+                <target>E-Mail-Adressen von zurückgesendeten E-Mails mit falschem Host</target>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_list" resname="stats_emails_returned_list">
-				<source>Email adresses of returned mails</source>
+				<source>Email addresses of returned mails</source>
+                <target>E-Mail-Adressen von zurückgesendeten</target>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_mailbox_full_list" resname="stats_emails_returned_mailbox_full_list">
-				<source>Email adresses of returned mails with mailbox full</source>
+				<source>Email addresses of returned mails with mailbox full</source>
+                <target>E-Mail-Adressen von zurückgesendeten E-Mails mit vollem Postfach</target>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_reason_unknown_list" resname="stats_emails_returned_reason_unknown_list">
-				<source>Email adresses of returned mails for unknown reason</source>
+				<source>Email addresses of returned mails for unknown reason</source>
+                <target>E-Mail-Adressen von zurückgesendeten E-Mails mit unbekanntem Grund</target>
 			</trans-unit>
 			<trans-unit id="stats_emails_returned_unknown_recipient_list" resname="stats_emails_returned_unknown_recipient_list">
-				<source>Email adresses of returned mails with unknown recipient</source>
+				<source>Email addresses of returned mails with unknown recipient</source>
+                <target>E-Mail-Adressen von zurückgesendeten E-Mails mit unbekanntem Empfänger</target>
 			</trans-unit>
 			<trans-unit id="stats_error_in_header" resname="stats_error_in_header">
 				<source>Error in Header</source>
+				<target>Fehler im Header</target>
 			</trans-unit>
 			<trans-unit id="stats_performance" resname="stats_performance">
 				<source>Performance</source>
+				<target>Leistung</target>
 			</trans-unit>
 			<trans-unit id="stats_img_link" resname="stats_img_link">
 				<source>Imagelink</source>
+				<target>Bildlink</target>
 			</trans-unit>
 			<trans-unit id="stats_links_clicked_per_respondent" resname="stats_links_clicked_per_respondent">
 				<source>Total responses/Unique responses</source>
+				<target>Antworten insgesamt/einzigartige Antworten</target>
 			</trans-unit>
 			<trans-unit id="stats_list_returned" resname="stats_list_returned">
-				<source>List returned recipients</source>
+				<source>Returned recipients</source>
+				<target>Zurückgesandte Empfänger</target>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_bad_header" resname="stats_list_returned_bad_header">
-				<source>List returned recipients with error in header</source>
+				<source>Returned recipients with error in header</source>
+				<target>Empfänger mit Fehler in der Kopfzeile</target>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_bad_host" resname="stats_list_returned_bad_host">
-				<source>List returned recipients with bad host</source>
+				<source>Returned recipients with bad host</source>
+				<target>Empfänger mit falschem Host</target>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_mailbox_full" resname="stats_list_returned_mailbox_full">
-				<source>List returned recipients with mailbox full</source>
+				<source>Returned recipients with mailbox full</source>
+				<target>Empfänger mit vollem Postfach</target>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_reason_unknown" resname="stats_list_returned_reason_unknown">
-				<source>List returned recipients for unknown reason</source>
+				<source>Returned recipients for unknown reason</source>
+                <target>Empfänger mit unbekanntem Grund</target>
 			</trans-unit>
 			<trans-unit id="stats_list_returned_unknown_recipient" resname="stats_list_returned_unknown_recipient">
-				<source>List returned recipients with unknown recipient</source>
+				<source>Returned recipients with unknown recipient</source>
+                <target>Empfänger mit unbekanntem Empfänger</target>
 			</trans-unit>
 			<trans-unit id="stats_mailbox_full" resname="stats_mailbox_full">
 				<source>Mailbox full</source>
+				<target>Postfach voll</target>
 			</trans-unit>
 			<trans-unit id="stats_mails_returned" resname="stats_mails_returned">
 				<source>Delivery failed</source>
+				<target>Zustellung fehlgeschlagen</target>
 			</trans-unit>
 			<trans-unit id="stats_mails_sent" resname="stats_mails_sent">
 				<source>Mails received</source>
+				<target>Mails empfangen</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_choose" resname="stats_overview_choose">
 				<source>Choose a mail</source>
+				<target>Mail wählen</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_delivery_begun" resname="stats_overview_delivery_begun">
 				<source>Delivery begun</source>
+				<target>Versandstart</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_delivery_ended" resname="stats_overview_delivery_ended">
 				<source>Delivery ended</source>
+				<target>Versandende</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_header" resname="stats_overview_header">
 				<source>Mail Reports</source>
+				<target>Mail Berichte</target>
 			</trans-unit>
 			<trans-unit id="stats_show_header" resname="stats_show_header">
 				<source>Mail Report</source>
+				<target>Mail Bericht</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_queuing" resname="stats_overview_queuing">
 				<source>queuing</source>
+				<target>abarbeiten</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_scheduled" resname="stats_overview_scheduled">
 				<source>Scheduled</source>
+				<target>Eingeplant</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_sending" resname="stats_overview_sending">
 				<source>sending</source>
+				<target>sende</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_sent" resname="stats_overview_sent">
 				<source>sent</source>
+				<target>versandt</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_status" resname="stats_overview_status">
 				<source>Status</source>
 			</trans-unit>
 			<trans-unit id="stats_overview_subject" resname="stats_overview_subject">
 				<source>Subject</source>
+				<target>Thema</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_total_sent" resname="stats_overview_total_sent">
 				<source># sent</source>
+				<target># versandt</target>
 			</trans-unit>
 			<trans-unit id="stats_plainlist" resname="stats_plainlist">
 				<source>List of recipients</source>
+				<target>Empfängerliste</target>
 			</trans-unit>
 			<trans-unit id="stats_plaintext" resname="stats_plaintext">
 				<source>Plaintext</source>
+				<target>Reiner Text</target>
 			</trans-unit>
 			<trans-unit id="stats_plaintext_link_nr" resname="stats_plaintext_link_nr">
 				<source>Plaintext Link #</source>
+				<target>Reiner Text Link #</target>
 			</trans-unit>
 			<trans-unit id="stats_reason_unkown" resname="stats_reason_unkown">
 				<source>Reason unknown</source>
+				<target>Grund unbekannt</target>
 			</trans-unit>
 			<trans-unit id="stats_recalculate_cached_data" resname="stats_recalculate_cached_data">
 				<source>Recalculate</source>
+				<target>Neuberechnung</target>
 			</trans-unit>
 			<trans-unit id="stats_recalculate_stats" resname="stats_recalculate_stats">
 				<source>Recalculate</source>
+                <target>Neuberechnung</target>
 			</trans-unit>
 			<trans-unit id="stats_recipient_unknown" resname="stats_recipient_unknown">
 				<source>Recipient unknown</source>
+				<target>Empfänger unbekannt</target>
 			</trans-unit>
 			<trans-unit id="stats_response" resname="stats_response">
 				<source>Responses</source>
+				<target>Antworten</target>
 			</trans-unit>
 			<trans-unit id="stats_response_link" resname="stats_response_link">
 				<source>Link Responses</source>
+				<target>Link Antworten</target>
 			</trans-unit>
 			<trans-unit id="stats_total" resname="stats_total">
 				<source>Total</source>
+				<target>Gesamt</target>
 			</trans-unit>
 			<trans-unit id="stats_total_mails_returned" resname="stats_total_mails_returned">
 				<source>Total mails returned</source>
+				<target>Zurückerhaltene Mails</target>
 			</trans-unit>
 			<trans-unit id="stats_total_responses" resname="stats_total_responses">
 				<source>Total responses (links clicked)</source>
+				<target>Reaktionen (geklickte Links)</target>
 			</trans-unit>
 			<trans-unit id="stats_unique_responses" resname="stats_unique_responses">
 				<source>Unique responses (links clicked)</source>
+				<target>Eindeutige Reaktionen (geklickte Links)</target>
 			</trans-unit>
 			<trans-unit id="stats_website_users" resname="stats_website_users">
 				<source>List of recipients from fe_users</source>
+				<target>Liste der Empfänger von fe_users</target>
 			</trans-unit>
 			<trans-unit id="stats_website_users_disabled" resname="stats_website_users_disabled">
-				<source>website users disabled</source>
-			</trans-unit>
-			<trans-unit id="subscriber_info" resname="subscriber_info">
-				<source>Subscriber Info</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile" resname="subscriber_profile">
-				<source>Subscriber Profile</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile_htmlemail" resname="subscriber_profile_htmlemail">
-				<source>Receive HTML based mails</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile_instructions" resname="subscriber_profile_instructions">
-				<source>Set categories of interest for the subscriber.</source>
-			</trans-unit>
-			<trans-unit id="subscriber_profile_update" resname="subscriber_profile_update">
-				<source>Update profile settings</source>
+				<source>Website users disabled</source>
+				<target>Webseitenbenutzer deaktiviert</target>
 			</trans-unit>
 			<trans-unit id="testmail_individual" resname="testmail_individual">
 				<source>Individual</source>
-			</trans-unit>
-			<trans-unit id="testmail_individual_msg" resname="testmail_individual_msg">
-				<source>Select a recipient of the testmail. The mail will be generated based on the profile of the recipient you select.</source>
+				<target>Individuell</target>
 			</trans-unit>
 			<trans-unit id="testmail_mailgroup" resname="testmail_mailgroup">
 				<source>Recipient group</source>
+				<target>Empfängergruppe</target>
 			</trans-unit>
 			<trans-unit id="testmail_mailgroup_msg" resname="testmail_mailgroup_msg">
 				<source>Select a recipient group for the test mail.</source>
+				<target>Wählen Sie eine Empfängergruppe für die Testmail aus.</target>
 			</trans-unit>
 			<trans-unit id="testmail_simple" resname="testmail_simple">
 				<source>Send a simple test mail</source>
+				<target>Senden Sie eine einfache Test-E-Mail</target>
 			</trans-unit>
 			<trans-unit id="testmail_simple_msg" resname="testmail_simple_msg" xmlspace="preserve">
 				<source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.<br>
 				Beware: The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
+                <target><![CDATA[Hier können Sie (optional) eine einfache Testmail an einen oder mehrere Empfänger senden, bevor Sie den endgültigen Versand auf der nächsten Seite planen.<br>
+				Bitte beachten Sie: Die generierte Mail enthält ALLE Elemente, unabhängig von ihrer Kategorie. Die Benutzerfelder werden NICHT durch Daten ersetzt.]]></target>
 			</trans-unit>
 			<trans-unit id="view_delivery_begin_end" resname="view_delivery_begin_end">
 				<source>Delivery begun/ended</source>
+				<target>Versand gestartet/beendet</target>
 			</trans-unit>
 			<trans-unit id="view_dmail" resname="view_dmail">
 				<source>Source</source>
+				<target>Quelle</target>
 			</trans-unit>
 			<trans-unit id="view_flowed" resname="view_flowed">
 				<source>Flowed text</source>
+				<target>Fließtext</target>
 			</trans-unit>
 			<trans-unit id="view_from" resname="view_from">
 				<source>Sender</source>
+				<target>Absender</target>
 			</trans-unit>
 			<trans-unit id="view_mail" resname="view_mail">
 				<source>Email format/attachments</source>
+				<target>E-Mail-Format/Attachments</target>
 			</trans-unit>
 			<trans-unit id="view_media" resname="view_media">
 				<source>Include media</source>
+				<target>Eingebundene Bilder</target>
 			</trans-unit>
 			<trans-unit id="view_recipient_total_sent" resname="view_recipient_total_sent">
 				<source>Recipients</source>
+				<target>Empfänger</target>
 			</trans-unit>
 			<trans-unit id="view_replyto" resname="view_replyto">
 				<source>Reply</source>
+				<target>Antwort</target>
 			</trans-unit>
 			<trans-unit id="yes" resname="yes">
 				<source>Yes</source>
+				<target>Ja</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.server" resname="scheduler.bounceMail.server">
 				<source>Server URL/IP</source>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.csh.server" resname="scheduler.bounceMail.csh.server">
 				<source>URL or IP of the mail server</source>
+				<target>URL oder IP des Mailservers</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.port" resname="scheduler.bounceMail.port">
 				<source>Port number</source>
+				<target>Port Nummer</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.csh.port" resname="scheduler.bounceMail.csh.port">
 				<source>Port number of the mail server</source>
+				<target>Port Nummer des Mailservers</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.user" resname="scheduler.bounceMail.user">
 				<source>Username</source>
+				<target>Benutzername</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.csh.user" resname="scheduler.bounceMail.csh.user">
 				<source>Username to authenticate</source>
+				<target>Benutzername zur Authentifizierung</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.password" resname="scheduler.bounceMail.password">
 				<source>Password</source>
+				<target>Passwort</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.csh.password" resname="scheduler.bounceMail.csh.password">
 				<source>Password of the user</source>
+				<target>Passwort des Benutzers</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.service" resname="scheduler.bounceMail.service">
 				<source>Type of mailserver</source>
+				<target>Art des Mailservers</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.csh.service" resname="scheduler.bounceMail.csh.service">
 				<source>IMAP or POP3</source>
+				<target>IMAP oder POP3</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.maxProcessed" resname="scheduler.bounceMail.maxProcessed">
 				<source>Number of bounce mail to be processed</source>
+				<target>Anzahl der zu bearbeitenden Rückläufermails</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.csh.maxProcessed" resname="scheduler.bounceMail.csh.maxProcessed">
 				<source>Maximum number of bounce mail to be processed on one scheduler cycle</source>
+				<target>Anzahl der zu bearbeitenden Rückläufermails pro Durchlauf</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.dataVerification" resname="scheduler.bounceMail.dataVerification">
 				<source><![CDATA[Connection using the given data is failed. Error message ]]></source>
+				<target><![CDATA[Verbindung mit den angegebenen Daten fehlgeschlagen. Fehlermeldung: ]]></target>
 			</trans-unit>
 			<trans-unit id="error.no_recipient_groups_found" resname="error.no_recipient_groups_found">
 				<source>No recipient groups found</source>
+				<target>Keine Empfängergruppen gefunden</target>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.phpImapError" resname="scheduler.bounceMail.phpImapError">
 				<source>Please install PHP IMAP extension</source>
+				<target>Bitte die PHP-IMAP-Erweiterung installieren</target>
 			</trans-unit>
 			<trans-unit id="labels.path" resname="labels.path">
 				<source>Path</source>
+				<target>Pfad</target>
 			</trans-unit>
 			<trans-unit id="mod.no_access" resname="mod.no_access">
 				<source>no access</source>
+				<target>Kein Zugang</target>
 			</trans-unit>
 			<trans-unit id="mod.no_recipients" resname="mod.no_recipients">
 				<source>no recipients</source>
+				<target>Keine Empfänger</target>
 			</trans-unit>
             <trans-unit id="assign_categories.alttitle" resname="assign_categories.alttitle">
                 <source>Assign categories to content elements</source>
+                <target>Zuweisung von Kategorien zu Inhaltselementen</target>
             </trans-unit>
             <trans-unit id="assign_categories.description" xml:space="preserve">
-			<source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
+			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
 			Content elements without category restrictions will appear for in all mails.]]></source>
-		</trans-unit>
-            <trans-unit id="create_directmail_from_nl.alttitle">
-                <source>Create a new mail from newsletter</source>
-            </trans-unit>
-            <trans-unit id="create_directmail_from_nl.description">
-                <source>No mail has been created using the content of the following newsletters. Click on the one you want to use to create a new mail.</source>
-            </trans-unit>
+                <target><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur dann in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
+			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target>
+		    </trans-unit>
             <trans-unit id="create_directmail_from_url.alttitle">
                 <source>Create a new mailing from external pages</source>
+                <target>Ein neues Mailing von externen Seiten erstellen</target>
             </trans-unit>
             <trans-unit id="create_directmail_from_url.description">
                 <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+                <target>Klicken Sie auf WEITER, um mit den weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
             </trans-unit>
             <trans-unit id="create_newsletter.alttitle">
                 <source>Create a newsletter</source>
+                <target>Erstelle einen Newsletter</target>
             </trans-unit>
             <trans-unit id="create_newsletter.description">
                 <source>Click on this link if you want to create a new newsletter.</source>
+                <target>Klicken Sie auf diesen Link, wenn Sie einen neuen Newsletter erstellen möchten.</target>
             </trans-unit>
             <trans-unit id="create_newsletter.details" xml:space="preserve">
 			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the Direct Mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
@@ -1469,47 +1536,22 @@ You may personalize the mails that will be sent to each recipient by inserting t
 ###SYS_TABLE_NAME###
 ###SYS_MAIL_ID###
 ###SYS_AUTHCODE###]]></source>
-		</trans-unit>
-            <trans-unit id="directmail_actions.alttitle">
-                <source>Mail options menu</source>
-            </trans-unit>
-            <trans-unit id="directmail_actions.description">
-                <source>Select the action you want to perform on this mail.</source>
-            </trans-unit>
-            <trans-unit id="directmail_actions.details" xml:space="preserve">
-			<source><![CDATA[Possible actions are the following, but their availability vary depending on the current state of the mail:
-
-1. Fetch and compile mail content: this option lets you fetch or acquire the content of the mail which will be compiled in a special format for later mailing; this action must be performed before any other action may be taken; you should review the properties of the mail as presented on the screen, and edit them, if required, before fetching content.
-
-2. Send a testmail: this option lets you send a test mail to make sure that the email messages that will be sent to the recipient list look as expected when received in a client email application.
-
-3. Mass-send mail: this option lets you schedule the actual sending of the mail to a specific recipient list.
-
-4. See statistics of this mail: this option lets you review statistics on the mail and the responses, and take action on returned mails; this option is available only after mass-sending the mail has been initiated.]]></source>
-		</trans-unit>
-            <trans-unit id="folders.alttitle">
-                <source>Available mail folders</source>
-            </trans-unit>
-            <trans-unit id="folders.description">
-                <source>Select the mail folder you wish to work with.</source>
-            </trans-unit>
-            <trans-unit id="folders.details">
-                <source>Each mail folder is a specifically configured work area for the Direct Mail module.</source>
-            </trans-unit>
-            <trans-unit id="select_directmail.description">
-                <source>The following mails have not yet been sent. Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
-            </trans-unit>
+		    </trans-unit>
             <trans-unit id="select_newsletter.alttitle">
                 <source>Select an internal page to create a mailing</source>
+                <target>Wählen Sie eine interne Seite, um ein Mailing zu erstellen</target>
             </trans-unit>
             <trans-unit id="select_newsletter.description">
                 <source>Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+                <target>Klicken Sie auf WEITER, um mit den weiteren Einstellungen (Format, Empfängergruppe, Sendezeit...) fortzufahren.</target>
             </trans-unit>
             <trans-unit id="quick_mail.alttitle">
                 <source>Create a quick mailing</source>
+                <target>Kurznachricht erstellen</target>
             </trans-unit>
             <trans-unit id="quick_mail.description">
                 <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+                <target>Klicken Sie auf WEITER, um mit den weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
             </trans-unit>
 		</body>
 	</file>
