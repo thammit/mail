@@ -219,8 +219,8 @@
 			<target>Inklusive Unterseiten</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.select_categories">
-			<source>Must subscribe to one of the categories</source>
-			<target>Muss sich für eine der Kategorien anmelden</target>
+			<source>Recipients must subscribe to one of the following categories</source>
+			<target>Empfänger müssen eine dieser Kategorien abonniert haben</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.static_list">
 			<source>Recipients</source>
@@ -247,11 +247,11 @@
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types">
 			<source>Types of records</source>
-			<target>Arten von Datensätzen</target>
+			<target>Datensatztypen</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types.I.0">
-			<source>Address</source>
-			<target>Adresse</target>
+			<source>Addresses</source>
+			<target>Adressen</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types.I.1">
 			<source>Website user</source>
@@ -262,8 +262,8 @@
 			<target>Von einer benutzerdefinierten Tabelle</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types.I.3">
-			<source>Website User Group</source>
-			<target>Webseitenbenutzergruppe</target>
+			<source>Website User Groups</source>
+			<target>Webseitenbenutzergruppen</target>
 		</trans-unit>
 		</body>
 	</file>

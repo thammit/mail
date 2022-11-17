@@ -169,7 +169,7 @@
 			<source>Include page subtree</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.select_categories">
-			<source>Must subscribe to one of the categories</source>
+			<source>Recipients must subscribe to one of the following categories</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.static_list">
 			<source>Recipients</source>
@@ -193,7 +193,7 @@
 			<source>Types of records</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types.I.0">
-			<source>Address</source>
+			<source>Addresses</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types.I.1">
 			<source>Website user</source>
@@ -202,7 +202,7 @@
 			<source>From custom-defined table</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types.I.3">
-			<source>Website User Group</source>
+			<source>Website User Groups</source>
 		</trans-unit>
 		</body>
 	</file>

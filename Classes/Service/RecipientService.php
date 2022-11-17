@@ -582,10 +582,13 @@ class RecipientService
      */
     protected function getRecursiveGroups(Group $group, int $recursion = 0): array
     {
-        $groups = [$group];
         $recursion++;
         if ($recursion > 20) {
-            return $groups;
+            return [];
+        }
+        $groups = [];
+        if ($group->getType() !== RecipientGroupType::OTHER) {
+            $groups = [$group];
         }
         $childGroups = $group->getChildren();
         if ($group->getType() === RecipientGroupType::OTHER && $childGroups->count() > 0) {
@@ -596,7 +599,7 @@ class RecipientService
             }
         }
 
-        return array_merge(...$groups);
+        return $groups;
     }
 
     /**

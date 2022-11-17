@@ -3,17 +3,25 @@
 	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-11-01T12:00:00Z" product-name="mail">
 		<header />
 		<body>
+            <trans-unit id="general.button.next">
+                <source>Next</source>
+                <target>Weiter</target>
+            </trans-unit>
+            <trans-unit id="general.button.back">
+                <source>Previous</source>
+                <target>Zurück</target>
+            </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
+                <target>Liste der Felder, die zur Berechnung von Authentifizierungscodes von Abmeldelinks und Sprung-URLs in E-Mails verwendet werden sollen.</target>
             </trans-unit>
             <trans-unit id="flowedFormat.description">
                 <source>Set this option if you want to use normally flowing text inside the plain text mail content.</source>
+                <target>Setzen Sie diese Option, wenn Sie normalen Fließtext innerhalb des reinen Textinhalts der E-Mail verwenden möchten.</target>
             </trans-unit>
             <trans-unit id="flowedFormat.details">
-                <source>If the option is set, plain text mail content will be broken in fixed length lines, as is standard for plain text email content, but so-called flowed format
-                    will be used. This will allow client agents that support this format to display the text as normally flowing text. The option is ignored if 'quoted-printable'
-                    is used.
-                </source>
+                <source>If the option is set, plain text mail content will be broken in fixed length lines, as is standard for plain text email content, but so-called flowed format will be used. This will allow client agents that support this format to display the text as normally flowing text. The option is ignored if 'quoted-printable' is used.</source>
+                <target>Wenn die Option gesetzt ist, wird der Inhalt von E-Mails mit reinem Text in Zeilen fester Länge umgebrochen, wie es bei E-Mails mit reinem Text üblich ist, aber das so genannte fließende Format verwendet. Dadurch können Client-Agenten, die dieses Format unterstützen, den Text als normalen Fließtext anzeigen. Die Option wird ignoriert, wenn 'quoted-printable' verwendet wird.</target>
             </trans-unit>
             <trans-unit id="from_email.description">
                 <source>Enter the sender email address. (Required)</source>
@@ -21,6 +29,7 @@
             </trans-unit>
             <trans-unit id="from_email.details">
                 <source>This email address will appear as the originating address or sender address in the mails received by the recipients.</source>
+                <target>Diese E-Mail-Adresse wird in den von den Empfängern empfangenen E-Mails als Absenderadresse angezeigt.</target>
             </trans-unit>
             <trans-unit id="from_name.description">
                 <source>Enter the sender name. (Required)</source>
@@ -28,24 +37,29 @@
             </trans-unit>
             <trans-unit id="from_name.details">
                 <source>This name will appear as the name of the author or sender in the mails received by the recipients.</source>
-                <target state="translated">Dieser Name wird als Name des Authors oder Absenders in den E-Mails beim Empfänger erscheinen.</target>
+                <target state="translated">Dieser Name wird als Name des Authors oder Absenders in den E-Mails beim Empfänger angezeigt.</target>
             </trans-unit>
             <trans-unit id="includeMedia.description">
                 <source>Set this option if you want to embed images in HTML mails.</source>
+                <target>Setzen Sie diese Option, wenn Sie Bilder in HTML-Mails einbetten möchten.</target>
             </trans-unit>
             <trans-unit id="includeMedia.details" xml:space="preserve">
-			<source><![CDATA[If the option is set, images are encoded and embed into the messages. Sent messages will be heavier to transport.
+			    <source><![CDATA[If the option is set, images are encoded and embed into the messages. Sent messages will be heavier to transport.
 If the option is not set, images are included in HTML content by absolute reference (href) to their location on the site where they reside.]]></source>
+                <target><![CDATA[Wenn die Option aktiviert ist, werden Bilder kodiert und in die Nachrichten eingebettet. Gesendete Nachrichten werden dadurch größer.
+Wenn die Option NICHT gesetzt ist, werden Bilder in den HTML-Inhalt über einen absoluten Link zur Website eingebunden.]]></target>
 		    </trans-unit>
             <trans-unit id="redirect_all.description">
                 <source>If set and if redirect is set, all links in plain text content will be redirected, not only links longer than 76 characters.</source>
+                <target>Wenn gesetzt und wenn redirect gesetzt ist, werden alle Links im reinen Textinhalt umgeleitet, nicht nur Links, die länger als 76 Zeichen sind.</target>
             </trans-unit>
             <trans-unit id="organisation.description">
                 <source>Enter the name of the sending organization.</source>
+                <target>Geben Sie den Namen der sendenden Organisation ein.</target>
             </trans-unit>
             <trans-unit id="organisation.details">
                 <source>The name of the organization will appear in the headers of the mails sent to subscribers.</source>
-                <target state="translated">Der Name der Organisation wird in dem Header der E-Mails an die Abonnenten erscheinen.</target>
+                <target state="translated">Der Name der Organisation wird im Header der E-Mails an die Abonnenten angezeigt.</target>
             </trans-unit>
             <trans-unit id="priority.description">
                 <source>Enter the email delivery priority.</source>
@@ -53,6 +67,7 @@ If the option is not set, images are included in HTML content by absolute refere
             </trans-unit>
             <trans-unit id="priority.details">
                 <source>The delivery priority will be set in the headers of the mails sent to subscribers.</source>
+                <target>Die Zustellpriorität wird in den Kopfzeilen der an die Abonnenten gesendeten Mails mitgeschickt.</target>
             </trans-unit>
             <trans-unit id="replyto_email.description">
                 <source>Enter the email address to which replys are sent. (Optional)</source>
@@ -72,37 +87,37 @@ If the option is not set, images are included in HTML content by absolute refere
             </trans-unit>
             <trans-unit id="return_path.description">
                 <source>Enter the return path email address here.</source>
+                <target>Geben Sie hier die E-Mail-Adresse ein, an die unzustellbare E-Mails zurückgesendet werden sollen.</target>
             </trans-unit>
             <trans-unit id="return_path.details" xml:space="preserve">
-			<source><![CDATA[This is the address to which non-deliverable mails will be returned to.
-If you put in the marker ###XID### it'll be substituted with the unique id of the mail recipient.
-Note that if PHP is executing in safe mode, the Direct mail module may not be able to set the return path to a value different than the value defined at the server level.]]></source>
+			    <source><![CDATA[This is the address to which non-deliverable mails will be returned to.
+If you put in the marker ###XID### it'll be substituted with the unique id of the mail recipient.]]></source>
+                <target><![CDATA[Dies ist die Adresse, an die unzustellbare Mails zurückgeschickt werden.
+Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des E-Mail-Empfängers ersetzt.]]></target>
 		    </trans-unit>
             <trans-unit id="sendOptions.description">
                 <source>Select the format of mail content.</source>
                 <target state="translated">Wähle das Format des E-Mail-Inhalts aus.</target>
             </trans-unit>
             <trans-unit id="sendOptions.details">
-                <source>If in doubt, set it to both Plain text and HTML. The messages will then be sent with both formats included, and the recipients are normally able to select
-                    their preferred format.
-                </source>
+                <source>If in doubt, set it to 'Plain text and HTML'. The messages will then be sent with both formats included, and the recipients are normally able to select their preferred format.</source>
+                <target>Im Zweifelsfall sollten Sie die Einstellung 'Reiner Text und HTML' setzen. Die Nachrichten werden dann in beiden Formaten verschickt, und die Empfänger können normalerweise ihr bevorzugtes Format auswählen.</target>
             </trans-unit>
             <trans-unit id="type.description">
                 <source>Type of source of the mail</source>
                 <target state="translated">Quelltyp der Mail</target>
             </trans-unit>
             <trans-unit id="type.details">
-                <source>The Direct mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External
-                    URL'.
-                </source>
+                <source>The mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External URL'.</source>
+                <target>Die Mail kann aus einer Seite aus dem Seitenbaum der TYPO3-Site zusammengestellt werden: 'TYPO3-Seite', oder von einer Seite einer anderen Site: 'Externe URL'.</target>
             </trans-unit>
             <trans-unit id="redirect.description">
                 <source>Redirect long links found in plain text content.</source>
                 <target state="translated">Lange Links aus dem Klartext-Inhalt weiterleiten.</target>
             </trans-unit>
             <trans-unit id="redirect.details">
-                <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the core redirect module.
-                </source>
+                <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the TYPO3 redirect module.</source>
+                <target>Wenn diese Option gesetzt ist, werden Links, die länger als 76 Zeichen sind, umgeleitet: Lange URLs werden durch eine /redirect-[hash]-URL ersetzt, die vom TYPO3 Redirect-Modul verarbeitet wird.</target>
             </trans-unit>
             <trans-unit id="configure_HTMLParams_description" resname="configure_HTMLParams_description">
 				<source>Enter the additional URL parameters used to fetch the HTML content from a TYPO3 page.</source>
@@ -289,8 +304,8 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<target>Betreff-Präfix für Test-Mails</target>
 			</trans-unit>
 			<trans-unit id="configure_testmail_description" resname="configure_testmail_description">
-				<source>This will be prepended to the test mail subject</source>
-				<target>Dies wird dem Betreff der Test-Mail vorangestellt</target>
+				<source>Will be prepended to test mails subject</source>
+				<target>Wird dem Betreff von Test-Mails vorangestellt</target>
 			</trans-unit>
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
 				<source>Save</source>
@@ -1036,9 +1051,9 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="schedule_select_mailgroup2" resname="schedule_select_mailgroup2" xmlspace="preserve">
 				<source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
-				After pressing FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending starts at the given distribution time.]]></source>
-                <target><![CDATA[Hier müssen Sie mindestens eine Empfängergruppe und den Zeitpunkt der Verteilung auswählen.
-				Nach dem Drücken von FINISH wird die Mail in die Mail-Warteschlange aufgenommen. Dort kann sie gelöscht werden, bevor der endgültige Versand zur angegebenen Zeit beginnt.]]></target>
+				After click FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending is finished.]]></source>
+                <target><![CDATA[Hier müssen Sie mindestens eine Empfängergruppe und den Versandbeginn auswählen.
+				Nach Klick auf FERTIGSTELLEN wird die Mail in die Warteschlange aufgenommen. Dort kann sie gelöscht werden, bis der endgültige Versand abgeschlossen ist.]]></target>
 			</trans-unit>
 			<trans-unit id="schedule_send_all" resname="schedule_send_all">
 				<source>Send mail to all selected groups</source>
@@ -1054,7 +1069,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="schedule_time" resname="schedule_time">
 				<source>Distribution time (hh:mm dd-mm-yyyy)</source>
-				<target>Versand Zeitpunkt (hh:mm dd-mm-yyyy)</target>
+				<target>Versandbeginn (hh:mm dd-mm-yyyy)</target>
 			</trans-unit>
 			<trans-unit id="select_folder" resname="select_folder">
 				<source>Please select mail folder.</source>

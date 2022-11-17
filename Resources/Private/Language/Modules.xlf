@@ -3,6 +3,12 @@
 	<file source-language="en" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-11-01T12:00:00Z" product-name="mail">
 		<header />
 		<body>
+            <trans-unit id="general.button.next">
+                <source>Next</source>
+            </trans-unit>
+            <trans-unit id="general.button.back">
+                <source>Back</source>
+            </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
             </trans-unit>
@@ -73,24 +79,19 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
                 <source>Select the format of mail content.</source>
             </trans-unit>
             <trans-unit id="sendOptions.details">
-                <source>If in doubt, set it to both Plain text and HTML. The messages will then be sent with both formats included, and the recipients are normally able to select
-                    their preferred format.
-                </source>
+                <source>If in doubt, set it to 'Plain text and HTML'. The messages will then be sent with both formats included, and the recipients are normally able to select their preferred format.</source>
             </trans-unit>
             <trans-unit id="type.description">
                 <source>Type of source of the Direct mail</source>
             </trans-unit>
             <trans-unit id="type.details">
-                <source>The Direct mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External
-                    URL'.
-                </source>
+                <source>The mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External URL'.</source>
             </trans-unit>
             <trans-unit id="redirect.description">
                 <source>Redirect long links found in plain text content.</source>
             </trans-unit>
             <trans-unit id="redirect.details">
-                <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the core redirect module.
-                </source>
+                <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the TYPO3 redirect module.</source>
             </trans-unit>
             <trans-unit id="configure_HTMLParams_description" resname="configure_HTMLParams_description">
 				<source>Enter the additional URL parameters used to fetch the HTML content from a TYPO3 page.</source>
@@ -230,7 +231,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Subject prefix for test mails</source>
 			</trans-unit>
 			<trans-unit id="configure_testmail_description" resname="configure_testmail_description">
-				<source>This will be prepended to the test mail subject</source>
+                <source>Will be prepended to test mails subject</source>
 			</trans-unit>
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
 				<source>Save</source>
@@ -808,7 +809,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
 			<trans-unit id="schedule_select_mailgroup2" resname="schedule_select_mailgroup2" xmlspace="preserve">
 				<source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
-				After pressing FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending starts at the given distribution time.]]></source>
+				After pressing FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending is finished.]]></source>
 			</trans-unit>
 			<trans-unit id="schedule_send_all" resname="schedule_send_all">
 				<source>Send mail to all selected groups</source>
