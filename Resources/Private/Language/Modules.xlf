@@ -146,7 +146,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Content transfer encoding and character set</source>
 			</trans-unit>
 			<trans-unit id="configure_options_links" resname="configure_options_links">
-				<source>Links in mail content</source>
+				<source>Links and click tracking</source>
 			</trans-unit>
 			<trans-unit id="configure_options_links_jumpurl" resname="configure_options_links_jumpurl">
 				<source>Click tracking</source>
@@ -158,7 +158,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>This configuration determines how QuickMails are handled and further sets the default value for mails.</source>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl" resname="configure_options_mailto_jumpurl">
-				<source>Enable click tracking for mailto links</source>
+				<source>Click tracking for mailto links</source>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl_description" resname="configure_options_mailto_jumpurl_description">
 				<source>Check this option to enable click tracking for mailto links.</source>
@@ -871,6 +871,9 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="stats_CSV_returned_unknown_recipient" resname="stats_CSV_returned_unknown_recipient">
 				<source>CSV of returned recipients with unknown recipient</source>
 			</trans-unit>
+			<trans-unit id="stats_clicked_link" resname="stats_clicked_link">
+				<source>Clicked links</source>
+			</trans-unit>
 			<trans-unit id="stats_HTML" resname="stats_HTML">
 				<source>HTML</source>
 			</trans-unit>
@@ -1031,7 +1034,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Responses</source>
 			</trans-unit>
 			<trans-unit id="stats_response_link" resname="stats_response_link">
-				<source>Link Responses</source>
+				<source>Reactions</source>
 			</trans-unit>
 			<trans-unit id="stats_total" resname="stats_total">
 				<source>Total</source>

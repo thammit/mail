@@ -154,9 +154,7 @@ class MailerService implements LoggerAwareInterface
     public function prepare(int $mailUid): void
     {
         $this->mailUid = $mailUid;
-        /** @var Mail $mail */
         $this->mail = $this->mailRepository->findByUid($mailUid);
-
         $this->charset = $this->mail->getType() === MailType::INTERNAL ? 'utf-8' : strtolower($this->mail->getCharset());
         $this->subject = $this->charsetConverter->conv($this->mail->getSubject(), $this->backendCharset, $this->charset);
         $this->fromName = ($this->mail->getFromName() ? $this->charsetConverter->conv($this->mail->getFromName(), $this->backendCharset, $this->charset) : '');

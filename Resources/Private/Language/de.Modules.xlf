@@ -194,8 +194,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
                 <target state="translated">Versandkodierung und Zeichensatz</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links" resname="configure_options_links">
-				<source>Links in mail content</source>
-                <target state="translated">Links in Mailinhalten</target>
+				<source>Links and click tracking</source>
+                <target state="translated">Links und Klickverfolgung</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links_jumpurl" resname="configure_options_links_jumpurl">
 				<source>Click tracking</source>
@@ -210,8 +210,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
                 <target state="translated">Diese Einstellung legt Standardwerte für Mails und Quickmails fest.</target>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl" resname="configure_options_mailto_jumpurl">
-				<source>Enable click tracking for mailto links</source>
-				<target>Aktiviere Klickverfolgung für mailto-Links</target>
+				<source>Click tracking for mailto links</source>
+				<target>Klickverfolgung für mailto-Links</target>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl_description" resname="configure_options_mailto_jumpurl_description">
 				<source>Check this option to enable click tracking for mailto links.</source>
@@ -1139,6 +1139,10 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<source>CSV of returned recipients with unknown recipient</source>
                 <target>CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Empfänger</target>
 			</trans-unit>
+            <trans-unit id="stats_clicked_link" resname="stats_clicked_link">
+                <source>Clicked links</source>
+                <target>Geklickte Links</target>
+            </trans-unit>
 			<trans-unit id="stats_HTML" resname="stats_HTML">
 				<source>HTML</source>
 			</trans-unit>
@@ -1347,8 +1351,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>Antworten</target>
 			</trans-unit>
 			<trans-unit id="stats_response_link" resname="stats_response_link">
-				<source>Link Responses</source>
-				<target>Link Antworten</target>
+				<source>Reactions</source>
+				<target>Reaktionen</target>
 			</trans-unit>
 			<trans-unit id="stats_total" resname="stats_total">
 				<source>Total</source>
