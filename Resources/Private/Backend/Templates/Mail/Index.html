@@ -11,11 +11,11 @@
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1><f:translate key="{lll}dmail_wizard_title"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <h3>
+    <h2>
         <f:translate key="{lll}dmail_wiz1_new_mail"/>
         -
         <f:translate key="{lll}dmail_wiz1_select_nl_source"/>
-    </h3>
+    </h2>
     <div class="panel-group" id="mail-wizard-source-select-panel">
         <f:if condition="{panel.open.data}">
             <f:variable name="counter" value="{panel.open.data -> f:count()}"/>
