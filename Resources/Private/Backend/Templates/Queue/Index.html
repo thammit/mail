@@ -15,7 +15,7 @@
     <f:if condition="{trigger}">
         <f:be.infobox title="{f:translate(key: '{lll}dmail_mailerengine_manual_invoke')}">
             <p>
-                <f:translate key="{lll}dmail_mailerengine_manual_explain"/>
+                <f:translate key="{lll}dmail_mailerengine_manual_explain" arguments="{0: sendPerCycle}"/>
             </p>
             <f:link.action action="trigger" class="btn btn-mail-theme"><f:translate key="{lll}dmail_mailerengine_invoke_now"/></f:link.action>
         </f:be.infobox>

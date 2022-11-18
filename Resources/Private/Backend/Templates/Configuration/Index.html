@@ -353,5 +353,11 @@
         </label>
         <f:form.textfield id="pageTS_testmail" name="pageTS[testmail]" value="{configuration.testmail}" class="form-control"/>
     </div>
+    <div class="mb-3">
+        <label for="pageTS_sendPerCycle" class="form-label">
+            <f:translate key="{lll}configure_sendPerCycle"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_sendPerCycle_description\'}'}"/>
+        </label>
+        <f:form.textfield id="pageTS_sendPerCycle" type="number" additionalAttributes="{min:1, max:500}" name="pageTS[sendPerCycle]" value="{configuration.sendPerCycle}" class="form-control"/>
+    </div>
 </f:section>
 </html>

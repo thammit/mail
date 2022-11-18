@@ -43,6 +43,7 @@ class QueueController extends AbstractController
         $this->view->assignMultiple([
             'id' => $this->id,
             'data' => $data,
+            'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
             'trigger' => !(isset($this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger'])
         ]);
 
@@ -57,14 +58,13 @@ class QueueController extends AbstractController
      * @throws StopActionException
      * @throws DBALException
      * @throws Exception
-     * @throws TransportExceptionInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws \TYPO3\CMS\Core\Exception
      */
     public function triggerAction(): void
     {
-        $this->mailerService->start();
+        $this->mailerService->start((int)($this->pageTSConfiguration['sendPerCycle'] ?? 50));
         $this->mailerService->handleQueue();
         ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_mailerengine_invoked'), true);
         $this->redirect('index');

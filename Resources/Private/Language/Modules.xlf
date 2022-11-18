@@ -233,6 +233,12 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="configure_testmail_description" resname="configure_testmail_description">
                 <source>Will be prepended to test mails subject</source>
 			</trans-unit>
+			<trans-unit id="configure_sendPerCycle" resname="configure_sendPerCycle">
+				<source>Send per cycle (only valid for manual trigger)</source>
+			</trans-unit>
+			<trans-unit id="configure_sendPerCycle_description" resname="configure_sendPerCycle_description">
+                <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>
+			</trans-unit>
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
 				<source>Save</source>
 			</trans-unit>
@@ -321,7 +327,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Manual sending started!</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_explain" resname="dmail_mailerengine_manual_explain">
-				<source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can start the sending manually.</source>
+                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed with the pagets setting mod.web_modules.mail.sendPerCycle.</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_invoke" resname="dmail_mailerengine_manual_invoke">
 				<source>Manually Invoke Engine</source>
@@ -522,7 +528,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Download CSV</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_header" resname="mailgroup_header">
-				<source>Mail Recipients</source>
+				<source>Recipient groups</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_import" resname="mailgroup_import">
 				<source>Import CSV into tt_address database table</source>
@@ -793,7 +799,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Import CSV</source>
 			</trans-unit>
 			<trans-unit id="recip_select_mailgroup" resname="recip_select_mailgroup">
-				<source>Select a recipient group</source>
+				<source>Recipient groups</source>
 			</trans-unit>
 			<trans-unit id="schedule_draft" resname="schedule_draft">
 				<source>Save mail settings for recurring mailings</source>

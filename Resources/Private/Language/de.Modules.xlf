@@ -307,6 +307,14 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<source>Will be prepended to test mails subject</source>
 				<target>Wird dem Betreff von Test-Mails vorangestellt</target>
 			</trans-unit>
+            <trans-unit id="configure_sendPerCycle" resname="configure_sendPerCycle">
+                <source>Send per cycle (only valid for manual trigger)</source>
+                <target>Senden pro Zyklus (nur für manuelles anstossen relevant)</target>
+            </trans-unit>
+            <trans-unit id="configure_sendPerCycle_description" resname="configure_sendPerCycle_description">
+                <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>
+                <target>Dies ist die Anzahl der E-Mails, die pro Klick gesendet werden, wenn jemand den manuellen Auslöser im Warteschlangenmodul verwendet.</target>
+            </trans-unit>
 			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
 				<source>Save</source>
 				<target>Speichern</target>
@@ -423,12 +431,12 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>Manueller Versand gestartet!</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_explain" resname="dmail_mailerengine_manual_explain">
-				<source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can start the sending manually.</source>
-				<target>Wenn TYPO3 nicht für den Versand von Mails mit dem mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand manuell starten.</target>
+                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed with the pagets setting mod.web_modules.mail.sendPerCycle.</source>
+				<target>Wenn TYPO3 nicht für den Versand von Mails über den mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand auch durch Klick auf den folgenden Button manuell anstossen. Mit jedem Klick werden %s Mails versandt. Die Anzahl lässt sich über den Pagets-Parameter mod.web_modules.mail.sendPerCycle ändern.</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_invoke" resname="dmail_mailerengine_manual_invoke">
 				<source>Manually Invoke Engine</source>
-				<target>Manuellen Versand anstossen</target>
+				<target>Manueller Versand</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_number_sent" resname="dmail_mailerengine_number_sent">
 				<source># sent</source>
@@ -672,8 +680,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<source>Download CSV</source>
 			</trans-unit>
 			<trans-unit id="mailgroup_header" resname="mailgroup_header">
-				<source>Mail Recipients</source>
-				<target>Mail Empfänger</target>
+				<source>Recipient groups</source>
+				<target>Empfängergruppen</target>
 			</trans-unit>
 			<trans-unit id="mailgroup_import" resname="mailgroup_import">
 				<source>Import CSV into tt_address database table</source>
@@ -1030,8 +1038,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>CSV importieren</target>
 			</trans-unit>
 			<trans-unit id="recip_select_mailgroup" resname="recip_select_mailgroup">
-				<source>Select a recipient group</source>
-				<target>Empfängergruppe auswählen</target>
+				<source>Recipient groups</source>
+				<target>Empfängergruppen</target>
 			</trans-unit>
 			<trans-unit id="schedule_draft" resname="schedule_draft">
 				<source>Save mail settings for recurring mailings</source>
@@ -1273,11 +1281,11 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 			</trans-unit>
 			<trans-unit id="stats_overview_delivery_begun" resname="stats_overview_delivery_begun">
 				<source>Delivery begun</source>
-				<target>Versandstart</target>
+				<target>Versand gestartet</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_delivery_ended" resname="stats_overview_delivery_ended">
 				<source>Delivery ended</source>
-				<target>Versandende</target>
+				<target>Versand beendet</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_header" resname="stats_overview_header">
 				<source>Mail Reports</source>
@@ -1293,7 +1301,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 			</trans-unit>
 			<trans-unit id="stats_overview_scheduled" resname="stats_overview_scheduled">
 				<source>Scheduled</source>
-				<target>Eingeplant</target>
+				<target>Geplant</target>
 			</trans-unit>
 			<trans-unit id="stats_overview_sending" resname="stats_overview_sending">
 				<source>sending</source>

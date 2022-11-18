@@ -598,9 +598,6 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Called from the dmailerd script.
-     * Look if there is newsletter to be sent and do the sending process. Otherwise, quit runtime
-     *
      * @return void
      * @throws DBALException
      * @throws Exception
