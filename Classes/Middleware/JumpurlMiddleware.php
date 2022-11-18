@@ -193,8 +193,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function shouldProcess(): bool
     {
-        $mid = $this->request->getQueryParams()['mail'] ?? null;
-        return ($mid !== null);
+        return (bool)($this->request->getQueryParams()['mail'] ?? false);
     }
 
     /**
