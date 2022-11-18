@@ -589,8 +589,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>Schritt 2 - Mail Einstellungen</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
-				<source>The page was fetched successfully.</source>
-				<target>Die Seite wurde erfolgreich ausgelesen.</target>
+				<source>The page "%s" was fetched successfully.</source>
+				<target>Die Seite "%s" wurde erfolgreich ausgelesen.</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz3_cats" resname="dmail_wiz3_cats">
 				<source>Categories</source>

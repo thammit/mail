@@ -447,7 +447,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Step 2 - Mail settings</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
-				<source>The page was fetched successfully.</source>
+				<source>The page "%s" was fetched successfully.</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz3_cats" resname="dmail_wiz3_cats">
 				<source>Categories</source>

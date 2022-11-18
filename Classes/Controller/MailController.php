@@ -229,6 +229,7 @@ class MailController extends AbstractController
         }
         if ($newMail instanceof Mail) {
             // copy new fetch content and charset to current mail record
+            $mail->setSubject($newMail->getSubject());
             $mail->setMessageId($newMail->getMessageId());
             $mail->setPlainContent($newMail->getPlainContent());
             $mail->setHtmlContent($newMail->getHtmlContent());
@@ -250,7 +251,6 @@ class MailController extends AbstractController
      */
     public function settingsAction(Mail $mail): ResponseInterface
     {
-        ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_wiz2_fetch_success'));
         $data = [];
         $table = 'tx_mail_domain_model_mail';
         $groups = [
@@ -282,7 +282,7 @@ class MailController extends AbstractController
                         }
                         $value = implode(', ', $attachments);
                     }
-                    $data[$groupName][] = [
+                    $data[$groupName][$property] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment', $table),
                         'value' => $value,
                     ];
@@ -292,7 +292,7 @@ class MailController extends AbstractController
                         if ($rawValue instanceof SendFormat) {
                             $rawValue = (string)$rawValue;
                         }
-                        $data[$groupName][] = [
+                        $data[$groupName][$property] = [
                             'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $table),
                             'value' => htmlspecialchars((string)BackendUtility::getProcessedValue($tableName, $columnName, $rawValue)),
                         ];
@@ -312,6 +312,9 @@ class MailController extends AbstractController
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+        // ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_wiz2_fetch_success'));
+        $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'\', \'' . sprintf(LanguageUtility::getLL('dmail_wiz2_fetch_success'), $data['composition']['page']['value']) . '\');');
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
