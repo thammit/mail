@@ -59,7 +59,7 @@ class JumpurlMiddleware implements MiddlewareInterface
 
         if ($this->shouldProcess()) {
             $mailUid = (int)$this->request->getQueryParams()['mail'];
-            $submittedRecipient = $this->request->getQueryParams()['rid'];
+            $submittedRecipient = $this->request->getQueryParams()['rid'] ?? '';
             $submittedAuthCode = $this->request->getQueryParams()['aC'];
             $jumpUrl = $this->request->getQueryParams()['jumpurl'];
             $this->mail = GeneralUtility::makeInstance(MailRepository::class)->findByUid($mailUid);
@@ -219,7 +219,7 @@ class JumpurlMiddleware implements MiddlewareInterface
     /**
      * Will split the combined recipient parameter into the table and uid and fetches the record if successful.
      *
-     * @param string $combinedRecipient eg. "f_13667".
+     * @param string $combinedRecipient eg. "fe_users-13667".
      * @throws DBALException|Exception
      */
     protected function initRecipientRecord(string $combinedRecipient): void
