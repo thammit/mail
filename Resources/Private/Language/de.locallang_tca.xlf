@@ -37,10 +37,6 @@
 			<source>Message text character set</source>
 			<target>Zeichensatz für Nachrichtentext</target>
 		</trans-unit>
-		<trans-unit id="sys_dmail.flowedFormat">
-			<source>Use flowing text format in plain text content</source>
-			<target>Fließtextformat in einfachem Textinhalt verwenden</target>
-		</trans-unit>
 		<trans-unit id="sys_dmail.from_email">
 			<source>Sender email</source>
 			<target>Absender E-Mail</target>

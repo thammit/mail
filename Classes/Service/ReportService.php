@@ -90,7 +90,6 @@ class ReportService
             'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $this->mail->getPriority()),
             'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options',
                 (string)$this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
-            'flowedFormat' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'flowed_format', $this->mail->isFlowedFormat()),
             'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $this->mail->isIncludeMedia()),
         ];
     }

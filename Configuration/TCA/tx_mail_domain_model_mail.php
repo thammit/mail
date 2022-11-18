@@ -155,13 +155,6 @@ return [
                 'default' => '0',
             ],
         ],
-        'flowed_format' => [
-            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.flowedFormat',
-            'config' => [
-                'type' => 'check',
-                'default' => '0',
-            ],
-        ],
         'html_params' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.HTMLParams',
             'config' => [

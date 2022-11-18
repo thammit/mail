@@ -15,14 +15,6 @@
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
                 <target>Liste der Felder, die zur Berechnung von Authentifizierungscodes von Abmeldelinks und Sprung-URLs in E-Mails verwendet werden sollen.</target>
             </trans-unit>
-            <trans-unit id="flowedFormat.description">
-                <source>Set this option if you want to use normally flowing text inside the plain text mail content.</source>
-                <target>Setzen Sie diese Option, wenn Sie normalen Fließtext innerhalb des reinen Textinhalts der E-Mail verwenden möchten.</target>
-            </trans-unit>
-            <trans-unit id="flowedFormat.details">
-                <source>If the option is set, plain text mail content will be broken in fixed length lines, as is standard for plain text email content, but so-called flowed format will be used. This will allow client agents that support this format to display the text as normally flowing text. The option is ignored if 'quoted-printable' is used.</source>
-                <target>Wenn die Option gesetzt ist, wird der Inhalt von E-Mails mit reinem Text in Zeilen fester Länge umgebrochen, wie es bei E-Mails mit reinem Text üblich ist, aber das so genannte fließende Format verwendet. Dadurch können Client-Agenten, die dieses Format unterstützen, den Text als normalen Fließtext anzeigen. Die Option wird ignoriert, wenn 'quoted-printable' verwendet wird.</target>
-            </trans-unit>
             <trans-unit id="from_email.description">
                 <source>Enter the sender email address. (Required)</source>
                 <target state="translated">E-Mail-Adresse des Senders. (Pflichtfeld)</target>
@@ -137,7 +129,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 			</trans-unit>
 			<trans-unit id="configure_default_headers" resname="configure_default_headers">
 				<source>Default headers</source>
-				<target>Standardwerte des Mailkopfs</target>
+				<target>Standardwerte Mailkopf</target>
 			</trans-unit>
 			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
 				<source>Configure mail module</source>
@@ -186,12 +178,12 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
                     Wenn Benutzername und Kennwort nicht angegeben sind, die auszulesende Seite aber mit einem Kennwort geschützt ist, wird es einen Fehler geben und keine Inhalten werden ausgelesen.</target>
 			</trans-unit>
 			<trans-unit id="configure_jumpurl_tracking_privacy" resname="configure_jumpurl_tracking_privacy">
-				<source>Privacy jumpurl</source>
-                <target state="translated">Anonyme jumpurl</target>
+				<source>Privacy click tracking</source>
+                <target state="translated">Anonyme Klickverfolgung</target>
 			</trans-unit>
 			<trans-unit id="configure_jumpurl_tracking_privacy_description" resname="configure_jumpurl_tracking_privacy_description">
-				<source>Set this option, to anonymize click statistics</source>
-                <target state="translated">Setze diese Option, um die Klick-Statistiken zu anonymisieren</target>
+				<source>Set this option, to anonymize click tracking.</source>
+                <target state="translated">Setze diese Option, um die Klickverfolgung zu anonymisieren</target>
 			</trans-unit>
 			<trans-unit id="configure_options_additional" resname="configure_options_additional">
 				<source>Additional module options</source>
@@ -206,24 +198,24 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
                 <target state="translated">Links in Mailinhalten</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links_jumpurl" resname="configure_options_links_jumpurl">
-				<source>Enable jump URL's</source>
-				<target>Aktiviere jump URL's</target>
+				<source>Click tracking</source>
+				<target>Klickverfolgung</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links_jumpurl_description" resname="configure_options_links_jumpurl_description">
-				<source>Check this option to enable jump URL's and the collection of click statistics.</source>
-                <target state="translated">Aktiviere diese Option, um Jump URL's für Klick-Statistiken zu aktivieren.</target>
+                <source>Check this option to enable tracking of clicks.</source>
+                <target state="translated">Aktiviere diese Option, um die Klickverfolgung zu aktivieren.</target>
 			</trans-unit>
 			<trans-unit id="configure_options_links_rdct" resname="configure_options_links_rdct">
 				<source>This configuration determines how QuickMails are handled and further sets the default value for mails.</source>
                 <target state="translated">Diese Einstellung legt Standardwerte für Mails und Quickmails fest.</target>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl" resname="configure_options_mailto_jumpurl">
-				<source>Enable jump URL's for mailto links</source>
-				<target>Aktiviere jump URL's für mailto links</target>
+				<source>Enable click tracking for mailto links</source>
+				<target>Aktiviere Klickverfolgung für mailto-Links</target>
 			</trans-unit>
 			<trans-unit id="configure_options_mailto_jumpurl_description" resname="configure_options_mailto_jumpurl_description">
-				<source>Check this option to enable jump URL's for mailto links.</source>
-				<target>Aktiviere diese Option um jump URL's für mailto links zu aktivieren.</target>
+				<source>Check this option to enable click tracking for mailto links.</source>
+				<target>Aktiviere diese Option um Klickverfolgung für mailto-Links zu aktivieren.</target>
 			</trans-unit>
 			<trans-unit id="configure_plainParams_description" resname="configure_plainParams_description">
 				<source>Enter the additional URL parameters used to fetch the plain text content from a TYPO3 page.</source>
@@ -308,8 +300,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>Wird dem Betreff von Test-Mails vorangestellt</target>
 			</trans-unit>
             <trans-unit id="configure_sendPerCycle" resname="configure_sendPerCycle">
-                <source>Send per cycle (only valid for manual trigger)</source>
-                <target>Senden pro Zyklus (nur für manuelles anstossen relevant)</target>
+                <source>Send per click (only valid for manual trigger)</source>
+                <target>Versand pro Klick (nur für manuellen Versand relevant)</target>
             </trans-unit>
             <trans-unit id="configure_sendPerCycle_description" resname="configure_sendPerCycle_description">
                 <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>

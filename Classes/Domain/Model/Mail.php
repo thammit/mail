@@ -31,7 +31,6 @@ class Mail extends AbstractEntity
     protected string $charset = 'iso-8859-1';
     protected SendFormat $sendOptions;
     protected bool $includeMedia = false;
-    protected bool $flowedFormat = false;
     protected string $htmlParams = '';
     protected string $plainParams = '';
     protected bool $sent = false;
@@ -383,24 +382,6 @@ class Mail extends AbstractEntity
     public function setIncludeMedia(bool $includeMedia): Mail
     {
         $this->includeMedia = $includeMedia;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isFlowedFormat(): bool
-    {
-        return $this->flowedFormat;
-    }
-
-    /**
-     * @param bool $flowedFormat
-     * @return Mail
-     */
-    public function setFlowedFormat(bool $flowedFormat): Mail
-    {
-        $this->flowedFormat = $flowedFormat;
         return $this;
     }
 

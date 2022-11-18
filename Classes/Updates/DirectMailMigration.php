@@ -68,7 +68,6 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'charset' => $record['charset'],
                         'send_options' => $record['sendOptions'],
                         'include_media' => $record['includeMedia'],
-                        'flowed_format' => $record['flowedFormat'],
                         'html_params' => $record['HTMLParams'],
                         'plain_params' => $record['plainParams'],
                         'sent' => $record['issent'],

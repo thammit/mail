@@ -18,7 +18,7 @@
                 arguments="{
                     configuration: configuration,
                     index: 1,
-                    section: 'box-1',
+                    section: 'HeaderSettings',
                     title: 'configure_default_headers',
                     lll: lll,
                     lll2: lll2
@@ -29,7 +29,7 @@
                 arguments="{
                     configuration: configuration,
                     index: 2,
-                    section: 'box-2',
+                    section: 'FormatSettings',
                     title: 'configure_default_content',
                     lll: lll,
                     lll2: lll2
@@ -40,7 +40,7 @@
                 arguments="{
                     configuration: configuration,
                     index: 3,
-                    section: 'box-3',
+                    section: 'FetchSettings',
                     title: 'configure_default_fetching',
                     lll: lll,
                     lll2: lll2
@@ -52,7 +52,7 @@
                     configuration: configuration,
                     charsets: charsets,
                     index: 4,
-                    section: 'box-4',
+                    section: 'EncodingSettings',
                     title: 'configure_options_encoding',
                     lll: lll,
                     lll2: lll2
@@ -63,7 +63,7 @@
                 arguments="{
                     configuration: configuration,
                     index: 5,
-                    section: 'box-5',
+                    section: 'MailLinksSettings',
                     title: 'configure_options_links',
                     lll: lll,
                     lll2: lll2
@@ -74,7 +74,7 @@
                 arguments="{
                     configuration: configuration,
                     index: 6,
-                    section: 'box-6',
+                    section: 'AdditionalModuleSettings',
                     title: 'configure_options_additional',
                     lll: lll,
                     lll2: lll2
@@ -129,7 +129,7 @@
     </span>
 </f:section>
 
-<f:section name="box-1">
+<f:section name="HeaderSettings">
     <div class="mb-3">
         <label for="pageTS_from_email" class="form-label">
             <f:translate key="{lll2}sys_dmail.from_email"/><f:render section="help" arguments="{messages: '{0: \'{lll}from_email.description\', 1: \'{lll}from_email.details\'}'}"/>
@@ -184,7 +184,7 @@
     </div>
 </f:section>
 
-<f:section name="box-2">
+<f:section name="FormatSettings">
     <div class="mb-3">
         <label for="pageTS_sendOptions" class="form-label">
             <f:translate key="{lll2}sys_dmail.sendOptions"/><f:render section="help" arguments="{messages: '{0: \'{lll}sendOptions.description\', 1: \'{lll}sendOptions.details\'}'}"/>
@@ -207,15 +207,9 @@
             <f:translate key="{lll2}sys_dmail.includeMedia"/><f:render section="help" arguments="{messages: '{0: \'{lll}includeMedia.description\', 1: \'{lll}includeMedia.details\'}'}"/>
         </label>
     </div>
-    <div class="form-check mb-3">
-        <f:form.checkbox id="pageTS_flowedFormat" class="form-check-input" name="pageTS[flowedFormat]" value="1" checked="{configuration.flowedFormat} == 1"/>
-        <label for="pageTS_flowedFormat" class="form-check-label">
-            <f:translate key="{lll2}sys_dmail.flowedFormat"/><f:render section="help" arguments="{messages: '{0: \'{lll}flowedFormat.description\', 1: \'{lll}flowedFormat.details\'}'}"/>
-        </label>
-    </div>
 </f:section>
 
-<f:section name="box-3">
+<f:section name="FetchSettings">
     <div class="mb-3">
         <label for="pageTS_HTMLParams" class="form-label">
             <f:translate key="{lll2}sys_dmail.HTMLParams"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_HTMLParams_description\', 1: \'{lll}configure_HTMLParams_details\'}'}"/>
@@ -230,7 +224,7 @@
     </div>
 </f:section>
 
-<f:section name="box-4">
+<f:section name="EncodingSettings">
     <div class="mb-3">
         <label for="pageTS_quick_mail_encoding" class="form-label">
             <f:translate key="{lll}configure_quickmail_encoding"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_quickmail_encoding\'}'}"/>
@@ -271,7 +265,7 @@
     </div>
 </f:section>
 
-<f:section name="box-5">
+<f:section name="MailLinksSettings">
     <div class="form-check mb-3">
         <f:form.checkbox id="pageTS_redirect" class="form-check-input" name="pageTS[redirect]" value="1" checked="{configuration.redirect} == 1"/>
         <label for="pageTS_redirect" class="form-check-label">
@@ -310,7 +304,7 @@
     </div>
 </f:section>
 
-<f:section name="box-6">
+<f:section name="AdditionalModuleSettings">
     <div class="mb-3">
         <label for="pageTS_http_username" class="form-label">
             <f:translate key="{lll}configure_http_username"/><f:render section="help" arguments="{messages: '{0: \'{lll}configure_http_username_description\', 1: \'{lll}configure_http_username_details\'}'}"/>

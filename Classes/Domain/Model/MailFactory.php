@@ -273,7 +273,6 @@ class MailFactory
             ->setAuthCodeFields($this->pageTSConfiguration['auth_code_fields'] ?? '')
             ->setSendOptions(new SendFormat($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))
             ->setIncludeMedia((bool)($this->pageTSConfiguration['includeMedia'] ?? false))
-            ->setFlowedFormat((bool)($this->pageTSConfiguration['flowed_format'] ?? false))
             ->setPid($this->storageFolder);
 
         return $mail;

@@ -256,7 +256,7 @@ class MailController extends AbstractController
         $groups = [
             'composition' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
             'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority', 'encoding'],
-            'sending' => ['sendOptions', 'includeMedia', 'flowedFormat', 'redirect', 'redirectAll', 'authCodeFields'],
+            'sending' => ['sendOptions', 'includeMedia', 'redirect', 'redirectAll', 'authCodeFields'],
         ];
 
         $className = get_class($mail);
