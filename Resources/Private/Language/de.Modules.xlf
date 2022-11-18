@@ -120,16 +120,16 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
                 <target state="translated">Die eingegebene Parameter werden der URL hinzugefügt, um die HTML Inhalte für die Mail von einer TYPO3 Seite auszulesen. Im Zweifel leer lassen.</target>
 			</trans-unit>
 			<trans-unit id="configure_default_content" resname="configure_default_content">
-				<source>Default content format</source>
-                <target state="translated">Standard Inhaltsformat</target>
+				<source>Mail format (default)</source>
+                <target state="translated">Mail Format (Standardeinstellungen)</target>
 			</trans-unit>
 			<trans-unit id="configure_default_fetching" resname="configure_default_fetching">
-				<source>Default content fetching options</source>
-                <target state="translated">Standardwerte für das Auslesen der Inhalte</target>
+				<source>Content fetching options (default)</source>
+                <target state="translated">Auslesen der Inhalte (Standardeinstellungen)</target>
 			</trans-unit>
 			<trans-unit id="configure_default_headers" resname="configure_default_headers">
-				<source>Default headers</source>
-				<target>Standardwerte Mailkopf</target>
+				<source>Mail headers (default)</source>
+				<target>Mail Header (Standardeinstellungen)</target>
 			</trans-unit>
 			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
 				<source>Configure mail module</source>
@@ -255,7 +255,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 			</trans-unit>
 			<trans-unit id="configure_quickmail_encoding" resname="configure_quickmail_encoding">
 				<source>Encoding for quick mails</source>
-				<target>Encoding für Kurznachrichten</target>
+				<target>Kodierung für Kurznachrichten</target>
 			</trans-unit>
 			<trans-unit id="configure_quickmail_encoding_description" resname="configure_quickmail_encoding_description">
 				<source>Select the content transfer encoding to use when sending quick mails.</source>

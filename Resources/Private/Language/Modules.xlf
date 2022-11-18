@@ -91,13 +91,13 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>The specified parameters will be added to the URL used to fetch the HTML content of the mail from a TYPO3 page. If in doubt, leave it blank.</source>
 			</trans-unit>
 			<trans-unit id="configure_default_content" resname="configure_default_content">
-				<source>Default content format</source>
+				<source>Mail format (default)</source>
 			</trans-unit>
 			<trans-unit id="configure_default_fetching" resname="configure_default_fetching">
-				<source>Default content fetching options</source>
+				<source>Content fetching options (default)</source>
 			</trans-unit>
 			<trans-unit id="configure_default_headers" resname="configure_default_headers">
-				<source>Default headers</source>
+				<source>Mail Headers (default)</source>
 			</trans-unit>
 			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
 				<source>Configure mail module</source>
