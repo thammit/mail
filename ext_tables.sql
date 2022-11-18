@@ -18,7 +18,6 @@ CREATE TABLE tx_mail_domain_model_mail (
    charset varchar(20) DEFAULT 'iso-8859-1' NOT NULL,
    send_options tinyint(4) unsigned DEFAULT '0' NOT NULL,
    include_media tinyint(4) unsigned DEFAULT '0' NOT NULL,
-   flowed_format tinyint(4) unsigned DEFAULT '0' NOT NULL,
    html_params varchar(80) DEFAULT '' NOT NULL,
    plain_params varchar(80) DEFAULT '' NOT NULL,
    sent tinyint(4) unsigned DEFAULT '0' NOT NULL,
