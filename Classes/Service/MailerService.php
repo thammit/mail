@@ -11,6 +11,8 @@ use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
+use MEDIAESSENZ\Mail\Events\ManipulateMarkersEvent;
+use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
@@ -20,6 +22,7 @@ use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
 use pQuery;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Mime\Address;
@@ -85,6 +88,7 @@ class MailerService implements LoggerAwareInterface
         protected RequestFactory $requestFactory,
         protected Context $context,
         protected SiteFinder $siteFinder,
+        protected EventDispatcherInterface $eventDispatcher
     ) {
     }
 
@@ -313,10 +317,16 @@ class MailerService implements LoggerAwareInterface
         // replace %23%23%23 with ###, since typolink generated link with urlencode
         $content = str_replace('%23%23%23', '###', $content);
 
-        $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipFields'), true);
-        if ($addRecipientFields = ConfigurationUtility::getExtensionConfiguration('addRecipFields')) {
+        // PSR-14 event to manipulate recipient fields
+        $recipient = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipient))->getRecipient();
+
+        $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipientFields'), true);
+        if ($addRecipientFields = ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')) {
             $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields, true));
         }
+
+        // PSR-14 event to manipulate recipient data
+        $recipient = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipient))->getRecipient();
 
         foreach ($rowFieldsArray as $substField) {
             if (isset($recipient[$substField])) {
@@ -324,29 +334,12 @@ class MailerService implements LoggerAwareInterface
             }
         }
 
-        // uppercase fields with uppercased values
-        $uppercaseFieldsArray = ['name', 'firstname'];
-        foreach ($uppercaseFieldsArray as $substField) {
-            if (isset($recipient[$substField])) {
-                $markers['###USER_' . strtoupper($substField) . '###'] = strtoupper($this->charsetConverter->conv($recipient[$substField],
-                    $this->backendCharset, $this->charset));
-            }
-        }
-
-        // Hook allows to manipulate the markers to add salutation etc.
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailMarkersHook'])) {
-            $mailMarkersHook =& $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/direct_mail']['res/scripts/class.dmailer.php']['mailMarkersHook'];
-            if (is_array($mailMarkersHook)) {
-                $hookParameters = [
-                    'row' => &$recipient,
-                    'markers' => &$markers,
-                ];
-                $hookReference = &$this;
-                foreach ($mailMarkersHook as $hookFunction) {
-                    GeneralUtility::callUserFunction($hookFunction, $hookParameters, $hookReference);
-                }
-            }
-        }
+        // PSR-14 event to manipulate the recipient data and markers to add e.g. salutation or other data
+        // see MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers for example
+        $event = $this->eventDispatcher->dispatch(
+            new ManipulateMarkersEvent($markers, $recipient)
+        );
+        $markers = $event->getMarkers();
 
         return GeneralUtility::makeInstance(MarkerBasedTemplateService::class)->substituteMarkerArray($content, $markers);
     }
@@ -734,7 +727,8 @@ class MailerService implements LoggerAwareInterface
             $files = MailerUtility::getAttachments($this->mailUid);
             /** @var FileReference $file */
             foreach ($files as $file) {
-                $mailMessage->attachFromPath($file->getForLocalProcessing(false));
+                // $mailMessage->attachFromPath($file->getForLocalProcessing(false));
+                $mailMessage->attach($file->getContents(), $file->getName(), $file->getMimeType());
             }
         }
     }

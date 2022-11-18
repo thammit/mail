@@ -7,6 +7,10 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/app-pagetree-folder-contains-mail.svg'
     ],
+    'app-pagetree-mail' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/app-pagetree-mail.svg'
+    ],
     'mail-module' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/mail-module.svg'

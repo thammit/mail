@@ -1,0 +1,9 @@
+#####################
+#### TCAdefaults ####
+#####################
+TCAdefaults {
+    pages {
+        module = mail
+        hidden = 0
+    }
+}

@@ -431,7 +431,7 @@ class ReportService
 
     /**
      * Get baseURL of the FE
-     * force http if UseHttpToFetch is set
+     * force http if useHttpToFetch is set
      *
      * @return string the baseURL
      * @throws ExtensionConfigurationExtensionNotConfiguredException
@@ -442,7 +442,7 @@ class ReportService
         $baseUrl = BackendDataUtility::getBaseUrl($this->mail->getPage() ?: $this->mail->getPid());
 
         // if fetching the newsletter using http, set the url to http here
-        if (ConfigurationUtility::getExtensionConfiguration('UseHttpToFetch')) {
+        if (ConfigurationUtility::getExtensionConfiguration('useHttpToFetch')) {
             $baseUrl = str_replace('https', 'http', $baseUrl);
         }
 

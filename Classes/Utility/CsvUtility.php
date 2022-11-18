@@ -47,7 +47,7 @@ class CsvUtility
             // overrides any existing value in the field
             $firstRow = $lines[0];
             try {
-                $fieldList = array_merge($fieldList, explode(',', ConfigurationUtility::getExtensionConfiguration('addRecipFields')));
+                $fieldList = array_merge($fieldList, explode(',', ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')));
             } catch (ExtensionConfigurationPathDoesNotExistException|ExtensionConfigurationExtensionNotConfiguredException) {
             }
             $fieldName = 1;

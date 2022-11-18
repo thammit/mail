@@ -229,7 +229,7 @@ return [
             ],
         ],
         'redirect_all' => [
-            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.long_link_mode',
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail.redirect_all',
             'config' => [
                 'type' => 'check',
             ],

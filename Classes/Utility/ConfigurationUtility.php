@@ -17,7 +17,7 @@ class ConfigurationUtility
      */
     public static function getDefaultScheme(): string
     {
-        return self::getExtensionConfiguration('UseHttpToFetch') ? 'http' : 'https';
+        return self::getExtensionConfiguration('useHttpToFetch') ? 'http' : 'https';
     }
 
     /**

@@ -12,6 +12,9 @@
 			<target>Aktiviert Newsletter</target>
 		</trans-unit>
 		<trans-unit id="pages.module.I.5">
+			<source>Mail Module</source>
+		</trans-unit>
+		<trans-unit id="pages.module.I.6">
 			<source>Mail</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail">

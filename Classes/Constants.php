@@ -5,7 +5,8 @@ namespace MEDIAESSENZ\Mail;
 
 final class Constants
 {
-    const MAIL_MODULE_NAME = 'dmail';
+    const MAIL_MODULE_NAME = 'module_mail';
+    const MAIL_MAIL_NAME = 'mail';
 
     const PANEL_INTERNAL = 'internal';
     const PANEL_EXTERNAL = 'external';

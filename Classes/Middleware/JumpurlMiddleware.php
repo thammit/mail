@@ -289,11 +289,11 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function substituteUserMarkersFromTargetUrl(string $targetUrl): string
     {
-        $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipFields'), true);
-        if (ConfigurationUtility::getExtensionConfiguration('addRecipFields')) {
+        $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipientFields'), true);
+        if (ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')) {
             $rowFieldsArray = array_merge(
                 $rowFieldsArray,
-                GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('addRecipFields'), true)
+                GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields'), true)
             );
         }
 

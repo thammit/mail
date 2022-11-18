@@ -441,7 +441,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>New Quickmail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Mail source</source>
+				<source>Choose mail source</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
 				<source>Step 2 - Mail settings</source>
@@ -1159,7 +1159,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			Content elements without category restrictions will appear for in all mails.]]></source>
 		    </trans-unit>
             <trans-unit id="create_directmail_from_url.alttitle">
-                <source>Create a new mailing from external pages</source>
+                <source>New mailing from external pages</source>
             </trans-unit>
             <trans-unit id="create_directmail_from_url.description">
                 <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
@@ -1194,10 +1194,10 @@ You may personalize the mails that will be sent to each recipient by inserting t
 ###SYS_AUTHCODE###]]></source>
 		    </trans-unit>
             <trans-unit id="select_newsletter.alttitle">
-                <source>Select an internal page to create a mailing</source>
+                <source>New mailing from an internal page</source>
             </trans-unit>
             <trans-unit id="select_newsletter.description">
-                <source>Click on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+                <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
             </trans-unit>
             <trans-unit id="quick_mail.alttitle">
                 <source>Create a quick mailing</source>
