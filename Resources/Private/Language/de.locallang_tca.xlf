@@ -139,8 +139,8 @@
 			<target>Thema</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail.tab1">
-			<source>Composition</source>
-			<target>Zusammenstellung</target>
+			<source>General</source>
+			<target>Generell</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail.tab2">
 			<source>Mail headers</source>

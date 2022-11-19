@@ -15,6 +15,9 @@
             <trans-unit id="general.button.sendTestMail">
                 <source>Send test mail to %s</source>
             </trans-unit>
+            <trans-unit id="mail.type.quickMail">
+                <source>Quick Mail</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.settings.general">
                 <source>General</source>
             </trans-unit>
@@ -27,11 +30,53 @@
             <trans-unit id="mail.wizard.testMail.groups">
                 <source>Group(s)</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.success.title">
+                <source>Success</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.waring.title">
+                <source>Warning</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.error.title">
+                <source>Error</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.externalUrlInvalid.message">
+                <source>Error during fetching external Urls: %s</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.fetchSuccessfully.message">
+                <source>The page "%s" was fetched successfully.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.categoriesUpdated.title">
+                <source>Categories applied</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.categoriesUpdated.message">
+                <source>Categories restrictions successfully applied</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.testMailSent.title">
+                <source>Test mail successfully sent</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.testMailSent.message">
+                <source>Recipient(s): %s</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.finished.title">
+                <source>Mail scheduled for distribution</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.finished.message">
+                <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.deleted.title">
+                <source>Mail deleted</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.deleted.message">
+                <source>The mail "%s" was successfully deleted.</source>
+            </trans-unit>
             <trans-unit id="report.general.htmlSource">
                 <source>HTML</source>
             </trans-unit>
             <trans-unit id="report.general.plainSource">
                 <source>Plain text</source>
+            </trans-unit>
+            <trans-unit id="report.general.groups">
+                <source>Recipient groups</source>
             </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>

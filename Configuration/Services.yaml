@@ -44,3 +44,10 @@ services:
     tags:
       - name: 'event.listener'
         identifier: 'addUpperCaseMarkers'
+
+  MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter:
+    tags:
+      - name: extbase.type_converter
+        priority: 10
+        target: \DateTimeImmutable
+        sources: int,string

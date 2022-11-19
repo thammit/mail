@@ -19,6 +19,10 @@
                 <source>Send test mail to %s</source>
                 <target>Sende Test-Mail an %s</target>
             </trans-unit>
+            <trans-unit id="mail.type.quickMail">
+                <source>Quick Mail</source>
+                <target>Kurznachricht</target>
+            </trans-unit>
             <trans-unit id="mail.wizard.settings.general">
                 <source>General</source>
                 <target>Allgemein</target>
@@ -34,6 +38,62 @@
             <trans-unit id="mail.wizard.testMail.groups">
                 <source>Group(s)</source>
                 <target>Gruppe(n)</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.success.title">
+                <source>Success</source>
+                <target>Erfolgreich</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.waring.title">
+                <source>Warning</source>
+                <target>Warnung</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.error.title">
+                <source>Error</source>
+                <target>Fehler</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.externalUrlInvalid.message">
+                <source>Error during fetching external Urls: %s</source>
+                <target>Fehler beim Einlesen der externen Urls: %s</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.fetchSuccessfully.message">
+                <source>The page "%s" was fetched successfully.</source>
+                <target>Die Seite "%s" wurde erfolgreich ausgelesen.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.categoriesUpdated.title">
+                <source>Categories applied</source>
+                <target>Kategorien gespeichert</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.categoriesUpdated.message">
+                <source>Categories restrictions successfully applied</source>
+                <target>Kategorie-Einschränkungen erfolgreich gespeichert</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.testMailSent.title">
+                <source>Test mail successfully sent</source>
+                <target>Test Mail erfolgreich versandt</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.testMailSent.message">
+                <source>Recipient(s): %s</source>
+                <target>Empfänger: %s</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.finished.title">
+                <source>Mail scheduled for distribution</source>
+                <target>Mail für Versand eingeplant</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.finished.message">
+                <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
+                <target>Die E-Mail "%s" wurde erfolgreich für den Versand am %s eingeplant.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.deleted.title">
+                <source>Mail deleted</source>
+                <target>Mail gelöscht</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.deleted.message">
+                <source>The mail "%s" was successfully deleted.</source>
+                <target>Die Mail "%s" wurde erfolgreich gelöscht.</target>
+            </trans-unit>
+            <trans-unit id="report.general.groups">
+                <source>Recipient groups</source>
+                <target>Empfängergruppen</target>
             </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>

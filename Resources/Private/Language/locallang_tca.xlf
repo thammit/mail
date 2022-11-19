@@ -109,7 +109,7 @@
 			<source>Subject</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.tab1">
-			<source>Composition</source>
+			<source>General</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.tab2">
 			<source>Mail headers</source>

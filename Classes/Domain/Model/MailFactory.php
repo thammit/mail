@@ -6,6 +6,8 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Exception\HtmlContentFetchFailedException;
+use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
@@ -160,6 +162,8 @@ class MailFactory
      * @return Mail|null
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws HtmlContentFetchFailedException
+     * @throws PlainTextContentFetchFailedException
      */
     public function fromExternalUrls(string $subject, string $htmlContentUrl = '', string $plainContentUrl = ''): ?Mail
     {
@@ -181,6 +185,9 @@ class MailFactory
             // todo only add domain with scheme
             $mail->setRedirectUrl($htmlUrl);
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
+            if ($htmlContent === false) {
+                throw new HtmlContentFetchFailedException;
+            }
             $matches = [];
             $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', $htmlContent, $matches);
             if ($res === 1) {
@@ -198,6 +205,9 @@ class MailFactory
         } else {
             $plainTextUrl = MailerUtility::getUrlForExternalPage($mail->getHtmlParams());
             $plainContent = $this->fetchPlainTextContent($plainTextUrl);
+            if ($plainContent === false) {
+                throw new PlainTextContentFetchFailedException;
+            }
         }
 
         if ($mail->getSendOptions()->isNone()) {

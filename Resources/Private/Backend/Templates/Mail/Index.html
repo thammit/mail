@@ -69,7 +69,7 @@
                     <td class="col-title col-responsive nowrap">
                         {row.subject}
                     </td>
-                    <td class="nowrap"><f:translate key="{lllTypePrefix}{row.type}"/></td>
+                    <td class="nowrap"><f:if condition="{row.quickMail}"><f:then><f:translate key="{lll}mail.type.quickMail"/></f:then><f:else><f:translate key="{lllTypePrefix}{row.type}"/></f:else></f:if></td>
                     <td class="nowrap">{row.lastModified -> f:format.date(format:'H:i d-m-Y')}</td>
                     <td class="nowrap">{row.renderedSize -> f:format.bytes()}</td>
                     <td class="nowrap"><f:if condition="{row.attachment}">

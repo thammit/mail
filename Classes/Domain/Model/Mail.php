@@ -67,19 +67,24 @@ class Mail extends AbstractEntity
      * @Transient
      */
     protected $numberOfSent;
-    protected string $recipientGroups = '';
+    /**
+     * @var ObjectStorage<Group>
+     */
+    protected ObjectStorage $recipientGroups;
     protected int $sysLanguageUid = 0;
     protected ?DateTimeImmutable $lastModified = null;
 
     public function __construct()
     {
         $this->attachment = new ObjectStorage();
+        $this->recipientGroups = new ObjectStorage();
         $this->sendOptions = new SendFormat(SendFormat::NONE);
     }
 
     public function initializeObject(): void
     {
         $this->attachment = $this->attachment ?? new ObjectStorage();
+        $this->recipientGroups = $this->recipientGroups ?? new ObjectStorage();
         $this->sendOptions = $this->sendOptions ?? new SendFormat(SendFormat::NONE);
     }
 
@@ -105,6 +110,11 @@ class Mail extends AbstractEntity
     public function isExternal(): bool
     {
         return $this->type === MailType::EXTERNAL;
+    }
+
+    public function isQuickMail(): bool
+    {
+        return $this->isExternal() && $this->getMessageId() && !$this->getHtmlParams() && !$this->getPlainParams();
     }
 
     /**
@@ -749,18 +759,18 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @return string
+     * @return ObjectStorage
      */
-    public function getRecipientGroups(): string
+    public function getRecipientGroups(): ObjectStorage
     {
         return $this->recipientGroups;
     }
 
     /**
-     * @param string $recipientGroups
+     * @param ObjectStorage<Group> $recipientGroups
      * @return Mail
      */
-    public function setRecipientGroups(string $recipientGroups): Mail
+    public function setRecipientGroups(ObjectStorage $recipientGroups): Mail
     {
         $this->recipientGroups = $recipientGroups;
         return $this;

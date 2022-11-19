@@ -79,6 +79,13 @@
             </tr>
             <tr>
                 <th>
+                    <f:translate key="{lll}report.general.groups"/>
+                </th>
+                <td><f:for each="{mail.recipientGroups}" as="recipientGroup" iteration="recipientIterator">{recipientGroup.title}<f:if condition="!{recipientIterator.isLast}">, </f:if></f:for></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <th>
                     <f:translate key="{lll}view_recipient_total_sent"/>
                 </th>
                 <td>{mail.numberOfRecipients}</td>

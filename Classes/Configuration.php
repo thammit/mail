@@ -8,7 +8,9 @@ use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\RecipientController;
 use MEDIAESSENZ\Mail\Controller\ReportController;
+use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
@@ -160,5 +162,13 @@ final class Configuration
     public static function directMailMigration(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail'] = DirectMailMigration::class;
+    }
+
+    public static function registerTypeConverter(): void
+    {
+        if ((new Typo3Version())->getMajorVersion() < 12)
+        {
+            ExtensionUtility::registerTypeConverter(DateTimeImmutableConverter::class);
+        }
     }
 }

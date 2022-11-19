@@ -13,19 +13,19 @@
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
     <h3><f:translate key="{lll}dmail_wiz5_sendmass"/></h3>
-    <f:form action="finish" arguments="{mail:mailUid}" method="post" enctype="multipart/form-data">
+    <f:form action="finish" object="{mail}" objectName="mail" method="post" enctype="multipart/form-data">
         <div class="mb-4">
             <f:be.infobox state="-1" title="{f:translate(key: '{lll}schedule_select_mailgroup')}">
                 <f:format.nl2br><f:translate key="{lll}schedule_select_mailgroup2"/></f:format.nl2br>
             </f:be.infobox>
-            <f:if condition="{data}">
+            <f:if condition="{groups}">
                 <f:then>
-                    <f:variable name="numberOfRecipientGroups" value="{data -> f:count()}"/>
+                    <f:variable name="numberOfRecipientGroups" value="{groups -> f:count()}"/>
                     <f:if condition="{numberOfRecipientGroups} == 1">
                         <f:then>
-                            <f:variable name="group">{data.0}</f:variable>
-                            <f:form.hidden name="groups[]" value="{group.uid}"/>
-                            <label class="form-label">
+                            <f:variable name="group">{groups.0}</f:variable>
+                            <f:form.hidden property="recipientGroups" value="{group.uid}"/>
+                            <label class="form-label h4 mb-2">
                                 <f:translate key="{lll}schedule_mailgroup"/>
                             </label>
                             <ul>
@@ -40,10 +40,9 @@
                                     <h4>
                                         <f:translate key="{lll}schedule_mailgroups"/>
                                     </h4>
-                                    <f:for each="{data}" as="group">
+                                    <f:for each="{groups}" as="group">
                                         <div class="form-check">
-                                            <f:form.hidden name="groups[{group.uid}]" value="0" />
-                                            <f:form.checkbox class="form-check-input" name="groups[{group.uid}]" value="1" id="mailgroups-{group.uid}"/>
+                                            <f:form.checkbox class="form-check-input" property="recipientGroups" multiple="1" value="{group.uid}" id="mailgroups-{group.uid}"/>
                                             <label class="form-check-label" for="mailgroups-{group.uid}">
                                                 {group.title} <span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
                                             </label>
@@ -61,13 +60,13 @@
                 </f:else>
             </f:if>
             <div class="mb-4 row">
-                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <div class="col-12 col-md-6 col-lg-4">
                     <label for="distributionTime" class="form-label h4 mb-2">
                         <f:translate key="{lll}schedule_time"/>
                     </label>
                     <div class="input-group">
                         <f:form.textfield additionalAttributes="{autocomplete:'off'}" data="{date-type:'datetime'}" class="form-control t3js-datetimepicker t3js-clearable" id="distributionTime"
-                               name="distributionTime" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
+                               property="scheduled" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
                         <label class="mb-0 btn btn-default" for="distributionTime">
                             <span class="t3js-icon icon icon-size-small icon-state-default icon-actions-calendar" data-identifier="actions-calendar">
                                 <span class="icon-markup">

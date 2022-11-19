@@ -9,5 +9,6 @@ defined('TYPO3') or die();
     \MEDIAESSENZ\Mail\Configuration::addTypoScripContentObject();
     \MEDIAESSENZ\Mail\Configuration::registerHooks();
     \MEDIAESSENZ\Mail\Configuration::registerFluidNameSpace();
+    \MEDIAESSENZ\Mail\Configuration::registerTypeConverter();
     \MEDIAESSENZ\Mail\Configuration::directMailMigration();
 })();;
