@@ -37,8 +37,8 @@
 			<target>Für die Berechnung der Authentifizierungscodes verwendete Felder</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail.charset">
-			<source>Message text character set</source>
-			<target>Zeichensatz für Nachrichtentext</target>
+			<source>Character set</source>
+			<target>Zeichensatz</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail.from_email">
 			<source>Sender email</source>
@@ -152,7 +152,7 @@
 		</trans-unit>
 		<trans-unit id="sys_dmail.transfer_encoding">
 			<source>Content transfer encoding</source>
-			<target>Kodierung der Inhaltsübertragung</target>
+			<target>Inhaltskodierung</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail.type.I.0">
 			<source>Internal page</source>

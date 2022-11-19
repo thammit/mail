@@ -31,7 +31,7 @@
 			<source>Fields used in the computation of authentication codes</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.charset">
-			<source>Message text character set</source>
+			<source>character set</source>
 		</trans-unit>
 		<trans-unit id="sys_dmail.from_email">
 			<source>Sender email</source>

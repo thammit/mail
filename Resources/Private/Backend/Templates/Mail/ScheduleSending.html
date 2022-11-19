@@ -11,7 +11,8 @@
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1><f:translate key="{lll}dmail_wizard_title"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <h2><f:translate key="{lll}dmail_wiz5_sendmass"/></h2>
+    <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
+    <h3><f:translate key="{lll}dmail_wiz5_sendmass"/></h3>
     <f:form action="finish" arguments="{mail:mailUid}" method="post" enctype="multipart/form-data">
         <div class="mb-4">
             <f:be.infobox state="-1" title="{f:translate(key: '{lll}schedule_select_mailgroup')}">
@@ -36,9 +37,9 @@
                         <f:else>
                             <div class="mb-3 row">
                                 <div class="col-12 col-md-6 col-lg-3">
-                                    <p>
+                                    <h4>
                                         <f:translate key="{lll}schedule_mailgroups"/>
-                                    </p>
+                                    </h4>
                                     <f:for each="{data}" as="group">
                                         <div class="form-check">
                                             <f:form.hidden name="groups[{group.uid}]" value="0" />
@@ -59,9 +60,9 @@
                     </f:be.infobox>
                 </f:else>
             </f:if>
-            <div class="mb-3 row">
+            <div class="mb-4 row">
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
-                    <label for="distributionTime" class="form-label">
+                    <label for="distributionTime" class="form-label h4 mb-2">
                         <f:translate key="{lll}schedule_time"/>
                     </label>
                     <div class="input-group">

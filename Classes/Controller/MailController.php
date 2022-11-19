@@ -254,9 +254,9 @@ class MailController extends AbstractController
         $data = [];
         $table = 'tx_mail_domain_model_mail';
         $groups = [
-            'composition' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
-            'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority', 'encoding'],
-            'sending' => ['sendOptions', 'includeMedia', 'redirect', 'redirectAll', 'authCodeFields'],
+            'general' => ['type', 'sysLanguageUid', 'page', 'sendOptions', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
+            'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority'],
+            'content' => ['includeMedia', 'encoding', 'redirect', 'redirectAll', 'authCodeFields'],
         ];
 
         $className = get_class($mail);
@@ -294,7 +294,7 @@ class MailController extends AbstractController
                         }
                         $data[$groupName][$property] = [
                             'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $table),
-                            'value' => htmlspecialchars((string)BackendUtility::getProcessedValue($tableName, $columnName, $rawValue)),
+                            'value' => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue),
                         ];
                     }
                 }
@@ -314,7 +314,7 @@ class MailController extends AbstractController
         $moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
         // ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_wiz2_fetch_success'));
-        $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'\', \'' . sprintf(LanguageUtility::getLL('dmail_wiz2_fetch_success'), $data['composition']['page']['value']) . '\');');
+        $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'\', \'' . sprintf(LanguageUtility::getLL('dmail_wiz2_fetch_success'), $data['general']['page']['value']) . '\');');
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
@@ -384,6 +384,7 @@ class MailController extends AbstractController
         $this->view->assignMultiple([
             'data' => $data,
             'mailUid' => $mail->getUid(),
+            'title' => $mail->getSubject(),
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail))
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
@@ -476,6 +477,7 @@ class MailController extends AbstractController
             'data' => $data,
             'navigation' => $this->getNavigation($hideCategoryStep ? 3 : 4, $hideCategoryStep),
             'mailUid' => $mail->getUid(),
+            'title' => $mail->getSubject(),
             'backendUser' => [
                 'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
@@ -528,6 +530,7 @@ class MailController extends AbstractController
             'data' => $this->recipientService->getFinalSendingGroups($this->id, $this->userTable),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mailUid' => $mail->getUid(),
+            'title' => $mail->getSubject(),
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());

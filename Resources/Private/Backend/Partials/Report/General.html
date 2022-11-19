@@ -13,72 +13,79 @@
         2: '{f:translate(key:\'{lll2}sys_dmail.return_path\')}: {mail.returnPath}'}"/>
 
 <f:variable name="sourceInfo" value="{
-        0: '{f:translate(key:\'{lll}view_media\')}: {data.includeMedia}'}"/>
+        0: '{f:translate(key:\'{lll}report.general.htmlSource\')}: {data.htmlSource}',
+        1: '{f:translate(key:\'{lll}report.general.plainSource\')}: {data.plainSource}'
+        }"/>
 
 <f:variable name="mailFormatAttachementInfo" value="{
         0: '{f:translate(key:\'{lll2}sys_dmail.priority\')}: {mail.priority}',
         1: '{f:translate(key:\'{lll2}sys_dmail.transfer_encoding\')}: {mail.encoding}',
-        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {mail.charset}'}"/>
+        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {mail.charset}',
+        3: '{f:translate(key:\'{lll}view_media\')}: {data.includeMedia}'
+        }"/>
 
 <h2>
     <f:translate key="{lll}stats_direct_mail"/>
 </h2>
 <div class="panel panel-default mb-3">
-    <table class="table table-striped table-hover">
-        <tr>
-            <th>
-                <f:translate key="{lll}view_from"/>
-            </th>
-            <td>{mail.fromName} &lt;{mail.fromEmail}&gt;</td>
-            <td>
-                <f:render section="help" arguments="{messages: fromInfo}"/>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                <f:translate key="{lll}view_dmail"/>
-            </th>
-            <td>{data.type}
-                <f:if condition="{mail.internal}">
-                    [{mail.page}]
-                </f:if>
-                / {data.source}
-            </td>
-            <td>
-                <f:render section="help" arguments="{messages: sourceInfo}"/>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                <f:translate key="{lll}view_mail"/>
-            </th>
-            <td>
-                {data.sendOptions}
-                <f:if condition="{mail.attachment}">
-                    <f:for each="{mail.attachment}" as="attachment">
-                        {attachment -> f:debug(inline:1)}
-                    </f:for>
-                </f:if>
-            </td>
-            <td>
-                <f:render section="help" arguments="{messages: mailFormatAttachementInfo}"/>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                <f:translate key="{lll}view_delivery_begin_end"/>
-            </th>
-            <td>{mail.scheduledBegin -> f:format.date(format: 'd.m.Y H:i')} / {mail.scheduledEnd -> f:format.date(format: 'd.m.Y H:i')}</td>
-            <td>&nbsp;</td>
-        </tr>
-        <tr>
-            <th>
-                <f:translate key="{lll}view_recipient_total_sent"/>
-            </th>
-            <td>{mail.numberOfRecipients}</td>
-            <td>&nbsp;</td>
-        </tr>
-    </table>
+    <div class="table-fit">
+        <table class="table table-striped table-hover">
+            <tr>
+                <th>
+                    <f:translate key="{lll}view_from"/>
+                </th>
+                <td>{mail.fromName} &lt;{mail.fromEmail}&gt;</td>
+                <td>
+                    <f:render section="help" arguments="{messages: fromInfo}"/>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <f:translate key="{lll}view_dmail"/>
+                </th>
+                <td>{data.type}
+                    <f:if condition="{mail.internal}">
+                        [{mail.page}]
+                    </f:if>
+                </td>
+                <td>
+                    <f:render section="help" arguments="{messages: sourceInfo}"/>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <f:translate key="{lll}view_mail"/>
+                </th>
+                <td>
+                    {data.sendOptions}
+                    <f:if condition="{mail.attachment}">
+                        <f:for each="{mail.attachment}" as="attachment">
+                            {attachment -> f:debug(inline:1)}
+                        </f:for>
+                    </f:if>
+                </td>
+                <td>
+                    <f:render section="help" arguments="{messages: mailFormatAttachementInfo}"/>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <f:translate key="{lll}view_delivery_begin_end"/>
+                </th>
+                <td>{mail.scheduledBegin -> f:format.date(format: 'd.m.Y H:i')} / {mail.scheduledEnd ->
+                    f:format.date(format: 'd.m.Y H:i')}
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <th>
+                    <f:translate key="{lll}view_recipient_total_sent"/>
+                </th>
+                <td>{mail.numberOfRecipients}</td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 <f:section name="help">
@@ -87,7 +94,8 @@
             {message}<br>
         </f:for>
     </f:variable>
-    <span class="badge rounded-pill bg-mail-theme mb-1 ms-1" data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="popover" data-bs-html="true"
+    <span class="badge rounded-pill bg-mail-theme mb-1 ms-1" data-bs-trigger="hover focus" data-bs-container="body"
+          data-bs-toggle="popover" data-bs-html="true"
           data-bs-placement="right" data-bs-content="{tooltip -> f:format.html()}">
         i
     </span>

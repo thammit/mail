@@ -11,6 +11,30 @@
                 <source>Previous</source>
                 <target>Zurück</target>
             </trans-unit>
+            <trans-unit id="general.button.send">
+                <source>Send</source>
+                <target>Senden</target>
+            </trans-unit>
+            <trans-unit id="general.button.sendTestMail">
+                <source>Send test mail to %s</source>
+                <target>Sende Test-Mail an %s</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.settings.general">
+                <source>General</source>
+                <target>Allgemein</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.settings.headers">
+                <source>Headers</source>
+                <target>Kopfzeilen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.settings.content">
+                <source>Content</source>
+                <target>Inhalte</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail.groups">
+                <source>Group(s)</source>
+                <target>Gruppe(n)</target>
+            </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
                 <target>Liste der Felder, die zur Berechnung von Authentifizierungscodes von Abmeldelinks und Sprung-URLs in E-Mails verwendet werden sollen.</target>
@@ -348,8 +372,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>Bearbeiten</target>
 			</trans-unit>
 			<trans-unit id="dmail_edit_info" resname="dmail_edit_info">
-				<source>Edit sender data</source>
-				<target>Absenderdaten bearbeiten</target>
+				<source>Edit settings</source>
+				<target>Einstellungen bearbeiten</target>
 			</trans-unit>
 			<trans-unit id="dmail_error" resname="dmail_error">
 				<source>An error has occurred</source>
@@ -581,12 +605,12 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
                 <target>Neue Kurznachricht</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Choose mail source</source>
-				<target>Mail Quelle auswählen</target>
+				<source>Please choose source</source>
+				<target>Bitte Quelle auswählen</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
-				<source>Step 2 - Mail settings</source>
-				<target>Schritt 2 - Mail Einstellungen</target>
+				<source>Settings</source>
+				<target>Einstellungen</target>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
 				<source>The page "%s" was fetched successfully.</source>
@@ -1402,7 +1426,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 			</trans-unit>
 			<trans-unit id="view_delivery_begin_end" resname="view_delivery_begin_end">
 				<source>Delivery begun/ended</source>
-				<target>Versand gestartet/beendet</target>
+				<target>Versand von/bis</target>
 			</trans-unit>
 			<trans-unit id="view_dmail" resname="view_dmail">
 				<source>Source</source>
@@ -1417,8 +1441,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>Absender</target>
 			</trans-unit>
 			<trans-unit id="view_mail" resname="view_mail">
-				<source>Email format/attachments</source>
-				<target>E-Mail-Format/Attachments</target>
+				<source>Format/attachments</source>
+				<target>Format/Anhänge</target>
 			</trans-unit>
 			<trans-unit id="view_media" resname="view_media">
 				<source>Include media</source>
@@ -1514,7 +1538,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
             <trans-unit id="assign_categories.description" xml:space="preserve">
 			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
 			Content elements without category restrictions will appear for in all mails.]]></source>
-                <target><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur dann in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
+                <target><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
 			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target>
 		    </trans-unit>
             <trans-unit id="create_directmail_from_url.alttitle">

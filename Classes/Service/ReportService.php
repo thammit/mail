@@ -85,7 +85,8 @@ class ReportService
         }
 
         return [
-            'source' => rtrim(($plainSource ? $plainSource . ' / ': '') . ($htmlSource ? $htmlSource . ' / ' : ''), ' /'),
+            'htmlSource' => $htmlSource,
+            'plainSource' => $plainSource,
             'type' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'type', $this->mail->getType()),
             'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $this->mail->getPriority()),
             'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options',

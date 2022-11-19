@@ -9,6 +9,30 @@
             <trans-unit id="general.button.back">
                 <source>Back</source>
             </trans-unit>
+            <trans-unit id="general.button.send">
+                <source>Send</source>
+            </trans-unit>
+            <trans-unit id="general.button.sendTestMail">
+                <source>Send test mail to %s</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.settings.general">
+                <source>General</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.settings.headers">
+                <source>Headers</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.settings.content">
+                <source>Content</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail.groups">
+                <source>Group(s)</source>
+            </trans-unit>
+            <trans-unit id="report.general.htmlSource">
+                <source>HTML</source>
+            </trans-unit>
+            <trans-unit id="report.general.plainSource">
+                <source>Plain text</source>
+            </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
             </trans-unit>
@@ -261,7 +285,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Edit</source>
 			</trans-unit>
 			<trans-unit id="dmail_edit_info" resname="dmail_edit_info">
-				<source>Edit sender data</source>
+				<source>Edit settings</source>
 			</trans-unit>
 			<trans-unit id="dmail_error" resname="dmail_error">
 				<source>An error has occurred</source>
@@ -441,10 +465,10 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>New Quickmail</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Choose mail source</source>
+				<source>Please choose source</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
-				<source>Step 2 - Mail settings</source>
+				<source>Settings</source>
 			</trans-unit>
 			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
 				<source>The page "%s" was fetched successfully.</source>
@@ -1083,7 +1107,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Sender</source>
 			</trans-unit>
 			<trans-unit id="view_mail" resname="view_mail">
-				<source>Email format/attachments</source>
+				<source>Format/attachments</source>
 			</trans-unit>
 			<trans-unit id="view_media" resname="view_media">
 				<source>Include media</source>

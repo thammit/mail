@@ -10,33 +10,36 @@
 </h2>
 
 <div class="panel panel-default mb-3">
-    <table class="table table-striped table-hover">
-        <thead>
-        <tr>
-            <th>
-                <f:translate key="{lll}stats_clicked_link"/>
-            </th>
-            <th>
-                <f:translate key="{lll}stats_HTML"/>
-            </th>
-            <th>
-                <f:translate key="{lll}stats_plaintext"/>
-            </th>
-            <th>
-                <f:translate key="{lll}stats_total"/>
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        <f:for each="{data}" as="row">
+    <div class="table-fit">
+        <table class="table table-striped table-hover">
+            <thead>
             <tr>
-                <td><a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget">{row.label -> f:format.crop(maxCharacters:40)}</a></td>
-                <td>{row.htmlCounter}</td>
-                <td>{row.plainCounter}</td>
-                <td>{row.totalCounter}</td>
+                <th>
+                    <f:translate key="{lll}stats_clicked_link"/>
+                </th>
+                <th>
+                    <f:translate key="{lll}stats_HTML"/>
+                </th>
+                <th>
+                    <f:translate key="{lll}stats_plaintext"/>
+                </th>
+                <th>
+                    <f:translate key="{lll}stats_total"/>
+                </th>
             </tr>
-        </f:for>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            <f:for each="{data}" as="row">
+                <tr>
+                    <td><a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget">{row.label ->
+                        f:format.crop(maxCharacters:40)}</a></td>
+                    <td>{row.htmlCounter}</td>
+                    <td>{row.plainCounter}</td>
+                    <td>{row.totalCounter}</td>
+                </tr>
+            </f:for>
+            </tbody>
+        </table>
+    </div>
 </div>
 </html>

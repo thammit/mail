@@ -11,10 +11,11 @@
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1><f:translate key="{lll}dmail_wizard_title"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <h2><f:translate key="{lll}dmail_wiz3_cats"/></h2>
+    <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
     <f:form action="updateCategories" arguments="{mail:mailUid}" method="post" enctype="multipart/form-data">
         <f:render partial="InfoBox" arguments="{field: 'assign_categories'}" />
         <f:if condition="{data.rows}">
+            <h3><f:translate key="{lll}dmail_wiz3_cats"/></h3>
             <div class="panel panel-default">
                 <table class="table table-striped table-hover">
                     <tbody>
