@@ -581,6 +581,7 @@ class MailController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param array $notification
      * @return ResponseInterface
      * @throws DBALException
      * @throws IllegalObjectTypeException
@@ -588,7 +589,7 @@ class MailController extends AbstractController
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public function scheduleSendingAction(Mail $mail): ResponseInterface
+    public function scheduleSendingAction(Mail $mail, array $notification = []): ResponseInterface
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
@@ -602,6 +603,10 @@ class MailController extends AbstractController
         $moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
+        if ($notification) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($notification['severity'] ?? 'success') . '(\'' . ($notification['title'] ?? '') . '\', \'' . ($notification['message'] ?? '') . '\');');
+        }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
@@ -624,9 +629,32 @@ class MailController extends AbstractController
      */
     public function finishAction(Mail $mail): void
     {
+        if ($mail->getRecipientGroups()->count() === 0) {
+            $this->redirect('scheduleSending', null, null, [
+                'mail' => $mail,
+                'notification' => [
+                    'severity' => 'warning',
+                    'message' => LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'),
+                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.warning.title')
+                ]
+            ]);
+        }
+
+        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByTables($mail->getRecipientGroups()->toArray()));
+
+        if ($mail->getNumberOfRecipients() === 0) {
+            $this->redirect('scheduleSending', null, null, [
+                'mail' => $mail,
+                'notification' => [
+                    'severity' => 'warning',
+                    'message' => LanguageUtility::getLL('mail.wizard.notification.noRecipients.message'),
+                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.warning.title')
+                ]
+            ]);
+        }
+
         // Update the record:
-        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByTables($mail->getRecipientGroups()->toArray()))
-            ->setSent(true);
+        $mail->setSent(true);
 
 //        if (false && $this->isTestMail) {
 //            $updateFields['subject'] = ($this->pageTSConfiguration['testmail'] ?? '') . ' ' . $row['subject'];

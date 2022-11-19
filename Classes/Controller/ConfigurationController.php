@@ -15,7 +15,11 @@ class ConfigurationController  extends AbstractController
 {
     protected string $tsConfigPrefix = 'mod.web_modules.mail.';
 
-    public function indexAction(): ResponseInterface
+    /**
+     * @param array $notification
+     * @return ResponseInterface
+     */
+    public function indexAction(array $notification = []): ResponseInterface
     {
         if (!isset($this->implodedParams['plainParams'])) {
             $this->implodedParams['plainParams'] = '&type=99';
@@ -41,6 +45,11 @@ class ConfigurationController  extends AbstractController
         $moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
+        if ($notification) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($notification['severity'] ?? 'success') . '(\'' . ($notification['title'] ?? '') . '\', \'' . ($notification['message'] ?? '') . '\');');
+        }
+
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
@@ -51,10 +60,33 @@ class ConfigurationController  extends AbstractController
      */
     public function updateAction(array $pageTS): void
     {
-        if ($pageTS && BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
-            TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, $this->tsConfigPrefix);
-            ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('configure_update_configuration_success') . ' ' . $this->id, true);
+        if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
+            $this->redirect('index', null, null, [
+                'notification' => [
+                    'severity' => 'error',
+                    'message' => sprintf(LanguageUtility::getLL('configuration.notification.permissionError.message'), $this->id),
+                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title')
+                ]
+            ]);
         }
-        $this->redirect('index');
+        if ($pageTS) {
+            $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, $this->tsConfigPrefix);
+            if ($success) {
+                $this->redirect('index', null, null, [
+                    'notification' => [
+                        'severity' => 'success',
+                        'message' => sprintf(LanguageUtility::getLL('configuration.notification.savedOnPage.message'), $this->id),
+                        'title' => LanguageUtility::getLL('mail.wizard.notification.severity.success.title')
+                    ]
+                ]);
+            }
+            $this->redirect('index', null, null, [
+                'notification' => [
+                    'severity' => 'warning',
+                    'message' => sprintf(LanguageUtility::getLL('configuration.notification.savedFailed.message'), $this->id),
+                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.warning.title')
+                ]
+            ]);
+        }
     }
 }

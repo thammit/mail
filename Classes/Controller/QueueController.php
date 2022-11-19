@@ -20,12 +20,13 @@ use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 class QueueController extends AbstractController
 {
     /**
+     * @param array $notification
      * @return ResponseInterface
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      */
-    public function indexAction(): ResponseInterface
+    public function indexAction(array $notification = []): ResponseInterface
     {
         $data = [];
         $scheduledMails = $this->mailRepository->findScheduledByPid($this->id)->toArray();
@@ -50,6 +51,11 @@ class QueueController extends AbstractController
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
 
+        if ($notification) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($notification['severity'] ?? 'success') . '(\'' . ($notification['title'] ?? '') . '\', \'' . ($notification['message'] ?? '') . '\');');
+        }
+
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
@@ -64,10 +70,24 @@ class QueueController extends AbstractController
      */
     public function triggerAction(): void
     {
+        if (!$this->mailRepository->findMailToSend()) {
+            $this->redirect('index', null, null, [
+                'notification' => [
+                    'severity' => 'info',
+                    'message' => LanguageUtility::getLL('queue.notification.nothingToDo.message'),
+                    'title' => LanguageUtility::getLL('queue.notification.nothingToDo.title')
+                ]
+            ]);
+        }
         $this->mailerService->start((int)($this->pageTSConfiguration['sendPerCycle'] ?? 50));
         $this->mailerService->handleQueue();
-        ViewUtility::addOkToFlashMessageQueue('', LanguageUtility::getLL('dmail_mailerengine_invoked'), true);
-        $this->redirect('index');
+        $this->redirect('index', null, null, [
+            'notification' => [
+                'severity' => 'success',
+                'message' => LanguageUtility::getLL('queue.notification.mailSendTriggered.message'),
+                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.success.title')
+            ]
+        ]);
     }
 
     /**
@@ -79,6 +99,12 @@ class QueueController extends AbstractController
     public function deleteAction(Mail $mail):void
     {
         $this->mailRepository->remove($mail);
-        $this->redirect('index');
+        $this->redirect('index', null, null, [
+            'notification' => [
+                'severity' => 'success',
+                'message' => LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'),
+                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.success.title')
+            ]
+        ]);
     }
 }

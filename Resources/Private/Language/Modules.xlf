@@ -33,7 +33,7 @@
             <trans-unit id="mail.wizard.notification.severity.success.title">
                 <source>Success</source>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.waring.title">
+            <trans-unit id="mail.wizard.notification.severity.warning.title">
                 <source>Warning</source>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.severity.error.title">
@@ -60,6 +60,12 @@
             <trans-unit id="mail.wizard.notification.finished.title">
                 <source>Mail scheduled for distribution</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.missingRecipientGroup.message">
+                <source>Please select at least one recipient group.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.noRecipients.message">
+                <source>There are no recipients in the selected group(s).</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.finished.message">
                 <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
             </trans-unit>
@@ -77,6 +83,24 @@
             </trans-unit>
             <trans-unit id="report.general.groups">
                 <source>Recipient groups</source>
+            </trans-unit>
+            <trans-unit id="queue.notification.nothingToDo.title">
+                <source>Nothing to do</source>
+            </trans-unit>
+            <trans-unit id="queue.notification.nothingToDo.message">
+                <source>There are currently no mails in the queue.</source>
+            </trans-unit>
+            <trans-unit id="queue.notification.mailSendTriggered.message">
+                <source>Manual sending started!</source>
+            </trans-unit>
+            <trans-unit id="configuration.notification.permissionError.message">
+                <source>You do not have permissions to write configuration to page %s.</source>
+            </trans-unit>
+            <trans-unit id="configuration.notification.savedOnPage.message">
+                <source>The configuration was successfully saved to the selected page %s.</source>
+            </trans-unit>
+            <trans-unit id="configuration.notification.savedFailed.message">
+                <source>The configuration was not saved to the selected page %s.</source>
             </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>

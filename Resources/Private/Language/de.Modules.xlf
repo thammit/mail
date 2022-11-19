@@ -43,7 +43,7 @@
                 <source>Success</source>
                 <target>Erfolgreich</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.waring.title">
+            <trans-unit id="mail.wizard.notification.severity.warning.title">
                 <source>Warning</source>
                 <target>Warnung</target>
             </trans-unit>
@@ -75,6 +75,14 @@
                 <source>Recipient(s): %s</source>
                 <target>Empfänger: %s</target>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.missingRecipientGroup.message">
+                <source>Please select at least one recipient group.</source>
+                <target>Bitte wählen Sie mindestens eine Empfängergruppe aus.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.noRecipients.message">
+                <source>There are no recipients in the selected group(s).</source>
+                <target>Es gibt keine Empfänger in der/den ausgewählten Gruppen.</target>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.finished.title">
                 <source>Mail scheduled for distribution</source>
                 <target>Mail für Versand eingeplant</target>
@@ -94,6 +102,30 @@
             <trans-unit id="report.general.groups">
                 <source>Recipient groups</source>
                 <target>Empfängergruppen</target>
+            </trans-unit>
+            <trans-unit id="queue.notification.nothingToDo.title">
+                <source>Nothing to do</source>
+                <target>Nichts zu tun</target>
+            </trans-unit>
+            <trans-unit id="queue.notification.nothingToDo.message">
+                <source>There are currently no mails in the queue.</source>
+                <target>Im Moment befinden sich keine Mails in der Warteschlange.</target>
+            </trans-unit>
+            <trans-unit id="queue.notification.mailSendTriggered.message">
+                <source>Manual sending started!</source>
+                <target>Manueller Versand gestartet!</target>
+            </trans-unit>
+            <trans-unit id="configuration.notification.permissionError.message">
+                <source>You do not have permissions to write configuration to page %s.</source>
+                <target>Sie haben keine Berechtigung, die Konfiguration in die Seite %s zu schreiben.</target>
+            </trans-unit>
+            <trans-unit id="configuration.notification.savedOnPage.message">
+                <source>The configuration was successfully saved to the selected page %s.</source>
+                <target>Die Konfiguration wurde erfolgreich auf der ausgewählten Seite %s gespeichert.</target>
+            </trans-unit>
+            <trans-unit id="configuration.notification.savedFailed.message">
+                <source>The configuration was not saved to the selected page %s.</source>
+                <target>Die Konfiguration wurde nicht auf der ausgewählten Seite %s gespeichert.</target>
             </trans-unit>
             <trans-unit id="authcode_fieldList.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>

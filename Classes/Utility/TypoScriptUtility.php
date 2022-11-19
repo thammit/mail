@@ -46,11 +46,11 @@ class TypoScriptUtility
      * @param array $pageTSConfig Page TS array to write
      * @param string $tsConfigPrefix Prefix for object paths
      *
-     * @return    void
+     * @return bool
      *
      * @see implodeTSParams(), getPagesTSconfig()
      */
-    public static function updatePagesTSConfig(int $pageId, array $pageTSConfig, string $tsConfigPrefix)
+    public static function updatePagesTSConfig(int $pageId, array $pageTSConfig, string $tsConfigPrefix): bool
     {
         $done = false;
         if ($pageId > 0) {
@@ -92,7 +92,7 @@ class TypoScriptUtility
             }
         }
 
-        return $done;
+        return (bool)$done;
     }
 
     public static function getUserTSConfig(): array
