@@ -43,10 +43,14 @@
                 <th>
                     <f:translate key="{lll}view_dmail"/>
                 </th>
-                <td>{data.type}
-                    <f:if condition="{mail.internal}">
-                        [{mail.page}]
+                <td>
+                    <f:if condition="{mail.quickMail}">
+                        <f:then><f:translate key="{lll}mail.type.quickMail"/></f:then>
+                        <f:else>
+                            <f:translate key="{lll2}sys_dmail.type.I.{mail.type}"/>
+                        </f:else>
                     </f:if>
+                    <f:if condition="{mail.internal}">[{mail.page}]</f:if>
                 </td>
                 <td>
                     <f:render section="help" arguments="{messages: sourceInfo}"/>
