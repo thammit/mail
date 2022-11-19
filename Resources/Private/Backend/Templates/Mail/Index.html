@@ -107,7 +107,7 @@
                     <tbody>
                     <f:for each="{data.data}" as="row">
                         <tr class="db_list_normal">
-                            <td class="col-icon nowrap" style="width: 1%"><core:iconForRecord row="{uid: row.uid, type:0}" table="tx_mail_domain_model_mail"/></td>
+                            <td class="col-icon nowrap" style="width: 1%"><core:iconForRecord row="{uid: row.uid, module:'mail'}" table="pages"/></td>
                             <td class="col-title col-responsive nowrap">{row.title}</td>
                             <td class="nowrap">
                                 <be:link.editRecord uid="{row.uid}" table="pages" class="btn btn-default" title="{f:translate(key: '{lll}nl_editPage')}">
