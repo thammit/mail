@@ -12,8 +12,20 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <f:if condition="{settings.html2canvas}">
+        <script src="{f:uri.resource(path:'EXT:mail/Resources/Public/JavaScript/html2canvas.min.js')}"></script>
+    </f:if>
 </head>
 <body><f:spaceless>
 <f:render section="Header" /><f:render section="Body" /><f:render section="Footer" />
-</f:spaceless></body>
+</f:spaceless>
+<f:if condition="{settings.html2canvas}">
+    <script defer>
+        html2canvas(document.body).then(function(canvas) {
+            const canvasNode = document.body.appendChild(canvas);
+            canvasNode.setAttribute("hidden", "hidden");
+        });
+    </script>
+</f:if>
+</body>
 </html>

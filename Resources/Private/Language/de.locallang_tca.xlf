@@ -125,7 +125,7 @@
 		</trans-unit>
 		<trans-unit id="sys_dmail.sendOptions">
 			<source>Format of mail content</source>
-			<target>Format des Mail-Inhals</target>
+			<target>Format des Mail-Inhalts</target>
 		</trans-unit>
 		<trans-unit id="sys_dmail.sendOptions.I.0">
 			<source>Plain text</source>

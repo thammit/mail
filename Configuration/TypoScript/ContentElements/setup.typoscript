@@ -68,7 +68,7 @@ mail {
     }
     10 = EMOGRIFIER
     10 {
-        extractContent = 1
+        extractContent = 0
         css = COA
         css {
 #            10 = FLUIDTEMPLATE
@@ -85,6 +85,7 @@ mail {
             partialRootPaths.200 = EXT:mail/Resources/Private/Partials/
             layoutRootPaths.200 = EXT:mail/Resources/Private/Layouts/
             settings {
+                html2canvas = 0
                 header {
                     title = {$plugin.mail.settings.header.title}
                     image {
@@ -107,6 +108,9 @@ mail {
         }
     }
 }
+[traverse(request.getQueryParams(), 'html2canvas')  == 1]
+    mail.10.html.settings.html2canvas = 1
+[end]
 
 [traverse(request.getQueryParams(), 'plain')  == 1]
     // do no use table markup for plain text since conversation is done by league/html-to-markdown package

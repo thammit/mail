@@ -30,6 +30,12 @@
             <trans-unit id="mail.wizard.testMail.groups">
                 <source>Group(s)</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.info.title">
+                <source>Info</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.severity.notice.title">
+                <source>Notice</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.severity.success.title">
                 <source>Success</source>
             </trans-unit>
@@ -98,6 +104,9 @@
             </trans-unit>
             <trans-unit id="configuration.notification.savedOnPage.message">
                 <source>The configuration was successfully saved to the selected page %s.</source>
+            </trans-unit>
+            <trans-unit id="configuration.notification.noChanges.message">
+                <source>No changes in the configuration detected.</source>
             </trans-unit>
             <trans-unit id="configuration.notification.savedFailed.message">
                 <source>The configuration was not saved to the selected page %s.</source>

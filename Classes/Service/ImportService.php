@@ -24,6 +24,7 @@ use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\File\ExtendedFileUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -112,8 +113,8 @@ class ImportService
         $data['newFileUid'] = $this->configuration['newFileUid'];
 
         $beUser = BackendUserUtility::getBackendUser();
-        $pagePermsClause3 = $beUser->getPagePermsClause(3);
-        $pagePermsClause1 = $beUser->getPagePermsClause(1);
+        $pagePermsClause3 = $beUser->getPagePermsClause(Permission::PAGE_SHOW | Permission::PAGE_EDIT);
+        $pagePermsClause1 = $beUser->getPagePermsClause(Permission::PAGE_SHOW);
         // get list of sysfolder
         // TODO: maybe only subtree von this->id??
 

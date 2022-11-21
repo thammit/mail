@@ -28,6 +28,8 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
@@ -347,6 +349,22 @@ class MailController extends AbstractController
             'table' => $table,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail))
         ]);
+
+        // Html2canvas stuff
+        if ($mail->isInternal()) {
+            try {
+                $targetUrl = BackendUtility::getPreviewUrl(
+                    $mail->getPage(),
+                    '',
+                    null,
+                    '',
+                    '',
+                    '&html2canvas=1&L=' . $mail->getSysLanguageUid()
+                );
+                $this->view->assign('htmlToCanvasIframeSrc', $targetUrl);
+            } catch (UnableToLinkToPageException $e) {
+            }
+        }
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());

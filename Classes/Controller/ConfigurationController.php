@@ -82,9 +82,9 @@ class ConfigurationController  extends AbstractController
             }
             $this->redirect('index', null, null, [
                 'notification' => [
-                    'severity' => 'warning',
-                    'message' => sprintf(LanguageUtility::getLL('configuration.notification.savedFailed.message'), $this->id),
-                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.warning.title')
+                    'severity' => 'info',
+                    'message' => sprintf(LanguageUtility::getLL('configuration.notification.noChanges.message'), $this->id),
+                    'title' => LanguageUtility::getLL('queue.notification.nothingToDo.title')
                 ]
             ]);
         }
