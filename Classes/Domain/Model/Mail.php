@@ -37,6 +37,10 @@ class Mail extends AbstractEntity
     protected int $renderedSize = 0;
     protected string $messageId = '';
     protected string $htmlContent = '';
+    /**
+     * @var string
+     */
+    protected string $previewImage = '';
     protected string $plainContent = '';
     /**
      * html links (do not delete this annotation block!)
@@ -496,6 +500,24 @@ class Mail extends AbstractEntity
     {
         $this->htmlContent = $htmlContent;
         $this->recalculateRenderSize();
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreviewImage(): string
+    {
+        return $this->previewImage;
+    }
+
+    /**
+     * @param string $previewImage
+     * @return Mail
+     */
+    public function setPreviewImage(string $previewImage): Mail
+    {
+        $this->previewImage = $previewImage;
         return $this;
     }
 

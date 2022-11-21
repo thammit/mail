@@ -110,6 +110,8 @@ mail {
 }
 [traverse(request.getQueryParams(), 'html2canvas')  == 1]
     mail.10.html.settings.html2canvas = 1
+    mail.10.html.variables.mailUid = TEXT
+    mail.10.html.variables.mailUid.data = gp:mailUid
 [end]
 
 [traverse(request.getQueryParams(), 'plain')  == 1]

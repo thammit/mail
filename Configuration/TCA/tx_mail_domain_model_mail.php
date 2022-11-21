@@ -310,6 +310,12 @@ return [
                 'type' => 'passthrough'
             ]
         ],
+        'preview_image' => [
+            'label' => 'preview image',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
         'plain_content' => [
             'label' => 'plain content',
             'config' => [

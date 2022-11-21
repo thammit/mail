@@ -24,6 +24,7 @@ use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -359,7 +360,7 @@ class MailController extends AbstractController
                     null,
                     '',
                     '',
-                    '&html2canvas=1&L=' . $mail->getSysLanguageUid()
+                    '&html2canvas=1&mailUid=' . $mail->getUid() . '&L=' . $mail->getSysLanguageUid()
                 );
                 $this->view->assign('htmlToCanvasIframeSrc', $targetUrl);
             } catch (UnableToLinkToPageException $e) {
@@ -446,6 +447,7 @@ class MailController extends AbstractController
         }
         $this->view->assignMultiple([
             'data' => $data,
+            'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail))
@@ -723,6 +725,28 @@ class MailController extends AbstractController
                 'title' => LanguageUtility::getLL('mail.wizard.notification.deleted.title')
             ]
         ]);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
+    public function savePreviewImageAction(ServerRequestInterface $request): ResponseInterface
+    {
+        $dataUrl = $request->getBody()->getContents() ?? null;
+        $mailUid = (int)($request->getQueryParams()['mailUid'] ?? 0);
+
+        if ($dataUrl && $mailUid) {
+            $mail = $this->mailRepository->findByUid($mailUid);
+            $mail->setPreviewImage($dataUrl);
+            $this->mailRepository->update($mail);
+            $this->mailRepository->persist();
+            return $this->jsonResponse(json_encode(['status' => 200, 'message' => 'Preview image saved']));
+        }
+
+        return $this->jsonResponse(json_encode(['status' => 500, 'message' => 'Error during preview image save']));
     }
 
     protected function hideCategoryStep(Mail $mail = null): bool

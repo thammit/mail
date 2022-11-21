@@ -24,6 +24,7 @@ CREATE TABLE tx_mail_domain_model_mail (
    rendered_size int(11) unsigned DEFAULT '0' NOT NULL,
    message_id varchar(100),
    html_content mediumblob,
+   preview_image longblob,
    plain_content mediumblob,
    html_links text,
    plain_links text,

@@ -9,12 +9,19 @@
 
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}dmail_wizard_title"/></h1>
+    <h1>
+        <f:translate key="{lll}dmail_wizard_title"/>
+    </h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <f:if condition="{data}">
-        <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
-        <f:if condition="{data}">
-            <h3><f:translate key="{lll}dmail_wiz2_detail"/></h3>
+    <h2>
+        <core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
+        {title}
+    </h2>
+    <div class="row justify-content-between">
+        <div class="col-12 col-md-8">
+            <h3>
+                <f:translate key="{lll}dmail_wiz2_detail"/>
+            </h3>
             <div role="tabpanel">
                 <ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab" data-store-last-tab="1">
                     <li role="presentation" class="t3js-tabmenu-item">
@@ -37,25 +44,16 @@
                     <div role="tabpanel" class="tab-pane active" id="tab-1">
                         <div class="panel panel-tab">
                             <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-12 col-md-6 col-lg-8">
-                                        <table class="table table-striped table-hover">
-                                            <tbody>
-                                            <f:for each="{data.general}" as="column">
-                                                <tr>
-                                                    <th style="width:20%; min-width:200px">{column.title}</th>
-                                                    <td>{column.value}</td>
-                                                </tr>
-                                            </f:for>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="col-12 col-md-6 col-lg-4">
-                                        <div style="width:300px; height:400px;">
-                                            <iframe style="transform: scale(0.5) translate(-50%, -50%); width:600px; height:800px;" src="{htmlToCanvasIframeSrc}" width="100%" height="100%" frameborder="0"></iframe>
-                                        </div>
-                                    </div>
-                                </div>
+                                <table class="table table-striped table-hover">
+                                    <tbody>
+                                    <f:for each="{data.general}" as="column">
+                                        <tr>
+                                            <th style="width:20%; min-width:200px">{column.title}</th>
+                                            <td>{column.value}</td>
+                                        </tr>
+                                    </f:for>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -93,17 +91,26 @@
                     </div>
                 </div>
             </div>
-        </f:if>
-    </f:if>
+        </div>
+        <div class="col-12 col-md-4">
+            <div style="width:300px; height:450px;">
+                <iframe style="transform: scale(0.5) translate(-50%, -50%); width:600px; height:840px;" src="{htmlToCanvasIframeSrc}" width="100%"
+                        height="100%"
+                        frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
     <f:if condition="{allowEdit} && !{isSent}">
         <f:then>
             <be:link.editRecord uid="{mailUid}" table="{table}" class="btn btn-default mb-3">
-                <core:icon identifier="actions-open" />
+                <core:icon identifier="actions-open"/>
                 <f:translate key="{lll}dmail_edit_info"/>
             </be:link.editRecord>
         </f:then>
         <f:else>
-            <f:be.infobox state="1"><f:translate key="{lll}dmail_noEdit_noPerms"/></f:be.infobox>
+            <f:be.infobox state="1">
+                <f:translate key="{lll}dmail_noEdit_noPerms"/>
+            </f:be.infobox>
         </f:else>
     </f:if>
     <f:render partial="Wizard/Navigation" arguments="{mail:mailUid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>

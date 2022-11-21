@@ -20,10 +20,17 @@
 <f:render section="Header" /><f:render section="Body" /><f:render section="Footer" />
 </f:spaceless>
 <f:if condition="{settings.html2canvas}">
+    <f:variable name="savePreviewImageAjaxUri" value="{f:be.uri(route:'ajax_mail_save-preview-image', parameters:'{mailUid:mailUid}')}" />
     <script defer>
-        html2canvas(document.body).then(function(canvas) {
+        html2canvas(document.body, { scale: .5, logging: false }).then(function(canvas) {
             const canvasNode = document.body.appendChild(canvas);
             canvasNode.setAttribute("hidden", "hidden");
+            const base64image = canvas.toDataURL('image/jpeg', 80);
+            <f:comment></f:comment>
+            window.fetch('{savePreviewImageAjaxUri -> f:format.raw()}', {
+                method: 'POST',
+                body: base64image,
+            });
         });
     </script>
 </f:if>
