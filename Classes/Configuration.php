@@ -10,6 +10,9 @@ use MEDIAESSENZ\Mail\Controller\RecipientController;
 use MEDIAESSENZ\Mail\Controller\ReportController;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
@@ -40,6 +43,17 @@ final class Configuration
     	TCEFORM.tt_address.categories.disabled = 1
     	TCEFORM.fe_users.categories.disabled = 1
     	TCEFORM.tx_mail_domain_model_group.categories.disabled = 1
+        ');
+    }
+
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
+    public static function addUserTSConfig(): void
+    {
+        \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addUserTSConfig('
+        options.pageTree.doktypesToShowInNewPageDragArea := addToList(' . (int)(ConfigurationUtility::getExtensionConfiguration('mailPageTypeNumber') ?? Constants::DEFAULT_MAIL_PAGE_TYPE) . ')
         ');
     }
 
@@ -170,5 +184,17 @@ final class Configuration
         {
             ExtensionUtility::registerTypeConverter(DateTimeImmutableConverter::class);
         }
+    }
+
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
+    public static function addMailPageType(): void
+    {
+        $GLOBALS['PAGES_TYPES'][(int)(ConfigurationUtility::getExtensionConfiguration('mailPageTypeNumber') ?? Constants::DEFAULT_MAIL_PAGE_TYPE)] = [
+            'type' => 'web',
+            'allowedTables' => '*',
+        ];
     }
 }

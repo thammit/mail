@@ -23,6 +23,10 @@
                 <source>Quick Mail</source>
                 <target>Kurznachricht</target>
             </trans-unit>
+            <trans-unit id="mail.wizard.edit.title">
+                <source>Edit title/subject</source>
+                <target>Titel/Thema bearbeiten</target>
+            </trans-unit>
             <trans-unit id="mail.wizard.settings.general">
                 <source>General</source>
                 <target>Allgemein</target>

@@ -107,12 +107,12 @@
                     <tbody>
                     <f:for each="{data.data}" as="row">
                         <tr class="db_list_normal">
-                            <td class="col-icon nowrap" style="width: 1%"><core:iconForRecord row="{uid: row.uid, module:'mail'}" table="pages"/></td>
+                            <td class="col-icon nowrap" style="width: 1%"><core:icon identifier="app-pagetree-mail" size="small"/></td>
                             <td class="col-title col-responsive nowrap">{row.title}</td>
                             <td class="nowrap">
-                                <be:link.editRecord uid="{row.uid}" table="pages" class="btn btn-default" title="{f:translate(key: '{lll}nl_editPage')}">
-                                    <core:icon identifier="actions-open" size="small"/>
-                                </be:link.editRecord>
+                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: row.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}nl_editPage')}">
+                                    <core:icon identifier="actions-page-open" size="small"/>
+                                </a>
                                 <f:variable name="previewLinks" value="{mail:previewLinks(data:row,pageId:mailSysFolderUid)}"/>
                                 <f:for each="{previewLinks}" as="previewLinks" key="type">
                                     <f:if condition="{type} == 'htmlPreview'">

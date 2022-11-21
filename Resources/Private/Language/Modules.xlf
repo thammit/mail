@@ -18,6 +18,9 @@
             <trans-unit id="mail.type.quickMail">
                 <source>Quick Mail</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.edit.title">
+                <source>Edit title/subject</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.settings.general">
                 <source>General</source>
             </trans-unit>

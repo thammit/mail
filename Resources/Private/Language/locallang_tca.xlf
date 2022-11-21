@@ -3,6 +3,9 @@
 	<file source-language="en" datatype="plaintext" original="messages" date="2022-11-16T17:00:00Z">
 		<header />
 		<body>
+		<trans-unit id="pages.mail">
+			<source>Mail</source>
+		</trans-unit>
 		<trans-unit id="accepts_html">
 			<source>Receiver accept HTML mails</source>
 		</trans-unit>

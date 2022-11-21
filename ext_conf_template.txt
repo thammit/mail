@@ -1,10 +1,13 @@
 # cat=basic; type=string; label=Default recipient fields: Default fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user
 defaultRecipientFields = uid,name,title,email,phone,www,address,company,city,zip,country,fax,firstname,first_name,last_name
 
-# cat=basic; type=string; label=Additional DB fields of the recipient : Additional fields that may be substituted in the mail messages.
+# cat=basic; type=string; label=Additional DB fields of the recipient: Additional fields that may be substituted in the mail messages.
 additionalRecipientFields =
 
-# cat=feature; type=boolean; label=Enable notification email : Allow mail to send notification about start and end of a mailing job.
+# cat=basic; type=int; label=Mail page type number: Change this number only if another extension use the same.
+mailPageTypeNumber = 24
+
+# cat=feature; type=boolean; label=Enable notification email: Allow mail to send notification about start and end of a mailing job.
 notificationJob = 1
 
 # cat=feature; type=boolean; label=Use http connection for fetching Newsletter-Content: Even if your TYPO3 Backend is in SSL-Mode, the URL for fetching the newsletter contents will be http
