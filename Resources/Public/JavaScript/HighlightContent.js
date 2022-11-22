@@ -6,7 +6,7 @@ define([], function() {
             const contentElement = document.getElementById(contentElementUid);
             const originContainerBackgroundColor = contentElement.parentElement.style.backgroundColor;
             row.dataset.originBackgroundColor = originContainerBackgroundColor;
-            contentElement.parentElement.style.backgroundColor = 'red';
+            contentElement.parentElement.style.backgroundColor = '#ea7676';
         });
         row.addEventListener('mouseout', (event) => {
             const row = event.target.closest('[data-content-id]');
