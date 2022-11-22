@@ -371,7 +371,7 @@ class MailController extends AbstractController
                 ],
             ]);
             $this->pageRenderer->loadRequireJsModule('html2canvas');
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/MailPreviewImage');
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewImage');
             $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
             $savePreviewImageAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mailUid' => $mail->getUid()]);
             $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
@@ -465,6 +465,7 @@ class MailController extends AbstractController
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/HighlightContent');
 
         if ($notification) {
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
