@@ -1,5 +1,4 @@
 define([], function() {
-    console.log('Highlight content');
     document.querySelectorAll('[data-content-id]').forEach((row) => {
         row.addEventListener('mouseover', (event) => {
             const row = event.target.closest('[data-content-id]');
