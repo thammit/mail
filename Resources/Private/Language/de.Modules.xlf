@@ -71,6 +71,14 @@
                 <source>The page "%s" was fetched successfully.</source>
                 <target>Die Seite "%s" wurde erfolgreich ausgelesen.</target>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.previewImageSaved.message">
+                <source>Preview image successfully saved.</source>
+                <target>Vorschaubild erfolgreich abgespeichert.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.previewImageCreationFailed.message">
+                <source>Preview image creation failed.</source>
+                <target>Generierung des Vorschaubildes fehlgeschlagen.</target>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.categoriesUpdated.title">
                 <source>Categories applied</source>
                 <target>Kategorien gespeichert</target>

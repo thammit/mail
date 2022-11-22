@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use DateTimeImmutable;
 use Doctrine\DBAL\DBALException;
 use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use FriendsOfTYPO3\TtAddress\Domain\Repository\AddressRepository;
@@ -23,23 +22,24 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use pQuery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
-use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 use TYPO3\CMS\Extbase\Reflection\ReflectionService;
@@ -270,6 +270,7 @@ class MailController extends AbstractController
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws NoSuchPropertyException
      * @throws UnknownClassException
+     * @throws InvalidFileException
      */
     public function settingsAction(Mail $mail): ResponseInterface
     {
@@ -342,12 +343,10 @@ class MailController extends AbstractController
         }
 
         $this->view->assignMultiple([
+            'mail' => $mail,
+            'table' => $table,
             'data' => $data,
             'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
-            'isSent' => $mail->isSent(),
-            'title' => $mail->getSubject(),
-            'mailUid' => $mail->getUid(),
-            'table' => $table,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail))
         ]);
 
@@ -360,11 +359,22 @@ class MailController extends AbstractController
                     null,
                     '',
                     '',
-                    '&html2canvas=1&mailUid=' . $mail->getUid() . '&L=' . $mail->getSysLanguageUid()
+                    '&mailUid=' . $mail->getUid() . '&L=' . $mail->getSysLanguageUid()
                 );
                 $this->view->assign('htmlToCanvasIframeSrc', $targetUrl);
             } catch (UnableToLinkToPageException $e) {
             }
+            $this->view->assign('mailBody', pQuery::parseStr($mail->getHtmlContent())->query('body')->html());
+            $this->pageRenderer->addRequireJsConfiguration([
+                'paths' => [
+                    'html2canvas' => PathUtility::getPublicResourceWebPath('EXT:mail/Resources/Public/') . 'JavaScript/Contrib/html2canvas.min',
+                ],
+            ]);
+            $this->pageRenderer->loadRequireJsModule('html2canvas');
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/MailPreviewImage');
+            $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
+            $savePreviewImageAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mailUid' => $mail->getUid()]);
+            $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
         }
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
@@ -372,11 +382,13 @@ class MailController extends AbstractController
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
 
         if ($mail->isInternal()) {
+            $title = LanguageUtility::getLL('mail.wizard.notification.severity.success.title');
             $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), $data['general']['page']['value']);
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'\', \'' . $message . '\');');
+            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'' . $title . '\', \'' . $message . '\');');
         } elseif (!$mail->isQuickMail()) {
+            $title = LanguageUtility::getLL('mail.wizard.notification.severity.success.title');
             $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /'));
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'\', \'' . $message . '\');');
+            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'' . $title . '\', \'' . $message . '\');');
         }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
@@ -448,8 +460,7 @@ class MailController extends AbstractController
         $this->view->assignMultiple([
             'data' => $data,
             'mail' => $mail,
-            'mailUid' => $mail->getUid(),
-            'title' => $mail->getSubject(),
+            'mailBody' => pQuery::parseStr($mail->getHtmlContent())->query('body')->html(),
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail))
         ]);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
@@ -721,8 +732,8 @@ class MailController extends AbstractController
         $this->redirect('index', null, null, [
             'notification' => [
                 'severity' => 'success',
+                'title' => LanguageUtility::getLL('mail.wizard.notification.deleted.title'),
                 'message' => sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
-                'title' => LanguageUtility::getLL('mail.wizard.notification.deleted.title')
             ]
         ]);
     }
@@ -743,10 +754,18 @@ class MailController extends AbstractController
             $mail->setPreviewImage($dataUrl);
             $this->mailRepository->update($mail);
             $this->mailRepository->persist();
-            return $this->jsonResponse(json_encode(['status' => 200, 'message' => 'Preview image saved']));
+            return $this->jsonResponse(json_encode([
+                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.success.title'),
+                'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageSaved.message')
+            ]));
         }
 
-        return $this->jsonResponse(json_encode(['status' => 500, 'message' => 'Error during preview image save']));
+        return $this->responseFactory->createResponse(400)
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
+            ->withBody($this->streamFactory->createStream(json_encode([
+                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageCreationFailed.message')
+            ])));
     }
 
     protected function hideCategoryStep(Mail $mail = null): bool

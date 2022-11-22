@@ -103,3 +103,24 @@
 .mail-wizard-navigation li.done:active {
     background-color: var(--mail-background-color);
 }
+
+.mail-wizard-preview {
+    width:320px;
+    height:450px;
+    overflow-x: hidden;
+    overflow-y:scroll;
+}
+.mail-wizard-preview-body {
+    width:600px;
+    height:600px;
+    overflow:visible;
+    transform: scale(0.5) translate(-50%, -50%);
+}
+.mail-wizard-preview-body::before {
+    position:absolute;
+    content:"";
+    display:block;
+    width:100%;
+    height:200%;
+    background-color:rgba(0,0,0,0);
+}

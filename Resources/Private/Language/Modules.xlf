@@ -54,6 +54,12 @@
             <trans-unit id="mail.wizard.notification.fetchSuccessfully.message">
                 <source>The page "%s" was fetched successfully.</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.previewImageSaved.message">
+                <source>Preview image successfully saved.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.previewImageCreationFailed.message">
+                <source>Preview image creation failed.</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.categoriesUpdated.title">
                 <source>Categories applied</source>
             </trans-unit>

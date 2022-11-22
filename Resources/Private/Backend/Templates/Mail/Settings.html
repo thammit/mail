@@ -14,8 +14,8 @@
     </h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2>
-        <core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
-        {title}
+        <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
+        {mail.subject}
     </h2>
     <div class="row justify-content-between">
         <div class="col-12 col-md-8">
@@ -92,17 +92,17 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-4">
-            <div style="width:300px; height:450px;">
-                <iframe style="transform: scale(0.5) translate(-50%, -50%); width:600px; height:840px;" src="{htmlToCanvasIframeSrc}" width="100%"
-                        height="100%"
-                        frameborder="0"></iframe>
+        <f:if condition="{mailBody}">
+            <div class="col-12 col-md-4">
+                <div class="mail-wizard-preview">
+                    <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">{mailBody -> f:format.raw()}</div>
+                </div>
             </div>
-        </div>
+        </f:if>
     </div>
-    <f:if condition="{allowEdit} && !{isSent}">
+    <f:if condition="{allowEdit} && !{mail.sent}">
         <f:then>
-            <be:link.editRecord uid="{mailUid}" table="{table}" class="btn btn-default mb-3">
+            <be:link.editRecord uid="{mail.uid}" table="{table}" class="btn btn-default mb-3">
                 <core:icon identifier="actions-open"/>
                 <f:translate key="{lll}dmail_edit_info"/>
             </be:link.editRecord>
@@ -113,6 +113,6 @@
             </f:be.infobox>
         </f:else>
     </f:if>
-    <f:render partial="Wizard/Navigation" arguments="{mail:mailUid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
+    <f:render partial="Wizard/Navigation" arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
 </f:section>
 </html>

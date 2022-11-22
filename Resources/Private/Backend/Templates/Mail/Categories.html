@@ -14,12 +14,12 @@
     </h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2>
-        <core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
-        {title}
+        <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
+        {mail.subject}
     </h2>
     <div class="row justify-content-between">
         <div class="col-12 col-md-8">
-            <f:form action="updateCategories" arguments="{mail:mailUid}" method="post" enctype="multipart/form-data">
+            <f:form action="updateCategories" arguments="{mail:mail.uid}" method="post" enctype="multipart/form-data">
                 <f:render partial="InfoBox" arguments="{field: 'assign_categories'}"/>
                 <f:if condition="{data.rows}">
                     <h3>
@@ -80,11 +80,15 @@
                 </f:if>
             </f:form>
         </div>
-        <div class="col-12 col-md-4">
-            <img src="{mail.previewImage -> f:format.raw()}" class="img-fluid" alt="Preview"/>
-        </div>
+        <f:if condition="{mailBody}">
+            <div class="col-12 col-md-4">
+                <div class="mail-wizard-preview">
+                    <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">{mailBody -> f:format.raw()}</div>
+                </div>
+            </div>
+        </f:if>
     </div>
 
-    <f:render partial="Wizard/Navigation" arguments="{mail:mailUid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
+    <f:render partial="Wizard/Navigation" arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
 </f:section>
 </html>
