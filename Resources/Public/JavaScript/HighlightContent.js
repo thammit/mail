@@ -8,8 +8,6 @@ define([], function() {
             const originContainerBackgroundColor = contentElement.parentElement.style.backgroundColor;
             row.dataset.originBackgroundColor = originContainerBackgroundColor;
             contentElement.parentElement.style.backgroundColor = 'red';
-            console.log(contentElementUid);
-            console.log(event);
         });
         row.addEventListener('mouseout', (event) => {
             const row = event.target.closest('[data-content-id]');
