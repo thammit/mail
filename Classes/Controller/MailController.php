@@ -157,10 +157,7 @@ class MailController extends AbstractController
         // todo add multi language support
         $newMail = $mailFactory->fromInternalPage($page);
         if ($newMail instanceof Mail) {
-            $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
-            $persistenceManager->add($newMail);
-            $persistenceManager->persistAll();
-            $this->redirect('settings', null, null, ['mail' => $newMail->getUid()]);
+            $this->addNewMailAndRedirectToSettings($newMail);
         }
         ViewUtility::addErrorToFlashMessageQueue('Could not generate mail from internal page.', LanguageUtility::getLL('dmail_error'), true);
         $this->redirect('index');
@@ -179,10 +176,7 @@ class MailController extends AbstractController
         try {
             $newMail = $mailFactory->fromExternalUrls($subject, $htmlUrl, $plainTextUrl);
             if ($newMail instanceof Mail) {
-                $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
-                $persistenceManager->add($newMail);
-                $persistenceManager->persistAll();
-                $this->redirect('settings', null, null, ['mail' => $newMail->getUid()]);
+                $this->addNewMailAndRedirectToSettings($newMail);
             }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {}
         catch (HtmlContentFetchFailedException|PlainTextContentFetchFailedException) {
@@ -212,12 +206,20 @@ class MailController extends AbstractController
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = $mailFactory->fromText($subject, $message, $fromName, $fromEmail, $breakLines);
         if ($newMail instanceof Mail) {
-            $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
-            $persistenceManager->add($newMail);
-            $persistenceManager->persistAll();
-            $this->redirect('settings', null, null, ['mail' => $newMail->getUid()]);
+            $this->addNewMailAndRedirectToSettings($newMail);
         }
         $this->redirect('index');
+    }
+
+    /**
+     * @throws StopActionException
+     */
+    protected function addNewMailAndRedirectToSettings(Mail $mail): void
+    {
+        $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+        $persistenceManager->add($mail);
+        $persistenceManager->persistAll();
+        $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
