@@ -59,7 +59,9 @@
                                                         <f:for each="{row.categories}" as="category">
                                                             <f:form.hidden name="categories[{row.uid}][{category.uid}]" value="0"/>
                                                             <div class="form-check form-check-inline">
-                                                                <f:form.checkbox class="form-check-input" value="1" id="categories_{row.uid}_{category.uid}"
+                                                                <f:form.checkbox class="form-check-input mail-content-category"
+                                                                                 data="{category:category.uid, content:row.uid}"
+                                                                                 value="1" id="categories_{row.uid}_{category.uid}"
                                                                                  name="categories[{row.uid}][{category.uid}]" checked="{category.checked}"/>
                                                                 <label class="form-check-label" for="categories_{row.uid}_{category.uid}">{category.title}</label>
                                                             </div>
@@ -74,9 +76,6 @@
                             </table>
                         </div>
                     </div>
-                    <f:form.button class="btn btn-default" type="submit">
-                        <f:translate key="{lll}nl_l_update"/>
-                    </f:form.button>
                 </f:if>
             </f:form>
         </div>

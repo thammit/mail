@@ -64,7 +64,10 @@
                 <source>Categories applied</source>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.categoriesUpdated.message">
-                <source>Categories restrictions successfully applied</source>
+                <source>Categories restrictions successfully applied.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.categoryRestrictionSaveFailed.message">
+                <source>Category restrictions save failed.</source>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.testMailSent.title">
                 <source>Test mail successfully sent</source>

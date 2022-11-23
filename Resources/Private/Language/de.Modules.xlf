@@ -83,9 +83,13 @@
                 <source>Categories applied</source>
                 <target>Kategorien gespeichert</target>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.categoryRestrictionSaveFailed.message">
+                <source>Category restrictions save failed.</source>
+                <target>Speichern von Kategorie-Einschränkungen fehlgeschlagen.</target>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.categoriesUpdated.message">
-                <source>Categories restrictions successfully applied</source>
-                <target>Kategorie-Einschränkungen erfolgreich gespeichert</target>
+                <source>Categories restrictions successfully applied.</source>
+                <target>Kategorie-Einschränkungen erfolgreich gespeichert.</target>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.testMailSent.title">
                 <source>Test mail successfully sent</source>

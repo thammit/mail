@@ -251,7 +251,7 @@ class MailController extends AbstractController
         }
         if ($newMail instanceof Mail) {
             // copy new fetch content and charset to current mail record
-            $mail->setSubject($newMail->getSubject());
+            // $mail->setSubject($newMail->getSubject());
             $mail->setMessageId($newMail->getMessageId());
             $mail->setPlainContent($newMail->getPlainContent());
             $mail->setHtmlContent($newMail->getHtmlContent());
@@ -373,7 +373,7 @@ class MailController extends AbstractController
             $this->pageRenderer->loadRequireJsModule('html2canvas');
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewImage');
             $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
-            $savePreviewImageAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mailUid' => $mail->getUid()]);
+            $savePreviewImageAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mail' => $mail->getUid()]);
             $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
         }
 
@@ -392,6 +392,36 @@ class MailController extends AbstractController
         }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
+    public function savePreviewImageAction(ServerRequestInterface $request): ResponseInterface
+    {
+        $dataUrl = $request->getBody()->getContents() ?? null;
+        $mailUid = (int)($request->getQueryParams()['mail'] ?? 0);
+
+        if ($dataUrl && $mailUid) {
+            $mail = $this->mailRepository->findByUid($mailUid);
+            $mail->setPreviewImage($dataUrl);
+            $this->mailRepository->update($mail);
+            $this->mailRepository->persist();
+            return $this->jsonResponse(json_encode([
+                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.success.title'),
+                'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageSaved.message')
+            ]));
+        }
+
+        return $this->responseFactory->createResponse(400)
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
+            ->withBody($this->streamFactory->createStream(json_encode([
+                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageCreationFailed.message')
+            ])));
     }
 
     /**
@@ -466,6 +496,10 @@ class MailController extends AbstractController
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/HighlightContent');
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/UpdateCategoryRestrictions');
+        $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
+        $saveCategoryRestrictionsAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-category-restrictions', ['mail' => $mail->getUid()]);
+        $this->pageRenderer->addJsInlineCode('mail-configuration', 'var saveCategoryRestrictionsAjaxUri = \'' . $saveCategoryRestrictionsAjaxUri . '\'');
 
         if ($notification) {
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
@@ -476,40 +510,44 @@ class MailController extends AbstractController
     }
 
     /**
-     * @param Mail $mail
-     * @param array $categories
-     * @return void
-     * @throws StopActionException
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
      */
-    public function updateCategoriesAction(Mail $mail, array $categories = []): void
+    public function updateCategoryRestrictionsAction(ServerRequestInterface $request): ResponseInterface
     {
-        if ($categories) {
-            $data = [];
-            foreach ($categories as $recUid => $recValues) {
-                $enabled = [];
-                foreach ($recValues as $k => $b) {
-                    if ($b) {
-                        $enabled[] = $k;
-                    }
+        $mail = $this->mailRepository->findByUid((int)($request->getQueryParams()['mail'] ?? 0));
+        $contentCategories = json_decode($request->getBody()->getContents() ?? null, true);
+        $contentElementUid = $contentCategories['content'] ?? 0;
+        $categories = $contentCategories['categories'] ?? [];
+
+        if ($mail instanceOf Mail && $contentElementUid && $categories) {
+            $newCategories = [];
+            foreach ($categories as $category) {
+                if ($category['checked'] ?? false) {
+                    $newCategories[] = $category['category'];
                 }
-                $data['tt_content'][$recUid]['categories'] = implode(',', $enabled);
             }
 
+           $data['tt_content'][$contentElementUid]['categories'] = implode(',', $newCategories);
             $dataHandler = $this->getDataHandler();
             $dataHandler->start($data, []);
             $dataHandler->process_datamap();
 
             // remove cache
             $dataHandler->clear_cacheCmd($mail->getPage());
+
+            return $this->jsonResponse(json_encode([
+                'title' => LanguageUtility::getLL('mail.wizard.notification.categoriesUpdated.title'),
+                'message' => LanguageUtility::getLL('mail.wizard.notification.categoriesUpdated.message')
+            ]));
         }
 
-        $this->redirect('categories', null, null, ['mail' => $mail->getUid(),
-            'notification' => [
-                'severity' => 'success',
-                'message' => LanguageUtility::getLL('mail.wizard.notification.categoriesUpdated.message'),
-                'title' => LanguageUtility::getLL('mail.wizard.notification.categoriesUpdated.title')
-            ]
-        ]);
+        return $this->responseFactory->createResponse(400)
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
+            ->withBody($this->streamFactory->createStream(json_encode([
+                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                'message' => LanguageUtility::getLL('mail.wizard.notification.categoryRestrictionSaveFailed.message')
+            ])));
     }
 
     /**
@@ -737,36 +775,6 @@ class MailController extends AbstractController
                 'message' => sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
             ]
         ]);
-    }
-
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
-    public function savePreviewImageAction(ServerRequestInterface $request): ResponseInterface
-    {
-        $dataUrl = $request->getBody()->getContents() ?? null;
-        $mailUid = (int)($request->getQueryParams()['mailUid'] ?? 0);
-
-        if ($dataUrl && $mailUid) {
-            $mail = $this->mailRepository->findByUid($mailUid);
-            $mail->setPreviewImage($dataUrl);
-            $this->mailRepository->update($mail);
-            $this->mailRepository->persist();
-            return $this->jsonResponse(json_encode([
-                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.success.title'),
-                'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageSaved.message')
-            ]));
-        }
-
-        return $this->responseFactory->createResponse(400)
-            ->withHeader('Content-Type', 'application/json; charset=utf-8')
-            ->withBody($this->streamFactory->createStream(json_encode([
-                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
-                'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageCreationFailed.message')
-            ])));
     }
 
     protected function hideCategoryStep(Mail $mail = null): bool
