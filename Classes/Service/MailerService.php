@@ -332,7 +332,7 @@ class MailerService implements LoggerAwareInterface
             }
         }
 
-        // PSR-14 event to manipulate the recipient data and markers to add e.g. salutation or other data
+        // PSR-14 event to manipulate markers to add e.g. salutation or other data
         // see MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers for example
         $markers = $this->eventDispatcher->dispatch(new ManipulateMarkersEvent($markers, $recipient))->getMarkers();
 
