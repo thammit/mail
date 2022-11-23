@@ -208,14 +208,12 @@ class MailerService implements LoggerAwareInterface
     {
         $plainContent = '';
         if ($this->mail->getPlainContent() ?? false) {
-            [$contentParts] = MailerUtility::getBoundaryParts($this->plainBoundaryParts);
-            $plainContent = implode('', $contentParts);
+            $plainContent = MailerUtility::getBoundaryParts($this->plainBoundaryParts) ?: '';
         }
 
         $htmlContent = '';
         if ($this->mail->getHtmlContent() ?? false) {
-            [$contentParts] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts);
-            $htmlContent = implode('', $contentParts);
+            $htmlContent = MailerUtility::getBoundaryParts($this->htmlBoundaryParts) ?: '';
         }
 
         $recipients = explode(',', $addressList);
@@ -256,10 +254,10 @@ class MailerService implements LoggerAwareInterface
 
             $htmlContent = '';
             if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
+                $htmlContent = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
 
-                if ($mailHasContent) {
-                    $htmlContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
+                if ($htmlContent) {
+                    $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $additionalMarkers);
                     $formatSent->set(SendFormat::HTML);
                 }
             }
@@ -268,10 +266,10 @@ class MailerService implements LoggerAwareInterface
             $plainContent = '';
 
             if ($this->isPlain) {
-                [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, ($recipientData['categories'] ?? ''));
+                $plainContent = MailerUtility::getBoundaryParts($this->plainBoundaryParts, ($recipientData['categories'] ?? ''));
 
-                if ($mailHasContent) {
-                    $plainContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
+                if ($plainContent) {
+                    $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $additionalMarkers);
                     if ($this->mail->isRedirect() || $this->mail->isRedirectAll()) {
                         $plainContent = MailerUtility::shortUrlsInPlainText(
                             $plainContent,

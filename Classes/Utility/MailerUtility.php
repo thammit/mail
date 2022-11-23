@@ -78,9 +78,9 @@ class MailerUtility
      * @param array $contentArray Array of content split by dmail boundary
      * @param string|null $userCategories The list of categories the user is subscribing to.
      *
-     * @return array Content of the email, which the recipient subscribed
+     * @return string|bool Content of the email, which the recipient subscribed or false if no content found
      */
-    public static function getBoundaryParts(array $contentArray, string $userCategories = null): array
+    public static function getBoundaryParts(array $contentArray, string $userCategories = null): string|bool
     {
         $contentParts = [];
         $mailHasContent = false;
@@ -102,8 +102,9 @@ class MailerUtility
                         $mailHasContent = true;
                     }
                 } else {
-                    foreach (explode(',', $key) as $group) {
-                        if (GeneralUtility::inList($userCategories, $group)) {
+                    $contentCategories = explode(',', $key);
+                    foreach ($contentCategories as $contentCategory) {
+                        if (GeneralUtility::inList($userCategories, $contentCategory)) {
                             $isSubscribed = true;
                         }
                     }
@@ -114,10 +115,7 @@ class MailerUtility
                 }
             }
         }
-        return [
-            $contentParts,
-            $mailHasContent,
-        ];
+        return $mailHasContent ? implode('', $contentParts) : false;
     }
 
     /*
