@@ -139,8 +139,7 @@ class MailController extends AbstractController
         $moduleTemplate->setContent($this->view->render());
 
         if ($notification) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($notification['severity'] ?? 'success') . '(\'' . ($notification['title'] ?? '') . '\', \'' . ($notification['message'] ?? '') . '\');');
+            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
         }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
@@ -172,8 +171,6 @@ class MailController extends AbstractController
      * @param string $htmlUrl
      * @param string $plainTextUrl
      * @return void
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws StopActionException
      */
     public function createMailFromExternalUrlsAction(string $subject, string $htmlUrl, string $plainTextUrl): void
@@ -379,16 +376,15 @@ class MailController extends AbstractController
 
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
 
         if ($mail->isInternal()) {
             $title = LanguageUtility::getLL('mail.wizard.notification.severity.success.title');
             $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), $data['general']['page']['value']);
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'' . $title . '\', \'' . $message . '\');');
+            $this->addJsNotification($message, $title);
         } elseif (!$mail->isQuickMail()) {
             $title = LanguageUtility::getLL('mail.wizard.notification.severity.success.title');
             $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /'));
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.success(\'' . $title . '\', \'' . $message . '\');');
+            $this->addJsNotification($message, $title);
         }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
@@ -502,8 +498,7 @@ class MailController extends AbstractController
         $this->pageRenderer->addJsInlineCode('mail-configuration', 'var saveCategoryRestrictionsAjaxUri = \'' . $saveCategoryRestrictionsAjaxUri . '\'');
 
         if ($notification) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($notification['severity'] ?? 'success') . '(\'' . ($notification['title'] ?? '') . '\', \'' . ($notification['message'] ?? '') . '\');');
+            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
         }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
@@ -528,7 +523,7 @@ class MailController extends AbstractController
                 }
             }
 
-           $data['tt_content'][$contentElementUid]['categories'] = implode(',', $newCategories);
+            $data['tt_content'][$contentElementUid]['categories'] = implode(',', $newCategories);
             $dataHandler = $this->getDataHandler();
             $dataHandler->start($data, []);
             $dataHandler->process_datamap();
@@ -615,8 +610,7 @@ class MailController extends AbstractController
         $moduleTemplate->setContent($this->view->render());
 
         if ($notification) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($notification['severity'] ?? 'success') . '(\'' . ($notification['title'] ?? '') . '\', \'' . ($notification['message'] ?? '') . '\');');
+            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
         }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
@@ -674,8 +668,7 @@ class MailController extends AbstractController
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
         if ($notification) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-            $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($notification['severity'] ?? 'success') . '(\'' . ($notification['title'] ?? '') . '\', \'' . ($notification['message'] ?? '') . '\');');
+            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
         }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
@@ -775,6 +768,18 @@ class MailController extends AbstractController
                 'message' => sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
             ]
         ]);
+    }
+
+    /**
+     * @param string $message
+     * @param string $title
+     * @param string $severity
+     * @return void
+     */
+    protected function addJsNotification(string $message, string $title = '', string $severity = 'success'): void
+    {
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+        $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . $severity . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
     }
 
     protected function hideCategoryStep(Mail $mail = null): bool
