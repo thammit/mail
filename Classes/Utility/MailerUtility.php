@@ -87,7 +87,6 @@ class MailerUtility
         $boundaryMax = count($contentParts) - 1;
         foreach ($contentParts as $blockKey => $contentPart) {
             $key = substr($contentPart[0], 1);
-            $isSubscribed = false;
             if (!$key || $userCategories === null) {
                 $returnContentParts[] = $contentPart[1];
                 if ($contentPart[1]) {
