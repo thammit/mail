@@ -109,6 +109,7 @@
     height:450px;
     overflow-x: hidden;
     overflow-y:scroll;
+    scroll-behavior: smooth;
 }
 .mail-wizard-preview-body {
     width:600px;
