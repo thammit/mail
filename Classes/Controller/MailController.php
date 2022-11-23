@@ -25,10 +25,12 @@ use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use pQuery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -46,6 +48,19 @@ use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 
 class MailController extends AbstractController
 {
+    const NOTIFICATIONS = 'mail.notifications';
+
+    public function initializeAction()
+    {
+        $notifications = $this->getFlashMessageQueue(self::NOTIFICATIONS)->getAllMessagesAndFlush();
+        if ($notifications) {
+            foreach ($notifications as $notification) {
+                $this->addJsNotification($notification->getMessage(), $notification->getTitle(), $notification->getSeverity());
+            }
+        }
+        parent::initializeAction();
+    }
+
     public function noPageSelectedAction(): ResponseInterface
     {
         ViewUtility::addWarningToFlashMessageQueue('Please select a mail page in the page tree.', 'No valid page selected');
@@ -56,11 +71,10 @@ class MailController extends AbstractController
     }
 
     /**
-     * @param array $notification
      * @return ResponseInterface
      * @throws StopActionException
      */
-    public function indexAction(array $notification = []): ResponseInterface
+    public function indexAction(): ResponseInterface
     {
         if ($this->id === 0) {
             $this->redirect('noPageSelected');
@@ -80,14 +94,17 @@ class MailController extends AbstractController
             $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id], $this->pageInfo['pid']);
         }
 
-        $panels = [Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL, Constants::PANEL_OPEN];
+        $panels = [Constants::PANEL_OPEN, Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL];
         if ($this->userTSConfiguration['hideTabs'] ?? false) {
             $hidePanel = GeneralUtility::trimExplode(',', $this->userTSConfiguration['hideTabs']);
             foreach ($hidePanel as $hideTab) {
                 $panels = ArrayUtility::removeArrayEntryByValue($panels, $hideTab);
             }
         }
-        $defaultTab = Constants::PANEL_OPEN;
+
+        $openMails = $this->mailRepository->findOpenByPid($this->id);
+
+        $defaultTab = $openMails->count() > 0 ? Constants::PANEL_OPEN : Constants::PANEL_INTERNAL;
         if ($this->userTSConfiguration['defaultTab'] ?? false) {
             if (in_array($this->userTSConfiguration['defaultTab'], $panels)) {
                 $defaultTab = $this->userTSConfiguration['defaultTab'];
@@ -96,12 +113,12 @@ class MailController extends AbstractController
 
         $panelData = [];
         foreach ($panels as $panel) {
-            $open = $defaultTab == $panel;
+            $open = $defaultTab === $panel;
             switch ($panel) {
                 case Constants::PANEL_OPEN:
                     $panelData['open'] = [
                         'open' => $open,
-                        'data' => $this->mailRepository->findOpenByPid($this->id)
+                        'data' => $openMails
                     ];
                     break;
                 case Constants::PANEL_INTERNAL:
@@ -138,10 +155,6 @@ class MailController extends AbstractController
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
 
-        if ($notification) {
-            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
-        }
-
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
@@ -159,7 +172,7 @@ class MailController extends AbstractController
         if ($newMail instanceof Mail) {
             $this->addNewMailAndRedirectToSettings($newMail);
         }
-        ViewUtility::addErrorToFlashMessageQueue('Could not generate mail from internal page.', LanguageUtility::getLL('dmail_error'), true);
+        ViewUtility::addErrorToFlashMessageQueue('Could not generate mail from internal page.', LanguageUtility::getLL('dmail_error'), true, self::NOTIFICATIONS);
         $this->redirect('index');
     }
 
@@ -180,13 +193,14 @@ class MailController extends AbstractController
             }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {}
         catch (HtmlContentFetchFailedException|PlainTextContentFetchFailedException) {
-            $this->redirect('index', null, null, [
-                'notification' => [
-                    'severity' => 'error',
-                    'message' => sprintf(LanguageUtility::getLL('mail.wizard.notification.externalUrlInvalid.message'), $htmlUrl . ' / ' . $plainTextUrl),
-                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title')
-                ]
-            ]);
+            ViewUtility::addErrorToFlashMessageQueue(
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.externalUrlInvalid.message'), $htmlUrl . ' / ' . $plainTextUrl),
+                LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                true,
+                self::NOTIFICATIONS
+            );
+
+            $this->redirect('index');
         }
 
         $this->redirect('index');
@@ -265,11 +279,10 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws NoSuchPropertyException
-     * @throws UnknownClassException
      * @throws InvalidFileException
+     * @throws NoSuchPropertyException
+     * @throws RouteNotFoundException
+     * @throws UnknownClassException
      */
     public function settingsAction(Mail $mail): ResponseInterface
     {
@@ -424,13 +437,13 @@ class MailController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @param array $notification
      * @return ResponseInterface
      * @throws DBALException
      * @throws InvalidQueryException
      * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws RouteNotFoundException
      */
-    public function categoriesAction(Mail $mail, array $notification = []): ResponseInterface
+    public function categoriesAction(Mail $mail): ResponseInterface
     {
         $data = [];
         $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid($mail->getPage(), $mail->getSysLanguageUid());
@@ -499,10 +512,6 @@ class MailController extends AbstractController
         $saveCategoryRestrictionsAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-category-restrictions', ['mail' => $mail->getUid()]);
         $this->pageRenderer->addJsInlineCode('mail-configuration', 'var saveCategoryRestrictionsAjaxUri = \'' . $saveCategoryRestrictionsAjaxUri . '\'');
 
-        if ($notification) {
-            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
-        }
-
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
@@ -549,7 +558,6 @@ class MailController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @param array $notification
      * @return ResponseInterface
      * @throws DBALException
      * @throws IllegalObjectTypeException
@@ -558,7 +566,7 @@ class MailController extends AbstractController
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public function testMailAction(Mail $mail, array $notification = []): ResponseInterface
+    public function testMailAction(Mail $mail): ResponseInterface
     {
         $data = [];
         $ttAddressRepository = GeneralUtility::makeInstance(AddressRepository::class);
@@ -611,10 +619,6 @@ class MailController extends AbstractController
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
 
-        if ($notification) {
-            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
-        }
-
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
@@ -635,19 +639,17 @@ class MailController extends AbstractController
             $this->mailerService->setTestMail(true);
             $this->mailerService->sendSimpleMail($addressList);
         }
-        $this->redirect('testMail', null, null, [
-            'mail' => $mail->getUid(),
-            'notification' => [
-                'severity' => 'success',
-                'message' => sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), $addressList),
-                'title' => LanguageUtility::getLL('mail.wizard.notification.testMailSent.title')
-            ]
-        ]);
+        ViewUtility::addOkToFlashMessageQueue(
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), $addressList),
+            LanguageUtility::getLL('mail.wizard.notification.testMailSent.title'),
+            true,
+            self::NOTIFICATIONS
+        );
+        $this->redirect('testMail');
     }
 
     /**
      * @param Mail $mail
-     * @param array $notification
      * @return ResponseInterface
      * @throws DBALException
      * @throws IllegalObjectTypeException
@@ -655,7 +657,7 @@ class MailController extends AbstractController
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public function scheduleSendingAction(Mail $mail, array $notification = []): ResponseInterface
+    public function scheduleSendingAction(Mail $mail): ResponseInterface
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
@@ -669,9 +671,6 @@ class MailController extends AbstractController
         $moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
-        if ($notification) {
-            $this->addJsNotification(($notification['message'] ?? ''), ($notification['title'] ?? ''), ($notification['severity'] ?? 'success'));
-        }
 
         return $this->htmlResponse($moduleTemplate->renderContent());
     }
@@ -708,14 +707,14 @@ class MailController extends AbstractController
         $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByTables($mail->getRecipientGroups()->toArray()));
 
         if ($mail->getNumberOfRecipients() === 0) {
-            $this->redirect('scheduleSending', null, null, [
-                'mail' => $mail,
-                'notification' => [
-                    'severity' => 'warning',
-                    'message' => LanguageUtility::getLL('mail.wizard.notification.noRecipients.message'),
-                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.warning.title')
-                ]
-            ]);
+            ViewUtility::addWarningToFlashMessageQueue(
+                LanguageUtility::getLL('mail.wizard.notification.noRecipients.message'),
+                LanguageUtility::getLL('mail.wizard.notification.severity.warning.title'),
+                true,
+                self::NOTIFICATIONS
+            );
+
+            $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
         }
 
         // Update the record:
@@ -746,13 +745,14 @@ class MailController extends AbstractController
 
         $this->mailRepository->update($mail);
 
-        $this->redirect('index', null, null, [
-            'notification' => [
-                'severity' => 'success',
-                'message' => sprintf(LanguageUtility::getLL('mail.wizard.notification.finished.message'), $mail->getSubject(), BackendUtility::datetime($mail->getScheduled()->getTimestamp())),
-                'title' => LanguageUtility::getLL('mail.wizard.notification.finished.title')
-            ]
-        ]);
+        ViewUtility::addOkToFlashMessageQueue(
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.finished.message'), $mail->getSubject(), BackendUtility::datetime($mail->getScheduled()->getTimestamp())),
+            LanguageUtility::getLL('mail.wizard.notification.finished.title'),
+            true,
+            self::NOTIFICATIONS
+        );
+
+        $this->redirect('index');
     }
 
     /**
@@ -763,25 +763,34 @@ class MailController extends AbstractController
     public function deleteAction(Mail $mail): void
     {
         $this->mailRepository->remove($mail);
-        $this->redirect('index', null, null, [
-            'notification' => [
-                'severity' => 'success',
-                'title' => LanguageUtility::getLL('mail.wizard.notification.deleted.title'),
-                'message' => sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
-            ]
-        ]);
+
+        ViewUtility::addOkToFlashMessageQueue(
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
+            LanguageUtility::getLL('mail.wizard.notification.deleted.title'),
+            true,
+            self::NOTIFICATIONS
+        );
+
+        $this->redirect('index');
     }
 
     /**
      * @param string $message
      * @param string $title
-     * @param string $severity
+     * @param int $severity
      * @return void
      */
-    protected function addJsNotification(string $message, string $title = '', string $severity = 'success'): void
+    protected function addJsNotification(string $message, string $title = '', int $severity = AbstractMessage::OK): void
     {
+        $severities = [
+            AbstractMessage::NOTICE => 'notice',
+            AbstractMessage::INFO => 'info',
+            AbstractMessage::OK => 'success',
+            AbstractMessage::WARNING => 'warning',
+            AbstractMessage::ERROR => 'error',
+        ];
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-        $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . $severity . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
+        $this->pageRenderer->addJsInlineCode('mail-notifications', 'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
     }
 
     protected function hideCategoryStep(Mail $mail = null): bool
