@@ -6,7 +6,6 @@ namespace MEDIAESSENZ\Mail\Utility;
 use Exception;
 use GuzzleHttp\Exception\RequestException;
 use MEDIAESSENZ\Mail\Constants;
-use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
@@ -70,13 +69,8 @@ class MailerUtility
      */
 
     /**
-     * This function checks which content elements are supposed to be sent to the recipient.
-     * tslib_content inserts dmail boundary markers in the content specifying which elements are intended for which categories,
-     * this functions check if the recipient is subscribing to any of these categories and
-     * filters out the elements that are inteded for categories not subscribed to.
-     *
-     * @param array $contentParts Array of content split by dmail boundary
-     * @param array $userCategories The list of categories the user is subscribing to.
+     * @param array $contentParts content parts
+     * @param array $userCategories category uids of the user
      *
      * @return string|bool Content of the email, which the recipient subscribed or false if no content found
      */
@@ -342,8 +336,7 @@ class MailerUtility
     }
 
     /**
-     * Returns the absolute address of a link. This is based on
-     * $this->theParts["html"]["path"] being the root-address
+     * Returns the absolute address of a link
      *
      * @param string $ref Address to use
      * @param string $path
@@ -376,9 +369,9 @@ class MailerUtility
     }
 
     /**
-     * Gets the unixtime as milliseconds.
+     * Gets the unix timestamp as milliseconds.
      *
-     * @return int The unixtime as milliseconds
+     * @return int The unix timestamp as milliseconds
      */
     public static function getMilliseconds(): int
     {
