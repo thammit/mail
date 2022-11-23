@@ -18,6 +18,7 @@ use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
@@ -63,7 +64,7 @@ class MailController extends AbstractController
 
     public function noPageSelectedAction(): ResponseInterface
     {
-        ViewUtility::addWarningToFlashMessageQueue('Please select a mail page in the page tree.', 'No valid page selected');
+        ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('mail.wizard.notification.noPageSelected.message'), LanguageUtility::getLL('mail.wizard.notification.noPageSelected.title'));
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->setContent($this->view->render());
 
@@ -72,11 +73,13 @@ class MailController extends AbstractController
 
     /**
      * @return ResponseInterface
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws StopActionException
      */
     public function indexAction(): ResponseInterface
     {
-        if ($this->id === 0) {
+        if ($this->id === 0 || ($this->pageInfo['doktype'] !== (int)ConfigurationUtility::getExtensionConfiguration('mailPageTypeNumber') && $this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME)) {
             $this->redirect('noPageSelected');
         }
         if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
