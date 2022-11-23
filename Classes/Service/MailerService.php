@@ -78,8 +78,8 @@ class MailerService implements LoggerAwareInterface
     protected bool $redirect = false;
     protected string $redirectUrl = '';
     protected int $attachment = 0;
-    protected array $htmlBoundaryParts = [];
-    protected array $plainBoundaryParts = [];
+    protected array $htmlContentParts = [];
+    protected array $plainContentParts = [];
     protected string $siteIdentifier = '';
     protected Site $site;
 
@@ -171,29 +171,17 @@ class MailerService implements LoggerAwareInterface
         $this->isPlain = (bool)($this->mail->getPlainContent() ?? false);
         $this->authCodeFieldList = $this->mail->getAuthCodeFields() ?: 'uid';
         $this->attachment = $this->mail->getAttachment()->count();
-        $this->htmlBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getHtmlContent());
-
-        foreach ($this->htmlBoundaryParts as $bKey => $bContent) {
-            $this->htmlBoundaryParts[$bKey] = explode('-->', $bContent, 2);
-
+        $this->htmlContentParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getHtmlContent());
+        foreach ($this->htmlContentParts as $bKey => $bContent) {
+            $this->htmlContentParts[$bKey] = explode('-->', $bContent, 2);
             // remove useless HTML comments
-            if (substr($this->htmlBoundaryParts[$bKey][0], 1) == 'END') {
-                $this->htmlBoundaryParts[$bKey][1] = MailerUtility::removeHtmlComments($this->htmlBoundaryParts[$bKey][1]);
-            }
-
-            // analyzing which media files are used in this part of the mail:
-            $mediaParts = explode('cid:part', $this->htmlBoundaryParts[$bKey][1]);
-            next($mediaParts);
-            if (!isset($this->htmlBoundaryParts[$bKey]['mediaList'])) {
-                $this->htmlBoundaryParts[$bKey]['mediaList'] = '';
-            }
-            foreach ($mediaParts as $part) {
-                $this->htmlBoundaryParts[$bKey]['mediaList'] .= ',' . strtok($part, '.');
+            if (substr($this->htmlContentParts[$bKey][0], 1) == 'END') {
+                $this->htmlContentParts[$bKey][1] = MailerUtility::removeHtmlComments($this->htmlContentParts[$bKey][1]);
             }
         }
-        $this->plainBoundaryParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getPlainContent());
-        foreach ($this->plainBoundaryParts as $bKey => $bContent) {
-            $this->plainBoundaryParts[$bKey] = explode('-->', $bContent, 2);
+        $this->plainContentParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getPlainContent());
+        foreach ($this->plainContentParts as $bKey => $bContent) {
+            $this->plainContentParts[$bKey] = explode('-->', $bContent, 2);
         }
     }
 
@@ -208,12 +196,12 @@ class MailerService implements LoggerAwareInterface
     {
         $plainContent = '';
         if ($this->mail->getPlainContent() ?? false) {
-            $plainContent = MailerUtility::getBoundaryParts($this->plainBoundaryParts) ?: '';
+            $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts) ?: '';
         }
 
         $htmlContent = '';
         if ($this->mail->getHtmlContent() ?? false) {
-            $htmlContent = MailerUtility::getBoundaryParts($this->htmlBoundaryParts) ?: '';
+            $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts) ?: '';
         }
 
         $recipients = explode(',', $addressList);
@@ -254,7 +242,7 @@ class MailerService implements LoggerAwareInterface
 
             $htmlContent = '';
             if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
-                $htmlContent = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
+                $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, GeneralUtility::intExplode(',', $recipientData['categories']) ?? []);
 
                 if ($htmlContent) {
                     $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $additionalMarkers);
@@ -266,7 +254,7 @@ class MailerService implements LoggerAwareInterface
             $plainContent = '';
 
             if ($this->isPlain) {
-                $plainContent = MailerUtility::getBoundaryParts($this->plainBoundaryParts, ($recipientData['categories'] ?? ''));
+                $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts, GeneralUtility::intExplode(',', $recipientData['categories']) ?? []);
 
                 if ($plainContent) {
                     $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $additionalMarkers);

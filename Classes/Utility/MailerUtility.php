@@ -75,47 +75,41 @@ class MailerUtility
      * this functions check if the recipient is subscribing to any of these categories and
      * filters out the elements that are inteded for categories not subscribed to.
      *
-     * @param array $contentArray Array of content split by dmail boundary
-     * @param string|null $userCategories The list of categories the user is subscribing to.
+     * @param array $contentParts Array of content split by dmail boundary
+     * @param array $userCategories The list of categories the user is subscribing to.
      *
      * @return string|bool Content of the email, which the recipient subscribed or false if no content found
      */
-    public static function getBoundaryParts(array $contentArray, string $userCategories = null): string|bool
+    public static function getContentFromContentPartsMatchingUserCategories(array $contentParts, array $userCategories = []): string|bool
     {
-        $contentParts = [];
+        $returnContentParts = [];
         $mailHasContent = false;
-        $boundaryMax = count($contentArray) - 1;
-        foreach ($contentArray as $blockKey => $contentPart) {
+        $boundaryMax = count($contentParts) - 1;
+        foreach ($contentParts as $blockKey => $contentPart) {
             $key = substr($contentPart[0], 1);
             $isSubscribed = false;
-            $contentPart['mediaList'] = $contentPart['mediaList'] ?? '';
             if (!$key || $userCategories === null) {
-                $contentParts[] = $contentPart[1];
+                $returnContentParts[] = $contentPart[1];
                 if ($contentPart[1]) {
                     $mailHasContent = true;
                 }
             } else {
                 if ($key == 'END') {
-                    $contentParts[] = $contentPart[1];
+                    $returnContentParts[] = $contentPart[1];
                     // There is content, and it is not just the header and footer content, or it is the only content because we have no direct mail boundaries.
-                    if (($contentPart[1] && !($blockKey == 0 || $blockKey == $boundaryMax)) || count($contentArray) == 1) {
+                    if (($contentPart[1] && !($blockKey === 0 || $blockKey === $boundaryMax)) || count($contentParts) === 1) {
                         $mailHasContent = true;
                     }
                 } else {
-                    $contentCategories = explode(',', $key);
-                    foreach ($contentCategories as $contentCategory) {
-                        if (GeneralUtility::inList($userCategories, $contentCategory)) {
-                            $isSubscribed = true;
-                        }
-                    }
-                    if ($isSubscribed) {
-                        $contentParts[] = $contentPart[1];
+                    $contentCategories = GeneralUtility::intExplode(',', $key, true);
+                    if (count(array_intersect($contentCategories, $userCategories)) > 0) {
+                        $returnContentParts[] = $contentPart[1];
                         $mailHasContent = true;
                     }
                 }
             }
         }
-        return $mailHasContent ? implode('', $contentParts) : false;
+        return $mailHasContent ? implode('', $returnContentParts) : false;
     }
 
     /*
