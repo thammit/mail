@@ -41,6 +41,8 @@ use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class MailerService implements LoggerAwareInterface
 {
@@ -295,7 +297,6 @@ class MailerService implements LoggerAwareInterface
                     new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset))
                 );
             }
-
         }
 
         return $formatSent;
@@ -317,9 +318,6 @@ class MailerService implements LoggerAwareInterface
         // replace %23%23%23 with ###, since typolink generated link with urlencode
         $content = str_replace('%23%23%23', '###', $content);
 
-        // PSR-14 event to manipulate recipient fields
-        $recipient = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipient))->getRecipient();
-
         $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipientFields'), true);
         if ($addRecipientFields = ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')) {
             $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields, true));
@@ -336,10 +334,7 @@ class MailerService implements LoggerAwareInterface
 
         // PSR-14 event to manipulate the recipient data and markers to add e.g. salutation or other data
         // see MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers for example
-        $event = $this->eventDispatcher->dispatch(
-            new ManipulateMarkersEvent($markers, $recipient)
-        );
-        $markers = $event->getMarkers();
+        $markers = $this->eventDispatcher->dispatch(new ManipulateMarkersEvent($markers, $recipient))->getMarkers();
 
         return GeneralUtility::makeInstance(MarkerBasedTemplateService::class)->substituteMarkerArray($content, $markers);
     }
@@ -347,48 +342,48 @@ class MailerService implements LoggerAwareInterface
     /**
      * Mass send to recipient in the list
      *
-     * @param array $groupedRecipientIds
-     * @param int $mailUid
      * @return boolean
      * @throws DBALException
      * @throws Exception
      * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function massSend(array $groupedRecipientIds, int $mailUid): bool
+    protected function massSend(): bool
     {
         $numberOfSentMails = 0;
         $finished = true;
+        $groupedRecipientIds = $this->mail->getRecipients();
         foreach ($groupedRecipientIds as $table => $listArr) {
             if (is_array($listArr)) {
                 $numberOfSentMailsOfGroup = 0;
 
                 // get already sent mails
-                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($mailUid, $table);
+                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($this->mail->getUid(), $table);
                 if ($table === 'tx_mail_domain_model_group') {
-                    foreach ($listArr as $kval => $recipientData) {
-                        $kval++;
-                        if (!in_array($kval, $sentMails)) {
+                    foreach ($listArr as $recipientUid => $recipientData) {
+                        // fake uid for csv
+                        $recipientUid++;
+                        if (!in_array($recipientUid, $sentMails)) {
                             if ($numberOfSentMails >= $this->sendPerCycle) {
                                 $finished = false;
                                 break;
                             }
-                            $recipientData['uid'] = $kval;
-                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $table);
+                            $recipientData['uid'] = $recipientUid;
+                            $this->sendSingleMailAndAddLogEntry($recipientData, $table);
                             $numberOfSentMailsOfGroup++;
                             $numberOfSentMails++;
                         }
                     }
                 } else {
-                    $idList = implode(',', $listArr);
-                    if ($idList) {
+                    if ($listArr) {
                         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
                         $queryBuilder
                             ->select('*')
                             ->from($table)
-                            ->where($queryBuilder->expr()->in('uid', $idList))
+                            ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($listArr)))
                             ->setMaxResults($this->sendPerCycle + 1);
                         if ($sentMails) {
-                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $sentMails));
+                            // exclude already sent mails
+                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($sentMails)));
                         }
 
                         $statement = $queryBuilder->execute();
@@ -402,7 +397,7 @@ class MailerService implements LoggerAwareInterface
                             }
 
                             // We are NOT finished!
-                            $this->sendSingleMailAndAddLogEntry($mailUid, $recipientData, $table);
+                            $this->sendSingleMailAndAddLogEntry($recipientData, $table);
                             $numberOfSentMailsOfGroup++;
                             $numberOfSentMails++;
                         }
@@ -458,27 +453,27 @@ class MailerService implements LoggerAwareInterface
     /**
      * Sending the email and write to log.
      *
-     * @param int $mailUid
      * @param array $recipientData Recipient's data array
      * @param string $recipientTable Table name
      *
      * @return void
      * @throws DBALException
+     * @throws Exception
      * @throws \TYPO3\CMS\Core\Exception
-     * @throws \Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
-    protected function sendSingleMailAndAddLogEntry(int $mailUid, array $recipientData, string $recipientTable): void
+    protected function sendSingleMailAndAddLogEntry(array $recipientData, string $recipientTable): void
     {
-        if ($this->isMailSendToRecipient($mailUid, (int)$recipientData['uid'], $recipientTable) === false) {
+        if ($this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid((int)$recipientData['uid'], $recipientTable, $this->mail->getUid()) === false) {
             $parseTime = MailerUtility::getMilliseconds();
             $recipientData = RecipientUtility::normalizeAddress($recipientData);
 
             // write to log table. if it can be written, continue with sending.
             // if not, stop the script and report error
             // try to insert the mail to the mail log repository
-            $mail = $this->mailRepository->findByUid($mailUid);
             $log = GeneralUtility::makeInstance(Log::class);
-            $log->setMail($mail);
+            $log->setMail($this->mail);
             $log->setRecipientTable($recipientTable);
             $log->setRecipientUid($recipientData['uid']);
             $log->setEmail($recipientData['email']);
@@ -497,48 +492,20 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Find out, if an email has been sent to a recipient
-     *
-     * @param int $mailUid
-     * @param int $recipientUid Recipient UID
-     * @param string $table Recipient table
-     *
-     * @return bool Number of found records
-     * @throws DBALException
-     */
-    public function isMailSendToRecipient(int $mailUid, int $recipientUid, string $table): bool
-    {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_mail_domain_model_log');
-
-        $statement = $queryBuilder
-            ->select('uid')
-            ->from('tx_mail_domain_model_log')
-            ->where($queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($table)))
-            ->andWhere($queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('response_type', '0'))
-            ->execute();
-
-        return (bool)$statement->rowCount();
-    }
-
-    /**
      * Set job begin and send a notification to admin if activated in extension settings (notificationJob = 1)
-     *
-     * @param Mail $mail
      *
      * @return void
      * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function setJobBegin(Mail $mail): void
+    protected function setJobBegin(): void
     {
-        $mail->setScheduledBegin(new DateTimeImmutable('now'));
-        $this->mailRepository->update($mail);
+        $this->mail->setScheduledBegin(new DateTimeImmutable('now'));
+        $this->mailRepository->update($this->mail);
         $this->mailRepository->persist();
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                LanguageUtility::getLL('dmailer_mid') . ' ' . $mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_begin'),
+                LanguageUtility::getLL('dmailer_mid') . ' ' . $this->mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_begin'),
                 LanguageUtility::getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s')
             );
         }
@@ -547,20 +514,18 @@ class MailerService implements LoggerAwareInterface
     /**
      *Set job end and send a notification to admin if activated in extension settings (notificationJob = 1)
      *
-     * @param Mail $mail
-     *
      * @return void
      * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function setJobEnd(Mail $mail): void
+    protected function setJobEnd(): void
     {
-        $mail->setScheduledEnd(new DateTimeImmutable('now'));
-        $this->mailRepository->update($mail);
+        $this->mail->setScheduledEnd(new DateTimeImmutable('now'));
+        $this->mailRepository->update($this->mail);
         $this->mailRepository->persist();
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                LanguageUtility::getLL('dmailer_mid') . ' ' . $mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_end'),
+                LanguageUtility::getLL('dmailer_mid') . ' ' . $this->mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_end'),
                 LanguageUtility::getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s')
             );
         }
@@ -616,17 +581,16 @@ class MailerService implements LoggerAwareInterface
         if ($mail instanceof Mail) {
             $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
             $this->prepare($mail->getUid());
-            $recipients = $mail->getRecipients();
 
-            if (!$mail->getScheduledBegin()) {
+            if (!$this->mail->getScheduledBegin()) {
                 // todo add psr-15 event to manipulate mail before send
-                $this->setJobBegin($mail);
+                $this->setJobBegin();
             }
 
-            $finished = $this->massSend($recipients, $mail->getUid());
+            $finished = $this->massSend();
 
             if ($finished) {
-                $this->setJobEnd($mail);
+                $this->setJobEnd();
             }
         } else {
             $this->logger->debug(LanguageUtility::getLL('dmailer_nothing_to_do'));
@@ -637,7 +601,7 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * Send of the email using php mail function.
+     * Send mail to recipient
      *
      * @param string|Address $recipient The recipient to send the mail to
      * @return void
