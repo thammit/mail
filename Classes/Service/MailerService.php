@@ -211,19 +211,17 @@ class MailerService implements LoggerAwareInterface
             [$contentParts] = MailerUtility::getBoundaryParts($this->plainBoundaryParts);
             $plainContent = implode('', $contentParts);
         }
-        $this->mail->setPlainContent($plainContent);
 
         $htmlContent = '';
         if ($this->mail->getHtmlContent() ?? false) {
             [$contentParts] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts);
             $htmlContent = implode('', $contentParts);
         }
-        $this->mail->setHtmlContent($htmlContent);
 
         $recipients = explode(',', $addressList);
 
         foreach ($recipients as $recipient) {
-            $this->sendMailToRecipient($recipient);
+            $this->sendMailToRecipient($recipient, $htmlContent, $plainContent);
         }
     }
 
@@ -256,32 +254,32 @@ class MailerService implements LoggerAwareInterface
                 '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
             ];
 
-            $this->mail->setHtmlContent('');
+            $htmlContent = '';
             if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->htmlBoundaryParts, ($recipientData['categories'] ?? ''));
 
                 if ($mailHasContent) {
-                    $this->mail->setHtmlContent($this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers));
+                    $htmlContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
                     $formatSent->set(SendFormat::HTML);
                 }
             }
 
             // Plain
-            $this->mail->setPlainContent('');
+            $plainContent = '';
+
             if ($this->isPlain) {
                 [$contentParts, $mailHasContent] = MailerUtility::getBoundaryParts($this->plainBoundaryParts, ($recipientData['categories'] ?? ''));
 
                 if ($mailHasContent) {
-                    $plainTextContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
+                    $plainContent = $this->replaceMailMarkers(implode('', $contentParts), $recipientData, $additionalMarkers);
                     if ($this->mail->isRedirect() || $this->mail->isRedirectAll()) {
-                        $plainTextContent = MailerUtility::shortUrlsInPlainText(
-                            $plainTextContent,
+                        $plainContent = MailerUtility::shortUrlsInPlainText(
+                            $plainContent,
                             $this->mail->isRedirectAll() ? 0 : 76,
                             $this->mail->getRedirectUrl(),
                             $this->site->getLanguageById($this->mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
                         );
                     }
-                    $this->mail->setPlainContent($plainTextContent);
                     $formatSent->set(SendFormat::PLAIN);
                 }
             }
@@ -294,7 +292,9 @@ class MailerService implements LoggerAwareInterface
 
             if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
                 $this->sendMailToRecipient(
-                    new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset))
+                    new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
+                    $htmlContent,
+                    $plainContent
                 );
             }
         }
@@ -350,7 +350,6 @@ class MailerService implements LoggerAwareInterface
     protected function massSend(): bool
     {
         $numberOfSentMails = 0;
-        $finished = true;
         $groupedRecipientIds = $this->mail->getRecipients();
         foreach ($groupedRecipientIds as $table => $listArr) {
             if (is_array($listArr)) {
@@ -358,14 +357,14 @@ class MailerService implements LoggerAwareInterface
 
                 // get already sent mails
                 $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($this->mail->getUid(), $table);
+
                 if ($table === 'tx_mail_domain_model_group') {
                     foreach ($listArr as $recipientUid => $recipientData) {
                         // fake uid for csv
                         $recipientUid++;
                         if (!in_array($recipientUid, $sentMails)) {
                             if ($numberOfSentMails >= $this->sendPerCycle) {
-                                $finished = false;
-                                break;
+                                return false;
                             }
                             $recipientData['uid'] = $recipientUid;
                             $this->sendSingleMailAndAddLogEntry($recipientData, $table);
@@ -390,13 +389,9 @@ class MailerService implements LoggerAwareInterface
 
                         while ($recipientData = $statement->fetchAssociative()) {
                             $recipientData['categories'] = $this->getListOfRecipientCategories($table, $recipientData['uid']);
-
                             if ($numberOfSentMails >= $this->sendPerCycle) {
-                                $finished = false;
-                                break;
+                                return false;
                             }
-
-                            // We are NOT finished!
                             $this->sendSingleMailAndAddLogEntry($recipientData, $table);
                             $numberOfSentMailsOfGroup++;
                             $numberOfSentMails++;
@@ -407,7 +402,7 @@ class MailerService implements LoggerAwareInterface
                 $this->logger->debug(LanguageUtility::getLL('dmailer_sending') . ' ' . $numberOfSentMailsOfGroup . ' ' . LanguageUtility::getLL('dmailer_sending_to_table') . ' ' . $table);
             }
         }
-        return $finished;
+        return true;
     }
 
 
@@ -604,9 +599,11 @@ class MailerService implements LoggerAwareInterface
      * Send mail to recipient
      *
      * @param string|Address $recipient The recipient to send the mail to
+     * @param string $htmlContent
+     * @param string $plainContent
      * @return void
      */
-    protected function sendMailToRecipient(Address|string $recipient): void
+    protected function sendMailToRecipient(Address|string $recipient, string $htmlContent, string $plainContent): void
     {
         /** @var MailMessage $mailMessage */
         $mailMessage = GeneralUtility::makeInstance(MailMessage::class);
@@ -627,7 +624,7 @@ class MailerService implements LoggerAwareInterface
             $mailMessage->sender($this->mail->getReturnPath());
         }
 
-        $this->addHtmlPlainTextAndAttachmentsToMailMessage($mailMessage);
+        $this->addHtmlPlainTextAndAttachmentsToMailMessage($mailMessage, $htmlContent, $plainContent);
 
         // setting additional header
         // organization and TYPO3MID
@@ -649,16 +646,18 @@ class MailerService implements LoggerAwareInterface
     /**
      * Add html, plaintext and attachments to mail message
      *
+     * @param MailMessage $mailMessage
+     * @param string $htmlContent
+     * @param string $plainContent
      * @return void
-     * @var MailMessage $mailMessage Mailer Message Object
      */
-    protected function addHtmlPlainTextAndAttachmentsToMailMessage(MailMessage $mailMessage): void
+    protected function addHtmlPlainTextAndAttachmentsToMailMessage(MailMessage $mailMessage, string $htmlContent = '', string $plainContent = ''): void
     {
         // iterate through the media array and embed them
-        if ($this->mail->getHtmlContent()) {
+        if ($htmlContent) {
             if ($this->mail->isIncludeMedia()) {
                 // extract all media path from the mail message
-                $dom = pQuery::parseStr($this->mail->getHtmlContent());
+                $dom = pQuery::parseStr($htmlContent);
                 /** @var pQuery\IQuery $element */
                 foreach($dom->query('img[!do_not_embed]') as $element) {
                     $absoluteImagePath = MailerUtility::absRef($element->attr('src'), $this->mail->getRedirectUrl());
@@ -677,11 +676,11 @@ class MailerService implements LoggerAwareInterface
                 $mailMessage->html($dom->html());
             } else {
                 // add html content part to mail
-                $mailMessage->html($this->mail->getHtmlContent());
+                $mailMessage->html($htmlContent);
             }
         }
 
-        if ($plainContent = $this->mail->getPlainContent()) {
+        if ($plainContent) {
             // add plain content part to mail
             $mailMessage->text($plainContent);
         }

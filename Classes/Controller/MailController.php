@@ -648,7 +648,7 @@ class MailController extends AbstractController
             true,
             self::NOTIFICATIONS
         );
-        $this->redirect('testMail');
+        $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
