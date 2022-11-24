@@ -70,11 +70,11 @@ class MailerUtility
 
     /**
      * @param array $contentParts content parts
-     * @param array $userCategories category uids of the user
+     * @param array|null $userCategories category uids of the user
      *
      * @return string Content of the email, which the recipient subscribed or false if no content found
      */
-    public static function getContentFromContentPartsMatchingUserCategories(array $contentParts, array $userCategories = []): string
+    public static function getContentFromContentPartsMatchingUserCategories(array $contentParts, array $userCategories = null): string
     {
         $returnContentParts = [];
         $mailHasContent = false;
@@ -85,7 +85,7 @@ class MailerUtility
             }
             $key = substr($contentPart[0], 1);
             // $key can be empty, contain the string "END" or a comma separated list of category uids
-            if (empty($key)) {
+            if (empty($key) || $userCategories === null) {
                 // content has no category restrictions -> add to output if not empty
                 $returnContentParts[] = $contentPart[1];
                 $mailHasContent = true;

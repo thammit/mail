@@ -198,7 +198,11 @@ class MailerService implements LoggerAwareInterface
         $recipients = explode(',', $addressList);
 
         foreach ($recipients as $recipient) {
-            $this->sendMailToRecipient($recipient, $this->mail->getHtmlContent(), $this->mail->getPlainContent());
+            $this->sendMailToRecipient(
+                $recipient,
+                MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts),
+                MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts)
+            );
         }
     }
 
