@@ -45,6 +45,11 @@ services:
       - name: 'event.listener'
         identifier: 'addUpperCaseMarkers'
 
+  MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData:
+    tags:
+      - name: 'event.listener'
+        identifier: 'normalizeRecipientData'
+
   MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter:
     tags:
       - name: extbase.type_converter

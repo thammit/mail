@@ -302,9 +302,6 @@ class MailerService implements LoggerAwareInterface
             $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields, true));
         }
 
-        // PSR-14 event to manipulate recipient data
-        $recipient = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipient))->getRecipient();
-
         foreach ($rowFieldsArray as $substField) {
             if (isset($recipient[$substField])) {
                 $markers['###USER_' . $substField . '###'] = $this->charsetConverter->conv($recipient[$substField], $this->backendCharset, $this->charset);
@@ -330,15 +327,15 @@ class MailerService implements LoggerAwareInterface
     {
         $numberOfSentMails = 0;
         $groupedRecipientIds = $this->mail->getRecipients();
-        foreach ($groupedRecipientIds as $table => $listArr) {
-            if (is_array($listArr)) {
+        foreach ($groupedRecipientIds as $recipientTable => $recipientsData) {
+            if (is_array($recipientsData)) {
                 $numberOfSentMailsOfGroup = 0;
 
                 // get already sent mails
-                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($this->mail->getUid(), $table);
+                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($this->mail->getUid(), $recipientTable);
 
-                if ($table === 'tx_mail_domain_model_group') {
-                    foreach ($listArr as $recipientUid => $recipientData) {
+                if ($recipientTable === 'tx_mail_domain_model_group') {
+                    foreach ($recipientsData as $recipientUid => $recipientData) {
                         // fake uid for csv
                         $recipientUid++;
                         if (!in_array($recipientUid, $sentMails)) {
@@ -346,18 +343,18 @@ class MailerService implements LoggerAwareInterface
                                 return false;
                             }
                             $recipientData['uid'] = $recipientUid;
-                            $this->sendSingleMailAndAddLogEntry($recipientData, $table);
+                            $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
                             $numberOfSentMailsOfGroup++;
                             $numberOfSentMails++;
                         }
                     }
                 } else {
-                    if ($listArr) {
-                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+                    if ($recipientsData) {
+                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientTable);
                         $queryBuilder
                             ->select('*')
-                            ->from($table)
-                            ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($listArr)))
+                            ->from($recipientTable)
+                            ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientsData)))
                             ->setMaxResults($this->sendPerCycle + 1);
                         if ($sentMails) {
                             // exclude already sent mails
@@ -367,18 +364,18 @@ class MailerService implements LoggerAwareInterface
                         $statement = $queryBuilder->execute();
 
                         while ($recipientData = $statement->fetchAssociative()) {
-                            $recipientData['categories'] = $this->getListOfRecipientCategories($table, $recipientData['uid']);
+                            $recipientData['categories'] = $this->getListOfRecipientCategories($recipientTable, $recipientData['uid']);
                             if ($numberOfSentMails >= $this->sendPerCycle) {
                                 return false;
                             }
-                            $this->sendSingleMailAndAddLogEntry($recipientData, $table);
+                            $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
                             $numberOfSentMailsOfGroup++;
                             $numberOfSentMails++;
                         }
                     }
                 }
 
-                $this->logger->debug(LanguageUtility::getLL('dmailer_sending') . ' ' . $numberOfSentMailsOfGroup . ' ' . LanguageUtility::getLL('dmailer_sending_to_table') . ' ' . $table);
+                $this->logger->debug(LanguageUtility::getLL('dmailer_sending') . ' ' . $numberOfSentMailsOfGroup . ' ' . LanguageUtility::getLL('dmailer_sending_to_table') . ' ' . $recipientTable);
             }
         }
         return true;
@@ -398,7 +395,7 @@ class MailerService implements LoggerAwareInterface
     public function getListOfRecipientCategories(string $table, int $uid): array
     {
         if ($table === 'tx_mail_domain_model_group') {
-            return '';
+            return [];
         }
 
         $relationTable = $GLOBALS['TCA'][$table]['columns']['categories']['config']['MM'];
@@ -441,7 +438,10 @@ class MailerService implements LoggerAwareInterface
     {
         if ($this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid((int)$recipientData['uid'], $recipientTable, $this->mail->getUid()) === false) {
             $parseTime = MailerUtility::getMilliseconds();
-            $recipientData = RecipientUtility::normalizeAddress($recipientData);
+
+            // PSR-14 event dispatcher to manipulate recipient data
+            // see MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData for example
+            $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData))->getRecipient();
 
             // write to log table. if it can be written, continue with sending.
             // if not, stop the script and report error

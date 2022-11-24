@@ -31,33 +31,6 @@ class RecipientUtility
     }
 
     /**
-     * Normalize address
-     * fe_user and tt_address are using different field names for the same information
-     *
-     * @param array $recipientData Recipient's data array
-     *
-     * @return array Fixed recipient's data array
-     */
-    public static function normalizeAddress(array $recipientData): array
-    {
-        // Compensation for the fact that fe_users has the field 'telephone' instead of 'phone'
-        if ($recipientData['telephone'] ?? false) {
-            $recipientData['phone'] = $recipientData['telephone'];
-        }
-
-        // Firstname must be more than 1 character
-        $token = strtok(trim($recipientData['name']), ' ');
-        $recipientData['firstname'] = $token ? trim($token) : '';
-        if (strlen($recipientData['firstname']) < 2 || preg_match('|[^[:alnum:]]$|', $recipientData['firstname'])) {
-            $recipientData['firstname'] = $recipientData['name'];
-        }
-        if (!trim($recipientData['firstname'])) {
-            $recipientData['firstname'] = $recipientData['email'];
-        }
-        return $recipientData;
-    }
-
-    /**
      * Normalize a list of email addresses separated by colon, semicolon or enter (chr10) and remove not valid emails
      *
      * @param string $emailAddresses
