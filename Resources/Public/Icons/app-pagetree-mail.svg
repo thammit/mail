@@ -1,16 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 27.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 32 32" style="enable-background:new 0 0 32 32;" xml:space="preserve">
-<style type="text/css">
-	.mail-theme-mail {
-		fill:#FFFFFF;
-		stroke:#000000;
-		stroke-linecap:round;
-		stroke-linejoin:round;
-		stroke-miterlimit:5.3333;
-	}
-</style>
-<path class="mail-theme-mail" d="M3.6,10.5l10.8,7.2c0.9,0.7,2.1,0.7,3,0l10.8-7.2 M6.4,25.6h19.2c1.6,0,2.7-1.2,2.7-2.7V9.1
-	c0-1.6-1.2-2.7-2.7-2.7H6.4C4.8,6.3,3.6,7.5,3.6,9.1v13.7C3.6,24.3,4.9,25.6,6.4,25.6z"/>
-</svg>
+<?xml version="1.0" encoding="UTF-8"?><svg id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g><path d="M2.9,15.48H13.15c.85,0,1.44-.64,1.44-1.44V6.66c0-.85-.64-1.44-1.44-1.44H2.9c-.85-.05-1.5,.59-1.5,1.44v7.32c0,.8,.69,1.5,1.5,1.5Z" style="fill:#fff;"/><path d="M13.15,15.98H2.9c-1.08,0-2-.91-2-2V6.66c0-.57,.21-1.08,.6-1.44,.38-.36,.88-.53,1.42-.5H13.15c1.11,0,1.94,.83,1.94,1.94v7.37c0,1.11-.83,1.94-1.94,1.94ZM2.82,5.72c-.26,0-.47,.08-.63,.23-.19,.17-.29,.43-.29,.71v7.32c0,.52,.47,1,1,1H13.15c.55,0,.94-.39,.94-.94V6.66c0-.55-.39-.94-.94-.94H2.9s-.05,0-.08,0Z" style="fill:#515151;"/></g><path d="M2,0V8l5.97,4,6.03-4V4L10,0H2Z" style="fill:#efefef;"/><path d="M10,4V0l4,4h-4Z" style="fill:#fff; isolation:isolate; opacity:.65;"/><path d="M13,5v4l-.48,.21-3.52-4.21h4Z" style="fill:#212121; isolation:isolate; opacity:.2;"/><path d="M2,0V8l5.97,4,6.03-4V4L10,0H2Zm1,1h6V5h4v3.66l-5,3.34-5-3.33V1Zm7,.4l2.6,2.6h-2.6V1.4Z" style="fill:#999;"/><path d="M7.98,12.41c-.39,0-.78-.13-1.12-.39L1.13,8.2c-.23-.15-.29-.46-.14-.69,.15-.23,.46-.29,.69-.14l5.77,3.85c.33,.25,.72,.25,1.02,.02l5.8-3.87c.23-.15,.54-.09,.69,.14,.15,.23,.09,.54-.14,.69l-5.77,3.85c-.31,.24-.69,.37-1.07,.37Z" style="fill:#515151;"/></svg>
