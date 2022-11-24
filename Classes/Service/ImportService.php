@@ -361,7 +361,7 @@ class ImportService
 
         // show not imported record and reasons,
         $result = $this->doImport($csvData);
-        ViewUtility::addOkToFlashMessageQueue(LanguageUtility::getLL('mailgroup_import_done'));
+        ViewUtility::addFlashMessageSuccess(LanguageUtility::getLL('mailgroup_import_done'));
 
         $resultOrder = [];
         if (!empty($this->pageTsConfiguration['resultOrder'])) {

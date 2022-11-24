@@ -298,23 +298,23 @@ class MailFactory
         try {
             $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
             if ($htmlContent === false) {
-                ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_html_uri_is_invalid'),
+                ViewUtility::addFlashMessageError(LanguageUtility::getLL('dmail_external_html_uri_is_invalid'),
                     LanguageUtility::getLL('dmail_error'));
                 return false;
             } else {
                 if (MailerUtility::contentContainsFrameTag($htmlContent)) {
-                    ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_frames_not allowed'), LanguageUtility::getLL('dmail_error'));
+                    ViewUtility::addFlashMessageError(LanguageUtility::getLL('dmail_frames_not allowed'), LanguageUtility::getLL('dmail_error'));
                     return false;
                 }
                 if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
-                    ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_html_boundaries'),
+                    ViewUtility::addFlashMessageWarning(LanguageUtility::getLL('dmail_no_html_boundaries'),
                         LanguageUtility::getLL('dmail_warning'));
                 }
 
                 return $htmlContent;
             }
         } catch (RequestException $exception) {
-            ViewUtility::addErrorToFlashMessageQueue(' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
+            ViewUtility::addFlashMessageError(' Requested URL: ' . $htmlContentUrlWithUsernameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
                 LanguageUtility::getLL('dmail_no_html_content'));
             return false;
         }
@@ -330,18 +330,18 @@ class MailFactory
         try {
             $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
             if ($plainContent === false) {
-                ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_external_plain_uri_is_invalid'),
+                ViewUtility::addFlashMessageError(LanguageUtility::getLL('dmail_external_plain_uri_is_invalid'),
                     LanguageUtility::getLL('dmail_error'));
                 return false;
             } else {
                 if (!MailerUtility::contentContainsBoundaries($plainContent)) {
-                    ViewUtility::addWarningToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_boundaries'),
+                    ViewUtility::addFlashMessageWarning(LanguageUtility::getLL('dmail_no_plain_boundaries'),
                         LanguageUtility::getLL('dmail_warning'));
                 }
                 return $plainContent;
             }
         } catch (RequestException|ConnectException $exception) {
-            ViewUtility::addErrorToFlashMessageQueue(LanguageUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
+            ViewUtility::addFlashMessageError(LanguageUtility::getLL('dmail_no_plain_content') . ' Requested URL: ' . $plainContentUrlWithUserNameAndPassword . ' Reason: ' . $exception->getResponse()->getReasonPhrase(),
                 LanguageUtility::getLL('dmail_error'));
             return false;
         }

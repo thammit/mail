@@ -139,6 +139,10 @@
                 <source>Recipient groups</source>
                 <target>Empfängergruppen</target>
             </trans-unit>
+            <trans-unit id="report.notification.recipientsDisabled.message">
+                <source>%s recipients successfully disabled.</source>
+                <target>%s Empfänger erfolgreich deaktiviert.</target>
+            </trans-unit>
             <trans-unit id="queue.notification.nothingToDo.title">
                 <source>Nothing to do</source>
                 <target>Nichts zu tun</target>

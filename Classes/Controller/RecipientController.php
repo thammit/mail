@@ -165,7 +165,7 @@ class RecipientController extends AbstractController
                         GeneralUtility::trimExplode(',', $fields, true));
                     CsvUtility::downloadCSV($rows);
                 } else {
-                    ViewUtility::addErrorToFlashMessageQueue('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
+                    ViewUtility::addFlashMessageError('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
                     $this->redirect('show');
                 }
             }
@@ -207,7 +207,7 @@ class RecipientController extends AbstractController
         $importService->init($this->id, $this->request, $configuration);
 
         if (!$importService->uploadOrImportCsv()) {
-            ViewUtility::addErrorToFlashMessageQueue('An error occurred during csv import', 'Error');
+            ViewUtility::addFlashMessageError('An error occurred during csv import', 'Error');
             $this->redirect('csvImportWizard');
         }
 

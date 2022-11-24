@@ -13,11 +13,13 @@ use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -79,8 +81,38 @@ abstract class AbstractController extends ActionController
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
     }
 
+    public function initializeAction()
+    {
+        $notifications = $this->getFlashMessageQueue(ViewUtility::NOTIFICATIONS)->getAllMessagesAndFlush();
+        if ($notifications) {
+            foreach ($notifications as $notification) {
+                $this->addJsNotification($notification->getMessage(), $notification->getTitle(), $notification->getSeverity());
+            }
+        }
+        parent::initializeAction();
+    }
+
     protected function getDataHandler(): DataHandler
     {
         return GeneralUtility::makeInstance(DataHandler::class);
+    }
+
+    /**
+     * @param string $message
+     * @param string $title
+     * @param int $severity
+     * @return void
+     */
+    protected function addJsNotification(string $message, string $title = '', int $severity = AbstractMessage::OK): void
+    {
+        $severities = [
+            AbstractMessage::NOTICE => 'notice',
+            AbstractMessage::INFO => 'info',
+            AbstractMessage::OK => 'success',
+            AbstractMessage::WARNING => 'warning',
+            AbstractMessage::ERROR => 'error',
+        ];
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+        $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS, 'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
     }
 }

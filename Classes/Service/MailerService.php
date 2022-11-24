@@ -64,9 +64,9 @@ class MailerService implements LoggerAwareInterface
     protected bool $isHtml = false;
     protected bool $isPlain = false;
     protected string $backendUserLanguage = 'default';
-    protected bool $isTestMail = false;
     protected string $charset = 'utf-8';
     protected string $subject = '';
+    protected string $subjectPrefix = '';
     protected string $fromName = '';
     protected string $organisation = '';
     protected string $replyToName = '';
@@ -113,11 +113,11 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     * @param bool $isTestMail
+     * @param string $subjectPrefix
      */
-    public function setTestMail(bool $isTestMail): void
+    public function setSubjectPrefix(string $subjectPrefix): void
     {
-        $this->isTestMail = $isTestMail;
+        $this->subjectPrefix = $subjectPrefix;
     }
 
     /**
@@ -188,26 +188,17 @@ class MailerService implements LoggerAwareInterface
     /**
      * Send a simple email (without personalizing)
      *
-     * @param string $addressList list of recipient address, comma list of emails
+     * @param string $addressList comma separated list of emails
      *
      * @return void
      */
     public function sendSimpleMail(string $addressList): void
     {
-        $plainContent = '';
-        if ($this->mail->getPlainContent() ?? false) {
-            $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts) ?: '';
-        }
-
-        $htmlContent = '';
-        if ($this->mail->getHtmlContent() ?? false) {
-            $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts) ?: '';
-        }
-
+        $addressList = str_replace(';', ',', $addressList);
         $recipients = explode(',', $addressList);
 
         foreach ($recipients as $recipient) {
-            $this->sendMailToRecipient($recipient, $htmlContent, $plainContent);
+            $this->sendMailToRecipient($recipient, $this->mail->getHtmlContent(), $this->mail->getPlainContent());
         }
     }
 
@@ -240,9 +231,11 @@ class MailerService implements LoggerAwareInterface
                 '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
             ];
 
+            $recipientCategories = $recipientData['categories'] ?? [];
+
             $htmlContent = '';
             if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
-                $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, GeneralUtility::intExplode(',', $recipientData['categories']) ?? []);
+                $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, $recipientCategories);
 
                 if ($htmlContent) {
                     $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $additionalMarkers);
@@ -254,7 +247,7 @@ class MailerService implements LoggerAwareInterface
             $plainContent = '';
 
             if ($this->isPlain) {
-                $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts, GeneralUtility::intExplode(',', $recipientData['categories']) ?? []);
+                $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts, $recipientCategories);
 
                 if ($plainContent) {
                     $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $additionalMarkers);
@@ -398,11 +391,11 @@ class MailerService implements LoggerAwareInterface
      * @param string $table table of the recipient (tt_address or fe_users)
      * @param int $uid Uid of the recipient
      *
-     * @return string        list of categories
+     * @return array list of categories
      * @throws DBALException
      * @throws Exception
      */
-    public function getListOfRecipientCategories(string $table, int $uid): string
+    public function getListOfRecipientCategories(string $table, int $uid): array
     {
         if ($table === 'tx_mail_domain_model_group') {
             return '';
@@ -423,12 +416,12 @@ class MailerService implements LoggerAwareInterface
             )
             ->execute();
 
-        $list = '';
+        $recipientCategories = [];
         while ($row = $statement->fetchAssociative()) {
-            $list .= $row['uid_local'] . ',';
+                $recipientCategories[] = (int)$row['uid_local'];
         }
 
-        return rtrim($list, ',');
+        return $recipientCategories;
     }
 
     /**
@@ -597,7 +590,7 @@ class MailerService implements LoggerAwareInterface
             ->setSiteIdentifier($this->siteIdentifier)
             ->from(new Address($this->mail->getFromEmail(), $this->fromName))
             ->to($recipient)
-            ->subject($this->subject)
+            ->subject($this->subjectPrefix . $this->subject)
             ->priority($this->priority);
 
         if ($this->mail->getReplyToEmail()) {

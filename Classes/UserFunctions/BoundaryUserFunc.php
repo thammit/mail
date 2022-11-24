@@ -43,8 +43,12 @@ class BoundaryUserFunc
      */
     public function insertContentBoundaries(string $content, ?array $conf = []): string
     {
-        if (!($GLOBALS['TSFE']->config['config']['insertContentBoundaries'] ?? false) || empty($content) || empty($this->contentObjectRenderer->data['categories'])) {
+        if (!($GLOBALS['TSFE']->config['config']['insertContentBoundaries'] ?? false) || empty($content)) {
             return $content;
+        }
+
+        if (empty($this->contentObjectRenderer->data['categories'])) {
+            return $this->contentObjectRenderer->wrap('', $this->boundaryStartWrap) . $content . $this->boundaryEnd;
         }
 
         if (isset($conf['useParentCObj']) && $conf['useParentCObj']) {

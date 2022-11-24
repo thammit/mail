@@ -72,37 +72,40 @@ class MailerUtility
      * @param array $contentParts content parts
      * @param array $userCategories category uids of the user
      *
-     * @return string|bool Content of the email, which the recipient subscribed or false if no content found
+     * @return string Content of the email, which the recipient subscribed or false if no content found
      */
-    public static function getContentFromContentPartsMatchingUserCategories(array $contentParts, array $userCategories = []): string|bool
+    public static function getContentFromContentPartsMatchingUserCategories(array $contentParts, array $userCategories = []): string
     {
         $returnContentParts = [];
         $mailHasContent = false;
         $boundaryMax = count($contentParts) - 1;
         foreach ($contentParts as $blockKey => $contentPart) {
+            if (empty($contentPart[1])) {
+                continue;
+            }
             $key = substr($contentPart[0], 1);
-            if (!$key || $userCategories === null) {
+            // $key can be empty, contain the string "END" or a comma separated list of category uids
+            if (empty($key)) {
+                // content has no category restrictions -> add to output if not empty
                 $returnContentParts[] = $contentPart[1];
-                if ($contentPart[1]) {
-                    $mailHasContent = true;
-                }
+                $mailHasContent = true;
             } else {
-                if ($key == 'END') {
+                if ($key === 'END') {
                     $returnContentParts[] = $contentPart[1];
-                    // There is content, and it is not just the header and footer content, or it is the only content because we have no direct mail boundaries.
-                    if (($contentPart[1] && !($blockKey === 0 || $blockKey === $boundaryMax)) || count($contentParts) === 1) {
+                    // There is content, and it is not just the header and footer content, or it is the only content because we have no mail boundaries.
+                    if (!($blockKey === 0 || $blockKey === $boundaryMax) || count($contentParts) === 1) {
                         $mailHasContent = true;
                     }
                 } else {
                     $contentCategories = GeneralUtility::intExplode(',', $key, true);
-                    if (count(array_intersect($contentCategories, $userCategories)) > 0) {
+                    if (empty($contentCategories) || count(array_intersect($contentCategories, $userCategories)) > 0) {
                         $returnContentParts[] = $contentPart[1];
                         $mailHasContent = true;
                     }
                 }
             }
         }
-        return $mailHasContent ? implode('', $returnContentParts) : false;
+        return $mailHasContent ? implode('', $returnContentParts) : '';
     }
 
     /*

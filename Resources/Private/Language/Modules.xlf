@@ -111,6 +111,9 @@
             <trans-unit id="report.general.groups">
                 <source>Recipient groups</source>
             </trans-unit>
+            <trans-unit id="report.notification.recipientsDisabled.message">
+                <source>%s recipients successfully disabled.</source>
+            </trans-unit>
             <trans-unit id="queue.notification.nothingToDo.title">
                 <source>Nothing to do</source>
             </trans-unit>

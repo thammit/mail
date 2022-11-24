@@ -41,7 +41,7 @@ class CategoryCommentConverter implements ConverterInterface, ConfigurationAware
         $preserve = $this->config->getOption('preserve_category_comments');
         if ($preserve === true) {
             $value = \trim($element->getValue());
-            $pattern = '/' . Constants::CONTENT_SECTION_BOUNDARY . '_(END|[0-9,]+)/';
+            $pattern = '/' . Constants::CONTENT_SECTION_BOUNDARY . '_(|END|[0-9,]+)?/';
             return (bool)preg_match($pattern, $value);
         }
 

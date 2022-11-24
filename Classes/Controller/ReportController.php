@@ -8,7 +8,7 @@ use Doctrine\DBAL\Driver\Exception;
 use JetBrains\PhpStorm\NoReturn;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -96,7 +96,7 @@ class ReportController extends AbstractController
     {
         $this->mailService->init($mail);
         $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData());
-        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
+        ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
@@ -147,7 +147,7 @@ class ReportController extends AbstractController
     {
         $this->mailService->init($mail);
         $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
-        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
+        ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
@@ -198,7 +198,7 @@ class ReportController extends AbstractController
     {
         $this->mailService->init($mail);
         $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]));
-        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
+        ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
@@ -249,7 +249,7 @@ class ReportController extends AbstractController
     {
         $this->mailService->init($mail);
         $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]));
-        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
+        ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
@@ -300,7 +300,7 @@ class ReportController extends AbstractController
     {
         $this->mailService->init($mail);
         $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]));
-        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
+        ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
@@ -351,7 +351,7 @@ class ReportController extends AbstractController
     {
         $this->mailService->init($mail);
         $affectedRecipients = $this->mailService->disableRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
-        ViewUtility::addOkToFlashMessageQueue($affectedRecipients . ' recipients successfully disabled.', '', true);
+        ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
