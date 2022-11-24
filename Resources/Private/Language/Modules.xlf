@@ -75,6 +75,9 @@
             <trans-unit id="mail.wizard.notification.categoryRestrictionSaveFailed.message">
                 <source>Category restrictions save failed.</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.updateContentFailed.message">
+                <source>Content update failed.</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.testMailSent.title">
                 <source>Test mail successfully sent</source>
             </trans-unit>

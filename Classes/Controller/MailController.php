@@ -530,6 +530,8 @@ class MailController extends AbstractController
         $categories = $contentCategories['categories'] ?? [];
 
         if ($mail instanceOf Mail && $contentElementUid && $categories) {
+
+            // build array with all checked content element categories
             $newCategories = [];
             foreach ($categories as $category) {
                 if ($category['checked'] ?? false) {
@@ -537,13 +539,37 @@ class MailController extends AbstractController
                 }
             }
 
-            $data['tt_content'][$contentElementUid]['categories'] = implode(',', $newCategories);
+            // use data handler to store content categories
             $dataHandler = $this->getDataHandler();
+            $data['tt_content'][$contentElementUid]['categories'] = implode(',', $newCategories);
             $dataHandler->start($data, []);
             $dataHandler->process_datamap();
 
             // remove cache
             $dataHandler->clear_cacheCmd($mail->getPage());
+
+            // update content in mail, because category boundaries changed
+            $mailFactory = MailFactory::forStorageFolder($mail->getPage());
+            try {
+                $newMail = $mailFactory->fromInternalPage($mail->getPage(), $mail->getSysLanguageUid());
+                if ($newMail instanceof Mail) {
+                    // copy new fetch content and charset to current mail record
+                    $mail->setMessageId($newMail->getMessageId());
+                    $mail->setPlainContent($newMail->getPlainContent());
+                    $mail->setHtmlContent($newMail->getHtmlContent());
+                    $mail->setCharset($newMail->getCharset());
+
+                    $this->mailRepository->update($mail);
+                    $this->mailRepository->persist();
+                }
+            } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException|IllegalObjectTypeException|UnknownObjectException $e) {
+                return $this->responseFactory->createResponse(400)
+                    ->withHeader('Content-Type', 'application/json; charset=utf-8')
+                    ->withBody($this->streamFactory->createStream(json_encode([
+                        'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                        'message' => LanguageUtility::getLL('mail.wizard.notification.updateContentFailed.message')
+                    ])));
+            }
 
             return $this->jsonResponse(json_encode([
                 'title' => LanguageUtility::getLL('mail.wizard.notification.categoriesUpdated.title'),

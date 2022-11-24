@@ -95,6 +95,10 @@
                 <source>Category restrictions save failed.</source>
                 <target>Speichern von Kategorie-Einschränkungen fehlgeschlagen.</target>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.updateContentFailed.message">
+                <source>Content update failed.</source>
+                <target>Aktualisierung der Inhalte fehlgeschlagen.</target>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.categoriesUpdated.message">
                 <source>Categories restrictions successfully applied.</source>
                 <target>Kategorie-Einschränkungen erfolgreich gespeichert.</target>
