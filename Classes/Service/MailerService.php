@@ -441,7 +441,7 @@ class MailerService implements LoggerAwareInterface
 
             // PSR-14 event dispatcher to manipulate recipient data
             // see MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData for example
-            $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientTable))->getRecipient();
+            $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientTable))->getRecipientData();
 
             // write to log table. if it can be written, continue with sending.
             // if not, stop the script and report error
