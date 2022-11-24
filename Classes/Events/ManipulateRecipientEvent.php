@@ -5,20 +5,28 @@ namespace MEDIAESSENZ\Mail\Events;
 
 final class ManipulateRecipientEvent
 {
-    public function __construct(private array $recipient) {
+    public function __construct(private array $recipientData, private readonly string $recipientTable) {
     }
 
-    public function getRecipient(): array
+    public function getRecipientData(): array
     {
-        return $this->recipient;
+        return $this->recipientData;
     }
 
     /**
-     * @param array $recipient
+     * @param array $recipientData
      * @return void
      */
-    public function setRecipient(array $recipient): void
+    public function setRecipientData(array $recipientData): void
     {
-        $this->recipient = $recipient;
+        $this->recipientData = $recipientData;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecipientTable(): string
+    {
+        return $this->recipientTable;
     }
 }
