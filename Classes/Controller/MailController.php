@@ -133,6 +133,7 @@ class MailController extends AbstractController
 
         $this->view->assignMultiple([
             'panel' => $panelData,
+            'pageInfo' => $this->pageInfo,
             'navigation' => $this->getNavigation(1, $this->hideCategoryStep()),
             'mailSysFolderUid' => $this->id,
             'backendUser' => [

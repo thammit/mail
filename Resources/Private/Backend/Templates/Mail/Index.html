@@ -23,7 +23,7 @@
         <f:if condition="{panel.internal}">
             <f:variable name="counter" value="{panel.internal.data -> f:count()}"/>
             <f:variable name="title"><f:translate key="{lll}dmail_wiz1_internal_page"/></f:variable>
-            <f:variable name="additionalHeading"><f:be.pageInfo /> <f:be.pagePath /></f:variable>
+            <f:variable name="additionalHeading"><core:icon identifier="app-pagetree-folder-contains-mail" /> {pageInfo.title} [{pageInfo.uid}]</f:variable>
             <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:4, open:panel.internal.open, counter: counter, additionalHeading: additionalHeading}" contentAs="panelBody">
                 <f:render section="InternalPanel" arguments="{lll:lll, data: panel.internal, mailSysFolderUid:mailSysFolderUid}" />
             </f:render>
