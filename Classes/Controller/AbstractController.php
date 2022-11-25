@@ -11,14 +11,19 @@ use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\ReportService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -36,6 +41,7 @@ abstract class AbstractController extends ActionController
     protected array $implodedParams = [];
     protected string $userTable = '';
     protected array $allowedTables = [];
+    protected ModuleTemplate $moduleTemplate;
 
     /**
      * Constructor Method
@@ -51,9 +57,15 @@ abstract class AbstractController extends ActionController
         protected GroupRepository $groupRepository,
         protected LogRepository $logRepository,
         protected PageRepository $pageRepository,
-        protected CategoryRepository $categoryRepository
+        protected CategoryRepository $categoryRepository,
+        protected IconFactory $iconFactory
     ) {
-        $this->id = (int)GeneralUtility::_GP('id');
+        try {
+            $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?? GeneralUtility::_GP('id'));
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
+            $this->id = (int)GeneralUtility::_GP('id');
+        }
+
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         try {
             $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
@@ -89,6 +101,8 @@ abstract class AbstractController extends ActionController
                 $this->addJsNotification($notification->getMessage(), $notification->getTitle(), $notification->getSeverity());
             }
         }
+        $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+
         parent::initializeAction();
     }
 

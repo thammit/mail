@@ -10,9 +10,10 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
@@ -47,10 +48,10 @@ class QueueController extends AbstractController
             'trigger' => !(isset($this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger'])
         ]);
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
+        $this->configureOverViewDocHeader($this->request->getRequestTarget());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -94,5 +95,20 @@ class QueueController extends AbstractController
             LanguageUtility::getLL('mail.wizard.notification.severity.success.title')
         );
         $this->redirect('index');
+    }
+
+    /**
+     * Create document header buttons of "overview" action
+     *
+     * @param string $requestUri
+     */
+    protected function configureOverViewDocHeader(string $requestUri): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $reloadButton = $buttonBar->makeLinkButton()
+            ->setHref($requestUri)
+            ->setTitle(LanguageUtility::getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload'))
+            ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
+        $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT);
     }
 }

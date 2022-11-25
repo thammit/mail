@@ -40,11 +40,10 @@ class ConfigurationController  extends AbstractController
             ],
         ]);
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**

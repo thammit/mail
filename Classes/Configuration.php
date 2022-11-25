@@ -13,8 +13,11 @@ use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
 final class Configuration
@@ -59,6 +62,14 @@ final class Configuration
 
     public static function registerBackendModules(): void
     {
+        $navigationComponentId = 'TYPO3/CMS/Backend/PageTree/PageTreeElement';
+        try {
+            if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId'))) {
+                $navigationComponentId = '';
+            }
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
+
+        }
         ExtensionUtility::registerModule(
             'Mail',
             'mail',
@@ -84,7 +95,7 @@ final class Configuration
                 MailController::class => 'index,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,openMail,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete,noPageSelected'
             ],
             [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'navigationComponentId' => $navigationComponentId,
                 'access' => 'group,user',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-mail',
@@ -101,7 +112,7 @@ final class Configuration
                 RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport'
             ],
             [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'navigationComponentId' => $navigationComponentId,
                 'access' => 'group,user',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-recipient',
@@ -118,7 +129,7 @@ final class Configuration
                 ReportController::class => 'index,show,showTotalReturned,disableTotalReturned,csvExportTotalReturned,showUnknown,disableUnknown,csvExportUnknown,showFull,disableFull,csvExportFull,showBadHost,disableBadHost,csvExportBadHost,showBadHeader,disableBadHeader,csvExportBadHeader,showReasonUnknown,disableReasonUnknown,csvExportReasonUnknown'
             ],
             [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'navigationComponentId' => $navigationComponentId,
                 'access' => 'group,user',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-report',
@@ -135,7 +146,7 @@ final class Configuration
                 QueueController::class => 'index,trigger,delete'
             ],
             [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'navigationComponentId' => $navigationComponentId,
                 'access' => 'group,user',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-queue',
@@ -152,7 +163,7 @@ final class Configuration
                 ConfigurationController::class => 'index,update'
             ],
             [
-                'navigationComponentId' => 'TYPO3/CMS/Backend/PageTree/PageTreeElement',
+                'navigationComponentId' => $navigationComponentId,
                 'access' => 'group,user',
                 'workspaces' => 'online',
                 'iconIdentifier' => 'mail-module-configuration',

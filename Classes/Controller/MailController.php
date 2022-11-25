@@ -27,11 +27,11 @@ use pQuery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -52,10 +52,9 @@ class MailController extends AbstractController
     public function noPageSelectedAction(): ResponseInterface
     {
         ViewUtility::addFlashMessageWarning(LanguageUtility::getLL('mail.wizard.notification.noPageSelected.message'), LanguageUtility::getLL('mail.wizard.notification.noPageSelected.title'));
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -142,10 +141,9 @@ class MailController extends AbstractController
             ],
         ]);
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -377,13 +375,12 @@ class MailController extends AbstractController
             ]);
             $this->pageRenderer->loadRequireJsModule('html2canvas');
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewImage');
-            $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
+            $backendUriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
             $savePreviewImageAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mail' => $mail->getUid()]);
             $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
         }
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
         if ($mail->isInternal()) {
             $title = LanguageUtility::getLL('mail.wizard.notification.severity.success.title');
@@ -395,7 +392,7 @@ class MailController extends AbstractController
             $this->addJsNotification($message, $title);
         }
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -497,15 +494,14 @@ class MailController extends AbstractController
             'mailBody' => pQuery::parseStr($mail->getHtmlContent())->query('body')->html(),
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail))
         ]);
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/HighlightContent');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/UpdateCategoryRestrictions');
-        $backendUriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
+        $backendUriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $saveCategoryRestrictionsAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-category-restrictions', ['mail' => $mail->getUid()]);
         $this->pageRenderer->addJsInlineCode('mail-configuration', 'var saveCategoryRestrictionsAjaxUri = \'' . $saveCategoryRestrictionsAjaxUri . '\'');
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -635,10 +631,9 @@ class MailController extends AbstractController
                 'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
             ]
         ]);
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -685,12 +680,11 @@ class MailController extends AbstractController
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
         ]);
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     public function initializeFinishAction(): void

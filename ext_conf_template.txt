@@ -7,6 +7,9 @@ additionalRecipientFields =
 # cat=basic; type=int; label=Mail page type number: Change this number only if another extension use the same.
 mailPageTypeNumber = 24
 
+# cat=basic; type=int; label=Mail module page id: If set, page tree navigation will be hidden in mail module
+mailModulePageId =
+
 # cat=feature; type=boolean; label=Enable notification email: Allow mail to send notification about start and end of a mailing job.
 notificationJob = 1
 

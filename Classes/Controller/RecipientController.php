@@ -61,11 +61,10 @@ class RecipientController extends AbstractController
         $this->view->assign('pid', $this->id);
         $this->view->assign('data', $data);
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -132,11 +131,10 @@ class RecipientController extends AbstractController
 
         $this->view->assign('data', $data);
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -184,10 +182,9 @@ class RecipientController extends AbstractController
 
         $this->view->assign('data', $importService->getCsvImportUploadData());
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -213,10 +210,9 @@ class RecipientController extends AbstractController
 
         $this->view->assign('data', $importService->getCsvImportConfigurationData());
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -232,10 +228,9 @@ class RecipientController extends AbstractController
 
         $this->view->assign('data', $importService->getCsvImportMappingData());
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
     /**
@@ -258,9 +253,8 @@ class RecipientController extends AbstractController
 
         $this->view->assign('data', $importService->startCsvImport());
 
-        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $moduleTemplate->setContent($this->view->render());
+        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 }
