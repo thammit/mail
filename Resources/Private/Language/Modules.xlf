@@ -444,7 +444,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Manual sending started!</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_explain" resname="dmail_mailerengine_manual_explain">
-                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed with the pagets setting mod.web_modules.mail.sendPerCycle.</source>
+                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed within the settings module.</source>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_invoke" resname="dmail_mailerengine_manual_invoke">
 				<source>Manually Invoke Engine</source>

@@ -583,8 +583,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<target>Manueller Versand gestartet!</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_explain" resname="dmail_mailerengine_manual_explain">
-                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed with the pagets setting mod.web_modules.mail.sendPerCycle.</source>
-				<target>Wenn TYPO3 nicht für den Versand von Mails über den mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand auch durch Klick auf den folgenden Button manuell anstossen. Mit jedem Klick werden %s Mails versandt. Die Anzahl lässt sich über den Pagets-Parameter mod.web_modules.mail.sendPerCycle ändern.</target>
+                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed within the settings module.</source>
+				<target>Wenn TYPO3 nicht für den Versand von Mails über den mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand auch durch Klick auf den folgenden Button manuell anstossen. Mit jedem Klick werden %s Mails versandt. Die Anzahl lässt sich über das Einstellungs-Modul ändern.</target>
 			</trans-unit>
 			<trans-unit id="dmail_mailerengine_manual_invoke" resname="dmail_mailerengine_manual_invoke">
 				<source>Manually Invoke Engine</source>
