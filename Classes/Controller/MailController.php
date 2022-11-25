@@ -28,6 +28,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -142,6 +143,7 @@ class MailController extends AbstractController
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());
+        $this->addDocheaderButtons();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -839,5 +841,17 @@ class MailController extends AbstractController
             'totalSteps' => count($steps),
             'steps' => range(1, count($steps)),
         ];
+    }
+
+    protected function addDocheaderButtons(): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailMail');
+        $arguments = [
+            'id' => $this->id,
+        ];
+        $shortCutButton->setArguments($arguments);
+        $shortCutButton->setDisplayName('Mail Wizard [' . $this->id . ']');
+        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
     }
 }

@@ -110,5 +110,14 @@ class QueueController extends AbstractController
             ->setTitle(LanguageUtility::getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload'))
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT);
+
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailQueue');
+        $arguments = [
+            'id' => $this->id,
+        ];
+        $displayName = 'Mail Queue [' . $this->id . ']';
+        $shortCutButton->setArguments($arguments);
+        $shortCutButton->setDisplayName($displayName);
+        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
     }
 }

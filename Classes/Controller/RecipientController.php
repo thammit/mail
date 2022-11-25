@@ -14,8 +14,10 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
+use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
@@ -63,6 +65,7 @@ class RecipientController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        $this->addDocheaderButtons();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -133,6 +136,7 @@ class RecipientController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        $this->addDocheaderButtons($group->getTitle());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -256,5 +260,33 @@ class RecipientController extends AbstractController
         $this->moduleTemplate->setContent($this->view->render());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
+    }
+
+    /**
+     * Create document header buttons of "overview" action
+     * @param string $groupName
+     */
+    protected function addDocheaderButtons(string $groupName = ''): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailRecipient');
+        $arguments = [
+            'id' => $this->id,
+        ];
+        $potentialArguments = [
+            'tx_mail_mailmail_mailrecipient' => ['group', 'action', 'controller'],
+        ];
+        $displayName = 'Mail Groups [' . $this->id . ']';
+        foreach ($potentialArguments as $argument => $subArguments) {
+            if (!empty($this->request->getQueryParams()[$argument])) {
+                foreach ($subArguments as $subArgument) {
+                    $arguments[$argument][$subArgument] = $this->request->getQueryParams()[$argument][$subArgument];
+                }
+                $displayName = 'Mail Group: ' . $groupName . ' [' . $arguments['tx_mail_mailmail_mailrecipient']['group'] . ']';
+            }
+        }
+        $shortCutButton->setArguments($arguments);
+        $shortCutButton->setDisplayName($displayName);
+        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
     }
 }

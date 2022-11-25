@@ -33,7 +33,7 @@ class ReportController extends AbstractController
         $this->view->assign('mails', $this->mailRepository->findSentByPid($this->id));
 
         $this->moduleTemplate->setContent($this->view->render());
-        $this->configureOverViewDocHeader($this->request->getRequestTarget());
+        $this->addDocheaderButtons($this->request->getRequestTarget());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -60,7 +60,7 @@ class ReportController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
-        $this->configureOverViewDocHeader($this->request->getRequestTarget());
+        $this->addDocheaderButtons($this->request->getRequestTarget());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -365,12 +365,7 @@ class ReportController extends AbstractController
         $this->mailService->csvDownloadRecipients($this->mailService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
     }
 
-    /**
-     * Create document header buttons of "overview" action
-     *
-     * @param string $requestUri
-     */
-    protected function configureOverViewDocHeader(string $requestUri): void
+    protected function addDocheaderButtons(string $requestUri): void
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
         $reloadButton = $buttonBar->makeLinkButton()
@@ -378,6 +373,26 @@ class ReportController extends AbstractController
             ->setTitle(LanguageUtility::getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload'))
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT);
+
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailReport');
+        $arguments = [
+            'id' => $this->id,
+        ];
+        $potentialArguments = [
+            'tx_mail_mailmail_mailreport' => ['mail', 'action', 'controller'],
+        ];
+        $displayName = 'Mail Reports [' . $this->id . ']';
+        foreach ($potentialArguments as $argument => $subArguments) {
+            if (!empty($this->request->getQueryParams()[$argument])) {
+                foreach ($subArguments as $subArgument) {
+                    $arguments[$argument][$subArgument] = $this->request->getQueryParams()[$argument][$subArgument];
+                }
+                $displayName = 'Mail Report [' . $arguments['tx_mail_mailmail_mailreport']['mail'] . ']';
+            }
+        }
+        $shortCutButton->setArguments($arguments);
+        $shortCutButton->setDisplayName($displayName);
+        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
     }
 
 }
