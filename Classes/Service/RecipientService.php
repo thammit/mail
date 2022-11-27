@@ -146,16 +146,17 @@ class RecipientService
 
         foreach ($recipients as $recipient) {
             if ($recipient instanceof RecipientInterface) {
-                $values = $this->getRecipientModelData($recipient, $fields);
-                $data[$recipient->getUid()] = $values;
-                if ($useEnhancedModel && $recipient->getRecordIdentifier() !== get_class($recipient) . ':' . $recipient->getUid()) {
-                    [$modelName, $uid] = explode(':', $recipient->getRecordIdentifier());
-                    $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($modelName);
-                    $repository = GeneralUtility::makeInstance($repositoryName);
-                    $recipient = $repository->findByUid($uid);
-                    $values = $this->getRecipientModelData($recipient, $fields);
-                    $data[$recipient->getUid()] += $values;
-                }
+                $data[$recipient->getUid()] = $recipient->getCsvExportData();
+//                $values = $this->getRecipientModelData($recipient, $fields);
+//                $data[$recipient->getUid()] = $values;
+//                if ($useEnhancedModel && $recipient->getRecordIdentifier() !== get_class($recipient) . ':' . $recipient->getUid()) {
+//                    [$modelName, $uid] = explode(':', $recipient->getRecordIdentifier());
+//                    $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($modelName);
+//                    $repository = GeneralUtility::makeInstance($repositoryName);
+//                    $recipient = $repository->findByUid($uid);
+//                    $values = $this->getRecipientModelData($recipient, $fields);
+//                    $data[$recipient->getUid()] += $values;
+//                }
             }
         }
 

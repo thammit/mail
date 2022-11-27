@@ -116,4 +116,10 @@ class FrontendUser extends AbstractRecipient implements RecipientInterface
     {
         return static::class . ':' . $this->uid;
     }
+
+    public function getCsvExportData(): array
+    {
+        // todo create field/value array
+        return [];
+    }
 }

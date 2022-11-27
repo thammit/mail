@@ -48,4 +48,11 @@ interface RecipientInterface
      * @return string
      */
     public function getRecordIdentifier(): string;
+
+    /**
+     * Return all field/values used by the csv export in the recipient module
+     * ['uid' => 1, 'email' => 'recipient@gmail.com', 'name' => 'Recipient Name']
+     * @return array
+     */
+    public function getCsvExportData(): array;
 }
