@@ -123,13 +123,12 @@ class RecipientService
      *
      * @param array $uidListOfRecipients List of recipient IDs
      * @param string $modelName model name
-     * @param array $fields Field to be selected
-     * @param bool $useEnhancedModel set to true if data from enhanced model should be used
+     * @param array $fields Field to be selected. If empty csv export data will be used
      *
      * @return array recipients' data
      * @throws InvalidQueryException
      */
-    public function getRecipientsDataByUidListAndModelName(array $uidListOfRecipients, string $modelName, array $fields = ['uid', 'name', 'email'], bool $useEnhancedModel = false): array
+    public function getRecipientsDataByUidListAndModelName(array $uidListOfRecipients, string $modelName, array $fields = ['uid', 'name', 'email']): array
     {
         $data = [];
         $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
@@ -146,9 +145,11 @@ class RecipientService
 
         foreach ($recipients as $recipient) {
             if ($recipient instanceof RecipientInterface) {
-                $data[$recipient->getUid()] = $recipient->getCsvExportData();
-//                $values = $this->getRecipientModelData($recipient, $fields);
-//                $data[$recipient->getUid()] = $values;
+                if (empty($fields)) {
+                    $data[$recipient->getUid()] = $recipient->getCsvExportData();
+                } else {
+                    $data[$recipient->getUid()] = $this->getRecipientModelData($recipient, $fields);
+                }
 //                if ($useEnhancedModel && $recipient->getRecordIdentifier() !== get_class($recipient) . ':' . $recipient->getUid()) {
 //                    [$modelName, $uid] = explode(':', $recipient->getRecordIdentifier());
 //                    $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($modelName);

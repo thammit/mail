@@ -183,10 +183,7 @@ class RecipientController extends AbstractController
                 $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
                 $table = $dataMapper->getDataMap($group->getRecordType())->getTableName();
                 if (BackendUserUtility::getBackendUser()->check('tables_select', $table)) {
-                    $fields = $table === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
-                    $fields .= ',tstamp,active';
-                    $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idLists[$group->getRecordType()], $group->getRecordType(),
-                        GeneralUtility::trimExplode(',', $fields, true), true);
+                    $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idLists[$group->getRecordType()], $group->getRecordType(), []);
                     CsvUtility::downloadCSV($rows);
                 } else {
                     ViewUtility::addFlashMessageError('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
