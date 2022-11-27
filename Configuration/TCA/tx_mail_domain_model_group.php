@@ -16,6 +16,7 @@ return [
             \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC => 'mail-group',
             \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY => 'mail-group',
             \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER => 'mail-group',
+            \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::MODEL => 'mail-group',
         ],
     ],
     'columns' => [
@@ -46,6 +47,7 @@ return [
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.1', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::CSV],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.2', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.4', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.type.I.5', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::MODEL],
                 ],
                 'default' => '0',
             ],
@@ -90,6 +92,20 @@ return [
                 'type' => 'check',
             ],
         ],
+        'record_type' => [
+            'label' => 'Record Type',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'allowNonIdValues' => true,
+                'items' => [
+                    ['', ''],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.0', \MEDIAESSENZ\Mail\Domain\Model\Address::class, 'EXT:tt_address/Resources/Public/Icons/tt_address.svg'],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.1', \MEDIAESSENZ\Mail\Domain\Model\FrontendUser::class, 'status-user-frontend'],
+                ],
+                'minitems' => 1,
+            ],
+        ],
         'record_types' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types',
             'config' => [
@@ -132,9 +148,10 @@ return [
         ],
     ],
     'types' => [
-        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::PAGES => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,pages,recursive,record_types,categories'],
+        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::PAGES => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,record_types,pages,recursive,categories'],
         \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::CSV => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,list,csv'],
         \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,static_list'],
         \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,children'],
+        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::MODEL => ['showitem' => 'type, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.advanced,record_type,pages,recursive,categories'],
     ],
 ];

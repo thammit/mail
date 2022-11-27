@@ -192,6 +192,9 @@
 		<trans-unit id="sys_dmail_group.type.I.4">
 			<source>From other recipient lists</source>
 		</trans-unit>
+		<trans-unit id="sys_dmail_group.type.I.5">
+			<source>From Extbase Domain Model</source>
+		</trans-unit>
 		<trans-unit id="sys_dmail_group.record_types">
 			<source>Types of records</source>
 		</trans-unit>

@@ -53,6 +53,7 @@ CREATE TABLE tx_mail_domain_model_group (
     list mediumblob,
     csv tinyint(4) DEFAULT '0' NOT NULL,
     pages tinyblob,
+    record_type varchar(255) DEFAULT '' NOT NULL,
     record_types tinyint(4) DEFAULT '0' NOT NULL,
     recursive tinyint(4) DEFAULT '0' NOT NULL,
     children tinyblob,
@@ -98,10 +99,11 @@ CREATE TABLE fe_users (
   newsletter tinyint(3) unsigned DEFAULT '0' NOT NULL,
   categories int(10) unsigned DEFAULT '0' NOT NULL,
   accepts_html tinyint(3) unsigned DEFAULT '0' NOT NULL,
-  KEY newsletter (newsletter, accepts_html)
+  KEY newsletter (newsletter,accepts_html)
 );
 
 CREATE TABLE tt_address (
+  newsletter tinyint(3) unsigned DEFAULT '0' NOT NULL,
   accepts_html tinyint(3) unsigned DEFAULT '0' NOT NULL,
-  KEY newsletter (accepts_html)
+  KEY newsletter (newsletter,accepts_html)
 );

@@ -15,18 +15,23 @@ class RecipientUtility
     public static function calculateTotalRecipientsOfUidLists(array $uidLists, string $userTable = ''): int
     {
         $totalRecipients = 0;
-        if (is_array($uidLists['tt_address'] ?? false)) {
-            $totalRecipients += count($uidLists['tt_address']);
+        foreach ($uidLists as $uidList) {
+            if (is_array($uidList)) {
+                $totalRecipients += count($uidList);
+            }
         }
-        if (is_array($uidLists['fe_users'] ?? false)) {
-            $totalRecipients += count($uidLists['fe_users']);
-        }
-        if (is_array($uidLists['tx_mail_domain_model_group'] ?? false)) {
-            $totalRecipients += count($uidLists['tx_mail_domain_model_group']);
-        }
-        if (is_array($uidLists[$userTable] ?? false)) {
-            $totalRecipients += count($uidLists[$userTable]);
-        }
+//        if (is_array($uidLists['tt_address'] ?? false)) {
+//            $totalRecipients += count($uidLists['tt_address']);
+//        }
+//        if (is_array($uidLists['fe_users'] ?? false)) {
+//            $totalRecipients += count($uidLists['fe_users']);
+//        }
+//        if (is_array($uidLists['tx_mail_domain_model_group'] ?? false)) {
+//            $totalRecipients += count($uidLists['tx_mail_domain_model_group']);
+//        }
+//        if (is_array($uidLists[$userTable] ?? false)) {
+//            $totalRecipients += count($uidLists[$userTable]);
+//        }
         return $totalRecipients;
     }
 

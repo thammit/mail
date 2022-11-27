@@ -21,7 +21,9 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 
 class RecipientController extends AbstractController
 {
@@ -78,6 +80,8 @@ class RecipientController extends AbstractController
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws InvalidQueryException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      */
     public function showAction(Group $group): ResponseInterface
     {
@@ -131,6 +135,19 @@ class RecipientController extends AbstractController
                 'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $this->userTable),
             ];
         }
+        if ($group->getRecordType()) {
+            // add data for domain model
+            $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idLists[$group->getRecordType()], $group->getRecordType());
+            $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
+            $tableName = $dataMapper->getDataMap($group->getRecordType())->getTableName();
+            $data['tables'][$group->getRecordType()] = [
+                'table' => $tableName,
+                'recipients' => $rows,
+                'numberOfRecipients' => count($rows),
+                'show' => BackendUserUtility::getBackendUser()->check('tables_select', $tableName),
+                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
+            ];
+        }
 
         $this->view->assign('data', $data);
 
@@ -147,10 +164,12 @@ class RecipientController extends AbstractController
      * @return void
      * @throws DBALException
      * @throws Exception
-     * @throws StopActionException
-     * @throws \Doctrine\DBAL\Exception
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws StopActionException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      */
     public function csvDownloadAction(Group $group, string $table): void
     {
@@ -159,7 +178,21 @@ class RecipientController extends AbstractController
         if ($table === 'tx_mail_domain_model_group') {
             CsvUtility::downloadCSV($idLists['tx_mail_domain_model_group']);
         } else {
-            if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $table)) {
+            if ($group->getRecordType()) {
+                // add data for domain model
+                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
+                $table = $dataMapper->getDataMap($group->getRecordType())->getTableName();
+                if (BackendUserUtility::getBackendUser()->check('tables_select', $table)) {
+                    $fields = $table === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
+                    $fields .= ',tstamp,active';
+                    $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idLists[$group->getRecordType()], $group->getRecordType(),
+                        GeneralUtility::trimExplode(',', $fields, true), true);
+                    CsvUtility::downloadCSV($rows);
+                } else {
+                    ViewUtility::addFlashMessageError('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
+                    $this->redirect('show');
+                }
+            } else if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $table)) {
                 if (BackendUserUtility::getBackendUser()->check('tables_select', $table)) {
                     $fields = $table === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
                     $fields .= ',tstamp';

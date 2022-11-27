@@ -4,39 +4,46 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
+use TYPO3\CMS\Extbase\Domain\Model\Category;
 
-interface RecipientInterface extends SimpleRecipientInterface
+interface RecipientInterface
 {
     /**
-     * m=male;f=female;v=various;empty=unknown
-     * See MEDIAESSENZ\Mail\Type\Enumeration\Gender
-     * @return string
+     * @return int|null
      */
-    public function getGender(): string;
+    public function getUid(): ?int;
 
     /**
-     * @return string
+     * Return true if recipient is activated to receive mails
+     * @return bool
      */
-    public function getFirstName(): string;
+    public function isActive(): bool;
 
     /**
-     * @return string
-     */
-    public function getLastName(): string;
-
-    /**
-     * True if recipient accepts html mails
+     * Return true if recipient accepts html mails
      * @return bool
      */
     public function isAcceptsHtml(): bool;
 
     /**
-     * @return ObjectStorage
+     * @return string
+     */
+    public function getEmail(): string;
+
+    /**
+     * @return string
+     */
+    public function getName(): string;
+
+    /**
+     * @return ObjectStorage<Category>
      */
     public function getCategories(): ObjectStorage;
 
     /**
-     * Record identifier
+     * Full record identifier
+     * Can contain an enhanced model to load more data of the recipient which can be handy inside an EventListener
+     * See NormalizeRecipientData EventListener for example
      * e.g. MEDIAESSENZ\Mail\Domain\Model\Address:123 or MEDIAESSENZ\Mail\Domain\Model\FrontendUser:123
      * @return string
      */

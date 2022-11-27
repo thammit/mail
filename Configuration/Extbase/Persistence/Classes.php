@@ -19,9 +19,22 @@ return [
     ],
     \MEDIAESSENZ\Mail\Domain\Model\FrontendUser::class => [
         'tableName' => 'fe_users',
+        'properties' => [
+            'active' => [
+                'fieldName' => 'newsletter',
+            ],
+        ],
     ],
     \MEDIAESSENZ\Mail\Domain\Model\Address::class => [
         'tableName' => 'tt_address',
+        'properties' => [
+            'disable' => [
+                'fieldName' => 'hidden',
+            ],
+            'active' => [
+                'fieldName' => 'newsletter',
+            ],
+        ],
     ],
     \MEDIAESSENZ\Mail\Domain\Model\Category::class => [
         'tableName' => 'sys_category',

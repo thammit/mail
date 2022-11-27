@@ -51,6 +51,11 @@ class Group extends AbstractEntity
     protected string $pages = '';
 
     /**
+     * @var string
+     */
+    protected string $recordType = '';
+
+    /**
      * @var int
      */
     protected int $recordTypes = 0;
@@ -224,6 +229,22 @@ class Group extends AbstractEntity
     {
         $this->pages = $pages;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecordType(): string
+    {
+        return $this->recordType;
+    }
+
+    /**
+     * @param string $recordType
+     */
+    public function setRecordType(string $recordType): void
+    {
+        $this->recordType = $recordType;
     }
 
     /**

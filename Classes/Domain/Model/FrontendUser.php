@@ -4,22 +4,13 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use MEDIAESSENZ\Mail\Type\Enumeration\Gender;
-use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
-class FrontendUser extends AbstractEntity implements RecipientInterface
+class FrontendUser extends AbstractRecipient implements RecipientInterface
 {
-    protected bool $disable = false;
-
     /**
      * @var string
      */
     protected string $gender = Gender::UNKNOWN;
-
-    /**
-     * @var string
-     */
-    protected string $name = '';
 
     /**
      * @var string
@@ -39,56 +30,7 @@ class FrontendUser extends AbstractEntity implements RecipientInterface
     /**
      * @var string
      */
-    protected string $email = '';
-
-    /**
-     * @var string
-     */
     protected string $company = '';
-
-    /**
-     * @var bool
-     */
-    protected bool $acceptsHtml = false;
-
-    /**
-     * @var ObjectStorage<Category>
-     */
-    protected ObjectStorage $categories;
-
-    /**
-     * Constructs a new Front-End User
-     */
-    public function __construct()
-    {
-        $this->categories = new ObjectStorage();
-    }
-
-    /**
-     * Called again with initialize object, as fetching an entity from the DB does not use the constructor
-     */
-    public function initializeObject()
-    {
-        $this->categories = $this->categories ?? new ObjectStorage();
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDisable(): bool
-    {
-        return $this->disable;
-    }
-
-    /**
-     * @param bool $disable
-     * @return FrontendUser
-     */
-    public function setDisable(bool $disable): FrontendUser
-    {
-        $this->disable = $disable;
-        return $this;
-    }
 
     /**
      * @return string
@@ -100,30 +42,10 @@ class FrontendUser extends AbstractEntity implements RecipientInterface
 
     /**
      * @param string $gender
-     * @return FrontendUser
      */
-    public function setGender(string $gender): FrontendUser
+    public function setGender(string $gender)
     {
         $this->gender = $gender;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     * @return FrontendUser
-     */
-    public function setName(string $name): FrontendUser
-    {
-        $this->name = $name;
-        return $this;
     }
 
     /**
@@ -136,12 +58,10 @@ class FrontendUser extends AbstractEntity implements RecipientInterface
 
     /**
      * @param string $firstName
-     * @return FrontendUser
      */
-    public function setFirstName(string $firstName): FrontendUser
+    public function setFirstName(string $firstName)
     {
         $this->firstName = $firstName;
-        return $this;
     }
 
     /**
@@ -154,12 +74,10 @@ class FrontendUser extends AbstractEntity implements RecipientInterface
 
     /**
      * @param string $lastName
-     * @return FrontendUser
      */
-    public function setLastName(string $lastName): FrontendUser
+    public function setLastName(string $lastName)
     {
         $this->lastName = $lastName;
-        return $this;
     }
 
     /**
@@ -172,30 +90,10 @@ class FrontendUser extends AbstractEntity implements RecipientInterface
 
     /**
      * @param string $title
-     * @return FrontendUser
      */
-    public function setTitle(string $title): FrontendUser
+    public function setTitle(string $title)
     {
         $this->title = $title;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    /**
-     * @param string $email
-     * @return FrontendUser
-     */
-    public function setEmail(string $email): FrontendUser
-    {
-        $this->email = $email;
-        return $this;
     }
 
     /**
@@ -208,77 +106,10 @@ class FrontendUser extends AbstractEntity implements RecipientInterface
 
     /**
      * @param string $company
-     * @return FrontendUser
      */
-    public function setCompany(string $company): FrontendUser
+    public function setCompany(string $company)
     {
         $this->company = $company;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAcceptsHtml(): bool
-    {
-        return $this->acceptsHtml;
-    }
-
-    /**
-     * @param bool $acceptsHtml
-     * @return FrontendUser
-     */
-    public function setAcceptsHtml(bool $acceptsHtml): FrontendUser
-    {
-        $this->acceptsHtml = $acceptsHtml;
-        return $this;
-    }
-
-    /**
-     * @return ObjectStorage
-     */
-    public function getCategories(): ObjectStorage
-    {
-        return $this->categories;
-    }
-
-    /**
-     * @param ObjectStorage $categories
-     * @return FrontendUser
-     */
-    public function setCategories(ObjectStorage $categories): FrontendUser
-    {
-        $this->categories = $categories;
-        return $this;
-    }
-
-    /**
-     * @param Category $category
-     * @return FrontendUser
-     */
-    public function addCategory(Category $category): FrontendUser
-    {
-        $this->categories->attach($category);
-        return $this;
-    }
-
-    /**
-     * @param Category $category
-     * @return FrontendUser
-     */
-    public function removeCategory(Category $category): FrontendUser
-    {
-        $this->categories->detach($category);
-        return $this;
-    }
-
-    /**
-     * @return FrontendUser
-     */
-    public function removeAllCategories(): FrontendUser
-    {
-        $this->categories = new ObjectStorage();
-        return $this;
     }
 
     public function getRecordIdentifier(): string

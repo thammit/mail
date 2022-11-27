@@ -12,4 +12,5 @@ class RecipientGroupType extends Enumeration
     const STATIC = 2;
     const QUERY = 3;
     const OTHER = 4;
+    const MODEL = 5;
 }

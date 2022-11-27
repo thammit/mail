@@ -266,6 +266,7 @@ class DirectMailMigration implements UpgradeWizardInterface
         $AddressRecords = $this->getPreparedQueryBuilder('tt_address')->select('*')->executeQuery()->fetchAllAssociative();
         foreach ($AddressRecords as $record) {
             $connectionAddresses->update('tt_address', [
+                'newsletter' => 1,
                 'accepts_html' => $record['module_sys_dmail_html'],
 //                'categories' => $record['module_sys_dmail_category'],
             ],

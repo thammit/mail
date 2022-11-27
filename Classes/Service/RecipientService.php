@@ -7,17 +7,22 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Database\QueryGenerator;
+use MEDIAESSENZ\Mail\Domain\Model\Address;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
+use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
+use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecordType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
+use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use PDO;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Tree\View\PageTreeView;
@@ -26,22 +31,31 @@ use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class RecipientService
 {
+    use DebugQueryTrait;
+
     protected string $backendUserPermissions;
     protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,accepts_html';
     protected array $allowedTables = ['fe_users', 'tt_address'];
 
     public function __construct(
-        protected GroupRepository $groupRepository,
-        protected AddressRepository $addressRepository,
-        protected FrontendUserRepository $frontendUserRepository,
+        protected GroupRepository          $groupRepository,
+        protected AddressRepository        $addressRepository,
+        protected FrontendUserRepository   $frontendUserRepository,
         protected EventDispatcherInterface $eventDispatcher
-    ) {
+    )
+    {
         $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
     }
 
@@ -52,6 +66,7 @@ class RecipientService
      * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
@@ -84,7 +99,7 @@ class RecipientService
      * @throws Exception
      * @throws DBALException
      */
-    public function getRecipientsDataByUidListAndTable(array $uidListOfRecipients, string $table, array $fields = ['uid','name','email']): array
+    public function getRecipientsDataByUidListAndTable(array $uidListOfRecipients, string $table, array $fields = ['uid', 'name', 'email']): array
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
 
@@ -93,7 +108,7 @@ class RecipientService
             $res = $queryBuilder
                 ->select(...$fields)
                 ->from($table)
-                ->where($queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidListOfRecipients,Connection::PARAM_INT_ARRAY)))
+                ->where($queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidListOfRecipients, Connection::PARAM_INT_ARRAY)))
                 ->execute();
 
             while ($row = $res->fetchAssociative()) {
@@ -104,12 +119,95 @@ class RecipientService
     }
 
     /**
+     * Get recipient DB record given on the ID
+     *
+     * @param array $uidListOfRecipients List of recipient IDs
+     * @param string $modelName model name
+     * @param array $fields Field to be selected
+     * @param bool $useEnhancedModel set to true if data from enhanced model should be used
+     *
+     * @return array recipients' data
+     * @throws InvalidQueryException
+     */
+    public function getRecipientsDataByUidListAndModelName(array $uidListOfRecipients, string $modelName, array $fields = ['uid', 'name', 'email'], bool $useEnhancedModel = false): array
+    {
+        $data = [];
+        $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+        $query = $persistenceManager->createQueryForType($modelName);
+        $query->getQuerySettings()->setRespectStoragePage(false);
+        $query->getQuerySettings()->setRespectSysLanguage(false);
+        $query->getQuerySettings()->setLanguageOverlayMode(false);
+        $query->matching(
+            $query->in('uid', $uidListOfRecipients)
+        );
+        $debugResult = $this->debugQuery($query);
+        $recipients = $query->execute();
+        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
+
+        foreach ($recipients as $recipient) {
+            if ($recipient instanceof RecipientInterface) {
+                $values = $this->getRecipientModelData($recipient, $fields);
+                $data[$recipient->getUid()] = $values;
+                if ($useEnhancedModel && $recipient->getRecordIdentifier() !== get_class($recipient) . ':' . $recipient->getUid()) {
+                    [$modelName, $uid] = explode(':', $recipient->getRecordIdentifier());
+                    $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($modelName);
+                    $repository = GeneralUtility::makeInstance($repositoryName);
+                    $recipient = $repository->findByUid($uid);
+                    $values = $this->getRecipientModelData($recipient, $fields);
+                    $data[$recipient->getUid()] += $values;
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    protected function getRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $fields): array
+    {
+        $values = [];
+        foreach ($fields as $field) {
+            $getter = 'get' . ucfirst($field);
+            if (str_contains($field, '_')) {
+                // convert snake_case field name to camelCase
+                $camelCaseFieldName = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $field))));
+                $getter = 'get' . ucfirst($camelCaseFieldName);
+            }
+            if (method_exists($recipient, $getter)) {
+                $value = $recipient->$getter();
+                if ($value instanceof ObjectStorage) {
+                    if ($value->count() > 0) {
+                        $titles = [];
+                        foreach ($value as $item) {
+                            if (method_exists($item, 'getTitle')) {
+                                $titles[] = $item->getTitle();
+                            } else if (method_exists($item, 'getName')) {
+                                $titles[] = $item->getName();
+                            }
+                        }
+                        $values[$field] = implode(', ', $titles);
+                    } else {
+                        $values[$field] = '';
+                    }
+                } else {
+                    $values[$field] = $value;
+                }
+            }
+            $getter = 'is' . ucfirst($camelCaseFieldName ?? $field);
+            if (method_exists($recipient, $getter)) {
+                $values[$field] = $recipient->$getter() ? '1' : '0';
+            }
+        }
+        return $values;
+    }
+
+    /**
      * @param array $groups
      * @param string $userTable
      * @return array
      * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
@@ -127,22 +225,30 @@ class RecipientService
             $idLists = array_merge_recursive($idLists, $recipientList);
         }
 
+        foreach ($idLists as $table => $idList) {
+            if ($table === 'tx_mail_domain_model_group') {
+                $idLists[$table] = RecipientUtility::removeDuplicates($idList);
+            } else {
+                $idLists[$table] = array_unique($idList);
+            }
+        }
+
         // Make unique entries
-        if (is_array($idLists['tt_address'] ?? false)) {
-            $idLists['tt_address'] = array_unique($idLists['tt_address']);
-        }
-
-        if (is_array($idLists['fe_users'] ?? false)) {
-            $idLists['fe_users'] = array_unique($idLists['fe_users']);
-        }
-
-        if (is_array($idLists[$userTable] ?? false) && $userTable) {
-            $idLists[$userTable] = array_unique($idLists[$userTable]);
-        }
-
-        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
-            $idLists['tx_mail_domain_model_group'] = RecipientUtility::removeDuplicates($idLists['tx_mail_domain_model_group']);
-        }
+//        if (is_array($idLists['tt_address'] ?? false)) {
+//            $idLists['tt_address'] = array_unique($idLists['tt_address']);
+//        }
+//
+//        if (is_array($idLists['fe_users'] ?? false)) {
+//            $idLists['fe_users'] = array_unique($idLists['fe_users']);
+//        }
+//
+//        if (is_array($idLists[$userTable] ?? false) && $userTable) {
+//            $idLists[$userTable] = array_unique($idLists[$userTable]);
+//        }
+//
+//        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
+//            $idLists['tx_mail_domain_model_group'] = RecipientUtility::removeDuplicates($idLists['tx_mail_domain_model_group']);
+//        }
 
         return $idLists;
     }
@@ -155,9 +261,10 @@ class RecipientService
      * @return array List of recipient IDs
      * @throws DBALException
      * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function getRecipientsUidListsGroupedByTable(Group $group, string $userTable = ''): array
     {
@@ -165,15 +272,28 @@ class RecipientService
         switch ($group->getType()) {
             case RecipientGroupType::PAGES:
                 // From pages
-                $pages = $this->getRecursivePagesList($group->getPages(), $group);
+                $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
 
                 // Make queries
                 if ($pages) {
-                    $idLists = $this->getUidListOfRecipients($group, $pages, $idLists, $userTable);
-                    if ($group->hasFrontendUserGroup()) {
-                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pages, $group);
-                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users']));
+                    if ($group->hasAddress()) {
+                        $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pages, $group);
                     }
+                    if ($group->hasFrontendUser()) {
+                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pages, $group);
+                    }
+                    if ($group->hasFrontendUserGroup()) {
+                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'] ?? [], $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pages, $group)));
+                    }
+                    if ($userTable && $group->hasCustom()) {
+                        $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pages, $group);
+                    }
+                }
+                break;
+            case RecipientGroupType::MODEL:
+                $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
+                if ($pages && $group->getRecordType()) {
+                    $idLists[$group->getRecordType()] = $this->getRecipientUidListByModelNameAndStoragePageIdsAndCategories($group->getRecordType(), $pages, $group->getCategories());
                 }
                 break;
             case RecipientGroupType::CSV:
@@ -233,26 +353,46 @@ class RecipientService
     }
 
     /**
-     * @param Group $group
-     * @param array $pages
-     * @param array $idLists
-     * @param string $userTable
-     * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws InvalidQueryException
      */
-    protected function getUidListOfRecipients(Group $group, array $pages, array $idLists, string $userTable): array
+    protected function getRecipientUidListByModelNameAndStoragePageIdsAndCategories(string $modelName, array $storagePageIds, ObjectStorage $categories): array
     {
-        if ($group->hasAddress()) {
-            $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pages, $group);
+        $recipientUids = [];
+//        $repositoryNameqq = ClassNamingUtility::translateModelNameToRepositoryName($modelName);
+        $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+        $query = $persistenceManager->createQueryForType($modelName);
+        if ($storagePageIds) {
+            $query->getQuerySettings()->setStoragePageIds($storagePageIds);
+        } else {
+            $query->getQuerySettings()->setRespectStoragePage(false);
         }
-        if ($group->hasFrontendUser()) {
-            $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pages, $group);
+        $query->getQuerySettings()->setRespectSysLanguage(false);
+        $query->getQuerySettings()->setLanguageOverlayMode(false);
+        $constrains = [
+            $query->equals('active', true),
+            $query->logicalNot($query->equals('email', ''))
+        ];
+        if ($categories->count() > 0) {
+            $orCategoryConstrains = [];
+            foreach ($categories as $category) {
+                $orCategoryConstrains[] = $query->contains('categories', $category);
+            }
+            $constrains[] = $query->logicalOr(...$orCategoryConstrains);
         }
-        if ($userTable && $group->hasCustom()) {
-            $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pages, $group);
+        $query->matching(
+            $query->logicalAnd($constrains)
+        );
+        $debugResult = $this->debugQuery($query);
+        $recipients = $query->execute();
+        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
+
+        foreach ($recipients as $recipient) {
+            if ($recipient instanceof RecipientInterface) {
+                $recipientUids[] = $recipient->getUid();
+            }
         }
-        return $idLists;
+
+        return $recipientUids;
     }
 
     /**
@@ -289,7 +429,7 @@ class RecipientService
                         $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true))
-                            ->add($queryBuilder->expr()->neq( 'fe_users.email', $queryBuilder->createNamedParameter('')))
+                            ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
                             ->add($queryBuilder->expr()->eq('fe_users.newsletter', 1))
                     )
                     ->orderBy('fe_users.uid')
@@ -319,7 +459,7 @@ class RecipientService
             foreach ($group->getCategories() as $category) {
                 // collect all recipients containing at least one category of the given group
                 $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
-                foreach($recipientCollection as $recipient) {
+                foreach ($recipientCollection as $recipient) {
                     if (!in_array($recipient['uid'], $recipients) &&
                         in_array($recipient['pid'], $pages) &&
                         ($switchTable === 'tt_address' || $recipient['newsletter']) &&
@@ -604,14 +744,18 @@ class RecipientService
 
     /**
      * @param string $pagesCSV
-     * @param Group $group
+     * @param bool $recursive
      * @return array
      */
-    protected function getRecursivePagesList(string $pagesCSV, Group $group): array
+    protected function getRecursivePagesList(string $pagesCSV, bool $recursive): array
     {
-        $pages = GeneralUtility::intExplode(',', $pagesCSV);
+        if (empty($pagesCSV)) {
+            return [];
+        }
 
-        if (!$group->isRecursive()) {
+        $pages = GeneralUtility::intExplode(',', $pagesCSV, true);
+
+        if (!$recursive) {
             return $pages;
         }
 
