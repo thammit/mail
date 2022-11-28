@@ -23,7 +23,7 @@ interface RecipientInterface
      * Return true if recipient accepts html mails
      * @return bool
      */
-    public function isAcceptsHtml(): bool;
+    public function isMailHtml(): bool;
 
     /**
      * @return string

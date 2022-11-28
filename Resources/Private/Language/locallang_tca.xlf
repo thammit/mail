@@ -6,11 +6,11 @@
 		<trans-unit id="pages.mail">
 			<source>Mail</source>
 		</trans-unit>
-		<trans-unit id="accepts_html">
-			<source>Receiver accept HTML mails</source>
+		<trans-unit id="mail_active">
+			<source>Activate Mail</source>
 		</trans-unit>
-		<trans-unit id="newsletter">
-			<source>Activate Newsletter</source>
+		<trans-unit id="mail_html">
+			<source>Accept HTML mails</source>
 		</trans-unit>
 		<trans-unit id="pages.module.I.5">
 			<source>Mail Module</source>

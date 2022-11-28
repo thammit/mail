@@ -30,8 +30,8 @@ class DirectMailMigration implements UpgradeWizardInterface
     public function getDescription(): string
     {
         return 'Migrate EXT:direct_mail database tables to EXT:mail format  (sys_dmail -> tx_mail_domain_model_mail; '
-        . 'sys_dmail_group -> tx_mail_domain_model_group; sys_dmail_maillog -> tx_mail_domain_model_log; sys_dmail_category -> sys_category). '
-        . 'Please update reference index afterwards, to update number of category relations';
+            . 'sys_dmail_group -> tx_mail_domain_model_group; sys_dmail_maillog -> tx_mail_domain_model_log; sys_dmail_category -> sys_category). '
+            . 'Please update reference index afterwards, to update number of category relations';
     }
 
     /**
@@ -246,29 +246,27 @@ class DirectMailMigration implements UpgradeWizardInterface
         }
 
         // copy fe_users.module_sys_dmail_newsletter -> newsletter
-        // copy fe_users.module_sys_dmail_html -> accepts_html
+        // copy fe_users.module_sys_dmail_html -> mail_html
         // copy fe_users.module_sys_dmail_category -> categories (or reference index update ?)
         $connectionFrontendUsers = $this->getConnectionPool()->getConnectionForTable('fe_users');
         $frontendUserRecords = $this->getPreparedQueryBuilder('fe_users')->select('*')->executeQuery()->fetchAllAssociative();
         foreach ($frontendUserRecords as $record) {
             $connectionFrontendUsers->update('fe_users', [
-                'newsletter' => $record['module_sys_dmail_newsletter'],
-                'accepts_html' => $record['module_sys_dmail_html'],
-//                'categories' => $record['module_sys_dmail_category'],
+                'mail_active' => $record['module_sys_dmail_newsletter'],
+                'mail_html' => $record['module_sys_dmail_html'],
             ],
                 ['uid' => (int)$record['uid']]
             );
         }
 
-        // copy tt_address.module_sys_dmail_html -> accepts_html
+        // copy tt_address.module_sys_dmail_html -> mail_html
         // copy tt_address.module_sys_dmail_category -> categories (or reference index update ?)
         $connectionAddresses = $this->getConnectionPool()->getConnectionForTable('tt_address');
         $AddressRecords = $this->getPreparedQueryBuilder('tt_address')->select('*')->executeQuery()->fetchAllAssociative();
         foreach ($AddressRecords as $record) {
             $connectionAddresses->update('tt_address', [
-                'newsletter' => 1,
-                'accepts_html' => $record['module_sys_dmail_html'],
-//                'categories' => $record['module_sys_dmail_category'],
+                'mail_active' => 1,
+                'mail_html' => $record['module_sys_dmail_html'],
             ],
                 ['uid' => (int)$record['uid']]
             );

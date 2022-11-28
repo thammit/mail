@@ -3,15 +3,15 @@ defined('TYPO3') or die();
 
 // fe_users modified
 $feUsersCols = [
-    'newsletter' => [
-        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:newsletter',
+    'mail_active' => [
+        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:mail_active',
         'exclude' => '1',
         'config' => [
             'type' => 'check'
         ]
     ],
-    'accepts_html' => [
-        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:accepts_html',
+    'mail_html' => [
+        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:mail_html',
         'exclude' => '1',
         'config' => [
             'type' => 'check'
@@ -27,4 +27,4 @@ $feUsersCols = [
 ];
 
 TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('fe_users', $feUsersCols);
-TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('fe_users', '--div--;Mail,newsletter,accepts_html,categories');
+TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('fe_users', '--div--;Mail,mail_active,mail_html,categories');

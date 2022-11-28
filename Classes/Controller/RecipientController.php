@@ -27,7 +27,7 @@ use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 
 class RecipientController extends AbstractController
 {
-    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,accepts_html';
+    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html';
 
     /**
      * @return ResponseInterface

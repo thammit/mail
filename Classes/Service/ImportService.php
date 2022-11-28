@@ -475,7 +475,7 @@ class ImportService
                         $data['tt_address'][$firstUserUid] = $dataArray;
                         $data['tt_address'][$firstUserUid]['pid'] = $this->configuration['storage'];
                         if ($this->configuration['all_html']) {
-                            $data['tt_address'][$firstUserUid]['accepts_html'] = $this->configuration['all_html'];
+                            $data['tt_address'][$firstUserUid]['mail_html'] = $this->configuration['all_html'];
                         }
                         if (isset($this->configuration['cat']) && is_array($this->configuration['cat']) && !in_array('cats', $this->configuration['map'])) {
                             if ($this->configuration['addAllCategories']) {
@@ -564,7 +564,7 @@ class ImportService
         $data['tt_address'][$id] = $dataArray;
         $data['tt_address'][$id]['pid'] = $this->configuration['storage'];
         if ($this->configuration['all_html']) {
-            $data['tt_address'][$id]['accepts_html'] = 1;
+            $data['tt_address'][$id]['mail_html'] = 1;
         }
         if (isset($this->configuration['categories']) && is_array($this->configuration['categories']) && !in_array('cats', $this->configuration['map'])) {
             foreach ($this->configuration['categories'] as $k => $v) {

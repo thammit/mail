@@ -3,13 +3,13 @@
 	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2022-11-16T17:00:00Z">
 		<header />
 		<body>
-		<trans-unit id="accepts_html">
-			<source>Receiver accept HTML mails</source>
-			<target>Empfänger akzeptiert HTML Mails</target>
+		<trans-unit id="mail_active">
+			<source>Activate Mail</source>
+			<target>Aktiviere Mail</target>
 		</trans-unit>
-		<trans-unit id="newsletter">
-			<source>Activate Newsletter</source>
-			<target>Aktiviert Newsletter</target>
+		<trans-unit id="mail_html">
+			<source>Accept HTML mails</source>
+			<target>Akzeptiert HTML Mails</target>
 		</trans-unit>
 		<trans-unit id="pages.module.I.5">
 			<source>Mail Module</source>

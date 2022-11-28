@@ -21,7 +21,7 @@ return [
         'tableName' => 'fe_users',
         'properties' => [
             'active' => [
-                'fieldName' => 'newsletter',
+                'fieldName' => 'mail_active',
             ],
         ],
     ],
@@ -32,7 +32,7 @@ return [
                 'fieldName' => 'hidden',
             ],
             'active' => [
-                'fieldName' => 'newsletter',
+                'fieldName' => 'mail_active',
             ],
         ],
     ],

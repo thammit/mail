@@ -531,7 +531,7 @@ class ReportService
     {
         /** @var Address $address */
         foreach ($addresses as $address) {
-            $address->setHidden(true);
+            $address->setActive(false);
             $this->addressRepository->update($address);
         }
 
@@ -549,7 +549,7 @@ class ReportService
     {
         /** @var FrontendUser $frontendUser */
         foreach ($frontendUsers as $frontendUser) {
-            $frontendUser->setDisable(true);
+            $frontendUser->setActive(false);
             $this->addressRepository->update($frontendUser);
         }
 

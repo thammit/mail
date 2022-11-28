@@ -119,7 +119,12 @@ class FrontendUser extends AbstractRecipient implements RecipientInterface
 
     public function getCsvExportData(): array
     {
-        // todo create field/value array
-        return [];
+        $additionalFields = [
+            'title' => $this->title,
+            'first_name' => $this->firstName,
+            'last_name' => $this->lastName,
+            'company' => $this->company,
+        ];
+        return parent::getCsvExportData() + $additionalFields;
     }
 }

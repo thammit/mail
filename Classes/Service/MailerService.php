@@ -238,7 +238,7 @@ class MailerService implements LoggerAwareInterface
             $recipientCategories = $recipientData['categories'] ?? [];
 
             $htmlContent = '';
-            if ($this->isHtml && (($recipientData['accepts_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
+            if ($this->isHtml && (($recipientData['mail_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
                 $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, $recipientCategories);
 
                 if ($htmlContent) {

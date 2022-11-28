@@ -22,7 +22,7 @@ abstract class AbstractRecipient extends AbstractEntity
     /**
      * @var bool
      */
-    protected bool $acceptsHtml = false;
+    protected bool $mailHtml = false;
 
     /**
      * @var string
@@ -74,19 +74,27 @@ abstract class AbstractRecipient extends AbstractEntity
     }
 
     /**
-     * @return bool
+     * @param bool $active
      */
-    public function isAcceptsHtml(): bool
+    public function setActive(bool $active): void
     {
-        return $this->acceptsHtml;
+        $this->active = $active;
     }
 
     /**
-     * @param bool $acceptsHtml
+     * @return bool
      */
-    public function setAcceptsHtml(bool $acceptsHtml): void
+    public function isMailHtml(): bool
     {
-        $this->acceptsHtml = $acceptsHtml;
+        return $this->mailHtml;
+    }
+
+    /**
+     * @param bool $mailHtml
+     */
+    public function setMailHtml(bool $mailHtml): void
+    {
+        $this->mailHtml = $mailHtml;
     }
 
     public function getEmail(): string
@@ -147,5 +155,23 @@ abstract class AbstractRecipient extends AbstractEntity
     public function removeAllCategories(): void
     {
         $this->categories = new ObjectStorage();
+    }
+
+    public function getCsvExportData(): array
+    {
+        $categories = [];
+        if ($this->categories->count() > 0) {
+            foreach ($this->categories as $category) {
+                $categories[] = $category->getTitle();
+            }
+        }
+        return [
+            'uid' => $this->uid,
+            'email' => $this->email,
+            'name' => $this->name,
+            'mail_active' => $this->active ? '1' : '0',
+            'mail_html' => $this->mailHtml,
+            'categories' => implode(', ', $categories)
+        ];
     }
 }

@@ -46,7 +46,7 @@ class RecipientService
     use DebugQueryTrait;
 
     protected string $backendUserPermissions;
-    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,accepts_html';
+    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html';
     protected array $allowedTables = ['fe_users', 'tt_address'];
 
     public function __construct(
@@ -416,8 +416,8 @@ class RecipientService
         $queryBuilder = $this->getQueryBuilder($table);
 
         $addWhere = '';
-        if ($switchTable === 'fe_users') {
-            $addWhere = $queryBuilder->expr()->eq('fe_users.newsletter', 1);
+        if (in_array($switchTable, $this->allowedTables)) {
+            $addWhere = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
         if ($group->getCategories()->count() === 0) {
@@ -432,7 +432,7 @@ class RecipientService
                             ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true))
                             ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
-                            ->add($queryBuilder->expr()->eq('fe_users.newsletter', 1))
+                            ->add($queryBuilder->expr()->eq('fe_users.mail_active', 1))
                     )
                     ->orderBy('fe_users.uid')
                     ->addOrderBy('fe_users.email')
@@ -464,7 +464,7 @@ class RecipientService
                 foreach ($recipientCollection as $recipient) {
                     if (!in_array($recipient['uid'], $recipients) &&
                         in_array($recipient['pid'], $pages) &&
-                        ($switchTable === 'tt_address' || $recipient['newsletter']) &&
+                        in_array($switchTable, $this->allowedTables) && $recipient['mail_active'] &&
                         ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
                     ) {
                         // add it to the list if all constrains fulfilled
@@ -522,7 +522,7 @@ class RecipientService
         $newsletterExpression = '';
         if ($switchTable === 'fe_users') {
             // for fe_users and fe_group, only activated newsletter
-            $newsletterExpression = $queryBuilder->expr()->eq($switchTable . '.newsletter', 1);
+            $newsletterExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
         if ($table === 'fe_groups') {

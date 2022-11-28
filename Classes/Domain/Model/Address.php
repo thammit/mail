@@ -17,21 +17,6 @@ class Address extends AbstractRecipient implements RecipientInterface
 
     public function getCsvExportData(): array
     {
-        $categories = [];
-        if ($this->categories->count() > 0) {
-            foreach ($this->categories as $category) {
-                $categories[] = $category->getTitle();
-            }
-        }
-        $csvExportArray = [
-            'uid' => $this->uid,
-            'email' => $this->email,
-            'name' => $this->name,
-            'active' => $this->active ? '1' : '0',
-            'accepts_html' => $this->acceptsHtml,
-            'categories' => implode(', ', $categories)
-        ];
-
         $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName(self::ENHANCED_MODEL);
         $repository = GeneralUtility::makeInstance($repositoryName);
         $address = $repository->findByUid($this->uid);
@@ -55,6 +40,6 @@ class Address extends AbstractRecipient implements RecipientInterface
             ];
         }
 
-        return $csvExportArray + $additionalFields;
+        return parent::getCsvExportData() + $additionalFields;
     }
 }
