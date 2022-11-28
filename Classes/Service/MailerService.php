@@ -43,6 +43,7 @@ use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 
 class MailerService implements LoggerAwareInterface
 {
@@ -334,6 +335,11 @@ class MailerService implements LoggerAwareInterface
         foreach ($groupedRecipientIds as $recipientTable => $recipientsData) {
             if (is_array($recipientsData)) {
                 $numberOfSentMailsOfGroup = 0;
+
+                if (str_contains($recipientTable, 'Domain\\Model')) {
+                    $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
+                    $recipientTable = $dataMapper->getDataMap($recipientTable)->getTableName();
+                }
 
                 // get already sent mails
                 $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($this->mail->getUid(), $recipientTable);

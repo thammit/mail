@@ -520,7 +520,7 @@ class RecipientService
         $queryBuilder = $this->getQueryBuilder($table);
 
         $newsletterExpression = '';
-        if ($switchTable === 'fe_users') {
+        if (in_array($switchTable, $this->allowedTables)) {
             // for fe_users and fe_group, only activated newsletter
             $newsletterExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
