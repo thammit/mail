@@ -100,64 +100,26 @@ class RecipientController extends AbstractController
             'special' => [],
         ];
 
-        if (is_array($idLists['tt_address'] ?? false)) {
-            $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists['tt_address'], 'tt_address');
-            $data['tables']['tt_address'] = [
-                'table' => 'tt_address',
-                'recipients' => $rows,
-                'numberOfRecipients' => count($rows),
-                'categoryColumn' => true,
-                'htmlColumn' => true,
-                'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tt_address'),
-                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tt_address'),
-            ];
-        }
-        if (is_array($idLists['fe_users'] ?? false)) {
-            $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists['fe_users'], 'fe_users');
-            $data['tables']['fe_users'] = [
-                'table' => 'fe_users',
-                'recipients' => $rows,
-                'numberOfRecipients' => count($rows),
-                'categoryColumn' => true,
-                'htmlColumn' => true,
-                'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'fe_users'),
-                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'fe_users'),
-            ];
-        }
-        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
-            $data['tables']['tx_mail_domain_model_group'] = [
-                'table' => 'tx_mail_domain_model_group',
-                'recipients' => $idLists['tx_mail_domain_model_group'],
-                'numberOfRecipients' => count($idLists['tx_mail_domain_model_group']),
-                'categoryColumn' => false,
-                'htmlColumn' => false,
-                'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tx_mail_domain_model_group'),
-                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tx_mail_domain_model_group'),
-            ];
-        }
-        if (is_array($idLists[$this->userTable] ?? false)) {
-            $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists[$this->userTable], $this->userTable);
-            $data['tables'][$this->userTable] = [
-                'table' => $this->userTable,
-                'recipients' => $rows,
-                'numberOfRecipients' => count($rows),
-                'categoryColumn' => false,
-                'htmlColumn' => false,
-                'show' => BackendUserUtility::getBackendUser()->check('tables_select', $this->userTable),
-                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $this->userTable),
-            ];
-        }
-        if (is_array($idLists[$group->getRecordType()] ?? false)) {
-            // add data for domain model
-            $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idLists[$group->getRecordType()], $group->getRecordType());
-            $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-            $tableName = $dataMapper->getDataMap($group->getRecordType())->getTableName();
-            $data['tables'][$group->getRecordType()] = [
+        foreach ($idLists as $tableName => $idList) {
+            $categoryColumn = true;
+            $htmlColumn = true;
+            if (str_contains($tableName, 'Domain\\Model')) {
+                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $tableName);
+                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
+                $tableName = $dataMapper->getDataMap($tableName)->getTableName();
+            } else if ($tableName === 'tx_mail_domain_model_group') {
+                $rows = $idLists['tx_mail_domain_model_group'];
+                $categoryColumn = false;
+                $htmlColumn = false;
+            } else {
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $tableName);
+            }
+            $data['tables'][$tableName] = [
                 'table' => $tableName,
                 'recipients' => $rows,
                 'numberOfRecipients' => count($rows),
-                'categoryColumn' => true,
-                'htmlColumn' => true,
+                'categoryColumn' => $categoryColumn,
+                'htmlColumn' => $htmlColumn,
                 'show' => BackendUserUtility::getBackendUser()->check('tables_select', $tableName),
                 'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
             ];
@@ -189,26 +151,20 @@ class RecipientController extends AbstractController
     {
         $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group);
 
-        if ($table === 'tx_mail_domain_model_group') {
-            CsvUtility::downloadCSV($idLists['tx_mail_domain_model_group']);
-        } else {
-            if ($group->getRecordType()) {
-                // add data for domain model
+        foreach ($idLists as $tableName => $idList) {
+            if (str_contains($tableName, 'Domain\\Model')) {
+                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $tableName, []);
                 $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-                $table = $dataMapper->getDataMap($group->getRecordType())->getTableName();
-                if (BackendUserUtility::getBackendUser()->check('tables_select', $table)) {
-                    $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idLists[$group->getRecordType()], $group->getRecordType(), []);
-                    CsvUtility::downloadCSV($rows);
-                } else {
-                    ViewUtility::addFlashMessageError('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
-                    $this->redirect('show');
-                }
-            } else if (GeneralUtility::inList('tt_address,fe_users,' . $this->userTable, $table)) {
-                if (BackendUserUtility::getBackendUser()->check('tables_select', $table)) {
-                    $fields = $table === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
-                    $fields .= ',tstamp';
-                    $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idLists[$table], $table,
-                        GeneralUtility::trimExplode(',', $fields, true));
+                $tableName = $dataMapper->getDataMap($tableName)->getTableName();
+            } else if ($tableName === 'tx_mail_domain_model_group') {
+                $rows = $idLists['tx_mail_domain_model_group'];
+            } else {
+                $fields = $tableName === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
+                $fields .= ',tstamp';
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $tableName, GeneralUtility::trimExplode(',', $fields, true));
+            }
+            if ($tableName === $table) {
+                if (BackendUserUtility::getBackendUser()->check('tables_select', $tableName)) {
                     CsvUtility::downloadCSV($rows);
                 } else {
                     ViewUtility::addFlashMessageError('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
