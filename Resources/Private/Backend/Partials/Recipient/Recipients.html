@@ -13,6 +13,8 @@
                 <th></th>
                 <th>Name</th>
                 <th>Email</th>
+                <f:if condition="{categoryColumn}"><th><f:translate key="{lll}recip_group_categories"/></th></f:if>
+                <f:if condition="{htmlColumn}"><th><f:translate key="{lll}recip_group_html_format"/></th></f:if>
                 <th></th>
             </tr>
             </thead>
@@ -37,6 +39,15 @@
                     <td class="nowrap">
                         <f:link.email email="{recipient.email}"/>
                     </td>
+                    <f:if condition="{categoryColumn}"><td class="nowrap">{recipient.categories}</td></f:if>
+                    <f:if condition="{htmlColumn}">
+                        <td class="nowrap text-center">
+                            <f:if condition="{recipient.mail_html}">
+                                <f:then><core:icon identifier="actions-check-square" /></f:then>
+                                <f:else><core:icon identifier="actions-check-markstate" /></f:else>
+                            </f:if>
+                        </td>
+                    </f:if>
                     <td class="col-control nowrap">
                         <f:if condition="{recipient.uid} && {allowEdit}">
                             <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}dmail_edit')}">

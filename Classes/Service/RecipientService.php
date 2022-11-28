@@ -99,7 +99,7 @@ class RecipientService
      * @throws Exception
      * @throws DBALException
      */
-    public function getRecipientsDataByUidListAndTable(array $uidListOfRecipients, string $table, array $fields = ['uid', 'name', 'email']): array
+    public function getRecipientsDataByUidListAndTable(array $uidListOfRecipients, string $table, array $fields = ['uid', 'name', 'email', 'categories', 'mail_html']): array
     {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
 
@@ -128,7 +128,7 @@ class RecipientService
      * @return array recipients' data
      * @throws InvalidQueryException
      */
-    public function getRecipientsDataByUidListAndModelName(array $uidListOfRecipients, string $modelName, array $fields = ['uid', 'name', 'email']): array
+    public function getRecipientsDataByUidListAndModelName(array $uidListOfRecipients, string $modelName, array $fields = ['uid', 'name', 'email', 'categories', 'mail_html']): array
     {
         $data = [];
         $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);

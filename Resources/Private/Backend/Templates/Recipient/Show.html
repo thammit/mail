@@ -28,7 +28,7 @@
                 <f:render partial="Panel"
                           arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:recipientTablesIterator.index, open:open, counter: table.numberOfRecipients, additionalHeading:additionalHeading}"
                           contentAs="panelBody">
-                    <f:render partial="Recipient/Recipients" arguments="{recipients: table.recipients, table: table.table, allowEdit: table.edit, lll:lll}"/>
+                    <f:render partial="Recipient/Recipients" arguments="{recipients: table.recipients, htmlColumn: table.htmlColumn, categoryColumn: table.categoryColumn, table: table.table, allowEdit: table.edit, lll:lll}"/>
                 </f:render>
             </f:for>
         </div>

@@ -912,6 +912,9 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
             <trans-unit id="recip_group_categories" resname="recip_group_categories">
                 <source>Categories</source>
             </trans-unit>
+            <trans-unit id="recip_group_html_format" resname="recip_group_html_format">
+                <source>HTML Format</source>
+            </trans-unit>
             <trans-unit id="recip_import_mailgroup_msg" resname="recip_import_mailgroup_msg">
 				<source>Import CSV</source>
 			</trans-unit>

@@ -34,6 +34,7 @@ class RecipientController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
@@ -50,6 +51,9 @@ class RecipientController extends AbstractController
                 case RecipientGroupType::PAGES:
                     $typeProcessed .= ' (' . BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'record_types', $group->getRecordTypes()) . ')';
                     break;
+                case RecipientGroupType::MODEL:
+                    $typeProcessed .= ' (' . $group->getRecordType() . ')';
+                    break;
                 case RecipientGroupType::STATIC:
                     $typeProcessed .= ' (' . $group->getStaticList() . ' Records)';
                     break;
@@ -57,7 +61,7 @@ class RecipientController extends AbstractController
             $data[] = [
                 'group' => $group,
                 'typeProcessed' => $typeProcessed,
-                'categories' => $group->getType() === RecipientGroupType::PAGES ? $group->getCategories() : [],
+                'categories' => in_array($group->getType(), [RecipientGroupType::PAGES, RecipientGroupType::MODEL]) ? $group->getCategories() : [],
                 'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group), $this->userTable),
             ];
         }
@@ -102,6 +106,8 @@ class RecipientController extends AbstractController
                 'table' => 'tt_address',
                 'recipients' => $rows,
                 'numberOfRecipients' => count($rows),
+                'categoryColumn' => true,
+                'htmlColumn' => true,
                 'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tt_address'),
                 'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tt_address'),
             ];
@@ -112,6 +118,8 @@ class RecipientController extends AbstractController
                 'table' => 'fe_users',
                 'recipients' => $rows,
                 'numberOfRecipients' => count($rows),
+                'categoryColumn' => true,
+                'htmlColumn' => true,
                 'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'fe_users'),
                 'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'fe_users'),
             ];
@@ -121,6 +129,8 @@ class RecipientController extends AbstractController
                 'table' => 'tx_mail_domain_model_group',
                 'recipients' => $idLists['tx_mail_domain_model_group'],
                 'numberOfRecipients' => count($idLists['tx_mail_domain_model_group']),
+                'categoryColumn' => false,
+                'htmlColumn' => false,
                 'show' => BackendUserUtility::getBackendUser()->check('tables_select', 'tx_mail_domain_model_group'),
                 'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tx_mail_domain_model_group'),
             ];
@@ -131,11 +141,13 @@ class RecipientController extends AbstractController
                 'table' => $this->userTable,
                 'recipients' => $rows,
                 'numberOfRecipients' => count($rows),
+                'categoryColumn' => false,
+                'htmlColumn' => false,
                 'show' => BackendUserUtility::getBackendUser()->check('tables_select', $this->userTable),
                 'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $this->userTable),
             ];
         }
-        if ($group->getRecordType()) {
+        if (is_array($idLists[$group->getRecordType()] ?? false)) {
             // add data for domain model
             $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idLists[$group->getRecordType()], $group->getRecordType());
             $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
@@ -144,6 +156,8 @@ class RecipientController extends AbstractController
                 'table' => $tableName,
                 'recipients' => $rows,
                 'numberOfRecipients' => count($rows),
+                'categoryColumn' => true,
+                'htmlColumn' => true,
                 'show' => BackendUserUtility::getBackendUser()->check('tables_select', $tableName),
                 'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
             ];
