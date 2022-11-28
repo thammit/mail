@@ -45,6 +45,18 @@ services:
       - name: 'event.listener'
         identifier: 'addUpperCaseMarkers'
 
+  MEDIAESSENZ\Mail\EventListener\ManipulateFrontendUserRecipient:
+    tags:
+      - name: 'event.listener'
+        identifier: 'manipulateFrontendUserRecipient'
+        before: 'normalizeRecipientData'
+
+  MEDIAESSENZ\Mail\EventListener\ManipulateAddressRecipient:
+    tags:
+      - name: 'event.listener'
+        identifier: 'manipulateAddressRecipient'
+        before: 'normalizeRecipientData'
+
   MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData:
     tags:
       - name: 'event.listener'

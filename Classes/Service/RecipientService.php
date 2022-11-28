@@ -50,12 +50,11 @@ class RecipientService
     protected array $allowedTables = ['fe_users', 'tt_address'];
 
     public function __construct(
-        protected GroupRepository          $groupRepository,
-        protected AddressRepository        $addressRepository,
-        protected FrontendUserRepository   $frontendUserRepository,
+        protected GroupRepository $groupRepository,
+        protected AddressRepository $addressRepository,
+        protected FrontendUserRepository $frontendUserRepository,
         protected EventDispatcherInterface $eventDispatcher
-    )
-    {
+    ) {
         $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
     }
 
@@ -80,7 +79,8 @@ class RecipientService
                 $mailGroups[] = [
                     'uid' => $group->getUid(),
                     'title' => $group->getTitle(),
-                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTable($group, $userTable), $userTable)
+                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTable($group, $userTable),
+                        $userTable),
                 ];
             }
         }
@@ -99,8 +99,11 @@ class RecipientService
      * @throws Exception
      * @throws DBALException
      */
-    public function getRecipientsDataByUidListAndTable(array $uidListOfRecipients, string $table, array $fields = ['uid', 'name', 'email', 'categories', 'mail_html']): array
-    {
+    public function getRecipientsDataByUidListAndTable(
+        array $uidListOfRecipients,
+        string $table,
+        array $fields = ['uid', 'name', 'email', 'categories', 'mail_html']
+    ): array {
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
 
         $data = [];
@@ -123,13 +126,20 @@ class RecipientService
      *
      * @param array $uidListOfRecipients List of recipient IDs
      * @param string $modelName model name
-     * @param array $fields Field to be selected. If empty csv export data will be used
+     * @param array $fields Field to be selected. If empty enhanced model data will be returned
+     * @param bool $categoryUidsArray
+     * @param int $limit limit of results
      *
      * @return array recipients' data
      * @throws InvalidQueryException
      */
-    public function getRecipientsDataByUidListAndModelName(array $uidListOfRecipients, string $modelName, array $fields = ['uid', 'name', 'email', 'categories', 'mail_html']): array
-    {
+    public function getRecipientsDataByUidListAndModelName(
+        array $uidListOfRecipients,
+        string $modelName,
+        array $fields = ['uid', 'name', 'email', 'categories', 'mail_html'],
+        bool $categoryUidsArray = false,
+        int $limit = 0
+    ): array {
         $data = [];
         $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
         $query = $persistenceManager->createQueryForType($modelName);
@@ -139,32 +149,23 @@ class RecipientService
         $query->matching(
             $query->in('uid', $uidListOfRecipients)
         );
-        $debugResult = $this->debugQuery($query);
+        if ($limit > 0) {
+            $query->setLimit($limit);
+        }
+//        $debugResult = $this->debugQuery($query);
         $recipients = $query->execute();
-        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
+//        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
 
         foreach ($recipients as $recipient) {
             if ($recipient instanceof RecipientInterface) {
-                if (empty($fields)) {
-                    $data[$recipient->getUid()] = $recipient->getCsvExportData();
-                } else {
-                    $data[$recipient->getUid()] = $this->getRecipientModelData($recipient, $fields);
-                }
-//                if ($useEnhancedModel && $recipient->getRecordIdentifier() !== get_class($recipient) . ':' . $recipient->getUid()) {
-//                    [$modelName, $uid] = explode(':', $recipient->getRecordIdentifier());
-//                    $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($modelName);
-//                    $repository = GeneralUtility::makeInstance($repositoryName);
-//                    $recipient = $repository->findByUid($uid);
-//                    $values = $this->getRecipientModelData($recipient, $fields);
-//                    $data[$recipient->getUid()] += $values;
-//                }
+                $data[$recipient->getUid()] = empty($fields) ? $recipient->getEnhancedData() : $this->getRecipientModelData($recipient, $fields, $categoryUidsArray);
             }
         }
 
         return $data;
     }
 
-    protected function getRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $fields): array
+    protected function getRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $fields, bool $categoryUidsArray = false): array
     {
         $values = [];
         foreach ($fields as $field) {
@@ -177,18 +178,29 @@ class RecipientService
             if (method_exists($recipient, $getter)) {
                 $value = $recipient->$getter();
                 if ($value instanceof ObjectStorage) {
+                    $categoryUids = $categoryUidsArray && $field === 'categories';
                     if ($value->count() > 0) {
                         $titles = [];
                         foreach ($value as $item) {
-                            if (method_exists($item, 'getTitle')) {
-                                $titles[] = $item->getTitle();
-                            } else if (method_exists($item, 'getName')) {
-                                $titles[] = $item->getName();
+                            if ($categoryUids) {
+                                $titles[] = $item->getUid();
+                            } else {
+                                if (method_exists($item, 'getTitle')) {
+                                    $titles[] = $item->getTitle();
+                                } else {
+                                    if (method_exists($item, 'getName')) {
+                                        $titles[] = $item->getName();
+                                    }
+                                }
                             }
                         }
-                        $values[$field] = implode(', ', $titles);
+                        if ($categoryUids) {
+                            $values[$field] = $titles;
+                        } else {
+                            $values[$field] = implode(', ', $titles);
+                        }
                     } else {
-                        $values[$field] = '';
+                        $values[$field] = $categoryUids ? [] : '';
                     }
                 } else {
                     $values[$field] = $value;
@@ -285,7 +297,8 @@ class RecipientService
                         $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pages, $group);
                     }
                     if ($group->hasFrontendUserGroup()) {
-                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'] ?? [], $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pages, $group)));
+                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'] ?? [],
+                            $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pages, $group)));
                     }
                     if ($userTable && $group->hasCustom()) {
                         $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pages, $group);
@@ -295,7 +308,8 @@ class RecipientService
             case RecipientGroupType::MODEL:
                 $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages && $group->getRecordType()) {
-                    $idLists[$group->getRecordType()] = $this->getRecipientUidListByModelNameAndStoragePageIdsAndCategories($group->getRecordType(), $pages, $group->getCategories());
+                    $idLists[$group->getRecordType()] = $this->getRecipientUidListByModelNameAndStoragePageIdsAndCategories($group->getRecordType(), $pages,
+                        $group->getCategories());
                 }
                 break;
             case RecipientGroupType::CSV:
@@ -372,7 +386,7 @@ class RecipientService
         $query->getQuerySettings()->setLanguageOverlayMode(false);
         $constrains = [
             $query->equals('active', true),
-            $query->logicalNot($query->equals('email', ''))
+            $query->logicalNot($query->equals('email', '')),
         ];
         if ($categories->count() > 0) {
             $orCategoryConstrains = [];
@@ -384,9 +398,9 @@ class RecipientService
         $query->matching(
             $query->logicalAnd($constrains)
         );
-        $debugResult = $this->debugQuery($query);
+//        $debugResult = $this->debugQuery($query);
         $recipients = $query->execute();
-        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
+//        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
 
         foreach ($recipients as $recipient) {
             if ($recipient instanceof RecipientInterface) {
@@ -456,7 +470,8 @@ class RecipientService
         } else {
             // get recipients with same categories set in group
             $recipients = [];
-            $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pages, ['uid']), 'uid') : [];
+            $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pages,
+                ['uid']), 'uid') : [];
             /** @var Category $category */
             foreach ($group->getCategories() as $category) {
                 // collect all recipients containing at least one category of the given group

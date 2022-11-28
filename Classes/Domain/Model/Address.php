@@ -15,7 +15,7 @@ class Address extends AbstractRecipient implements RecipientInterface
         return self::ENHANCED_MODEL . ':' . $this->uid;
     }
 
-    public function getCsvExportData(): array
+    public function getEnhancedData(): array
     {
         $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName(self::ENHANCED_MODEL);
         $repository = GeneralUtility::makeInstance($repositoryName);
@@ -40,6 +40,6 @@ class Address extends AbstractRecipient implements RecipientInterface
             ];
         }
 
-        return parent::getCsvExportData() + $additionalFields;
+        return parent::getEnhancedData() + $additionalFields;
     }
 }

@@ -54,5 +54,5 @@ interface RecipientInterface
      * ['uid' => 1, 'email' => 'recipient@gmail.com', 'name' => 'Recipient Name']
      * @return array
      */
-    public function getCsvExportData(): array;
+    public function getEnhancedData(): array;
 }

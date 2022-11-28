@@ -243,7 +243,7 @@ class MailerService implements LoggerAwareInterface
                 $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, $recipientCategories);
 
                 if ($htmlContent) {
-                    $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $additionalMarkers);
+                    $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $tableName, $additionalMarkers);
                     $formatSent->set(SendFormat::HTML);
                 }
             }
@@ -255,7 +255,7 @@ class MailerService implements LoggerAwareInterface
                 $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts, $recipientCategories);
 
                 if ($plainContent) {
-                    $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $additionalMarkers);
+                    $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $tableName, $additionalMarkers);
                     if ($this->mail->isRedirect() || $this->mail->isRedirectAll()) {
                         $plainContent = MailerUtility::shortUrlsInPlainText(
                             $plainContent,
@@ -291,13 +291,14 @@ class MailerService implements LoggerAwareInterface
      *
      * @param string $content The HTML or plaintext part
      * @param array $recipient Recipient's data array
+     * @param string $tableName table or domain model name
      * @param array $markers Existing markers that are mail-specific, not user-specific
      *
      * @return string content with replaced markers
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    protected function replaceMailMarkers(string $content, array $recipient, array $markers): string
+    protected function replaceMailMarkers(string $content, array $recipient, string $tableName, array $markers): string
     {
         // replace %23%23%23 with ###, since typolink generated link with urlencode
         $content = str_replace('%23%23%23', '###', $content);
@@ -315,7 +316,7 @@ class MailerService implements LoggerAwareInterface
 
         // PSR-14 event to manipulate markers to add e.g. salutation or other data
         // see MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers for example
-        $markers = $this->eventDispatcher->dispatch(new ManipulateMarkersEvent($markers, $recipient))->getMarkers();
+        $markers = $this->eventDispatcher->dispatch(new ManipulateMarkersEvent($markers, $recipient, $tableName))->getMarkers();
 
         return GeneralUtility::makeInstance(MarkerBasedTemplateService::class)->substituteMarkerArray($content, $markers);
     }
@@ -332,20 +333,15 @@ class MailerService implements LoggerAwareInterface
     {
         $numberOfSentMails = 0;
         $groupedRecipientIds = $this->mail->getRecipients();
-        foreach ($groupedRecipientIds as $recipientTable => $recipientsData) {
-            if (is_array($recipientsData)) {
+        foreach ($groupedRecipientIds as $recipientTable => $recipientIds) {
+            if (is_array($recipientIds)) {
                 $numberOfSentMailsOfGroup = 0;
-
-                if (str_contains($recipientTable, 'Domain\\Model')) {
-                    $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-                    $recipientTable = $dataMapper->getDataMap($recipientTable)->getTableName();
-                }
 
                 // get already sent mails
                 $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($this->mail->getUid(), $recipientTable);
 
                 if ($recipientTable === 'tx_mail_domain_model_group') {
-                    foreach ($recipientsData as $recipientUid => $recipientData) {
+                    foreach ($recipientIds as $recipientUid => $recipientData) {
                         // fake uid for csv
                         $recipientUid++;
                         if (!in_array($recipientUid, $sentMails)) {
@@ -359,28 +355,44 @@ class MailerService implements LoggerAwareInterface
                         }
                     }
                 } else {
-                    if ($recipientsData) {
-                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientTable);
-                        $queryBuilder
-                            ->select('*')
-                            ->from($recipientTable)
-                            ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientsData)))
-                            ->setMaxResults($this->sendPerCycle + 1);
-                        if ($sentMails) {
-                            // exclude already sent mails
-                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($sentMails)));
-                        }
-
-                        $statement = $queryBuilder->execute();
-
-                        while ($recipientData = $statement->fetchAssociative()) {
-                            $recipientData['categories'] = $this->getListOfRecipientCategories($recipientTable, $recipientData['uid']);
-                            if ($numberOfSentMails >= $this->sendPerCycle) {
-                                return false;
+                    if ($recipientIds) {
+                        if (str_contains($recipientTable, 'Domain\\Model')) {
+                            $recipientService = GeneralUtility::makeInstance(RecipientService::class);
+                            $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
+                                $recipientIds,
+                                $recipientTable,
+                                ['uid', 'name', 'email', 'categories', 'mail_html'],
+                                true,
+                                $this->sendPerCycle + 1
+                            );
+                            foreach ($recipientsData as $recipientData) {
+                                $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
+                                $numberOfSentMailsOfGroup++;
+                                $numberOfSentMails++;
                             }
-                            $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
-                            $numberOfSentMailsOfGroup++;
-                            $numberOfSentMails++;
+                        } else {
+                            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientTable);
+                            $queryBuilder
+                                ->select('*')
+                                ->from($recipientTable)
+                                ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
+                                ->setMaxResults($this->sendPerCycle + 1);
+                            if ($sentMails) {
+                                // exclude already sent mails
+                                $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($sentMails)));
+                            }
+
+                            $statement = $queryBuilder->execute();
+
+                            while ($recipientData = $statement->fetchAssociative()) {
+                                $recipientData['categories'] = $this->getListOfRecipientCategories($recipientTable, $recipientData['uid']);
+                                if ($numberOfSentMails >= $this->sendPerCycle) {
+                                    return false;
+                                }
+                                $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
+                                $numberOfSentMailsOfGroup++;
+                                $numberOfSentMails++;
+                            }
                         }
                     }
                 }

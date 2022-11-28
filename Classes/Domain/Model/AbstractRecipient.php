@@ -157,7 +157,7 @@ abstract class AbstractRecipient extends AbstractEntity
         $this->categories = new ObjectStorage();
     }
 
-    public function getCsvExportData(): array
+    public function getEnhancedData(): array
     {
         $categories = [];
         if ($this->categories->count() > 0) {

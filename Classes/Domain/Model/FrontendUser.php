@@ -117,7 +117,7 @@ class FrontendUser extends AbstractRecipient implements RecipientInterface
         return static::class . ':' . $this->uid;
     }
 
-    public function getCsvExportData(): array
+    public function getEnhancedData(): array
     {
         $additionalFields = [
             'title' => $this->title,
@@ -125,6 +125,6 @@ class FrontendUser extends AbstractRecipient implements RecipientInterface
             'last_name' => $this->lastName,
             'company' => $this->company,
         ];
-        return parent::getCsvExportData() + $additionalFields;
+        return parent::getEnhancedData() + $additionalFields;
     }
 }
