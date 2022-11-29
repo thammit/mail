@@ -26,6 +26,7 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
@@ -34,10 +35,12 @@ abstract class AbstractController extends ActionController
 {
     protected int $id = 0;
     protected array|false $pageInfo = false;
+    protected ?Site $site;
     protected string $siteIdentifier;
     protected string $backendUserPermissions = '';
     protected array $pageTSConfiguration = [];
     protected array $userTSConfiguration = [];
+    protected array $siteConfiguration = [];
     protected array $implodedParams = [];
     protected string $userTable = '';
     protected array $allowedTables = [];
@@ -68,8 +71,10 @@ abstract class AbstractController extends ActionController
 
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         try {
-            $this->siteIdentifier = $this->siteFinder->getSiteByPageId($this->id)->getIdentifier();
+            $this->site = $this->siteFinder->getSiteByPageId($this->id);
+            $this->siteIdentifier = $this->site->getIdentifier();
             $this->mailerService->setSiteIdentifier($this->siteIdentifier);
+            $this->siteConfiguration = $this->site->getConfiguration()['mail'] ?? [];
         } catch (SiteNotFoundException $e) {
             $this->siteIdentifier = '';
         }

@@ -6,7 +6,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Address extends AbstractRecipient implements RecipientInterface
+class Address extends AbstractRecipient implements RecipientInterface, CategoryInterface
 {
     const ENHANCED_MODEL = \FriendsOfTYPO3\TtAddress\Domain\Model\Address::class;
 

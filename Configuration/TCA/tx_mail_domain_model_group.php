@@ -57,7 +57,7 @@ return [
             'config' => [
                 'type' => 'group',
                 'internal_type' => 'db',
-                'allowed' => 'tt_address,fe_users,fe_groups',
+                'allowed' => 'tt_address,fe_users,fe_groups,tx_mail_domain_model_group',
                 'MM' => 'tx_mail_group_mm',
                 'size' => '20',
                 'maxitems' => '100000',
@@ -100,8 +100,8 @@ return [
                 'allowNonIdValues' => true,
                 'items' => [
                     ['', ''],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.0', \MEDIAESSENZ\Mail\Domain\Model\Address::class, 'EXT:tt_address/Resources/Public/Icons/tt_address.svg'],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.1', \MEDIAESSENZ\Mail\Domain\Model\FrontendUser::class, 'status-user-frontend'],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.0', 'tt_address', 'EXT:tt_address/Resources/Public/Icons/tt_address.svg'],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:sys_dmail_group.record_types.I.1', 'fe_users', 'status-user-frontend'],
                 ],
                 'minitems' => 1,
             ],

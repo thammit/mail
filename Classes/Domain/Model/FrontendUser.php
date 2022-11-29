@@ -5,7 +5,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use MEDIAESSENZ\Mail\Type\Enumeration\Gender;
 
-class FrontendUser extends AbstractRecipient implements RecipientInterface
+class FrontendUser extends AbstractRecipient implements RecipientInterface, CategoryInterface
 {
     /**
      * @var string

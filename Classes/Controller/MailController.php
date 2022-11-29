@@ -603,7 +603,7 @@ class MailController extends AbstractController
                 /** @var Group $testMailGroup */
                 $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
                 $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
-                $recipientGroups = $this->recipientService->getRecipientsUidListsGroupedByTable($testMailGroup);
+                $recipientGroups = $this->recipientService->getRecipientsUidListsGroupedByTable($testMailGroup, $this->siteConfiguration);
                 foreach ($recipientGroups as $recipientGroup => $recipients) {
                     switch ($recipientGroup) {
                         case 'fe_users':
@@ -719,7 +719,7 @@ class MailController extends AbstractController
             ]);
         }
 
-        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByTables($mail->getRecipientGroups()->toArray()));
+        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByTables($mail->getRecipientGroups()->toArray(), $this->siteConfiguration));
 
         if ($mail->getNumberOfRecipients() === 0) {
             ViewUtility::addNotificationWarning(

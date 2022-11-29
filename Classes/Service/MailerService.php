@@ -43,7 +43,6 @@ use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
-use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 
 class MailerService implements LoggerAwareInterface
 {
@@ -356,11 +355,12 @@ class MailerService implements LoggerAwareInterface
                     }
                 } else {
                     if ($recipientIds) {
-                        if (str_contains($recipientTable, 'Domain\\Model')) {
+                        $model = $this->siteConfiguration['RecipientGroups'][$recipientTable]['model'] ?? false;
+                        if ($model || str_contains($recipientTable, 'Domain\\Model')) {
                             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
                             $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
                                 $recipientIds,
-                                $recipientTable,
+                                $model ?: $recipientTable,
                                 ['uid', 'name', 'email', 'categories', 'mail_html'],
                                 true,
                                 $this->sendPerCycle + 1

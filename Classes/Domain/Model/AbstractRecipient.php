@@ -7,7 +7,7 @@ use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
-abstract class AbstractRecipient extends AbstractEntity
+abstract class AbstractRecipient extends AbstractEntity implements CategoryInterface
 {
     /**
      * @var bool

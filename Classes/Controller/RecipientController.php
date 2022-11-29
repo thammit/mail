@@ -62,7 +62,7 @@ class RecipientController extends AbstractController
                 'group' => $group,
                 'typeProcessed' => $typeProcessed,
                 'categories' => in_array($group->getType(), [RecipientGroupType::PAGES, RecipientGroupType::MODEL]) ? $group->getCategories() : [],
-                'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group), $this->userTable),
+                'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration), $this->userTable),
             ];
         }
 
@@ -89,7 +89,7 @@ class RecipientController extends AbstractController
      */
     public function showAction(Group $group): ResponseInterface
     {
-        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group);
+        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration);
         $totalRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($idLists, $this->userTable);
 
         $data = [
@@ -103,7 +103,10 @@ class RecipientController extends AbstractController
         foreach ($idLists as $tableName => $idList) {
             $categoryColumn = true;
             $htmlColumn = true;
-            if (str_contains($tableName, 'Domain\\Model')) {
+            $model = $this->siteConfiguration['RecipientGroups'][$tableName]['model'] ?? false;
+            if ($model) {
+                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
+            } else if (str_contains($tableName, 'Domain\\Model')) {
                 $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $tableName);
                 $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
                 $tableName = $dataMapper->getDataMap($tableName)->getTableName();
@@ -149,10 +152,13 @@ class RecipientController extends AbstractController
      */
     public function csvDownloadAction(Group $group, string $table): void
     {
-        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group);
+        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration);
 
         foreach ($idLists as $tableName => $idList) {
-            if (str_contains($tableName, 'Domain\\Model')) {
+            $model = $this->siteConfiguration['RecipientGroups'][$tableName]['model'] ?? false;
+            if ($model) {
+                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model, []);
+            } else if (str_contains($tableName, 'Domain\\Model')) {
                 $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $tableName, []);
                 $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
                 $tableName = $dataMapper->getDataMap($tableName)->getTableName();
