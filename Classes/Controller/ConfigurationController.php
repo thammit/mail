@@ -56,7 +56,7 @@ class ConfigurationController  extends AbstractController
         if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
             ViewUtility::addNotificationError(
                 sprintf(LanguageUtility::getLL('configuration.notification.permissionError.message'), $this->id),
-                LanguageUtility::getLL('mail.wizard.notification.severity.error.title')
+                LanguageUtility::getLL('general.notification.severity.error.title')
             );
 
             $this->redirect('index');
@@ -66,7 +66,7 @@ class ConfigurationController  extends AbstractController
             if ($success) {
                 ViewUtility::addNotificationSuccess(
                     sprintf(LanguageUtility::getLL('configuration.notification.savedOnPage.message'), $this->id),
-                    LanguageUtility::getLL('mail.wizard.notification.severity.success.title')
+                    LanguageUtility::getLL('general.notification.severity.success.title')
                 );
 
                 $this->redirect('index');

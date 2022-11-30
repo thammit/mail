@@ -76,7 +76,7 @@ class QueueController extends AbstractController
         $this->mailerService->handleQueue();
         ViewUtility::addNotificationSuccess(
             LanguageUtility::getLL('queue.notification.mailSendTriggered.message'),
-            LanguageUtility::getLL('mail.wizard.notification.severity.success.title')
+            LanguageUtility::getLL('general.notification.severity.success.title')
         );
         $this->redirect('index');
     }
@@ -92,7 +92,7 @@ class QueueController extends AbstractController
         $this->mailRepository->remove($mail);
         ViewUtility::addNotificationSuccess(
             LanguageUtility::getLL('queue.notification.missingRecipientGroup.message'),
-            LanguageUtility::getLL('mail.wizard.notification.severity.success.title')
+            LanguageUtility::getLL('general.notification.severity.success.title')
         );
         $this->redirect('index');
     }

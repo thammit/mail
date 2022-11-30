@@ -166,7 +166,7 @@ class MailController extends AbstractController
 
         ViewUtility::addNotificationError(
             'Could not generate mail from internal page.',
-            LanguageUtility::getLL('mail.wizard.notification.severity.error.title')
+            LanguageUtility::getLL('general.notification.severity.error.title')
         );
 
         $this->redirect('index');
@@ -191,7 +191,7 @@ class MailController extends AbstractController
         catch (HtmlContentFetchFailedException|PlainTextContentFetchFailedException) {
             ViewUtility::addNotificationError(
                 sprintf(LanguageUtility::getLL('mail.wizard.notification.externalUrlInvalid.message'), trim($htmlUrl . ' / ' . $plainTextUrl, ' /')),
-                LanguageUtility::getLL('mail.wizard.notification.severity.error.title')
+                LanguageUtility::getLL('general.notification.severity.error.title')
             );
 
             $this->redirect('index');
@@ -386,11 +386,11 @@ class MailController extends AbstractController
         $this->moduleTemplate->setContent($this->view->render());
 
         if ($mail->isInternal()) {
-            $title = LanguageUtility::getLL('mail.wizard.notification.severity.success.title');
+            $title = LanguageUtility::getLL('general.notification.severity.success.title');
             $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), $data['general']['page']['value']);
             $this->addJsNotification($message, $title);
         } elseif (!$mail->isQuickMail()) {
-            $title = LanguageUtility::getLL('mail.wizard.notification.severity.success.title');
+            $title = LanguageUtility::getLL('general.notification.severity.success.title');
             $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /'));
             $this->addJsNotification($message, $title);
         }
@@ -415,7 +415,7 @@ class MailController extends AbstractController
             $this->mailRepository->update($mail);
             $this->mailRepository->persist();
             return $this->jsonResponse(json_encode([
-                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.success.title'),
+                'title' => LanguageUtility::getLL('general.notification.severity.success.title'),
                 'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageSaved.message')
             ]));
         }
@@ -423,7 +423,7 @@ class MailController extends AbstractController
         return $this->responseFactory->createResponse(400)
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withBody($this->streamFactory->createStream(json_encode([
-                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                'title' => LanguageUtility::getLL('general.notification.severity.error.title'),
                 'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageCreationFailed.message')
             ])));
     }
@@ -555,7 +555,7 @@ class MailController extends AbstractController
                 return $this->responseFactory->createResponse(400)
                     ->withHeader('Content-Type', 'application/json; charset=utf-8')
                     ->withBody($this->streamFactory->createStream(json_encode([
-                        'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                        'title' => LanguageUtility::getLL('general.notification.severity.error.title'),
                         'message' => LanguageUtility::getLL('mail.wizard.notification.updateContentFailed.message')
                     ])));
             }
@@ -569,7 +569,7 @@ class MailController extends AbstractController
         return $this->responseFactory->createResponse(400)
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withBody($this->streamFactory->createStream(json_encode([
-                'title' => LanguageUtility::getLL('mail.wizard.notification.severity.error.title'),
+                'title' => LanguageUtility::getLL('general.notification.severity.error.title'),
                 'message' => LanguageUtility::getLL('mail.wizard.notification.categoryRestrictionSaveFailed.message')
             ])));
     }
@@ -714,7 +714,7 @@ class MailController extends AbstractController
                 'notification' => [
                     'severity' => 'warning',
                     'message' => LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'),
-                    'title' => LanguageUtility::getLL('mail.wizard.notification.severity.warning.title')
+                    'title' => LanguageUtility::getLL('general.notification.severity.warning.title')
                 ]
             ]);
         }
@@ -724,7 +724,7 @@ class MailController extends AbstractController
         if ($mail->getNumberOfRecipients() === 0) {
             ViewUtility::addNotificationWarning(
                 LanguageUtility::getLL('mail.wizard.notification.noRecipients.message'),
-                LanguageUtility::getLL('mail.wizard.notification.severity.warning.title')
+                LanguageUtility::getLL('general.notification.severity.warning.title')
             );
 
             $this->redirect('scheduleSending', null, null, ['mail' => $mail]);

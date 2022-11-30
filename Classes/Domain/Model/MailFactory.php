@@ -302,7 +302,7 @@ class MailFactory
             } else {
                 if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
                     ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.noHtmlBoundariesFound.message'),
-                        LanguageUtility::getLL('mail.wizard.notification.severity.warning.title'));
+                        LanguageUtility::getLL('general.notification.severity.warning.title'));
                 }
 
                 return $htmlContent;
@@ -326,7 +326,7 @@ class MailFactory
             } else {
                 if (!MailerUtility::contentContainsBoundaries($plainContent)) {
                     ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.noPlainTextBoundariesFound.message'),
-                        LanguageUtility::getLL('mail.wizard.notification.severity.warning.title'));
+                        LanguageUtility::getLL('general.notification.severity.warning.title'));
                 }
                 return $plainContent;
             }

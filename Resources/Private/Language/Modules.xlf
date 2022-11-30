@@ -33,6 +33,21 @@
             <trans-unit id="general.button.downloadCsv" resname="general.button.downloadCsv">
                 <source>Download CSV</source>
             </trans-unit>
+            <trans-unit id="general.notification.severity.info.title">
+                <source>Info</source>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.notice.title">
+                <source>Notice</source>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.success.title">
+                <source>Success</source>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.warning.title">
+                <source>Warning</source>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.error.title">
+                <source>Error</source>
+            </trans-unit>
             <trans-unit id="mail.type.quickMail">
                 <source>Quick Mail</source>
             </trans-unit>
@@ -50,21 +65,6 @@
             </trans-unit>
             <trans-unit id="mail.wizard.testMail.groups">
                 <source>Group(s)</source>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.info.title">
-                <source>Info</source>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.notice.title">
-                <source>Notice</source>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.success.title">
-                <source>Success</source>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.warning.title">
-                <source>Warning</source>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.error.title">
-                <source>Error</source>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.externalUrlInvalid.message">
                 <source>Error during fetching external Urls: %s</source>

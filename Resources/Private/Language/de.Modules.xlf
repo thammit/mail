@@ -43,6 +43,26 @@
                 <source>Download CSV</source>
                 <target>CSV Herunterladen</target>
             </trans-unit>
+            <trans-unit id="general.notification.severity.info.title">
+                <source>Info</source>
+                <target>Info</target>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.notice.title">
+                <source>Notice</source>
+                <target>Hinweis</target>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.success.title">
+                <source>Success</source>
+                <target>Erfolgreich</target>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.warning.title">
+                <source>Warning</source>
+                <target>Warnung</target>
+            </trans-unit>
+            <trans-unit id="general.notification.severity.error.title">
+                <source>Error</source>
+                <target>Fehler</target>
+            </trans-unit>
             <trans-unit id="mail.type.quickMail">
                 <source>Quick Mail</source>
                 <target>Kurznachricht</target>
@@ -66,26 +86,6 @@
             <trans-unit id="mail.wizard.testMail.groups">
                 <source>Group(s)</source>
                 <target>Gruppe(n)</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.info.title">
-                <source>Info</source>
-                <target>Info</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.notice.title">
-                <source>Notice</source>
-                <target>Hinweis</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.success.title">
-                <source>Success</source>
-                <target>Erfolgreich</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.warning.title">
-                <source>Warning</source>
-                <target>Warnung</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.notification.severity.error.title">
-                <source>Error</source>
-                <target>Fehler</target>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.noPageSelected.title">
                 <source>No valid page selected</source>
