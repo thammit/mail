@@ -806,7 +806,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 			<trans-unit id="dmailer_sending_to_table" resname="dmailer_sending_to_table">
 				<source>mails using records from table</source>
 			</trans-unit>
-			<trans-unit id="dmailer_sys_dmail_record" resname="dmailer_sys_dmail_record">
+			<trans-unit id="tx_mail_domain_model_mail" resname="tx_mail_domain_model_mail">
 				<source>mail record</source>
 			</trans-unit>
 			<trans-unit id="header_conf" resname="header_conf">

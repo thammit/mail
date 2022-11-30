@@ -575,7 +575,7 @@ class MailerService implements LoggerAwareInterface
         $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
         $mail = $this->mailRepository->findMailToSend();
         if ($mail instanceof Mail) {
-            $this->logger->debug(LanguageUtility::getLL('dmailer_sys_dmail_record') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
+            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
             $this->prepare($mail->getUid());
 
             if (!$this->mail->getScheduledBegin()) {

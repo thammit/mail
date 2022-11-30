@@ -9,8 +9,8 @@
 
 <f:variable name="fromInfo" value="{
         0: '{f:translate(key:\'{lll}view_replyto\')}: {mail.replytoName} {mail.replyToEmail}',
-        1: '{f:translate(key:\'{lll2}sys_dmail.organisation\')}: {mail.organisation}',
-        2: '{f:translate(key:\'{lll2}sys_dmail.return_path\')}: {mail.returnPath}'}"/>
+        1: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.organisation\')}: {mail.organisation}',
+        2: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.returnPath\')}: {mail.returnPath}'}"/>
 
 <f:variable name="sourceInfo" value="{
         0: '{f:translate(key:\'{lll}report.general.htmlSource\')}: {data.htmlSource}',
@@ -18,9 +18,9 @@
         }"/>
 
 <f:variable name="mailFormatAttachementInfo" value="{
-        0: '{f:translate(key:\'{lll2}sys_dmail.priority\')}: {mail.priority}',
-        1: '{f:translate(key:\'{lll2}sys_dmail.transfer_encoding\')}: {mail.encoding}',
-        2: '{f:translate(key:\'{lll2}sys_dmail.charset\')}: {mail.charset}',
+        0: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.priority\')}: {mail.priority}',
+        1: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.transferEncoding\')}: {mail.encoding}',
+        2: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.charset\')}: {mail.charset}',
         3: '{f:translate(key:\'{lll}view_media\')}: {data.includeMedia}'
         }"/>
 
@@ -47,7 +47,7 @@
                     <f:if condition="{mail.quickMail}">
                         <f:then><f:translate key="{lll}mail.type.quickMail"/></f:then>
                         <f:else>
-                            <f:translate key="{lll2}sys_dmail.type.I.{mail.type}"/>
+                            <f:translate key="{lll2}tx_mail_domain_model_mail.type.I.{mail.type}"/>
                         </f:else>
                     </f:if>
                     <f:if condition="{mail.internal}">[{mail.page}]</f:if>
