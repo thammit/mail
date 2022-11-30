@@ -9,6 +9,7 @@ use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 
 class ConfigurationController  extends AbstractController
@@ -53,7 +54,7 @@ class ConfigurationController  extends AbstractController
      */
     public function updateAction(array $pageTS): void
     {
-        if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), 2)) {
+        if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), Permission::PAGE_EDIT)) {
             ViewUtility::addNotificationError(
                 sprintf(LanguageUtility::getLL('configuration.notification.permissionError.message'), $this->id),
                 LanguageUtility::getLL('general.notification.severity.error.title')
