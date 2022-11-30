@@ -677,7 +677,7 @@ class MailController extends AbstractController
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
-            'groups' => $this->recipientService->getFinalSendingGroups($this->id, $this->userTable),
+            'groups' => $this->recipientService->getFinalSendingGroups($this->id),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mail' => $mail,
             'mailUid' => $mail->getUid(),

@@ -58,7 +58,6 @@ class RecipientService
     /**
      * @param int $pageId
      * @param array $siteConfiguration
-     * @param string $userTable
      * @return array
      * @throws DBALException
      * @throws Exception
@@ -67,7 +66,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getFinalSendingGroups(int $pageId, array $siteConfiguration = [], string $userTable = ''): array
+    public function getFinalSendingGroups(int $pageId, array $siteConfiguration = []): array
     {
         $mailGroups = [];
         $groups = $this->groupRepository->findByPid($pageId);
@@ -77,8 +76,7 @@ class RecipientService
                 $mailGroups[] = [
                     'uid' => $group->getUid(),
                     'title' => $group->getTitle(),
-                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTable($group, $siteConfiguration, $userTable),
-                        $userTable),
+                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTable($group, $siteConfiguration)),
                 ];
             }
         }
@@ -217,7 +215,6 @@ class RecipientService
     /**
      * @param array $groups
      * @param array $siteConfiguration
-     * @param string $userTable
      * @return array
      * @throws DBALException
      * @throws Exception
@@ -226,7 +223,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getRecipientsUidListsGroupedByTables(array $groups, array $siteConfiguration, string $userTable = ''): array
+    public function getRecipientsUidListsGroupedByTables(array $groups, array $siteConfiguration): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
         if (count($groups) === 0) {
@@ -236,7 +233,7 @@ class RecipientService
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
         foreach ($groups as $group) {
-            $recipientList = $this->getRecipientsUidListsGroupedByTable($group, $siteConfiguration, $userTable);
+            $recipientList = $this->getRecipientsUidListsGroupedByTable($group, $siteConfiguration);
             $idLists = array_merge_recursive($idLists, $recipientList);
         }
 
@@ -257,10 +254,6 @@ class RecipientService
 //            $idLists['fe_users'] = array_unique($idLists['fe_users']);
 //        }
 //
-//        if (is_array($idLists[$userTable] ?? false) && $userTable) {
-//            $idLists[$userTable] = array_unique($idLists[$userTable]);
-//        }
-//
 //        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
 //            $idLists['tx_mail_domain_model_group'] = RecipientUtility::removeDuplicates($idLists['tx_mail_domain_model_group']);
 //        }
@@ -273,7 +266,6 @@ class RecipientService
      *
      * @param Group $group Recipient group ID
      * @param array $siteConfiguration
-     * @param string $userTable
      * @return array List of recipient IDs
      * @throws DBALException
      * @throws Exception
@@ -282,7 +274,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getRecipientsUidListsGroupedByTable(Group $group, array $siteConfiguration = [], string $userTable = ''): array
+    public function getRecipientsUidListsGroupedByTable(Group $group, array $siteConfiguration = []): array
     {
         $idLists = [];
         switch ($group->getType()) {
@@ -301,9 +293,6 @@ class RecipientService
                     if ($group->hasFrontendUserGroup()) {
                         $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'] ?? [],
                             $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pages, $group)));
-                    }
-                    if ($userTable && $group->hasCustom()) {
-                        $idLists[$userTable] = $this->getRecipientUidListByTableAndPageUidListAndGroup($userTable, $pages, $group);
                     }
                 }
                 break;
@@ -329,16 +318,13 @@ class RecipientService
                 $idLists['tt_address'] = $this->getStaticIdListByTableAndGroupUid('tt_address', $group->getUid());
                 $idLists['fe_users'] = $this->getStaticIdListByTableAndGroupUid('fe_users', $group->getUid());
                 $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $this->getStaticIdListByTableAndGroupUid('fe_groups', $group->getUid())));
-                if ($userTable) {
-                    $idLists[$userTable] = $this->getStaticIdListByTableAndGroupUid($userTable, $group->getUid());
-                }
                 break;
             case RecipientGroupType::QUERY:
                 // Special query list
                 // Todo add functionality again
                 $queryTable = GeneralUtility::_GP('SET')['queryTable'] ?? '';
                 $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
-                $this->updateGroupQueryConfig($group, $userTable, $queryTable, $queryConfig);
+                $this->updateGroupQueryConfig($group, $queryTable, $queryConfig);
 
                 $table = '';
                 if ($group->hasAddress()) {
@@ -346,10 +332,6 @@ class RecipientService
                 } else {
                     if ($group->hasFrontendUser()) {
                         $table = 'fe_users';
-                    } else {
-                        if ($userTable && $group->hasCustom()) {
-                            $table = $userTable;
-                        }
                     }
                 }
                 if ($table) {
@@ -359,7 +341,7 @@ class RecipientService
             case RecipientGroupType::OTHER:
                 $groups = $this->getRecursiveGroups($group);
                 foreach ($groups as $recursiveGroup) {
-                    $collect = $this->getRecipientsUidListsGroupedByTable($recursiveGroup, $userTable);
+                    $collect = $this->getRecipientsUidListsGroupedByTable($recursiveGroup);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
@@ -679,14 +661,13 @@ class RecipientService
 
     /**
      * @param Group $group
-     * @param string $userTable
      * @param mixed $queryTable
      * @param mixed $queryConfig
      * @return void
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      */
-    protected function updateGroupQueryConfig(Group $group, string $userTable, mixed $queryTable, mixed $queryConfig): void
+    protected function updateGroupQueryConfig(Group $group, mixed $queryTable, mixed $queryConfig): void
     {
         $table = '';
         if ($group->hasAddress()) {
@@ -694,10 +675,6 @@ class RecipientService
         } else {
             if ($group->hasFrontendUser()) {
                 $table = 'fe_users';
-            } else {
-                if ($userTable && ($group->hasCustom())) {
-                    $table = $userTable;
-                }
             }
         }
 
@@ -715,10 +692,6 @@ class RecipientService
             } else {
                 if ($queryTable === 'fe_users') {
                     $recordTypes = RecordType::FRONTEND_USER;
-                } else {
-                    if ($queryTable === $userTable) {
-                        $recordTypes = RecordType::CUSTOM;
-                    }
                 }
             }
 

@@ -42,7 +42,6 @@ abstract class AbstractController extends ActionController
     protected array $userTSConfiguration = [];
     protected array $siteConfiguration = [];
     protected array $implodedParams = [];
-    protected string $userTable = '';
     protected array $allowedTables = [];
     protected ModuleTemplate $moduleTemplate;
 
@@ -86,15 +85,6 @@ abstract class AbstractController extends ActionController
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['mail.'] ?? [];
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
         $this->pageTSConfiguration['pid'] = $this->id;
-
-        if (array_key_exists('userTable', $this->pageTSConfiguration) &&
-            isset($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']]) &&
-            is_array($GLOBALS['TCA'][$this->pageTSConfiguration['userTable']])
-        ) {
-            $this->userTable = $this->pageTSConfiguration['userTable'];
-            $this->allowedTables[] = $this->userTable;
-        }
-
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
     }
 

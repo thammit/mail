@@ -62,7 +62,7 @@ class RecipientController extends AbstractController
                 'group' => $group,
                 'typeProcessed' => $typeProcessed,
                 'categories' => in_array($group->getType(), [RecipientGroupType::PAGES, RecipientGroupType::MODEL]) ? $group->getCategories() : [],
-                'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration), $this->userTable),
+                'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration)),
             ];
         }
 
@@ -90,7 +90,7 @@ class RecipientController extends AbstractController
     public function showAction(Group $group): ResponseInterface
     {
         $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration);
-        $totalRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($idLists, $this->userTable);
+        $totalRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($idLists);
 
         $data = [
             'uid' => $group->getUid(),
