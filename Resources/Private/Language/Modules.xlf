@@ -921,6 +921,37 @@ You may personalize the mails that will be sent to each recipient by inserting t
 ###SYS_MAIL_ID###
 ###SYS_AUTHCODE###]]></source>
 		    </trans-unit>
+            <trans-unit id="mail.wizard.categories.alttitle" resname="mail.wizard.categories.alttitle">
+                <source>Assign categories to content elements</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.categories.description" xml:space="preserve">
+			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
+			Content elements without category restrictions will appear for in all mails.]]></source>
+		    </trans-unit>
+            <trans-unit id="mail.wizard.externalPage.alttitle">
+                <source>New mailing from external pages</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.externalPage.description">
+                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+            </trans-unit>
+            <trans-unit id="create_newsletter.alttitle">
+                <source>Create a newsletter</source>
+            </trans-unit>
+            <trans-unit id="create_newsletter.description">
+                <source>Click on this link if you want to create a new newsletter.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.internalPage.alttitle">
+                <source>New mailing from an internal page</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.internalPage.description">
+                <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickMail.alttitle">
+                <source>Create a quick mailing</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickMail.description">
+                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+            </trans-unit>
 		</body>
 	</file>
 </xliff>

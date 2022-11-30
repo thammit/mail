@@ -93,7 +93,7 @@
 <f:section name="InternalPanel">
     <f:if condition="{data.data}">
         <f:then>
-            <f:render partial="InfoBox" arguments="{field: 'select_newsletter'}" />
+            <f:render partial="InfoBox" arguments="{field: 'mail.wizard.internalPage'}" />
             <div class="panel panel-default">
                 <table class="table table-striped table-hover">
                     <thead class="table-light">
@@ -161,7 +161,7 @@
 </f:section>
 
 <f:section name="ExternalPanel">
-    <f:render partial="InfoBox" arguments="{field: 'create_directmail_from_url'}" />
+    <f:render partial="InfoBox" arguments="{field: 'mail.wizard.externalPage'}" />
     <f:form action="createMailFromExternalUrls" object="external" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="externalMailHtmlUri" class="form-label"><f:translate key="{lll}configuration.externalMailHtmlUrl"/></label>
@@ -180,7 +180,7 @@
 </f:section>
 
 <f:section name="QuickMailPanel">
-    <f:render partial="InfoBox" arguments="{field: 'quick_mail'}" />
+    <f:render partial="InfoBox" arguments="{field: 'mail.wizard.quickMail'}" />
     <f:form action="createQuickMail" method="post" object="quickMail" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="quickmailFromName" class="form-label"><f:translate key="{lll}mail.wizard.quickmail.senderName"/></label>

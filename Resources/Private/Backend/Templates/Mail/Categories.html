@@ -20,7 +20,7 @@
     <div class="row justify-content-between">
         <div class="col-12 col-md-8">
             <f:form action="updateCategories" arguments="{mail:mail.uid}" method="post" enctype="multipart/form-data">
-                <f:render partial="InfoBox" arguments="{field: 'assign_categories'}"/>
+                <f:render partial="InfoBox" arguments="{field: 'mail.wizard.categories'}"/>
                 <f:if condition="{data.rows}">
                     <h3>
                         <f:translate key="{lll}mail.wizard.categories"/>
