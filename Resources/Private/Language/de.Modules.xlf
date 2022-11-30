@@ -167,6 +167,412 @@
                 <source>The mail "%s" was successfully deleted.</source>
                 <target>Die Mail "%s" wurde erfolgreich gelöscht.</target>
             </trans-unit>
+            <trans-unit id="mail.wizard.externalMailPlainTextUrl" resname="mail.wizard.externalMailPlainTextUrl">
+                <source>URL of plain text content</source>
+                <target>URL des reinen Textinhalts</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.externalMailSubject" resname="mail.wizard.externalMailSubject">
+                <source>Subject</source>
+                <target>Thema</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.title" resname="mail.wizard.title">
+                <source>Mail Wizard</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.externalPage" resname="mail.wizard.externalPage">
+                <source>External Page</source>
+                <target>Externe Seite</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.internalPage" resname="mail.wizard.internalPage">
+                <source>Internal Page</source>
+                <target>Interne Seite</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.openMails" resname="mail.wizard.openMails">
+                <source>Open Mails</source>
+                <target>Offene Mails</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickMail" resname="mail.wizard.quickMail">
+                <source>Quick Mail</source>
+                <target>Kurznachricht</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource">
+                <source>Please choose source</source>
+                <target>Bitte Quelle auswählen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.settings" resname="mail.wizard.settings">
+                <source>Settings</source>
+                <target>Einstellungen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.categories" resname="mail.wizard.categories">
+                <source>Categories</source>
+                <target>Kategorien</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail" resname="mail.wizard.testMail">
+                <source>Test Mail</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending" resname="mail.wizard.scheduleSending">
+                <source>Schedule sending</source>
+                <target>Versandplanung</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.subject" resname="mail.wizard.subject">
+                <source>Subject</source>
+                <target>Thema</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.categories.restrictToCategories" resname="mail.wizard.categories.restrictToCategories">
+                <source>Restrict to categories</source>
+                <target>Auf Kategorien einschränken</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.attachment" resname="mail.wizard.attachment">
+                <source>Attachment</source>
+                <target>Anhang</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.categories.column" resname="mail.wizard.categories.column">
+                <source>Column</source>
+                <target>Spalte</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.lastModified" resname="mail.wizard.lastModified">
+                <source>Last modified</source>
+                <target>Zuletzt geändert</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.size" resname="mail.wizard.size">
+                <source>Size</source>
+                <target>Größe</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.subject" resname="mail.wizard.subject">
+                <source>Subject</source>
+                <target>Thema</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.type" resname="mail.wizard.type">
+                <source>Type</source>
+                <target>Typ</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.noMailPagesFound.title" resname="mail.wizard.noMailPagesFound.title">
+                <source>Select a mail</source>
+                <target>Mail auswählen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.noMailPagesFound.message" resname="mail.wizard.noMailPagesFound.message">
+                <source>There are no pages in the mail module.</source>
+                <target>Es gibt keine Seiten im Mail-Modul.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.htmlPreviewLink.title" resname="mail.wizard.htmlPreviewLink.title">
+                <source>View page in HTML format</source>
+                <target>Seite im HTML-Format anzeigen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.plainTextPreviewLink.title" resname="mail.wizard.plainTextPreviewLink.title">
+                <source>View page in Text format</source>
+                <target>Seite im Text-Format anzeigen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickmail.breakLines" resname="mail.wizard.quickmail.breakLines">
+                <source>Break lines to 76 char</source>
+                <target>Zeilenumbruch auf 76 Zeichen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickmail.message" resname="mail.wizard.quickmail.message">
+                <source>Message</source>
+                <target>Nachricht</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickmail.senderEmail" resname="mail.wizard.quickmail.senderEmail">
+                <source>Sender Email</source>
+                <target>Absender E-Mail</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickmail.senderName" resname="mail.wizard.quickmail.senderName">
+                <source>Sender Name</source>
+                <target>Absender Name</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleDraft" resname="mail.wizard.scheduleDraft">
+                <source>Save mail settings for recurring mailings</source>
+                <target>Mail-Einstellungen für wiederkehrende Mailings speichern</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.mailGroup" resname="mail.wizard.scheduleSending.mailGroup">
+                <source>Recipient group</source>
+                <target>Empfängergruppe</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.mailGroups" resname="mail.wizard.scheduleSending.mailGroups">
+                <source>Recipient groups</source>
+                <target>Empfängergruppen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.info.mailGroup.title" resname="mail.wizard.scheduleSending.info.mailGroup.title">
+                <source>Select recipients and time of sending</source>
+                <target>Empfänger und Zeitpunkt des Versands auswählen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.info.mailGroup.message" resname="mail.wizard.scheduleSending.info.mailGroup.message" xmlspace="preserve">
+                <source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
+				After click FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending is finished.]]></source>
+                <target><![CDATA[Hier müssen Sie mindestens eine Empfängergruppe und den Versandbeginn auswählen.
+				Nach Klick auf FERTIGSTELLEN wird die Mail in die Warteschlange aufgenommen. Dort kann sie gelöscht werden, bis der endgültige Versand abgeschlossen ist.]]></target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.testMail" resname="mail.wizard.scheduleSending.testMail">
+                <source>Send this as test mail</source>
+                <target>Als Test-Mail senden</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.distributionTime" resname="mail.wizard.scheduleSending.distributionTime">
+                <source>Distribution time (hh:mm dd-mm-yyyy)</source>
+                <target>Versandbeginn (hh:mm dd-mm-yyyy)</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.draftSaved.title" resname="mail.wizard.notification.draftSaved.title">
+                <source>Mail saved as draft</source>
+                <target>Mail als Entwurf gespeichert</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.draftSaved.message" resname="mail.wizard.notification.draftSaved.message">
+                <source>The mail "%s" was successfully saved as draft for recurring sending within the scheduler.</source>
+                <target>Die E-Mail "%s" wurde erfolgreich als Entwurf für den wiederholten Versand im Planer gespeichert.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.scheduledForDistribution.title" resname="mail.wizard.notification.scheduledForDistribution.title">
+                <source>Mail scheduled for distribution</source>
+                <target>Mail für Versand eingeplant</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.scheduledForDistribution.message" resname="mail.wizard.notification.scheduledForDistribution.message">
+                <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
+                <target>Die E-Mail "%s" wurde erfolgreich für den Versand am %s eingeplant.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail.individual" resname="mail.wizard.testMail.individual">
+                <source>Individual</source>
+                <target>Individuell</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail.mailGroup" resname="mail.wizard.testMail.mailGroup">
+                <source>Recipient group</source>
+                <target>Empfängergruppe</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail.mailGroup.message" resname="mail.wizard.testMail.mailGroup.message">
+                <source>Select a recipient group for the test mail.</source>
+                <target>Wählen Sie eine Empfängergruppe für die Testmail aus.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail.info.title" resname="mail.wizard.testMail.info.title">
+                <source>Send a simple test mail</source>
+                <target>Senden Sie eine einfache Test-E-Mail</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.testMail.info.message" resname="mail.wizard.testMail.info.message" xmlspace="preserve">
+                <source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.
+				Beware: The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
+                <target><![CDATA[Hier können Sie (optional) eine einfache Testmail an einen oder mehrere Empfänger senden, bevor Sie den endgültigen Versand auf der nächsten Seite planen.
+				Bitte beachten Sie: Die generierte Mail enthält ALLE Elemente, unabhängig von ihrer Kategorie. Die Benutzerfelder werden NICHT durch Daten ersetzt.]]></target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.noRecipientGroupsFound.message" resname="mail.wizard.scheduleSending.noRecipientGroupsFound.message">
+                <source>No recipient groups found</source>
+                <target>Keine Empfängergruppen gefunden</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.categories.alttitle" resname="mail.wizard.categories.alttitle">
+                <source>Assign categories to content elements</source>
+                <target>Zuweisung von Kategorien zu Inhaltselementen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.categories.description" xml:space="preserve">
+			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
+			Content elements without category restrictions will appear for in all mails.]]></source>
+                <target><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
+			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target>
+		    </trans-unit>
+            <trans-unit id="mail.wizard.externalPage.alttitle">
+                <source>New mailing from external pages</source>
+                <target>Neues Mailing von externer Seite</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.externalPage.description">
+                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+                <target>Nach Eingabe der URL(s) und des Themas auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.internalPage.alttitle">
+                <source>New mailing from an internal page</source>
+                <target>Neues Mailing von interner Seite</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.internalPage.description">
+                <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+                <target>Klicken Sie bei der gewünschten Seite auf WEITER, um mit weiteren Einstellungen (Format, Empfängergruppe, Sendezeit...) fortzufahren.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickMail.alttitle">
+                <source>Create a quick mailing</source>
+                <target>Kurznachricht erstellen</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.quickMail.description">
+                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+                <target>Nach Eingabe des Themas und der Nachricht auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
+            </trans-unit>
+            <trans-unit id="mail.wizard.internalPage.description.old" xml:space="preserve">
+			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
+
+You may personalize the mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
+
+###USER_uid### (the unique id of the recipient)
+###USER_name### (full name)
+###USER_firstname### (first name calculated)
+###USER_NAME### and ###USER_FIRSTNAME### will insert uppercase versions of the equivalents
+###USER_title###
+###USER_email###
+###USER_phone###
+###USER_www###
+###USER_address###
+###USER_company###
+###USER_city###
+###USER_zip###
+###USER_country###
+###USER_fax###
+###SYS_TABLE_NAME###
+###SYS_MAIL_ID###
+###SYS_AUTHCODE###]]></source>
+		    </trans-unit>
+            <trans-unit id="recipient.header" resname="recipient.header">
+                <source>Recipient groups</source>
+                <target>Empfängergruppen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.header" resname="recipient.import.header">
+                <source>Import CSV into tt_address database table</source>
+                <target>CSV in tt_address Datenbanktabelle importieren</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.dublette.description" resname="recipient.import.dublette.description">
+                <source>Filter email dublettes from csv data. If a dublette is found, only the first entry is imported.</source>
+                <target>Filtere E-Mail-Dubletten aus CSV-Daten. Wenn eine Dublette gefunden wird, wird nur der erste Eintrag importiert.</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.validEmail.description" resname="recipient.import.validEmail.description">
+                <source>Only update/import valid emails from csv data.</source>
+                <target>Nur gültige E-Mails aus csv-Daten aktualisieren/importieren.</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.notification.done.message" resname="recipient.import.notification.done.message">
+                <source>CSV import successfully finished.</source>
+                <target>CSV-Import erfolgreich abgeschlossen.</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.encapsulation" resname="recipient.import.encapsulation">
+                <source>Field encapsulation character (data fields are encapsed with...)</source>
+                <target>Feldkapselungszeichen (Datenfelder sind gekapselt mit...)</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.firstRowContainFieldNames" resname="recipient.import.firstRowContainFieldNames">
+                <source>First row of import file contain field names</source>
+                <target>Die erste Zeile der Importdatei enthält Feldnamen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.settings" resname="recipient.import.settings">
+                <source>Import settings</source>
+                <target>Import Einstellungen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.uploadCsv.subheader" resname="recipient.import.uploadCsv.subheader">
+                <source>Upload CSV</source>
+                <target>CSV Hochladen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.allHtml" resname="recipient.import.allHtml">
+                <source>All recipients receive HTML mail</source>
+                <target>Alle Empfänger erhalten HTML-Mails</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.categoryMapping" resname="recipient.import.categoryMapping">
+                <source>Categories</source>
+                <target>Kategorien</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.assignAllCategories" resname="recipient.import.assignAllCategories">
+                <source>Assign the following categories to all recipients</source>
+                <target>Weisen Sie allen Empfängern die folgenden Kategorien zu</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mappingCharset.subheader" resname="recipient.import.mappingCharset.subheader">
+                <source>Settings</source>
+                <target>Einstellungen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mappingCharset.pleaseChoose" resname="recipient.import.mappingCharset.pleaseChoose">
+                <source>Please select the character set of the import file</source>
+                <target>Bitte wählen Sie den Zeichensatz der Importdatei</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.fieldMapping" resname="recipient.import.fieldMapping">
+                <source>Field mapping</source>
+                <target>Feldzuordnung</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.fieldMapping.additionalOptions" resname="recipient.import.fieldMapping.additionalOptions">
+                <source>Additional options</source>
+                <target>Zusätzliche Optionen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.description" resname="recipient.import.mapping.description">
+                <source>Description</source>
+                <target>Beschreibung</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.error" resname="recipient.import.mapping.error">
+                <source>Mapping error</source>
+                <target>Zuordnungsfehler</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.error_detail" resname="recipient.import.mapping.error_detail">
+                <source>Please fix following error(s)</source>
+                <target>Bitte beheben Sie folgende(n) Fehler</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.error_email" resname="recipient.import.mapping.error_email">
+                <source>&quot;Email&quot; field has to be mapped.</source>
+                <target>&quot;Email&quot; Feld muss zugeordnet werden.</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.error_noMap" resname="recipient.import.mapping.error_noMap">
+                <source>No mapping is found. You have to map at least &quot;email&quot; field.</source>
+                <target>Es wurde keine Zuordnung gefunden. Sie müssen mindestens das Feld &quot;E-Mail&quot; zuordnen.</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.mapTo" resname="recipient.import.mapping.mapTo">
+                <source>Maps to ...</source>
+                <target>gehört zu ...</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.mapping" resname="recipient.import.mapping.mapping">
+                <source>Mapping</source>
+                <target>Zuordnung</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.number" resname="recipient.import.mapping.number">
+                <source>#</source>
+            </trans-unit>
+            <trans-unit id="recipient.import.mapping.value" resname="recipient.import.mapping.value">
+                <source>Value</source>
+                <target>Wert</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.or" resname="recipient.import.or">
+                <source>OR</source>
+                <target>ODER</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.pasteCsv" resname="recipient.import.pasteCsv">
+                <source>Paste the CSV data</source>
+                <target>CSV Daten einfügen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.recordUnique" resname="recipient.import.recordUnique">
+                <source>Specify the field which determines the uniqueness of imported users</source>
+                <target>Geben Sie das Feld an, das die Einzigartigkeit der importierten Benutzer bestimmt</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.removeExisting" resname="recipient.import.removeExisting">
+                <source>Remove all Addresses in the storage folder before importing</source>
+                <target>Alle Adressen im Speicherordner vor dem Importieren entfernen</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.separator" resname="recipient.import.separator">
+                <source>Field delimiter (data fields are separated by...)</source>
+                <target>Feldtrenner (Datenfelder werden separiert von ..)</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.separator.colon" resname="recipient.import.separator.colon">
+                <source>colon [:]</source>
+                <target>Doppelpunkt [:]</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.separator.comma" resname="recipient.import.separator.comma">
+                <source>comma [,]</source>
+                <target>Komma [,]</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.separator.semicolon" resname="recipient.import.separator.semicolon">
+                <source>semicolon [;]</source>
+                <target>Semicolon [;]</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.separator.tab" resname="recipient.import.separator.tab">
+                <source>horizontal tab [TAB]</source>
+                <target>Tabulator [TAB]</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.storage" resname="recipient.import.storage">
+                <source>Please select the storage folder for the addresses to be imported.</source>
+                <target>Bitte wählen Sie den Speicherordner für die zu importierenden Adressen.</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.updateUnique" resname="recipient.import.updateUnique">
+                <source>Update existing (unique) addresses</source>
+                <target>Eindeutige Adressen aktualisieren</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.chooseCsvFile" resname="recipient.import.chooseCsvFile">
+                <source>Choose a csv file from your local computer</source>
+                <target>Wählen Sie eine CSV-Datei von Ihrem lokalen Computer</target>
+            </trans-unit>
+            <trans-unit id="recipient.notification.disallowedCsvExport.message" resname="recipient.notification.disallowedCsvExport.message">
+                <source>CSV export failed. Insufficient access right.</source>
+                <target>CSV-Export fehlgeschlagen. Unzureichendes Zugriffsrecht.</target>
+            </trans-unit>
+            <trans-unit id="recipient.createMailGroup" resname="recipient.createMailGroup">
+                <source>New recipient list</source>
+                <target>Neue Empfängerliste</target>
+            </trans-unit>
+            <trans-unit id="recipient.createMailGroup.message" resname="recipient.createMailGroup.message">
+                <source>New group</source>
+                <target>Neue Gruppe</target>
+            </trans-unit>
+            <trans-unit id="recipient.categories" resname="recipient.categories">
+                <source>Categories</source>
+                <target>Kategorien</target>
+            </trans-unit>
+            <trans-unit id="recipient.button.importCsv" resname="recipient.button.importCsv">
+                <source>Import CSV</source>
+                <target>CSV importieren</target>
+            </trans-unit>
             <trans-unit id="report.general.groups">
                 <source>Recipient groups</source>
                 <target>Empfängergruppen</target>
@@ -174,6 +580,241 @@
             <trans-unit id="report.notification.recipientsDisabled.message">
                 <source>%s recipients successfully disabled.</source>
                 <target>%s Empfänger erfolgreich deaktiviert.</target>
+            </trans-unit>
+            <trans-unit id="report.plainList" resname="report.plainList">
+                <source>Plain List</source>
+                <target>Reine Liste</target>
+            </trans-unit>
+            <trans-unit id="report.returned.table.tt_address" resname="report.returned.table.tt_address">
+                <source>Address Table [tt_address]</source>
+                <target>Adressen Tabelle [tt_address]</target>
+            </trans-unit>
+            <trans-unit id="report.returned.table.custom" resname="report.returned.table.custom">
+                <source>Custom Table</source>
+                <target>Benutzerdefinierte Tabelle</target>
+            </trans-unit>
+            <trans-unit id="report.returned.table.fe_users" resname="report.returned.table.fe_users">
+                <source>Website User [fe_users]</source>
+                <target>Webseitenbenutzer [fe_users]</target>
+            </trans-unit>
+            <trans-unit id="report.csvReturned" resname="report.csvReturned">
+                <source>CSV of recipients of returned mails</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails</target>
+            </trans-unit>
+            <trans-unit id="report.csvReturned.badHeader" resname="report.csvReturned.badHeader">
+                <source>CSV of returned recipients with error in header</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit Fehlern im Header</target>
+            </trans-unit>
+            <trans-unit id="report.csvReturned.badHost" resname="report.csvReturned.badHost">
+                <source>CSV of returned recipients with bad host</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit Fehler "Bad host"</target>
+            </trans-unit>
+            <trans-unit id="report.csvReturned.mailboxFull" resname="report.csvReturned.mailboxFull">
+                <source>CSV of returned recipients with mailbox full</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit Fehler "Mailbox voll"</target>
+            </trans-unit>
+            <trans-unit id="report.report.csvReturned.reasonUnknown" resname="report.report.csvReturned.reasonUnknown">
+                <source>CSV of returned recipients for unknown reason</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Fehler</target>
+            </trans-unit>
+            <trans-unit id="report.csvReturned.unknownRecipient" resname="report.csvReturned.unknownRecipient">
+                <source>CSV of returned recipients with unknown recipient</source>
+                <target>CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Empfänger</target>
+            </trans-unit>
+            <trans-unit id="report.response.clickedLinks" resname="report.response.clickedLinks">
+                <source>Clicked links</source>
+                <target>Geklickte Links</target>
+            </trans-unit>
+            <trans-unit id="report.html" resname="report.html">
+                <source>HTML</source>
+            </trans-unit>
+            <trans-unit id="report.html.linkNumber" resname="report.html.linkNumber">
+                <source>HTML Link #</source>
+            </trans-unit>
+            <trans-unit id="report.html.mailsViewed" resname="report.html.mailsViewed">
+                <source>Mails viewed</source>
+                <target>Mails angesehen</target>
+            </trans-unit>
+            <trans-unit id="report.badHost" resname="report.badHost">
+                <source>Bad host</source>
+            </trans-unit>
+            <trans-unit id="report.mail" resname="report.mail">
+                <source>Mail</source>
+            </trans-unit>
+            <trans-unit id="report.disable.returned" resname="report.disable.returned">
+                <source>Disable returned recipients</source>
+                <target>Empfänger deaktivieren</target>
+            </trans-unit>
+            <trans-unit id="report.disable.returned.badHeader" resname="report.disable.returned.badHeader">
+                <source>Disable returned recipients with error in header</source>
+                <target>Deaktivieren Sie zurückgesendete Empfänger mit Fehler in der Kopfzeile</target>
+            </trans-unit>
+            <trans-unit id="report.disable.returned.badHost" resname="report.disable.returned.badHost">
+                <source>Disable returned recipients with bad host</source>
+                <target>Deaktiviere Empfänger mit falschem Host</target>
+            </trans-unit>
+            <trans-unit id="report.disable.returned.mailboxFull" resname="report.disable.returned.mailboxFull">
+                <source>Disable returned recipients with mailbox full</source>
+                <target>Deaktiviere Empfängern mit vollem Postfach</target>
+            </trans-unit>
+            <trans-unit id="report.disable.returned.reasonUnknown" resname="report.disable.returned.reasonUnknown">
+                <source>Disable returned recipients for unknown reason</source>
+                <target>Deaktiviere Empfängern mit unbekannten Grund</target>
+            </trans-unit>
+            <trans-unit id="report.disable.returned.unknownRecipient" resname="report.disable.returned.unknownRecipient">
+                <source>Disable returned recipients with unknown recipient</source>
+                <target>Deaktiviere Empfängern mit unbekannten Empfänger</target>
+            </trans-unit>
+            <trans-unit id="report.headerError" resname="report.headerError">
+                <source>Error in Header</source>
+                <target>Fehler im Header</target>
+            </trans-unit>
+            <trans-unit id="report.performance" resname="report.performance">
+                <source>Performance</source>
+                <target>Leistung</target>
+            </trans-unit>
+            <trans-unit id="report.performance.linksClickedPerRespondent" resname="report.performance.linksClickedPerRespondent">
+                <source>Total responses/Unique responses</source>
+                <target>Antworten insgesamt/einzigartige Antworten</target>
+            </trans-unit>
+            <trans-unit id="report.returned" resname="report.returned">
+                <source>Returned recipients</source>
+                <target>Zurückgesandte Empfänger</target>
+            </trans-unit>
+            <trans-unit id="report.returned.badHeader" resname="report.returned.badHeader">
+                <source>Returned recipients with error in header</source>
+                <target>Empfänger mit Fehler in der Kopfzeile</target>
+            </trans-unit>
+            <trans-unit id="report.returned.badHost" resname="report.returned.badHost">
+                <source>Returned recipients with bad host</source>
+                <target>Empfänger mit falschem Host</target>
+            </trans-unit>
+            <trans-unit id="report.returned.mailboxFull" resname="report.returned.mailboxFull">
+                <source>Returned recipients with mailbox full</source>
+                <target>Empfänger mit vollem Postfach</target>
+            </trans-unit>
+            <trans-unit id="report.returned.reasonUnknown" resname="report.returned.reasonUnknown">
+                <source>Returned recipients for unknown reason</source>
+                <target>Empfänger mit unbekanntem Grund</target>
+            </trans-unit>
+            <trans-unit id="report.returned.unknownRecipient" resname="report.returned.unknownRecipient">
+                <source>Returned recipients with unknown recipient</source>
+                <target>Empfänger mit unbekanntem Empfänger</target>
+            </trans-unit>
+            <trans-unit id="report.mailboxFull" resname="report.mailboxFull">
+                <source>Mailbox full</source>
+                <target>Postfach voll</target>
+            </trans-unit>
+            <trans-unit id="report.deliveryFailed" resname="report.deliveryFailed">
+                <source>Delivery failed</source>
+                <target>Zustellung fehlgeschlagen</target>
+            </trans-unit>
+            <trans-unit id="report.mailsSent" resname="report.mailsSent">
+                <source>Mails received</source>
+                <target>Mails empfangen</target>
+            </trans-unit>
+            <trans-unit id="report.chooseMail" resname="report.chooseMail">
+                <source>Choose a mail</source>
+                <target>Mail wählen</target>
+            </trans-unit>
+            <trans-unit id="report.deliveryBegun" resname="report.deliveryBegun">
+                <source>Delivery begun</source>
+                <target>Versand gestartet</target>
+            </trans-unit>
+            <trans-unit id="report.deliveryEnded" resname="report.deliveryEnded">
+                <source>Delivery ended</source>
+                <target>Versand beendet</target>
+            </trans-unit>
+            <trans-unit id="report.header" resname="report.header">
+                <source>Mail Reports</source>
+                <target>Mail Berichte</target>
+            </trans-unit>
+            <trans-unit id="report.show.header" resname="report.show.header">
+                <source>Mail Report</source>
+                <target>Mail Bericht</target>
+            </trans-unit>
+            <trans-unit id="report.scheduled" resname="report.scheduled">
+                <source>Scheduled</source>
+                <target>Geplant</target>
+            </trans-unit>
+            <trans-unit id="report.status" resname="report.status">
+                <source>Status</source>
+            </trans-unit>
+            <trans-unit id="report.subject" resname="report.subject">
+                <source>Subject</source>
+                <target>Thema</target>
+            </trans-unit>
+            <trans-unit id="report.totalSent" resname="report.totalSent">
+                <source># sent</source>
+                <target># versandt</target>
+            </trans-unit>
+            <trans-unit id="report.plainText" resname="report.plainText">
+                <source>Plaintext</source>
+                <target>Reiner Text</target>
+            </trans-unit>
+            <trans-unit id="report.plainText.linkNumber" resname="report.plainText.linkNumber">
+                <source>Plaintext Link #</source>
+                <target>Reiner Text Link #</target>
+            </trans-unit>
+            <trans-unit id="report.reasonUnknown" resname="report.reasonUnknown">
+                <source>Reason unknown</source>
+                <target>Grund unbekannt</target>
+            </trans-unit>
+            <trans-unit id="report.recipientUnknown" resname="report.recipientUnknown">
+                <source>Recipient unknown</source>
+                <target>Empfänger unbekannt</target>
+            </trans-unit>
+            <trans-unit id="report.responses" resname="report.responses">
+                <source>Responses</source>
+                <target>Antworten</target>
+            </trans-unit>
+            <trans-unit id="report.reactions" resname="report.reactions">
+                <source>Reactions</source>
+                <target>Reaktionen</target>
+            </trans-unit>
+            <trans-unit id="report.total" resname="report.total">
+                <source>Total</source>
+                <target>Gesamt</target>
+            </trans-unit>
+            <trans-unit id="report.total.returned" resname="report.total.returned">
+                <source>Total mails returned</source>
+                <target>Zurückerhaltene Mails</target>
+            </trans-unit>
+            <trans-unit id="report.total.responses" resname="report.total.responses">
+                <source>Total responses (links clicked)</source>
+                <target>Reaktionen (geklickte Links)</target>
+            </trans-unit>
+            <trans-unit id="report.uniqueResponses" resname="report.uniqueResponses">
+                <source>Unique responses (links clicked)</source>
+                <target>Eindeutige Reaktionen (geklickte Links)</target>
+            </trans-unit>
+            <trans-unit id="report.deliveryBeginEnd" resname="report.deliveryBeginEnd">
+                <source>Delivery begun/ended</source>
+                <target>Versand von/bis</target>
+            </trans-unit>
+            <trans-unit id="report.source" resname="report.source">
+                <source>Source</source>
+                <target>Quelle</target>
+            </trans-unit>
+            <trans-unit id="report.from" resname="report.from">
+                <source>Sender</source>
+                <target>Absender</target>
+            </trans-unit>
+            <trans-unit id="report.formatAttachments" resname="report.formatAttachments">
+                <source>Format/attachments</source>
+                <target>Format/Anhänge</target>
+            </trans-unit>
+            <trans-unit id="report.includeMedia" resname="report.includeMedia">
+                <source>Include media</source>
+                <target>Eingebundene Bilder</target>
+            </trans-unit>
+            <trans-unit id="report.recipients" resname="report.recipients">
+                <source>Recipients</source>
+                <target>Empfänger</target>
+            </trans-unit>
+            <trans-unit id="report.replyTo" resname="report.replyTo">
+                <source>Reply</source>
+                <target>Antwort</target>
             </trans-unit>
             <trans-unit id="queue.notification.nothingToDo.title">
                 <source>Nothing to do</source>
@@ -186,6 +827,42 @@
             <trans-unit id="queue.notification.mailSendTriggered.message">
                 <source>Manual sending started!</source>
                 <target>Manueller Versand gestartet!</target>
+            </trans-unit>
+            <trans-unit id="queue.deliveryBegun" resname="queue.deliveryBegun">
+                <source>Delivery begun</source>
+                <target>Versand gestartet</target>
+            </trans-unit>
+            <trans-unit id="queue.deliveryEnded" resname="queue.deliveryEnded">
+                <source>Delivery ended</source>
+                <target>Versand beendet</target>
+            </trans-unit>
+            <trans-unit id="queue.button.triggerManualSending" resname="queue.button.triggerManualSending">
+                <source>Start sending manually</source>
+                <target>Versand manuell starten</target>
+            </trans-unit>
+            <trans-unit id="queue.manualSending.description" resname="queue.manualSending.description">
+                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed within the settings module.</source>
+                <target>Wenn TYPO3 nicht für den Versand von Mails über den mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand auch durch Klick auf den folgenden Button manuell anstossen. Mit jedem Klick werden %s Mails versandt. Die Anzahl lässt sich über das Einstellungs-Modul ändern.</target>
+            </trans-unit>
+            <trans-unit id="queue.manualSending" resname="queue.manualSending">
+                <source>Manual delivery</source>
+                <target>Manueller Versand</target>
+            </trans-unit>
+            <trans-unit id="queue.numberSent" resname="queue.numberSent">
+                <source># sent</source>
+                <target># versandt</target>
+            </trans-unit>
+            <trans-unit id="queue.scheduled" resname="queue.scheduled">
+                <source>Scheduled</source>
+                <target>Geplant</target>
+            </trans-unit>
+            <trans-unit id="queue.subject" resname="queue.subject">
+                <source>Subject</source>
+                <target>Thema</target>
+            </trans-unit>
+            <trans-unit id="queue.header" resname="queue.header">
+                <source>Mail Queue</source>
+                <target>Mail Warteschlange</target>
             </trans-unit>
             <trans-unit id="configuration.notification.permissionError.message">
                 <source>You do not have permissions to write configuration to page %s.</source>
@@ -495,633 +1172,14 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<source>URL of HTML content</source>
 				<target>URL des HTML Inhalts</target>
 			</trans-unit>
-			<trans-unit id="queue.deliveryBegun" resname="queue.deliveryBegun">
-				<source>Delivery begun</source>
-				<target>Versand gestartet</target>
-			</trans-unit>
-			<trans-unit id="queue.deliveryEnded" resname="queue.deliveryEnded">
-				<source>Delivery ended</source>
-                <target>Versand beendet</target>
-			</trans-unit>
-			<trans-unit id="queue.button.triggerManualSending" resname="queue.button.triggerManualSending">
-				<source>Start sending manually</source>
-				<target>Versand manuell starten</target>
-			</trans-unit>
-			<trans-unit id="queue.manualSending.description" resname="queue.manualSending.description">
-                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed within the settings module.</source>
-				<target>Wenn TYPO3 nicht für den Versand von Mails über den mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand auch durch Klick auf den folgenden Button manuell anstossen. Mit jedem Klick werden %s Mails versandt. Die Anzahl lässt sich über das Einstellungs-Modul ändern.</target>
-			</trans-unit>
-			<trans-unit id="queue.manualSending" resname="queue.manualSending">
-				<source>Manual delivery</source>
-				<target>Manueller Versand</target>
-			</trans-unit>
-			<trans-unit id="queue.numberSent" resname="queue.numberSent">
-				<source># sent</source>
-				<target># versandt</target>
-			</trans-unit>
-			<trans-unit id="queue.scheduled" resname="queue.scheduled">
-				<source>Scheduled</source>
-				<target>Geplant</target>
-			</trans-unit>
-			<trans-unit id="queue.subject" resname="queue.subject">
-				<source>Subject</source>
-				<target>Thema</target>
-			</trans-unit>
-			<trans-unit id="configuration.noEditPermissions" resname="configuration.noEditPermissions">
-				<source>You don't have permissions to change mail settings.</source>
-				<target>Sie haben keine Berechtigung zum Ändern der E-Mail-Einstellungen.</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.externalMailPlainTextUrl" resname="mail.wizard.externalMailPlainTextUrl">
-				<source>URL of plain text content</source>
-				<target>URL des reinen Textinhalts</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.externalMailSubject" resname="mail.wizard.externalMailSubject">
-				<source>Subject</source>
-				<target>Thema</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.title" resname="mail.wizard.title">
-				<source>Mail Wizard</source>
-			</trans-unit>
-			<trans-unit id="mail.wizard.externalPage" resname="mail.wizard.externalPage">
-				<source>External Page</source>
-				<target>Externe Seite</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.internalPage" resname="mail.wizard.internalPage">
-				<source>Internal Page</source>
-				<target>Interne Seite</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.openMails" resname="mail.wizard.openMails">
-				<source>Open Mails</source>
-				<target>Offene Mails</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.quickMail" resname="mail.wizard.quickMail">
-				<source>Quick Mail</source>
-				<target>Kurznachricht</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource">
-				<source>Please choose source</source>
-				<target>Bitte Quelle auswählen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.settings" resname="mail.wizard.settings">
-				<source>Settings</source>
-				<target>Einstellungen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.categories" resname="mail.wizard.categories">
-				<source>Categories</source>
-				<target>Kategorien</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.testMail" resname="mail.wizard.testMail">
-				<source>Test Mail</source>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending" resname="mail.wizard.scheduleSending">
-				<source>Schedule sending</source>
-				<target>Versandplanung</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.subject" resname="mail.wizard.subject">
-				<source>Subject</source>
-				<target>Thema</target>
-			</trans-unit>
-			<trans-unit id="tx_mail_domain_model_mail" resname="tx_mail_domain_model_mail">
-				<source>mail record</source>
-			</trans-unit>
-			<trans-unit id="configuration.header" resname="configuration.header">
-				<source>Mail Settings</source>
-				<target>Mail Einstellungen</target>
-			</trans-unit>
-			<trans-unit id="queue.header" resname="queue.header">
-				<source>Mail Queue</source>
-				<target>Mail Warteschlange</target>
-			</trans-unit>
-			<trans-unit id="recipient.header" resname="recipient.header">
-				<source>Recipient groups</source>
-				<target>Empfängergruppen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.header" resname="recipient.import.header">
-				<source>Import CSV into tt_address database table</source>
-				<target>CSV in tt_address Datenbanktabelle importieren</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.dublette.description" resname="recipient.import.dublette.description">
-				<source>Filter email dublettes from csv data. If a dublette is found, only the first entry is imported.</source>
-				<target>Filtere E-Mail-Dubletten aus CSV-Daten. Wenn eine Dublette gefunden wird, wird nur der erste Eintrag importiert.</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.validEmail.description" resname="recipient.import.validEmail.description">
-				<source>Only update/import valid emails from csv data.</source>
-				<target>Nur gültige E-Mails aus csv-Daten aktualisieren/importieren.</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.notification.done.message" resname="recipient.import.notification.done.message">
-				<source>CSV import successfully finished.</source>
-				<target>CSV-Import erfolgreich abgeschlossen.</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.encapsulation" resname="recipient.import.encapsulation">
-				<source>Field encapsulation character (data fields are encapsed with...)</source>
-				<target>Feldkapselungszeichen (Datenfelder sind gekapselt mit...)</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.firstRowContainFieldNames" resname="recipient.import.firstRowContainFieldNames">
-				<source>First row of import file contain field names</source>
-				<target>Die erste Zeile der Importdatei enthält Feldnamen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.settings" resname="recipient.import.settings">
-				<source>Import settings</source>
-				<target>Import Einstellungen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.uploadCsv.subheader" resname="recipient.import.uploadCsv.subheader">
-				<source>Upload CSV</source>
-				<target>CSV Hochladen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.allHtml" resname="recipient.import.allHtml">
-				<source>All recipients receive HTML mail</source>
-				<target>Alle Empfänger erhalten HTML-Mails</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.categoryMapping" resname="recipient.import.categoryMapping">
-				<source>Categories</source>
-				<target>Kategorien</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.assignAllCategories" resname="recipient.import.assignAllCategories">
-				<source>Assign the following categories to all recipients</source>
-				<target>Weisen Sie allen Empfängern die folgenden Kategorien zu</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mappingCharset.subheader" resname="recipient.import.mappingCharset.subheader">
-				<source>Settings</source>
-				<target>Einstellungen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mappingCharset.pleaseChoose" resname="recipient.import.mappingCharset.pleaseChoose">
-				<source>Please select the character set of the import file</source>
-				<target>Bitte wählen Sie den Zeichensatz der Importdatei</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.fieldMapping" resname="recipient.import.fieldMapping">
-				<source>Field mapping</source>
-				<target>Feldzuordnung</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.fieldMapping.additionalOptions" resname="recipient.import.fieldMapping.additionalOptions">
-				<source>Additional options</source>
-				<target>Zusätzliche Optionen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.description" resname="recipient.import.mapping.description">
-				<source>Description</source>
-				<target>Beschreibung</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.error" resname="recipient.import.mapping.error">
-				<source>Mapping error</source>
-				<target>Zuordnungsfehler</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.error_detail" resname="recipient.import.mapping.error_detail">
-				<source>Please fix following error(s)</source>
-				<target>Bitte beheben Sie folgende(n) Fehler</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.error_email" resname="recipient.import.mapping.error_email">
-				<source>&quot;Email&quot; field has to be mapped.</source>
-				<target>&quot;Email&quot; Feld muss zugeordnet werden.</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.error_noMap" resname="recipient.import.mapping.error_noMap">
-				<source>No mapping is found. You have to map at least &quot;email&quot; field.</source>
-				<target>Es wurde keine Zuordnung gefunden. Sie müssen mindestens das Feld &quot;E-Mail&quot; zuordnen.</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.mapTo" resname="recipient.import.mapping.mapTo">
-				<source>Maps to ...</source>
-				<target>gehört zu ...</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.mapping" resname="recipient.import.mapping.mapping">
-				<source>Mapping</source>
-				<target>Zuordnung</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.number" resname="recipient.import.mapping.number">
-				<source>#</source>
-			</trans-unit>
-			<trans-unit id="recipient.import.mapping.value" resname="recipient.import.mapping.value">
-				<source>Value</source>
-				<target>Wert</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.or" resname="recipient.import.or">
-				<source>OR</source>
-				<target>ODER</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.pasteCsv" resname="recipient.import.pasteCsv">
-				<source>Paste the CSV data</source>
-				<target>CSV Daten einfügen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.recordUnique" resname="recipient.import.recordUnique">
-				<source>Specify the field which determines the uniqueness of imported users</source>
-				<target>Geben Sie das Feld an, das die Einzigartigkeit der importierten Benutzer bestimmt</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.removeExisting" resname="recipient.import.removeExisting">
-				<source>Remove all Addresses in the storage folder before importing</source>
-				<target>Alle Adressen im Speicherordner vor dem Importieren entfernen</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.separator" resname="recipient.import.separator">
-				<source>Field delimiter (data fields are separated by...)</source>
-				<target>Feldtrenner (Datenfelder werden separiert von ..)</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.separator.colon" resname="recipient.import.separator.colon">
-				<source>colon [:]</source>
-				<target>Doppelpunkt [:]</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.separator.comma" resname="recipient.import.separator.comma">
-				<source>comma [,]</source>
-				<target>Komma [,]</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.separator.semicolon" resname="recipient.import.separator.semicolon">
-				<source>semicolon [;]</source>
-				<target>Semicolon [;]</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.separator.tab" resname="recipient.import.separator.tab">
-				<source>horizontal tab [TAB]</source>
-				<target>Tabulator [TAB]</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.storage" resname="recipient.import.storage">
-				<source>Please select the storage folder for the addresses to be imported.</source>
-				<target>Bitte wählen Sie den Speicherordner für die zu importierenden Adressen.</target>
-			</trans-unit>
-			<trans-unit id="general.button.update_unique" resname="general.button.update_unique">
-				<source>Update existing (unique) addresses</source>
-				<target>Eindeutige Adressen aktualisieren</target>
-			</trans-unit>
-			<trans-unit id="recipient.import.chooseCsvFile" resname="recipient.import.chooseCsvFile">
-				<source>Choose a csv file from your local computer</source>
-				<target>Wählen Sie eine CSV-Datei von Ihrem lokalen Computer</target>
-			</trans-unit>
-			<trans-unit id="report.plainList" resname="report.plainList">
-				<source>Plain List</source>
-				<target>Reine Liste</target>
-			</trans-unit>
-			<trans-unit id="report.returned.table.tt_address" resname="report.returned.table.tt_address">
-				<source>Address Table [tt_address]</source>
-				<target>Adressen Tabelle [tt_address]</target>
-			</trans-unit>
-			<trans-unit id="report.returned.table.custom" resname="report.returned.table.custom">
-				<source>Custom Table</source>
-				<target>Benutzerdefinierte Tabelle</target>
-			</trans-unit>
-			<trans-unit id="report.returned.table.fe_users" resname="report.returned.table.fe_users">
-				<source>Website User [fe_users]</source>
-				<target>Webseitenbenutzer [fe_users]</target>
-			</trans-unit>
-			<trans-unit id="recipient.notification.disallowedCsvExport.message" resname="recipient.notification.disallowedCsvExport.message">
-				<source>CSV export failed. Insufficient access right.</source>
-				<target>CSV-Export fehlgeschlagen. Unzureichendes Zugriffsrecht.</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.categories.restrictToCategories" resname="mail.wizard.categories.restrictToCategories">
-				<source>Restrict to categories</source>
-				<target>Auf Kategorien einschränken</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.attachment" resname="mail.wizard.attachment">
-				<source>Attachment</source>
-				<target>Anhang</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.categories.column" resname="mail.wizard.categories.column">
-				<source>Column</source>
-				<target>Spalte</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.lastModified" resname="mail.wizard.lastModified">
-				<source>Last modified</source>
-				<target>Zuletzt geändert</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.size" resname="mail.wizard.size">
-				<source>Size</source>
-				<target>Größe</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.subject" resname="mail.wizard.subject">
-				<source>Subject</source>
-				<target>Thema</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.type" resname="mail.wizard.type">
-				<source>Type</source>
-				<target>Typ</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.noMailPagesFound.title" resname="mail.wizard.noMailPagesFound.title">
-				<source>Select a mail</source>
-				<target>Mail auswählen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.noMailPagesFound.message" resname="mail.wizard.noMailPagesFound.message">
-				<source>There are no pages in the mail module.</source>
-				<target>Es gibt keine Seiten im Mail-Modul.</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.htmlPreviewLink.title" resname="mail.wizard.htmlPreviewLink.title">
-				<source>View page in HTML format</source>
-				<target>Seite im HTML-Format anzeigen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.plainTextPreviewLink.title" resname="mail.wizard.plainTextPreviewLink.title">
-				<source>View page in Text format</source>
-				<target>Seite im Text-Format anzeigen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.quickmail.breakLines" resname="mail.wizard.quickmail.breakLines">
-				<source>Break lines to 76 char</source>
-				<target>Zeilenumbruch auf 76 Zeichen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.quickmail.message" resname="mail.wizard.quickmail.message">
-				<source>Message</source>
-				<target>Nachricht</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.quickmail.senderEmail" resname="mail.wizard.quickmail.senderEmail">
-				<source>Sender Email</source>
-				<target>Absender E-Mail</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.quickmail.senderName" resname="mail.wizard.quickmail.senderName">
-				<source>Sender Name</source>
-				<target>Absender Name</target>
-			</trans-unit>
-			<trans-unit id="recipient.createMailGroup" resname="recipient.createMailGroup">
-				<source>New recipient list</source>
-				<target>Neue Empfängerliste</target>
-			</trans-unit>
-			<trans-unit id="recipient.createMailGroup.message" resname="recipient.createMailGroup.message">
-				<source>New group</source>
-				<target>Neue Gruppe</target>
-			</trans-unit>
-            <trans-unit id="recipient.categories" resname="recipient.categories">
-                <source>Categories</source>
-                <target>Kategorien</target>
+            <trans-unit id="configuration.noEditPermissions" resname="configuration.noEditPermissions">
+                <source>You don't have permissions to change mail settings.</source>
+                <target>Sie haben keine Berechtigung zum Ändern der E-Mail-Einstellungen.</target>
             </trans-unit>
-            <trans-unit id="recipient.button.importCsv" resname="recipient.button.importCsv">
-				<source>Import CSV</source>
-				<target>CSV importieren</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleDraft" resname="mail.wizard.scheduleDraft">
-				<source>Save mail settings for recurring mailings</source>
-				<target>Mail-Einstellungen für wiederkehrende Mailings speichern</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending.mailGroup" resname="mail.wizard.scheduleSending.mailGroup">
-				<source>Recipient group</source>
-				<target>Empfängergruppe</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending.mailGroups" resname="mail.wizard.scheduleSending.mailGroups">
-				<source>Recipient groups</source>
-				<target>Empfängergruppen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending.info.mailGroup.title" resname="mail.wizard.scheduleSending.info.mailGroup.title">
-				<source>Select recipients and time of sending</source>
-				<target>Empfänger und Zeitpunkt des Versands auswählen</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending.info.mailGroup.message" resname="mail.wizard.scheduleSending.info.mailGroup.message" xmlspace="preserve">
-				<source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
-				After click FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending is finished.]]></source>
-                <target><![CDATA[Hier müssen Sie mindestens eine Empfängergruppe und den Versandbeginn auswählen.
-				Nach Klick auf FERTIGSTELLEN wird die Mail in die Warteschlange aufgenommen. Dort kann sie gelöscht werden, bis der endgültige Versand abgeschlossen ist.]]></target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending.testMail" resname="mail.wizard.scheduleSending.testMail">
-				<source>Send this as test mail</source>
-				<target>Als Test-Mail senden</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending.distributionTime" resname="mail.wizard.scheduleSending.distributionTime">
-				<source>Distribution time (hh:mm dd-mm-yyyy)</source>
-				<target>Versandbeginn (hh:mm dd-mm-yyyy)</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.notification.draftSaved.title" resname="mail.wizard.notification.draftSaved.title">
-				<source>Mail saved as draft</source>
-				<target>Mail als Entwurf gespeichert</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.notification.draftSaved.message" resname="mail.wizard.notification.draftSaved.message">
-				<source>The mail "%s" was successfully saved as draft for recurring sending within the scheduler.</source>
-				<target>Die E-Mail "%s" wurde erfolgreich als Entwurf für den wiederholten Versand im Planer gespeichert.</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.notification.scheduledForDistribution.title" resname="mail.wizard.notification.scheduledForDistribution.title">
-				<source>Mail scheduled for distribution</source>
-				<target>Mail für Versand eingeplant</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.notification.scheduledForDistribution.message" resname="mail.wizard.notification.scheduledForDistribution.message">
-				<source>The mail "%s" was successfully scheduled for distribution at %s.</source>
-				<target>Die E-Mail "%s" wurde erfolgreich für den Versand am %s eingeplant.</target>
-			</trans-unit>
-			<trans-unit id="report.csvReturned" resname="report.csvReturned">
-				<source>CSV of recipients of returned mails</source>
-				<target>CSV der Empfänger von zurückgesendeten Mails</target>
-			</trans-unit>
-			<trans-unit id="report.csvReturned.badHeader" resname="report.csvReturned.badHeader">
-				<source>CSV of returned recipients with error in header</source>
-				<target>CSV der Empfänger von zurückgesendeten Mails mit Fehlern im Header</target>
-			</trans-unit>
-			<trans-unit id="report.csvReturned.badHost" resname="report.csvReturned.badHost">
-				<source>CSV of returned recipients with bad host</source>
-                <target>CSV der Empfänger von zurückgesendeten Mails mit Fehler "Bad host"</target>
-			</trans-unit>
-			<trans-unit id="report.csvReturned.mailboxFull" resname="report.csvReturned.mailboxFull">
-				<source>CSV of returned recipients with mailbox full</source>
-                <target>CSV der Empfänger von zurückgesendeten Mails mit Fehler "Mailbox voll"</target>
-			</trans-unit>
-			<trans-unit id="report.report.csvReturned.reasonUnknown" resname="report.report.csvReturned.reasonUnknown">
-				<source>CSV of returned recipients for unknown reason</source>
-                <target>CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Fehler</target>
-			</trans-unit>
-			<trans-unit id="report.csvReturned.unknownRecipient" resname="report.csvReturned.unknownRecipient">
-				<source>CSV of returned recipients with unknown recipient</source>
-                <target>CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Empfänger</target>
-			</trans-unit>
-            <trans-unit id="report.response.clickedLinks" resname="report.response.clickedLinks">
-                <source>Clicked links</source>
-                <target>Geklickte Links</target>
+            <trans-unit id="configuration.header" resname="configuration.header">
+                <source>Mail Settings</source>
+                <target>Mail Einstellungen</target>
             </trans-unit>
-			<trans-unit id="report.html" resname="report.html">
-				<source>HTML</source>
-			</trans-unit>
-			<trans-unit id="report.html.linkNumber" resname="report.html.linkNumber">
-				<source>HTML Link #</source>
-			</trans-unit>
-			<trans-unit id="report.html.mailsViewed" resname="report.html.mailsViewed">
-				<source>Mails viewed</source>
-				<target>Mails angesehen</target>
-			</trans-unit>
-			<trans-unit id="report.badHost" resname="report.badHost">
-				<source>Bad host</source>
-			</trans-unit>
-			<trans-unit id="report.mail" resname="report.mail">
-				<source>Mail</source>
-			</trans-unit>
-			<trans-unit id="report.disable.returned" resname="report.disable.returned">
-				<source>Disable returned recipients</source>
-				<target>Empfänger deaktivieren</target>
-			</trans-unit>
-			<trans-unit id="report.disable.returned.badHeader" resname="report.disable.returned.badHeader">
-				<source>Disable returned recipients with error in header</source>
-				<target>Deaktivieren Sie zurückgesendete Empfänger mit Fehler in der Kopfzeile</target>
-			</trans-unit>
-			<trans-unit id="report.disable.returned.badHost" resname="report.disable.returned.badHost">
-				<source>Disable returned recipients with bad host</source>
-				<target>Deaktiviere Empfänger mit falschem Host</target>
-			</trans-unit>
-			<trans-unit id="report.disable.returned.mailboxFull" resname="report.disable.returned.mailboxFull">
-				<source>Disable returned recipients with mailbox full</source>
-				<target>Deaktiviere Empfängern mit vollem Postfach</target>
-			</trans-unit>
-			<trans-unit id="report.disable.returned.reasonUnknown" resname="report.disable.returned.reasonUnknown">
-				<source>Disable returned recipients for unknown reason</source>
-				<target>Deaktiviere Empfängern mit unbekannten Grund</target>
-			</trans-unit>
-			<trans-unit id="report.disable.returned.unknownRecipient" resname="report.disable.returned.unknownRecipient">
-				<source>Disable returned recipients with unknown recipient</source>
-				<target>Deaktiviere Empfängern mit unbekannten Empfänger</target>
-			</trans-unit>
-			<trans-unit id="report.headerError" resname="report.headerError">
-				<source>Error in Header</source>
-				<target>Fehler im Header</target>
-			</trans-unit>
-			<trans-unit id="report.performance" resname="report.performance">
-				<source>Performance</source>
-				<target>Leistung</target>
-			</trans-unit>
-			<trans-unit id="report.performance.linksClickedPerRespondent" resname="report.performance.linksClickedPerRespondent">
-				<source>Total responses/Unique responses</source>
-				<target>Antworten insgesamt/einzigartige Antworten</target>
-			</trans-unit>
-			<trans-unit id="report.returned" resname="report.returned">
-				<source>Returned recipients</source>
-				<target>Zurückgesandte Empfänger</target>
-			</trans-unit>
-			<trans-unit id="report.returned.badHeader" resname="report.returned.badHeader">
-				<source>Returned recipients with error in header</source>
-				<target>Empfänger mit Fehler in der Kopfzeile</target>
-			</trans-unit>
-			<trans-unit id="report.returned.badHost" resname="report.returned.badHost">
-				<source>Returned recipients with bad host</source>
-				<target>Empfänger mit falschem Host</target>
-			</trans-unit>
-			<trans-unit id="report.returned.mailboxFull" resname="report.returned.mailboxFull">
-				<source>Returned recipients with mailbox full</source>
-				<target>Empfänger mit vollem Postfach</target>
-			</trans-unit>
-			<trans-unit id="report.returned.reasonUnknown" resname="report.returned.reasonUnknown">
-				<source>Returned recipients for unknown reason</source>
-                <target>Empfänger mit unbekanntem Grund</target>
-			</trans-unit>
-			<trans-unit id="report.returned.unknownRecipient" resname="report.returned.unknownRecipient">
-				<source>Returned recipients with unknown recipient</source>
-                <target>Empfänger mit unbekanntem Empfänger</target>
-			</trans-unit>
-			<trans-unit id="report.mailboxFull" resname="report.mailboxFull">
-				<source>Mailbox full</source>
-				<target>Postfach voll</target>
-			</trans-unit>
-			<trans-unit id="report.deliveryFailed" resname="report.deliveryFailed">
-				<source>Delivery failed</source>
-				<target>Zustellung fehlgeschlagen</target>
-			</trans-unit>
-			<trans-unit id="report.mailsSent" resname="report.mailsSent">
-				<source>Mails received</source>
-				<target>Mails empfangen</target>
-			</trans-unit>
-			<trans-unit id="report.chooseMail" resname="report.chooseMail">
-				<source>Choose a mail</source>
-				<target>Mail wählen</target>
-			</trans-unit>
-			<trans-unit id="report.deliveryBegun" resname="report.deliveryBegun">
-				<source>Delivery begun</source>
-				<target>Versand gestartet</target>
-			</trans-unit>
-			<trans-unit id="report.deliveryEnded" resname="report.deliveryEnded">
-				<source>Delivery ended</source>
-				<target>Versand beendet</target>
-			</trans-unit>
-			<trans-unit id="report.header" resname="report.header">
-				<source>Mail Reports</source>
-				<target>Mail Berichte</target>
-			</trans-unit>
-			<trans-unit id="report.show.header" resname="report.show.header">
-				<source>Mail Report</source>
-				<target>Mail Bericht</target>
-			</trans-unit>
-			<trans-unit id="report.scheduled" resname="report.scheduled">
-				<source>Scheduled</source>
-				<target>Geplant</target>
-			</trans-unit>
-			<trans-unit id="report.status" resname="report.status">
-				<source>Status</source>
-			</trans-unit>
-			<trans-unit id="report.subject" resname="report.subject">
-				<source>Subject</source>
-				<target>Thema</target>
-			</trans-unit>
-			<trans-unit id="report.totalSent" resname="report.totalSent">
-				<source># sent</source>
-				<target># versandt</target>
-			</trans-unit>
-			<trans-unit id="report.plainText" resname="report.plainText">
-				<source>Plaintext</source>
-				<target>Reiner Text</target>
-			</trans-unit>
-			<trans-unit id="report.plainText.linkNumber" resname="report.plainText.linkNumber">
-				<source>Plaintext Link #</source>
-				<target>Reiner Text Link #</target>
-			</trans-unit>
-			<trans-unit id="report.reasonUnknown" resname="report.reasonUnknown">
-				<source>Reason unknown</source>
-				<target>Grund unbekannt</target>
-			</trans-unit>
-			<trans-unit id="report.recipientUnknown" resname="report.recipientUnknown">
-				<source>Recipient unknown</source>
-				<target>Empfänger unbekannt</target>
-			</trans-unit>
-			<trans-unit id="report.responses" resname="report.responses">
-				<source>Responses</source>
-				<target>Antworten</target>
-			</trans-unit>
-			<trans-unit id="report.reactions" resname="report.reactions">
-				<source>Reactions</source>
-				<target>Reaktionen</target>
-			</trans-unit>
-			<trans-unit id="report.total" resname="report.total">
-				<source>Total</source>
-				<target>Gesamt</target>
-			</trans-unit>
-			<trans-unit id="report.total.returned" resname="report.total.returned">
-				<source>Total mails returned</source>
-				<target>Zurückerhaltene Mails</target>
-			</trans-unit>
-			<trans-unit id="report.total.responses" resname="report.total.responses">
-				<source>Total responses (links clicked)</source>
-				<target>Reaktionen (geklickte Links)</target>
-			</trans-unit>
-			<trans-unit id="report.uniqueResponses" resname="report.uniqueResponses">
-				<source>Unique responses (links clicked)</source>
-				<target>Eindeutige Reaktionen (geklickte Links)</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.testMail.individual" resname="mail.wizard.testMail.individual">
-				<source>Individual</source>
-				<target>Individuell</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.testMail.mailGroup" resname="mail.wizard.testMail.mailGroup">
-				<source>Recipient group</source>
-				<target>Empfängergruppe</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.testMail.mailGroup.message" resname="mail.wizard.testMail.mailGroup.message">
-				<source>Select a recipient group for the test mail.</source>
-				<target>Wählen Sie eine Empfängergruppe für die Testmail aus.</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.testMail.info.title" resname="mail.wizard.testMail.info.title">
-				<source>Send a simple test mail</source>
-				<target>Senden Sie eine einfache Test-E-Mail</target>
-			</trans-unit>
-			<trans-unit id="mail.wizard.testMail.info.message" resname="mail.wizard.testMail.info.message" xmlspace="preserve">
-				<source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.
-				Beware: The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
-                <target><![CDATA[Hier können Sie (optional) eine einfache Testmail an einen oder mehrere Empfänger senden, bevor Sie den endgültigen Versand auf der nächsten Seite planen.
-				Bitte beachten Sie: Die generierte Mail enthält ALLE Elemente, unabhängig von ihrer Kategorie. Die Benutzerfelder werden NICHT durch Daten ersetzt.]]></target>
-			</trans-unit>
-			<trans-unit id="report.deliveryBeginEnd" resname="report.deliveryBeginEnd">
-				<source>Delivery begun/ended</source>
-				<target>Versand von/bis</target>
-			</trans-unit>
-			<trans-unit id="report.source" resname="report.source">
-				<source>Source</source>
-				<target>Quelle</target>
-			</trans-unit>
-			<trans-unit id="report.from" resname="report.from">
-				<source>Sender</source>
-				<target>Absender</target>
-			</trans-unit>
-			<trans-unit id="report.formatAttachments" resname="report.formatAttachments">
-				<source>Format/attachments</source>
-				<target>Format/Anhänge</target>
-			</trans-unit>
-			<trans-unit id="report.includeMedia" resname="report.includeMedia">
-				<source>Include media</source>
-				<target>Eingebundene Bilder</target>
-			</trans-unit>
-			<trans-unit id="report.recipients" resname="report.recipients">
-				<source>Recipients</source>
-				<target>Empfänger</target>
-			</trans-unit>
-			<trans-unit id="report.replyTo" resname="report.replyTo">
-				<source>Reply</source>
-				<target>Antwort</target>
-			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.server" resname="scheduler.bounceMail.server">
 				<source>Server URL/IP</source>
 			</trans-unit>
@@ -1173,79 +1231,10 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
 				<source><![CDATA[Connection using the given data is failed. Error message ]]></source>
 				<target><![CDATA[Verbindung mit den angegebenen Daten fehlgeschlagen. Fehlermeldung: ]]></target>
 			</trans-unit>
-			<trans-unit id="mail.wizard.scheduleSending.noRecipientGroupsFound.message" resname="mail.wizard.scheduleSending.noRecipientGroupsFound.message">
-				<source>No recipient groups found</source>
-				<target>Keine Empfängergruppen gefunden</target>
-			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.phpImapError" resname="scheduler.bounceMail.phpImapError">
 				<source>Please install PHP IMAP extension</source>
 				<target>Bitte die PHP-IMAP-Erweiterung installieren</target>
 			</trans-unit>
-            <trans-unit id="mail.wizard.categories.alttitle" resname="mail.wizard.categories.alttitle">
-                <source>Assign categories to content elements</source>
-                <target>Zuweisung von Kategorien zu Inhaltselementen</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.categories.description" xml:space="preserve">
-			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
-			Content elements without category restrictions will appear for in all mails.]]></source>
-                <target><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
-			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target>
-		    </trans-unit>
-            <trans-unit id="mail.wizard.externalPage.alttitle">
-                <source>New mailing from external pages</source>
-                <target>Neues Mailing von externer Seite</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.externalPage.description">
-                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
-                <target>Nach Eingabe der URL(s) und des Themas auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
-            </trans-unit>
-            <trans-unit id="create_newsletter.alttitle">
-                <source>Create a newsletter</source>
-                <target>Erstelle einen Newsletter</target>
-            </trans-unit>
-            <trans-unit id="create_newsletter.description">
-                <source>Click on this link if you want to create a new newsletter.</source>
-                <target>Klicken Sie auf diesen Link, wenn Sie einen neuen Newsletter erstellen möchten.</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.internalPage.alttitle">
-                <source>New mailing from an internal page</source>
-                <target>Neues Mailing von interner Seite</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.internalPage.description">
-                <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
-                <target>Klicken Sie bei der gewünschten Seite auf WEITER, um mit weiteren Einstellungen (Format, Empfängergruppe, Sendezeit...) fortzufahren.</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.quickMail.alttitle">
-                <source>Create a quick mailing</source>
-                <target>Kurznachricht erstellen</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.quickMail.description">
-                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
-                <target>Nach Eingabe des Themas und der Nachricht auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
-            </trans-unit>
-            <trans-unit id="mail.wizard.internalPage.description.old" xml:space="preserve">
-			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
-
-You may personalize the mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
-
-###USER_uid### (the unique id of the recipient)
-###USER_name### (full name)
-###USER_firstname### (first name calculated)
-###USER_NAME### and ###USER_FIRSTNAME### will insert uppercase versions of the equivalents
-###USER_title###
-###USER_email###
-###USER_phone###
-###USER_www###
-###USER_address###
-###USER_company###
-###USER_city###
-###USER_zip###
-###USER_country###
-###USER_fax###
-###SYS_TABLE_NAME###
-###SYS_MAIL_ID###
-###SYS_AUTHCODE###]]></source>
-		    </trans-unit>
 		</body>
 	</file>
 </xliff>
