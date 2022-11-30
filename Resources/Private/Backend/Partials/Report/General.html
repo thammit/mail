@@ -8,7 +8,7 @@
 <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
 
 <f:variable name="fromInfo" value="{
-        0: '{f:translate(key:\'{lll}view_replyto\')}: {mail.replytoName} {mail.replyToEmail}',
+        0: '{f:translate(key:\'{lll}report.replyTo\')}: {mail.replytoName} {mail.replyToEmail}',
         1: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.organisation\')}: {mail.organisation}',
         2: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.returnPath\')}: {mail.returnPath}'}"/>
 
@@ -21,18 +21,18 @@
         0: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.priority\')}: {mail.priority}',
         1: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.transferEncoding\')}: {mail.encoding}',
         2: '{f:translate(key:\'{lll2}tx_mail_domain_model_mail.charset\')}: {mail.charset}',
-        3: '{f:translate(key:\'{lll}view_media\')}: {data.includeMedia}'
+        3: '{f:translate(key:\'{lll}report.includeMedia\')}: {data.includeMedia}'
         }"/>
 
 <h2>
-    <f:translate key="{lll}stats_direct_mail"/>
+    <f:translate key="{lll}report.mail"/>
 </h2>
 <div class="panel panel-default mb-3">
     <div class="table-fit">
         <table class="table table-striped table-hover">
             <tr>
                 <th>
-                    <f:translate key="{lll}view_from"/>
+                    <f:translate key="{lll}report.from"/>
                 </th>
                 <td>{mail.fromName} &lt;{mail.fromEmail}&gt;</td>
                 <td>
@@ -41,7 +41,7 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}view_dmail"/>
+                    <f:translate key="{lll}report.source"/>
                 </th>
                 <td>
                     <f:if condition="{mail.quickMail}">
@@ -58,7 +58,7 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}view_mail"/>
+                    <f:translate key="{lll}report.formatAttachments"/>
                 </th>
                 <td>
                     {data.sendOptions}
@@ -74,7 +74,7 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}view_delivery_begin_end"/>
+                    <f:translate key="{lll}report.deliveryBeginEnd"/>
                 </th>
                 <td>{mail.scheduledBegin -> f:format.date(format: 'd.m.Y H:i')} / {mail.scheduledEnd ->
                     f:format.date(format: 'd.m.Y H:i')}
@@ -90,7 +90,7 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}view_recipient_total_sent"/>
+                    <f:translate key="{lll}report.recipients"/>
                 </th>
                 <td>{mail.numberOfRecipients}</td>
                 <td>&nbsp;</td>

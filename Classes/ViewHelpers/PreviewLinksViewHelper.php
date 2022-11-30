@@ -69,7 +69,7 @@ class PreviewLinksViewHelper extends AbstractViewHelper
                 ->buildDispatcherDataAttributes(['windowFeatures' => 'width=700,height=800']);
 
             $previewHTMLLinkAttributes[$languageUid] = [
-                'title' => htmlentities(LanguageUtility::getLL('nl_viewPage_HTML') . $langTitle),
+                'title' => htmlentities(LanguageUtility::getLL('mail.wizard.htmlPreviewLink.title') . $langTitle),
                 'data-dispatch-action' => $attributes['dispatch-action'],
                 'data-dispatch-args' => $attributes['dispatch-args'],
                 'data-flag-icon' => $flagIcon,
@@ -81,7 +81,7 @@ class PreviewLinksViewHelper extends AbstractViewHelper
                 ->buildDispatcherDataAttributes(['windowFeatures' => 'width=700,height=800']);
 
             $previewTextLinkAttributes[$languageUid] = [
-                'title' => htmlentities(LanguageUtility::getLL('nl_viewPage_TXT') . $langTitle),
+                'title' => htmlentities(LanguageUtility::getLL('mail.wizard.plainTextPreviewLink.title') . $langTitle),
                 'data-dispatch-action' => $attributes['dispatch-action'],
                 'data-dispatch-args' => $attributes['dispatch-args'],
                 'data-flag-icon' => $flagIcon,

@@ -20,7 +20,7 @@
                     <f:translate key="{llg}LGL.type"/>
                 </th>
                 <th>
-                    <f:translate key="{lll}recip_group_categories"/>
+                    <f:translate key="{lll}recipient.categories"/>
                 </th>
                 <th class="col-control nowrap"></th>
             </tr>
@@ -69,13 +69,13 @@
 <be:link.newRecord pid="{pid}" table="tx_mail_domain_model_group" class="btn btn-default text-uppercase"
                    title="New group">
     <core:icon identifier="actions-add"/>
-    <f:translate key="{lll}recip_create_mailgroup_msg"/>
+    <f:translate key="{lll}recipient.createMailGroup.message"/>
 </be:link.newRecord>
 <h3>
-    <f:translate key="{lll}mailgroup_import"/>
+    <f:translate key="{lll}recipient.import.header"/>
 </h3>
 <f:link.action class="btn btn-default text-uppercase" action="csvImportWizard">
     <core:icon identifier="content-csv" overlay="actions-arrow-up-alt"/>
-    <f:translate key="{lll}recip_import_mailgroup_msg"/>
+    <f:translate key="{lll}recipient.button.importCsv"/>
 </f:link.action>
 </html>

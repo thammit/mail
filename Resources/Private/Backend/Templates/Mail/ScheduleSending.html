@@ -9,14 +9,14 @@
 
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}dmail_wizard_title"/></h1>
+    <h1><f:translate key="{lll}mail.wizard.title"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
-    <h3><f:translate key="{lll}dmail_wiz5_sendmass"/></h3>
+    <h3><f:translate key="{lll}mail.wizard.scheduleSending"/></h3>
     <f:form action="finish" object="{mail}" objectName="mail" method="post" enctype="multipart/form-data">
         <div class="mb-4">
-            <f:be.infobox state="-1" title="{f:translate(key: '{lll}schedule_select_mailgroup')}">
-                <f:format.nl2br><f:translate key="{lll}schedule_select_mailgroup2"/></f:format.nl2br>
+            <f:be.infobox state="-1" title="{f:translate(key: '{lll}mail.wizard.scheduleSending.info.mailGroup.title')}">
+                <f:format.nl2br><f:translate key="{lll}mail.wizard.scheduleSending.info.mailGroup.message"/></f:format.nl2br>
             </f:be.infobox>
             <f:if condition="{groups}">
                 <f:then>
@@ -26,7 +26,7 @@
                             <f:variable name="group">{groups.0}</f:variable>
                             <f:form.hidden property="recipientGroups" value="{group.uid}"/>
                             <label class="form-label h4 mb-2">
-                                <f:translate key="{lll}schedule_mailgroup"/>
+                                <f:translate key="{lll}mail.wizard.scheduleSending.mailGroup"/>
                             </label>
                             <ul>
                                 <li title="{group.uid}">{group.title}
@@ -38,7 +38,7 @@
                             <div class="mb-3 row">
                                 <div class="col-12 col-md-6 col-lg-3">
                                     <h4>
-                                        <f:translate key="{lll}schedule_mailgroups"/>
+                                        <f:translate key="{lll}mail.wizard.scheduleSending.mailGroups"/>
                                     </h4>
                                     <f:for each="{groups}" as="group">
                                         <div class="form-check">
@@ -55,14 +55,14 @@
                 </f:then>
                 <f:else>
                     <f:be.infobox state="2">
-                        <f:translate key="{lll}error.no_recipient_groups_found"/>
+                        <f:translate key="{lll}mail.wizard.scheduleSending.noRecipientGroupsFound.message"/>
                     </f:be.infobox>
                 </f:else>
             </f:if>
             <div class="mb-4 row">
                 <div class="col-12 col-md-6 col-lg-4">
                     <label for="distributionTime" class="form-label h4 mb-2">
-                        <f:translate key="{lll}schedule_time"/>
+                        <f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
                     </label>
                     <div class="input-group">
                         <f:form.textfield additionalAttributes="{autocomplete:'off'}" data="{date-type:'datetime'}" class="form-control t3js-datetimepicker t3js-clearable" id="distributionTime"
@@ -81,18 +81,18 @@
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" name="isTestMail" id="tx-directmail-sendtestmail-check" value="1"/>
                     <label class="form-check-label" for="tx-directmail-sendtestmail-check">
-                        <f:translate key="{lll}schedule_testmail"/>
+                        <f:translate key="{lll}mail.wizard.scheduleSending.testMail"/>
                     </label>
                 </div>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" name="saveDraft" id="tx-directmail-savedraft-check" value="1"/>
                     <label class="form-check-label" for="tx-directmail-savedraft-check">
-                        <f:translate key="{lll}schedule_draft"/>
+                        <f:translate key="{lll}mail.wizard.scheduleDraft"/>
                     </label>
                 </div>
             </f:comment>
             <f:form.button class="btn btn-lg btn-mail-theme text-uppercase" type="Submit">
-                <f:translate key="{lll}schedule_finish"/>
+                <f:translate key="{lll}general.button.finish"/>
             </f:form.button>
         </div>
     </f:form>

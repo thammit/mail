@@ -10,14 +10,14 @@
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1>
-        <f:translate key="{lll}header_mailer"/>
+        <f:translate key="{lll}queue.header"/>
     </h1>
     <f:if condition="{trigger}">
-        <f:be.infobox title="{f:translate(key: '{lll}dmail_mailerengine_manual_invoke')}">
+        <f:be.infobox title="{f:translate(key: '{lll}queue.manualSending')}">
             <p>
-                <f:translate key="{lll}dmail_mailerengine_manual_explain" arguments="{0: sendPerCycle}"/>
+                <f:translate key="{lll}queue.manualSending.description" arguments="{0: sendPerCycle}"/>
             </p>
-            <f:link.action action="trigger" class="btn btn-mail-theme"><f:translate key="{lll}dmail_mailerengine_invoke_now"/></f:link.action>
+            <f:link.action action="trigger" class="btn btn-mail-theme"><f:translate key="{lll}queue.button.triggerManualSending"/></f:link.action>
         </f:be.infobox>
     </f:if>
     <div class="panel panel-default">
@@ -26,22 +26,22 @@
             <tr>
                 <th class="col-icon nowrap"></th>
                 <th class="col-title col-responsive nowrap">
-                    <f:translate key="{lll}dmail_mailerengine_subject"/>
+                    <f:translate key="{lll}queue.subject"/>
                 </th>
                 <th class="nowrap">
-                    <f:translate key="{lll}dmail_mailerengine_scheduled"/>
+                    <f:translate key="{lll}queue.scheduled"/>
                 </th>
                 <th class="nowrap">
-                    <f:translate key="{lll}dmail_mailerengine_delivery_begun"/>
+                    <f:translate key="{lll}queue.deliveryBegun"/>
                 </th>
                 <th class="nowrap">
-                    <f:translate key="{lll}dmail_mailerengine_delivery_ended"/>
+                    <f:translate key="{lll}queue.deliveryEnded"/>
                 </th>
                 <th class="nowrap" style="min-width: 200px;">
-                    <f:translate key="{lll}dmail_mailerengine_number_sent"/>
+                    <f:translate key="{lll}queue.numberSent"/>
                 </th>
                 <th class="col-control nowrap">
-                    <f:translate key="{lll}dmail_mailerengine_delete"/>
+                    <f:translate key="{lll}general.button.delete"/>
                 </th>
             </tr>
             </thead>

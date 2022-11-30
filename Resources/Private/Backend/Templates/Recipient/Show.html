@@ -19,11 +19,11 @@
             </f:if>
             <f:for each="{data.tables}" as="table" iteration="recipientTablesIterator">
                 <f:variable name="title">
-                    <f:translate key="{lll}mailgroup_table_{table.table}" default="{table.table}"/>
+                    <f:translate key="{lll}report.returned.table.{table.table}" default="{table.table}"/>
                 </f:variable>
                 <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: data.uid, table: table.table}" class="btn btn-default btn-sm text-uppercase">
                     <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-                    <f:translate key="{lll}mailgroup_download"/>
+                    <f:translate key="{lll}general.button.downloadCsv"/>
                 </f:link.action></f:variable>
                 <f:render partial="Panel"
                           arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:recipientTablesIterator.index, open:open, counter: table.numberOfRecipients, additionalHeading:additionalHeading}"

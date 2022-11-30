@@ -8,10 +8,10 @@
 <div class="panel-group" id="mail-recipient-list-panel">
     <f:variable name="open" value="1"/>
     <f:if condition="{data.addresses}">
-        <f:variable name="title"><f:translate key="{lll}mailgroup_table_tt_address"/></f:variable>
+        <f:variable name="title"><f:translate key="{lll}report.returned.table.tt_address"/></f:variable>
         <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
             <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-            <f:translate key="{lll}mailgroup_download"/>
+            <f:translate key="{lll}general.button.downloadCsv"/>
         </f:link.action></f:variable>
         <f:variable name="counter" value="{data.addresses -> f:count()}"/>
         <f:render partial="Panel"
@@ -22,10 +22,10 @@
         <f:variable name="open" value="0"/>
     </f:if>
     <f:if condition="{data.frontendUsers}">
-        <f:variable name="title"><f:translate key="{lll}mailgroup_table_fe_users"/></f:variable>
+        <f:variable name="title"><f:translate key="{lll}report.returned.table.fe_users"/></f:variable>
         <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
             <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-            <f:translate key="{lll}mailgroup_download"/>
+            <f:translate key="{lll}general.button.downloadCsv"/>
         </f:link.action></f:variable>
         <f:variable name="counter" value="{data.frontendUsers -> f:count()}"/>
         <f:render partial="Panel"
@@ -36,10 +36,10 @@
         <f:variable name="open" value="0"/>
     </f:if>
     <f:if condition="{data.plainList}">
-        <f:variable name="title"><f:translate key="{lll}mailgroup_plain_list"/></f:variable>
+        <f:variable name="title"><f:translate key="{lll}report.plainList"/></f:variable>
         <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
             <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-            <f:translate key="{lll}mailgroup_download"/>
+            <f:translate key="{lll}general.button.downloadCsv"/>
         </f:link.action></f:variable>
         <f:variable name="counter" value="{data.plainList -> f:count()}"/>
         <f:render partial="Panel"

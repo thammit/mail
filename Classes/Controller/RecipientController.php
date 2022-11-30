@@ -173,7 +173,7 @@ class RecipientController extends AbstractController
                 if (BackendUserUtility::getBackendUser()->check('tables_select', $tableName)) {
                     CsvUtility::downloadCSV($rows);
                 } else {
-                    ViewUtility::addFlashMessageError('', LanguageUtility::getLL('mailgroup_table_disallowed_csv'), true);
+                    ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
                     $this->redirect('show');
                 }
             }

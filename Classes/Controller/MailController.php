@@ -190,7 +190,7 @@ class MailController extends AbstractController
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {}
         catch (HtmlContentFetchFailedException|PlainTextContentFetchFailedException) {
             ViewUtility::addNotificationError(
-                sprintf(LanguageUtility::getLL('mail.wizard.notification.externalUrlInvalid.message'), $htmlUrl . ' / ' . $plainTextUrl),
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.externalUrlInvalid.message'), trim($htmlUrl . ' / ' . $plainTextUrl, ' /')),
                 LanguageUtility::getLL('mail.wizard.notification.severity.error.title')
             );
 
@@ -746,13 +746,13 @@ class MailController extends AbstractController
 //            }
 //            $updateFields['scheduled'] = 0;
 //            ViewUtility::addOkToFlashMessageQueue(
-//                sprintf(LanguageUtility::getLL('send_draft_scheduler'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
-//                LanguageUtility::getLL('send_draft_saved'), true
+//                sprintf(LanguageUtility::getLL('mail.wizard.notification.draftSaved.message'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
+//                LanguageUtility::getLL('mail.wizard.notification.draftSaved.title'), true
 //            );
 //        } else {
 //            ViewUtility::addOkToFlashMessageQueue(
-//                sprintf(LanguageUtility::getLL('send_was_scheduled_for'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
-//                LanguageUtility::getLL('send_was_scheduled'), true
+//                sprintf(LanguageUtility::getLL('mail.wizard.notification.scheduledForDistribution.message'), $row['subject'], BackendUtility::datetime($this->distributionTimeStamp)),
+//                LanguageUtility::getLL('mail.wizard.notification.scheduledForDistribution.title'), true
 //            );
 //        }
 

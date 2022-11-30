@@ -8,13 +8,13 @@
 
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}mailgroup_import"/></h1>
-    <h2><f:translate key="{lll}mailgroup_import_mapping_charset"/></h2>
+    <h1><f:translate key="{lll}recipient.import.header"/></h1>
+    <h2><f:translate key="{lll}recipient.import.mappingCharset.subheader"/></h2>
     <f:form action="csvImportWizardStepMapping" method="post" enctype="multipart/form-data">
         <f:if condition="{data.charset -> f:count()}">
             <fieldset class="form-section mb-4 pb-3">
                 <label for="csvImportCharset" class="form-label">
-                    <f:translate key="{lll}mailgroup_import_mapping_charset_choose"/>
+                    <f:translate key="{lll}recipient.import.mappingCharset.pleaseChoose"/>
                 </label>
                 <f:form.select class="form-select mb-2" id="csvImportCharset" name="configuration[charset]" value="{data.charsetSelected}">
                     <f:for each="{data.charset}" as="cs">
@@ -23,42 +23,42 @@
                 </f:form.select>
                 <f:render section="commonHiddenFields" arguments="{_all}" />
                 <f:form.hidden name="configuration[charsetSelected]" value="{data.charsetSelected}"/>
-                <f:form.submit name="configuration[update]" value="{f:translate(key: '{lll}mailgroup_import_update')}" class="btn btn-mail-theme text-uppercase"/>
+                <f:form.submit name="configuration[update]" value="{f:translate(key: '{lll}general.button.update')}" class="btn btn-mail-theme text-uppercase"/>
             </fieldset>
         </f:if>
     </f:form>
     <f:form action="csvImportWizardStepStartImport" method="post" enctype="multipart/form-data">
         <f:if condition="{data.error -> f:count()}">
             <h3>
-                <f:translate key="{lll}mailgroup_import_mapping_error"/>
+                <f:translate key="{lll}recipient.import.mapping.error"/>
             </h3>
-            <f:translate key="{lll}mailgroup_import_mapping_error_detail"/>
+            <f:translate key="{lll}recipient.import.mapping.error_detail"/>
             <ul>
                 <f:for each="{data.error}" as="error">
                     <li>
-                        <f:translate key="{lll}mailgroup_import_mapping_error_{error}"/>
+                        <f:translate key="{lll}recipient.import.mapping.error_{error}"/>
                     </li>
                 </f:for>
             </ul>
         </f:if>
         <h3>
-            <f:translate key="{lll}mailgroup_import_mapping_conf"/>
+            <f:translate key="{lll}recipient.import.fieldMapping"/>
         </h3>
         <fieldset class="form-section mb-4">
             <table class="table table-striped table-hover">
                 <thead>
                 <tr>
                     <th>
-                        <f:translate key="{lll}mailgroup_import_mapping_number"/>
+                        <f:translate key="{lll}recipient.import.mapping.number"/>
                     </th>
                     <th>
-                        <f:translate key="{lll}mailgroup_import_mapping_description"/>
+                        <f:translate key="{lll}recipient.import.mapping.description"/>
                     </th>
                     <th>
-                        <f:translate key="{lll}mailgroup_import_mapping_mapping"/>
+                        <f:translate key="{lll}recipient.import.mapping.mapping"/>
                     </th>
                     <th>
-                        <f:translate key="{lll}mailgroup_import_mapping_value"/>
+                        <f:translate key="{lll}recipient.import.mapping.value"/>
                     </th>
                 </tr>
                 </thead>
@@ -99,13 +99,13 @@
             </table>
         </fieldset>
         <h3>
-            <f:translate key="{lll}mailgroup_import_mapping_conf_add"/>
+            <f:translate key="{lll}recipient.import.fieldMapping.additionalOptions"/>
         </h3>
         <fieldset class="form-section mb-4">
             <div class="form-check mb-4">
                 <f:form.checkbox class="form-check-input" id="AllHtml" name="configuration[all_html]" value="1" checked="{data.all_html}"/>
                 <label class="form-check-label" for="AllHtml">
-                    <f:translate key="{lll}mailgroup_import_mapping_all_html"/>
+                    <f:translate key="{lll}recipient.import.allHtml"/>
                 </label>
             </div>
             <f:if condition="{data.categories -> f:count()}">
@@ -113,7 +113,7 @@
                     <div class="form-check">
                         <f:form.checkbox class="form-check-input" id="addAllCategories" name="configuration[addAllCategories]" value="1" checked="{data.addAllCategories}"/>
                         <label class="form-check-label" for="addAllCategories">
-                            <f:translate key="{lll}mailgroup_import_mapping_cats"/>
+                            <f:translate key="{lll}recipient.import.assignAllCategories"/>
                         </label>
                     </div>
                 </f:if>
@@ -129,10 +129,10 @@
         <f:render section="commonHiddenFields" arguments="{_all}" />
         <f:form.hidden name="configuration[charset]" value="{data.charsetSelected}"/>
         <f:link.action action="csvImportWizardStepConfiguration" class="btn btn-default text-uppercase">
-            <f:translate key="{lll}mailgroup_import_back"/>
+            <f:translate key="{lll}general.button.back"/>
         </f:link.action>
         <f:form.button type="submit" class="btn btn-mail-theme text-uppercase">
-            <f:translate key="{lll}mailgroup_import_next"/>
+            <f:translate key="{lll}general.button.next"/>
         </f:form.button>
     </f:form>
 </f:section>

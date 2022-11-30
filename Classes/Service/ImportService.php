@@ -132,10 +132,10 @@ class ImportService
         }
 
         $optDelimiter = [
-            ['val' => 'comma', 'text' => LanguageUtility::getLL('mailgroup_import_separator_comma')],
-            ['val' => 'semicolon', 'text' => LanguageUtility::getLL('mailgroup_import_separator_semicolon')],
-            ['val' => 'colon', 'text' => LanguageUtility::getLL('mailgroup_import_separator_colon')],
-            ['val' => 'tab', 'text' => LanguageUtility::getLL('mailgroup_import_separator_tab')],
+            ['val' => 'comma', 'text' => LanguageUtility::getLL('recipient.import.separator.comma')],
+            ['val' => 'semicolon', 'text' => LanguageUtility::getLL('recipient.import.separator.semicolon')],
+            ['val' => 'colon', 'text' => LanguageUtility::getLL('recipient.import.separator.colon')],
+            ['val' => 'tab', 'text' => LanguageUtility::getLL('recipient.import.separator.tab')],
         ];
 
         $optEncap = [
@@ -264,10 +264,10 @@ class ImportService
             ];
         }
         // add 'no value'
-        array_unshift($mapFields, ['noMap', LanguageUtility::getLL('mailgroup_import_mapping_mapTo')]);
+        array_unshift($mapFields, ['noMap', LanguageUtility::getLL('recipient.import.mapping.mapTo')]);
         $mapFields[] = [
             'cats',
-            LanguageUtility::getLL('mailgroup_import_mapping_categories'),
+            LanguageUtility::getLL('recipient.import.categoryMapping'),
         ];
         reset($columnNames);
         reset($csvData);
@@ -361,7 +361,7 @@ class ImportService
 
         // show not imported record and reasons,
         $result = $this->doImport($csvData);
-        ViewUtility::addFlashMessageSuccess(LanguageUtility::getLL('mailgroup_import_done'));
+        ViewUtility::addFlashMessageSuccess(LanguageUtility::getLL('recipient.import.notification.done.message'));
 
         $resultOrder = [];
         if (!empty($this->pageTsConfiguration['resultOrder'])) {

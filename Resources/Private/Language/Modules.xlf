@@ -9,11 +9,29 @@
             <trans-unit id="general.button.back">
                 <source>Back</source>
             </trans-unit>
+            <trans-unit id="general.button.edit" resname="general.button.edit">
+                <source>Edit</source>
+            </trans-unit>
+            <trans-unit id="general.button.delete" resname="general.button.delete">
+                <source>Delete</source>
+            </trans-unit>
+            <trans-unit id="general.button.update" resname="general.button.update">
+                <source>Update</source>
+            </trans-unit>
+            <trans-unit id="general.button.save" resname="general.button.save">
+                <source>Save</source>
+            </trans-unit>
             <trans-unit id="general.button.send">
                 <source>Send</source>
             </trans-unit>
+            <trans-unit id="general.button.finish" resname="general.button.finish">
+                <source>Finish</source>
+            </trans-unit>
             <trans-unit id="general.button.sendTestMail">
                 <source>Send test mail to %s</source>
+            </trans-unit>
+            <trans-unit id="general.button.downloadCsv" resname="general.button.downloadCsv">
+                <source>Download CSV</source>
             </trans-unit>
             <trans-unit id="mail.type.quickMail">
                 <source>Quick Mail</source>
@@ -59,6 +77,12 @@
             </trans-unit>
             <trans-unit id="mail.wizard.notification.fetchSuccessfully.message">
                 <source>The page "%s" was fetched successfully.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.noHtmlBoundariesFound.message">
+                <source>The HTML content does not contain any mail boundaries.</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.noPlainTextBoundariesFound.message">
+                <source>The plain text content does not contain any mail boundaries.</source>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.previewImageSaved.message">
                 <source>Preview image successfully saved.</source>
@@ -135,1096 +159,699 @@
             <trans-unit id="configuration.notification.savedFailed.message">
                 <source>The configuration was not saved to the selected page %s.</source>
             </trans-unit>
-            <trans-unit id="authcode_fieldList.description">
+            <trans-unit id="configuration.authCodeFields.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
             </trans-unit>
-            <trans-unit id="from_email.description">
+            <trans-unit id="configuration.fromEmail.description">
                 <source>Enter the sender email address. (Required)</source>
             </trans-unit>
-            <trans-unit id="from_email.details">
+            <trans-unit id="configuration.fromEmail.details">
                 <source>This email address will appear as the originating address or sender address in the mails received by the recipients.</source>
             </trans-unit>
-            <trans-unit id="from_name.description">
+            <trans-unit id="configuration.fromName.description">
                 <source>Enter the sender name. (Required)</source>
             </trans-unit>
-            <trans-unit id="from_name.details">
+            <trans-unit id="configuration.fromName.details">
                 <source>This name will appear as the name of the author or sender in the mails received by the recipients.</source>
             </trans-unit>
-            <trans-unit id="includeMedia.description">
+            <trans-unit id="configuration.includeMedia.description">
                 <source>Set this option if you want to embed images in HTML mails.</source>
             </trans-unit>
-            <trans-unit id="includeMedia.details" xml:space="preserve">
+            <trans-unit id="configuration.includeMedia.details" xml:space="preserve">
 			<source><![CDATA[If the option is set, images are encoded and embed into the messages. Sent messages will be heavier to transport.
 If the option is not set, images are included in HTML content by absolute reference (href) to their location on the site where they reside.]]></source>
 		    </trans-unit>
-            <trans-unit id="redirect_all.description">
+            <trans-unit id="configuration.redirectAll.description">
                 <source>If set and if redirect is set, all links in plain text content will be redirected, not only links longer than 76 characters.</source>
             </trans-unit>
-            <trans-unit id="organisation.description">
+            <trans-unit id="configuration.organisation.description">
                 <source>Enter the name of the sending organization.</source>
             </trans-unit>
-            <trans-unit id="organisation.details">
+            <trans-unit id="configuration.organisation.details">
                 <source>The name of the organization will appear in the headers of the mails sent to subscribers.</source>
             </trans-unit>
-            <trans-unit id="priority.description">
+            <trans-unit id="configuration.priority.description">
                 <source>Enter the email delivery priority.</source>
             </trans-unit>
-            <trans-unit id="priority.details">
+            <trans-unit id="configuration.priority.details">
                 <source>The delivery priority will be set in the headers of the mails sent to subscribers.</source>
             </trans-unit>
-            <trans-unit id="replyto_email.description">
+            <trans-unit id="configuration.replyToEmail.description">
                 <source>Enter the email address to which replys are sent. (Optional)</source>
             </trans-unit>
-            <trans-unit id="replyto_email.details">
+            <trans-unit id="configuration.replyToEmail.details">
                 <source>If no reply address is specified, the sender email address will be used.</source>
             </trans-unit>
-            <trans-unit id="replyto_name.description">
+            <trans-unit id="configuration.replyToName.description">
                 <source>Enter the name of the 'Reply To' email address. (Optional)</source>
             </trans-unit>
-            <trans-unit id="replyto_name.details">
+            <trans-unit id="configuration.replyToName.details">
                 <source>If no reply name is specified, the sender name will be used.</source>
             </trans-unit>
-            <trans-unit id="return_path.description">
+            <trans-unit id="configuration.returnPath.description">
                 <source>Enter the return path email address here.</source>
             </trans-unit>
-            <trans-unit id="return_path.details" xml:space="preserve">
+            <trans-unit id="configuration.returnPath.details" xml:space="preserve">
 			<source><![CDATA[This is the address to which non-deliverable mails will be returned to.
 If you put in the marker ###XID### it'll be substituted with the unique id of the mail recipient.
 Note that if PHP is executing in safe mode, the Direct mail module may not be able to set the return path to a value different than the value defined at the server level.]]></source>
 		    </trans-unit>
-            <trans-unit id="sendOptions.description">
+            <trans-unit id="configuration.sendOptions.description">
                 <source>Select the format of mail content.</source>
             </trans-unit>
-            <trans-unit id="sendOptions.details">
+            <trans-unit id="configuration.sendOptions.details">
                 <source>If in doubt, set it to 'Plain text and HTML'. The messages will then be sent with both formats included, and the recipients are normally able to select their preferred format.</source>
             </trans-unit>
-            <trans-unit id="type.description">
+            <trans-unit id="configuration.type.description">
                 <source>Type of source of the Direct mail</source>
             </trans-unit>
-            <trans-unit id="type.details">
+            <trans-unit id="configuration.type.details">
                 <source>The mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External URL'.</source>
             </trans-unit>
-            <trans-unit id="redirect.description">
+            <trans-unit id="configuration.redirect.description">
                 <source>Redirect long links found in plain text content.</source>
             </trans-unit>
-            <trans-unit id="redirect.details">
+            <trans-unit id="configuration.redirect.details">
                 <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the TYPO3 redirect module.</source>
             </trans-unit>
-            <trans-unit id="configure_HTMLParams_description" resname="configure_HTMLParams_description">
+            <trans-unit id="configuration.htmlParams.description" resname="configuration.htmlParams.description">
 				<source>Enter the additional URL parameters used to fetch the HTML content from a TYPO3 page.</source>
 			</trans-unit>
-			<trans-unit id="configure_HTMLParams_details" resname="configure_HTMLParams_details">
+			<trans-unit id="configuration.htmlParams.details" resname="configuration.htmlParams.details">
 				<source>The specified parameters will be added to the URL used to fetch the HTML content of the mail from a TYPO3 page. If in doubt, leave it blank.</source>
 			</trans-unit>
-			<trans-unit id="configure_default_content" resname="configure_default_content">
+			<trans-unit id="configuration.defaultFormat" resname="configuration.defaultFormat">
 				<source>Mail format (default)</source>
 			</trans-unit>
-			<trans-unit id="configure_default_fetching" resname="configure_default_fetching">
+			<trans-unit id="configuration.defaultFetchSettings" resname="configuration.defaultFetchSettings">
 				<source>Content fetching options (default)</source>
 			</trans-unit>
-			<trans-unit id="configure_default_headers" resname="configure_default_headers">
+			<trans-unit id="configuration.defaultHeaders" resname="configuration.defaultHeaders">
 				<source>Mail Headers (default)</source>
 			</trans-unit>
-			<trans-unit id="configure_direct_mail_module" resname="configure_direct_mail_module">
-				<source>Configure mail module</source>
-			</trans-unit>
-			<trans-unit id="configure_directmail_charset" resname="configure_directmail_charset">
+			<trans-unit id="configuration.charset" resname="configuration.charset">
 				<source>Default character set for mails built from external pages</source>
 			</trans-unit>
-			<trans-unit id="configure_directmail_charset_description" resname="configure_directmail_charset_description">
+			<trans-unit id="configuration.charset.description" resname="configuration.charset.description">
 				<source>Specify the character set used in mails when they are built from external pages and character set cannot be auto-detected.</source>
 			</trans-unit>
-			<trans-unit id="configure_directmail_encoding" resname="configure_directmail_encoding">
+			<trans-unit id="configuration.encoding" resname="configuration.encoding">
 				<source>Default encoding of mails</source>
 			</trans-unit>
-			<trans-unit id="configure_directmail_encoding_description" resname="configure_directmail_encoding_description">
+			<trans-unit id="configuration.encoding.description" resname="configuration.encoding.description">
 				<source>Select the default content transfer encoding of mails.</source>
 			</trans-unit>
-			<trans-unit id="configure_html_only" resname="configure_html_only">
+			<trans-unit id="configuration.htmlOnly" resname="configuration.htmlOnly">
 				<source>HTML only</source>
 			</trans-unit>
-			<trans-unit id="configure_http_password" resname="configure_http_password">
+			<trans-unit id="configuration.httpPassword" resname="configuration.httpPassword">
 				<source>HTTP Password</source>
 			</trans-unit>
-			<trans-unit id="configure_http_password_description" resname="configure_http_password_description">
+			<trans-unit id="configuration.httpPassword.description" resname="configuration.httpPassword.description">
 				<source>If mail content is protected by HTTP authentication, enter the password here.</source>
 			</trans-unit>
-			<trans-unit id="configure_http_username" resname="configure_http_username">
+			<trans-unit id="configuration.httpUsername" resname="configuration.httpUsername">
 				<source>HTTP Username</source>
 			</trans-unit>
-			<trans-unit id="configure_http_username_description" resname="configure_http_username_description">
+			<trans-unit id="configuration.httpUsername.description" resname="configuration.httpUsername.description">
 				<source>If mail content is protected by HTTP authentication, enter the username here.</source>
 			</trans-unit>
-			<trans-unit id="configure_http_username_details" resname="configure_http_username_details" xmlspace="preserve">
+			<trans-unit id="configuration.httpUsername.details" resname="configuration.httpUsername.details" xmlspace="preserve">
 				<source><![CDATA[The username and password is used to fetch mail content. They are NOT sent in the mail!
 	If you do not specify a username and password and the mail pages happen to be protected, an error will occur and no mail content will be fetched.]]></source>
 			</trans-unit>
-			<trans-unit id="configure_jumpurl_tracking_privacy" resname="configure_jumpurl_tracking_privacy">
+			<trans-unit id="configuration.trackingPrivacy" resname="configuration.trackingPrivacy">
 				<source>Privacy click tracking</source>
 			</trans-unit>
-			<trans-unit id="configure_jumpurl_tracking_privacy_description" resname="configure_jumpurl_tracking_privacy_description">
+			<trans-unit id="configuration.trackingPrivacy.description" resname="configuration.trackingPrivacy.description">
 				<source>Set this option, to anonymize click tracking.</source>
 			</trans-unit>
-			<trans-unit id="configure_options_additional" resname="configure_options_additional">
+			<trans-unit id="configuration.additionalOptions" resname="configuration.additionalOptions">
 				<source>Additional module options</source>
 			</trans-unit>
-			<trans-unit id="configure_options_encoding" resname="configure_options_encoding">
+			<trans-unit id="configuration.additionalOptions.encoding" resname="configuration.additionalOptions.encoding">
 				<source>Content transfer encoding and character set</source>
 			</trans-unit>
-			<trans-unit id="configure_options_links" resname="configure_options_links">
+			<trans-unit id="configuration.linksAndTracking" resname="configuration.linksAndTracking">
 				<source>Links and click tracking</source>
 			</trans-unit>
-			<trans-unit id="configure_options_links_jumpurl" resname="configure_options_links_jumpurl">
+			<trans-unit id="configuration.linksAndTracking.clickTracking" resname="configuration.linksAndTracking.clickTracking">
 				<source>Click tracking</source>
 			</trans-unit>
-			<trans-unit id="configure_options_links_jumpurl_description" resname="configure_options_links_jumpurl_description">
+			<trans-unit id="configuration.linksAndTracking.clickTracking.description" resname="configuration.linksAndTracking.clickTracking.description">
 				<source>Check this option to enable tracking of clicks.</source>
 			</trans-unit>
-			<trans-unit id="configure_options_links_rdct" resname="configure_options_links_rdct">
-				<source>This configuration determines how QuickMails are handled and further sets the default value for mails.</source>
-			</trans-unit>
-			<trans-unit id="configure_options_mailto_jumpurl" resname="configure_options_mailto_jumpurl">
+			<trans-unit id="configuration.linksAndTracking.clickTracking.mailTo" resname="configuration.linksAndTracking.clickTracking.mailTo">
 				<source>Click tracking for mailto links</source>
 			</trans-unit>
-			<trans-unit id="configure_options_mailto_jumpurl_description" resname="configure_options_mailto_jumpurl_description">
+			<trans-unit id="configuration.linksAndTracking.clickTracking.mailTo.description" resname="configuration.linksAndTracking.clickTracking.mailTo.description">
 				<source>Check this option to enable click tracking for mailto links.</source>
 			</trans-unit>
-			<trans-unit id="configure_plainParams_description" resname="configure_plainParams_description">
+			<trans-unit id="configuration.plainParams.description" resname="configuration.plainParams.description">
 				<source>Enter the additional URL parameters used to fetch the plain text content from a TYPO3 page.</source>
 			</trans-unit>
-			<trans-unit id="configure_plainParams_details" resname="configure_plainParams_details">
+			<trans-unit id="configuration.plainParams.details" resname="configuration.plainParams.details">
 				<source>The specified parameters will be added to the URL used to fetch the plain text content of the mail from a TYPO3 page. If in doubt, set it to '&amp;plain=1'.</source>
 			</trans-unit>
-			<trans-unit id="configure_plain_and_html" resname="configure_plain_and_html">
+			<trans-unit id="configuration.plainTextAndHtml" resname="configuration.plainTextAndHtml">
 				<source>Plain text and HTML</source>
 			</trans-unit>
-			<trans-unit id="configure_plain_only" resname="configure_plain_only">
+			<trans-unit id="configuration.plainTextOnly" resname="configuration.plainTextOnly">
 				<source>Plain text only</source>
 			</trans-unit>
-			<trans-unit id="configure_priority_high" resname="configure_priority_high">
+			<trans-unit id="configuration.priority.high" resname="configuration.priority.high">
 				<source>High</source>
 			</trans-unit>
-			<trans-unit id="configure_priority_low" resname="configure_priority_low">
+			<trans-unit id="configuration.priority.low" resname="configuration.priority.low">
 				<source>Low</source>
 			</trans-unit>
-			<trans-unit id="configure_priority_normal" resname="configure_priority_normal">
+			<trans-unit id="configuration.priority.normal" resname="configuration.priority.normal">
 				<source>Normal</source>
 			</trans-unit>
-			<trans-unit id="configure_quickmail_charset" resname="configure_quickmail_charset">
+			<trans-unit id="configuration.quickmail.charset" resname="configuration.quickmail.charset">
 				<source>Character set for quick mails</source>
 			</trans-unit>
-			<trans-unit id="configure_quickmail_charset_description" resname="configure_quickmail_charset_description">
+			<trans-unit id="configuration.quickmail.charset.description" resname="configuration.quickmail.charset.description">
 				<source>Specify the character set to use when sending quick mails.</source>
 			</trans-unit>
-			<trans-unit id="configure_quickmail_encoding" resname="configure_quickmail_encoding">
+			<trans-unit id="configuration.quickmail.encoding" resname="configuration.quickmail.encoding">
 				<source>Encoding for quick mails</source>
 			</trans-unit>
-			<trans-unit id="configure_quickmail_encoding_description" resname="configure_quickmail_encoding_description">
+			<trans-unit id="configuration.quickmail.encoding.description" resname="configuration.quickmail.encoding.description">
 				<source>Select the content transfer encoding to use when sending quick mails.</source>
 			</trans-unit>
-			<trans-unit id="configure_simulate_usergroup" resname="configure_simulate_usergroup">
+			<trans-unit id="configuration.simulateUsergroup" resname="configuration.simulateUsergroup">
 				<source>Frontend User Group</source>
 			</trans-unit>
-			<trans-unit id="configure_simulate_usergroup_description" resname="configure_simulate_usergroup_description">
+			<trans-unit id="configuration.simulateUsergroup.description" resname="configuration.simulateUsergroup.description">
 				<source>If mail content is protected by Frontend user authentication, enter the user group here.</source>
 			</trans-unit>
-			<trans-unit id="configure_simulate_usergroup_details" resname="configure_simulate_usergroup_details" xmlspace="preserve">
+			<trans-unit id="configuration.simulateUsergroup.details" resname="configuration.simulateUsergroup.details" xmlspace="preserve">
 				<source><![CDATA[The usergroup with the uid specified is used to to fetch the mail content.
 	If you do not specify a usergroup uid and the page has frontend user restrictions, an error will occur and no mail content will be fetched.]]></source>
 			</trans-unit>
-			<trans-unit id="configure_test_dmail_group_uids" resname="configure_test_dmail_group_uids">
+			<trans-unit id="configuration.testMailGroupUids" resname="configuration.testMailGroupUids">
 				<source>Comma separated list of test recipients (group uids)</source>
 			</trans-unit>
-			<trans-unit id="configure_test_dmail_group_uids_description" resname="configure_test_dmail_group_uids_description">
+			<trans-unit id="configuration.testMailGroupUids.description" resname="configuration.testMailGroupUids.description">
 				<source>Alternatively to send test-mails to individuals, you can send it to this groups.</source>
 			</trans-unit>
-			<trans-unit id="configure_test_tt_address_uids" resname="configure_test_tt_address_uids">
+			<trans-unit id="configuration.testAddressUids" resname="configuration.testAddressUids">
 				<source>Comma separated list of test recipients (tt_address uids)</source>
 			</trans-unit>
-			<trans-unit id="configure_test_tt_address_uids_description" resname="configure_test_tt_address_uids_description">
+			<trans-unit id="configuration.testAddressUids.description" resname="configuration.testAddressUids.description">
 				<source>Alternatively to send test-mails to individuals, you can send it to this addresses.</source>
 			</trans-unit>
-			<trans-unit id="configure_testmail" resname="configure_testmail">
+			<trans-unit id="configuration.testMailSubjectPrefix" resname="configuration.testMailSubjectPrefix">
 				<source>Subject prefix for test mails</source>
 			</trans-unit>
-			<trans-unit id="configure_testmail_description" resname="configure_testmail_description">
+			<trans-unit id="configuration.testMailSubjectPrefix.description" resname="configuration.testMailSubjectPrefix.description">
                 <source>Will be prepended to test mails subject</source>
 			</trans-unit>
-			<trans-unit id="configure_sendPerCycle" resname="configure_sendPerCycle">
+			<trans-unit id="configuration.sendPerCycle" resname="configuration.sendPerCycle">
 				<source>Send per click (only valid for manual trigger)</source>
 			</trans-unit>
-			<trans-unit id="configure_sendPerCycle_description" resname="configure_sendPerCycle_description">
+			<trans-unit id="configuration.sendPerCycle.description" resname="configuration.sendPerCycle.description">
                 <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>
 			</trans-unit>
-			<trans-unit id="configure_update_configuration" resname="configure_update_configuration">
-				<source>Save</source>
-			</trans-unit>
-			<trans-unit id="configure_update_configuration_success" resname="configure_update_configuration_success">
-				<source>The configuration was successfully saved to the selected page</source>
-			</trans-unit>
-			<trans-unit id="configure_user_table" resname="configure_user_table">
-				<source>Custom-defined table</source>
-			</trans-unit>
-			<trans-unit id="configure_user_table_description" resname="configure_user_table_description">
-				<source>Enter the name of a custom-defined table, with compatible columns defined, which may also be used for mails distribution.</source>
-			</trans-unit>
-			<trans-unit id="dmail_HTML_url" resname="dmail_HTML_url">
+			<trans-unit id="configuration.externalMailHtmlUrl" resname="configuration.externalMailHtmlUrl">
 				<source>URL of HTML content</source>
 			</trans-unit>
-			<trans-unit id="dmail_cancel" resname="dmail_cancel">
-				<source>Cancel</source>
-			</trans-unit>
-			<trans-unit id="dmail_createMail" resname="dmail_createMail">
-				<source>Create mail</source>
-			</trans-unit>
-			<trans-unit id="dmail_dovsk_crFromNL" resname="dmail_dovsk_crFromNL">
-				<source>Create a new mail from a internal page</source>
-			</trans-unit>
-			<trans-unit id="dmail_dovsk_crFromUrl" resname="dmail_dovsk_crFromUrl">
-				<source>Create a new mail from an external URL</source>
-			</trans-unit>
-			<trans-unit id="dmail_edit" resname="dmail_edit">
-				<source>Edit</source>
-			</trans-unit>
-			<trans-unit id="dmail_edit_info" resname="dmail_edit_info">
-				<source>Edit settings</source>
-			</trans-unit>
-			<trans-unit id="dmail_error" resname="dmail_error">
-				<source>An error has occurred</source>
-			</trans-unit>
-			<trans-unit id="dmail_warning" resname="dmail_warning">
-				<source>A warning has occurred</source>
-			</trans-unit>
-			<trans-unit id="dmail_folders" resname="dmail_folders">
-				<source>Available mail folders</source>
-			</trans-unit>
-			<trans-unit id="dmail_frames_not allowed" resname="dmail_frames_not allowed">
-				<source>Pages with HTML frames may not be fetched.</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_caution" resname="dmail_mailerengine_cron_caution">
-				<source>Caution</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_caution_msg" resname="dmail_mailerengine_cron_caution_msg">
-				<source>Please check the cronjob or cronjob is not set.</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_lastrun" resname="dmail_mailerengine_cron_lastrun">
-				<source>Last run </source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_ok" resname="dmail_mailerengine_cron_ok">
-				<source>OK</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_ok_msg" resname="dmail_mailerengine_cron_ok_msg">
-				<source>Cronjob is running.</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_status" resname="dmail_mailerengine_cron_status">
-				<source>Cron job status</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_warning" resname="dmail_mailerengine_cron_warning">
-				<source>Warning</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_cron_warning_msg" resname="dmail_mailerengine_cron_warning_msg">
-				<source>Please check the cronjob.</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_current_time" resname="dmail_mailerengine_current_time">
-				<source>Current time</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_delete" resname="dmail_mailerengine_delete">
-				<source>Delete</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_delivery_begun" resname="dmail_mailerengine_delivery_begun">
+			<trans-unit id="queue.deliveryBegun" resname="queue.deliveryBegun">
 				<source>Delivery begun</source>
 			</trans-unit>
-			<trans-unit id="dmail_mailerengine_delivery_ended" resname="dmail_mailerengine_delivery_ended">
+			<trans-unit id="queue.deliveryEnded" resname="queue.deliveryEnded">
 				<source>Delivery ended</source>
 			</trans-unit>
-			<trans-unit id="dmail_mailerengine_invoke_now" resname="dmail_mailerengine_invoke_now">
+			<trans-unit id="queue.button.triggerManualSending" resname="queue.button.triggerManualSending">
 				<source>Start sending manually</source>
 			</trans-unit>
-			<trans-unit id="dmail_mailerengine_invoked" resname="dmail_mailerengine_invoked">
-				<source>Manual sending started!</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_manual_explain" resname="dmail_mailerengine_manual_explain">
+			<trans-unit id="queue.manualSending.description" resname="queue.manualSending.description">
                 <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed within the settings module.</source>
 			</trans-unit>
-			<trans-unit id="dmail_mailerengine_manual_invoke" resname="dmail_mailerengine_manual_invoke">
-				<source>Manually Invoke Engine</source>
+			<trans-unit id="queue.manualSending" resname="queue.manualSending">
+				<source>Manual delivery</source>
 			</trans-unit>
-			<trans-unit id="dmail_mailerengine_number_sent" resname="dmail_mailerengine_number_sent">
+			<trans-unit id="queue.numberSent" resname="queue.numberSent">
 				<source># sent</source>
 			</trans-unit>
-			<trans-unit id="dmail_mailerengine_scheduled" resname="dmail_mailerengine_scheduled">
+			<trans-unit id="queue.scheduled" resname="queue.scheduled">
 				<source>Scheduled</source>
 			</trans-unit>
-			<trans-unit id="dmail_mailerengine_status" resname="dmail_mailerengine_status">
-				<source>Mail Engine Status</source>
-			</trans-unit>
-			<trans-unit id="dmail_mailerengine_subject" resname="dmail_mailerengine_subject">
+			<trans-unit id="queue.subject" resname="queue.subject">
 				<source>Subject</source>
 			</trans-unit>
-			<trans-unit id="dmail_makeQuery" resname="dmail_makeQuery">
-				<source>Make query</source>
-			</trans-unit>
-			<trans-unit id="dmail_menuItems_testmail" resname="dmail_menuItems_testmail">
-				<source>Send a testmail</source>
-			</trans-unit>
-			<trans-unit id="dmail_menu_conf" resname="dmail_menu_conf">
-				<source>Module configuration</source>
-			</trans-unit>
-			<trans-unit id="dmail_menu_convert_categories" resname="dmail_menu_convert_categories">
-				<source>Categories Conversion</source>
-			</trans-unit>
-			<trans-unit id="dmail_menu_quickMail" resname="dmail_menu_quickMail">
-				<source>QuickMail</source>
-			</trans-unit>
-			<trans-unit id="dmail_mails" resname="dmail_mails">
-				<source>Mail Extension</source>
-			</trans-unit>
-			<trans-unit id="dmail_no" resname="dmail_no">
-				<source>NO</source>
-			</trans-unit>
-			<trans-unit id="dmail_noCreateAccess" resname="dmail_noCreateAccess">
-				<source>You cannot create mails using pages that are hidden or access-restricted.</source>
-			</trans-unit>
-			<trans-unit id="dmail_noEdit_isSent" resname="dmail_noEdit_isSent">
-				<source>Cannot edit - mail has been sent</source>
-			</trans-unit>
-			<trans-unit id="dmail_noEdit_noPerms" resname="dmail_noEdit_noPerms">
+			<trans-unit id="configuration.noEditPermissions" resname="configuration.noEditPermissions">
 				<source>You don't have permissions to change mail settings.</source>
 			</trans-unit>
-			<trans-unit id="dmail_noRegular" resname="dmail_noRegular">
-				<source>This type of page cannot be used to create mails. Please select a mail page.</source>
-			</trans-unit>
-			<trans-unit id="dmail_no_html_boundaries" resname="dmail_no_html_boundaries">
-				<source>The HTML content does not contain any mail boundaries.</source>
-			</trans-unit>
-			<trans-unit id="dmail_no_html_content" resname="dmail_no_html_content">
-				<source>The HTML content could not be fetched.</source>
-			</trans-unit>
-			<trans-unit id="dmail_no_plain_boundaries" resname="dmail_no_plain_boundaries">
-				<source>The plain text content does not contain any mail boundaries.</source>
-			</trans-unit>
-			<trans-unit id="dmail_no_plain_content" resname="dmail_no_plain_content">
-				<source>The plain text content could not be fetched.</source>
-			</trans-unit>
-			<trans-unit id="dmail_no_mail_content_format_selected" resname="dmail_no_mail_content_format_selected">
-				<source>No mail content format selected.</source>
-			</trans-unit>
-			<trans-unit id="dmail_no_valid_url" resname="dmail_no_valid_url">
-				<source>Enter at least one valid URL!</source>
-			</trans-unit>
-			<trans-unit id="dmail_external_html_uri_is_invalid" resname="dmail_external_html_uri_is_invalid">
-				<source>The external HTML Url is invalid!</source>
-			</trans-unit>
-			<trans-unit id="dmail_external_plain_uri_is_invalid" resname="dmail_external_plain_uri_is_invalid">
-				<source>The external plain Url is invalid!</source>
-			</trans-unit>
-			<trans-unit id="dmail_number_records" resname="dmail_number_records">
-				<source>Number of records</source>
-			</trans-unit>
-			<trans-unit id="dmail_plaintext_url" resname="dmail_plaintext_url">
-				<source>URL of plain text content</source>
-			</trans-unit>
-			<trans-unit id="dmail_query" resname="dmail_query">
-				<source>Query</source>
-			</trans-unit>
-			<trans-unit id="dmail_send" resname="dmail_send">
-				<source>Send</source>
-			</trans-unit>
-			<trans-unit id="dmail_subject" resname="dmail_subject">
-				<source>Subject</source>
-			</trans-unit>
-			<trans-unit id="dmail_updateQuery" resname="dmail_updateQuery">
-				<source>Update query</source>
-			</trans-unit>
-			<trans-unit id="dmail_view" resname="dmail_view">
-				<source>Information on mail record</source>
-			</trans-unit>
-			<trans-unit id="dmail_warning" resname="dmail_warning">
-				<source>Warning</source>
-			</trans-unit>
-			<trans-unit id="dmail_wizard_title" resname="dmail_wizard_title">
+			<trans-unit id="mail.wizard.title" resname="mail.wizard.title">
 				<source>Mail Wizard</source>
 			</trans-unit>
-			<trans-unit id="dmail_wiz1_external_page" resname="dmail_wiz1_external_page">
-				<source>External Page</source>
+			<trans-unit id="mail.wizard.externalMailPlainTextUrl" resname="mail.wizard.externalMailPlainTextUrl">
+				<source>URL of plain text content</source>
 			</trans-unit>
-			<trans-unit id="dmail_wiz1_internal_page" resname="dmail_wiz1_internal_page">
-				<source>Internal Page</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz1_list_dmail" resname="dmail_wiz1_list_dmail">
-				<source>Open Mails</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz1_list_header" resname="dmail_wiz1_list_header">
-				<source>Select a mail to continue sending</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz1_new_mail" resname="dmail_wiz1_new_mail">
-				<source>Step 1</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz1_quickmail" resname="dmail_wiz1_quickmail">
-				<source>Quick Mail</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz1_quickmail_header" resname="dmail_wiz1_quickmail_header">
-				<source>New Quickmail</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz1_select_nl_source" resname="dmail_wiz1_select_nl_source">
-				<source>Please choose source</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz2_detail" resname="dmail_wiz2_detail">
-				<source>Settings</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz2_fetch_success" resname="dmail_wiz2_fetch_success">
-				<source>The page "%s" was fetched successfully.</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz3_cats" resname="dmail_wiz3_cats">
-				<source>Categories</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz4_testmail" resname="dmail_wiz4_testmail">
-				<source>Test Mail</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz5_sendmass" resname="dmail_wiz5_sendmass">
-				<source>Schedule sending</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz_back" resname="dmail_wiz_back">
-				<source>Back</source>
-			</trans-unit>
-			<trans-unit id="dmail_wiz_next" resname="dmail_wiz_next">
-				<source>Next</source>
-			</trans-unit>
-			<trans-unit id="dmail_write_subject" resname="dmail_write_subject">
+			<trans-unit id="mail.wizard.externalMailSubject" resname="mail.wizard.externalMailSubject">
 				<source>Subject</source>
 			</trans-unit>
-			<trans-unit id="dmail_yes" resname="dmail_yes">
-				<source>YES</source>
+			<trans-unit id="mail.wizard.externalPage" resname="mail.wizard.externalPage">
+				<source>External Page</source>
 			</trans-unit>
-			<trans-unit id="dmailer_ending" resname="dmailer_ending">
-				<source>Ending, parsetime</source>
+			<trans-unit id="mail.wizard.internalPage" resname="mail.wizard.internalPage">
+				<source>Internal Page</source>
 			</trans-unit>
-			<trans-unit id="dmailer_invoked_at" resname="dmailer_invoked_at">
-				<source>Invoked at</source>
+			<trans-unit id="mail.wizard.openMails" resname="mail.wizard.openMails">
+				<source>Open Mails</source>
 			</trans-unit>
-			<trans-unit id="dmailer_job_begin" resname="dmailer_job_begin">
-				<source>Job begin</source>
+			<trans-unit id="mail.wizard.quickMail" resname="mail.wizard.quickMail">
+				<source>Quick Mail</source>
 			</trans-unit>
-			<trans-unit id="dmailer_job_end" resname="dmailer_job_end">
-				<source>Job end</source>
+			<trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource">
+				<source>Please choose source</source>
 			</trans-unit>
-			<trans-unit id="dmailer_mid" resname="dmailer_mid">
-				<source>Job No</source>
+			<trans-unit id="mail.wizard.settings" resname="mail.wizard.settings">
+				<source>Settings</source>
 			</trans-unit>
-			<trans-unit id="dmailer_nothing_to_do" resname="dmailer_nothing_to_do">
-				<source>Nothing to do.</source>
+			<trans-unit id="mail.wizard.categories" resname="mail.wizard.categories">
+				<source>Categories</source>
 			</trans-unit>
-			<trans-unit id="dmailer_processed" resname="dmailer_processed">
-				<source>processed...</source>
+			<trans-unit id="mail.wizard.testMail" resname="mail.wizard.testMail">
+				<source>Test Mail</source>
 			</trans-unit>
-			<trans-unit id="dmailer_sending" resname="dmailer_sending">
-				<source>Sending</source>
+			<trans-unit id="mail.wizard.scheduleSending" resname="mail.wizard.scheduleSending">
+				<source>Schedule sending</source>
 			</trans-unit>
-			<trans-unit id="dmailer_sending_to_table" resname="dmailer_sending_to_table">
-				<source>mails using records from table</source>
+			<trans-unit id="mail.wizard.subject" resname="mail.wizard.subject">
+				<source>Subject</source>
 			</trans-unit>
 			<trans-unit id="tx_mail_domain_model_mail" resname="tx_mail_domain_model_mail">
 				<source>mail record</source>
 			</trans-unit>
-			<trans-unit id="header_conf" resname="header_conf">
+			<trans-unit id="configuration.header" resname="configuration.header">
 				<source>Mail Settings</source>
 			</trans-unit>
-			<trans-unit id="header_directmail" resname="header_directmail">
-				<source>Mail</source>
-			</trans-unit>
-			<trans-unit id="header_mailer" resname="header_mailer">
+			<trans-unit id="queue.header" resname="queue.header">
 				<source>Mail Queue</source>
 			</trans-unit>
-			<trans-unit id="header_recip" resname="header_recip">
-				<source>Recipient Lists</source>
-			</trans-unit>
-			<trans-unit id="header_stat" resname="header_stat">
-				<source>Statistics</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_download" resname="mailgroup_download">
-				<source>Download CSV</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_header" resname="mailgroup_header">
+			<trans-unit id="recipient.header" resname="recipient.header">
 				<source>Recipient groups</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import" resname="mailgroup_import">
+			<trans-unit id="recipient.import.header" resname="recipient.import.header">
 				<source>Import CSV into tt_address database table</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_back" resname="mailgroup_import_back">
-				<source>Back</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_csv_dublette-description" resname="mailgroup_import_csv_dublette-description">
+			<trans-unit id="recipient.import.dublette.description" resname="recipient.import.dublette.description">
 				<source>Filter email dublettes from csv data. If a dublette is found, only the first entry is imported.</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_csv_validemail-description" resname="mailgroup_import_csv_validemail-description">
+			<trans-unit id="recipient.import.validEmail.description" resname="recipient.import.validEmail.description">
 				<source>Only update/import valid emails from csv data.</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_current_file" resname="mailgroup_import_current_file">
-				<source>Current file</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_done" resname="mailgroup_import_done">
+			<trans-unit id="recipient.import.notification.done.message" resname="recipient.import.notification.done.message">
 				<source>CSV import successfully finished.</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_encapsulation" resname="mailgroup_import_encapsulation">
+			<trans-unit id="recipient.import.encapsulation" resname="recipient.import.encapsulation">
 				<source>Field encapsulation character (data fields are encapsed with...)</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_first_fieldnames" resname="mailgroup_import_first_fieldnames">
-				<source>First row of import file has fieldnames</source>
+			<trans-unit id="recipient.import.firstRowContainFieldNames" resname="recipient.import.firstRowContainFieldNames">
+				<source>First row of import file contain field names</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_header_conf" resname="mailgroup_import_header_conf">
+			<trans-unit id="recipient.import.settings" resname="recipient.import.settings">
 				<source>Import settings</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_header_upload" resname="mailgroup_import_header_upload">
+			<trans-unit id="recipient.import.uploadCsv.subheader" resname="recipient.import.uploadCsv.subheader">
 				<source>Upload CSV</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_import" resname="mailgroup_import_import">
-				<source>Import</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_all_html" resname="mailgroup_import_mapping_all_html">
+			<trans-unit id="recipient.import.allHtml" resname="recipient.import.allHtml">
 				<source>All recipients receive HTML mail</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_categories" resname="mailgroup_import_mapping_categories">
+			<trans-unit id="recipient.import.categoryMapping" resname="recipient.import.categoryMapping">
 				<source>Categories</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_cats" resname="mailgroup_import_mapping_cats">
+			<trans-unit id="recipient.import.assignAllCategories" resname="recipient.import.assignAllCategories">
 				<source>Assign the following categories to all recipients</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_cats_add" resname="mailgroup_import_mapping_cats_add">
-				<source>Add categories</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_charset" resname="mailgroup_import_mapping_charset">
+			<trans-unit id="recipient.import.mappingCharset.subheader" resname="recipient.import.mappingCharset.subheader">
 				<source>Settings</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_charset_choose" resname="mailgroup_import_mapping_charset_choose">
+			<trans-unit id="recipient.import.mappingCharset.pleaseChoose" resname="recipient.import.mappingCharset.pleaseChoose">
 				<source>Please select the character set of the import file</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_conf" resname="mailgroup_import_mapping_conf">
+			<trans-unit id="recipient.import.fieldMapping" resname="recipient.import.fieldMapping">
 				<source>Field mapping</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_conf_add" resname="mailgroup_import_mapping_conf_add">
+			<trans-unit id="recipient.import.fieldMapping.additionalOptions" resname="recipient.import.fieldMapping.additionalOptions">
 				<source>Additional options</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_description" resname="mailgroup_import_mapping_description">
+			<trans-unit id="recipient.import.mapping.description" resname="recipient.import.mapping.description">
 				<source>Description</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_error" resname="mailgroup_import_mapping_error">
+			<trans-unit id="recipient.import.mapping.error" resname="recipient.import.mapping.error">
 				<source>Mapping error</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_error_detail" resname="mailgroup_import_mapping_error_detail">
+			<trans-unit id="recipient.import.mapping.error_detail" resname="recipient.import.mapping.error_detail">
 				<source>Please fix following error(s)</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_error_email" resname="mailgroup_import_mapping_error_email">
+			<trans-unit id="recipient.import.mapping.error_email" resname="recipient.import.mapping.error_email">
 				<source>&quot;Email&quot; field has to be mapped.</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_error_noMap" resname="mailgroup_import_mapping_error_noMap">
+			<trans-unit id="recipient.import.mapping.error_noMap" resname="recipient.import.mapping.error_noMap">
 				<source>No mapping is found. You have to map at least &quot;email&quot; field.</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_mapTo" resname="mailgroup_import_mapping_mapTo">
+			<trans-unit id="recipient.import.mapping.mapTo" resname="recipient.import.mapping.mapTo">
 				<source>Maps to ...</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_mapping" resname="mailgroup_import_mapping_mapping">
+			<trans-unit id="recipient.import.mapping.mapping" resname="recipient.import.mapping.mapping">
 				<source>Mapping</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_number" resname="mailgroup_import_mapping_number">
+			<trans-unit id="recipient.import.mapping.number" resname="recipient.import.mapping.number">
 				<source>#</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_mapping_value" resname="mailgroup_import_mapping_value">
+			<trans-unit id="recipient.import.mapping.value" resname="recipient.import.mapping.value">
 				<source>Value</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_next" resname="mailgroup_import_next">
-				<source>Next</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_or" resname="mailgroup_import_or">
+			<trans-unit id="recipient.import.or" resname="recipient.import.or">
 				<source>OR</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_overwrite" resname="mailgroup_import_overwrite">
-				<source>Overwrite existing file </source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_paste_csv" resname="mailgroup_import_paste_csv">
+			<trans-unit id="recipient.import.pasteCsv" resname="recipient.import.pasteCsv">
 				<source>Paste the CSV data</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_ready_import" resname="mailgroup_import_ready_import">
-				<source>Ready to import</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_ready_import_label" resname="mailgroup_import_ready_import_label" xmlspace="preserve">
-				<source><![CDATA[All necessary information for the import have been entered.
-	By clicking on the "Import" button below, all data will be written in tt_address.]]></source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_record_unique" resname="mailgroup_import_record_unique">
+			<trans-unit id="recipient.import.recordUnique" resname="recipient.import.recordUnique">
 				<source>Specify the field which determines the uniqueness of imported users</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_remove_existing" resname="mailgroup_import_remove_existing">
+			<trans-unit id="recipient.import.removeExisting" resname="recipient.import.removeExisting">
 				<source>Remove all Addresses in the storage folder before importing</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_report_double" resname="mailgroup_import_report_double">
-				<source>Duplicate addresses</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_report_invalid_email" resname="mailgroup_import_report_invalid_email">
-				<source>NOT imported/update addresses (invalid email)</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_report_new" resname="mailgroup_import_report_new">
-				<source>Imported addresses</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_report_update" resname="mailgroup_import_report_update">
-				<source>Updated addresses</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_separator" resname="mailgroup_import_separator">
+			<trans-unit id="recipient.import.separator" resname="recipient.import.separator">
 				<source>Field delimiter (data fields are separated by...)</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_separator_colon" resname="mailgroup_import_separator_colon">
+			<trans-unit id="recipient.import.separator.colon" resname="recipient.import.separator.colon">
 				<source>colon [:]</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_separator_comma" resname="mailgroup_import_separator_comma">
+			<trans-unit id="recipient.import.separator.comma" resname="recipient.import.separator.comma">
 				<source>comma [,]</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_separator_semicolon" resname="mailgroup_import_separator_semicolon">
+			<trans-unit id="recipient.import.separator.semicolon" resname="recipient.import.separator.semicolon">
 				<source>semicolon [;]</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_separator_tab" resname="mailgroup_import_separator_tab">
+			<trans-unit id="recipient.import.separator.tab" resname="recipient.import.separator.tab">
 				<source>horizontal tab [TAB]</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_storage" resname="mailgroup_import_storage">
+			<trans-unit id="recipient.import.storage" resname="recipient.import.storage">
 				<source>Please select the storage folder for the addresses to be imported.</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_update" resname="mailgroup_import_update">
-				<source>update</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_import_update_unique" resname="mailgroup_import_update_unique">
+			<trans-unit id="general.button.update_unique" resname="general.button.update_unique">
 				<source>Update existing (unique) addresses</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_import_upload_file" resname="mailgroup_import_upload_file">
+			<trans-unit id="recipient.import.chooseCsvFile" resname="recipient.import.chooseCsvFile">
 				<source>Choose a csv file from your local computer</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_list_all" resname="mailgroup_list_all">
-				<source>List all</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_plain_list" resname="mailgroup_plain_list">
+			<trans-unit id="report.plainList" resname="report.plainList">
 				<source>Plain List</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_recip_from" resname="mailgroup_recip_from">
-				<source>Recipients from recipient list</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_recip_number" resname="mailgroup_recip_number">
-				<source>Number of recipients</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_table_address" resname="mailgroup_table_address">
-				<source>Address Table (tt_address)</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_table_tt_address" resname="mailgroup_table_tt_address">
+			<trans-unit id="report.returned.table.tt_address" resname="report.returned.table.tt_address">
 				<source>Address Table [tt_address]</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_table_custom" resname="mailgroup_table_custom">
-				<source>Custom Table</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_table_fe_users" resname="mailgroup_table_fe_users">
+			<trans-unit id="report.returned.table.fe_users" resname="report.returned.table.fe_users">
 				<source>Website User [fe_users]</source>
 			</trans-unit>
-			<trans-unit id="mailgroup_table_disallowed_placeholder" resname="mailgroup_table_disallowed_placeholder">
-				<source>Missing permission to display data</source>
-			</trans-unit>
-			<trans-unit id="mailgroup_table_disallowed_csv" resname="mailgroup_table_disallowed_csv">
+			<trans-unit id="recipient.notification.disallowedCsvExport.message" resname="recipient.notification.disallowedCsvExport.message">
 				<source>CSV export failed. Insufficient access right.</source>
 			</trans-unit>
-			<trans-unit id="restrictToCategories" resname="restrictToCategories">
+			<trans-unit id="mail.wizard.categories.restrictToCategories" resname="mail.wizard.categories.restrictToCategories">
 				<source>Restrict to categories</source>
 			</trans-unit>
-			<trans-unit id="nl_cat_msg1" resname="nl_cat_msg1">
-				<source>There are no content elements on the page.</source>
-			</trans-unit>
-			<trans-unit id="nl_create" resname="nl_create">
-				<source>Create a mail</source>
-			</trans-unit>
-			<trans-unit id="nl_editPage" resname="nl_editPage">
-				<source>Edit page</source>
-			</trans-unit>
-			<trans-unit id="nl_l_ALL" resname="nl_l_ALL">
-				<source>ALL</source>
-			</trans-unit>
-			<trans-unit id="nl_l_ONLY" resname="nl_l_ONLY">
-				<source>ONLY</source>
-			</trans-unit>
-			<trans-unit id="nl_l_attach" resname="nl_l_attach">
+			<trans-unit id="mail.wizard.attachment" resname="mail.wizard.attachment">
 				<source>Attachment</source>
 			</trans-unit>
-			<trans-unit id="nl_l_column" resname="nl_l_column">
+			<trans-unit id="mail.wizard.categories.column" resname="mail.wizard.categories.column">
 				<source>Column</source>
 			</trans-unit>
-			<trans-unit id="nl_l_lastM" resname="nl_l_lastM">
+			<trans-unit id="mail.wizard.lastModified" resname="mail.wizard.lastModified">
 				<source>Last modified</source>
 			</trans-unit>
-			<trans-unit id="nl_l_size" resname="nl_l_size">
+			<trans-unit id="mail.wizard.size" resname="mail.wizard.size">
 				<source>Size</source>
 			</trans-unit>
-			<trans-unit id="nl_l_subject" resname="nl_l_subject">
+			<trans-unit id="mail.wizard.subject" resname="mail.wizard.subject">
 				<source>Subject</source>
 			</trans-unit>
-			<trans-unit id="nl_l_tDraft" resname="nl_l_tDraft">
-				<source>Draft</source>
-			</trans-unit>
-			<trans-unit id="nl_l_tPage" resname="nl_l_tPage">
-				<source>Internal Page</source>
-			</trans-unit>
-			<trans-unit id="nl_l_tUrl" resname="nl_l_tUrl">
-				<source>External Page</source>
-			</trans-unit>
-			<trans-unit id="nl_l_type" resname="nl_l_type">
+			<trans-unit id="mail.wizard.type" resname="mail.wizard.type">
 				<source>Type</source>
 			</trans-unit>
-			<trans-unit id="nl_l_update" resname="nl_l_update">
-				<source>Save category restrictions</source>
-			</trans-unit>
-			<trans-unit id="nl_select" resname="nl_select">
+			<trans-unit id="mail.wizard.noMailPagesFound.title" resname="mail.wizard.noMailPagesFound.title">
 				<source>Select a mail</source>
 			</trans-unit>
-			<trans-unit id="nl_select_msg1" resname="nl_select_msg1">
+			<trans-unit id="mail.wizard.noMailPagesFound.message" resname="mail.wizard.noMailPagesFound.message">
 				<source>There are no pages in the mail module.</source>
 			</trans-unit>
-			<trans-unit id="nl_viewPage_HTML" resname="nl_viewPage_HTML">
+			<trans-unit id="mail.wizard.htmlPreviewLink.title" resname="mail.wizard.htmlPreviewLink.title">
 				<source>View page in HTML format</source>
 			</trans-unit>
-			<trans-unit id="nl_viewPage_TXT" resname="nl_viewPage_TXT">
+			<trans-unit id="mail.wizard.plainTextPreviewLink.title" resname="mail.wizard.plainTextPreviewLink.title">
 				<source>View page in Text format</source>
 			</trans-unit>
-			<trans-unit id="quickmail_break_lines" resname="quickmail_break_lines">
+			<trans-unit id="mail.wizard.quickmail.breakLines" resname="mail.wizard.quickmail.breakLines">
 				<source>Break lines to 76 char</source>
 			</trans-unit>
-			<trans-unit id="quickmail_message" resname="quickmail_message">
+			<trans-unit id="mail.wizard.quickmail.message" resname="mail.wizard.quickmail.message">
 				<source>Message</source>
 			</trans-unit>
-			<trans-unit id="quickmail_sender_email" resname="quickmail_sender_email">
+			<trans-unit id="mail.wizard.quickmail.senderEmail" resname="mail.wizard.quickmail.senderEmail">
 				<source>Sender Email</source>
 			</trans-unit>
-			<trans-unit id="quickmail_sender_name" resname="quickmail_sender_name">
+			<trans-unit id="mail.wizard.quickmail.senderName" resname="mail.wizard.quickmail.senderName">
 				<source>Sender Name</source>
 			</trans-unit>
-			<trans-unit id="recip_create_mailgroup" resname="recip_create_mailgroup">
+			<trans-unit id="recipient.createMailGroup" resname="recipient.createMailGroup">
 				<source>New recipient list</source>
 			</trans-unit>
-			<trans-unit id="recip_create_mailgroup_msg" resname="recip_create_mailgroup_msg">
+			<trans-unit id="recipient.createMailGroup.message" resname="recipient.createMailGroup.message">
 				<source>New group</source>
 			</trans-unit>
-			<trans-unit id="recip_group_amount" resname="recip_group_amount">
-				<source>Recipients</source>
-			</trans-unit>
-            <trans-unit id="recip_group_record_types" resname="recip_group_record_types">
-                <source>Types of records</source>
-            </trans-unit>
-            <trans-unit id="recip_group_categories" resname="recip_group_categories">
+            <trans-unit id="recipient.categories" resname="recipient.categories">
                 <source>Categories</source>
             </trans-unit>
-            <trans-unit id="recip_group_html_format" resname="recip_group_html_format">
+            <trans-unit id="recipient.htmlFormat" resname="recipient.htmlFormat">
                 <source>HTML Format</source>
             </trans-unit>
-            <trans-unit id="recip_import_mailgroup_msg" resname="recip_import_mailgroup_msg">
+            <trans-unit id="recipient.button.importCsv" resname="recipient.button.importCsv">
 				<source>Import CSV</source>
 			</trans-unit>
-			<trans-unit id="recip_select_mailgroup" resname="recip_select_mailgroup">
-				<source>Recipient groups</source>
-			</trans-unit>
-			<trans-unit id="schedule_draft" resname="schedule_draft">
+			<trans-unit id="mail.wizard.scheduleDraft" resname="mail.wizard.scheduleDraft">
 				<source>Save mail settings for recurring mailings</source>
 			</trans-unit>
-			<trans-unit id="schedule_mailgroup" resname="schedule_mailgroup">
+			<trans-unit id="mail.wizard.scheduleSending.mailGroup" resname="mail.wizard.scheduleSending.mailGroup">
 				<source>Recipient group</source>
 			</trans-unit>
-			<trans-unit id="schedule_mailgroups" resname="schedule_mailgroups">
+			<trans-unit id="mail.wizard.scheduleSending.mailGroups" resname="mail.wizard.scheduleSending.mailGroups">
 				<source>Recipient groups</source>
 			</trans-unit>
-			<trans-unit id="schedule_select_mailgroup" resname="schedule_select_mailgroup">
+			<trans-unit id="mail.wizard.scheduleSending.info.mailGroup.title" resname="mail.wizard.scheduleSending.info.mailGroup.title">
 				<source>Select recipients and time of sending</source>
 			</trans-unit>
-			<trans-unit id="schedule_select_mailgroup2" resname="schedule_select_mailgroup2" xmlspace="preserve">
+			<trans-unit id="mail.wizard.scheduleSending.info.mailGroup.message" resname="mail.wizard.scheduleSending.info.mailGroup.message" xmlspace="preserve">
 				<source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
 				After pressing FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending is finished.]]></source>
 			</trans-unit>
-			<trans-unit id="schedule_send_all" resname="schedule_send_all">
-				<source>Send mail to all selected groups</source>
-			</trans-unit>
-			<trans-unit id="schedule_finish" resname="schedule_finish">
-				<source>Finish</source>
-			</trans-unit>
-			<trans-unit id="schedule_testmail" resname="schedule_testmail">
+			<trans-unit id="mail.wizard.scheduleSending.testMail" resname="mail.wizard.scheduleSending.testMail">
 				<source>Send this as test mail</source>
 			</trans-unit>
-			<trans-unit id="schedule_time" resname="schedule_time">
+			<trans-unit id="mail.wizard.scheduleSending.distributionTime" resname="mail.wizard.scheduleSending.distributionTime">
 				<source>Distribution time (hh:mm dd-mm-yyyy)</source>
 			</trans-unit>
-			<trans-unit id="select_folder" resname="select_folder">
-				<source>Please select mail folder.</source>
-			</trans-unit>
-			<trans-unit id="send_draft_saved" resname="send_draft_saved">
+			<trans-unit id="mail.wizard.notification.draftSaved.title" resname="mail.wizard.notification.draftSaved.title">
 				<source>Mail saved as draft</source>
 			</trans-unit>
-			<trans-unit id="send_draft_scheduler" resname="send_draft_scheduler">
+			<trans-unit id="mail.wizard.notification.draftSaved.message" resname="mail.wizard.notification.draftSaved.message">
 				<source>The mail "%s" was successfully saved as draft for recurring sending within the scheduler.</source>
 			</trans-unit>
-			<trans-unit id="send_recipients" resname="send_recipients">
-				<source>Recipient(s)</source>
-			</trans-unit>
-			<trans-unit id="send_was_scheduled" resname="send_was_scheduled">
+			<trans-unit id="mail.wizard.notification.scheduledForDistribution.title" resname="mail.wizard.notification.scheduledForDistribution.title">
 				<source>Mail scheduled for distribution</source>
 			</trans-unit>
-			<trans-unit id="send_was_scheduled_for" resname="send_was_scheduled_for">
+			<trans-unit id="mail.wizard.notification.scheduledForDistribution.message" resname="mail.wizard.notification.scheduledForDistribution.message">
 				<source>The mail "%s" was successfully scheduled for distribution at %s.</source>
 			</trans-unit>
-            <trans-unit id="testMailSent" resname="testMailSent">
-                <source>Test mail successfully sent</source>
-            </trans-unit>
-			<trans-unit id="testMailSentTo" resname="testMailSentTo">
-				<source>The test mail was sent to %s.</source>
-			</trans-unit>
-			<trans-unit id="send_was_sent" resname="send_was_sent">
-				<source>The mail was sent.</source>
-			</trans-unit>
-			<trans-unit id="send_was_sent_to_name" resname="send_was_sent_to_name">
-				<source>The mail was sent to %s.</source>
-			</trans-unit>
-			<trans-unit id="send_was_sent_to_number" resname="send_was_sent_to_number">
-				<source>The mail was sent to %s recipients.</source>
-			</trans-unit>
-			<trans-unit id="stats_CSV_returned" resname="stats_CSV_returned">
+			<trans-unit id="report.csvReturned" resname="report.csvReturned">
 				<source>CSV of recipients of returned mails</source>
 			</trans-unit>
-			<trans-unit id="stats_CSV_returned_bad_header" resname="stats_CSV_returned_bad_header">
+			<trans-unit id="report.csvReturned.badHeader" resname="report.csvReturned.badHeader">
 				<source>CSV of returned recipients with error in header</source>
 			</trans-unit>
-			<trans-unit id="stats_CSV_returned_bad_host" resname="stats_CSV_returned_bad_host">
+			<trans-unit id="report.csvReturned.badHost" resname="report.csvReturned.badHost">
 				<source>CSV of returned recipients with bad host</source>
 			</trans-unit>
-			<trans-unit id="stats_CSV_returned_mailbox_full" resname="stats_CSV_returned_mailbox_full">
+			<trans-unit id="report.csvReturned.mailboxFull" resname="report.csvReturned.mailboxFull">
 				<source>CSV of returned recipients with mailbox full</source>
 			</trans-unit>
-			<trans-unit id="stats_CSV_returned_reason_unknown" resname="stats_CSV_returned_reason_unknown">
+			<trans-unit id="report.report.csvReturned.reasonUnknown" resname="report.report.csvReturned.reasonUnknown">
 				<source>CSV of returned recipients for unknown reason</source>
 			</trans-unit>
-			<trans-unit id="stats_CSV_returned_unknown_recipient" resname="stats_CSV_returned_unknown_recipient">
+			<trans-unit id="report.csvReturned.unknownRecipient" resname="report.csvReturned.unknownRecipient">
 				<source>CSV of returned recipients with unknown recipient</source>
 			</trans-unit>
-			<trans-unit id="stats_clicked_link" resname="stats_clicked_link">
+			<trans-unit id="report.response.clickedLinks" resname="report.response.clickedLinks">
 				<source>Clicked links</source>
 			</trans-unit>
-			<trans-unit id="stats_HTML" resname="stats_HTML">
+			<trans-unit id="report.html" resname="report.html">
 				<source>HTML</source>
 			</trans-unit>
-			<trans-unit id="stats_HTML_link_nr" resname="stats_HTML_link_nr">
+			<trans-unit id="report.html.linkNumber" resname="report.html.linkNumber">
 				<source>HTML Link #</source>
 			</trans-unit>
-			<trans-unit id="stats_HTML_mails_viewed" resname="stats_HTML_mails_viewed">
+			<trans-unit id="report.html.mailsViewed" resname="report.html.mailsViewed">
 				<source>Mails viewed</source>
 			</trans-unit>
-			<trans-unit id="stats_bad_host" resname="stats_bad_host">
+			<trans-unit id="report.badHost" resname="report.badHost">
 				<source>Bad host</source>
 			</trans-unit>
-			<trans-unit id="stats_count" resname="stats_count">
-				<source>Count</source>
-			</trans-unit>
-			<trans-unit id="stats_direct_mail" resname="stats_direct_mail">
+			<trans-unit id="report.mail" resname="report.mail">
 				<source>Mail</source>
 			</trans-unit>
-			<trans-unit id="stats_disable_returned" resname="stats_disable_returned">
+			<trans-unit id="report.disable.returned" resname="report.disable.returned">
 				<source>Disable returned recipients</source>
 			</trans-unit>
-			<trans-unit id="stats_disable_returned_bad_header" resname="stats_disable_returned_bad_header">
+			<trans-unit id="report.disable.returned.badHeader" resname="report.disable.returned.badHeader">
 				<source>Disable returned recipients with error in header</source>
 			</trans-unit>
-			<trans-unit id="stats_disable_returned_bad_host" resname="stats_disable_returned_bad_host">
+			<trans-unit id="report.disable.returned.badHost" resname="report.disable.returned.badHost">
 				<source>Disable returned recipients with bad host</source>
 			</trans-unit>
-			<trans-unit id="stats_disable_returned_mailbox_full" resname="stats_disable_returned_mailbox_full">
+			<trans-unit id="report.disable.returned.mailboxFull" resname="report.disable.returned.mailboxFull">
 				<source>Disable returned recipients with mailbox full</source>
 			</trans-unit>
-			<trans-unit id="stats_disable_returned_reason_unknown" resname="stats_disable_returned_reason_unknown">
+			<trans-unit id="report.disable.returned.reasonUnknown" resname="report.disable.returned.reasonUnknown">
 				<source>Disable returned recipients for unknown reason</source>
 			</trans-unit>
-			<trans-unit id="stats_disable_returned_unknown_recipient" resname="stats_disable_returned_unknown_recipient">
+			<trans-unit id="report.disable.returned.unknownRecipient" resname="report.disable.returned.unknownRecipient">
 				<source>Disable returned recipients with unknown recipient</source>
 			</trans-unit>
-			<trans-unit id="stats_emails" resname="stats_emails">
-				<source>List of recipients from tt_address table</source>
-			</trans-unit>
-			<trans-unit id="stats_emails_disabled" resname="stats_emails_disabled">
-				<source>addresses disabled</source>
-			</trans-unit>
-			<trans-unit id="stats_emails_returned_bad_header_list" resname="stats_emails_returned_bad_header_list">
-				<source>Email addresses of returned mails with error in header</source>
-			</trans-unit>
-			<trans-unit id="stats_emails_returned_bad_host_list" resname="stats_emails_returned_bad_host_list">
-				<source>Email addresses of returned mails with bad host</source>
-			</trans-unit>
-			<trans-unit id="stats_emails_returned_list" resname="stats_emails_returned_list">
-				<source>Email addresses of returned mails</source>
-			</trans-unit>
-			<trans-unit id="stats_emails_returned_mailbox_full_list" resname="stats_emails_returned_mailbox_full_list">
-				<source>Email addresses of returned mails with mailbox full</source>
-			</trans-unit>
-			<trans-unit id="stats_emails_returned_reason_unknown_list" resname="stats_emails_returned_reason_unknown_list">
-				<source>Email addresses of returned mails for unknown reason</source>
-			</trans-unit>
-			<trans-unit id="stats_emails_returned_unknown_recipient_list" resname="stats_emails_returned_unknown_recipient_list">
-				<source>Email addresses of returned mails with unknown recipient</source>
-			</trans-unit>
-			<trans-unit id="stats_error_in_header" resname="stats_error_in_header">
+			<trans-unit id="report.headerError" resname="report.headerError">
 				<source>Error in Header</source>
 			</trans-unit>
-			<trans-unit id="stats_performance" resname="stats_performance">
+			<trans-unit id="report.performance" resname="report.performance">
 				<source>Performance</source>
 			</trans-unit>
-			<trans-unit id="stats_img_link" resname="stats_img_link">
-				<source>Imagelink</source>
-			</trans-unit>
-			<trans-unit id="stats_links_clicked_per_respondent" resname="stats_links_clicked_per_respondent">
+			<trans-unit id="report.performance.linksClickedPerRespondent" resname="report.performance.linksClickedPerRespondent">
 				<source>Total responses/Unique responses</source>
 			</trans-unit>
-			<trans-unit id="stats_list_returned" resname="stats_list_returned">
+			<trans-unit id="report.returned" resname="report.returned">
 				<source>Returned recipients</source>
 			</trans-unit>
-			<trans-unit id="stats_list_returned_bad_header" resname="stats_list_returned_bad_header">
+			<trans-unit id="report.returned.badHeader" resname="report.returned.badHeader">
 				<source>Returned recipients with error in header</source>
 			</trans-unit>
-			<trans-unit id="stats_list_returned_bad_host" resname="stats_list_returned_bad_host">
+			<trans-unit id="report.returned.badHost" resname="report.returned.badHost">
 				<source>Returned recipients with bad host</source>
 			</trans-unit>
-			<trans-unit id="stats_list_returned_mailbox_full" resname="stats_list_returned_mailbox_full">
+			<trans-unit id="report.returned.mailboxFull" resname="report.returned.mailboxFull">
 				<source>Returned recipients with mailbox full</source>
 			</trans-unit>
-			<trans-unit id="stats_list_returned_reason_unknown" resname="stats_list_returned_reason_unknown">
+			<trans-unit id="report.returned.reasonUnknown" resname="report.returned.reasonUnknown">
 				<source>Returned recipients for unknown reason</source>
 			</trans-unit>
-			<trans-unit id="stats_list_returned_unknown_recipient" resname="stats_list_returned_unknown_recipient">
+			<trans-unit id="report.returned.unknownRecipient" resname="report.returned.unknownRecipient">
 				<source>Returned recipients with unknown recipient</source>
 			</trans-unit>
-			<trans-unit id="stats_mailbox_full" resname="stats_mailbox_full">
+			<trans-unit id="report.mailboxFull" resname="report.mailboxFull">
 				<source>Mailbox full</source>
 			</trans-unit>
-			<trans-unit id="stats_mails_returned" resname="stats_mails_returned">
+			<trans-unit id="report.deliveryFailed" resname="report.deliveryFailed">
 				<source>Delivery failed</source>
 			</trans-unit>
-			<trans-unit id="stats_mails_sent" resname="stats_mails_sent">
+			<trans-unit id="report.mailsSent" resname="report.mailsSent">
 				<source>Mails received</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_choose" resname="stats_overview_choose">
+			<trans-unit id="report.chooseMail" resname="report.chooseMail">
 				<source>Choose a mail</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_delivery_begun" resname="stats_overview_delivery_begun">
+			<trans-unit id="report.deliveryBegun" resname="report.deliveryBegun">
 				<source>Delivery begun</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_delivery_ended" resname="stats_overview_delivery_ended">
+			<trans-unit id="report.deliveryEnded" resname="report.deliveryEnded">
 				<source>Delivery ended</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_header" resname="stats_overview_header">
+			<trans-unit id="report.header" resname="report.header">
 				<source>Mail Reports</source>
 			</trans-unit>
-			<trans-unit id="stats_show_header" resname="stats_show_header">
+			<trans-unit id="report.show.header" resname="report.show.header">
 				<source>Mail Report</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_queuing" resname="stats_overview_queuing">
-				<source>queuing</source>
-			</trans-unit>
-			<trans-unit id="stats_overview_scheduled" resname="stats_overview_scheduled">
+			<trans-unit id="report.scheduled" resname="report.scheduled">
 				<source>Scheduled</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_sending" resname="stats_overview_sending">
-				<source>sending</source>
-			</trans-unit>
-			<trans-unit id="stats_overview_sent" resname="stats_overview_sent">
-				<source>sent</source>
-			</trans-unit>
-			<trans-unit id="stats_overview_status" resname="stats_overview_status">
+			<trans-unit id="report.status" resname="report.status">
 				<source>Status</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_subject" resname="stats_overview_subject">
+			<trans-unit id="report.subject" resname="report.subject">
 				<source>Subject</source>
 			</trans-unit>
-			<trans-unit id="stats_overview_total_sent" resname="stats_overview_total_sent">
+			<trans-unit id="report.totalSent" resname="report.totalSent">
 				<source># sent</source>
 			</trans-unit>
-			<trans-unit id="stats_plainlist" resname="stats_plainlist">
-				<source>List of recipients</source>
-			</trans-unit>
-			<trans-unit id="stats_plaintext" resname="stats_plaintext">
+			<trans-unit id="report.plainText" resname="report.plainText">
 				<source>Plaintext</source>
 			</trans-unit>
-			<trans-unit id="stats_plaintext_link_nr" resname="stats_plaintext_link_nr">
+			<trans-unit id="report.plainText.linkNumber" resname="report.plainText.linkNumber">
 				<source>Plaintext Link #</source>
 			</trans-unit>
-			<trans-unit id="stats_reason_unkown" resname="stats_reason_unkown">
+			<trans-unit id="report.reasonUnknown" resname="report.reasonUnknown">
 				<source>Reason unknown</source>
 			</trans-unit>
-			<trans-unit id="stats_recalculate_cached_data" resname="stats_recalculate_cached_data">
-				<source>Recalculate</source>
-			</trans-unit>
-			<trans-unit id="stats_recalculate_stats" resname="stats_recalculate_stats">
-				<source>Recalculate</source>
-			</trans-unit>
-			<trans-unit id="stats_recipient_unknown" resname="stats_recipient_unknown">
+			<trans-unit id="report.recipientUnknown" resname="report.recipientUnknown">
 				<source>Recipient unknown</source>
 			</trans-unit>
-			<trans-unit id="stats_response" resname="stats_response">
+			<trans-unit id="report.responses" resname="report.responses">
 				<source>Responses</source>
 			</trans-unit>
-			<trans-unit id="stats_response_link" resname="stats_response_link">
+			<trans-unit id="report.reactions" resname="report.reactions">
 				<source>Reactions</source>
 			</trans-unit>
-			<trans-unit id="stats_total" resname="stats_total">
+			<trans-unit id="report.total" resname="report.total">
 				<source>Total</source>
 			</trans-unit>
-			<trans-unit id="stats_total_mails_returned" resname="stats_total_mails_returned">
+			<trans-unit id="report.total.returned" resname="report.total.returned">
 				<source>Total mails returned</source>
 			</trans-unit>
-			<trans-unit id="stats_total_responses" resname="stats_total_responses">
+			<trans-unit id="report.total.responses" resname="report.total.responses">
 				<source>Total responses (links clicked)</source>
 			</trans-unit>
-			<trans-unit id="stats_unique_responses" resname="stats_unique_responses">
+			<trans-unit id="report.uniqueResponses" resname="report.uniqueResponses">
 				<source>Unique responses (links clicked)</source>
 			</trans-unit>
-			<trans-unit id="stats_website_users" resname="stats_website_users">
-				<source>List of recipients from fe_users</source>
-			</trans-unit>
-			<trans-unit id="stats_website_users_disabled" resname="stats_website_users_disabled">
-				<source>Website users disabled</source>
-			</trans-unit>
-			<trans-unit id="testmail_individual" resname="testmail_individual">
+			<trans-unit id="mail.wizard.testMail.individual" resname="mail.wizard.testMail.individual">
 				<source>Individual</source>
 			</trans-unit>
-			<trans-unit id="testmail_mailgroup" resname="testmail_mailgroup">
+			<trans-unit id="mail.wizard.testMail.mailGroup" resname="mail.wizard.testMail.mailGroup">
 				<source>Recipient group</source>
 			</trans-unit>
-			<trans-unit id="testmail_mailgroup_msg" resname="testmail_mailgroup_msg">
+			<trans-unit id="mail.wizard.testMail.mailGroup.message" resname="mail.wizard.testMail.mailGroup.message">
 				<source>Select a recipient group for the test mail.</source>
 			</trans-unit>
-			<trans-unit id="testmail_simple" resname="testmail_simple">
+			<trans-unit id="mail.wizard.testMail.info.title" resname="mail.wizard.testMail.info.title">
 				<source>Send a simple test mail</source>
 			</trans-unit>
-			<trans-unit id="testmail_simple_msg" resname="testmail_simple_msg" xmlspace="preserve">
-				<source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.<br>
+			<trans-unit id="mail.wizard.testMail.info.message" resname="mail.wizard.testMail.info.message" xmlspace="preserve">
+				<source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.
 				Beware: The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
 			</trans-unit>
-			<trans-unit id="view_delivery_begin_end" resname="view_delivery_begin_end">
+			<trans-unit id="report.deliveryBeginEnd" resname="report.deliveryBeginEnd">
 				<source>Delivery begun/ended</source>
 			</trans-unit>
-			<trans-unit id="view_dmail" resname="view_dmail">
+			<trans-unit id="report.source" resname="report.source">
 				<source>Source</source>
 			</trans-unit>
-			<trans-unit id="view_flowed" resname="view_flowed">
-				<source>Flowed text</source>
-			</trans-unit>
-			<trans-unit id="view_from" resname="view_from">
+			<trans-unit id="report.from" resname="report.from">
 				<source>Sender</source>
 			</trans-unit>
-			<trans-unit id="view_mail" resname="view_mail">
+			<trans-unit id="report.formatAttachments" resname="report.formatAttachments">
 				<source>Format/attachments</source>
 			</trans-unit>
-			<trans-unit id="view_media" resname="view_media">
+			<trans-unit id="report.includeMedia" resname="report.includeMedia">
 				<source>Include media</source>
 			</trans-unit>
-			<trans-unit id="view_recipient_total_sent" resname="view_recipient_total_sent">
+			<trans-unit id="report.recipients" resname="report.recipients">
 				<source>Recipients</source>
 			</trans-unit>
-			<trans-unit id="view_replyto" resname="view_replyto">
+			<trans-unit id="report.replyTo" resname="report.replyTo">
 				<source>Reply</source>
-			</trans-unit>
-			<trans-unit id="yes" resname="yes">
-				<source>Yes</source>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.server" resname="scheduler.bounceMail.server">
 				<source>Server URL/IP</source>
@@ -1265,42 +892,14 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="scheduler.bounceMail.dataVerification" resname="scheduler.bounceMail.dataVerification">
 				<source><![CDATA[Connection using the given data is failed. Error message ]]></source>
 			</trans-unit>
-			<trans-unit id="error.no_recipient_groups_found" resname="error.no_recipient_groups_found">
+			<trans-unit id="mail.wizard.scheduleSending.noRecipientGroupsFound.message" resname="mail.wizard.scheduleSending.noRecipientGroupsFound.message">
 				<source>No recipient groups found</source>
 			</trans-unit>
 			<trans-unit id="scheduler.bounceMail.phpImapError" resname="scheduler.bounceMail.phpImapError">
 				<source>Please install PHP IMAP extension</source>
 			</trans-unit>
-			<trans-unit id="labels.path" resname="labels.path">
-				<source>Path</source>
-			</trans-unit>
-			<trans-unit id="mod.no_access" resname="mod.no_access">
-				<source>no access</source>
-			</trans-unit>
-			<trans-unit id="mod.no_recipients" resname="mod.no_recipients">
-				<source>no recipients</source>
-			</trans-unit>
-            <trans-unit id="assign_categories.alttitle" resname="assign_categories.alttitle">
-                <source>Assign categories to content elements</source>
-            </trans-unit>
-            <trans-unit id="assign_categories.description" xml:space="preserve">
-			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
-			Content elements without category restrictions will appear for in all mails.]]></source>
-		    </trans-unit>
-            <trans-unit id="create_directmail_from_url.alttitle">
-                <source>New mailing from external pages</source>
-            </trans-unit>
-            <trans-unit id="create_directmail_from_url.description">
-                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
-            </trans-unit>
-            <trans-unit id="create_newsletter.alttitle">
-                <source>Create a newsletter</source>
-            </trans-unit>
-            <trans-unit id="create_newsletter.description">
-                <source>Click on this link if you want to create a new newsletter.</source>
-            </trans-unit>
-            <trans-unit id="create_newsletter.details" xml:space="preserve">
-			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the Direct Mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
+            <trans-unit id="mail.wizard.internalPage.description.old" xml:space="preserve">
+			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
 
 You may personalize the mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
 
@@ -1322,18 +921,6 @@ You may personalize the mails that will be sent to each recipient by inserting t
 ###SYS_MAIL_ID###
 ###SYS_AUTHCODE###]]></source>
 		    </trans-unit>
-            <trans-unit id="select_newsletter.alttitle">
-                <source>New mailing from an internal page</source>
-            </trans-unit>
-            <trans-unit id="select_newsletter.description">
-                <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
-            </trans-unit>
-            <trans-unit id="quick_mail.alttitle">
-                <source>Create a quick mailing</source>
-            </trans-unit>
-            <trans-unit id="quick_mail.description">
-                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
-            </trans-unit>
 		</body>
 	</file>
 </xliff>

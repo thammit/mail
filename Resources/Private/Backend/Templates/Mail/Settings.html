@@ -10,7 +10,7 @@
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1>
-        <f:translate key="{lll}dmail_wizard_title"/>
+        <f:translate key="{lll}mail.wizard.title"/>
     </h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2>
@@ -20,7 +20,7 @@
     <div class="row justify-content-between">
         <div class="col-12 col-md-8">
             <h3>
-                <f:translate key="{lll}dmail_wiz2_detail"/>
+                <f:translate key="{lll}mail.wizard.settings"/>
             </h3>
             <div role="tabpanel">
                 <ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab" data-store-last-tab="1">
@@ -104,12 +104,12 @@
         <f:then>
             <be:link.editRecord uid="{mail.uid}" table="{table}" class="btn btn-default mb-3">
                 <core:icon identifier="actions-open"/>
-                <f:translate key="{lll}dmail_edit_info"/>
+                <f:translate key="{lll}general.button.edit"/>
             </be:link.editRecord>
         </f:then>
         <f:else>
             <f:be.infobox state="1">
-                <f:translate key="{lll}dmail_noEdit_noPerms"/>
+                <f:translate key="{lll}configuration.noEditPermissions"/>
             </f:be.infobox>
         </f:else>
     </f:if>

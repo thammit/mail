@@ -9,33 +9,33 @@
 
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}dmail_wizard_title"/></h1>
+    <h1><f:translate key="{lll}mail.wizard.title"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <h2><f:translate key="{lll}dmail_wiz1_select_nl_source"/>:</h2>
+    <h2><f:translate key="{lll}mail.wizard.selectSource"/>:</h2>
     <div class="panel-group" id="mail-wizard-source-select-panel">
         <f:if condition="{panel.open.data}">
             <f:variable name="counter" value="{panel.open.data -> f:count()}"/>
-            <f:variable name="title"><f:translate key="{lll}dmail_wiz1_list_dmail"/></f:variable>
+            <f:variable name="title"><f:translate key="{lll}mail.wizard.openMails"/></f:variable>
             <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:7, open:panel.open.open, counter: counter}" contentAs="panelBody">
                 <f:render section="OpenMailsPanel" arguments="{lll:lll, data: panel.open, mailSysFolderUid:mailSysFolderUid}" />
             </f:render>
         </f:if>
         <f:if condition="{panel.internal}">
             <f:variable name="counter" value="{panel.internal.data -> f:count()}"/>
-            <f:variable name="title"><f:translate key="{lll}dmail_wiz1_internal_page"/></f:variable>
+            <f:variable name="title"><f:translate key="{lll}mail.wizard.internalPage"/></f:variable>
             <f:variable name="additionalHeading"><core:icon identifier="app-pagetree-folder-contains-mail" /> {pageInfo.title} [{pageInfo.uid}]</f:variable>
             <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:4, open:panel.internal.open, counter: counter, additionalHeading: additionalHeading}" contentAs="panelBody">
                 <f:render section="InternalPanel" arguments="{lll:lll, data: panel.internal, mailSysFolderUid:mailSysFolderUid}" />
             </f:render>
         </f:if>
         <f:if condition="{panel.external}">
-            <f:variable name="title"><f:translate key="{lll}dmail_wiz1_external_page"/></f:variable>
+            <f:variable name="title"><f:translate key="{lll}mail.wizard.externalPage"/></f:variable>
             <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:5, open:panel.external.open, counter: 0}" contentAs="panelBody">
                 <f:render section="ExternalPanel" arguments="{lll:lll, settings: settings, data: panel.external}" />
             </f:render>
         </f:if>
         <f:if condition="{panel.quickMail}">
-            <f:variable name="title"><f:translate key="{lll}dmail_wiz1_quickmail"/></f:variable>
+            <f:variable name="title"><f:translate key="{lll}mail.wizard.quickMail"/></f:variable>
             <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:6, open:panel.quickMail.open, counter: 0}" contentAs="panelBody">
                 <f:render section="QuickMailPanel" arguments="{lll:lll, settings: settings, data: panel.quickMail}" />
             </f:render>
@@ -51,11 +51,11 @@
             <thead class="table-light">
             <tr>
                 <th style="width: 1%">&nbsp;</th>
-                <th class="col-title col-responsive nowrap"><f:translate key="{lll}nl_l_subject"/></th>
-                <th><f:translate key="{lll}nl_l_type"/></th>
-                <th><f:translate key="{lll}nl_l_lastM"/></th>
-                <th><f:translate key="{lll}nl_l_size"/></th>
-                <th><f:translate key="{lll}nl_l_attach"/></th>
+                <th class="col-title col-responsive nowrap"><f:translate key="{lll}mail.wizard.subject"/></th>
+                <th><f:translate key="{lll}mail.wizard.type"/></th>
+                <th><f:translate key="{lll}mail.wizard.lastModified"/></th>
+                <th><f:translate key="{lll}mail.wizard.size"/></th>
+                <th><f:translate key="{lll}mail.wizard.attachment"/></th>
                 <th class="col-control nowrap"></th>
                 <th class="col-control nowrap"></th>
             </tr>
@@ -99,7 +99,7 @@
                     <thead class="table-light">
                     <tr>
                         <th style="width: 1%"></th>
-                        <th class="col-title col-responsive nowrap"><f:translate key="{lll}dmail_wiz1_internal_page" default="Page" /></th>
+                        <th class="col-title col-responsive nowrap"><f:translate key="{lll}mail.wizard.internalPage" default="Page" /></th>
                         <th class="nowrap"></th>
                         <th class="col-control nowrap"></th>
                     </tr>
@@ -110,7 +110,7 @@
                             <td class="col-icon nowrap" style="width: 1%"><core:icon identifier="app-pagetree-mail" size="small"/></td>
                             <td class="col-title col-responsive nowrap">{row.title}</td>
                             <td class="nowrap">
-                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: row.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}nl_editPage')}">
+                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: row.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.edit')}">
                                     <core:icon identifier="actions-page-open" size="small"/>
                                 </a>
                                 <f:variable name="previewLinks" value="{mail:previewLinks(data:row,pageId:mailSysFolderUid)}"/>
@@ -153,8 +153,8 @@
             </div>
         </f:then>
         <f:else>
-            <f:be.infobox state="-1" title="{f:translate(key: '{lll}nl_select')}">
-                <f:translate key="{lll}nl_select_msg1"/>
+            <f:be.infobox state="-1" title="{f:translate(key: '{lll}mail.wizard.noMailPagesFound.title')}">
+                <f:translate key="{lll}mail.wizard.noMailPagesFound.message"/>
             </f:be.infobox>
         </f:else>
     </f:if>
@@ -164,16 +164,16 @@
     <f:render partial="InfoBox" arguments="{field: 'create_directmail_from_url'}" />
     <f:form action="createMailFromExternalUrls" object="external" method="post" enctype="multipart/form-data">
         <div class="mb-3">
-            <label for="externalMailHtmlUri" class="form-label"><f:translate key="{lll}dmail_HTML_url"/></label>
+            <label for="externalMailHtmlUri" class="form-label"><f:translate key="{lll}configuration.externalMailHtmlUrl"/></label>
             <f:form.textfield id="externalMailHtmlUri" type="url" placeholder="https://" property="htmlUrl" name="htmlUrl" class="form-control"/>
         </div>
         <div class="mb-3">
-            <label for="externalMailPlainUri" class="form-label"><f:translate key="{lll}dmail_plaintext_url"/></label>
+            <label for="externalMailPlainUri" class="form-label"><f:translate key="{lll}mail.wizard.externalMailPlainTextUrl"/></label>
             <f:form.textfield id="externalMailPlainUri" type="url" placeholder="https://" property="plainUrl" name="plainTextUrl" class="form-control"/>
         </div>
         <div class="mb-3">
-            <label for="subjectForExternalMail" class="form-label"><f:translate key="{lll}dmail_subject"/></label>
-            <f:form.textfield id="subjectForExternalMail" type="text" placeholder="{f:translate(key: '{lll}dmail_write_subject')}" property="subject" name="subject" class="form-control" required="1" />
+            <label for="subjectForExternalMail" class="form-label"><f:translate key="{lll}mail.wizard.externalMailSubject"/></label>
+            <f:form.textfield id="subjectForExternalMail" type="text" placeholder="{f:translate(key: '{lll}mail.wizard.subject')}" property="subject" name="subject" class="form-control" required="1" />
         </div>
         <button class="btn btn-mail-theme text-uppercase" type="submit"><f:translate key="{lll}general.button.next" default="Next" /></button>
     </f:form>
@@ -183,24 +183,24 @@
     <f:render partial="InfoBox" arguments="{field: 'quick_mail'}" />
     <f:form action="createQuickMail" method="post" object="quickMail" enctype="multipart/form-data">
         <div class="mb-3">
-            <label for="quickmailFromName" class="form-label"><f:translate key="{lll}quickmail_sender_name"/></label>
+            <label for="quickmailFromName" class="form-label"><f:translate key="{lll}mail.wizard.quickmail.senderName"/></label>
             <f:form.textfield id="quickmailFromName" type="text" name="fromName" value="{data.fromName}" class="form-control" required="1" />
         </div>
         <div class="mb-3">
-            <label for="quickmailFromEmail" class="form-label"><f:translate key="{lll}quickmail_sender_email"/></label>
+            <label for="quickmailFromEmail" class="form-label"><f:translate key="{lll}mail.wizard.quickmail.senderEmail"/></label>
             <f:form.textfield id="quickmailFromEmail" type="email" name="fromEmail" value="{data.fromEmail}" class="form-control" required="1" />
         </div>
         <div class="mb-3">
-            <label for="quickmailSubject" class="form-label"><f:translate key="{lll}dmail_subject"/></label>
+            <label for="quickmailSubject" class="form-label"><f:translate key="{lll}mail.wizard.externalMailSubject"/></label>
             <f:form.textfield id="quickmailSubject" type="text" name="subject" class="form-control" required="1" />
         </div>
         <div class="mb-3">
-            <label for="quickmailMessage" class="form-label"><f:translate key="{lll}quickmail_message"/></label>
+            <label for="quickmailMessage" class="form-label"><f:translate key="{lll}mail.wizard.quickmail.message"/></label>
             <f:form.textarea id="quickmailMessage" rows="10" name="message" class="form-control"></f:form.textarea>
         </div>
         <div class="form-check mb-3">
             <f:form.checkbox id="quickmailBreakLines" class="form-check-input mt-1" name="breakLines" value="1" />
-            <label for="quickmailBreakLines" class="form-check-label"><f:translate key="{lll}quickmail_break_lines"/></label>
+            <label for="quickmailBreakLines" class="form-check-label"><f:translate key="{lll}mail.wizard.quickmail.breakLines"/></label>
         </div>
         <button class="btn btn-mail-theme text-uppercase" type="Submit"><f:translate key="{lll}general.button.next" default="Next" /></button>
     </f:form>

@@ -397,7 +397,7 @@ class MailerService implements LoggerAwareInterface
                     }
                 }
 
-                $this->logger->debug(LanguageUtility::getLL('dmailer_sending') . ' ' . $numberOfSentMailsOfGroup . ' ' . LanguageUtility::getLL('dmailer_sending_to_table') . ' ' . $recipientTable);
+                $this->logger->debug('Sending ' . $numberOfSentMailsOfGroup . ' mails using records from table ' . $recipientTable);
             }
         }
         return true;
@@ -501,8 +501,8 @@ class MailerService implements LoggerAwareInterface
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                LanguageUtility::getLL('dmailer_mid') . ' ' . $this->mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_begin'),
-                LanguageUtility::getLL('dmailer_job_begin') . ': ' . date('d-m-y h:i:s')
+                'Mail Uid ' . $this->mail->getUid() . ' Job begin',
+                'Job begin: ' . date('d-m-y h:i:s')
             );
         }
     }
@@ -521,8 +521,8 @@ class MailerService implements LoggerAwareInterface
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                LanguageUtility::getLL('dmailer_mid') . ' ' . $this->mail->getUid() . ' ' . LanguageUtility::getLL('dmailer_job_end'),
-                LanguageUtility::getLL('dmailer_job_end') . ': ' . date('d-m-y h:i:s')
+                'Mail Uid ' . $this->mail->getUid() . ' Job end',
+                'Job end: ' . date('d-m-y h:i:s')
             );
         }
     }
@@ -572,10 +572,10 @@ class MailerService implements LoggerAwareInterface
 
         $startTime = MailerUtility::getMilliseconds();
 
-        $this->logger->debug(LanguageUtility::getLL('dmailer_invoked_at') . ' ' . date('h:i:s d-m-Y'));
+        $this->logger->debug('Invoked at ' . date('h:i:s d-m-Y'));
         $mail = $this->mailRepository->findMailToSend();
         if ($mail instanceof Mail) {
-            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\'' . LanguageUtility::getLL('dmailer_processed'));
+            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\' processed...');
             $this->prepare($mail->getUid());
 
             if (!$this->mail->getScheduledBegin()) {
@@ -589,11 +589,11 @@ class MailerService implements LoggerAwareInterface
                 $this->setJobEnd();
             }
         } else {
-            $this->logger->debug(LanguageUtility::getLL('dmailer_nothing_to_do'));
+            $this->logger->debug('Nothing to do.');
         }
 
         $parseTime = MailerUtility::getMilliseconds() - $startTime;
-        $this->logger->debug(LanguageUtility::getLL('dmailer_ending') . ' ' . $parseTime . ' ms');
+        $this->logger->debug('Ending, parsetime ' . $parseTime . ' ms');
     }
 
     /**

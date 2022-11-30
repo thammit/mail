@@ -6,7 +6,7 @@
       data-namespace-typo3-fluid="true">
 
 <h2>
-    <f:translate key="{lll}stats_performance"/>
+    <f:translate key="{lll}report.performance"/>
 </h2>
 
 <div class="panel panel-default mb-3">
@@ -16,20 +16,20 @@
             <tr>
                 <th></th>
                 <th>
-                    <f:translate key="{lll}stats_total"/>
+                    <f:translate key="{lll}report.total"/>
                 </th>
                 <th>
-                    <f:translate key="{lll}stats_HTML"/>
+                    <f:translate key="{lll}report.html"/>
                 </th>
                 <th>
-                    <f:translate key="{lll}stats_plaintext"/>
+                    <f:translate key="{lll}report.plainText"/>
                 </th>
             </tr>
             </thead>
             <tbody>
             <tr>
                 <th>
-                    <f:translate key="{lll}stats_mails_sent"/>
+                    <f:translate key="{lll}report.mailsSent"/>
                 </th>
                 <td>{data.totalSent}</td>
                 <td>{data.htmlSent}</td>
@@ -37,13 +37,13 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}stats_mails_returned"/>
+                    <f:translate key="{lll}report.deliveryFailed"/>
                 </th>
                 <td colspan="3">{data.returned}</td>
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}stats_HTML_mails_viewed"/>
+                    <f:translate key="{lll}report.html.mailsViewed"/>
                 </th>
                 <td></td>
                 <td>{data.htmlViewed}</td>
@@ -51,7 +51,7 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}stats_total_responses"/>
+                    <f:translate key="{lll}report.total.responses"/>
                 </th>
                 <td>{data.totalResponses}</td>
                 <td>{data.htmlResponses}</td>
@@ -59,7 +59,7 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}stats_unique_responses"/>
+                    <f:translate key="{lll}report.uniqueResponses"/>
                 </th>
                 <td>{data.uniqueResponsesTotal}</td>
                 <td>{data.uniqueResponsesHtml}</td>
@@ -67,7 +67,7 @@
             </tr>
             <tr>
                 <th>
-                    <f:translate key="{lll}stats_links_clicked_per_respondent"/>
+                    <f:translate key="{lll}report.performance.linksClickedPerRespondent"/>
                 </th>
                 <td>{data.totalResponsesVsUniqueResponses}</td>
                 <td>{data.htmlResponsesVsUniqueResponses}</td>

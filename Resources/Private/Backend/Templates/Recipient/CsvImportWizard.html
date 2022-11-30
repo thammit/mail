@@ -8,31 +8,31 @@
 
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}mailgroup_import"/></h1>
-    <h2><f:translate key="{lll}mailgroup_import_header_upload"/></h2>
+    <h1><f:translate key="{lll}recipient.import.header"/></h1>
+    <h2><f:translate key="{lll}recipient.import.uploadCsv.subheader"/></h2>
     <f:form action="csvImportWizardStepConfiguration" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="recipientListUpload" class="form-label">
-                <f:translate key="{lll}mailgroup_import_upload_file"/>
+                <f:translate key="{lll}recipient.import.chooseCsvFile"/>
             </label>
             <input type="file" class="form-control" id="recipientListUpload" name="upload_1"/>
             <f:form.hidden name="file[upload][1][data]" value="1"/>
             <f:form.hidden name="file[upload][1][target]" value="{data.target}"/>
         </div>
         <p><strong>
-            <f:translate key="{lll}mailgroup_import_or"/>
+            <f:translate key="{lll}recipient.import.or"/>
         </strong></p>
 
         <div class="mb-3">
             <label for="receipientListPlain" class="form-label">
-                <f:translate key="{lll}mailgroup_import_paste_csv"/>
+                <f:translate key="{lll}recipient.import.pasteCsv"/>
             </label>
             <f:form.textarea name="configuration[csv]" id="receipientListPlain" class="form-control"
                              rows="10">{data.csv}
             </f:form.textarea>
         </div>
         <f:form.button type="submit" class="btn btn-mail-theme text-uppercase">
-            <f:translate key="{lll}mailgroup_import_next"/>
+            <f:translate key="{lll}general.button.next"/>
         </f:form.button>
     </f:form>
 </f:section>
