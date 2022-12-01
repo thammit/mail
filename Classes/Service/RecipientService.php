@@ -136,6 +136,9 @@ class RecipientService
         bool $categoryUidsArray = false,
         int $limit = 0
     ): array {
+        if (!$uidListOfRecipients || !$modelName) {
+            return [];
+        }
         $data = [];
         $query = $this->persistenceManager->createQueryForType($modelName);
         $query->getQuerySettings()->setRespectStoragePage(false);
@@ -152,7 +155,7 @@ class RecipientService
 //        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
 
         foreach ($recipients as $recipient) {
-            if ($recipient instanceof RecipientInterface) {
+            if ($recipient instanceof RecipientInterface || $recipient instanceof DomainObjectInterface) {
                 $data[$recipient->getUid()] = empty($fields) ? $recipient->getEnhancedData() : $this->getRecipientModelData($recipient, $fields, $categoryUidsArray);
             }
         }
@@ -160,6 +163,12 @@ class RecipientService
         return $data;
     }
 
+    /**
+     * @param RecipientInterface|DomainObjectInterface $recipient
+     * @param array $fields
+     * @param bool $categoryUidsArray
+     * @return array
+     */
     protected function getRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $fields, bool $categoryUidsArray = false): array
     {
         $values = [];
@@ -167,6 +176,7 @@ class RecipientService
             $getter = 'get' . ucfirst($field);
             $categoryUids = $categoryUidsArray && $field === 'categories';
             if ($field === 'categories' && !$recipient instanceof CategoryInterface && !method_exists($recipient, $getter)) {
+                $values[$field] = $categoryUids ? [] : '';
                 continue;
             }
             if (str_contains($field, '_')) {
@@ -245,19 +255,6 @@ class RecipientService
             }
         }
 
-        // Make unique entries
-//        if (is_array($idLists['tt_address'] ?? false)) {
-//            $idLists['tt_address'] = array_unique($idLists['tt_address']);
-//        }
-//
-//        if (is_array($idLists['fe_users'] ?? false)) {
-//            $idLists['fe_users'] = array_unique($idLists['fe_users']);
-//        }
-//
-//        if (is_array($idLists['tx_mail_domain_model_group'] ?? false)) {
-//            $idLists['tx_mail_domain_model_group'] = RecipientUtility::removeDuplicates($idLists['tx_mail_domain_model_group']);
-//        }
-
         return $idLists;
     }
 
@@ -323,7 +320,7 @@ class RecipientService
                 // Special query list
                 // Todo add functionality again
                 $queryTable = GeneralUtility::_GP('SET')['queryTable'] ?? '';
-                $queryConfig = GeneralUtility::_GP('dmail_queryConfig');
+                $queryConfig = GeneralUtility::_GP('mailQueryConfig');
                 $this->updateGroupQueryConfig($group, $queryTable, $queryConfig);
 
                 $table = '';
