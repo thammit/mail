@@ -167,7 +167,7 @@ final class Configuration
         $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';
     }
 
-    public static function addTypoScripContentObject(): void
+    public static function addTypoScriptContentObject(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
             'EMOGRIFIER' => EmogrifierContentObject::class
