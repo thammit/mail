@@ -315,7 +315,7 @@ You may personalize the mails that will be sent to each recipient by inserting t
 ###SYS_AUTHCODE###]]></source>
 		    </trans-unit>
             <trans-unit id="recipient.header" resname="recipient.header">
-                <source>Recipient groups</source>
+                <source>Mail recipient groups</source>
             </trans-unit>
             <trans-unit id="recipient.import.header" resname="recipient.import.header">
                 <source>Import CSV into tt_address database table</source>
