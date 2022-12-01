@@ -113,7 +113,7 @@ return [
                 'items' => [
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes.I.0', ''],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes.I.1', ''],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes.I.3', ''],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes.I.2', ''],
                 ],
                 'cols' => 2,
                 'default' => 1,

@@ -241,7 +241,7 @@
                 <source>Website user</source>
                 <target>Webseitenbenutzer</target>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.recordTypes.I.3">
+            <trans-unit id="tx_mail_domain_model_group.recordTypes.I.2">
                 <source>Website User Groups</source>
                 <target>Webseitenbenutzergruppen</target>
             </trans-unit>

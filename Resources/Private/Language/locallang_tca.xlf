@@ -192,7 +192,7 @@
             <trans-unit id="tx_mail_domain_model_group.recordTypes.I.1">
                 <source>Website user</source>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.recordTypes.I.3">
+            <trans-unit id="tx_mail_domain_model_group.recordTypes.I.2">
                 <source>Website User Groups</source>
             </trans-unit>
         </body>
