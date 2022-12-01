@@ -669,6 +669,7 @@ class MailController extends AbstractController
      * @return ResponseInterface
      * @throws DBALException
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
@@ -677,7 +678,7 @@ class MailController extends AbstractController
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
-            'groups' => $this->recipientService->getFinalSendingGroups($this->id),
+            'groups' => $this->recipientService->getFinalSendingGroups($this->id, $this->siteConfiguration),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
