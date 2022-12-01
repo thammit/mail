@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Updates;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\RecordType;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -96,6 +97,25 @@ class DirectMailMigration implements UpgradeWizardInterface
         foreach ($this->getSysDmailGroupRecordsToMigrate() as $record) {
             $alreadyMigrated = $connectionGroup->count('*', 'tx_mail_domain_model_group', ['uid' => $record['uid']]);
             if ($alreadyMigrated === 0) {
+                $whichtablesToRecordTypes = [
+                    0b00000000 => 0,
+                    0b00000001 => RecordType::ADDRESS,
+                    0b00000010 => RecordType::FRONTEND_USER,
+                    0b00000011 => RecordType::ADDRESS | RecordType::FRONTEND_USER,
+                    0b00000100 => 0,
+                    0b00000101 => RecordType::ADDRESS,
+                    0b00000110 => RecordType::FRONTEND_USER,
+                    0b00000111 => RecordType::ADDRESS | RecordType::FRONTEND_USER,
+                    0b00001000 => RecordType::FRONTEND_USER_GROUP,
+                    0b00001001 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS,
+                    0b00001010 => RecordType::FRONTEND_USER_GROUP | RecordType::FRONTEND_USER,
+                    0b00001011 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS | RecordType::FRONTEND_USER,
+                    0b00001100 => RecordType::FRONTEND_USER_GROUP,
+                    0b00001101 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS,
+                    0b00001110 => RecordType::FRONTEND_USER_GROUP | RecordType::FRONTEND_USER,
+                    0b00001111 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS | RecordType::FRONTEND_USER,
+                ];
+                $recordTypes = $whichtablesToRecordTypes[$record['whichtables']];
                 $connectionGroup->insert('tx_mail_domain_model_group',
                     [
                         'uid' => $record['uid'],
@@ -109,7 +129,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'list' => $record['list'],
                         'csv' => $record['csv'],
                         'pages' => $record['pages'],
-                        'record_types' => $record['whichtables'],
+                        'record_types' => $recordTypes,
                         'recursive' => $record['recursive'],
                         'children' => $record['mail_groups'],
                         'categories' => $record['select_categories'],

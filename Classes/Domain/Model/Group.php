@@ -265,11 +265,6 @@ class Group extends AbstractEntity
         return ($this->recordTypes & RecordType::FRONTEND_USER) !== 0;
     }
 
-    public function hasCustom(): bool
-    {
-        return ($this->recordTypes & RecordType::CUSTOM) !== 0;
-    }
-
     public function hasFrontendUserGroup(): bool
     {
         return ($this->recordTypes & RecordType::FRONTEND_USER_GROUP) !== 0;

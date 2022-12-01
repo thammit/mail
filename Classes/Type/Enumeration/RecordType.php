@@ -9,6 +9,5 @@ class RecordType extends Enumeration
 {
     const ADDRESS             = 0b00000001;
     const FRONTEND_USER       = 0b00000010;
-    const CUSTOM              = 0b00000100;
-    const FRONTEND_USER_GROUP = 0b00001000;
+    const FRONTEND_USER_GROUP = 0b00000100;
 }
