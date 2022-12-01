@@ -710,8 +710,8 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <target>Zustellung fehlgeschlagen</target>
             </trans-unit>
             <trans-unit id="report.mailsSent" resname="report.mailsSent">
-                <source>Mails received</source>
-                <target>Mails empfangen</target>
+                <source>Mails sent</source>
+                <target>Mails gesendet</target>
             </trans-unit>
             <trans-unit id="report.chooseMail" resname="report.chooseMail">
                 <source>Choose a mail</source>
