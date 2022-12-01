@@ -57,7 +57,7 @@ return [
             'config' => [
                 'type' => 'group',
                 'internal_type' => 'db',
-                'allowed' => 'tt_address,fe_users,fe_groups,tx_mail_domain_model_group',
+                'allowed' => 'tt_address,fe_users,fe_groups',
                 'MM' => 'tx_mail_group_mm',
                 'size' => '20',
                 'maxitems' => '100000',
