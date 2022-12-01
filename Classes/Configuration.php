@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail;
 
+use MEDIAESSENZ\Mail\ContentObject\EmogrifierContentObject;
+use MEDIAESSENZ\Mail\ContentObject\ScssContentObject;
 use MEDIAESSENZ\Mail\Controller\ConfigurationController;
 use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\QueueController;
@@ -13,21 +15,12 @@ use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
 final class Configuration
 {
-    public static function registerHooks(): void
-    {
-        // Register hook for simulating a user group -> now SimulateFrontendUserGroupMiddleware
-        // $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['determineId-PreProcessing']['mail'] = \MEDIAESSENZ\Mail\Hooks\SimulateFrontendUserGroupHook::class . '->__invoke';
-    }
-
     public static function registerFluidNameSpace(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['fluid']['namespaces']['mail'] = ['MEDIAESSENZ\Mail\ViewHelpers'];
@@ -177,10 +170,10 @@ final class Configuration
     public static function addTypoScripContentObject(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
-            'EMOGRIFIER' => \MEDIAESSENZ\Mail\ContentObject\EmogrifierContentObject::class
+            'EMOGRIFIER' => EmogrifierContentObject::class
         ]);
         $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
-            'SCSS' => \MEDIAESSENZ\Mail\ContentObject\ScssContentObject::class
+            'SCSS' => ScssContentObject::class
         ]);
     }
 
