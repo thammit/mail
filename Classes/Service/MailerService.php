@@ -308,7 +308,7 @@ class MailerService implements LoggerAwareInterface
         }
 
         foreach ($rowFieldsArray as $substField) {
-            if (isset($recipient[$substField])) {
+            if ($recipient[$substField] ?? false) {
                 $markers['###USER_' . $substField . '###'] = $this->charsetConverter->conv($recipient[$substField], $this->backendCharset, $this->charset);
             }
         }
@@ -317,7 +317,13 @@ class MailerService implements LoggerAwareInterface
         // see MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers for example
         $markers = $this->eventDispatcher->dispatch(new ManipulateMarkersEvent($markers, $recipient, $tableName))->getMarkers();
 
-        return GeneralUtility::makeInstance(MarkerBasedTemplateService::class)->substituteMarkerArray($content, $markers);
+        return GeneralUtility::makeInstance(MarkerBasedTemplateService::class)->substituteMarkerArray(
+            $content,
+            $markers,
+            '',
+            false,
+            (bool)(ConfigurationUtility::getExtensionConfiguration('deleteUnusedMarkers') ?? false)
+        );
     }
 
     /**
