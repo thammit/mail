@@ -30,7 +30,7 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class RecipientController extends AbstractController
 {
-    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html';
+    protected string $defaultCsvExportFields = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html,tstamp';
 
     /**
      * @return ResponseInterface
@@ -89,6 +89,7 @@ class RecipientController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      */
     public function showAction(Group $group): ResponseInterface
     {
@@ -104,21 +105,30 @@ class RecipientController extends AbstractController
             $categoryColumn = true;
             $htmlColumn = true;
             $type = $recipientSourceConfiguration['type'] ?? 'Table';
+            $table = false;
             switch ($type) {
                 case 'Extbase':
+                    if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
+                        $recipients = $idLists['tx_mail_domain_model_group'];
+                        $categoryColumn = false;
+                        $htmlColumn = false;
+                        break;
+                    }
                     $model = $recipientSourceConfiguration['model'] ?? false;
                     if ($model && class_exists($model)) {
+                        if ($recipientSourceConfiguration['table'] ?? false) {
+                            $table = $recipientSourceConfiguration['table'];
+                        } else {
+                            $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
+                            $table = $dataMapper->getDataMap($model)->getTableName();
+                        }
                         // $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
                         $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($model);
                         /** @var Repository $repository */
                         $repository = GeneralUtility::makeInstance($repositoryName);
                         if ($repository instanceof RecipientRepositoryInterface) {
-                            $recipients = $repository->findByUidListAndCategories($idList)->toArray();
+                            $recipients = $repository->findByUidListAndCategories($idList);
                         }
-                    } else if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
-                        $recipients = $idLists['tx_mail_domain_model_group'];
-                        $categoryColumn = false;
-                        $htmlColumn = false;
                     }
                     break;
                 case 'Table':
@@ -128,10 +138,6 @@ class RecipientController extends AbstractController
             }
 //            if ($model) {
 //                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
-//            } else if (str_contains($sourceIdentifier, 'Domain\\Model')) {
-//                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $sourceIdentifier);
-//                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-//                $sourceIdentifier = $dataMapper->getDataMap($sourceIdentifier)->getTableName();
 //            } else if ($sourceIdentifier === 'tx_mail_domain_model_group') {
 //                $rows = $idLists['tx_mail_domain_model_group'];
 //                $categoryColumn = false;
@@ -146,8 +152,8 @@ class RecipientController extends AbstractController
                 'numberOfRecipients' => count($recipients),
                 'categoryColumn' => $categoryColumn,
                 'htmlColumn' => $htmlColumn,
-                'show' => BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceIdentifier),
-                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $recipientSourceIdentifier),
+                'show' => $table && BackendUserUtility::getBackendUser()->check('tables_select', $table),
+                'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
             ];
         }
 
@@ -173,36 +179,42 @@ class RecipientController extends AbstractController
      * @throws StopActionException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      */
     public function csvDownloadAction(Group $group, string $table): void
     {
-        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
-
-        foreach ($idLists as $tableName => $idList) {
-            $model = $this->siteConfiguration['RecipientSources'][$tableName]['model'] ?? false;
-            if ($model) {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model, []);
-            } else if (str_contains($tableName, 'Domain\\Model')) {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $tableName, []);
-                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-                $tableName = $dataMapper->getDataMap($tableName)->getTableName();
-            } else if ($tableName === 'tx_mail_domain_model_group') {
-                $rows = $idLists['tx_mail_domain_model_group'];
-            } else {
-                $fields = $tableName === 'fe_users' ? str_replace('phone', 'telephone', $this->fieldList) : $this->fieldList;
-                $fields .= ',tstamp';
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $tableName, GeneralUtility::trimExplode(',', $fields, true));
-            }
-            if ($tableName === $table) {
-                if (BackendUserUtility::getBackendUser()->check('tables_select', $tableName)) {
-                    CsvUtility::downloadCSV($rows);
-                } else {
-                    ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
-                    $this->redirect('show');
-                }
-            }
+        $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$table] ?? false;
+        if (!$recipientSourceConfiguration) {
+            ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
+            $this->redirect('show');
         }
+        if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceConfiguration['table'])) {
+            ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
+            $this->redirect('show');
+        }
+        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
+        if (!array_key_exists($table, $idLists) || count($idLists[$table]) === 0) {
+            ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
+            $this->redirect('show');
+        }
+
+        $idList = $idLists[$table];
+        $rows = [];
+        $type = $recipientSourceConfiguration['type'] ?? 'Table';
+        switch ($type) {
+            case 'Extbase':
+                $model = $recipientSourceConfiguration['model'] ?? false;
+                if ($model) {
+                    $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model, []);
+                } else if ($table === 'tx_mail_domain_model_group') {
+                    $rows = $idLists['tx_mail_domain_model_group'];
+                }
+                break;
+            case 'Table':
+                $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration['table'], $csvExportFields);
+                break;
+        }
+        CsvUtility::downloadCSV($rows);
     }
 
     /**

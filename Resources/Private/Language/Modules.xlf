@@ -428,6 +428,12 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="recipient.notification.disallowedCsvExport.message" resname="recipient.notification.disallowedCsvExport.message">
                 <source>CSV export failed. Insufficient access right.</source>
             </trans-unit>
+            <trans-unit id="recipient.notification.noRecipientsFound.message" resname="recipient.notification.disallowedCsvExport.message">
+                <source>CSV export failed. No recipients found.</source>
+            </trans-unit>
+            <trans-unit id="recipient.notification.noRecipientSourceConfigurationFound.message" resname="recipient.notification.disallowedCsvExport.message">
+                <source>CSV export failed. No recipient source configuration found.</source>
+            </trans-unit>
             <trans-unit id="recipient.createMailGroup" resname="recipient.createMailGroup">
                 <source>New recipient list</source>
             </trans-unit>
