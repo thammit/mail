@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
+use MEDIAESSENZ\Mail\Domain\Repository\RecipientRepositoryInterface;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
@@ -18,12 +19,14 @@ use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
+use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class RecipientController extends AbstractController
 {
@@ -49,7 +52,7 @@ class RecipientController extends AbstractController
             $typeProcessed = BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $group->getType());
             switch ($group->getType()) {
                 case RecipientGroupType::PAGES:
-                    $typeProcessed .= ' (' . BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'record_types', $group->getRecordTypes()) . ')';
+                    $typeProcessed .= ' (' . implode(', ', $group->getRecordTypes()) . ')';
                     break;
                 case RecipientGroupType::MODEL:
                     $typeProcessed .= ' (' . $group->getRecordType() . ')';
@@ -58,11 +61,12 @@ class RecipientController extends AbstractController
                     $typeProcessed .= ' (' . $group->getStaticList() . ' Records)';
                     break;
             }
+
             $data[] = [
                 'group' => $group,
                 'typeProcessed' => $typeProcessed,
                 'categories' => in_array($group->getType(), [RecipientGroupType::PAGES, RecipientGroupType::MODEL]) ? $group->getCategories() : [],
-                'count' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration)),
+                'count' => $this->recipientService->getNumberOfRecipientsByGroup($group),
             ];
         }
 
@@ -82,56 +86,77 @@ class RecipientController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @throws InvalidQueryException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      */
     public function showAction(Group $group): ResponseInterface
     {
-        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration);
-        $totalRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($idLists);
+        $data = [];
+        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
 
-        $data = [
-            'uid' => $group->getUid(),
-            'title' => $group->getTitle(),
-            'totalRecipients' => $totalRecipients,
-            'tables' => [],
-            'special' => [],
-        ];
-
-        foreach ($idLists as $tableName => $idList) {
+        foreach ($idLists as $recipientSourceIdentifier => $idList) {
+            $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
+            if (!$idList || !$recipientSourceConfiguration) {
+                continue;
+            }
+            $recipients = [];
             $categoryColumn = true;
             $htmlColumn = true;
-            $model = $this->siteConfiguration['RecipientGroups'][$tableName]['model'] ?? false;
-            if ($model) {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
-            } else if (str_contains($tableName, 'Domain\\Model')) {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $tableName);
-                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-                $tableName = $dataMapper->getDataMap($tableName)->getTableName();
-            } else if ($tableName === 'tx_mail_domain_model_group') {
-                $rows = $idLists['tx_mail_domain_model_group'];
-                $categoryColumn = false;
-                $htmlColumn = false;
-            } else {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $tableName);
+            $type = $recipientSourceConfiguration['type'] ?? 'Table';
+            switch ($type) {
+                case 'Extbase':
+                    $model = $recipientSourceConfiguration['model'] ?? false;
+                    if ($model && class_exists($model)) {
+                        // $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
+                        $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($model);
+                        /** @var Repository $repository */
+                        $repository = GeneralUtility::makeInstance($repositoryName);
+                        if ($repository instanceof RecipientRepositoryInterface) {
+                            $recipients = $repository->findByUidListAndCategories($idList)->toArray();
+                        }
+                    } else if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
+                        $recipients = $idLists['tx_mail_domain_model_group'];
+                        $categoryColumn = false;
+                        $htmlColumn = false;
+                    }
+                    break;
+                case 'Table':
+                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                    $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $table);
+                    break;
             }
-            $data['tables'][$tableName] = [
-                'table' => $tableName,
-                'recipients' => $rows,
-                'numberOfRecipients' => count($rows),
+//            if ($model) {
+//                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
+//            } else if (str_contains($sourceIdentifier, 'Domain\\Model')) {
+//                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $sourceIdentifier);
+//                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
+//                $sourceIdentifier = $dataMapper->getDataMap($sourceIdentifier)->getTableName();
+//            } else if ($sourceIdentifier === 'tx_mail_domain_model_group') {
+//                $rows = $idLists['tx_mail_domain_model_group'];
+//                $categoryColumn = false;
+//                $htmlColumn = false;
+//            } else {
+//                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $sourceIdentifier);
+//            }
+            $data['sources'][$recipientSourceIdentifier] = [
+                'table' => $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier,
+                'icon' => $recipientSourceConfiguration['icon'] ?? false,
+                'recipients' => $recipients,
+                'numberOfRecipients' => count($recipients),
                 'categoryColumn' => $categoryColumn,
                 'htmlColumn' => $htmlColumn,
-                'show' => BackendUserUtility::getBackendUser()->check('tables_select', $tableName),
-                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
+                'show' => BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceIdentifier),
+                'edit' => BackendUserUtility::getBackendUser()->check('tables_modify', $recipientSourceIdentifier),
             ];
         }
 
-        $this->view->assign('data', $data);
+        $this->view->assignMultiple([
+            'group' => $group,
+            'data' => $data
+        ]);
 
         $this->moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->addDocheaderButtons($group->getTitle());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -152,10 +177,10 @@ class RecipientController extends AbstractController
      */
     public function csvDownloadAction(Group $group, string $table): void
     {
-        $idLists = $this->recipientService->getRecipientsUidListsGroupedByTable($group, $this->siteConfiguration);
+        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
 
         foreach ($idLists as $tableName => $idList) {
-            $model = $this->siteConfiguration['RecipientGroups'][$tableName]['model'] ?? false;
+            $model = $this->siteConfiguration['RecipientSources'][$tableName]['model'] ?? false;
             if ($model) {
                 $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model, []);
             } else if (str_contains($tableName, 'Domain\\Model')) {

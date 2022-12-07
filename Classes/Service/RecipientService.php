@@ -42,8 +42,8 @@ class RecipientService
     use DebugQueryTrait;
 
     protected string $backendUserPermissions;
-    protected string $fieldList = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html';
     protected array $allowedTables = ['fe_users', 'tt_address'];
+    protected array $siteConfiguration = [];
 
     public function __construct(
         protected GroupRepository $groupRepository,
@@ -55,9 +55,13 @@ class RecipientService
         $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
     }
 
+    public function init(array $siteConfiguration): void
+    {
+        $this->siteConfiguration = $siteConfiguration;
+    }
+
     /**
      * @param int $pageId
-     * @param array $siteConfiguration
      * @return array
      * @throws DBALException
      * @throws Exception
@@ -66,7 +70,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getFinalSendingGroups(int $pageId, array $siteConfiguration = []): array
+    public function getFinalSendingGroups(int $pageId): array
     {
         $mailGroups = [];
         $groups = $this->groupRepository->findByPid($pageId);
@@ -76,7 +80,7 @@ class RecipientService
                 $mailGroups[] = [
                     'uid' => $group->getUid(),
                     'title' => $group->getTitle(),
-                    'receiver' => RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListsGroupedByTable($group, $siteConfiguration)),
+                    'receiver' => $this->getNumberOfRecipientsByGroup($group),
                 ];
             }
         }
@@ -223,8 +227,7 @@ class RecipientService
     }
 
     /**
-     * @param array $groups
-     * @param array $siteConfiguration
+     * @param ObjectStorage<Group> $groups
      * @return array
      * @throws DBALException
      * @throws Exception
@@ -233,7 +236,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getRecipientsUidListsGroupedByTables(array $groups, array $siteConfiguration): array
+    public function getRecipientsUidListsGroupedByRecipientSource(ObjectStorage $groups): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
         if (count($groups) === 0) {
@@ -243,15 +246,15 @@ class RecipientService
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
         foreach ($groups as $group) {
-            $recipientList = $this->getRecipientsUidListsGroupedByTable($group, $siteConfiguration);
+            $recipientList = $this->getRecipientsUidListGroupedByRecipientSource($group);
             $idLists = array_merge_recursive($idLists, $recipientList);
         }
 
-        foreach ($idLists as $table => $idList) {
-            if ($table === 'tx_mail_domain_model_group') {
-                $idLists[$table] = RecipientUtility::removeDuplicates($idList);
+        foreach ($idLists as $sourceIdentifier => $idList) {
+            if ($sourceIdentifier === 'tx_mail_domain_model_group') {
+                $idLists[$sourceIdentifier] = RecipientUtility::removeDuplicates($idList);
             } else {
-                $idLists[$table] = array_unique($idList);
+                $idLists[$sourceIdentifier] = array_unique($idList);
             }
         }
 
@@ -259,10 +262,22 @@ class RecipientService
     }
 
     /**
+     * @throws UnknownObjectException
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws DBALException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getNumberOfRecipientsByGroup(Group $group): int
+    {
+        return RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListGroupedByRecipientSource($group));
+    }
+
+    /**
      * collects all recipient uids from a given group respecting there categories
      *
      * @param Group $group Recipient group ID
-     * @param array $siteConfiguration
      * @return array List of recipient IDs
      * @throws DBALException
      * @throws Exception
@@ -271,7 +286,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getRecipientsUidListsGroupedByTable(Group $group, array $siteConfiguration = []): array
+    public function getRecipientsUidListGroupedByRecipientSource(Group $group): array
     {
         $idLists = [];
         switch ($group->getType()) {
@@ -281,23 +296,52 @@ class RecipientService
 
                 // Make queries
                 if ($pages) {
-                    if ($group->hasAddress()) {
-                        $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('tt_address', $pages, $group);
+                    foreach ($group->getRecordTypes() as $recipientSourceIdentifier) {
+                        $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
+                        if ($recipientSourceConfiguration) {
+                            $type = $recipientSourceConfiguration['type'] ?? 'Table';
+                            $contains = $recipientSourceConfiguration['contains'] ?? false;
+                            if ($contains) {
+                                // todo handle sources containing other sources
+                                continue;
+                            }
+                            switch ($type) {
+                                case 'Extbase':
+                                    $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
+                                        $recipientSourceConfiguration['model'],
+                                        $pages,
+                                        $group->getCategories()
+                                    );
+                                    break;
+                                case 'Table':
+                                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                                    $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByTableAndPageUidListAndCategories(
+                                        $table,
+                                        $pages,
+                                        $group->getCategories()
+                                    );
+                                    break;
+                            }
+                        }
                     }
-                    if ($group->hasFrontendUser()) {
-                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_users', $pages, $group);
-                    }
-                    if ($group->hasFrontendUserGroup()) {
-                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'] ?? [],
-                            $this->getRecipientUidListByTableAndPageUidListAndGroup('fe_groups', $pages, $group)));
-                    }
+
+//                    if ($group->hasAddress()) {
+//                        $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndCategories('tt_address', $pages, $group->getCategories());
+//                    }
+//                    if ($group->hasFrontendUser()) {
+//                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndCategories('fe_users', $pages, $group->getCategories());
+//                    }
+//                    if ($group->hasFrontendUserGroup()) {
+//                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'] ?? [],
+//                            $this->getRecipientUidListByTableAndPageUidListAndCategories('fe_groups', $pages, $group->getCategories())));
+//                    }
                 }
                 break;
             case RecipientGroupType::MODEL:
                 $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
-                $model = $siteConfiguration['RecipientGroups'][$group->getRecordType()]['model'] ?? false;
+                $model = $this->siteConfiguration['RecipientSources'][$group->getRecordType()]['model'] ?? false;
                 if ($pages && $model) {
-                    $idLists[$group->getRecordType()] = $this->getRecipientUidListByModelNameAndStoragePageIdsAndCategories($model, $pages,
+                    $idLists[$group->getRecordType()] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories($model, $pages,
                         $group->getCategories());
                 }
                 break;
@@ -336,9 +380,9 @@ class RecipientService
                 }
                 break;
             case RecipientGroupType::OTHER:
-                $groups = $this->getRecursiveGroups($group);
-                foreach ($groups as $recursiveGroup) {
-                    $collect = $this->getRecipientsUidListsGroupedByTable($recursiveGroup);
+                $childGroups = $group->getChildren();
+                foreach ($childGroups as $childGroup) {
+                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
@@ -353,7 +397,7 @@ class RecipientService
     /**
      * @throws InvalidQueryException
      */
-    protected function getRecipientUidListByModelNameAndStoragePageIdsAndCategories(string $modelName, array $storagePageIds, ObjectStorage $categories): array
+    protected function getRecipientUidListByModelNameAndPageUidListAndCategories(string $modelName, array $storagePageIds, ObjectStorage $categories): array
     {
         $recipientUids = [];
         $query = $this->persistenceManager->createQueryForType($modelName);
@@ -398,13 +442,13 @@ class RecipientService
      *
      * @param string $table source table
      * @param array $pages uid list of pages
-     * @param Group $group mail group
+     * @param ObjectStorage<Category> $categories mail categories
      *
      * @return array The resulting array of uids
      * @throws Exception
      * @throws DBALException
      */
-    protected function getRecipientUidListByTableAndPageUidListAndGroup(string $table, array $pages, Group $group): array
+    protected function getRecipientUidListByTableAndPageUidListAndCategories(string $table, array $pages, ObjectStorage $categories): array
     {
         $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
         $queryBuilder = $this->getQueryBuilder($table);
@@ -414,7 +458,7 @@ class RecipientService
             $addWhere = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
-        if ($group->getCategories()->count() === 0) {
+        if ($categories->count() === 0) {
             // get recipients without category restriction
             if ($table === 'fe_groups') {
                 return array_column($queryBuilder
@@ -453,7 +497,7 @@ class RecipientService
             $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pages,
                 ['uid']), 'uid') : [];
             /** @var Category $category */
-            foreach ($group->getCategories() as $category) {
+            foreach ($categories as $category) {
                 // collect all recipients containing at least one category of the given group
                 $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
                 foreach ($recipientCollection as $recipient) {
@@ -582,10 +626,10 @@ class RecipientService
                 ->execute();
         }
 
-        $outArr = [];
+        $idList = [];
 
         while ($row = $res->fetchAssociative()) {
-            $outArr[] = $row['uid'];
+            $idList[] = $row['uid'];
         }
 
         if ($table === 'fe_groups') {
@@ -642,13 +686,13 @@ class RecipientService
                         ->execute();
 
                     while ($row = $res->fetchAssociative()) {
-                        $outArr[] = $row['uid'];
+                        $idList[] = $row['uid'];
                     }
                 }
             }
         }
 
-        return array_unique($outArr);
+        return array_unique($idList);
     }
 
 
@@ -663,6 +707,7 @@ class RecipientService
      * @return void
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
+     * todo
      */
     protected function updateGroupQueryConfig(Group $group, mixed $queryTable, mixed $queryConfig): void
     {
@@ -683,7 +728,7 @@ class RecipientService
         }
 
         if ($queryTable != $table || $queryConfig != $group->getQuery()) {
-            $recordTypes = 0;
+            $recordTypes = [];
             if ($queryTable === 'tt_address') {
                 $recordTypes = RecordType::ADDRESS;
             } else {

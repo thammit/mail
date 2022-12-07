@@ -109,14 +109,10 @@ return [
         'record_types' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes',
             'config' => [
-                'type' => 'check',
-                'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes.I.0', ''],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes.I.1', ''],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recordTypes.I.2', ''],
-                ],
-                'cols' => 2,
-                'default' => 1,
+                'type' => 'select',
+                'renderType' => 'selectCheckBox',
+                'allowNonIdValues' => true,
+                'itemsProcFunc' => \MEDIAESSENZ\Mail\UserFunctions\RecordTypesProcFunc::class . '->itemsProcFunc',
             ],
         ],
         'list' => [

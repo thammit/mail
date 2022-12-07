@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecordType;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -56,9 +57,9 @@ class Group extends AbstractEntity
     protected string $recordType = '';
 
     /**
-     * @var int
+     * @var string
      */
-    protected int $recordTypes = 0;
+    protected string $recordTypes = '';
 
     /**
      * @var bool
@@ -248,36 +249,41 @@ class Group extends AbstractEntity
     }
 
     /**
-     * @return int
+     * @return array
      */
-    public function getRecordTypes(): int
+    public function getRecordTypes(): array
     {
-        return $this->recordTypes;
+        return GeneralUtility::trimExplode(',', $this->recordTypes, true);
+    }
+
+    /**
+     * @param array $recordTypes
+     * @return Group
+     */
+    public function setRecordTypes(array $recordTypes): Group
+    {
+        $this->recordTypes = implode(',', $recordTypes);
+        return $this;
+    }
+
+    public function hasRecordType(string $tableName): bool
+    {
+        return in_array($tableName, $this->getRecordTypes());
     }
 
     public function hasAddress(): bool
     {
-        return ($this->recordTypes & RecordType::ADDRESS) !== 0;
+        return $this->hasRecordType('tt_address');
     }
 
     public function hasFrontendUser(): bool
     {
-        return ($this->recordTypes & RecordType::FRONTEND_USER) !== 0;
+        return $this->hasRecordType('fe_users');
     }
 
     public function hasFrontendUserGroup(): bool
     {
-        return ($this->recordTypes & RecordType::FRONTEND_USER_GROUP) !== 0;
-    }
-
-    /**
-     * @param int $recordTypes
-     * @return Group
-     */
-    public function setRecordTypes(int $recordTypes): Group
-    {
-        $this->recordTypes = $recordTypes;
-        return $this;
+        return $this->hasRecordType('fe_groups');
     }
 
     /**

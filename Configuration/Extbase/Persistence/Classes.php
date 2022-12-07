@@ -25,6 +25,9 @@ return [
             ],
         ],
     ],
+    \MEDIAESSENZ\Mail\Domain\Model\FrontendUserGroup::class => [
+        'tableName' => 'fe_groups',
+    ],
     \MEDIAESSENZ\Mail\Domain\Model\Address::class => [
         'tableName' => 'tt_address',
         'properties' => [

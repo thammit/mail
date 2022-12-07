@@ -22,7 +22,9 @@
             <f:for each="{recipients}" as="recipient">
                 <tr>
                     <td class="col-icon nowrap" style="width: 1%">
-                        <core:iconForRecord row="{recipient}" table="{table}"/>
+                        <f:if condition="{icon}">
+                            {icon -> f:format.raw()}
+                        </f:if>
                     </td>
                     <td class="col-title col-responsive nowrap">
                         <f:if condition="{recipient.uid} && {allowEdit}">
@@ -39,10 +41,24 @@
                     <td class="nowrap">
                         <f:link.email email="{recipient.email}"/>
                     </td>
-                    <f:if condition="{categoryColumn}"><td class="nowrap">{recipient.categories}</td></f:if>
+                    <f:if condition="{categoryColumn}">
+                        <td class="nowrap">
+                            <f:if condition="{recipient.categories -> f:count() > 0}">
+                            <f:then>
+                                <f:for each="{recipient.categories}" as="category" iteration="categoryIterator">
+                                    {category.title}
+                                    <f:if condition="!{categoryIterator.isLast}">, </f:if>
+                                </f:for>
+                            </f:then>
+                            <f:else>
+                                {recipient.categories}
+                            </f:else>
+                        </f:if>
+                        </td>
+                    </f:if>
                     <f:if condition="{htmlColumn}">
                         <td class="nowrap text-center">
-                            <f:if condition="{recipient.mail_html}">
+                            <f:if condition="{recipient.mail_html} || {recipient.mailHtml}">
                                 <f:then><core:icon identifier="actions-check-square" /></f:then>
                                 <f:else><core:icon identifier="actions-check-markstate" /></f:else>
                             </f:if>

@@ -47,10 +47,8 @@
                         {group.typeProcessed}
                     </td>
                     <td class="nowrap">
-                        <f:for each="{group.categories}" as="category" iteration="categoryIterator">{category.title}
-                            <f:if condition="{categoryIterator.isLast}">
-                                <f:else>,</f:else>
-                            </f:if>
+                        <f:for each="{group.categories}" as="category" iteration="categoryIterator">
+                            {category.title}<f:if condition="!{categoryIterator.isLast}">, </f:if>
                         </f:for>
                     </td>
                     <td class="col-control nowrap">

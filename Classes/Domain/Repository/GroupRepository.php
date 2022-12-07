@@ -6,11 +6,12 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 use TYPO3\CMS\Extbase\Persistence\Repository;
 
-class GroupRepository extends Repository
+class GroupRepository extends Repository implements RecipientRepositoryInterface, RecipientGroupRepositoryInterface
 {
     public function initializeObject()
     {
@@ -28,7 +29,7 @@ class GroupRepository extends Repository
     /**
      * @throws InvalidQueryException
      */
-    public function findByUidList(array $uidList): QueryResultInterface|array
+    public function findByUidListAndCategories(array $uidList, ObjectStorage $categories = null): QueryResultInterface|array
     {
         $query = $this->createQuery();
         $query->matching(

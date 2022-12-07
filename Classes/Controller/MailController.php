@@ -603,7 +603,7 @@ class MailController extends AbstractController
                 /** @var Group $testMailGroup */
                 $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
                 $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
-                $recipientGroups = $this->recipientService->getRecipientsUidListsGroupedByTable($testMailGroup, $this->siteConfiguration);
+                $recipientGroups = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($testMailGroup);
                 foreach ($recipientGroups as $recipientGroup => $recipients) {
                     switch ($recipientGroup) {
                         case 'fe_users':
@@ -678,7 +678,7 @@ class MailController extends AbstractController
     {
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
-            'groups' => $this->recipientService->getFinalSendingGroups($this->id, $this->siteConfiguration),
+            'groups' => $this->recipientService->getFinalSendingGroups($this->id),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
@@ -720,7 +720,7 @@ class MailController extends AbstractController
             ]);
         }
 
-        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByTables($mail->getRecipientGroups()->toArray(), $this->siteConfiguration));
+        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()));
 
         if ($mail->getNumberOfRecipients() === 0) {
             ViewUtility::addNotificationWarning(

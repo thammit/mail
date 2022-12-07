@@ -6,9 +6,13 @@ use MEDIAESSENZ\Mail\Domain\Model\Address;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class ManipulateAddressRecipient
 {
+    /**
+     * @throws InvalidQueryException
+     */
     public function __invoke(ManipulateRecipientEvent $event): void
     {
         $recipientTable = $event->getRecipientTable();

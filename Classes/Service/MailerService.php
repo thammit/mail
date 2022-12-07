@@ -361,7 +361,7 @@ class MailerService implements LoggerAwareInterface
                     }
                 } else {
                     if ($recipientIds) {
-                        $model = $this->siteConfiguration['RecipientGroups'][$recipientTable]['model'] ?? false;
+                        $model = $this->siteConfiguration['RecipientSources'][$recipientTable]['model'] ?? false;
                         if ($model || str_contains($recipientTable, 'Domain\\Model')) {
                             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
                             $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
