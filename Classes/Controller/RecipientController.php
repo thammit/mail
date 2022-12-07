@@ -12,13 +12,11 @@ use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
@@ -104,13 +102,14 @@ class RecipientController extends AbstractController
             $recipients = [];
             $categoryColumn = true;
             $htmlColumn = true;
-            $type = $recipientSourceConfiguration['type'] ?? 'Table';
             $table = false;
             if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
                 $recipients = $idLists['tx_mail_domain_model_group'];
+                $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
                 $categoryColumn = false;
                 $htmlColumn = false;
             } else {
+                $type = $recipientSourceConfiguration['type'] ?? 'Table';
                 switch ($type) {
                     case 'Extbase':
                         $model = $recipientSourceConfiguration['model'] ?? false;
