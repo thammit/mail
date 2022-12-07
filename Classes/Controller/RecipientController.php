@@ -106,35 +106,35 @@ class RecipientController extends AbstractController
             $htmlColumn = true;
             $type = $recipientSourceConfiguration['type'] ?? 'Table';
             $table = false;
-            switch ($type) {
-                case 'Extbase':
-                    if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
-                        $recipients = $idLists['tx_mail_domain_model_group'];
-                        $categoryColumn = false;
-                        $htmlColumn = false;
+            if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
+                $recipients = $idLists['tx_mail_domain_model_group'];
+                $categoryColumn = false;
+                $htmlColumn = false;
+            } else {
+                switch ($type) {
+                    case 'Extbase':
+                        $model = $recipientSourceConfiguration['model'] ?? false;
+                        if ($model && class_exists($model)) {
+                            if ($recipientSourceConfiguration['table'] ?? false) {
+                                $table = $recipientSourceConfiguration['table'];
+                            } else {
+                                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
+                                $table = $dataMapper->getDataMap($model)->getTableName();
+                            }
+                            // $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
+                            $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($model);
+                            /** @var Repository $repository */
+                            $repository = GeneralUtility::makeInstance($repositoryName);
+                            if ($repository instanceof RecipientRepositoryInterface) {
+                                $recipients = $repository->findByUidListAndCategories($idList);
+                            }
+                        }
                         break;
-                    }
-                    $model = $recipientSourceConfiguration['model'] ?? false;
-                    if ($model && class_exists($model)) {
-                        if ($recipientSourceConfiguration['table'] ?? false) {
-                            $table = $recipientSourceConfiguration['table'];
-                        } else {
-                            $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-                            $table = $dataMapper->getDataMap($model)->getTableName();
-                        }
-                        // $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
-                        $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($model);
-                        /** @var Repository $repository */
-                        $repository = GeneralUtility::makeInstance($repositoryName);
-                        if ($repository instanceof RecipientRepositoryInterface) {
-                            $recipients = $repository->findByUidListAndCategories($idList);
-                        }
-                    }
-                    break;
-                case 'Table':
-                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
-                    $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $table);
-                    break;
+                    case 'Table':
+                        $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                        $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $table);
+                        break;
+                }
             }
 //            if ($model) {
 //                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
