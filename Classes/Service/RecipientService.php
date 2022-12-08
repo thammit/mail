@@ -278,6 +278,7 @@ class RecipientService
      * collects all recipient uids from a given group respecting there categories
      *
      * @param Group $group Recipient group ID
+     * @param bool $addGroupUidToRecipientSourceIdentifier
      * @return array List of recipient IDs
      * @throws DBALException
      * @throws Exception
@@ -286,7 +287,7 @@ class RecipientService
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getRecipientsUidListGroupedByRecipientSource(Group $group): array
+    public function getRecipientsUidListGroupedByRecipientSource(Group $group, bool $addGroupUidToRecipientSourceIdentifier = false): array
     {
         $idLists = [];
         switch ($group->getType()) {
@@ -352,7 +353,8 @@ class RecipientService
                 } else {
                     $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
                 }
-                $idLists['tx_mail_domain_model_group'] = RecipientUtility::removeDuplicates($recipients);
+                $csvRecipientSourceIdentifier = $addGroupUidToRecipientSourceIdentifier ? 'tx_mail_domain_model_group:' . $group->getUid() : 'tx_mail_domain_model_group';
+                $idLists[$csvRecipientSourceIdentifier] = RecipientUtility::removeDuplicates($recipients);
                 break;
             case RecipientGroupType::STATIC:
                 // Static MM list
@@ -382,7 +384,7 @@ class RecipientService
             case RecipientGroupType::OTHER:
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
-                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup);
+                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup, $addGroupUidToRecipientSourceIdentifier);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;

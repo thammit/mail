@@ -19,7 +19,7 @@
             </f:if>
             <f:for each="{recipientSources}" as="recipientSource" key="recipientSourceIdentifier">
                 <f:variable name="title">
-                    <f:translate key="{lll}report.returned.table.{recipientSourceIdentifier}" default="{recipientSourceIdentifier}"/>
+                    <f:translate key="{recipientSource.title}" default="{recipientSource.title}"/> [{recipientSource.table}]
                 </f:variable>
                 <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSourceIdentifier}" class="btn btn-default btn-sm text-uppercase">
                     <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
@@ -38,7 +38,7 @@
                 <f:render partial="Panel"
                           arguments="{lll:lll, parentId:'mail-recipient-list-panel-{recipientSourceIdentifier}', title: title, index:recipientSourceIdentifier, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
                           contentAs="panelBody">
-                    <f:render partial="Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, categoryColumn: recipientSource.categoryColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, lll:lll}"/>
+                    <f:render partial="Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, categoryColumn: recipientSource.categoryColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, editCsvList: recipientSource.editCsvList, lll:lll}"/>
                 </f:render>
             </f:for>
         </div>

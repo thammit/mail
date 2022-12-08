@@ -70,6 +70,11 @@
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
                         </f:if>
+                        <f:if condition="{editCsvList}">
+                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list" title="{f:translate(key: '{lll}general.button.edit')}">
+                                <core:icon identifier="actions-open"/>
+                            </be:link.editRecord>
+                        </f:if>
                     </td>
                 </tr>
             </f:for>

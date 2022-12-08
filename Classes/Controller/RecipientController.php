@@ -93,23 +93,28 @@ class RecipientController extends AbstractController
     public function showAction(Group $group): ResponseInterface
     {
         $recipientSources = [];
-        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
+        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group, true);
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
             $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
-            if (!$idList || !$recipientSourceConfiguration) {
+            $isCsv = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
+            if (!$idList || (!$recipientSourceConfiguration && !$isCsv)) {
                 continue;
             }
             $recipients = [];
             $categoryColumn = true;
             $htmlColumn = true;
             $table = false;
-            if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
-                $recipients = $idLists['tx_mail_domain_model_group'];
+            $editCsvList = 0;
+            if ($isCsv) {
+                [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
+                $recipients = $idList;
                 $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
                 $categoryColumn = false;
                 $htmlColumn = false;
                 $recipientSourceConfiguration['icon'] = 'actions-user';
+                $recipientSourceConfiguration['title'] = 'CSV List';
+                $editCsvList = $groupUid;
             } else {
                 $type = $recipientSourceConfiguration['type'] ?? 'Table';
                 switch ($type) {
@@ -138,6 +143,7 @@ class RecipientController extends AbstractController
             }
 
             $recipientSources[$recipientSourceIdentifier] = [
+                'title' => $recipientSourceConfiguration['title'],
                 'table' => $table,
                 'icon' => $recipientSourceConfiguration['icon'] ?? 'actions-user',
                 'recipients' => $recipients,
@@ -146,6 +152,7 @@ class RecipientController extends AbstractController
                 'htmlColumn' => $htmlColumn,
                 'show' => $table && BackendUserUtility::getBackendUser()->check('tables_select', $table),
                 'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
+                'editCsvList' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table) ? $editCsvList : 0,
             ];
         }
 

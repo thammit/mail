@@ -81,6 +81,7 @@ class MailerService implements LoggerAwareInterface
     protected array $htmlContentParts = [];
     protected array $plainContentParts = [];
     protected string $siteIdentifier = '';
+    protected array $siteConfiguration = [];
     protected Site $site;
 
     public function __construct(
@@ -111,6 +112,7 @@ class MailerService implements LoggerAwareInterface
     {
         $this->siteIdentifier = $siteIdentifier;
         $this->site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
+        $this->siteConfiguration = $this->site->getConfiguration()['mail'] ?? [];
     }
 
     /**
