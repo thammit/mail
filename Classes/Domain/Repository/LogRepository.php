@@ -127,16 +127,16 @@ class LogRepository extends Repository
     }
 
     /**
-     * Get array of recipient ids, which has been sent
+     * Get array of already sent recipient ids
      *
-     * @param int $mailUid UID of the mail record
-     * @param string $recipientTable Recipient table
+     * @param int $mailUid uid of the mail record
+     * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return array list of recipients
      * @throws DBALException
      * @throws Exception
      */
-    public function findRecipientsByMailUidAndRecipientTable(int $mailUid, string $recipientTable): array
+    public function findRecipientsByMailUidAndRecipientSourceIdentifier(int $mailUid, string $recipientSourceIdentifier): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -145,7 +145,7 @@ class LogRepository extends Repository
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientTable)),
+                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
             )
             ->execute()

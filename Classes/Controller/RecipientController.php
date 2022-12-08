@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Controller;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
+use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use MEDIAESSENZ\Mail\Domain\Repository\RecipientRepositoryInterface;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
@@ -91,7 +92,7 @@ class RecipientController extends AbstractController
      */
     public function showAction(Group $group): ResponseInterface
     {
-        $data = [];
+        $recipientSources = [];
         $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
@@ -108,19 +109,19 @@ class RecipientController extends AbstractController
                 $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
                 $categoryColumn = false;
                 $htmlColumn = false;
+                $recipientSourceConfiguration['icon'] = 'actions-user';
             } else {
                 $type = $recipientSourceConfiguration['type'] ?? 'Table';
                 switch ($type) {
                     case 'Extbase':
                         $model = $recipientSourceConfiguration['model'] ?? false;
-                        if ($model && class_exists($model)) {
+                        if (class_exists($model) && is_subclass_of($model, RecipientInterface::class)) {
                             if ($recipientSourceConfiguration['table'] ?? false) {
                                 $table = $recipientSourceConfiguration['table'];
                             } else {
                                 $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
                                 $table = $dataMapper->getDataMap($model)->getTableName();
                             }
-                            // $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
                             $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($model);
                             /** @var Repository $repository */
                             $repository = GeneralUtility::makeInstance($repositoryName);
@@ -135,18 +136,10 @@ class RecipientController extends AbstractController
                         break;
                 }
             }
-//            if ($model) {
-//                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model);
-//            } else if ($sourceIdentifier === 'tx_mail_domain_model_group') {
-//                $rows = $idLists['tx_mail_domain_model_group'];
-//                $categoryColumn = false;
-//                $htmlColumn = false;
-//            } else {
-//                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $sourceIdentifier);
-//            }
-            $data['sources'][$recipientSourceIdentifier] = [
-                'table' => $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier,
-                'icon' => $recipientSourceConfiguration['icon'] ?? false,
+
+            $recipientSources[$recipientSourceIdentifier] = [
+                'table' => $table,
+                'icon' => $recipientSourceConfiguration['icon'] ?? 'actions-user',
                 'recipients' => $recipients,
                 'numberOfRecipients' => count($recipients),
                 'categoryColumn' => $categoryColumn,
@@ -158,7 +151,7 @@ class RecipientController extends AbstractController
 
         $this->view->assignMultiple([
             'group' => $group,
-            'data' => $data
+            'recipientSources' => $recipientSources
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());
@@ -169,7 +162,7 @@ class RecipientController extends AbstractController
 
     /**
      * @param Group $group
-     * @param string $table
+     * @param string $recipientSourceIdentifier
      * @return void
      * @throws DBALException
      * @throws Exception
@@ -179,9 +172,9 @@ class RecipientController extends AbstractController
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function csvDownloadAction(Group $group, string $table): void
+    public function csvDownloadAction(Group $group, string $recipientSourceIdentifier): void
     {
-        $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$table] ?? false;
+        $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
         if (!$recipientSourceConfiguration) {
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
             $this->redirect('show');
@@ -191,27 +184,30 @@ class RecipientController extends AbstractController
             $this->redirect('show');
         }
         $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
-        if (!array_key_exists($table, $idLists) || count($idLists[$table]) === 0) {
+        if (!array_key_exists($recipientSourceIdentifier, $idLists) || count($idLists[$recipientSourceIdentifier]) === 0) {
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
             $this->redirect('show');
         }
 
-        $idList = $idLists[$table];
+        $idList = $idLists[$recipientSourceIdentifier];
         $rows = [];
-        $type = $recipientSourceConfiguration['type'] ?? 'Table';
-        switch ($type) {
-            case 'Extbase':
-                $model = $recipientSourceConfiguration['model'] ?? false;
-                if ($model) {
-                    $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model, []);
-                } else if ($table === 'tx_mail_domain_model_group') {
-                    $rows = $idLists['tx_mail_domain_model_group'];
-                }
-                break;
-            case 'Table':
-                $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration['table'], $csvExportFields);
-                break;
+        if (is_array(current($idList))) {
+            // the list already contain recipient data and not only an array of uids
+            $rows = $idList;
+        } else {
+            $type = $recipientSourceConfiguration['type'] ?? 'Table';
+            switch ($type) {
+                case 'Extbase':
+                    $model = $recipientSourceConfiguration['model'] ?? false;
+                    if ($model) {
+                        $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model, []);
+                    }
+                    break;
+                case 'Table':
+                    $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
+                    $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration['table'], $csvExportFields);
+                    break;
+            }
         }
         CsvUtility::downloadCSV($rows);
     }

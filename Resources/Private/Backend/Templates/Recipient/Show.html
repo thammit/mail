@@ -11,34 +11,34 @@
     <h1>
         {group.title}
     </h1>
-    <f:if condition="{data.sources -> f:count()}">
+    <f:if condition="{recipientSources -> f:count()}">
         <div class="panel-group" id="mail-recipient-list-panel">
             <f:variable name="open" value="0"/>
-            <f:if condition="{data.sources -> f:count()} == 1">
+            <f:if condition="{recipientSources -> f:count()} == 1">
                 <f:variable name="open" value="1"/>
             </f:if>
-            <f:for each="{data.sources}" as="source" iteration="recipientTablesIterator">
+            <f:for each="{recipientSources}" as="recipientSource" key="recipientSourceIdentifier">
                 <f:variable name="title">
-                    <f:translate key="{lll}report.returned.table.{source.table}" default="{source.table}"/>
+                    <f:translate key="{lll}report.returned.table.{recipientSourceIdentifier}" default="{recipientSourceIdentifier}"/>
                 </f:variable>
-                <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, table: source.table}" class="btn btn-default btn-sm text-uppercase">
+                <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSourceIdentifier}" class="btn btn-default btn-sm text-uppercase">
                     <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
                     <f:translate key="{lll}general.button.downloadCsv"/>
                 </f:link.action></f:variable>
                 <f:variable name="icon">
-                    <f:if condition="{source.icon}">
+                    <f:if condition="{recipientSource.icon}">
                         <f:then>
-                            <core:icon identifier="{source.icon}" />
+                            <core:icon identifier="{recipientSource.icon}" />
                         </f:then>
-                        <f:else if="{source.recipients.0} && {table}">
-                            <core:iconForRecord row="{source.recipients.0}" table="{table}"/>
+                        <f:else if="{recipientSource.recipients.0} && {table}">
+                            <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}"/>
                         </f:else>
                     </f:if>
                 </f:variable>
                 <f:render partial="Panel"
-                          arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:recipientTablesIterator.index, open:open, counter: source.numberOfRecipients, additionalHeading:additionalHeading}"
+                          arguments="{lll:lll, parentId:'mail-recipient-list-panel-{recipientSourceIdentifier}', title: title, index:recipientSourceIdentifier, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
                           contentAs="panelBody">
-                    <f:render partial="Recipient/Recipients" arguments="{recipients: source.recipients, htmlColumn: source.htmlColumn, categoryColumn: source.categoryColumn, table: source.table, icon: icon, allowEdit: source.edit, lll:lll}"/>
+                    <f:render partial="Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, categoryColumn: recipientSource.categoryColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, lll:lll}"/>
                 </f:render>
             </f:for>
         </div>

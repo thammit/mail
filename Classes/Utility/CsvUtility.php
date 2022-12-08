@@ -21,94 +21,89 @@ class CsvUtility
      */
     public static function rearrangeCsvValues(string $str, string $separator = ',', array $fieldList = []): array
     {
+        $data = [];
+
         $fh = tmpfile();
         fwrite($fh, trim($str));
         fseek($fh, 0);
+        $separator = $separator === 'tab' ? "\t" : $separator;
         $lines = [];
-        if ($separator == 'tab') {
-            $separator = "\t";
+        while ($line = fgetcsv($fh, 1000, $separator)) {
+            $lines[] = $line;
         }
-        while ($data = fgetcsv($fh, 1000, $separator)) {
-            $lines[] = $data;
-        }
-
         fclose($fh);
 
-        $out = [];
         if (count($lines) > 0) {
-            // Analyse if first line contains field names.
-            // Required is it that every value is either
-            // 1) found in the list fieldsList in this class,
-            // 2) the value is empty (value omitted then) or
-            // 3) the field starts with "user_".
+
+            // Analyse if first line contain field names.
+            // It is necessary that a value is either
+            // 1) found in the fields list
+            // 2) is empty (value omitted then)
+            // 3) starts with "user_".
             // In addition, fields may be prepended with "[code]".
-            // This is used if the incoming value is true in which case '+[value]'
-            // adds that number to the field value (accumulation) and '=[value]'
-            // overrides any existing value in the field
+            // This is used if the incoming value is true
+            // in that case '+[value]' adds that number to the field value (accumulation) and '=[value]' overrides any existing value in the field
+
             $firstRow = $lines[0];
             try {
                 $fieldList = array_merge($fieldList, explode(',', ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')));
             } catch (ExtensionConfigurationPathDoesNotExistException|ExtensionConfigurationExtensionNotConfiguredException) {
             }
-            $fieldName = 1;
+            $hasFieldNames = true;
             $fieldOrder = [];
 
             foreach ($firstRow as $value) {
-                $fName = '';
+                $fieldName = '';
                 $probe = preg_split('|[\[\]]|', $value);
                 if (is_array($probe)) {
-                    [$fName, $fConf] = count($probe) === 2 ? $probe : [$probe[0], ''];
+                    [$fieldName, $fieldConfiguration] = count($probe) === 2 ? $probe : [$probe[0], ''];
                 }
-                $fName = trim($fName ?? '');
-                $fConf = trim($fConf ?? '');
-                $fieldOrder[] = [$fName, $fConf];
-                if ($fName && !str_starts_with($fName, 'user_') && !in_array($fName, $fieldList)) {
-                    $fieldName = 0;
+                $fieldName = trim($fieldName ?? '');
+                $fieldOrder[] = [$fieldName, trim($fieldConfiguration ?? '')];
+                if ($fieldName && !str_starts_with($fieldName, 'user_') && !in_array($fieldName, $fieldList)) {
+                    $hasFieldNames = false;
                     break;
                 }
             }
-            // If not field list, then:
-            if (!$fieldName) {
+
+            if ($hasFieldNames) {
+                // if the first line contain field names move lines pointer to next element
+                next($lines);
+            } else {
                 $fieldOrder = [
                     ['name'],
                     ['email'],
                 ];
             }
-            // Re-map values
-            if ($fieldName) {
-                // Advance pointer if the first line was field names
-                next($lines);
-            }
 
-            $c = 0;
-            foreach ($lines as $data) {
+            $rowNumber = 0;
+            foreach ($lines as $line) {
                 // Must be a line with content.
                 // This sorts out entries with one key which is empty. Those are empty lines.
-                if (count($data) > 1 || $data[0]) {
+                if (count($line) > 1 || $line[0]) {
                     // Traverse fieldOrder and map values over
-                    foreach ($fieldOrder as $kk => $fN) {
-                        if ($fN[0]) {
-                            if ($fN[1] ?? false) {
+                    foreach ($fieldOrder as $column => $fieldConfiguration) {
+                        if ($fieldConfiguration[0]) {
+                            if ($fieldConfiguration[1] ?? false) {
                                 // If is true
-                                if (trim($data[$kk])) {
-                                    if (str_starts_with($fN[1], '=')) {
-                                        $out[$c][$fN[0]] = trim(substr($fN[1], 1));
-                                    } else if (str_starts_with($fN[1], '+')) {
-                                        $out[$c][$fN[0]] .= substr($fN[1], 1);
+                                if (trim($line[$column])) {
+                                    if (str_starts_with($fieldConfiguration[1], '=')) {
+                                        $data[$rowNumber][$fieldConfiguration[0]] = trim(substr($fieldConfiguration[1], 1));
+                                    } else if (str_starts_with($fieldConfiguration[1], '+')) {
+                                        $data[$rowNumber][$fieldConfiguration[0]] .= substr($fieldConfiguration[1], 1);
                                     }
                                 }
                             } else {
-                                $out[$c][$fN[0]] = trim($data[$kk]);
+                                $data[$rowNumber][$fieldConfiguration[0]] = trim($line[$column]);
                             }
                         }
                     }
-                    $c++;
+                    $rowNumber++;
                 }
             }
         }
-        return $out;
+        return $data;
     }
-
 
     /**
      * Filter duplicates from input csv data

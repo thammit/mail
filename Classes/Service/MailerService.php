@@ -84,14 +84,15 @@ class MailerService implements LoggerAwareInterface
     protected Site $site;
 
     public function __construct(
-        protected CharsetConverter $charsetConverter,
-        protected MailRepository $mailRepository,
-        protected LogRepository $logRepository,
-        protected RequestFactory $requestFactory,
-        protected Context $context,
-        protected SiteFinder $siteFinder,
+        protected CharsetConverter         $charsetConverter,
+        protected MailRepository           $mailRepository,
+        protected LogRepository            $logRepository,
+        protected RequestFactory           $requestFactory,
+        protected Context                  $context,
+        protected SiteFinder               $siteFinder,
         protected EventDispatcherInterface $eventDispatcher
-    ) {
+    )
+    {
     }
 
     /**
@@ -328,6 +329,7 @@ class MailerService implements LoggerAwareInterface
 
     /**
      * Mass send to recipient in the list
+     * returns true if sending is completed
      *
      * @return boolean
      * @throws DBALException
@@ -338,30 +340,39 @@ class MailerService implements LoggerAwareInterface
     {
         $numberOfSentMails = 0;
         $groupedRecipientIds = $this->mail->getRecipients();
-        foreach ($groupedRecipientIds as $recipientTable => $recipientIds) {
-            if (is_array($recipientIds)) {
-                $numberOfSentMailsOfGroup = 0;
+        foreach ($groupedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
+            if (!$recipientIds) {
+                continue;
+            }
+            $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
+            if (!$recipientSourceConfiguration) {
+                $this->logger->debug('No recipient source configuration found for ' . $recipientSourceIdentifier);
+                continue;
+            }
+            $numberOfSentMailsOfGroup = 0;
 
-                // get already sent mails
-                $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientTable($this->mail->getUid(), $recipientTable);
+            // get already sent mails
+            $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($this->mail->getUid(), $recipientSourceIdentifier);
 
-                if ($recipientTable === 'tx_mail_domain_model_group') {
-                    foreach ($recipientIds as $recipientUid => $recipientData) {
-                        // fake uid for csv
-                        $recipientUid++;
-                        if (!in_array($recipientUid, $sentMails)) {
-                            if ($numberOfSentMails >= $this->sendPerCycle) {
-                                return false;
-                            }
-                            $recipientData['uid'] = $recipientUid;
-                            $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
-                            $numberOfSentMailsOfGroup++;
-                            $numberOfSentMails++;
+            if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
+                foreach ($recipientIds as $recipientUid => $recipientData) {
+                    // fake uid for csv
+                    $recipientUid++;
+                    if (!in_array($recipientUid, $sentMails)) {
+                        $recipientData['uid'] = $recipientUid;
+                        $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                        $numberOfSentMailsOfGroup++;
+                        $numberOfSentMails++;
+                        if ($numberOfSentMails >= $this->sendPerCycle) {
+                            return false;
                         }
                     }
-                } else {
-                    if ($recipientIds) {
-                        $model = $this->siteConfiguration['RecipientSources'][$recipientTable]['model'] ?? false;
+                }
+            } else {
+                $type = $recipientSourceConfiguration['type'] ?? 'Table';
+                switch ($type) {
+                    case 'Extbase':
+                        $model = $recipientSourceConfiguration['model'] ?? false;
                         if ($model) {
                             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
                             $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
@@ -369,42 +380,48 @@ class MailerService implements LoggerAwareInterface
                                 $model,
                                 ['uid', 'name', 'email', 'categories', 'mail_html'],
                                 true,
-                                $this->sendPerCycle + 1
+                                $this->sendPerCycle
                             );
                             foreach ($recipientsData as $recipientData) {
-                                $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
-                                $numberOfSentMailsOfGroup++;
-                                $numberOfSentMails++;
-                            }
-                        } else {
-                            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientTable);
-                            $queryBuilder
-                                ->select('*')
-                                ->from($recipientTable)
-                                ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
-                                ->setMaxResults($this->sendPerCycle + 1);
-                            if ($sentMails) {
-                                // exclude already sent mails
-                                $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($sentMails)));
-                            }
-
-                            $statement = $queryBuilder->execute();
-
-                            while ($recipientData = $statement->fetchAssociative()) {
-                                $recipientData['categories'] = $this->getListOfRecipientCategories($recipientTable, $recipientData['uid']);
-                                if ($numberOfSentMails >= $this->sendPerCycle) {
-                                    return false;
+                                if (!in_array($recipientsData['uid'], $sentMails)) {
+                                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                                    $numberOfSentMailsOfGroup++;
+                                    $numberOfSentMails++;
+                                    if ($numberOfSentMails >= $this->sendPerCycle) {
+                                        return false;
+                                    }
                                 }
-                                $this->sendSingleMailAndAddLogEntry($recipientData, $recipientTable);
-                                $numberOfSentMailsOfGroup++;
-                                $numberOfSentMails++;
                             }
                         }
-                    }
-                }
+                        break;
+                    case 'Table':
+                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
+                        $queryBuilder
+                            ->select('*')
+                            ->from($recipientSourceIdentifier)
+                            ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
+                            ->setMaxResults($this->sendPerCycle);
+                        if ($sentMails) {
+                            // exclude already sent mails
+                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($sentMails)));
+                        }
 
-                $this->logger->debug('Sending ' . $numberOfSentMailsOfGroup . ' mails using records from table ' . $recipientTable);
+                        $statement = $queryBuilder->execute();
+
+                        while ($recipientData = $statement->fetchAssociative()) {
+                            $recipientData['categories'] = $this->getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
+                            $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                            $numberOfSentMailsOfGroup++;
+                            $numberOfSentMails++;
+                            if ($numberOfSentMails >= $this->sendPerCycle) {
+                                return false;
+                            }
+                        }
+                        break;
+                }
             }
+
+            $this->logger->debug('Sending ' . $numberOfSentMailsOfGroup . ' mails from recipient source ' . $recipientSourceIdentifier);
         }
         return true;
     }
@@ -443,7 +460,7 @@ class MailerService implements LoggerAwareInterface
 
         $recipientCategories = [];
         while ($row = $statement->fetchAssociative()) {
-                $recipientCategories[] = (int)$row['uid_local'];
+            $recipientCategories[] = (int)$row['uid_local'];
         }
 
         return $recipientCategories;
@@ -666,7 +683,7 @@ class MailerService implements LoggerAwareInterface
                 // extract all media path from the mail message
                 $dom = pQuery::parseStr($htmlContent);
                 /** @var pQuery\IQuery $element */
-                foreach($dom->query('img[!do_not_embed]') as $element) {
+                foreach ($dom->query('img[!do_not_embed]') as $element) {
                     $absoluteImagePath = MailerUtility::absRef($element->attr('src'), $this->mail->getRedirectUrl());
                     // change image src to absolute path in case fetch and embed fails
                     $element->attr('src', $absoluteImagePath);
@@ -677,7 +694,7 @@ class MailerService implements LoggerAwareInterface
                         // embed image into mail
                         $mailMessage->embed($response->getBody()->getContents(), $baseName, $response->getHeaderLine('Content-Type'));
                         // set image src to embed cid
-                        $element->attr('src',  'cid:' . $baseName);
+                        $element->attr('src', 'cid:' . $baseName);
                     }
                 }
                 $mailMessage->html($dom->html());
