@@ -5,7 +5,12 @@ namespace MEDIAESSENZ\Mail\Events;
 
 final class ManipulateMarkersEvent
 {
-    public function __construct(private array $markers, private readonly array $recipient, private readonly string $tableName) {
+    public function __construct(
+        private array $markers,
+        private readonly array $recipient,
+        private readonly string $recipientSourceIdentifier,
+        private readonly array $recipientSourceConfiguration
+    ) {
     }
 
     /**
@@ -32,9 +37,17 @@ final class ManipulateMarkersEvent
     /**
      * @return string
      */
-    public function getTableName(): string
+    public function getRecipientSourceIdentifier(): string
     {
-        return $this->tableName;
+        return $this->recipientSourceIdentifier;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRecipientSourceConfiguration(): array
+    {
+        return $this->recipientSourceConfiguration;
     }
 
 }

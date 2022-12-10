@@ -15,15 +15,18 @@ class ManipulateAddressRecipient
      */
     public function __invoke(ManipulateRecipientEvent $event): void
     {
-        $recipientTable = $event->getRecipientTable();
-
-        if ($recipientTable === Address::class) {
+        if ($event->getRecipientSourceIdentifier() === 'tt_address') {
+            $recipientSourceConfiguration = $event->getRecipientSourceConfiguration();
+            $type = $recipientSourceConfiguration['type'] ?? false;
+            $model = $recipientSourceConfiguration['model'] ?? false;
             $recipientData = $event->getRecipientData();
-            // add all csv export field/values to existing data, but do not override already existing field/values!
-            // this is important, because categories need to stay an array of uids
-            $enhancedRecipientData = GeneralUtility::makeInstance(RecipientService::class)->getRecipientsDataByUidListAndModelName([$recipientData['uid']], $recipientTable, []);
-            $recipientData += reset($enhancedRecipientData);
-            $event->setRecipientData($recipientData);
+            if ($type === 'Extbase' && $model && ($recipientData['uid'] ?? false)) {
+                // add all csv export field/values to existing data, but do not override already existing field/values!
+                // this is important, because categories need to stay an array of uids
+                $enhancedRecipientData = GeneralUtility::makeInstance(RecipientService::class)->getRecipientsDataByUidListAndModelName([$recipientData['uid']], $model, []);
+                $recipientData += reset($enhancedRecipientData);
+                $event->setRecipientData($recipientData);
+            }
         }
 
     }

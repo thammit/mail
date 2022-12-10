@@ -212,13 +212,13 @@ class MailerService implements LoggerAwareInterface
     /**
      * Replace the marker with recipient data and then send it
      *
-     * @param array $recipientData Recipient's data array
-     * @param string $tableName Table name, from which the recipient come from
+     * @param array $recipientData Recipient data
+     * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return SendFormat Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function sendPersonalizedMail(array $recipientData, string $tableName): SendFormat
+    public function sendPersonalizedMail(array $recipientData, string $recipientSourceIdentifier): SendFormat
     {
         $formatSent = new SendFormat(SendFormat::NONE);
 
@@ -233,7 +233,7 @@ class MailerService implements LoggerAwareInterface
         if ($recipientData['email']) {
 
             $additionalMarkers = [
-                '###SYS_TABLE_NAME###' => $tableName,
+                '###SYS_TABLE_NAME###' => $recipientSourceIdentifier,
                 '###SYS_MAIL_ID###' => $this->mailUid,
                 '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
             ];
@@ -241,11 +241,11 @@ class MailerService implements LoggerAwareInterface
             $recipientCategories = $recipientData['categories'] ?? [];
 
             $htmlContent = '';
-            if ($this->isHtml && (($recipientData['mail_html'] ?? false) || $tableName === 'tx_mail_domain_model_group')) {
+            if ($this->isHtml && (($recipientData['mail_html'] ?? false) || $recipientSourceIdentifier === 'tx_mail_domain_model_group')) {
                 $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, $recipientCategories);
 
                 if ($htmlContent) {
-                    $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $tableName, $additionalMarkers);
+                    $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $recipientSourceIdentifier, $additionalMarkers);
                     $formatSent->set(SendFormat::HTML);
                 }
             }
@@ -257,7 +257,7 @@ class MailerService implements LoggerAwareInterface
                 $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts, $recipientCategories);
 
                 if ($plainContent) {
-                    $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $tableName, $additionalMarkers);
+                    $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $recipientSourceIdentifier, $additionalMarkers);
                     if ($this->mail->isRedirect() || $this->mail->isRedirectAll()) {
                         $plainContent = MailerUtility::shortUrlsInPlainText(
                             $plainContent,
@@ -270,7 +270,7 @@ class MailerService implements LoggerAwareInterface
                 }
             }
 
-            $mailIdentifierHeaderWithoutHash = MailerUtility::buildMailIdentifierHeaderWithoutHash($this->mailUid, $tableName, (int)$recipientData['uid']);
+            $mailIdentifierHeaderWithoutHash = MailerUtility::buildMailIdentifierHeaderWithoutHash($this->mailUid, $recipientSourceIdentifier, (int)$recipientData['uid']);
             $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($mailIdentifierHeaderWithoutHash);
 
             // todo what is this for?
@@ -292,15 +292,15 @@ class MailerService implements LoggerAwareInterface
      * Replace the marker with recipient data and then send it
      *
      * @param string $content The HTML or plaintext part
-     * @param array $recipient Recipient's data array
-     * @param string $tableName table or domain model name
+     * @param array $recipient Recipient data
+     * @param string $recipientSourceIdentifier Recipient source identifier
      * @param array $markers Existing markers that are mail-specific, not user-specific
      *
      * @return string content with replaced markers
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    protected function replaceMailMarkers(string $content, array $recipient, string $tableName, array $markers): string
+    protected function replaceMailMarkers(string $content, array $recipient, string $recipientSourceIdentifier, array $markers): string
     {
         // replace %23%23%23 with ###, since typolink generated link with urlencode
         $content = str_replace('%23%23%23', '###', $content);
@@ -318,7 +318,14 @@ class MailerService implements LoggerAwareInterface
 
         // PSR-14 event to manipulate markers to add e.g. salutation or other data
         // see MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers for example
-        $markers = $this->eventDispatcher->dispatch(new ManipulateMarkersEvent($markers, $recipient, $tableName))->getMarkers();
+        $markers = $this->eventDispatcher->dispatch(
+            new ManipulateMarkersEvent(
+                $markers,
+                $recipient,
+                $recipientSourceIdentifier,
+                    $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? []
+            )
+        )->getMarkers();
 
         return GeneralUtility::makeInstance(MarkerBasedTemplateService::class)->substituteMarkerArray(
             $content,
@@ -472,7 +479,7 @@ class MailerService implements LoggerAwareInterface
      * Sending the email and write to log.
      *
      * @param array $recipientData Recipient's data array
-     * @param string $recipientTable Table name
+     * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return void
      * @throws DBALException
@@ -481,28 +488,31 @@ class MailerService implements LoggerAwareInterface
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      */
-    protected function sendSingleMailAndAddLogEntry(array $recipientData, string $recipientTable): void
+    protected function sendSingleMailAndAddLogEntry(array $recipientData, string $recipientSourceIdentifier): void
     {
-        if ($this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid((int)$recipientData['uid'], $recipientTable, $this->mail->getUid()) === false) {
+        if ($this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid((int)$recipientData['uid'], $recipientSourceIdentifier, $this->mail->getUid()) === false) {
             $parseTime = MailerUtility::getMilliseconds();
 
             // PSR-14 event dispatcher to manipulate recipient data
             // see MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData for example
-            $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientTable))->getRecipientData();
+            $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
+            if ($recipientSourceConfiguration) {
+              $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
+            }
 
             // write to log table. if it can be written, continue with sending.
             // if not, stop the script and report error
             // try to insert the mail to the mail log repository
             $log = GeneralUtility::makeInstance(Log::class);
             $log->setMail($this->mail);
-            $log->setRecipientTable($recipientTable);
+            $log->setRecipientTable($recipientSourceIdentifier);
             $log->setRecipientUid($recipientData['uid']);
             $log->setEmail($recipientData['email']);
             $this->logRepository->add($log);
             $this->logRepository->persist();
 
             // Send mail to recipient
-            $formatSent = $this->sendPersonalizedMail($recipientData, $recipientTable);
+            $formatSent = $this->sendPersonalizedMail($recipientData, $recipientSourceIdentifier);
 
             // try to store the sending return code
             $log->setFormatSent($formatSent);
