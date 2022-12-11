@@ -354,7 +354,8 @@ class MailerService implements LoggerAwareInterface
                 continue;
             }
             $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
-            if (!$recipientSourceConfiguration) {
+            $isSimpleList = $recipientSourceIdentifier === 'tx_mail_domain_model_group';
+            if (!$recipientSourceConfiguration && !$isSimpleList) {
                 $this->logger->debug('No recipient source configuration found for ' . $recipientSourceIdentifier);
                 continue;
             }
@@ -363,7 +364,7 @@ class MailerService implements LoggerAwareInterface
             // get already sent mails
             $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($this->mail->getUid(), $recipientSourceIdentifier);
 
-            if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
+            if ($isSimpleList) {
                 foreach ($recipientIds as $recipientUid => $recipientData) {
                     // fake uid for csv
                     $recipientUid++;
