@@ -104,12 +104,12 @@ class MailFactory
 
             $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
             $glue = str_contains($baseUrl, '?') ? '&' : '?';
-            $enableJumpUrl = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
-            $enableMailToJumpUrl = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
-            $jumpUrlTrackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
+            $clickTracking = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
+            $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
+            $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
             $jumpUrlPrefix = $baseUrl . $glue .
                 'mail=###SYS_MAIL_ID###' .
-                ($jumpUrlTrackingPrivacy ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
+                ($trackingPrivacy ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
                 '&aC=###SYS_AUTHCODE###' .
                 '&jumpurl=';
 
@@ -123,7 +123,7 @@ class MailFactory
                 $originalHyperLink = $element->attr($hyperLinkAttribute);
                 if (!str_starts_with(trim($originalHyperLink), '#')) {
                     $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
-                    if ($enableJumpUrl && !$element->attr('no_jumpurl') && (!str_starts_with($originalHyperLink, 'mailto:') || $enableMailToJumpUrl)) {
+                    if ($clickTracking && !$element->attr('data-do-not-track') && (!str_starts_with($originalHyperLink, 'mailto:') || $clickTrackingMailTo)) {
                         $hyperLink = array_search($originalHyperLink, array_column($htmlLinks, 'ref'));
                         if ($hyperLink === false) {
                             $htmlLinks[] = [
