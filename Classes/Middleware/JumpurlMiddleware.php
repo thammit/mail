@@ -6,6 +6,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
+use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -19,6 +20,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
@@ -235,40 +237,40 @@ class JumpurlMiddleware implements MiddlewareInterface
     {
         // this will split up the "rid=fe_users-13667", where the first part
         // is the DB table name and the second part the UID of the record in the DB table
-        $recipientSourceIdentifier = '';
         $recipientUid = '';
         if (!empty($combinedRecipient)) {
-            [$recipientSourceIdentifier, $recipientUid] = explode('-', $combinedRecipient);
+            [$this->recipientSourceIdentifier, $recipientUid] = explode('-', $combinedRecipient);
         }
 
         // todo get recipient source configuration from site configuration
-        $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
+        $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$this->recipientSourceIdentifier] ?? false;
 
         if ($recipientSourceConfiguration) {
             $type = $recipientSourceConfiguration['type'] ?? 'Table';
             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
             $recipientService->init($this->siteConfiguration);
-            switch ($type) {
-                case 'Extbase':
-                    $model = $recipientSourceConfiguration['model'] ?? false;
-                    $this->recipientRecord = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $model);
-                    break;
-                case 'Table':
-                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
-                    $this->recipientRecord = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $table);
-                    break;
+            $isSimpleList = $this->recipientSourceIdentifier === 'tx_mail_domain_model_group';
+            if ($isSimpleList) {
+                $this->recipientRecord['uid'] = $recipientUid;
+            } else {
+                switch ($type) {
+                    case 'Extbase':
+                        $model = $recipientSourceConfiguration['model'] ?? false;
+                        $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $model, []);
+                        $this->recipientRecord = reset($recipientData);
+                        break;
+                    case 'Table':
+                        $table = $recipientSourceConfiguration['table'] ?? $this->recipientSourceIdentifier;
+                        $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $table);
+                        $this->recipientRecord = reset($recipientData);
+                        break;
+                }
+
+                // PSR-14 event dispatcher to manipulate recipient data the same way done in mailerService::sendSingleMailAndAddLogEntry method
+                $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
+                $this->recipientRecord = $eventDispatcher->dispatch(new ManipulateRecipientEvent($this->recipientRecord, $this->recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
             }
         }
-
-//        $this->recipientSourceIdentifier = match ($recipientSourceIdentifier) {
-//            'tt_address' => self::RECIPIENT_TABLE_TTADDRESS,
-//            'fe_users' => self::RECIPIENT_TABLE_FEUSER,
-//            default => '',
-//        };
-//
-//        if (!empty($this->recipientSourceIdentifier)) {
-//            $this->recipientRecord = $this->getRawRecord($this->recipientSourceIdentifier, $recipientUid);
-//        }
     }
 
     /**

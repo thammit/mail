@@ -594,8 +594,8 @@ class MailController extends AbstractController
             $data['ttAddress'] = $ttAddressRepository->getAddressesByCustomSorting($demand);
         }
 
-        if ($this->pageTSConfiguration['test_mail_group_uids'] ?? false) {
-            $mailGroupUids = GeneralUtility::intExplode(',', $this->pageTSConfiguration['test_mail_group_uids']);
+        if ($this->pageTSConfiguration['testMailGroupUids'] ?? false) {
+            $mailGroupUids = GeneralUtility::intExplode(',', $this->pageTSConfiguration['testMailGroupUids']);
             $data['mailGroups'] = [];
             foreach ($mailGroupUids as $mailGroupUid) {
                 /** @var Group $testMailGroup */

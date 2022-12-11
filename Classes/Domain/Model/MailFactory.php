@@ -280,7 +280,7 @@ class MailFactory
             ->setRedirect((bool)($this->pageTSConfiguration['redirect'] ?? false))
             ->setRedirectAll((bool)($this->pageTSConfiguration['redirectAll'] ?? false))
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
-            ->setAuthCodeFields($this->pageTSConfiguration['auth_code_fields'] ?? '')
+            ->setAuthCodeFields($this->pageTSConfiguration['authCodeFields'] ?? '')
             ->setSendOptions(new SendFormat($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))
             ->setIncludeMedia((bool)($this->pageTSConfiguration['includeMedia'] ?? false))
             ->setPid($this->storageFolder);

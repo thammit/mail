@@ -41,7 +41,6 @@ class RecipientService
 {
     use DebugQueryTrait;
 
-    protected string $backendUserPermissions;
     protected array $allowedTables = ['fe_users', 'tt_address'];
     protected array $siteConfiguration = [];
 
@@ -52,7 +51,6 @@ class RecipientService
         protected EventDispatcherInterface $eventDispatcher,
         protected PersistenceManager $persistenceManager
     ) {
-        $this->backendUserPermissions = BackendUserUtility::backendUserPermissions();
     }
 
     public function init(array $siteConfiguration): void
