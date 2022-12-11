@@ -17,8 +17,8 @@ class RecordTypesProcFunc
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
         $site = $siteFinder->getSiteByPageId($params['row']['pid'] ?? 0);
         $configuration = $site->getConfiguration()['mail'] ?? [];
-        if ($configuration['RecipientSources'] ?? false) {
-            foreach ($configuration['RecipientSources'] as $recipientSourceIdentifier => $recipientSource) {
+        if ($configuration['recipientSources'] ?? false) {
+            foreach ($configuration['recipientSources'] as $recipientSourceIdentifier => $recipientSource) {
                 $params['items'][] = [$recipientSource['title'], $recipientSourceIdentifier, $recipientSource['icon']];
             }
         }

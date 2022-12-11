@@ -296,7 +296,7 @@ class RecipientService
                 $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
-                        $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
+                        $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
                         if ($recipientSourceConfiguration) {
                             $type = $recipientSourceConfiguration['type'] ?? 'Table';
                             $recipientSourceIdentifier = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
@@ -713,7 +713,7 @@ class RecipientService
                 }
             }
 
-            $group->setRecipientSources($recordTypes);
+            $group->setrecipientSources($recordTypes);
             $group->setQuery($queryConfig);
             $this->groupRepository->update($group);
             $this->groupRepository->persist();
