@@ -385,14 +385,12 @@ class MailController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
 
-        if ($mail->isInternal()) {
-            $title = LanguageUtility::getLL('general.notification.severity.success.title');
-            $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), $data['general']['page']['value']);
-            $this->addJsNotification($message, $title);
-        } elseif (!$mail->isQuickMail()) {
-            $title = LanguageUtility::getLL('general.notification.severity.success.title');
-            $message = sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'), trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /'));
-            $this->addJsNotification($message, $title);
+        if (!$mail->isQuickMail()) {
+            $this->addJsNotification(
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'),
+                    $mail->isInternal() ? $data['general']['page']['value'] :
+                        trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /')),
+                LanguageUtility::getLL('general.notification.severity.success.title'));
         }
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
