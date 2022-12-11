@@ -55,7 +55,6 @@ CREATE TABLE tx_mail_domain_model_group
     list         mediumblob,
     csv          tinyint(4)          DEFAULT '0' NOT NULL,
     pages        tinyblob,
-    record_type  varchar(255)        DEFAULT ''  NOT NULL,
     record_types text                            NOT NULL,
     recursive    tinyint(4)          DEFAULT '0' NOT NULL,
     children     tinyblob,

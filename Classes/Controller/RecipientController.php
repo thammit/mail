@@ -53,9 +53,6 @@ class RecipientController extends AbstractController
                 case RecipientGroupType::PAGES:
                     $typeProcessed .= ' (' . implode(', ', $group->getRecordTypes()) . ')';
                     break;
-                case RecipientGroupType::MODEL:
-                    $typeProcessed .= ' (' . $group->getRecordType() . ')';
-                    break;
                 case RecipientGroupType::STATIC:
                     $typeProcessed .= ' (' . $group->getStaticList() . ' Records)';
                     break;
@@ -64,7 +61,7 @@ class RecipientController extends AbstractController
             $data[] = [
                 'group' => $group,
                 'typeProcessed' => $typeProcessed,
-                'categories' => in_array($group->getType(), [RecipientGroupType::PAGES, RecipientGroupType::MODEL]) ? $group->getCategories() : [],
+                'categories' => $group->getType() === RecipientGroupType::PAGES ? $group->getCategories() : [],
                 'count' => $this->recipientService->getNumberOfRecipientsByGroup($group),
             ];
         }
@@ -212,7 +209,8 @@ class RecipientController extends AbstractController
                     break;
                 case 'Table':
                     $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
-                    $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration['table'], $csvExportFields);
+                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                    $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $table, $csvExportFields);
                     break;
             }
         }

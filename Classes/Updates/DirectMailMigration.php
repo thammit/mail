@@ -94,28 +94,27 @@ class DirectMailMigration implements UpgradeWizardInterface
 
         // sys_dmail_group -> tx_mail_domain_model_group
         $connectionGroup = $this->getConnectionPool()->getConnectionForTable('tx_mail_domain_model_group');
+        $whichtablesToRecordTypes = [
+            0b00000000 => '',
+            0b00000001 => 'tt_address',
+            0b00000010 => 'fe_users',
+            0b00000011 => 'tt_address,fe_users',
+            0b00000100 => '',
+            0b00000101 => 'tt_address',
+            0b00000110 => 'fe_users',
+            0b00000111 => 'tt_address,fe_users',
+            0b00001000 => 'fe_groups',
+            0b00001001 => 'fe_groups,tt_address',
+            0b00001010 => 'fe_groups,fe_users',
+            0b00001011 => 'fe_groups,tt_address,fe_users',
+            0b00001100 => 'fe_groups',
+            0b00001101 => 'fe_groups,tt_address',
+            0b00001110 => 'fe_groups,fe_users',
+            0b00001111 => 'fe_groups,tt_address,fe_users',
+        ];
         foreach ($this->getSysDmailGroupRecordsToMigrate() as $record) {
             $alreadyMigrated = $connectionGroup->count('*', 'tx_mail_domain_model_group', ['uid' => $record['uid']]);
             if ($alreadyMigrated === 0) {
-                $whichtablesToRecordTypes = [
-                    0b00000000 => 0,
-                    0b00000001 => RecordType::ADDRESS,
-                    0b00000010 => RecordType::FRONTEND_USER,
-                    0b00000011 => RecordType::ADDRESS | RecordType::FRONTEND_USER,
-                    0b00000100 => 0,
-                    0b00000101 => RecordType::ADDRESS,
-                    0b00000110 => RecordType::FRONTEND_USER,
-                    0b00000111 => RecordType::ADDRESS | RecordType::FRONTEND_USER,
-                    0b00001000 => RecordType::FRONTEND_USER_GROUP,
-                    0b00001001 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS,
-                    0b00001010 => RecordType::FRONTEND_USER_GROUP | RecordType::FRONTEND_USER,
-                    0b00001011 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS | RecordType::FRONTEND_USER,
-                    0b00001100 => RecordType::FRONTEND_USER_GROUP,
-                    0b00001101 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS,
-                    0b00001110 => RecordType::FRONTEND_USER_GROUP | RecordType::FRONTEND_USER,
-                    0b00001111 => RecordType::FRONTEND_USER_GROUP | RecordType::ADDRESS | RecordType::FRONTEND_USER,
-                ];
-                $recordTypes = $whichtablesToRecordTypes[$record['whichtables']];
                 $connectionGroup->insert('tx_mail_domain_model_group',
                     [
                         'uid' => $record['uid'],
@@ -129,7 +128,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'list' => $record['list'],
                         'csv' => $record['csv'],
                         'pages' => $record['pages'],
-                        'record_types' => $recordTypes,
+                        'record_types' => $whichtablesToRecordTypes[$record['whichtables']],
                         'recursive' => $record['recursive'],
                         'children' => $record['mail_groups'],
                         'categories' => $record['select_categories'],
@@ -159,7 +158,6 @@ class DirectMailMigration implements UpgradeWizardInterface
                     [
                         'uid' => $record['uid'],
                         'mail' => $record['mid'],
-//                        'recipient_table' => $record['rtbl'],
                         'recipient_table' => $table,
                         'recipient_uid' => $record['rid'],
                         'email' => $record['email'],

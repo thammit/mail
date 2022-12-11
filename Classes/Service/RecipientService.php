@@ -294,18 +294,12 @@ class RecipientService
             case RecipientGroupType::PAGES:
                 // From pages
                 $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
-
-                // Make queries
                 if ($pages) {
                     foreach ($group->getRecordTypes() as $recipientSourceIdentifier) {
                         $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
                         if ($recipientSourceConfiguration) {
                             $type = $recipientSourceConfiguration['type'] ?? 'Table';
-                            $contains = $recipientSourceConfiguration['contains'] ?? false;
-                            if ($contains) {
-                                // todo handle sources containing other sources
-                                continue;
-                            }
+                            $recipientSourceIdentifier = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
                             switch ($type) {
                                 case 'Extbase':
                                     $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
@@ -325,25 +319,6 @@ class RecipientService
                             }
                         }
                     }
-
-//                    if ($group->hasAddress()) {
-//                        $idLists['tt_address'] = $this->getRecipientUidListByTableAndPageUidListAndCategories('tt_address', $pages, $group->getCategories());
-//                    }
-//                    if ($group->hasFrontendUser()) {
-//                        $idLists['fe_users'] = $this->getRecipientUidListByTableAndPageUidListAndCategories('fe_users', $pages, $group->getCategories());
-//                    }
-//                    if ($group->hasFrontendUserGroup()) {
-//                        $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'] ?? [],
-//                            $this->getRecipientUidListByTableAndPageUidListAndCategories('fe_groups', $pages, $group->getCategories())));
-//                    }
-                }
-                break;
-            case RecipientGroupType::MODEL:
-                $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
-                $model = $this->siteConfiguration['RecipientSources'][$group->getRecordType()]['model'] ?? false;
-                if ($pages && $model) {
-                    $idLists[$group->getRecordType()] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories($model, $pages,
-                        $group->getCategories());
                 }
                 break;
             case RecipientGroupType::CSV:
@@ -362,25 +337,25 @@ class RecipientService
                 $idLists['fe_users'] = $this->getStaticIdListByTableAndGroupUid('fe_users', $group->getUid());
                 $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $this->getStaticIdListByTableAndGroupUid('fe_groups', $group->getUid())));
                 break;
-            case RecipientGroupType::QUERY:
-                // Special query list
-                // Todo add functionality again
-                $queryTable = GeneralUtility::_GP('SET')['queryTable'] ?? '';
-                $queryConfig = GeneralUtility::_GP('mailQueryConfig');
-                $this->updateGroupQueryConfig($group, $queryTable, $queryConfig);
-
-                $table = '';
-                if ($group->hasAddress()) {
-                    $table = 'tt_address';
-                } else {
-                    if ($group->hasFrontendUser()) {
-                        $table = 'fe_users';
-                    }
-                }
-                if ($table) {
-                    $idLists[$table] = $this->getSpecialQueryIdList($table, $group);
-                }
-                break;
+//            case RecipientGroupType::QUERY:
+//                // Special query list
+//                // Todo add functionality again
+//                $queryTable = GeneralUtility::_GP('SET')['queryTable'] ?? '';
+//                $queryConfig = GeneralUtility::_GP('mailQueryConfig');
+//                $this->updateGroupQueryConfig($group, $queryTable, $queryConfig);
+//
+//                $table = '';
+//                if ($group->hasAddress()) {
+//                    $table = 'tt_address';
+//                } else {
+//                    if ($group->hasFrontendUser()) {
+//                        $table = 'fe_users';
+//                    }
+//                }
+//                if ($table) {
+//                    $idLists[$table] = $this->getSpecialQueryIdList($table, $group);
+//                }
+//                break;
             case RecipientGroupType::OTHER:
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
@@ -388,7 +363,6 @@ class RecipientService
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
-            default:
         }
 
         // todo add event dispatcher to manipulate the returned idLists

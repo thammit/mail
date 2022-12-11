@@ -67,6 +67,7 @@ trait RepositoryTrait
 
         return $queryBuilder
             ->select(...$fields)
+            ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
             )
@@ -88,6 +89,7 @@ trait RepositoryTrait
 
         return $queryBuilder
             ->select(...$fields)
+            ->from($this->table)
             ->where(
                 $queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidList, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY))
             )
@@ -109,6 +111,7 @@ trait RepositoryTrait
 
         return $queryBuilder
             ->select(...$fields)
+            ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
             )
@@ -127,11 +130,11 @@ trait RepositoryTrait
     public function findRecordByPidList(array $pidList, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
         $queryBuilder = $withoutRestrictions ? $this->getQueryBuilderWithoutRestrictions() : $this->getQueryBuilder();
-
         return $queryBuilder
             ->select(...$fields)
+            ->from($this->table)
             ->where(
-                $queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($pidList, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY))
+                $queryBuilder->expr()->in('pid', $queryBuilder->createNamedParameter($pidList, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY))
             )
             ->executeQuery()
             ->fetchAllAssociative();
