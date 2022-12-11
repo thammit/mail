@@ -361,21 +361,22 @@ class MailerService implements LoggerAwareInterface
             }
             $numberOfSentMailsOfGroup = 0;
 
-            // get already sent mails
-            $sentMails = $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($this->mail->getUid(), $recipientSourceIdentifier);
+            // get already handled recipient uids
+            $alreadyHandledRecipientIds = $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($this->mail->getUid(), $recipientSourceIdentifier);
+
+            // reduce $recipientIds to unhandled recipient
+            $recipientIds = array_diff($recipientIds, $alreadyHandledRecipientIds);
 
             if ($isSimpleList) {
                 foreach ($recipientIds as $recipientUid => $recipientData) {
                     // fake uid for csv
                     $recipientUid++;
-                    if (!in_array($recipientUid, $sentMails)) {
-                        $recipientData['uid'] = $recipientUid;
-                        $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
-                        $numberOfSentMailsOfGroup++;
-                        $numberOfSentMails++;
-                        if ($numberOfSentMails >= $this->sendPerCycle) {
-                            return false;
-                        }
+                    $recipientData['uid'] = $recipientUid;
+                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                    $numberOfSentMailsOfGroup++;
+                    $numberOfSentMails++;
+                    if ($numberOfSentMails >= $this->sendPerCycle) {
+                        return false;
                     }
                 }
             } else {
@@ -393,32 +394,25 @@ class MailerService implements LoggerAwareInterface
                                 $this->sendPerCycle
                             );
                             foreach ($recipientsData as $recipientData) {
-                                if (!in_array($recipientsData['uid'], $sentMails)) {
-                                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
-                                    $numberOfSentMailsOfGroup++;
-                                    $numberOfSentMails++;
-                                    if ($numberOfSentMails >= $this->sendPerCycle) {
-                                        return false;
-                                    }
+                                $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                                $numberOfSentMailsOfGroup++;
+                                $numberOfSentMails++;
+                                if ($numberOfSentMails >= $this->sendPerCycle) {
+                                    return false;
                                 }
                             }
                         }
                         break;
                     case 'Table':
                         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
-                        $queryBuilder
+                        $queryResult = $queryBuilder
                             ->select('*')
                             ->from($recipientSourceIdentifier)
                             ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
-                            ->setMaxResults($this->sendPerCycle);
-                        if ($sentMails) {
-                            // exclude already sent mails
-                            $queryBuilder->andWhere($queryBuilder->expr()->notIn('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($sentMails)));
-                        }
+                            ->setMaxResults($this->sendPerCycle)
+                            ->execute();
 
-                        $statement = $queryBuilder->execute();
-
-                        while ($recipientData = $statement->fetchAssociative()) {
+                        while ($recipientData = $queryResult->fetchAssociative()) {
                             $recipientData['categories'] = $this->getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
                             $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
                             $numberOfSentMailsOfGroup++;
@@ -501,9 +495,7 @@ class MailerService implements LoggerAwareInterface
               $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
             }
 
-            // write to log table. if it can be written, continue with sending.
-            // if not, stop the script and report error
-            // try to insert the mail to the mail log repository
+            // Add mail log entry
             $log = GeneralUtility::makeInstance(Log::class);
             $log->setMail($this->mail);
             $log->setRecipientSource($recipientSourceIdentifier);
@@ -544,7 +536,7 @@ class MailerService implements LoggerAwareInterface
     }
 
     /**
-     *Set job end and send a notification to admin if activated in extension settings (notificationJob = 1)
+     * Set job end and send a notification to admin if activated in extension settings (notificationJob = 1)
      *
      * @return void
      * @throws \TYPO3\CMS\Core\Exception
@@ -615,13 +607,14 @@ class MailerService implements LoggerAwareInterface
             $this->prepare($mail->getUid());
 
             if (!$this->mail->getScheduledBegin()) {
-                // todo add psr-15 event to manipulate mail before send
+                // todo add PSR-14 event to manipulate mail before scheduled send begins
                 $this->setJobBegin();
             }
 
             $finished = $this->massSend();
 
             if ($finished) {
+                // todo add PSR-14 event to manipulate mail before scheduled send ends
                 $this->setJobEnd();
             }
         } else {
@@ -674,7 +667,7 @@ class MailerService implements LoggerAwareInterface
             $header->addTextHeader('Organization', $this->organisation);
         }
 
-        // todo add PSR-14 Event to modify mail headers
+        // todo add PSR-14 event to modify mail headers
 
         $mailMessage->send();
         unset($mailMessage);
@@ -696,7 +689,7 @@ class MailerService implements LoggerAwareInterface
                 // extract all media path from the mail message
                 $dom = pQuery::parseStr($htmlContent);
                 /** @var pQuery\IQuery $element */
-                foreach ($dom->query('img[!do_not_embed]') as $element) {
+                foreach ($dom->query('img[!data-do-not-embed]') as $element) {
                     $absoluteImagePath = MailerUtility::absRef($element->attr('src'), $this->mail->getRedirectUrl());
                     // change image src to absolute path in case fetch and embed fails
                     $element->attr('src', $absoluteImagePath);
