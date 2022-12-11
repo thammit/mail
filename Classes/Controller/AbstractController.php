@@ -50,17 +50,17 @@ abstract class AbstractController extends ActionController
      */
     public function __construct(
         protected ModuleTemplateFactory $moduleTemplateFactory,
-        protected PageRenderer $pageRenderer,
-        protected SiteFinder $siteFinder,
-        protected ReportService $mailService,
-        protected MailerService $mailerService,
-        protected RecipientService $recipientService,
-        protected MailRepository $mailRepository,
-        protected GroupRepository $groupRepository,
-        protected LogRepository $logRepository,
-        protected PageRepository $pageRepository,
-        protected CategoryRepository $categoryRepository,
-        protected IconFactory $iconFactory
+        protected PageRenderer          $pageRenderer,
+        protected SiteFinder            $siteFinder,
+        protected ReportService         $reportService,
+        protected MailerService         $mailerService,
+        protected RecipientService      $recipientService,
+        protected MailRepository        $mailRepository,
+        protected GroupRepository       $groupRepository,
+        protected LogRepository         $logRepository,
+        protected PageRepository        $pageRepository,
+        protected CategoryRepository    $categoryRepository,
+        protected IconFactory           $iconFactory
     ) {
         try {
             $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?? GeneralUtility::_GP('id'));

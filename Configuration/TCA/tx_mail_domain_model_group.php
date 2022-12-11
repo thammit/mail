@@ -26,6 +26,7 @@ return [
                 'size' => '30',
                 'max' => '120',
                 'eval' => 'trim,required',
+                'default' => ''
             ],
         ],
         'description' => [

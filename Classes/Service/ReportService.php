@@ -183,9 +183,10 @@ class ReportService
 
     /**
      * @param array $data
+     * @param string $filenamePrefix
      * @return void
      */
-    #[NoReturn] public function csvDownloadRecipients(array $data): void
+    #[NoReturn] public function csvDownloadRecipients(array $data, string $filenamePrefix): void
     {
         $emails = [];
         if ($data['addresses']) {
@@ -206,7 +207,7 @@ class ReportService
             }
         }
 
-        CsvUtility::downloadCSV($emails);
+        CsvUtility::downloadCSV($emails, $filenamePrefix);
     }
 
     /**

@@ -17,7 +17,7 @@ class Log extends AbstractEntity
     /**
      * @var string
      */
-    protected string $recipientTable = '';
+    protected string $recipientSource = '';
 
     /**
      * @var int
@@ -99,18 +99,18 @@ class Log extends AbstractEntity
     /**
      * @return string
      */
-    public function getRecipientTable(): string
+    public function getRecipientSource(): string
     {
-        return $this->recipientTable;
+        return $this->recipientSource;
     }
 
     /**
-     * @param string $recipientTable
+     * @param string $recipientSource
      * @return Log
      */
-    public function setRecipientTable(string $recipientTable): Log
+    public function setRecipientSource(string $recipientSource): Log
     {
-        $this->recipientTable = $recipientTable;
+        $this->recipientSource = $recipientSource;
         return $this;
     }
 

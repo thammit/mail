@@ -306,8 +306,8 @@ class MailerService implements LoggerAwareInterface
         $content = str_replace('%23%23%23', '###', $content);
 
         $rowFieldsArray = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipientFields'), true);
-        if ($addRecipientFields = ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')) {
-            $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $addRecipientFields, true));
+        if ($additionalRecipientFields = ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')) {
+            $rowFieldsArray = array_merge($rowFieldsArray, GeneralUtility::trimExplode(',', $additionalRecipientFields, true));
         }
 
         foreach ($rowFieldsArray as $substField) {
@@ -491,7 +491,7 @@ class MailerService implements LoggerAwareInterface
      */
     protected function sendSingleMailAndAddLogEntry(array $recipientData, string $recipientSourceIdentifier): void
     {
-        if ($this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid((int)$recipientData['uid'], $recipientSourceIdentifier, $this->mail->getUid()) === false) {
+        if ($this->logRepository->findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid((int)$recipientData['uid'], $recipientSourceIdentifier, $this->mail->getUid()) === false) {
             $parseTime = MailerUtility::getMilliseconds();
 
             // PSR-14 event dispatcher to manipulate recipient data
@@ -506,7 +506,7 @@ class MailerService implements LoggerAwareInterface
             // try to insert the mail to the mail log repository
             $log = GeneralUtility::makeInstance(Log::class);
             $log->setMail($this->mail);
-            $log->setRecipientTable($recipientSourceIdentifier);
+            $log->setRecipientSource($recipientSourceIdentifier);
             $log->setRecipientUid($recipientData['uid']);
             $log->setEmail($recipientData['email']);
             $this->logRepository->add($log);

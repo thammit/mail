@@ -17,6 +17,12 @@ $ttAddressCols = [
             'type' => 'check'
         ]
     ],
+    'tstamp' => [
+        'label' => 'Last modified',
+        'config' => [
+            'type' => 'passthrough'
+        ]
+    ],
 ];
 
 TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('tt_address', $ttAddressCols);

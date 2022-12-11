@@ -83,7 +83,7 @@ CREATE TABLE tx_mail_domain_model_log
     uid             int(11) unsigned NOT NULL auto_increment,
     mail            int(11) unsigned DEFAULT '0' NOT NULL,
     recipient_uid   int(11) DEFAULT '0' NOT NULL,
-    recipient_table varchar(255) DEFAULT '' NOT NULL,
+    recipient_source varchar(255) DEFAULT '' NOT NULL,
     email           varchar(255) DEFAULT '' NOT NULL,
     tstamp          int(11) unsigned DEFAULT '0' NOT NULL,
     url             tinyblob NULL,
@@ -94,8 +94,8 @@ CREATE TABLE tx_mail_domain_model_log
     return_content  mediumblob NULL,
     return_code     smallint(6) DEFAULT '0' NOT NULL,
     PRIMARY KEY (uid),
-    KEY             recipient (recipient_uid, recipient_table, mail, response_type, uid),
-    KEY             mail (mail, response_type, recipient_table, recipient_uid)
+    KEY             recipient (recipient_uid, recipient_source, mail, response_type, uid),
+    KEY             mail (mail, response_type, recipient_source, recipient_uid)
 );
 
 CREATE TABLE fe_users

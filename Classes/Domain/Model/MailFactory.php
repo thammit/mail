@@ -80,9 +80,9 @@ class MailFactory
             ->setSubject($pageRecord['title'] ?? '')
             ->setRedirectUrl(BackendDataUtility::getBaseUrl($pageUid))
             ->setPlainParams($this->pageTSConfiguration['plainParams'] ?? '')
-            ->setHtmlParams($this->pageTSConfiguration['HTMLParams'] ?? '')
-            ->setEncoding($this->pageTSConfiguration['direct_mail_encoding'] ?? 'quoted-printable')
-            ->setCharset($this->pageTSConfiguration['direct_mail_charset'] ?? 'iso-8859-1');
+            ->setHtmlParams($this->pageTSConfiguration['htmlParams'] ?? '')
+            ->setEncoding($this->pageTSConfiguration['encoding'] ?? 'quoted-printable')
+            ->setCharset($this->pageTSConfiguration['charset'] ?? 'iso-8859-1');
 
         if ($languageUid > 0) {
             $mail->setSysLanguageUid($languageUid);
@@ -104,9 +104,9 @@ class MailFactory
 
             $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
             $glue = str_contains($baseUrl, '?') ? '&' : '?';
-            $enableJumpUrl = (bool)($this->pageTSConfiguration['enable_jump_url'] ?? false);
-            $enableMailToJumpUrl = (bool)($this->pageTSConfiguration['enable_mailto_jump_url'] ?? false);
-            $jumpUrlTrackingPrivacy = (bool)($this->pageTSConfiguration['jumpurl_tracking_privacy'] ?? false);
+            $enableJumpUrl = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
+            $enableMailToJumpUrl = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
+            $jumpUrlTrackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
             $jumpUrlPrefix = $baseUrl . $glue .
                 'mail=###SYS_MAIL_ID###' .
                 ($jumpUrlTrackingPrivacy ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
@@ -241,8 +241,8 @@ class MailFactory
             ->setFromEmail($senderEmail)
             ->setSubject($subject)
             ->setSendOptions(new SendFormat(SendFormat::PLAIN))
-            ->setEncoding($this->pageTSConfiguration['quick_mail_encoding'] ?? 'quoted-printable')
-            ->setCharset($this->pageTSConfiguration['quick_mail_charset'] ?? 'utf-8');
+            ->setEncoding($this->pageTSConfiguration['quickMailEncoding'] ?? 'quoted-printable')
+            ->setCharset($this->pageTSConfiguration['quickMailCharset'] ?? 'utf-8');
 
         $plainContent = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_-->' . $plainContent . '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
         // shorten urls is done in mailer service sendPersonalizedMail method as well, but is necessary here as well, to not break links due to following wordwrap
@@ -271,14 +271,14 @@ class MailFactory
     {
         $mail = GeneralUtility::makeInstance(Mail::class);
         $mail
-            ->setFromEmail($this->pageTSConfiguration['from_email'] ?? '')
-            ->setFromName($this->pageTSConfiguration['from_name'] ?? '')
-            ->setReplyToEmail($this->pageTSConfiguration['replyto_email'] ?? '')
-            ->setReplyToName($this->pageTSConfiguration['replyto_name'] ?? '')
-            ->setReturnPath($this->pageTSConfiguration['return_path'] ?? '')
+            ->setFromEmail($this->pageTSConfiguration['fromEmail'] ?? '')
+            ->setFromName($this->pageTSConfiguration['fromName'] ?? '')
+            ->setReplyToEmail($this->pageTSConfiguration['replyToEmail'] ?? '')
+            ->setReplyToName($this->pageTSConfiguration['replyToName'] ?? '')
+            ->setReturnPath($this->pageTSConfiguration['returnPath'] ?? '')
             ->setPriority((int)($this->pageTSConfiguration['priority'] ?? 3))
             ->setRedirect((bool)($this->pageTSConfiguration['redirect'] ?? false))
-            ->setRedirectAll((bool)($this->pageTSConfiguration['redirect_all'] ?? false))
+            ->setRedirectAll((bool)($this->pageTSConfiguration['redirectAll'] ?? false))
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
             ->setAuthCodeFields($this->pageTSConfiguration['auth_code_fields'] ?? '')
             ->setSendOptions(new SendFormat($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))

@@ -3,13 +3,13 @@ return [
     'ctrl' => [
         'hideTable' => true,
         'label' => 'mail',
-        'label_alt' => 'recipient_table,recipient_uid',
+        'label_alt' => 'recipient_source,recipient_uid',
         'label_alt_force' => true,
         'default_sortby' => 'ORDER BY tstamp DESC',
         'tstamp' => 'tstamp',
         'title' => 'Mail Log',
         'delete' => '',
-        'typeicon_column' => 'recipient_table',
+        'typeicon_column' => 'recipient_source',
         'typeicon_classes' => [
             'fe_users' => 'mail-log',
             'tt_address' => 'mail-log',
@@ -35,7 +35,7 @@ return [
                 'type' => 'passthrough'
             ]
         ],
-        'recipient_table' => [
+        'recipient_source' => [
             'label' => 'Recipient Table',
             'config' => [
                 'type' => 'passthrough'

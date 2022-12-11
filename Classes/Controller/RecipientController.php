@@ -214,7 +214,7 @@ class RecipientController extends AbstractController
                     break;
             }
         }
-        CsvUtility::downloadCSV($rows);
+        CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);
     }
 
     /**

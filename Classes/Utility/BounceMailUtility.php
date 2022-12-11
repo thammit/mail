@@ -36,7 +36,7 @@ class BounceMailUtility
 
 //        $midArray = [
 //            'mail' => 7,
-//            'recipient_table' => 'tt_address',
+//            'recipient_source' => 'tt_address',
 //            'recipient_uid' => 32,
 //        ];
 

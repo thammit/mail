@@ -195,7 +195,7 @@ class AnalyzeBounceMailCommand extends Command
 
         $analyzeResult = BounceMailUtility::analyseReturnError($message->getMessageBody());
 
-        $row = $this->logRepository->findOneByRecipientUidAndRecipientTableAndMailUid($mailData['recipient_uid'], $mailData['recipient_table'], $mailData['mail']);
+        $row = $this->logRepository->findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid($mailData['recipient_uid'], $mailData['recipient_source'], $mailData['mail']);
 
         if ($row) {
             $tableName = 'tx_mail_domain_model_log';
@@ -207,7 +207,7 @@ class AnalyzeBounceMailCommand extends Command
                     'response_type' => ResponseType::FAILED,
                     'mail' => (int)$mailData['mail'],
                     'recipient_uid' => (int)$mailData['recipient_uid'],
-                    'recipient_table' => $mailData['recipient_table'],
+                    'recipient_source' => $mailData['recipient_source'],
                     'email' => $row['email'],
                     'return_content' => json_encode($analyzeResult),
                     'return_code' => (int)$analyzeResult['reason'],

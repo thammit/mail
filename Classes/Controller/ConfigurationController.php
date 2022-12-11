@@ -24,11 +24,11 @@ class ConfigurationController  extends AbstractController
         if (!isset($this->implodedParams['plainParams'])) {
             $this->implodedParams['plainParams'] = '&type=99';
         }
-        if (!isset($this->implodedParams['quick_mail_charset'])) {
-            $this->implodedParams['quick_mail_charset'] = 'utf-8';
+        if (!isset($this->implodedParams['quickMailCharset'])) {
+            $this->implodedParams['quickMailCharset'] = 'utf-8';
         }
-        if (!isset($this->implodedParams['direct_mail_charset'])) {
-            $this->implodedParams['direct_mail_charset'] = 'iso-8859-1';
+        if (!isset($this->implodedParams['charset'])) {
+            $this->implodedParams['charset'] = 'iso-8859-1';
         }
 
         $this->view->assignMultiple([

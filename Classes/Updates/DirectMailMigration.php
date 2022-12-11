@@ -6,7 +6,6 @@ namespace MEDIAESSENZ\Mail\Updates;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
-use MEDIAESSENZ\Mail\Type\Enumeration\RecordType;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -148,7 +147,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                     3 => SendFormat::BOTH,
                     default => SendFormat::NONE,
                 };
-                $table = match ($record['rtbl']) {
+                $recipientSource = match ($record['rtbl']) {
                     't' => 'tt_address',
                     'f' => 'fe_users',
                     'P' => 'tx_mail_domain_model_group',
@@ -158,7 +157,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                     [
                         'uid' => $record['uid'],
                         'mail' => $record['mid'],
-                        'recipient_table' => $table,
+                        'recipient_source' => $recipientSource,
                         'recipient_uid' => $record['rid'],
                         'email' => $record['email'],
                         'tstamp' => $record['tstamp'],
@@ -234,8 +233,8 @@ class DirectMailMigration implements UpgradeWizardInterface
         ];
 
         $connectionSysCategoryRecordMm = $this->getConnectionPool()->getConnectionForTable('sys_category_record_mm');
-        foreach ($mmTables as $table => $config) {
-            $mmRecords = $this->getPreparedQueryBuilder($table)->select('*')->executeQuery()->fetchAllAssociative();
+        foreach ($mmTables as $recipientSource => $config) {
+            $mmRecords = $this->getPreparedQueryBuilder($recipientSource)->select('*')->executeQuery()->fetchAllAssociative();
             foreach ($mmRecords as $record) {
                 $sysCategoryUid = $directMailCategorySysCategoryMappings[$record['uid_foreign']];
                 $connectionSysCategoryRecordMm->insert('sys_category_record_mm',

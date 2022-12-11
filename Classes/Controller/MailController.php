@@ -588,9 +588,9 @@ class MailController extends AbstractController
         $ttAddressRepository = GeneralUtility::makeInstance(AddressRepository::class);
         $frontendUsersRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
 
-        if ($this->pageTSConfiguration['test_tt_address_uids'] ?? false) {
+        if ($this->pageTSConfiguration['testTtAddressUids'] ?? false) {
             $demand = new Demand();
-            $demand->setSingleRecords($this->pageTSConfiguration['test_tt_address_uids']);
+            $demand->setSingleRecords($this->pageTSConfiguration['testTtAddressUids']);
             $data['ttAddress'] = $ttAddressRepository->getAddressesByCustomSorting($demand);
         }
 
@@ -651,7 +651,7 @@ class MailController extends AbstractController
         if ($addressList) {
             $this->mailerService->start();
             $this->mailerService->prepare($mail->getUid());
-            $this->mailerService->setSubjectPrefix($this->pageTSConfiguration['testmail'] ?? '');
+            $this->mailerService->setSubjectPrefix($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '');
             $this->mailerService->sendSimpleMail($addressList);
         }
 
@@ -733,7 +733,7 @@ class MailController extends AbstractController
         $mail->setSent(true);
 
 //        if (false && $this->isTestMail) {
-//            $updateFields['subject'] = ($this->pageTSConfiguration['testmail'] ?? '') . ' ' . $row['subject'];
+//            $updateFields['subject'] = ($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '') . ' ' . $row['subject'];
 //        }
 //
 //        // create a draft version of the record

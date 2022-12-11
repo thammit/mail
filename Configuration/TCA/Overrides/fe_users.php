@@ -24,6 +24,12 @@ $feUsersCols = [
             'type' => 'category'
         ]
     ],
+    'tstamp' => [
+        'label' => 'Last modified',
+        'config' => [
+            'type' => 'passthrough'
+        ]
+    ],
 ];
 
 TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('fe_users', $feUsersCols);

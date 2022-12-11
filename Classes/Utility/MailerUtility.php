@@ -203,13 +203,13 @@ class MailerUtility
 
     /**
      * @param int $mailUid
-     * @param string $tableName
+     * @param string $recipientSourceIdentifier
      * @param int $recipientUid
      * @return string
      */
-    public static function buildMailIdentifierHeaderWithoutHash(int $mailUid, string $tableName, int $recipientUid): string
+    public static function buildMailIdentifierHeaderWithoutHash(int $mailUid, string $recipientSourceIdentifier, int $recipientUid): string
     {
-        return 'MID' . $mailUid . '-' . $tableName . '-' . $recipientUid;
+        return 'MID' . $mailUid . '-' . $recipientSourceIdentifier . '-' . $recipientUid;
     }
 
     /**
@@ -231,12 +231,12 @@ class MailerUtility
         if (str_contains($rawHeaders, $header)) {
             $p = explode($header . ':', $rawHeaders, 2);
             $l = explode(LF, $p[1], 2);
-            [$mailUid, $tableName, $recipientUid, $hash] = GeneralUtility::trimExplode('-', $l[0]);
+            [$mailUid, $recipientSourceIdentifier, $recipientUid, $hash] = GeneralUtility::trimExplode('-', $l[0]);
             $mailUid = (int)ltrim($mailUid, 'MID');
-            if (md5(self::buildMailIdentifierHeaderWithoutHash($mailUid, $tableName, (int)$recipientUid)) === $hash) {
+            if (md5(self::buildMailIdentifierHeaderWithoutHash($mailUid, $recipientSourceIdentifier, (int)$recipientUid)) === $hash) {
                 return [
                     'mail' => $mailUid,
-                    'recipient_table' => $tableName,
+                    'recipient_source' => $recipientSourceIdentifier,
                     'recipient_uid' => (int)$recipientUid,
                 ];
             }
@@ -325,15 +325,15 @@ class MailerUtility
      */
     public static function addUsernameAndPasswordToUrl(string $url, array $params): string
     {
-        $username = $params['http_username'] ?? '';
-        $password = $params['http_password'] ?? '';
+        $username = $params['httpUsername'] ?? '';
+        $password = $params['httpPassword'] ?? '';
         $matches = [];
         if ($username && $password && preg_match('/^https?:\/\//', $url, $matches)) {
             $url = $matches[0] . $username . ':' . $password . '@' . substr($url, strlen($matches[0]));
         }
-        if (($params['simulate_usergroup'] ?? false) && MathUtility::canBeInterpretedAsInteger($params['simulate_usergroup'])) {
+        if (($params['simulateUsergroup'] ?? false) && MathUtility::canBeInterpretedAsInteger($params['simulateUsergroup'])) {
             $glue = str_contains($url, '?') ? '&' : '?';
-            $url .= $glue . 'dmail_fe_group=' . (int)$params['simulate_usergroup'] . '&access_token=' . RegistryUtility::createAndGetAccessToken();
+            $url .= $glue . 'dmail_fe_group=' . (int)$params['simulateUsergroup'] . '&access_token=' . RegistryUtility::createAndGetAccessToken();
         }
         return $url;
     }

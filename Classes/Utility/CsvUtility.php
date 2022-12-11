@@ -168,24 +168,24 @@ class CsvUtility
     /**
      * Send csv values as download by sending appropriate HTML header
      *
-     * @param array $idArr Values to be put into csv
+     * @param array $rows Values to be put into csv
      *
      * @return void Sent HML header for a file download
      */
-    #[NoReturn] public static function downloadCSV(array $idArr): void
+    #[NoReturn] public static function downloadCSV(array $rows, string $filenamePrefix = 'mail_recipients'): void
     {
         $lines = [];
-        if (count($idArr)) {
-            reset($idArr);
-            $lines[] = \TYPO3\CMS\Core\Utility\CsvUtility::csvValues(array_keys(current($idArr)));
+        if (count($rows)) {
+            reset($rows);
+            $lines[] = \TYPO3\CMS\Core\Utility\CsvUtility::csvValues(array_keys(current($rows)));
 
-            foreach ($idArr as $rec) {
+            foreach ($rows as $rec) {
                 $lines[] = \TYPO3\CMS\Core\Utility\CsvUtility::csvValues($rec);
             }
         }
 
         header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename=mail_recipients_' . date('dmy-Hi') . '.csv');
+        header('Content-Disposition: attachment; filename=' . $filenamePrefix . '_' . date('dmy-Hi') . '.csv');
         echo implode(CR . LF, $lines);
         exit;
     }

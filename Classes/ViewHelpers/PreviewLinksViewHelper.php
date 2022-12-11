@@ -60,7 +60,7 @@ class PreviewLinksViewHelper extends AbstractViewHelper
             $langParam = static::getLanguageParam($languageUid, $pageTSConfiguration);
             $langTitle = $multilingual ? ' - ' . $lang['title'] : '';
             $plainParams = $implodedParams['plainParams'] ?? $langParam;
-            $htmlParams = $implodedParams['HTMLParams'] ?? $langParam;
+            $htmlParams = $implodedParams['htmlParams'] ?? $langParam;
             $flagIcon = $lang['flagIcon'];
 
             $attributes = PreviewUriBuilder::create($row['uid'], '')

@@ -98,7 +98,7 @@ class LogRepository extends Repository
                 $queryBuilder->expr()->eq('response_type', $responseType)
             )
             ->groupBy('recipient_uid')
-            ->addGroupBy('recipient_table')
+            ->addGroupBy('recipient_source')
             ->orderBy('COUNT(*)')
             ->executeQuery()
             ->fetchOne();
@@ -145,7 +145,7 @@ class LogRepository extends Repository
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
+                $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
             )
             ->execute()
@@ -184,13 +184,13 @@ class LogRepository extends Repository
 
     /**
      * @param int $recipientUid
-     * @param string $recipientTable
+     * @param string $recipientSourceIdentifier
      * @param int $mailUid
      * @return bool|array
      * @throws DBALException
      * @throws Exception
      */
-    public function findOneByRecipientUidAndRecipientTableAndMailUid(int $recipientUid, string $recipientTable, int $mailUid): bool|array
+    public function findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid(int $recipientUid, string $recipientSourceIdentifier, int $mailUid): bool|array
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -198,9 +198,9 @@ class LogRepository extends Repository
             ->select('uid', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('recipient_table', $queryBuilder->createNamedParameter($recipientTable)),
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
+                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
             )
             ->setMaxResults(1)
@@ -253,7 +253,7 @@ class LogRepository extends Repository
         $queryBuilder = $this->getQueryBuilder();
 
         $statement = $queryBuilder
-            ->select('recipient_uid', 'recipient_table', 'email')
+            ->select('recipient_uid', 'recipient_source', 'email')
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
@@ -285,7 +285,7 @@ class LogRepository extends Repository
         ];
 
         foreach ($result as $row) {
-            switch ($row['recipient_table']) {
+            switch ($row['recipient_source']) {
                 case 'tt_address':
                     $idLists['addresses'][] = $row['recipient_uid'];
                     break;
@@ -296,7 +296,7 @@ class LogRepository extends Repository
                     $idLists['plainList'][] = $row['email'];
                     break;
                 default:
-                    $idLists[$row['recipient_table']][] = $row['recipient_uid'];
+                    $idLists[$row['recipient_source']][] = $row['recipient_uid'];
             }
         }
 

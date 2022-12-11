@@ -10,6 +10,11 @@ class Address extends AbstractRecipient implements RecipientInterface, CategoryI
 {
     const ENHANCED_MODEL = \FriendsOfTYPO3\TtAddress\Domain\Model\Address::class;
 
+    /**
+     * @var int
+     */
+    protected int $tstamp = 0;
+
     public function getRecordIdentifier(): string
     {
         return self::ENHANCED_MODEL . ':' . $this->uid;
@@ -37,6 +42,7 @@ class Address extends AbstractRecipient implements RecipientInterface, CategoryI
                 'zip' => $address->getZip(),
                 'city' => $address->getCity(),
                 'country' => $address->getCountry(),
+                'tstamp' => $this->tstamp,
             ];
         }
 
