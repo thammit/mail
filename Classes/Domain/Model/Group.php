@@ -54,12 +54,7 @@ class Group extends AbstractEntity
     /**
      * @var string
      */
-    protected string $recordType = '';
-
-    /**
-     * @var string
-     */
-    protected string $recordTypes = '';
+    protected string $recipientSources = '';
 
     /**
      * @var bool
@@ -233,57 +228,41 @@ class Group extends AbstractEntity
     }
 
     /**
-     * @return string
-     */
-    public function getRecordType(): string
-    {
-        return $this->recordType;
-    }
-
-    /**
-     * @param string $recordType
-     */
-    public function setRecordType(string $recordType): void
-    {
-        $this->recordType = $recordType;
-    }
-
-    /**
      * @return array
      */
-    public function getRecordTypes(): array
+    public function getRecipientSources(): array
     {
-        return GeneralUtility::trimExplode(',', $this->recordTypes, true);
+        return GeneralUtility::trimExplode(',', $this->recipientSources, true);
     }
 
     /**
-     * @param array $recordTypes
+     * @param array $recipientSources
      * @return Group
      */
-    public function setRecordTypes(array $recordTypes): Group
+    public function setRecipientSources(array $recipientSources): Group
     {
-        $this->recordTypes = implode(',', $recordTypes);
+        $this->recipientSources = implode(',', $recipientSources);
         return $this;
     }
 
-    public function hasRecordType(string $tableName): bool
+    public function hasRecipientSource(string $recipientSourceIdentifier): bool
     {
-        return in_array($tableName, $this->getRecordTypes());
+        return in_array($recipientSourceIdentifier, $this->getRecipientSources());
     }
 
     public function hasAddress(): bool
     {
-        return $this->hasRecordType('tt_address');
+        return $this->hasRecipientSource('tt_address');
     }
 
     public function hasFrontendUser(): bool
     {
-        return $this->hasRecordType('fe_users');
+        return $this->hasRecipientSource('fe_users');
     }
 
     public function hasFrontendUserGroup(): bool
     {
-        return $this->hasRecordType('fe_groups');
+        return $this->hasRecipientSource('fe_groups');
     }
 
     /**

@@ -295,7 +295,7 @@ class RecipientService
                 // From pages
                 $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
-                    foreach ($group->getRecordTypes() as $recipientSourceIdentifier) {
+                    foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
                         $recipientSourceConfiguration = $this->siteConfiguration['RecipientSources'][$recipientSourceIdentifier] ?? false;
                         if ($recipientSourceConfiguration) {
                             $type = $recipientSourceConfiguration['type'] ?? 'Table';
@@ -706,14 +706,14 @@ class RecipientService
         if ($queryTable != $table || $queryConfig != $group->getQuery()) {
             $recordTypes = [];
             if ($queryTable === 'tt_address') {
-                $recordTypes = RecordType::ADDRESS;
+                $recordTypes ='tt_address';
             } else {
                 if ($queryTable === 'fe_users') {
-                    $recordTypes = RecordType::FRONTEND_USER;
+                    $recordTypes = 'fe_users';
                 }
             }
 
-            $group->setRecordTypes($recordTypes);
+            $group->setRecipientSources($recordTypes);
             $group->setQuery($queryConfig);
             $this->groupRepository->update($group);
             $this->groupRepository->persist();

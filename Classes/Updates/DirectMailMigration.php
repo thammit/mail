@@ -94,7 +94,7 @@ class DirectMailMigration implements UpgradeWizardInterface
 
         // sys_dmail_group -> tx_mail_domain_model_group
         $connectionGroup = $this->getConnectionPool()->getConnectionForTable('tx_mail_domain_model_group');
-        $whichtablesToRecordTypes = [
+        $whichtablesToRecipientSources = [
             0b00000000 => '',
             0b00000001 => 'tt_address',
             0b00000010 => 'fe_users',
@@ -128,7 +128,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                         'list' => $record['list'],
                         'csv' => $record['csv'],
                         'pages' => $record['pages'],
-                        'record_types' => $whichtablesToRecordTypes[$record['whichtables']],
+                        'recipient_sources' => $whichtablesToRecipientSources[$record['whichtables']],
                         'recursive' => $record['recursive'],
                         'children' => $record['mail_groups'],
                         'categories' => $record['select_categories'],

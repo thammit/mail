@@ -229,19 +229,19 @@
                 <source>From other recipient lists</source>
                 <target>Von anderen Empfängerlisten</target>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.recordTypes">
-                <source>Types of records</source>
-                <target>Datensatztypen</target>
+            <trans-unit id="tx_mail_domain_model_group.recipientSources">
+                <source>Recipient sources</source>
+                <target>Empfängerquellen</target>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.recordTypes.I.0">
+            <trans-unit id="tx_mail_domain_model_group.recipientSources.I.0">
                 <source>Addresses</source>
                 <target>Adressen</target>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.recordTypes.I.1">
+            <trans-unit id="tx_mail_domain_model_group.recipientSources.I.1">
                 <source>Website user</source>
                 <target>Webseitenbenutzer</target>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.recordTypes.I.2">
+            <trans-unit id="tx_mail_domain_model_group.recipientSources.I.2">
                 <source>Website User Groups</source>
                 <target>Webseitenbenutzergruppen</target>
             </trans-unit>

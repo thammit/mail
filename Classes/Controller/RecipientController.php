@@ -51,7 +51,7 @@ class RecipientController extends AbstractController
             $typeProcessed = BackendUtility::getProcessedValue('tx_mail_domain_model_group', 'type', $group->getType());
             switch ($group->getType()) {
                 case RecipientGroupType::PAGES:
-                    $typeProcessed .= ' (' . implode(', ', $group->getRecordTypes()) . ')';
+                    $typeProcessed .= ' (' . implode(', ', $group->getRecipientSources()) . ')';
                     break;
                 case RecipientGroupType::STATIC:
                     $typeProcessed .= ' (' . $group->getStaticList() . ' Records)';
