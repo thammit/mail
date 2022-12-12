@@ -30,6 +30,9 @@ class ConfigurationController  extends AbstractController
         if (!isset($this->implodedParams['charset'])) {
             $this->implodedParams['charset'] = 'utf-8';
         }
+        if (!isset($this->implodedParams['sendPerCycle'])) {
+            $this->implodedParams['sendPerCycle'] = '50';
+        }
 
         $this->view->assignMultiple([
             'configuration' => $this->implodedParams,
