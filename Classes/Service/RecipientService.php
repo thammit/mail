@@ -363,6 +363,10 @@ class RecipientService
                 break;
         }
 
+        foreach ($idLists as $recipientSource => $idList) {
+            $idLists[$recipientSource] = str_starts_with($recipientSource, 'tx_mail_domain_model_group') ? $idList : array_unique($idList);
+        }
+
         // todo add event dispatcher to manipulate the returned idLists
 
         return $idLists;
