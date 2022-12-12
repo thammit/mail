@@ -91,6 +91,19 @@
                     </div>
                 </div>
             </div>
+            <f:if condition="{allowEdit} && !{mail.sent}">
+                <f:then>
+                    <be:link.editRecord uid="{mail.uid}" table="{table}" class="btn btn-default mb-3">
+                        <core:icon identifier="actions-open"/>
+                        <f:translate key="{lll}general.button.edit"/>
+                    </be:link.editRecord>
+                </f:then>
+                <f:else>
+                    <f:be.infobox state="1">
+                        <f:translate key="{lll}configuration.noEditPermissions"/>
+                    </f:be.infobox>
+                </f:else>
+            </f:if>
         </div>
         <f:if condition="{mailBody}">
             <div class="col-12 col-md-4">
@@ -100,19 +113,6 @@
             </div>
         </f:if>
     </div>
-    <f:if condition="{allowEdit} && !{mail.sent}">
-        <f:then>
-            <be:link.editRecord uid="{mail.uid}" table="{table}" class="btn btn-default mb-3">
-                <core:icon identifier="actions-open"/>
-                <f:translate key="{lll}general.button.edit"/>
-            </be:link.editRecord>
-        </f:then>
-        <f:else>
-            <f:be.infobox state="1">
-                <f:translate key="{lll}configuration.noEditPermissions"/>
-            </f:be.infobox>
-        </f:else>
-    </f:if>
     <f:render partial="Wizard/Navigation" arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
 </f:section>
 </html>
