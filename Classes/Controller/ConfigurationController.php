@@ -22,13 +22,13 @@ class ConfigurationController  extends AbstractController
     public function indexAction(): ResponseInterface
     {
         if (!isset($this->implodedParams['plainParams'])) {
-            $this->implodedParams['plainParams'] = '&type=99';
+            $this->implodedParams['plainParams'] = '&plain=1';
         }
         if (!isset($this->implodedParams['quickMailCharset'])) {
             $this->implodedParams['quickMailCharset'] = 'utf-8';
         }
         if (!isset($this->implodedParams['charset'])) {
-            $this->implodedParams['charset'] = 'iso-8859-1';
+            $this->implodedParams['charset'] = 'utf-8';
         }
 
         $this->view->assignMultiple([

@@ -186,7 +186,7 @@ return [
                 'size' => '15',
                 'max' => '80',
                 'eval' => 'trim',
-                'default' => '&type=99',
+                'default' => '&plain=1',
             ],
         ],
         'sent' => [
