@@ -22,36 +22,23 @@
                 <f:then>
                     <f:variable name="numberOfRecipientGroups" value="{groups -> f:count()}"/>
                     <f:if condition="{numberOfRecipientGroups} == 1">
-                        <f:then>
-                            <f:variable name="group">{groups.0}</f:variable>
-                            <f:form.hidden property="recipientGroups" value="{group.uid}"/>
-                            <label class="form-label h4 mb-2">
-                                <f:translate key="{lll}mail.wizard.scheduleSending.mailGroup"/>
-                            </label>
-                            <ul>
-                                <li title="{group.uid}">{group.title}
-                                    <f:if condition="{group.receiver}"><span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span></f:if>
-                                </li>
-                            </ul>
-                        </f:then>
-                        <f:else>
-                            <div class="mb-3 row">
-                                <div class="col-12 col-md-6 col-lg-3">
-                                    <h4>
-                                        <f:translate key="{lll}mail.wizard.scheduleSending.mailGroups"/>
-                                    </h4>
-                                    <f:for each="{groups}" as="group">
-                                        <div class="form-check">
-                                            <f:form.checkbox class="form-check-input" property="recipientGroups" multiple="1" value="{group.uid}" id="mailgroups-{group.uid}"/>
-                                            <label class="form-check-label" for="mailgroups-{group.uid}">
-                                                {group.title} <span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
-                                            </label>
-                                        </div>
-                                    </f:for>
-                                </div>
-                            </div>
-                        </f:else>
+                        <f:variable name="checked" value="1" />
                     </f:if>
+                    <div class="mb-3 row">
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <h4>
+                                <f:translate key="{lll}mail.wizard.scheduleSending.mailGroups"/>
+                            </h4>
+                            <f:for each="{groups}" as="group">
+                                <div class="form-check">
+                                    <f:form.checkbox class="form-check-input" checked="{checked}" property="recipientGroups" multiple="1" value="{group.uid}" id="mailgroups-{group.uid}"/>
+                                    <label class="form-check-label" for="mailgroups-{group.uid}">
+                                        {group.title} <span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
+                                    </label>
+                                </div>
+                            </f:for>
+                        </div>
+                    </div>
                 </f:then>
                 <f:else>
                     <f:be.infobox state="2">

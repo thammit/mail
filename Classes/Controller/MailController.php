@@ -38,12 +38,14 @@ use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
+use TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\CMS\Extbase\Property\TypeConverter\ArrayConverter;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 use TYPO3\CMS\Extbase\Reflection\ReflectionService;
@@ -73,10 +75,10 @@ class MailController extends AbstractController
             // the currently selected page is not a mail module sys folder
             $openMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
             if ($openMails->count() > 0) {
-                    // there is already an open mail of this page -> use it
-                    // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
-                    $_GET['id'] = $this->pageInfo['pid'];
-                    $this->redirect('openMail', null, null, ['mail' => $openMails->getFirst()->getUid()], $this->pageInfo['pid']);
+                // there is already an open mail of this page -> use it
+                // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+                $_GET['id'] = $this->pageInfo['pid'];
+                $this->redirect('openMail', null, null, ['mail' => $openMails->getFirst()->getUid()], $this->pageInfo['pid']);
             }
             // create a new mail of the page
             // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
@@ -187,8 +189,8 @@ class MailController extends AbstractController
             if ($newMail instanceof Mail) {
                 $this->addNewMailAndRedirectToSettings($newMail);
             }
-        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {}
-        catch (HtmlContentFetchFailedException|PlainTextContentFetchFailedException) {
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
+        } catch (HtmlContentFetchFailedException|PlainTextContentFetchFailedException) {
             ViewUtility::addNotificationError(
                 sprintf(LanguageUtility::getLL('mail.wizard.notification.externalUrlInvalid.message'), trim($htmlUrl . ' / ' . $plainTextUrl, ' /')),
                 LanguageUtility::getLL('general.notification.severity.error.title')
@@ -516,7 +518,7 @@ class MailController extends AbstractController
         $contentElementUid = $contentCategories['content'] ?? 0;
         $categories = $contentCategories['categories'] ?? [];
 
-        if ($mail instanceOf Mail && $contentElementUid && $categories) {
+        if ($mail instanceof Mail && $contentElementUid && $categories) {
 
             // build array with all checked content element categories
             $newCategories = [];
@@ -691,12 +693,17 @@ class MailController extends AbstractController
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
+    /**
+     * @throws NoSuchArgumentException
+     */
     public function initializeFinishAction(): void
     {
-        $this->arguments['mail']
-        ->getPropertyMappingConfiguration()
-        ->forProperty('scheduled')
-        ->setTypeConverterOption(DateTimeImmutableConverter::class, DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, 'H:i d-m-Y');
+        if ($this->arguments->hasArgument('mail')) {
+            $this->arguments->getArgument('mail')
+                ->getPropertyMappingConfiguration()
+                ->forProperty('scheduled')
+                ->setTypeConverterOption(DateTimeImmutableConverter::class, DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, 'H:i d-m-Y');
+        }
     }
 
     /**
@@ -710,14 +717,9 @@ class MailController extends AbstractController
     public function finishAction(Mail $mail): void
     {
         if ($mail->getRecipientGroups()->count() === 0) {
+            ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'), LanguageUtility::getLL('general.notification.severity.warning.title'));
             $this->redirect('scheduleSending', null, null, [
-                'mail' => $mail,
-                'notification' => [
-                    'severity' => 'warning',
-                    'message' => LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'),
-                    'title' => LanguageUtility::getLL('general.notification.severity.warning.title')
-                ]
-            ]);
+                'mail' => $mail]);
         }
 
         $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()));
