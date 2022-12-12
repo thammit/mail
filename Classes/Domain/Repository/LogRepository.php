@@ -246,9 +246,8 @@ class LogRepository extends Repository
      * @return array
      * @throws DBALException
      * @throws Exception
-     * @throws InvalidQueryException
      */
-    public function findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable(int $mailUid, array $returnCodes = []): array
+    public function findFailedRecipientIdsByMailAndReturnCodeGroupedByRecipientSource(int $mailUid, array $returnCodes = []): array
     {
         $queryBuilder = $this->getQueryBuilder();
 
@@ -274,49 +273,13 @@ class LogRepository extends Repository
             }
         }
 
-        $result = $statement
-            ->execute()
-            ->fetchAllAssociative();
+        $result = $statement->execute();
+        $idLists = [];
 
-        $idLists = [
-            'addresses' => [],
-            'frontendUsers' => [],
-            'plainList' => [],
-        ];
-
-        foreach ($result as $row) {
-            switch ($row['recipient_source']) {
-                case 'tt_address':
-                    $idLists['addresses'][] = $row['recipient_uid'];
-                    break;
-                case 'fe_users':
-                    $idLists['frontendUsers'][] = $row['recipient_uid'];
-                    break;
-                case 'tx_mail_domain_model_group':
-                    $idLists['plainList'][] = $row['email'];
-                    break;
-                default:
-                    $idLists[$row['recipient_source']][] = $row['recipient_uid'];
-            }
+        while ($row = $result->fetchAssociative()) {
+            $idLists[$row['recipient_source']][] = $row['recipient_source'] === 'tx_mail_domain_model_group' ? $row['email'] : $row['recipient_uid'];
         }
 
-        $returnedList = [];
-
-        if (count($idLists['addresses'])) {
-            $addressRepository = GeneralUtility::makeInstance(AddressRepository::class);
-            $demand = new Demand();
-            $demand->setSingleRecords(implode(',', $idLists['addresses']));
-            $returnedList['addresses'] = $addressRepository->getAddressesByCustomSorting($demand);
-        }
-        if (count($idLists['frontendUsers'])) {
-            $frontendUserRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
-            $frontendUsers = $frontendUserRepository->findByUidList($idLists['frontendUsers']);
-            $returnedList['frontendUsers'] = $frontendUsers;
-        }
-        if (count($idLists['plainList'])) {
-            $returnedList['plainList'] = $idLists['plainList'];
-        }
-
-        return $returnedList;
+        return $idLists;
     }
 }

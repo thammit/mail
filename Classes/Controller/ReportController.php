@@ -71,13 +71,14 @@ class ReportController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
     public function showTotalReturnedAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->reportService->getReturnedDetailsData(),
+            'recipientSources' => $this->reportService->getReturnedDetailsData(),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -89,9 +90,10 @@ class ReportController extends AbstractController
      * @return void
      * @throws DBALException
      * @throws Exception
-     * @throws InvalidQueryException
-     * @throws StopActionException
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws SiteNotFoundException
+     * @throws StopActionException
      * @throws UnknownObjectException
      */
     public function disableTotalReturnedAction(Mail $mail): void
@@ -104,15 +106,17 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param string $recipientSource
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
-    #[NoReturn] public function csvExportTotalReturnedAction(Mail $mail): void
+    #[NoReturn] public function csvExportTotalReturnedAction(Mail $mail, string $recipientSource): void
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData(), 'total_returned');
+        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData()[$recipientSource], 'total_returned');
     }
 
     /**
@@ -121,13 +125,14 @@ class ReportController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
     public function showUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]),
+            'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -141,6 +146,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      * @throws StopActionException
      * @throws UnknownObjectException
      */
@@ -154,15 +160,17 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param string $recipientSource
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
-    #[NoReturn] public function csvExportUnknownAction(Mail $mail): void
+    #[NoReturn] public function csvExportUnknownAction(Mail $mail, string $recipientSource): void
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]), 'unknown');
+        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID])[$recipientSource], 'unknown');
     }
 
     /**
@@ -171,13 +179,14 @@ class ReportController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
     public function showFullAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]),
+            'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -191,6 +200,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      * @throws StopActionException
      * @throws UnknownObjectException
      */
@@ -204,15 +214,17 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param string $recipientSource
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
-    #[NoReturn] public function csvExportFullAction(Mail $mail): void
+    #[NoReturn] public function csvExportFullAction(Mail $mail, string $recipientSource): void
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]), 'mailbox_full');
+        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL])[$recipientSource], 'mailbox_full');
     }
 
     /**
@@ -221,13 +233,14 @@ class ReportController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
     public function showBadHostAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]),
+            'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -241,6 +254,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      * @throws StopActionException
      * @throws UnknownObjectException
      */
@@ -254,15 +268,17 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param string $recipientSource
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
-    #[NoReturn] public function csvExportBadHostAction(Mail $mail): void
+    #[NoReturn] public function csvExportBadHostAction(Mail $mail, string $recipientSource): void
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]), 'bad_host');
+        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL])[$recipientSource], 'bad_host');
     }
 
     /**
@@ -271,13 +287,14 @@ class ReportController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
     public function showBadHeaderAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]),
+            'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -291,6 +308,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      * @throws StopActionException
      * @throws UnknownObjectException
      */
@@ -304,15 +322,17 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param string $recipientSource
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
-    #[NoReturn] public function csvExportBadHeaderAction(Mail $mail): void
+    #[NoReturn] public function csvExportBadHeaderAction(Mail $mail, string $recipientSource): void
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]), 'bad_header');
+        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED])[$recipientSource], 'bad_header');
     }
 
     /**
@@ -320,14 +340,15 @@ class ReportController extends AbstractController
      * @return ResponseInterface
      * @throws DBALException
      * @throws Exception
-     * @throws InvalidQueryException+
+     * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
     public function showReasonUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'data' => $this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]),
+            'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -341,6 +362,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      * @throws StopActionException
      * @throws UnknownObjectException
      */
@@ -354,15 +376,17 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param string $recipientSource
      * @return void
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws SiteNotFoundException
      */
-    #[NoReturn] public function csvExportReasonUnknownAction(Mail $mail): void
+    #[NoReturn] public function csvExportReasonUnknownAction(Mail $mail, string $recipientSource): void
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]), 'reason_unknown');
+        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON])[$recipientSource], 'reason_unknown');
     }
 
     protected function addDocheaderButtons(string $requestUri): void

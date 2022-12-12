@@ -581,19 +581,15 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>%s recipients successfully disabled.</source>
                 <target>%s Empfänger erfolgreich deaktiviert.</target>
             </trans-unit>
-            <trans-unit id="report.plainList" resname="report.plainList">
+            <trans-unit id="report.returned.recipientSource.tx_mail_domain_model_group" resname="report.returned.recipientSource.tx_mail_domain_model_group">
                 <source>Plain List</source>
-                <target>Reine Liste</target>
+                <target>Einfache Liste</target>
             </trans-unit>
-            <trans-unit id="report.returned.table.tt_address" resname="report.returned.table.tt_address">
+            <trans-unit id="report.returned.recipientSource.tt_address" resname="report.returned.recipientSource.tt_address">
                 <source>Address Table [tt_address]</source>
                 <target>Adressen Tabelle [tt_address]</target>
             </trans-unit>
-            <trans-unit id="report.returned.table.custom" resname="report.returned.table.custom">
-                <source>Custom Table</source>
-                <target>Benutzerdefinierte Tabelle</target>
-            </trans-unit>
-            <trans-unit id="report.returned.table.fe_users" resname="report.returned.table.fe_users">
+            <trans-unit id="report.returned.recipientSource.fe_users" resname="report.returned.recipientSource.fe_users">
                 <source>Website User [fe_users]</source>
                 <target>Webseitenbenutzer [fe_users]</target>
             </trans-unit>

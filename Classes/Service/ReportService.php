@@ -36,12 +36,16 @@ class ReportService
     protected ?Mail $mail;
 
     protected array $responseTypesTable = [];
+    protected array $siteConfiguration = [];
 
     public function __construct(
-        protected LogRepository $logRepository,
-        protected AddressRepository $addressRepository,
-        protected FrontendUserRepository $frontendUserRepository
-    ) {
+        protected LogRepository          $logRepository,
+        protected AddressRepository      $addressRepository,
+        protected FrontendUserRepository $frontendUserRepository,
+        protected SiteFinder             $siteFinder,
+        protected RecipientService       $recipientService,
+    )
+    {
     }
 
     /**
@@ -49,10 +53,13 @@ class ReportService
      * @return void
      * @throws DBALException
      * @throws Exception
+     * @throws SiteNotFoundException
      */
     public function init(Mail $mail): void
     {
         $this->mail = $mail;
+        $this->siteConfiguration = $this->siteFinder->getSiteByPageId($this->mail->getPid())->getConfiguration()['mail'] ?? [];
+        $this->recipientService->init($this->siteConfiguration);
         $this->responseTypesTable = $this->logRepository->findResponseTypesByMail($this->mail->getUid());
     }
 
@@ -79,7 +86,7 @@ class ReportService
             } else {
                 $plainSource = BackendUtility::getRecord('pages', $this->mail->getPage(), 'title')['title'];
                 if ($this->mail->getPlainParams()) {
-                    $plainSource .= '; ' .  $this->mail->getPlainParams();
+                    $plainSource .= '; ' . $this->mail->getPlainParams();
                 }
             }
         }
@@ -90,7 +97,7 @@ class ReportService
             'type' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'type', $this->mail->getType()),
             'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $this->mail->getPriority()),
             'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options',
-                (string)$this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
+                    (string)$this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
             'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $this->mail->isIncludeMedia()),
         ];
     }
@@ -130,7 +137,7 @@ class ReportService
             'uniqueResponsesTotal' => $this->showWithPercent($uniqueResponsesTotal, $totalSent),
             'uniqueResponsesHtml' => $this->showWithPercent($uniqueHtmlResponses, $htmlSent),
             'uniqueResponsesPlain' => $this->showWithPercent($uniquePlainResponses, $plainSent),
-            'totalResponsesVsUniqueResponses' => $uniqueResponsesTotal ? number_format($totalResponses / $uniqueResponsesTotal,2) : '-',
+            'totalResponsesVsUniqueResponses' => $uniqueResponsesTotal ? number_format($totalResponses / $uniqueResponsesTotal, 2) : '-',
             'htmlResponsesVsUniqueResponses' => $uniqueHtmlResponses ? number_format($htmlResponses / $uniqueHtmlResponses, 2) : '-',
             'plainResponsesVsUniqueResponses' => $uniquePlainResponses ? number_format($plainResponses / $uniquePlainResponses, 2) : '-',
         ];
@@ -157,13 +164,40 @@ class ReportService
     }
 
     /**
-     * @throws InvalidQueryException
-     * @throws Exception
+     * @param array $returnCodes
+     * @return array
      * @throws DBALException
+     * @throws Exception
+     * @throws InvalidQueryException
      */
     public function getReturnedDetailsData(array $returnCodes = []): array
     {
-        return $this->logRepository->findFailedRecipientsByMailAndReturnCodeGroupedByRecipientTable($this->mail->getUid(), $returnCodes);
+        $data = [];
+        $recipientSourcesConfiguration = $this->siteConfiguration['recipientSources'];
+        $failedRecipientIds = $this->logRepository->findFailedRecipientIdsByMailAndReturnCodeGroupedByRecipientSource($this->mail->getUid(), $returnCodes);
+        foreach ($failedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
+            if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
+                $data[$recipientSourceIdentifier] = $recipientIds;
+            } else {
+                // get site configuration
+                $recipientSourceConfiguration = $recipientSourcesConfiguration[$recipientSourceIdentifier];
+                $type = $recipientSourceConfiguration['type'] ?? 'Table';
+                switch ($type) {
+                    case 'Extbase':
+                        $model = $recipientSourceConfiguration['model'] ?? false;
+                        if ($model) {
+                            $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $model);
+                        }
+                        break;
+                    case 'Table':
+                        $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                        $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $table);
+                        break;
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**

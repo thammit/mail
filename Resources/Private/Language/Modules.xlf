@@ -461,13 +461,13 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="report.notification.recipientsDisabled.message">
                 <source>%s recipients successfully disabled.</source>
             </trans-unit>
-            <trans-unit id="report.plainList" resname="report.plainList">
+            <trans-unit id="report.returned.recipientSource.tx_mail_domain_model_group" resname="report.returned.recipientSource.tx_mail_domain_model_group">
                 <source>Plain List</source>
             </trans-unit>
-            <trans-unit id="report.returned.table.tt_address" resname="report.returned.table.tt_address">
+            <trans-unit id="report.returned.recipientSource.tt_address" resname="report.returned.recipientSource.tt_address">
                 <source>Address Table [tt_address]</source>
             </trans-unit>
-            <trans-unit id="report.returned.table.fe_users" resname="report.returned.table.fe_users">
+            <trans-unit id="report.returned.recipientSource.fe_users" resname="report.returned.recipientSource.fe_users">
                 <source>Website User [fe_users]</source>
             </trans-unit>
             <trans-unit id="report.csvReturned" resname="report.csvReturned">

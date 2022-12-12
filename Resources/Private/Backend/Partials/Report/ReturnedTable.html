@@ -17,13 +17,13 @@
             </tr>
             </thead>
             <tbody>
-            <f:for each="{data}" as="recipient">
+            <f:for each="{recipients}" as="recipient">
                 <tr>
                     <td class="col-icon nowrap" style="width: 1%">
-                        <core:iconForRecord row="{uid: recipient.uid}" table="{table}" size="small"/>
+                        <core:iconForRecord row="{uid: recipient.uid}" table="{recipientSource}" size="small"/>
                     </td>
                     <td class="nowrap">
-                        <be:link.editRecord uid="{recipient.uid}" table="{table}"
+                        <be:link.editRecord uid="{recipient.uid}" table="{recipientSource}"
                                             title="{f:translate(key: '{lll}general.button.edit')}">
                             {recipient.name}
                         </be:link.editRecord>
@@ -32,7 +32,7 @@
                         {recipient.email}
                     </td>
                     <td class="col-control nowrap">
-                        <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{table}"
+                        <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{recipientSource}"
                                             title="{f:translate(key: '{lll}general.button.edit')}">
                             <core:icon identifier="actions-open"/>
                         </be:link.editRecord>

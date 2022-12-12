@@ -6,53 +6,36 @@
       data-namespace-typo3-fluid="true">
 
 <div class="panel-group" id="mail-recipient-list-panel">
-    <f:variable name="open" value="1"/>
-    <f:if condition="{data.addresses}">
-        <f:variable name="title"><f:translate key="{lll}report.returned.table.tt_address"/></f:variable>
-        <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
-            <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-            <f:translate key="{lll}general.button.downloadCsv"/>
-        </f:link.action></f:variable>
-        <f:variable name="counter" value="{data.addresses -> f:count()}"/>
-        <f:render partial="Panel"
-                  arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:0, open:open, counter: counter, additionalHeading:additionalHeading}"
-                  contentAs="panelBody">
-            <f:render partial="Report/ReturnedTable" arguments="{data: data.addresses, table: 'tt_address', lll:lll}"/>
-        </f:render>
-        <f:variable name="open" value="0"/>
-    </f:if>
-    <f:if condition="{data.frontendUsers}">
-        <f:variable name="title"><f:translate key="{lll}report.returned.table.fe_users"/></f:variable>
-        <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
-            <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-            <f:translate key="{lll}general.button.downloadCsv"/>
-        </f:link.action></f:variable>
-        <f:variable name="counter" value="{data.frontendUsers -> f:count()}"/>
-        <f:render partial="Panel"
-                  arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:1, open:open, counter: counter, additionalHeading:additionalHeading}"
-                  contentAs="panelBody">
-            <f:render partial="Report/ReturnedTable" arguments="{data: data.frontendUsers, table: 'fe_users', lll:lll}"/>
-        </f:render>
-        <f:variable name="open" value="0"/>
-    </f:if>
-    <f:if condition="{data.plainList}">
-        <f:variable name="title"><f:translate key="{lll}report.plainList"/></f:variable>
-        <f:variable name="additionalHeading"><f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}" class="btn btn-default btn-sm text-uppercase">
-            <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-            <f:translate key="{lll}general.button.downloadCsv"/>
-        </f:link.action></f:variable>
-        <f:variable name="counter" value="{data.plainList -> f:count()}"/>
-        <f:render partial="Panel"
-                  arguments="{lll:lll, parentId:'mail-recipient-list-panel', title: title, index:2, open:open, counter: counter, additionalHeading:additionalHeading}"
-                  contentAs="panelBody">
-            <ul>
-                <f:for each="{data.plainList}" as="recipient">
-                    <li>
-                        {recipient}
-                    </li>
-                </f:for>
-            </ul>
-        </f:render>
-    </f:if>
+    <f:for each="recipientSources" as="recipients" key="recipientSource" iteration="recipientSourceIterator">
+        <f:if condition="{recipientSource}">
+            <f:variable name="title">
+                <f:translate key="{lll}report.returned.recipientSource.{recipientSource}" default="{recipientSource}"/>
+            </f:variable>
+            <f:variable name="additionalHeading">
+                <f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid, recipientSource: recipientSource}"
+                               class="btn btn-default btn-sm text-uppercase">
+                    <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
+                    <f:translate key="{lll}general.button.downloadCsv"/>
+                </f:link.action>
+            </f:variable>
+            <f:variable name="counter" value="{recipients -> f:count()}"/>
+            <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-recipient-list-panel-{recipientSource}', title: title, index:recipientSourceIterator.index, open:1, counter: counter, additionalHeading:additionalHeading}" contentAs="panelBody">
+                <f:if condition="{recipientSource} == 'tx_mail_domain_model_group'">
+                    <f:then>
+                        <ul>
+                            <f:for each="{recipients}" as="recipient">
+                                <li>
+                                    {recipient}
+                                </li>
+                            </f:for>
+                        </ul>
+                    </f:then>
+                    <f:else>
+                        <f:render partial="Report/ReturnedTable" arguments="{recipients: recipients, recipientSource: recipientSource, lll:lll}"/>
+                    </f:else>
+                </f:if>
+            </f:render>
+        </f:if>
+    </f:for>
 </div>
 </html>
