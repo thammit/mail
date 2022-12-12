@@ -600,20 +600,22 @@ class MailController extends AbstractController
             foreach ($mailGroupUids as $mailGroupUid) {
                 /** @var Group $testMailGroup */
                 $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
-                $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
-                $recipientGroups = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($testMailGroup);
-                foreach ($recipientGroups as $recipientGroup => $recipients) {
-                    switch ($recipientGroup) {
-                        case 'fe_users':
-                            foreach ($recipients as $recipient) {
-                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $frontendUsersRepository->findByUid($recipient);
-                            }
-                            break;
-                        case 'tt_address':
-                            foreach ($recipients as $recipient) {
-                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $ttAddressRepository->findByUid($recipient);
-                            }
-                            break;
+                if ($testMailGroup instanceof Group) {
+                    $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
+                    $recipientGroups = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($testMailGroup);
+                    foreach ($recipientGroups as $recipientGroup => $recipients) {
+                        switch ($recipientGroup) {
+                            case 'fe_users':
+                                foreach ($recipients as $recipient) {
+                                    $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $frontendUsersRepository->findByUid($recipient);
+                                }
+                                break;
+                            case 'tt_address':
+                                foreach ($recipients as $recipient) {
+                                    $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $ttAddressRepository->findByUid($recipient);
+                                }
+                                break;
+                        }
                     }
                 }
             }
