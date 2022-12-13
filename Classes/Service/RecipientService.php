@@ -296,24 +296,22 @@ class RecipientService
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
                         $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
                         if ($recipientSourceConfiguration) {
-                            $type = $recipientSourceConfiguration['type'] ?? 'Table';
                             $recipientSourceIdentifier = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
-                            switch ($type) {
-                                case 'Extbase':
-                                    $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
-                                        $recipientSourceConfiguration['model'],
-                                        $pages,
-                                        $group->getCategories()
-                                    );
-                                    break;
-                                case 'Table':
-                                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
-                                    $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByTableAndPageUidListAndCategories(
-                                        $table,
-                                        $pages,
-                                        $group->getCategories()
-                                    );
-                                    break;
+                            $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
+                            if ($recipientSourceConfiguration['model'] ?? false) {
+                                $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
+                                    $recipientSourceConfiguration['model'],
+                                    $pages,
+                                    $group->getCategories(),
+                                    $ignoreMailActive
+                                );
+                            } else {
+                                $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByTableAndPageUidListAndCategories(
+                                    $recipientSourceIdentifier,
+                                    $pages,
+                                    $group->getCategories(),
+                                    $ignoreMailActive
+                                );
                             }
                         }
                     }
@@ -331,9 +329,15 @@ class RecipientService
                 break;
             case RecipientGroupType::STATIC:
                 // Static MM list
-                $idLists['tt_address'] = $this->getStaticIdListByTableAndGroupUid('tt_address', $group->getUid());
-                $idLists['fe_users'] = $this->getStaticIdListByTableAndGroupUid('fe_users', $group->getUid());
-                $idLists['fe_users'] = array_unique(array_merge($idLists['fe_users'], $this->getStaticIdListByTableAndGroupUid('fe_groups', $group->getUid())));
+                foreach ($this->siteConfiguration['recipientSources'] as $recipientSourceIdentifier => $recipientSourceConfiguration) {
+                    $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
+                    $contains = $recipientSourceConfiguration['contains'] ?? false;
+                    if ($contains) {
+                        $idLists[$contains] = array_unique(array_merge($idLists[$contains], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), true)));
+                    } else {
+                        $idLists[$recipientSourceIdentifier] = $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive);
+                    }
+                }
                 break;
 //            case RecipientGroupType::QUERY:
 //                // Special query list
@@ -375,7 +379,7 @@ class RecipientService
     /**
      * @throws InvalidQueryException
      */
-    protected function getRecipientUidListByModelNameAndPageUidListAndCategories(string $modelName, array $storagePageIds, ObjectStorage $categories): array
+    protected function getRecipientUidListByModelNameAndPageUidListAndCategories(string $modelName, array $storagePageIds, ObjectStorage $categories, bool $ignoreMailActive = false): array
     {
         $recipientUids = [];
         $query = $this->persistenceManager->createQueryForType($modelName);
@@ -387,9 +391,13 @@ class RecipientService
         $query->getQuerySettings()->setRespectSysLanguage(false);
         $query->getQuerySettings()->setLanguageOverlayMode(false);
         $constrains = [
-            $query->equals('active', true),
-            $query->logicalNot($query->equals('email', '')),
+            $query->logicalNot($query->equals('email', ''))
         ];
+
+        if (!$ignoreMailActive) {
+            $constrains[] = $query->equals('active', true);
+        }
+
         if ($categories->count() > 0) {
             $orCategoryConstrains = [];
             foreach ($categories as $category) {
@@ -426,14 +434,14 @@ class RecipientService
      * @throws Exception
      * @throws DBALException
      */
-    protected function getRecipientUidListByTableAndPageUidListAndCategories(string $table, array $pages, ObjectStorage $categories): array
+    protected function getRecipientUidListByTableAndPageUidListAndCategories(string $table, array $pages, ObjectStorage $categories, bool $ignoreMailActive = false): array
     {
         $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
         $queryBuilder = $this->getQueryBuilder($table);
 
-        $addWhere = '';
-        if (in_array($switchTable, $this->allowedTables)) {
-            $addWhere = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
+        $mailActiveExpression = '';
+        if (!$ignoreMailActive) {
+            $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
         if ($categories->count() === 0) {
@@ -448,7 +456,7 @@ class RecipientService
                             ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true))
                             ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
-                            ->add($queryBuilder->expr()->eq('fe_users.mail_active', 1))
+                            ->add($mailActiveExpression)
                     )
                     ->orderBy('fe_users.uid')
                     ->addOrderBy('fe_users.email')
@@ -462,7 +470,7 @@ class RecipientService
                         $queryBuilder->expr()->and()
                             ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
                             ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                            ->add($addWhere)
+                            ->add($mailActiveExpression)
                     )
                     ->orderBy($switchTable . '.uid')
                     ->addOrderBy($switchTable . '.email')
@@ -481,7 +489,7 @@ class RecipientService
                 foreach ($recipientCollection as $recipient) {
                     if (!in_array($recipient['uid'], $recipients) &&
                         in_array($recipient['pid'], $pages) &&
-                        in_array($switchTable, $this->allowedTables) && $recipient['mail_active'] &&
+                        $mailActiveExpression &&
                         ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
                     ) {
                         // add it to the list if all constrains fulfilled
@@ -530,16 +538,16 @@ class RecipientService
      * @throws Exception
      * @throws DBALException
      */
-    protected function getStaticIdListByTableAndGroupUid(string $table, int $mailGroupUid): array
+    protected function getStaticIdListByTableAndGroupUid(string $table, int $mailGroupUid, bool $ignoreMailActive = false): array
     {
         $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
 
         $queryBuilder = $this->getQueryBuilder($table);
 
-        $newsletterExpression = '';
-        if (in_array($switchTable, $this->allowedTables)) {
+        $mailActiveExpression = '';
+        if (!$ignoreMailActive) {
             // for fe_users and fe_group, only activated newsletter
-            $newsletterExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
+            $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
         if ($table === 'fe_groups') {
@@ -570,7 +578,7 @@ class RecipientService
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                         ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
                         ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
-                        ->add($newsletterExpression)
+                        ->add($mailActiveExpression)
                 )
                 ->orderBy('fe_users.uid')
                 ->addOrderBy('fe_users.email')
@@ -597,7 +605,7 @@ class RecipientService
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
                         ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
-                        ->add($newsletterExpression)
+                        ->add($mailActiveExpression)
                 )
                 ->orderBy($switchTable . '.uid')
                 ->addOrderBy($switchTable . '.email')
@@ -612,8 +620,6 @@ class RecipientService
 
         if ($table === 'fe_groups') {
             // get the uid of the current fe_group
-//            $queryBuilder = $this->getQueryBuilder('fe_groups');
-
             $res = $queryBuilder->resetQueryParts()
                 ->selectLiteral('DISTINCT fe_groups.uid')
                 ->from('fe_groups', 'fe_groups')
@@ -646,21 +652,21 @@ class RecipientService
 
                     // fetch all fe_users from these subgroups
                     $res = $queryBuilder->resetQueryParts()
-                        ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
-                        ->from($table, $table)
+                        ->selectLiteral('DISTINCT fe_users.uid', 'fe_users.email')
+                        ->from('fe_groups', 'fe_groups')
                         ->innerJoin(
-                            $table,
-                            $switchTable,
-                            $switchTable
+                            'fe_groups',
+                            'fe_users',
+                            'fe_users'
                         )
                         ->orWhere(...$subGroupExpressions)
                         ->andWhere(
                             $queryBuilder->expr()->and()
-                                ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                                ->add($newsletterExpression)
+                                ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
+                                ->add($mailActiveExpression)
                         )
-                        ->orderBy($switchTable . '.uid')
-                        ->addOrderBy($switchTable . '.email')
+                        ->orderBy('fe_users.uid')
+                        ->addOrderBy('fe_users.email')
                         ->execute();
 
                     while ($row = $res->fetchAssociative()) {

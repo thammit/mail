@@ -181,18 +181,10 @@ class ReportService
             } else {
                 // get site configuration
                 $recipientSourceConfiguration = $recipientSourcesConfiguration[$recipientSourceIdentifier];
-                $type = $recipientSourceConfiguration['type'] ?? 'Table';
-                switch ($type) {
-                    case 'Extbase':
-                        $model = $recipientSourceConfiguration['model'] ?? false;
-                        if ($model) {
-                            $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $model);
-                        }
-                        break;
-                    case 'Table':
-                        $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
-                        $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $table);
-                        break;
+                if ($recipientSourceConfiguration['model'] ?? false) {
+                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration['model']);
+                } else {
+                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceIdentifier);
                 }
             }
         }

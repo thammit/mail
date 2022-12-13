@@ -323,7 +323,7 @@ class MailerService implements LoggerAwareInterface
                 $markers,
                 $recipient,
                 $recipientSourceIdentifier,
-                    $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? []
+                $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? []
             )
         )->getMarkers();
 
@@ -380,48 +380,41 @@ class MailerService implements LoggerAwareInterface
                     }
                 }
             } else {
-                $type = $recipientSourceConfiguration['type'] ?? 'Table';
-                switch ($type) {
-                    case 'Extbase':
-                        $model = $recipientSourceConfiguration['model'] ?? false;
-                        if ($model) {
-                            $recipientService = GeneralUtility::makeInstance(RecipientService::class);
-                            $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
-                                $recipientIds,
-                                $model,
-                                ['uid', 'name', 'email', 'categories', 'mail_html'],
-                                true,
-                                $this->sendPerCycle
-                            );
-                            foreach ($recipientsData as $recipientData) {
-                                $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
-                                $numberOfSentMailsOfGroup++;
-                                $numberOfSentMails++;
-                                if ($numberOfSentMails >= $this->sendPerCycle) {
-                                    return false;
-                                }
-                            }
+                if ($recipientSourceConfiguration['model'] ?? false) {
+                    $recipientService = GeneralUtility::makeInstance(RecipientService::class);
+                    $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
+                        $recipientIds,
+                        $recipientSourceConfiguration['model'],
+                        ['uid', 'name', 'email', 'categories', 'mail_html'],
+                        true,
+                        $this->sendPerCycle
+                    );
+                    foreach ($recipientsData as $recipientData) {
+                        $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                        $numberOfSentMailsOfGroup++;
+                        $numberOfSentMails++;
+                        if ($numberOfSentMails >= $this->sendPerCycle) {
+                            return false;
                         }
-                        break;
-                    case 'Table':
-                        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
-                        $queryResult = $queryBuilder
-                            ->select('*')
-                            ->from($recipientSourceIdentifier)
-                            ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
-                            ->setMaxResults($this->sendPerCycle)
-                            ->execute();
+                    }
+                } else {
+                    $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
+                    $queryResult = $queryBuilder
+                        ->select('*')
+                        ->from($recipientSourceIdentifier)
+                        ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
+                        ->setMaxResults($this->sendPerCycle)
+                        ->execute();
 
-                        while ($recipientData = $queryResult->fetchAssociative()) {
-                            $recipientData['categories'] = $this->getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
-                            $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
-                            $numberOfSentMailsOfGroup++;
-                            $numberOfSentMails++;
-                            if ($numberOfSentMails >= $this->sendPerCycle) {
-                                return false;
-                            }
+                    while ($recipientData = $queryResult->fetchAssociative()) {
+                        $recipientData['categories'] = $this->getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
+                        $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                        $numberOfSentMailsOfGroup++;
+                        $numberOfSentMails++;
+                        if ($numberOfSentMails >= $this->sendPerCycle) {
+                            return false;
                         }
-                        break;
+                    }
                 }
             }
 
@@ -492,7 +485,7 @@ class MailerService implements LoggerAwareInterface
             // see MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData for example
             $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
             if ($recipientSourceConfiguration) {
-              $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
+                $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
             }
 
             // Add mail log entry

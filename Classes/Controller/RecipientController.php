@@ -101,41 +101,30 @@ class RecipientController extends AbstractController
             $recipients = [];
             $categoryColumn = true;
             $htmlColumn = true;
-            $table = false;
             $editCsvList = 0;
             if ($isCsv) {
                 [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
                 $recipients = $idList;
-                $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                $table = $recipientSourceIdentifier;
                 $categoryColumn = false;
                 $htmlColumn = false;
                 $recipientSourceConfiguration['icon'] = 'actions-user';
                 $recipientSourceConfiguration['title'] = 'CSV List';
                 $editCsvList = $groupUid;
             } else {
-                $type = $recipientSourceConfiguration['type'] ?? 'Table';
-                switch ($type) {
-                    case 'Extbase':
-                        $model = $recipientSourceConfiguration['model'] ?? false;
-                        if (class_exists($model) && is_subclass_of($model, RecipientInterface::class)) {
-                            if ($recipientSourceConfiguration['table'] ?? false) {
-                                $table = $recipientSourceConfiguration['table'];
-                            } else {
-                                $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
-                                $table = $dataMapper->getDataMap($model)->getTableName();
-                            }
-                            $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($model);
-                            /** @var Repository $repository */
-                            $repository = GeneralUtility::makeInstance($repositoryName);
-                            if ($repository instanceof RecipientRepositoryInterface) {
-                                $recipients = $repository->findByUidListAndCategories($idList);
-                            }
+                $table = $recipientSourceIdentifier;
+                if ($recipientSourceConfiguration['model'] ?? false) {
+                    $model = $recipientSourceConfiguration['model'];
+                    if (class_exists($model) && is_subclass_of($model, RecipientInterface::class)) {
+                        $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName($model);
+                        /** @var Repository $repository */
+                        $repository = GeneralUtility::makeInstance($repositoryName);
+                        if ($repository instanceof RecipientRepositoryInterface) {
+                            $recipients = $repository->findByUidListAndCategories($idList);
                         }
-                        break;
-                    case 'Table':
-                        $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
-                        $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $table);
-                        break;
+                    }
+                } else {
+                    $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $table);
                 }
             }
 
@@ -183,7 +172,7 @@ class RecipientController extends AbstractController
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
             $this->redirect('show');
         }
-        if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceConfiguration['table'])) {
+        if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceIdentifier)) {
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
             $this->redirect('show');
         }
@@ -194,24 +183,15 @@ class RecipientController extends AbstractController
         }
 
         $idList = $idLists[$recipientSourceIdentifier];
-        $rows = [];
         if (is_array(current($idList))) {
             // the list already contain recipient data and not only an array of uids
             $rows = $idList;
         } else {
-            $type = $recipientSourceConfiguration['type'] ?? 'Table';
-            switch ($type) {
-                case 'Extbase':
-                    $model = $recipientSourceConfiguration['model'] ?? false;
-                    if ($model) {
-                        $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $model, []);
-                    }
-                    break;
-                case 'Table':
-                    $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
-                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
-                    $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $table, $csvExportFields);
-                    break;
+            if ($recipientSourceConfiguration['model'] ?? false) {
+                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $recipientSourceConfiguration['model'], []);
+            } else {
+                $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceIdentifier, $csvExportFields);
             }
         }
         CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);

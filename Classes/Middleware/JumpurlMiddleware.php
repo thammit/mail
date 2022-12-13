@@ -246,25 +246,18 @@ class JumpurlMiddleware implements MiddlewareInterface
         $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$this->recipientSourceIdentifier] ?? false;
 
         if ($recipientSourceConfiguration) {
-            $type = $recipientSourceConfiguration['type'] ?? 'Table';
             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
             $recipientService->init($this->siteConfiguration);
             $isSimpleList = $this->recipientSourceIdentifier === 'tx_mail_domain_model_group';
             if ($isSimpleList) {
                 $this->recipientRecord['uid'] = $recipientUid;
             } else {
-                switch ($type) {
-                    case 'Extbase':
-                        $model = $recipientSourceConfiguration['model'] ?? false;
-                        $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $model, []);
-                        $this->recipientRecord = reset($recipientData);
-                        break;
-                    case 'Table':
-                        $table = $recipientSourceConfiguration['table'] ?? $this->recipientSourceIdentifier;
-                        $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $table);
-                        $this->recipientRecord = reset($recipientData);
-                        break;
+                if ($recipientSourceConfiguration['model'] ?? false) {
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration['model'], []);
+                } else {
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $this->recipientSourceIdentifier);
                 }
+                $this->recipientRecord = reset($recipientData);
 
                 // PSR-14 event dispatcher to manipulate recipient data the same way done in mailerService::sendSingleMailAndAddLogEntry method
                 $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
