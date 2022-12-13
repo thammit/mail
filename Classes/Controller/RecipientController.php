@@ -62,7 +62,7 @@ class RecipientController extends AbstractController
             $data[] = [
                 'group' => $group,
                 'typeProcessed' => $typeProcessed,
-                'categories' => $group->getType() === RecipientGroupType::PAGES ? $group->getCategories() : [],
+                'categories' => $group->getCategories(),
                 'count' => $this->recipientService->getNumberOfRecipientsByGroup($group),
             ];
         }
