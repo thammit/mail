@@ -59,6 +59,10 @@ final class Configuration
         ');
     }
 
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
     public static function registerBackendModules(): void
     {
         $navigationComponentId = 'TYPO3/CMS/Backend/PageTree/PageTreeElement';
@@ -67,13 +71,13 @@ final class Configuration
                 $navigationComponentId = '';
             }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
-
         }
+        $modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePosition') ?? 'after:web';
         ExtensionUtility::registerModule(
             'Mail',
             'mail',
             '',
-            '',
+            $modulePosition,
             [],
             [
                 'access' => 'group,user',

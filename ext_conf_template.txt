@@ -7,6 +7,9 @@ additionalRecipientFields =
 # cat=basic; type=int; label=Mail page type number: Change this number only if another extension use the same.
 mailPageTypeNumber = 24
 
+# cat=basic; type=string; label=Position of the mail module in the side navigation: If set to empty, the module will move to the end of all other modules
+mailModulePosition = after:web
+
 # cat=basic; type=int; label=Mail module page id: If set, page tree navigation will be hidden in mail module
 mailModulePageId =
 
