@@ -16,6 +16,9 @@ deleteUnusedMarkers = 1
 # cat=feature; type=boolean; label=Enable notification email: Allow mail to send notification about start and end of a mailing job.
 notificationJob = 1
 
+# cat=feature; type=boolean; label=Deactivate categories: Attention: If set, ALL category fields inside tt_content,fe_users,tt_address,tx_mail_domain_model_group will be disabled!
+deactivateCategories = 1
+
 # cat=feature; type=boolean; label=Use http connection for fetching Newsletter-Content: Even if your TYPO3 Backend is in SSL-Mode, the URL for fetching the newsletter contents will be http
 useHttpToFetch = 0
 

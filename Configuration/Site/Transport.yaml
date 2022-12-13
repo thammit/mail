@@ -1,0 +1,26 @@
+
+# Do not import this file in your site configuration!
+# You can use it as a copy template for your own configuration
+# This is only relevant if you like to override mail setting for EXT:mail for a specific site
+# If a property is not set via site config, there corresponding system setting is used, defined in $GLOBALS['TYPO3_CONF_VARS']['Mail']
+# The overrides do only affect EXT:mail or extensions using the MEDIAESSENZ\Mail\Mail\Mailer/MailMessage classes
+
+mail:
+  transport: sendmail
+  transport_smtp_server: 'localhost:25'
+  transport_smtp_encrypt: false
+  transport_smtp_username:
+  transport_smtp_password:
+  transport_smtp_domain:
+  transport_sendmail_command:
+  transport_mbox_file:
+  transport_spool_type: file
+  transport_spool_filepath: 'typo3temp/tx_mailspool/'
+  dsn:
+  validators:
+    - Egulias\EmailValidator\Validation\RFCValidation
+  defaultMailFromAddress:
+  defaultMailFromName:
+  defaultMailReplyToAddress:
+  defaultMailReplyToName:
+  format: both

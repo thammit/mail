@@ -31,15 +31,21 @@ final class Configuration
         ExtensionManagementUtility::addTypoScriptSetup('<INCLUDE_TYPOSCRIPT: source="FILE:EXT:mail/Configuration/TypoScript/Backend/setup.typoscript">');
     }
 
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
     public static function addPageTSConfig(): void
     {
-        // Category field disabled by default in backend forms.
-        ExtensionManagementUtility::addPageTSConfig('
-    	TCEFORM.tt_content.categories.disabled = 1
-    	TCEFORM.tt_address.categories.disabled = 1
-    	TCEFORM.fe_users.categories.disabled = 1
-    	TCEFORM.tx_mail_domain_model_group.categories.disabled = 1
-        ');
+        if (ConfigurationUtility::getExtensionConfiguration('deactivateCategories') ?? false) {
+            // Category field disabled by default in backend forms.
+            ExtensionManagementUtility::addPageTSConfig('
+            TCEFORM.tt_content.categories.disabled = 1
+            TCEFORM.tt_address.categories.disabled = 1
+            TCEFORM.fe_users.categories.disabled = 1
+            TCEFORM.tx_mail_domain_model_group.categories.disabled = 1
+            ');
+        }
     }
 
     /**
