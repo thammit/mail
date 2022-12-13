@@ -466,23 +466,11 @@ class MailController extends AbstractController
                 $categories = [];
                 $ttContentPageTsConfig = BackendUtility::getTCEFORM_TSconfig('tt_content', $contentElementData);
                 if (is_array($ttContentPageTsConfig['categories'])) {
-                    $pidCsvList = $ttContentPageTsConfig['categories']['PAGE_TSCONFIG_IDLIST'] ?? false;
-                    if ($pidCsvList) {
-                        $pidList = GeneralUtility::intExplode(',', $pidCsvList, true);
-                        $ttContentCategories = $this->categoryRepository->findByPidList($pidList);
-                        foreach ($ttContentCategories as $category) {
-                            $categories[$category->getUid()] = [
-                                'uid' => $category->getUid(),
-                                'title' => $category->getTitle(),
-                                'checked' => in_array($category->getUid(), $categoriesRow),
-                            ];
-                        }
-                    }
                     $configTreeRootUid = $ttContentPageTsConfig['categories']['config.']['treeConfig.']['rootUid'] ?? false;
                     if ($configTreeRootUid) {
                         $ttContentCategories = $this->categoryRepository->findByParent((int)$configTreeRootUid);
                         foreach ($ttContentCategories as $category) {
-                            $categories[$category->getUid()] = [
+                            $categories[] = [
                                 'uid' => $category->getUid(),
                                 'title' => $category->getTitle(),
                                 'checked' => in_array($category->getUid(), $categoriesRow),

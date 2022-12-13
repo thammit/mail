@@ -287,12 +287,11 @@ class ImportService
             ];
         }
 
-        // get categories
-        $categoryPid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
-        if (is_numeric($categoryPid)) {
-            $sysCategories = $this->categoryRepository->findByPid((int)$categoryPid);
+            // get categories from TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.rootUid
+        $configTreeRootUid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['rootUid'] ?? false;
+        if ($configTreeRootUid) {
+            $sysCategories = $this->categoryRepository->findByParent((int)$configTreeRootUid);
             if ($sysCategories->count() > 0) {
-                // additional options
                 if ($data['update_unique']) {
                     $data['showAddAllCategories'] = true;
                     $data['addAllCategories'] = (bool)($this->configuration['addAllCategories'] ?? false);
@@ -300,8 +299,8 @@ class ImportService
                 /** @var Category $sysCategory */
                 foreach ($sysCategories as $sysCategory) {
                     $data['categories'][] = [
-                        'title' => $sysCategory->getTitle(),
                         'uid' => $sysCategory->getUid(),
+                        'title' => $sysCategory->getTitle(),
                         'checked' => (int)($this->configuration['cat'][$sysCategory->getUid()] ?? 0) === $sysCategory->getUid(),
                     ];
                 }
@@ -479,13 +478,13 @@ class ImportService
                         }
                         if (isset($this->configuration['cat']) && is_array($this->configuration['cat']) && !in_array('cats', $this->configuration['map'])) {
                             if ($this->configuration['addAllCategories']) {
-                                // add all categories
-                                $categoryPid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['PAGE_TSCONFIG_IDLIST'] ?? null;
-                                if (is_numeric($categoryPid)) {
-                                    $sysCategories = $this->categoryRepository->findByPid((int)$categoryPid);
+                                $configTreeRootUid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['rootUid'] ?? false;
+                                if ($configTreeRootUid) {
+                                    $sysCategories = $this->categoryRepository->findByParent((int)$configTreeRootUid);
                                     if ($sysCategories->count() > 0) {
-                                        foreach ($sysCategories as $category) {
-                                            $data['tt_address'][$firstUserUid]['categories'][] = $category->getUid();
+                                        /** @var Category $sysCategory */
+                                        foreach ($sysCategories as $sysCategory) {
+                                            $data['tt_address'][$firstUserUid]['categories'][$sysCategory->getUid()] = $sysCategory->getUid();
                                         }
                                     }
                                 }
@@ -530,9 +529,10 @@ class ImportService
         $this->dataHandler->start($data, []);
         $this->dataHandler->process_datamap();
 
-        /**
+        /*
          * Hook for doImport Mail
          * will be called every time a record is inserted
+         * todo replace by PSR-14 Event Dispatcher
          */
         if (isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail/mod3/class.tx_directmail_recipient_list.php']['doImport'])) {
             $hookObjectsArr = [];
