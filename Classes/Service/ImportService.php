@@ -287,22 +287,25 @@ class ImportService
             ];
         }
 
-            // get categories from TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.rootUid
-        $configTreeRootUid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['rootUid'] ?? false;
-        if ($configTreeRootUid) {
-            $sysCategories = $this->categoryRepository->findByParent((int)$configTreeRootUid);
-            if ($sysCategories->count() > 0) {
-                if ($data['update_unique']) {
-                    $data['showAddAllCategories'] = true;
-                    $data['addAllCategories'] = (bool)($this->configuration['addAllCategories'] ?? false);
-                }
-                /** @var Category $sysCategory */
-                foreach ($sysCategories as $sysCategory) {
-                    $data['categories'][] = [
-                        'uid' => $sysCategory->getUid(),
-                        'title' => $sysCategory->getTitle(),
-                        'checked' => (int)($this->configuration['cat'][$sysCategory->getUid()] ?? 0) === $sysCategory->getUid(),
-                    ];
+            // get categories from TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.startingPoints
+        $configTreeStartingPoints = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['startingPoints'] ?? false;
+        if ($configTreeStartingPoints) {
+            $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints, true);
+            foreach ($configTreeStartingPointsArray as $startingPoint) {
+                $sysCategories = $this->categoryRepository->findByParent($startingPoint);
+                if ($sysCategories->count() > 0) {
+                    if ($data['update_unique']) {
+                        $data['showAddAllCategories'] = true;
+                        $data['addAllCategories'] = (bool)($this->configuration['addAllCategories'] ?? false);
+                    }
+                    /** @var Category $sysCategory */
+                    foreach ($sysCategories as $sysCategory) {
+                        $data['categories'][] = [
+                            'uid' => $sysCategory->getUid(),
+                            'title' => $sysCategory->getTitle(),
+                            'checked' => (int)($this->configuration['cat'][$sysCategory->getUid()] ?? 0) === $sysCategory->getUid(),
+                        ];
+                    }
                 }
             }
         }
@@ -478,13 +481,16 @@ class ImportService
                         }
                         if (isset($this->configuration['cat']) && is_array($this->configuration['cat']) && !in_array('cats', $this->configuration['map'])) {
                             if ($this->configuration['addAllCategories']) {
-                                $configTreeRootUid = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['rootUid'] ?? false;
-                                if ($configTreeRootUid) {
-                                    $sysCategories = $this->categoryRepository->findByParent((int)$configTreeRootUid);
-                                    if ($sysCategories->count() > 0) {
-                                        /** @var Category $sysCategory */
-                                        foreach ($sysCategories as $sysCategory) {
-                                            $data['tt_address'][$firstUserUid]['categories'][$sysCategory->getUid()] = $sysCategory->getUid();
+                                $configTreeStartingPoints = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['startingPoints'] ?? false;
+                                if ($configTreeStartingPoints) {
+                                    $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints, true);
+                                    foreach ($configTreeStartingPointsArray as $startingPoint) {
+                                        $sysCategories = $this->categoryRepository->findByParent($startingPoint);
+                                        if ($sysCategories->count() > 0) {
+                                            /** @var Category $sysCategory */
+                                            foreach ($sysCategories as $sysCategory) {
+                                                $data['tt_address'][$firstUserUid]['categories'][] = $sysCategory->getUid();
+                                            }
                                         }
                                     }
                                 }
