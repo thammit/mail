@@ -64,7 +64,7 @@
                     {data.sendOptions}
                     <f:if condition="{mail.attachment}">
                         <f:for each="{mail.attachment}" as="attachment">
-                            {attachment -> f:debug(inline:1)}
+                            {attachment.originalResource.name}
                         </f:for>
                     </f:if>
                 </td>
