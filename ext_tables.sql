@@ -6,14 +6,20 @@ CREATE TABLE tx_mail_domain_model_mail
     deleted          tinyint(4) unsigned DEFAULT '0' NOT NULL,
     sys_language_uid int(11) DEFAULT '0' NOT NULL,
     type             tinyint(4) unsigned DEFAULT '0' NOT NULL,
+    message_id       varchar(100),
+    sent             tinyint(4) unsigned DEFAULT '0' NOT NULL,
+    scheduled        int(10) unsigned DEFAULT '0' NOT NULL,
+    scheduled_begin  int(10) unsigned DEFAULT '0' NOT NULL,
+    scheduled_end    int(10) unsigned DEFAULT '0' NOT NULL,
     page             int(11) unsigned DEFAULT '0' NOT NULL,
-    attachment       tinyblob,
     subject          varchar(120)  DEFAULT ''                 NOT NULL,
     from_email       varchar(80)   DEFAULT ''                 NOT NULL,
     from_name        varchar(80)   DEFAULT ''                 NOT NULL,
     reply_to_email   varchar(80)   DEFAULT ''                 NOT NULL,
     reply_to_name    varchar(80)   DEFAULT ''                 NOT NULL,
+    return_path      varchar(80)   DEFAULT ''                 NOT NULL,
     organisation     varchar(80)   DEFAULT ''                 NOT NULL,
+    attachment       tinyblob,
     priority         tinyint(4) unsigned DEFAULT '0' NOT NULL,
     encoding         varchar(80)   DEFAULT 'quoted-printable' NOT NULL,
     charset          varchar(20)   DEFAULT 'iso-8859-1'       NOT NULL,
@@ -21,25 +27,20 @@ CREATE TABLE tx_mail_domain_model_mail
     include_media    tinyint(4) unsigned DEFAULT '0' NOT NULL,
     html_params      varchar(80)   DEFAULT ''                 NOT NULL,
     plain_params     varchar(80)   DEFAULT ''                 NOT NULL,
-    sent             tinyint(4) unsigned DEFAULT '0' NOT NULL,
     rendered_size    int(11) unsigned DEFAULT '0' NOT NULL,
-    message_id       varchar(100),
     html_content     mediumblob,
     preview_image    longblob,
     plain_content    mediumblob,
     html_links       text,
     plain_links      text,
     recipients       text,
-    scheduled        int(10) unsigned DEFAULT '0' NOT NULL,
-    scheduled_begin  int(10) unsigned DEFAULT '0' NOT NULL,
-    scheduled_end    int(10) unsigned DEFAULT '0' NOT NULL,
-    return_path      varchar(80)   DEFAULT ''                 NOT NULL,
+    recipient_groups varchar(80)   DEFAULT ''                 NOT NULL,
     redirect         tinyint(4) unsigned DEFAULT '0' NOT NULL,
     redirect_all     tinyint(4) unsigned DEFAULT '0' NOT NULL,
     redirect_url     varchar(2048) DEFAULT ''                 NOT NULL,
     auth_code_fields varchar(80)   DEFAULT ''                 NOT NULL,
-    recipient_groups varchar(80)   DEFAULT ''                 NOT NULL,
-    PRIMARY KEY (uid)
+    PRIMARY KEY (uid),
+    KEY              sent (sent)
 );
 
 CREATE TABLE tx_mail_domain_model_group
@@ -80,29 +81,29 @@ CREATE TABLE tx_mail_group_mm
 
 CREATE TABLE tx_mail_domain_model_log
 (
-    uid             int(11) unsigned NOT NULL auto_increment,
-    mail            int(11) unsigned DEFAULT '0' NOT NULL,
-    recipient_uid   int(11) DEFAULT '0' NOT NULL,
+    uid              int(11) unsigned NOT NULL auto_increment,
+    mail             int(11) unsigned DEFAULT '0' NOT NULL,
+    recipient_uid    int(11) DEFAULT '0' NOT NULL,
     recipient_source varchar(255) DEFAULT '' NOT NULL,
-    email           varchar(255) DEFAULT '' NOT NULL,
-    tstamp          int(11) unsigned DEFAULT '0' NOT NULL,
-    url             tinyblob NULL,
-    parse_time      int(11) unsigned DEFAULT '0' NOT NULL,
-    response_type   tinyint(4) DEFAULT '0' NOT NULL,
-    format_sent     tinyint(4) DEFAULT '0' NOT NULL,
-    url_id          tinyint(4) DEFAULT '0' NOT NULL,
-    return_content  mediumblob NULL,
-    return_code     smallint(6) DEFAULT '0' NOT NULL,
+    email            varchar(255) DEFAULT '' NOT NULL,
+    tstamp           int(11) unsigned DEFAULT '0' NOT NULL,
+    url              tinyblob NULL,
+    parse_time       int(11) unsigned DEFAULT '0' NOT NULL,
+    response_type    tinyint(4) DEFAULT '0' NOT NULL,
+    format_sent      tinyint(4) DEFAULT '0' NOT NULL,
+    url_id           tinyint(4) DEFAULT '0' NOT NULL,
+    return_content   mediumblob NULL,
+    return_code      smallint(6) DEFAULT '0' NOT NULL,
     PRIMARY KEY (uid),
-    KEY             recipient (recipient_uid, recipient_source, mail, response_type, uid),
-    KEY             mail (mail, response_type, recipient_source, recipient_uid)
+    KEY              recipient (recipient_uid, recipient_source, mail, response_type, uid),
+    KEY              mail (mail, response_type, recipient_source, recipient_uid)
 );
 
 CREATE TABLE fe_users
 (
     mail_active tinyint(3) unsigned DEFAULT '0' NOT NULL,
-    categories  int(10) unsigned DEFAULT '0' NOT NULL,
     mail_html   tinyint(3) unsigned DEFAULT '0' NOT NULL,
+    categories  int(10) unsigned DEFAULT '0' NOT NULL,
     KEY         mail (mail_active, mail_html)
 );
 
