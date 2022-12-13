@@ -3,10 +3,51 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use PDO;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class RecipientUtility
 {
+    /**
+     * Get the list of categories ids subscribed to by recipient $uid from table $table
+     *
+     * @param string $table table of the recipient (tt_address or fe_users)
+     * @param int $uid Uid of the recipient
+     *
+     * @return array list of categories
+     * @throws DBALException
+     * @throws Exception
+     */
+    public static function getListOfRecipientCategories(string $table, int $uid): array
+    {
+        $relationTable = $GLOBALS['TCA'][$table]['columns']['categories']['config']['MM'];
+
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+
+        $statement = $queryBuilder
+            ->select($relationTable . '.uid_local')
+            ->from($relationTable, $relationTable)
+            ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_foreign = ' . $table . '.uid')
+            ->where(
+                $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table)),
+                $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+            )
+            ->execute();
+
+        $recipientCategories = [];
+        while ($row = $statement->fetchAssociative()) {
+            $recipientCategories[] = (int)$row['uid_local'];
+        }
+
+        return $recipientCategories;
+    }
+
+
     /**
      * @param array $uidLists
      * @return int

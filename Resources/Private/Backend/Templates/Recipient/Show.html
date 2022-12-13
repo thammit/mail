@@ -38,7 +38,7 @@
                 <f:render partial="Panel"
                           arguments="{lll:lll, parentId:'mail-recipient-list-panel-{recipientSourceIdentifier}', title: title, index:recipientSourceIdentifier, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
                           contentAs="panelBody">
-                    <f:render partial="Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, categoryColumn: recipientSource.categoryColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, editCsvList: recipientSource.editCsvList, lll:lll}"/>
+                    <f:render partial="Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, editCsvList: recipientSource.editCsvList, lll:lll}"/>
                 </f:render>
             </f:for>
         </div>

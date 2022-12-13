@@ -464,14 +464,25 @@ class MailController extends AbstractController
                 }
 
                 $categories = [];
-                $pageTsConfig = BackendUtility::getTCEFORM_TSconfig('tt_content', $contentElementData);
-                if (is_array($pageTsConfig['categories'])) {
-                    $pidCsvList = $pageTsConfig['categories']['PAGE_TSCONFIG_IDLIST'] ?? [];
+                $ttContentPageTsConfig = BackendUtility::getTCEFORM_TSconfig('tt_content', $contentElementData);
+                if (is_array($ttContentPageTsConfig['categories'])) {
+                    $pidCsvList = $ttContentPageTsConfig['categories']['PAGE_TSCONFIG_IDLIST'] ?? false;
                     if ($pidCsvList) {
                         $pidList = GeneralUtility::intExplode(',', $pidCsvList, true);
-                        $ttContentCategories = $this->categoryRepository->findByPidList($pidList)->toArray();
+                        $ttContentCategories = $this->categoryRepository->findByPidList($pidList);
                         foreach ($ttContentCategories as $category) {
-                            $categories[] = [
+                            $categories[$category->getUid()] = [
+                                'uid' => $category->getUid(),
+                                'title' => $category->getTitle(),
+                                'checked' => in_array($category->getUid(), $categoriesRow),
+                            ];
+                        }
+                    }
+                    $configTreeRootUid = $ttContentPageTsConfig['categories']['config.']['treeConfig.']['rootUid'] ?? false;
+                    if ($configTreeRootUid) {
+                        $ttContentCategories = $this->categoryRepository->findByParent((int)$configTreeRootUid);
+                        foreach ($ttContentCategories as $category) {
+                            $categories[$category->getUid()] = [
                                 'uid' => $category->getUid(),
                                 'title' => $category->getTitle(),
                                 'checked' => in_array($category->getUid(), $categoriesRow),

@@ -13,6 +13,7 @@ use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
@@ -85,7 +86,6 @@ class RecipientController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      */
     public function showAction(Group $group): ResponseInterface
     {
@@ -106,7 +106,6 @@ class RecipientController extends AbstractController
                 [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
                 $recipients = $idList;
                 $table = $recipientSourceIdentifier;
-                $categoryColumn = false;
                 $htmlColumn = false;
                 $recipientSourceConfiguration['icon'] = 'actions-user';
                 $recipientSourceConfiguration['title'] = 'CSV List';
@@ -134,7 +133,6 @@ class RecipientController extends AbstractController
                 'icon' => $recipientSourceConfiguration['icon'] ?? 'actions-user',
                 'recipients' => $recipients,
                 'numberOfRecipients' => count($recipients),
-                'categoryColumn' => $categoryColumn,
                 'htmlColumn' => $htmlColumn,
                 'show' => $table && BackendUserUtility::getBackendUser()->check('tables_select', $table),
                 'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),

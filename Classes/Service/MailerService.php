@@ -354,7 +354,7 @@ class MailerService implements LoggerAwareInterface
                 continue;
             }
             $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
-            $isSimpleList = $recipientSourceIdentifier === 'tx_mail_domain_model_group';
+            $isSimpleList = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
             if (!$recipientSourceConfiguration && !$isSimpleList) {
                 $this->logger->debug('No recipient source configuration found for ' . $recipientSourceIdentifier);
                 continue;
@@ -368,10 +368,12 @@ class MailerService implements LoggerAwareInterface
             $recipientIds = array_diff($recipientIds, $alreadyHandledRecipientIds);
 
             if ($isSimpleList) {
+                [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
                 foreach ($recipientIds as $recipientUid => $recipientData) {
                     // fake uid for csv
                     $recipientUid++;
                     $recipientData['uid'] = $recipientUid;
+                    $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, (int)$groupUid);
                     $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
                     $numberOfSentMailsOfGroup++;
                     $numberOfSentMails++;
@@ -407,7 +409,7 @@ class MailerService implements LoggerAwareInterface
                         ->execute();
 
                     while ($recipientData = $queryResult->fetchAssociative()) {
-                        $recipientData['categories'] = $this->getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
+                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
                         $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
                         $numberOfSentMailsOfGroup++;
                         $numberOfSentMails++;
@@ -421,46 +423,6 @@ class MailerService implements LoggerAwareInterface
             $this->logger->debug('Sending ' . $numberOfSentMailsOfGroup . ' mails from recipient source ' . $recipientSourceIdentifier);
         }
         return true;
-    }
-
-
-    /**
-     * Get the list of categories ids subscribed to by recipient $uid from table $table
-     *
-     * @param string $table table of the recipient (tt_address or fe_users)
-     * @param int $uid Uid of the recipient
-     *
-     * @return array list of categories
-     * @throws DBALException
-     * @throws Exception
-     */
-    public function getListOfRecipientCategories(string $table, int $uid): array
-    {
-        if ($table === 'tx_mail_domain_model_group') {
-            return [];
-        }
-
-        $relationTable = $GLOBALS['TCA'][$table]['columns']['categories']['config']['MM'];
-
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-
-        $statement = $queryBuilder
-            ->select($relationTable . '.uid_local')
-            ->from($relationTable, $relationTable)
-            ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_foreign = ' . $table . '.uid')
-            ->where(
-                $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table)),
-                $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
-            )
-            ->execute();
-
-        $recipientCategories = [];
-        while ($row = $statement->fetchAssociative()) {
-            $recipientCategories[] = (int)$row['uid_local'];
-        }
-
-        return $recipientCategories;
     }
 
     /**

@@ -13,7 +13,7 @@
                 <th></th>
                 <th>Name</th>
                 <th>Email</th>
-                <f:if condition="{categoryColumn}"><th><f:translate key="{lll}recipient.categories"/></th></f:if>
+                <th><f:translate key="{lll}recipient.categories"/></th>
                 <f:if condition="{htmlColumn}"><th><f:translate key="{lll}recipient.htmlFormat"/></th></f:if>
                 <th></th>
             </tr>
@@ -41,21 +41,19 @@
                     <td class="nowrap">
                         <f:link.email email="{recipient.email}"/>
                     </td>
-                    <f:if condition="{categoryColumn}">
-                        <td class="nowrap">
-                            <f:if condition="{recipient.categories -> f:count() > 0}">
-                            <f:then>
-                                <f:for each="{recipient.categories}" as="category" iteration="categoryIterator">
-                                    {category.title}
-                                    <f:if condition="!{categoryIterator.isLast}">, </f:if>
-                                </f:for>
-                            </f:then>
-                            <f:else>
-                                {recipient.categories}
-                            </f:else>
-                        </f:if>
-                        </td>
+                    <td class="nowrap">
+                        <f:if condition="{recipient.categories -> f:count() > 0}">
+                        <f:then>
+                            <f:for each="{recipient.categories}" as="category" iteration="categoryIterator">
+                                {category.title}
+                                <f:if condition="!{categoryIterator.isLast}">, </f:if>
+                            </f:for>
+                        </f:then>
+                        <f:else>
+                            {recipient.categories}
+                        </f:else>
                     </f:if>
+                    </td>
                     <f:if condition="{htmlColumn}">
                         <td class="nowrap text-center">
                             <f:if condition="{recipient.mail_html} || {recipient.mailHtml}">
@@ -71,7 +69,7 @@
                             </be:link.editRecord>
                         </f:if>
                         <f:if condition="{editCsvList}">
-                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list" title="{f:translate(key: '{lll}general.button.edit')}">
+                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list,categories" title="{f:translate(key: '{lll}general.button.edit')}">
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
                         </f:if>

@@ -170,7 +170,7 @@ abstract class AbstractRecipient extends AbstractEntity implements CategoryInter
             'email' => $this->email,
             'name' => $this->name,
             'mail_active' => $this->active ? '1' : '0',
-            'mail_html' => $this->mailHtml,
+            'mail_html' => $this->mailHtml ? '1': '0',
             'categories' => implode(', ', $categories)
         ];
     }

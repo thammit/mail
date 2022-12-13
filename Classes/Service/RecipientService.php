@@ -244,15 +244,15 @@ class RecipientService
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
         foreach ($groups as $group) {
-            $recipientList = $this->getRecipientsUidListGroupedByRecipientSource($group);
+            $recipientList = $this->getRecipientsUidListGroupedByRecipientSource($group, true);
             $idLists = array_merge_recursive($idLists, $recipientList);
         }
 
-        foreach ($idLists as $sourceIdentifier => $idList) {
-            if ($sourceIdentifier === 'tx_mail_domain_model_group') {
-                $idLists[$sourceIdentifier] = RecipientUtility::removeDuplicates($idList);
+        foreach ($idLists as $recipientSourceIdentifier => $idList) {
+            if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
+                $idLists[$recipientSourceIdentifier] = RecipientUtility::removeDuplicates($idList);
             } else {
-                $idLists[$sourceIdentifier] = array_unique($idList);
+                $idLists[$recipientSourceIdentifier] = array_unique($idList);
             }
         }
 
@@ -323,6 +323,9 @@ class RecipientService
                     $recipients = CsvUtility::rearrangeCsvValues($group->getList());
                 } else {
                     $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
+                }
+                foreach ($recipients as $key => $recipient) {
+                    $recipients[$key]['categories'] = $group->getCategories();
                 }
                 $csvRecipientSourceIdentifier = $addGroupUidToRecipientSourceIdentifier ? 'tx_mail_domain_model_group:' . $group->getUid() : 'tx_mail_domain_model_group';
                 $idLists[$csvRecipientSourceIdentifier] = RecipientUtility::removeDuplicates($recipients);

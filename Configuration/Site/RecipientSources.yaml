@@ -4,7 +4,8 @@ mail:
       title: 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recipientSources.I.0'
       icon: 'tcarecords-tt_address-default'
       model: MEDIAESSENZ\Mail\Domain\Model\Address
-      ignoreMailActive: true
+      #ignoreMailActive: true
+      #forceHtmlMail: true
       #csvExportFields: [uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html,tstamp]
     fe_users:
       title: 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recipientSources.I.1'
