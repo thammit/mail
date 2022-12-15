@@ -47,6 +47,11 @@ class Group extends AbstractEntity
     protected bool $csv = false;
 
     /**
+     * @var bool
+     */
+    protected bool $mailHtml = false;
+
+    /**
      * @var string
      */
     protected string $pages = '';
@@ -206,6 +211,24 @@ class Group extends AbstractEntity
     public function setCsv(bool $csv): Group
     {
         $this->csv = $csv;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMailHtml(): bool
+    {
+        return $this->mailHtml;
+    }
+
+    /**
+     * @param bool $mailHtml
+     * @return Group
+     */
+    public function setMailHtml(bool $mailHtml): Group
+    {
+        $this->mailHtml = $mailHtml;
         return $this;
     }
 

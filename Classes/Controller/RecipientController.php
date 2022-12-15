@@ -99,14 +99,11 @@ class RecipientController extends AbstractController
                 continue;
             }
             $recipients = [];
-            $categoryColumn = true;
-            $htmlColumn = true;
             $editCsvList = 0;
             if ($isCsv) {
                 [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
                 $recipients = $idList;
                 $table = $recipientSourceIdentifier;
-                $htmlColumn = false;
                 $recipientSourceConfiguration['icon'] = 'actions-user';
                 $recipientSourceConfiguration['title'] = 'CSV List';
                 $editCsvList = $groupUid;
@@ -133,7 +130,6 @@ class RecipientController extends AbstractController
                 'icon' => $recipientSourceConfiguration['icon'] ?? 'actions-user',
                 'recipients' => $recipients,
                 'numberOfRecipients' => count($recipients),
-                'htmlColumn' => $htmlColumn,
                 'show' => $table && BackendUserUtility::getBackendUser()->check('tables_select', $table),
                 'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
                 'editCsvList' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table) ? $editCsvList : 0,

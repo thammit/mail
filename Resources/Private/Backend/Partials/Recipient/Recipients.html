@@ -14,7 +14,7 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th><f:translate key="{lll}recipient.categories"/></th>
-                <f:if condition="{htmlColumn}"><th><f:translate key="{lll}recipient.htmlFormat"/></th></f:if>
+                <th><f:translate key="{lll}recipient.htmlFormat"/></th>
                 <th></th>
             </tr>
             </thead>
@@ -54,14 +54,12 @@
                         </f:else>
                     </f:if>
                     </td>
-                    <f:if condition="{htmlColumn}">
-                        <td class="nowrap text-center">
-                            <f:if condition="{recipient.mail_html} || {recipient.mailHtml}">
-                                <f:then><core:icon identifier="actions-check-square" /></f:then>
-                                <f:else><core:icon identifier="actions-check-markstate" /></f:else>
-                            </f:if>
-                        </td>
-                    </f:if>
+                    <td class="nowrap text-center">
+                        <f:if condition="{recipient.mail_html} || {recipient.mailHtml}">
+                            <f:then><core:icon identifier="actions-check-square" /></f:then>
+                            <f:else><core:icon identifier="actions-check-markstate" /></f:else>
+                        </f:if>
+                    </td>
                     <td class="col-control nowrap">
                         <f:if condition="{recipient.uid} && {allowEdit}">
                             <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}general.button.edit')}">
@@ -69,7 +67,7 @@
                             </be:link.editRecord>
                         </f:if>
                         <f:if condition="{editCsvList}">
-                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list,categories" title="{f:translate(key: '{lll}general.button.edit')}">
+                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
                         </f:if>

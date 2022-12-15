@@ -326,6 +326,7 @@ class RecipientService
                 }
                 foreach ($recipients as $key => $recipient) {
                     $recipients[$key]['categories'] = $group->getCategories();
+                    $recipients[$key]['mail_html'] = $group->isMailHtml() ? 1 : 0;
                 }
                 $csvRecipientSourceIdentifier = $addGroupUidToRecipientSourceIdentifier ? 'tx_mail_domain_model_group:' . $group->getUid() : 'tx_mail_domain_model_group';
                 $idLists[$csvRecipientSourceIdentifier] = RecipientUtility::removeDuplicates($recipients);
