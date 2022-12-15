@@ -336,9 +336,9 @@ class RecipientService
                     $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
                     $contains = $recipientSourceConfiguration['contains'] ?? false;
                     if ($contains) {
-                        $idLists[$contains] = array_unique(array_merge($idLists[$contains], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), true)));
+                        $idLists[$contains] = array_unique(array_merge($idLists[$contains] ?? [], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), true)));
                     } else {
-                        $idLists[$recipientSourceIdentifier] = $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive);
+                        $idLists[$recipientSourceIdentifier] = array_unique(array_merge($idLists[$recipientSourceIdentifier] ?? [], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive)));
                     }
                 }
                 break;
