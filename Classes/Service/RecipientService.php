@@ -16,7 +16,6 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
-use MEDIAESSENZ\Mail\Type\Enumeration\RecordType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
