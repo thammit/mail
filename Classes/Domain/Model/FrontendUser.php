@@ -10,6 +10,11 @@ class FrontendUser extends AbstractRecipient implements RecipientInterface, Cate
     /**
      * @var string
      */
+    protected string $salutation = '';
+
+    /**
+     * @var string
+     */
     protected string $gender = Gender::UNKNOWN;
 
     /**
@@ -76,6 +81,22 @@ class FrontendUser extends AbstractRecipient implements RecipientInterface, Cate
      * @var int
      */
     protected int $tstamp = 0;
+
+    /**
+     * @return string
+     */
+    public function getSalutation(): string
+    {
+        return $this->salutation;
+    }
+
+    /**
+     * @param string $salutation
+     */
+    public function setSalutation(string $salutation): void
+    {
+        $this->salutation = $salutation;
+    }
 
     /**
      * @return string
@@ -293,8 +314,8 @@ class FrontendUser extends AbstractRecipient implements RecipientInterface, Cate
     public function getEnhancedData(): array
     {
         $additionalFields = [
-            'title' => $this->title,
             'gender' => $this->gender,
+            'title' => $this->title,
             'first_name' => $this->firstName,
             'middle_name' => $this->middleName,
             'last_name' => $this->lastName,

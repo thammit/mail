@@ -17,6 +17,13 @@ $feUsersCols = [
             'type' => 'check'
         ]
     ],
+    'mail_salutation' => [
+        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:mail_salutation',
+        'exclude' => '1',
+        'config' => [
+            'type' => 'input'
+        ]
+    ],
     'categories' => [
         'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_category.categories',
         'exclude' => true,
@@ -33,4 +40,4 @@ $feUsersCols = [
 ];
 
 TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('fe_users', $feUsersCols);
-TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('fe_users', '--div--;Mail,mail_active,mail_html,categories');
+TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('fe_users', '--div--;Mail,mail_active,mail_html,mail_salutation,categories');

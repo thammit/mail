@@ -35,6 +35,11 @@ abstract class AbstractRecipient extends AbstractEntity implements CategoryInter
     protected string $name = '';
 
     /**
+     * @var string
+     */
+    protected string $salutation = '';
+
+    /**
      * @var ObjectStorage<Category>|null
      */
     protected ?ObjectStorage $categories;
@@ -123,6 +128,22 @@ abstract class AbstractRecipient extends AbstractEntity implements CategoryInter
         $this->name = $name;
     }
 
+    /**
+     * @return string
+     */
+    public function getSalutation(): string
+    {
+        return $this->salutation;
+    }
+
+    /**
+     * @param string $salutation
+     */
+    public function setSalutation(string $salutation): void
+    {
+        $this->salutation = $salutation;
+    }
+
     public function getCategories(): ObjectStorage
     {
         return $this->categories;
@@ -169,6 +190,7 @@ abstract class AbstractRecipient extends AbstractEntity implements CategoryInter
             'uid' => $this->uid,
             'email' => $this->email,
             'name' => $this->name,
+            'salutation' => $this->salutation,
             'mail_active' => $this->active ? '1' : '0',
             'mail_html' => $this->mailHtml ? '1': '0',
             'categories' => implode(', ', $categories)

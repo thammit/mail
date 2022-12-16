@@ -17,6 +17,13 @@ $ttAddressCols = [
             'type' => 'check'
         ]
     ],
+    'mail_salutation' => [
+        'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:mail_salutation',
+        'exclude' => '1',
+        'config' => [
+            'type' => 'input'
+        ]
+    ],
     'tstamp' => [
         'label' => 'Last modified',
         'config' => [
@@ -26,4 +33,4 @@ $ttAddressCols = [
 ];
 
 TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('tt_address', $ttAddressCols);
-TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('tt_address', '--div--;Mail,mail_active,mail_html');
+TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCATypes('tt_address', '--div--;Mail,mail_active,mail_html,mail_salutation');

@@ -9,6 +9,9 @@
             <trans-unit id="mail_html">
                 <source>Accept HTML mails</source>
             </trans-unit>
+            <trans-unit id="mail_salutation">
+                <source>Salutation</source>
+            </trans-unit>
             <trans-unit id="pages.mail">
                 <source>Mail</source>
             </trans-unit>

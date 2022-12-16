@@ -33,6 +33,11 @@ interface RecipientInterface
     public function getName(): string;
 
     /**
+     * @return string
+     */
+    public function getSalutation(): string;
+
+    /**
      * Full record identifier
      * Can contain an enhanced model to load more data of the recipient which can be handy inside an EventListener
      * See NormalizeRecipientData EventListener for example

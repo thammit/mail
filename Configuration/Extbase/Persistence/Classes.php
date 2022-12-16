@@ -23,6 +23,9 @@ return [
             'active' => [
                 'fieldName' => 'mail_active',
             ],
+            'salutation' => [
+                'fieldName' => 'mail_salutation',
+            ],
         ],
     ],
     \MEDIAESSENZ\Mail\Domain\Model\FrontendUserGroup::class => [
@@ -36,6 +39,9 @@ return [
             ],
             'active' => [
                 'fieldName' => 'mail_active',
+            ],
+            'salutation' => [
+                'fieldName' => 'mail_salutation',
             ],
         ],
     ],

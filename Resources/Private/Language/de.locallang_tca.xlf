@@ -11,6 +11,10 @@
                 <source>Accept HTML mails</source>
                 <target>Akzeptiert HTML Mails</target>
             </trans-unit>
+            <trans-unit id="mail_salutation">
+                <source>Salutation</source>
+                <target>Anrede</target>
+            </trans-unit>
             <trans-unit id="pages.module.I.5">
                 <source>Mail Module</source>
             </trans-unit>
