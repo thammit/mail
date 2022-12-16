@@ -1,5 +1,5 @@
 # cat=basic; type=string; label=Default recipient fields: Default fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user
-defaultRecipientFields = uid,name,title,email,phone,www,address,company,city,zip,country,fax,firstname,first_name,last_name
+defaultRecipientFields = uid,salutation,name,title,email,phone,www,address,company,city,zip,country,fax,firstname,first_name,last_name
 
 # cat=basic; type=string; label=Additional DB fields of the recipient: Additional fields that may be substituted in the mail messages.
 additionalRecipientFields =
