@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\ViewHelpers;
 use Closure;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
@@ -27,7 +28,7 @@ class PreviewLinksViewHelper extends AbstractViewHelper
      */
     public function initializeArguments(): void
     {
-        $this->registerArgument('data', 'array', 'Mail data', true);
+        $this->registerArgument('uid', 'int', 'Mail uid', true);
         $this->registerArgument('pageId', 'int', 'Page id of the PageTs configuration', true);
     }
 
@@ -48,9 +49,9 @@ class PreviewLinksViewHelper extends AbstractViewHelper
     {
         $pageTSConfiguration = BackendUtility::getPagesTSconfig($arguments['pageId'])['mod.']['web_modules.']['mail.'] ?? [];
         $implodedParams = TypoScriptUtility::implodeTSParams($pageTSConfiguration);
-        $row = $arguments['data'];
+        $uid = $arguments['uid'];
         try {
-            $languages = LanguageUtility::getAvailablePageLanguages($row['uid']);
+            $languages = LanguageUtility::getAvailablePageLanguages($uid);
         } catch (DBALException|Exception $e) {
             return [];
         }
@@ -64,8 +65,8 @@ class PreviewLinksViewHelper extends AbstractViewHelper
             $htmlParams = $implodedParams['htmlParams'] ?? $langParam;
             $flagIcon = $lang['flagIcon'];
 
-            $previewUriBuilder = PreviewUriBuilder::create($row['uid'], '')
-                ->withRootLine(BackendUtility::BEgetRootLine($row['uid']));
+            $previewUriBuilder = PreviewUriBuilder::create($uid, '')
+                ->withRootLine(BackendUtility::BEgetRootLine($uid));
 
             $previewHTMLLinkAttributes[$languageUid] = [
                 'title' => htmlentities(LanguageUtility::getLL('mail.wizard.htmlPreviewLink.title') . $langTitle),

@@ -43,6 +43,53 @@
     </div>
 </f:section>
 
+<f:section name="previewButtons">
+    <f:variable name="previewLinks" value="{mail:previewLinks(uid:uid,pageId:pageId)}"/>
+    <f:for each="{previewLinks}" as="previewLinks" key="type">
+        <f:if condition="{type} == 'htmlPreview'">
+            <f:variable name="addIconOverlay" value="0" />
+            <f:if condition="{previewLinks -> f:count()} > 1">
+                <f:variable name="addIconOverlay" value="1" />
+            </f:if>
+            <f:for each="{previewLinks}" as="htmlPreviewLink">
+                <f:variable name="overlay" value="" />
+                <f:if condition="{addIconOverlay}">
+                    <f:variable name="iconOverlay" value="{htmlPreviewLink.flagIcon}" />
+                </f:if>
+                <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{htmlPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{data.title}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
+            </f:for>
+        </f:if>
+        <f:if condition="{type} == 'textPreview'">
+            <f:variable name="addIconOverlay" value="0" />
+            <f:if condition="{previewLinks -> f:count()} > 1">
+                <f:variable name="addIconOverlay" value="1" />
+            </f:if>
+            <f:for each="{previewLinks}" as="textPreviewLink">
+                <f:variable name="overlay" value="" />
+                <f:if condition="{addIconOverlay}">
+                    <f:variable name="iconOverlay" value="{textPreviewLink.flagIcon}" />
+                </f:if>
+                <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{textPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{data.title}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
+            </f:for>
+        </f:if>
+    </f:for>
+    <div class="t3js-modal modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="previewModal">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="t3js-modal-content modal-content">
+                <div class="modal-header">
+                    <h4 class="t3js-modal-title modal-title"></h4>
+                    <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
+                        <core:icon identifier="actions-close" />
+                        <span class="visually-hidden">Close</span>
+                    </button>
+                </div>
+                <div class="t3js-modal-body modal-body">
+                    <iframe width="100%" height="440" title="Mail Preview" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</f:section>
 
 <f:section name="OpenMailsPanel">
     <f:variable name="lllTypePrefix" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.type.I." />
@@ -61,27 +108,28 @@
             </tr>
             </thead>
             <tbody>
-            <f:for each="{data.data}" as="row">
+            <f:for each="{data.data}" as="data">
                 <tr>
                     <td class="col-icon nowrap" style="width: 1%">
-                        <core:iconForRecord row="{uid: row.uid, type:0}" table="tx_mail_domain_model_mail"/>
+                        <core:iconForRecord row="{uid: data.uid, type:0}" table="tx_mail_domain_model_mail"/>
                     </td>
                     <td class="col-title col-responsive nowrap">
-                        {row.subject}
+                        {data.subject}
                     </td>
-                    <td class="nowrap"><f:if condition="{row.quickMail}"><f:then><f:translate key="{lll}mail.type.quickMail"/></f:then><f:else><f:translate key="{lllTypePrefix}{row.type}"/></f:else></f:if></td>
-                    <td class="nowrap">{row.lastModified -> f:format.date(format:'H:i d-m-Y')}</td>
-                    <td class="nowrap">{row.renderedSize -> f:format.bytes()}</td>
-                    <td class="nowrap"><f:if condition="{row.attachment}">
+                    <td class="nowrap"><f:if condition="{data.quickMail}"><f:then><f:translate key="{lll}mail.type.quickMail"/></f:then><f:else><f:translate key="{lllTypePrefix}{data.type}"/></f:else></f:if></td>
+                    <td class="nowrap">{data.lastModified -> f:format.date(format:'H:i d-m-Y')}</td>
+                    <td class="nowrap">{data.renderedSize -> f:format.bytes()}</td>
+                    <td class="nowrap"><f:if condition="{data.attachment}">
                         <core:icon identifier="mail-attachment" size="small"/>
                     </f:if></td>
                     <td class="nowrap">
-                        <f:if condition="!{row.scheduledBegin}">
-                            <f:link.action action="delete" arguments="{mail:row.uid}" class="btn btn-default" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:link.action>
+                        <f:render section="previewButtons" arguments="{uid:data.page,pageId:data.pid}" />
+                        <f:if condition="!{data.scheduledBegin}">
+                            <f:link.action action="delete" arguments="{mail:data.uid}" class="btn btn-default" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:link.action>
                         </f:if>
                     </td>
                     <td class="col-control nowrap">
-                        <f:link.action action="openMail" arguments="{mail:row.uid}" class="btn btn-mail-theme text-uppercase"><f:translate key="{lll}general.button.next" default="Next" /></f:link.action>
+                        <f:link.action action="openMail" arguments="{mail:data.uid}" class="btn btn-mail-theme text-uppercase"><f:translate key="{lll}general.button.next" default="Next" /></f:link.action>
                     </td>
                 </tr>
             </f:for>
@@ -105,46 +153,18 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <f:for each="{data.data}" as="row">
+                    <f:for each="{data.data}" as="data">
                         <tr class="db_list_normal">
                             <td class="col-icon nowrap" style="width: 1%"><core:icon identifier="app-pagetree-mail" size="small"/></td>
-                            <td class="col-title col-responsive nowrap">{row.title}</td>
+                            <td class="col-title col-responsive nowrap">{data.title}</td>
                             <td class="nowrap">
-                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: row.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.edit')}">
+                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: data.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.edit')}">
                                     <core:icon identifier="actions-page-open" size="small"/>
                                 </a>
-                                <f:variable name="previewLinks" value="{mail:previewLinks(data:row,pageId:mailSysFolderUid)}"/>
-                                <f:for each="{previewLinks}" as="previewLinks" key="type">
-                                    <f:if condition="{type} == 'htmlPreview'">
-                                        <f:variable name="addIconOverlay" value="0" />
-                                        <f:if condition="{previewLinks -> f:count()} > 1">
-                                            <f:variable name="addIconOverlay" value="1" />
-                                        </f:if>
-                                        <f:for each="{previewLinks}" as="htmlPreviewLink">
-                                            <f:variable name="overlay" value="" />
-                                            <f:if condition="{addIconOverlay}">
-                                                <f:variable name="iconOverlay" value="{htmlPreviewLink.flagIcon}" />
-                                            </f:if>
-                                            <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{htmlPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{row.title}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
-                                        </f:for>
-                                    </f:if>
-                                    <f:if condition="{type} == 'textPreview'">
-                                        <f:variable name="addIconOverlay" value="0" />
-                                        <f:if condition="{previewLinks -> f:count()} > 1">
-                                            <f:variable name="addIconOverlay" value="1" />
-                                        </f:if>
-                                        <f:for each="{previewLinks}" as="textPreviewLink">
-                                            <f:variable name="overlay" value="" />
-                                            <f:if condition="{addIconOverlay}">
-                                                <f:variable name="iconOverlay" value="{textPreviewLink.flagIcon}" />
-                                            </f:if>
-                                            <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{textPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{row.title}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
-                                        </f:for>
-                                    </f:if>
-                                </f:for>
+                                <f:render section="previewButtons" arguments="{uid:data.uid,pageId:mailSysFolderUid}" />
                             </td>
                             <td class="col-control nowrap">
-                                <f:link.action action="createMailFromInternalPage" arguments="{page: row.uid}" class="btn btn-mail-theme text-uppercase"><f:translate key="{lll}general.button.next" default="Next" /></f:link.action>
+                                <f:link.action action="createMailFromInternalPage" arguments="{page: data.uid}" class="btn btn-mail-theme text-uppercase"><f:translate key="{lll}general.button.next" default="Next" /></f:link.action>
                             </td>
                         </tr>
                     </f:for>
@@ -158,22 +178,6 @@
             </f:be.infobox>
         </f:else>
     </f:if>
-    <div class="t3js-modal modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="previewModal">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="t3js-modal-content modal-content">
-                <div class="modal-header">
-                    <h4 class="t3js-modal-title modal-title"></h4>
-                    <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
-                        <core:icon identifier="actions-close" />
-                        <span class="visually-hidden">Close</span>
-                    </button>
-                </div>
-                <div class="t3js-modal-body modal-body">
-                    <iframe width="100%" height="440" title="Mail Preview" frameborder="0"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
 </f:section>
 
 <f:section name="ExternalPanel">
