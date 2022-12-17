@@ -147,6 +147,7 @@ class MailController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->addDocheaderButtons();
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewModal');
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }

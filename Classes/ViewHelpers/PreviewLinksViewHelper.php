@@ -41,10 +41,11 @@ class PreviewLinksViewHelper extends AbstractViewHelper
      * @return array
      */
     public static function renderStatic(
-        array $arguments,
-        Closure $renderChildrenClosure,
+        array                     $arguments,
+        Closure                   $renderChildrenClosure,
         RenderingContextInterface $renderingContext
-    ): array {
+    ): array
+    {
         $pageTSConfiguration = BackendUtility::getPagesTSconfig($arguments['pageId'])['mod.']['web_modules.']['mail.'] ?? [];
         $implodedParams = TypoScriptUtility::implodeTSParams($pageTSConfiguration);
         $row = $arguments['data'];
@@ -63,28 +64,21 @@ class PreviewLinksViewHelper extends AbstractViewHelper
             $htmlParams = $implodedParams['htmlParams'] ?? $langParam;
             $flagIcon = $lang['flagIcon'];
 
-            $attributes = PreviewUriBuilder::create($row['uid'], '')
-                ->withRootLine(BackendUtility::BEgetRootLine($row['uid']))
-                ->withAdditionalQueryParameters($htmlParams)
-                ->buildDispatcherDataAttributes(['windowFeatures' => 'width=700,height=800']);
+            $previewUriBuilder = PreviewUriBuilder::create($row['uid'], '')
+                ->withRootLine(BackendUtility::BEgetRootLine($row['uid']));
 
             $previewHTMLLinkAttributes[$languageUid] = [
                 'title' => htmlentities(LanguageUtility::getLL('mail.wizard.htmlPreviewLink.title') . $langTitle),
-                'data-dispatch-action' => $attributes['dispatch-action'],
-                'data-dispatch-args' => $attributes['dispatch-args'],
-                'data-flag-icon' => $flagIcon,
+                'uri' => $previewUriBuilder->withAdditionalQueryParameters($htmlParams)->buildUri(),
+                'languageUid' => $languageUid,
+                'flagIcon' => $flagIcon,
             ];
-
-            $attributes = PreviewUriBuilder::create($row['uid'], '')
-                ->withRootLine(BackendUtility::BEgetRootLine($row['uid']))
-                ->withAdditionalQueryParameters($plainParams)
-                ->buildDispatcherDataAttributes(['windowFeatures' => 'width=700,height=800']);
 
             $previewTextLinkAttributes[$languageUid] = [
                 'title' => htmlentities(LanguageUtility::getLL('mail.wizard.plainTextPreviewLink.title') . $langTitle),
-                'data-dispatch-action' => $attributes['dispatch-action'],
-                'data-dispatch-args' => $attributes['dispatch-args'],
-                'data-flag-icon' => $flagIcon,
+                'uri' => $previewUriBuilder->withAdditionalQueryParameters($plainParams)->buildUri(),
+                'languageUid' => $languageUid,
+                'flagIcon' => $flagIcon,
             ];
         }
 

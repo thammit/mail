@@ -123,9 +123,9 @@
                                         <f:for each="{previewLinks}" as="htmlPreviewLink">
                                             <f:variable name="overlay" value="" />
                                             <f:if condition="{addIconOverlay}">
-                                                <f:variable name="iconOverlay" value="{htmlPreviewLink.data-flag-icon}" />
+                                                <f:variable name="iconOverlay" value="{htmlPreviewLink.flagIcon}" />
                                             </f:if>
-                                            <a href="#" class="btn btn-default" title="{htmlPreviewLink.title}" data-dispatch-action="{htmlPreviewLink.data-dispatch-action}" data-dispatch-args="{htmlPreviewLink.data-dispatch-args}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
+                                            <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{htmlPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{row.title}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
                                         </f:for>
                                     </f:if>
                                     <f:if condition="{type} == 'textPreview'">
@@ -136,9 +136,9 @@
                                         <f:for each="{previewLinks}" as="textPreviewLink">
                                             <f:variable name="overlay" value="" />
                                             <f:if condition="{addIconOverlay}">
-                                                <f:variable name="iconOverlay" value="{textPreviewLink.data-flag-icon}" />
+                                                <f:variable name="iconOverlay" value="{textPreviewLink.flagIcon}" />
                                             </f:if>
-                                            <a href="#" class="btn btn-default" title="{textPreviewLink.title}" data-dispatch-action="{textPreviewLink.data-dispatch-action}" data-dispatch-args="{textPreviewLink.data-dispatch-args}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
+                                            <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{textPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{row.title}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
                                         </f:for>
                                     </f:if>
                                 </f:for>
@@ -158,6 +158,22 @@
             </f:be.infobox>
         </f:else>
     </f:if>
+    <div class="t3js-modal modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="previewModal">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="t3js-modal-content modal-content">
+                <div class="modal-header">
+                    <h4 class="t3js-modal-title modal-title"></h4>
+                    <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
+                        <core:icon identifier="actions-close" />
+                        <span class="visually-hidden">Close</span>
+                    </button>
+                </div>
+                <div class="t3js-modal-body modal-body">
+                    <iframe width="100%" height="440" title="Mail Preview" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 </f:section>
 
 <f:section name="ExternalPanel">
