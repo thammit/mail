@@ -340,7 +340,7 @@ class JumpurlMiddleware implements MiddlewareInterface
         $submittedAuthCode = $this->request->getQueryParams()['aC'];
 
         // substitute system markers
-        $markers = ['###SYS_TABLE_NAME###', '###SYS_MAIL_ID###', '###SYS_AUTHCODE###'];
+        $markers = ['###MAIL_RECIPIENT_SOURCE###', '###MAIL_ID###', '###MAIL_AUTHCODE###'];
         $substitutions = [
             mb_substr($this->recipientSourceIdentifier, 0, 1),
             $mailId,

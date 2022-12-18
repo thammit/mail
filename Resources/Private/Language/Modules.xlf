@@ -310,9 +310,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
 ###USER_zip###
 ###USER_country###
 ###USER_fax###
-###SYS_TABLE_NAME###
-###SYS_MAIL_ID###
-###SYS_AUTHCODE###]]></source>
+###MAIL_RECIPIENT_SOURCE###
+###MAIL_ID###
+###MAIL_AUTHCODE###]]></source>
 		    </trans-unit>
             <trans-unit id="recipient.header" resname="recipient.header">
                 <source>Mail recipient groups</source>

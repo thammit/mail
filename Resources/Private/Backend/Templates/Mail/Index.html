@@ -41,6 +41,22 @@
             </f:render>
         </f:if>
     </div>
+    <div class="t3js-modal modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="previewModal">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="t3js-modal-content modal-content">
+                <div class="modal-header">
+                    <h4 class="t3js-modal-title modal-title"></h4>
+                    <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
+                        <core:icon identifier="actions-close" />
+                        <span class="visually-hidden">Close</span>
+                    </button>
+                </div>
+                <div class="t3js-modal-body modal-body">
+                    <iframe width="100%" height="440" title="Mail Preview" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 </f:section>
 
 <f:section name="previewButtons">
@@ -73,22 +89,6 @@
             </f:for>
         </f:if>
     </f:for>
-    <div class="t3js-modal modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="previewModal">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="t3js-modal-content modal-content">
-                <div class="modal-header">
-                    <h4 class="t3js-modal-title modal-title"></h4>
-                    <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
-                        <core:icon identifier="actions-close" />
-                        <span class="visually-hidden">Close</span>
-                    </button>
-                </div>
-                <div class="t3js-modal-body modal-body">
-                    <iframe width="100%" height="440" title="Mail Preview" frameborder="0"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
 </f:section>
 
 <f:section name="OpenMailsPanel">
@@ -161,7 +161,7 @@
                                 <a href="{be:moduleLink(route:'web_layout', arguments:'{id: data.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.edit')}">
                                     <core:icon identifier="actions-page-open" size="small"/>
                                 </a>
-                                <f:render section="previewButtons" arguments="{uid:data.uid,pageId:mailSysFolderUid}" />
+                                <f:render section="previewButtons" arguments="{uid:data.uid,pageId:data.pid}" />
                             </td>
                             <td class="col-control nowrap">
                                 <f:link.action action="createMailFromInternalPage" arguments="{page: data.uid}" class="btn btn-mail-theme text-uppercase"><f:translate key="{lll}general.button.next" default="Next" /></f:link.action>

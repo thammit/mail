@@ -108,9 +108,9 @@ class MailFactory
             $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
             $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
             $jumpUrlPrefix = $baseUrl . $glue .
-                'mail=###SYS_MAIL_ID###' .
-                ($trackingPrivacy ? '' : '&rid=###SYS_TABLE_NAME###-###USER_uid###') .
-                '&aC=###SYS_AUTHCODE###' .
+                'mail=###MAIL_ID###' .
+                ($trackingPrivacy ? '' : '&rid=###MAIL_RECIPIENT_SOURCE###-###USER_uid###') .
+                '&aC=###MAIL_AUTHCODE###' .
                 '&jumpurl=';
 
             $dom = pQuery::parseStr($htmlContent);

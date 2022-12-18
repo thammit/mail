@@ -233,9 +233,9 @@ class MailerService implements LoggerAwareInterface
         if ($recipientData['email']) {
 
             $additionalMarkers = [
-                '###SYS_TABLE_NAME###' => $recipientSourceIdentifier,
-                '###SYS_MAIL_ID###' => $this->mailUid,
-                '###SYS_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
+                '###MAIL_RECIPIENT_SOURCE###' => $recipientSourceIdentifier,
+                '###MAIL_ID###' => $this->mailUid,
+                '###MAIL_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
             ];
 
             $recipientCategories = $recipientData['categories'] ?? [];
