@@ -20,14 +20,17 @@ lib {
     contentElement {
         templateRootPaths {
             200 = EXT:mail/Resources/Private/Templates/ContentElements/
+            210 = {$plugin.mail.view.content.templatesRootPath}
         }
 
         partialRootPaths {
             200 = EXT:mail/Resources/Private/Partials/
+            210 = {$plugin.mail.view.content.partialsRootPath}
         }
 
         layoutRootPaths {
             200 = EXT:mail/Resources/Private/Layouts/
+            210 = {$plugin.mail.view.content.layoutsRootPath}
         }
     }
     parseFunc {
@@ -49,9 +52,15 @@ plugin.tx_news {
     view {
         templateRootPaths {
             200 = EXT:mail/Resources/Private/Templates/ContentElements/
+            210 = {$plugin.mail.view.content.templatesRootPath}
+        }
+        partialRootPaths {
+            200 = EXT:mail/Resources/Private/Partials/
+            210 = {$plugin.mail.view.content.partialsRootPath}
         }
         layoutRootPaths {
             200 = EXT:mail/Resources/Private/Layouts/
+            210 = {$plugin.mail.view.content.layoutsRootPath}
         }
     }
 }
@@ -71,21 +80,27 @@ mail {
         extractContent = 0
         css = COA
         css {
-#            10 = FLUIDTEMPLATE
-#            10.file = EXT:mail/Resources/Public/Css/zurb.css
             10 = SCSS
             10.file = EXT:mail/Resources/Public/Scss/foundation-emails.scss
             20 = SCSS
-            20.file = EXT:mail/Resources/Public/Scss/mail.scss
+            20.file = {$plugin.mail.settings.scss.modifications}
         }
         html = FLUIDTEMPLATE
         html {
             templateName = Html
-            templateRootPaths.200 = EXT:mail/Resources/Private/Templates/Mail/
-            partialRootPaths.200 = EXT:mail/Resources/Private/Partials/
-            layoutRootPaths.200 = EXT:mail/Resources/Private/Layouts/
+            templateRootPaths {
+                0 = EXT:mail/Resources/Private/Templates/Mail/
+                10 = {$plugin.mail.view.page.templatesRootPath}
+            }
+            partialRootPaths {
+                0 = EXT:mail/Resources/Private/Partials/
+                10 = {$plugin.mail.view.page.partialsRootPath}
+            }
+            layoutRootPaths {
+                0 = EXT:mail/Resources/Private/Layouts/
+                10 = {$plugin.mail.view.page.layoutsRootPath}
+            }
             settings {
-                html2canvas = 0
                 header {
                     title = {$plugin.mail.settings.header.title}
                     image {
@@ -103,16 +118,10 @@ mail {
                 privacyPid.value = {$privacyPid}
                 currentPid = TEXT
                 currentPid.data = TSFE:id
-                showGeneralSalutation < tmp.showGeneralSalutation
             }
         }
     }
 }
-[traverse(request.getQueryParams(), 'html2canvas')  == 1]
-    mail.10.html.settings.html2canvas = 1
-    mail.10.html.variables.mailUid = TEXT
-    mail.10.html.variables.mailUid.data = gp:mailUid
-[end]
 
 [traverse(request.getQueryParams(), 'plain')  == 1]
     // do no use table markup for plain text since conversation is done by league/html-to-markdown package

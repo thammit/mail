@@ -42,7 +42,7 @@ imports:
 
 ### 3. Add a new sysfolder inside (!) of your page tree (not on page 0!)
 
-This folder will be used to store the mail pages later. Remember the uid of this new page, it will be needed in a later step.
+This folder will be used to store the mail pages later. Remember the uid of this new sysfolder page, you may need it in a later step.
 
 Open the settings of the new created sysfolder page and go to tab "Behaviour", and select "Mail Module" under "Contains plugin".
 Next, switch to tab "Resources" and add this three static page TSconfig entries:
@@ -54,7 +54,7 @@ Press the good old floppy disc icon to save the data
 After saving, a new backend layout "Mail" should be available under the "Appearance" tab.
 Choose it for this page and also for the subpages.
 
-## 4. Add a typoscript template record to the mail sysfolder
+### 4. Add a typoscript template record to the mail sysfolder
 
 Under options activate the checkboxes to clear constant and setup from upper levels.
 After this change to tab "Contains" and add this two static templates:
@@ -63,7 +63,7 @@ After this change to tab "Contains" and add this two static templates:
 
 Press the good old floppy disc icon again to save the data
 
-## 5. Configure default settings
+### 5. Configure default settings
 Mail brings, like direct_mail, an own backend module to adjust some default settings used during creation of a new mailing.
 
 To do this, click on the blue cog icon (Configuration) on the left side within the other mail modules.
@@ -74,7 +74,7 @@ The input fields are split in several groups, which can be reached by clicking o
 
 After filling all fields with your data, press save to store it as pageTS-Config in the page you selected before.
 
-## 6. Add a recipient group
+### 6. Add a recipient group
 Since this extension is made to send personalized mails to groups of recipients, this groups has to be defined first.
 Mail comes with a lot of possibilities:
  - From pages
@@ -94,7 +94,7 @@ Mail comes with a lot of possibilities:
 Some direct_mail power users may miss the possibility to define queries as sending groups.
 This feature is currently not available, and will maybe come with a future release. Sponsoring is highly welcome.
 
-## 7. Add a mail page to the mail sysfolder
+### 7. Add a mail page to the mail sysfolder
 Mail brings an own page type (24, can be changed inside extension settings), which should appear as a new icon (letter within an envelope) above the page tree, beside the other page type icons.
 
 To create a new mail, just drag and drop the mail page icon inside the new mail sysfolder created in step 3.
@@ -176,20 +176,123 @@ During moving your mouse over a row of categories the corresponding content elem
 
 To see categories at this place, they must be defined before, off course.
 
-Here is an Page TSconfig example of how to restrict a list of categories to a specific parent category (14):
+Here is an Page TSconfig example of how to restrict a list of categories to a specific parent category (has uid 1 in this example):
 ```
-TCEFORM.tt_content.categories.config.treeConfig.startingPoints = 14
+TCEFORM.tt_content.categories.config.treeConfig.startingPoints = 1
 TCEFORM.tt_content.categories.config.treeConfig.appearance.nonSelectableLevels = 0
-TCEFORM.tt_address.categories.config.treeConfig.startingPoints = 14
+TCEFORM.tt_address.categories.config.treeConfig.startingPoints = 1
 TCEFORM.tt_address.categories.config.treeConfig.appearance.nonSelectableLevels = 0
-TCEFORM.fe_users.categories.config.treeConfig.startingPoints = 14
+TCEFORM.fe_users.categories.config.treeConfig.startingPoints = 1
 TCEFORM.fe_users.categories.config.treeConfig.appearance.nonSelectableLevels = 0
-TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.startingPoints = 14
+TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.startingPoints = 1
 TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.appearance.nonSelectableLevels = 0
 ```
-This config placed in the Page TSconfig field of the mail sysfolder page, will reduce all categories shown in tt_content, tt_address, fe_users and for simple list recipient groups to the parent category 14.
+This config placed in the Page TSconfig field of the mail sysfolder page, will reduce all categories shown in tt_content, tt_address, fe_users and for simple list recipient groups living inside the mail sysfolder to the parent category with the uid 1.
 
-Beside of this is prevents that the parent page itself is checkable (nonSelectableLevels = 0).
+Beside of this, the nonSelectableLevels = 0 lines prevent the parent category itself is checkable.
+
+But for now you can skip this step by click on NEXT, which brings you to the fourth step: test mail
+
+Here you can send a simple test mail to one or a list of mail addresses.
+But beware: The generated mail will include ALL content elements regardless of their categories. User fields will NOT be substituted with data.
+
+After pressing NEXT another time, you reached the last point of this wizard: Schedule sending
+
+On this site you can choose one (or more) recipient groups and the date/time when distribution should start.
+
+For our test, just choose the recipient group you created in step 6 of this manual and press FINISH.
+
+Now the mail was added to the mail queue, which can be managed in its own backend module.
+Watch out for the blue/white clock icon on the left side.
+
+If you click that clock button, you should see your mailing on top now.
+
+In the case you did not have configured the mail sending queue command controller yet inside the TYPO3 scheduler module, you can press the button "Start sending manually" for now.
+
+This will send the mail immediately to the members of the recipient group you choose in the last step of the mail wizard.
+
+Now go to the mail program of your trust, to receive the recently generated mail.
+
+If you add links to internal or external pages inside the mail content and activate click tracking inside the mail configuration module, you are also able to see which links are clicked how many times.
+To do this, move to the reports module (pie chart icon) and click on the title of the mailing.
+
+Under the panel "Performance" you can see some metrics about the responses.
+This numbers, especially "Unique responses (links clicked)" and "Total responses/Unique responses" are coming from the code developed from the direct_mail team.
+I have no clue, how relevant they are and even show the right values.
+If someone with marketing skills could give me feedback about it, I would really be happy.
+
+Basically thats all to know from a editor view.
+
+But there are some more things to know for integrators and developers ...
+
+## Integration
+
+### TypoScript Template
+
+The static template of this extension can be found in `EXT:mail/Configuration/TypoScript/ContentElements/` folder,
+and contains a constants file where you can change a lot of things.
+Most of them are also available by the constants editor and self explaining.
+
+All constants under the key `plugin.mail.settings.scss` are sass variables and identical with the values used by foundation mail.
+See https://get.foundation/emails/docs/ for more info.
+
+Since this extension make use of the php package scssphp/scssphp it is not necessary to use a special build pipeline to create css out of scss.
+Thanks to Benjamin Kott at this place for the inspiration!
+
+As in EXT:bootstrap_package it is possible to add your own scss variables under this key an use it later inside of your mail template.
+E.g. the constant `plugin.mail.settings.scss.my-own-color = #ff6600` will be available as scss variable $my-own-color in your own scss file.
+
+In the constants you also can adjust some logo settings (src, width and alt), used in the html mail template found under `EXT:mail/Resources/Private/Templates/Mail/Html.html`
+
+Furthermore, you can (of course) override all template, partial and layout paths of the mail template and the table based content elements as well.
+
+### Page TSconfig
+
+There are currently tree of such kind, who all can be found here:
+```
+EXT:mail/Configuration/TsConfig/Page
+```
+`TCADefaults.tsconfig` contain some default pages settings which does not (for me) make sense in context of mails.
+
+`ContentElement/All.tsconfig` removes all not supported content elements from the newContentElement wizard of TYPO3.
+
+`BackendLayouts/Mail.tsconfig` adds a very simple one column backend layout for mail content to the system.
+
+### Site Configuration
+
+This extension needs a existing site configuration to work, which should be standard nowadays.
+
+There are two site configurations coming with this extension, both life inside the `Configuration/Site` folder.
+
+#### Transport.yaml
+This configuration should only be used as a copy base for your own mail transport settings.
+The supported parameters are the same as defined in `$GLOBALS['TYPO3_CONF_VARS']['Mail']`.
+
+Adding one or more of this setting inside your site configuration is only necessary if you like to override the mail transport setting for a specific site.
+If a property is not set via site config, there corresponding system setting is used, defined in `$GLOBALS['TYPO3_CONF_VARS']['Mail']`.
+The overrides do only affect the transport settings used by EXT:mail or its `MEDIAESSENZ\Mail\Mail\(Mailer|MailMessage)` classes.
+
+#### RecipientSources.yaml
+To add all recipient sources come with EXT:mail (fe_groups, fe_users, tt_address) you just can import this file inside your site configuration like this:
+```yaml
+imports:
+  - { resource: "EXT:mail/Configuration/Site/RecipientSources.yaml" }
+```
+To add your own recipient source, just add another entry under the key `mail.recipientSources`.
+Here an (commented) example:
+```yaml
+mail:
+  recipientSources:
+    tx_extension_domain_model_address: #<- Table name
+      title: 'LLL:EXT:extension/Resources/Private/Language/locallang.xlf:tx_extension_domain_model_address.title' #<- title of the recipient source
+      icon: 'tcarecords-tx_extension_domain_model_address-default' #<- icon identifier
+```
+
+## Developer Stuff
+
+Under the hood the extension make use of the pelago/emogrifier package, which converts all css to inline styles, which is unfortunately necessary for outlook and co.
+
+Additionally, it uses the league/html-to-markdown package to convert an html mail to a plain text (markdown) version automatically, if a recipient don't like such modern stuff :-).
 
 ## Support
 Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.

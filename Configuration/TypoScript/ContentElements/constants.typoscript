@@ -10,93 +10,121 @@ styles {
 termsPid = 122
 privacyPid = 138
 
+plugin.mail.view {
+    page {
+        # cat=mail/file; type=string; label=Path to template root for mail pages (FE)
+        templatesRootPath = EXT:mail/Resources/Private/Templates/Mail/
+        # cat=mail/file; type=string; label=Path to partials root for mail pages (FE)
+        partialsRootPath = EXT:mail/Resources/Private/Partials/
+        # cat=mail/file; type=string; label=Path to layouts root for mail pages (FE)
+        layoutsRootPath = EXT:mail/Resources/Private/Layouts/
+    }
+    content {
+        # cat=mail/file; type=string; label=Path to template root for mail content element (FE)
+        templatesRootPath = EXT:mail/Resources/Private/Templates/ContentElements/
+        # cat=mail/file; type=string; label=Path to partials root for mail content element (FE)
+        partialsRootPath = EXT:mail/Resources/Private/Partials/
+        # cat=mail/file; type=string; label=Path to layouts root for mail content element (FE)
+        layoutsRootPath = EXT:mail/Resources/Private/Layouts/
+    }
+}
+
 plugin.mail.settings {
     header {
+        # cat=mail/dims/001; type=string; label=Title of the mail header
         title = Newsletter
         image {
+            # cat=mail/file/001; type=string; label=Logo source
             src = EXT:mail/Resources/Public/Images/Logo.png
+            # cat=mail/dims/001; type=string; label=Logo alt text
             alt = Logo
+            # cat=mail/dims/001; type=string; label=Logo width
             width = 300
+            # cat=mail/dims/001; type=string; label=Logo height
+            height =
         }
     }
 }
 
 plugin.mail.settings.scss {
-    # cat=basic/color/001; type=color; label=Primary color, used with components that support the `.primary` class
+    # cat=mail/file/001; type=string; label=Scss file to modify the default scss of foundation mail
+    modifications = EXT:mail/Resources/Public/Scss/mail.scss
+
+    # cat=mail/color/001; type=color; label=Primary color, used with components that support the `.primary` class
     primary-color = #037eab
 
-    # cat=basic/color/002; type=color; label=Secondary color, used with components that support the `.secondary` class
+    # cat=mail/color/002; type=color; label=Secondary color, used with components that support the `.secondary` class
     secondary-color = #777777
 
-    # cat=basic/color/003; type=color; label=Color to indicate a positive status or action, used with the `.success` class
+    # cat=mail/color/003; type=color; label=Color to indicate a positive status or action, used with the `.success` class
     success-color = #3adb76
 
-    # cat=basic/color/004; type=color; label=Color to indicate a caution status or action, used with the `.warning` class
+    # cat=mail/color/004; type=color; label=Color to indicate a caution status or action, used with the `.warning` class
     warning-color = #ffae00
 
-    # cat=basic/color/005; type=color; label=Color to indicate a negative status or action, used with the `.alert` class
+    # cat=mail/color/005; type=color; label=Color to indicate a negative status or action, used with the `.alert` class
     alert-color = #ec5840
 
-    # cat=basic/color/006; type=color; label=Color used for light gray UI items within Foundation
+    # cat=mail/color/006; type=color; label=Color used for light gray UI items within Foundation
     light-gray = #f3f3f3
 
-    # cat=basic/color/007; type=color; label=Color used for medium gray UI items within Foundation
+    # cat=mail/color/007; type=color; label=Color used for medium gray UI items within Foundation
     medium-gray = #cacaca
 
-    # cat=basic/color/008; type=color; label=Color used for dark gray UI items within Foundation
+    # cat=mail/color/008; type=color; label=Color used for dark gray UI items within Foundation
     dark-gray = #8a8a8a
 
-    # cat=basic/color/009; type=color; label=Color used for black ui items within Foundation
+    # cat=mail/color/009; type=color; label=Color used for black ui items within Foundation
     black = #0a0a0a
 
-    # cat=basic/color/010; type=color; label=Color used for white ui items within Foundation
+    # cat=mail/color/010; type=color; label=Color used for white ui items within Foundation
     white = #fefefe
 
-    # cat=basic/color/011; type=color; label=Code color (<pre>)
+    # cat=mail/color/011; type=color; label=Code color (<pre>)
     pre-color = #ff6908
 
-    # cat=basic/color/012; type=color; label=Headlines color
+    # cat=mail/color/012; type=color; label=Headlines color
     header-color = #444444
 
-    # cat=basic/color/013; type=color; label=Text color
+    # cat=mail/color/013; type=color; label=Text color
     global-font-color = #444444
 
-    # cat=basic/color/014; type=color; label=Header background color
+    # cat=mail/color/014; type=color; label=Header background color
     header-background-color = #037eab
 
-    # cat=basic/color/015; type=string; label=Body background color
+    # cat=mail/color/015; type=string; label=Body background color
     body-background = $light-gray
 
-    # cat=basic/color/016; type=string; label=Container background color
+    # cat=mail/color/016; type=string; label=Container background color
     container-background-color = $white
 
-    # cat=basic/color/017; type=string; label=Footer background color
+    # cat=mail/color/017; type=string; label=Footer background color
     footer-background-color = $light-gray
 
-    # cat=basic/dims/001; type=dims; label=Container width
+    # cat=mail/dims/001; type=dims; label=Container width
     global-width = 600px
 
-    # cat=basic/dims/002; type=dims; label=Container width (small screens)
+    # cat=mail/dims/002; type=dims; label=Container width (small screens)
     global-width-small = 95%
 
-    # cat=basic/dims/003; type=dims; label=Gutter for grid elements
+    # cat=mail/dims/003; type=dims; label=Gutter for grid elements
     global-gutter = 20px
 
-    # cat=basic/dims/004; type=string; label=Gutter for grid elements (small screens)
+    # cat=mail/dims/004; type=string; label=Gutter for grid elements (small screens)
     global-gutter-small = $global-gutter
 
-    # cat=basic/dims/005; type=dims; label=Global padding
+    # cat=mail/dims/005; type=dims; label=Global padding
     global-padding = 20px
 
-    # cat=basic/dims/006; type=dims; label=Global margin
+    # cat=mail/dims/006; type=dims; label=Global margin
     global-margin = 16px
 
-    # cat=basic/dims/007; type=dims; label=Global radius
+    # cat=mail/dims/007; type=dims; label=Global radius
     global-radius = 3px
 
-    # cat=basic/dims/008; type=dims; label=Global rounded radius of rounded-corners
+    # cat=mail/dims/008; type=dims; label=Global rounded radius of rounded-corners
     global-rounded = 500px
 
-    # cat=basic/dims/009; type=string; label=Global media query to switch from desktop to mobile styles
+    # cat=mail/dims/009; type=string; label=Global media query to switch from desktop to mobile styles
     global-breakpoint = $global-width + $global-gutter
 }
