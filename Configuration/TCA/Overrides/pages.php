@@ -60,17 +60,17 @@ try {
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::registerPageTSConfigFile(
     'mail',
     'Configuration/TsConfig/Page/ContentElement/All.tsconfig',
-    'Mail: Remove not supported content elements'
+    'MAIL: Remove not supported content elements'
 );
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::registerPageTSConfigFile(
     'mail',
     'Configuration/TsConfig/Page/BackendLayouts/Mail.tsconfig',
-    'Mail: Add simple mail backend layout'
+    'MAIL: Add simple mail backend layout'
 );
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::registerPageTSConfigFile(
     'mail',
     'Configuration/TsConfig/Page/TCADefaults.tsconfig',
-    'Mail: Default settings for mail pages'
+    'MAIL: Default settings for mail pages'
 );

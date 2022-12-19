@@ -15,7 +15,7 @@ mail:
   transport_sendmail_command:
   transport_mbox_file:
   transport_spool_type: file
-  transport_spool_filepath: 'typo3temp/tx_mailspool/'
+  transport_spool_filepath: 'upload/tx_mailspool/'
   dsn:
   validators:
     - Egulias\EmailValidator\Validation\RFCValidation

@@ -16,7 +16,7 @@
                 <source>Mail</source>
             </trans-unit>
             <trans-unit id="pages.module.I.5">
-                <source>Mail Module</source>
+                <source>MAIL Module</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_mail">
                 <source>Mails</source>

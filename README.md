@@ -1,10 +1,10 @@
-# Mail for TYPO3
+# MAIL for TYPO3
 
 
 
 ## What does it do?
 
-Mail is a TYPO3 backend module for sending personalized mails to different groups of recipients.
+MAIL is a TYPO3 backend module for sending personalized mails to different groups of recipients.
 
 This can be done from an internal TYPO3 page, from an external URL or a simple text field.
 
@@ -44,30 +44,30 @@ imports:
 
 This folder will be used to store the mail pages later. Remember the uid of this new sysfolder page, you may need it in a later step.
 
-Open the settings of the new created sysfolder page and go to tab "Behaviour", and select "Mail Module" under "Contains plugin".
+Open the settings of the new created sysfolder page and go to tab "Behaviour", and select "MAIL Module" under "Contains plugin".
 Next, switch to tab "Resources" and add this three static page TSconfig entries:
- - "Mail: Remove not supported content element (mail)"
- - "Mail: Add simple mail backend layout (mail)"
- - "Mail: Default settings for mail pages (mail)"
+ - "MAIL: Remove not supported content element (mail)"
+ - "MAIL: Add simple mail backend layout (mail)"
+ - "MAIL: Default settings for mail pages (mail)"
 
 Press the good old floppy disc icon to save the data.
 
-After saving, a new backend layout "Mail" should be available under the "Appearance" tab.
+After saving, a new backend layout "MAIL" should be available under the "Appearance" tab.
 Choose it for this page and also for the subpages.
 
-### 4. Add a typoscript template record to the mail sysfolder
+### 4. Add a typoscript template record to the MAIL sysfolder
 
 Under options activate the checkboxes to clear constant and setup from upper levels.
 After this change to tab "Contains" and add this two static templates:
  - "Fluid Content Elements (fluid_styled_content)"
- - "Mail (mail)"
+ - "MAIL (mail)"
 
 Press the good old floppy disc icon again to save the data.
 
 ### 5. Configure default settings
-Mail brings, like direct_mail, an own backend module to adjust some default settings used during creation of a new mailing.
+MAIL brings, like EXT:direct_mail, an own backend module to adjust some default settings used during creation of a new mailing.
 
-To do this, click on the blue cog icon (Configuration) on the left side within the other mail modules.
+To do this, click on the blue cog icon (Configuration) on the left side within the other MAIL modules.
 
 Now, you have to choose the mail sysfolder, because the configuration will be stored in it.
 
@@ -77,9 +77,9 @@ After filling all fields with your data, press save to store it as Page TSconfig
 
 ### 6. Add a recipient group
 Since this extension is made to send personalized mails to groups of recipients, this groups has to be defined first.
-Mail comes with a lot of possibilities:
+MAIL comes with a lot of possibilities:
  - From pages
-   - compare to direct_mail, mail is not limited to fe_groups, fe_users, tt_address and one custom table
+   - compare to EXT:direct_mail, MAIL is not limited to fe_groups, fe_users, tt_address and one custom table
    - It is possible to add as many tables you like, as long they have the needed fields or an extbase model which implements at least the RecipientInterface, defined in `Classes/Domain/Model/RecipientInterface.php`
    - Beside the recipient source (table) it is also possible to set a starting point where the records should be taken from
    - Categories can also be set to filter the list of recipients to only those how have the at least one of them assigned as well
@@ -87,20 +87,20 @@ Mail comes with a lot of possibilities:
    - Single records of all defined sources can be added – also fe_groups which will add all fe_users who have this groups assigned.
  - Plain list
    - A comma separated list of recipients (just mails or names and mails separated by a comma or semicolon)
-   - compare to direct_mail, within mail you also can choose whether the group of users should receive html or just plain mails.
+   - compare to EXT:direct_mail, within MAIL you also can choose whether the group of users should receive html or just plain mails.
    - categories are also definable
  - From other recipient lists
    - To make things even more flexible, it is also possible to create a compilation of different other recipient groups.
 
-Some direct_mail power users may miss the possibility to define queries as sending groups.
+Some EXT:direct_mail power users may miss the possibility to define queries as sending groups.
 This feature is currently not available, and will maybe come with a future release. Sponsoring is highly welcome.
 
-### 7. Add a mail page to the mail sysfolder
-Mail brings an own page type (24, can be changed inside extension settings), which should appear as a new icon (letter within an envelope) above the page tree, beside the other page type icons.
+### 7. Add a MAIL page to the MAIL sysfolder
+MAIL brings an own page type (24, can be changed inside extension settings), which should appear as a new icon (letter within an envelope) above the page tree, beside the other page type icons.
 
-To create a new mail, just drag and drop the mail page icon inside the new mail sysfolder created in step 3.
+To create a new mail, just drag and drop the MAIL page icon inside the new mail sysfolder created in step 3.
 
-Now you can add content to the mail page using the normal page module.
+Now you can add content to the MAIL page using the normal page module.
 
 As you may notice, only a few content elements are available, and some of them do not work yet.
 
@@ -112,7 +112,7 @@ The included content elements are inspired by EXT:luxletter. Thanks to in2code f
 
 ### 8. Send your first personalized mail
 After setting up all previous steps, its time to send our first personalized mail.
-To do so, we first add some content element to our just created mail page.
+To do so, we first add some content element to our just created MAIL page.
 Let's add a headline element first and enter this content inside the headline field:
 ```
 ###USER_salutation###
@@ -145,20 +145,20 @@ Additional ALL as uppercase version:
 ```
 This will result in the uppercase salutation, name, ... of the recipient later.
 
-Inspired by direct_mail, there are also some special placeholders available:
+Inspired by EXT:direct_mail, there are also some special placeholders available:
 ```
 ###MAIL_RECIPIENT_SOURCE###
 ###MAIL_ID###
 ###MAIL_AUTHCODE###
 ```
 
-Since we want to keep things simple for now, we only add another content element to the mail page, e.g. text with image.
+Since we want to keep things simple for now, we only add another content element to the MAIL page, e.g. text with image.
 
 After adding some dummy text choosing an image, specify its position, save and close it.
 
-Now click the blue/white envelope icon of the mail wizard module.
+Now click the blue/white envelope icon of the MAIL wizard module.
 
-Choose the mail sysfolder and move over to the main content area of this module, where the accordion for "Internal Page" should now show the previous created mail page.
+Choose the MAIL sysfolder and move over to the main content area of this module, where the accordion for "Internal Page" should now show the previous created MAIL page.
 
 With the two page preview buttons (page-eye-icon) you can get an idea how the mail will look like at the mail client of the recipient later.
 
@@ -188,7 +188,7 @@ TCEFORM.fe_users.categories.config.treeConfig.appearance.nonSelectableLevels = 0
 TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.startingPoints = 1
 TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.appearance.nonSelectableLevels = 0
 ```
-This config placed in the Page TSconfig field of the mail sysfolder page, will reduce all categories shown in tt_content, tt_address, fe_users and for simple list recipient groups living inside the mail sysfolder to the parent category with the uid 1.
+This config placed in the Page TSconfig field of the MAIL sysfolder page, will reduce all categories shown in tt_content, tt_address, fe_users and for simple list recipient groups living inside the MAIL sysfolder to the parent category with the uid 1.
 
 Beside of this, the nonSelectableLevels = 0 lines prevent the parent category itself is checkable.
 
@@ -203,30 +203,56 @@ On this site you can choose one (or more) recipient groups and the date/time whe
 
 For our test, just choose the recipient group you created in step 6 of this manual and press FINISH.
 
-Now the mail was added to the mail queue, which can be managed in its own backend module.
+Now the mail was added to the MAIL queue, which can be managed in its own backend module.
 Watch out for the blue/white clock icon on the left side.
 
 If you click that clock button, you should see your mailing on top now.
 
-In the case you did not have configured the mail sending queue command controller yet inside the TYPO3 scheduler module, you can press the button "Start sending manually" for now.
+In the case you did not have configured the MAIL sending queue command controller yet inside the TYPO3 scheduler module, you can press the button "Start sending manually" for now.
 
-This will send the mail immediately to the members of the recipient group you choose in the last step of the mail wizard.
+This will send the mail immediately to the members of the recipient group you choose in the last step of the MAIL wizard.
 
 Now go to the mail program of your trust, to receive the recently generated mail.
 
-If you add links to internal or external pages inside the mail content and activate click tracking inside the mail configuration module, you are also able to see which links are clicked how many times.
-To do this, move to the reports module (pie chart icon) and click on the title of the mailing.
+If you add links to internal or external pages inside the mail content and activate click tracking inside the MAIL configuration module, you are also able to see which links are clicked how many times.
+To do this, move to the report's module (pie chart icon) and click on the title of the mailing.
 
 Under the panel "Performance" you can see some metrics about the responses.
-This numbers, especially "Unique responses (links clicked)" and "Total responses/Unique responses" are coming from the code developed from the direct_mail team.
+This numbers, especially "Unique responses (links clicked)" and "Total responses/Unique responses" are taken from the code developed from the EXT:direct_mail team.
 I have no clue, how relevant they are and even show the right values.
 If someone with marketing skills could give me feedback about it, I would really be happy.
 
-Basically thats all to know from a editor view.
+Basically that's all to know from a editor view.
 
 But there are some more things to know for integrators and developers ...
 
 ## Integration
+
+### Extension Configuration (Install tool)
+
+#### Default recipient fields (defaultRecipientFields)
+Default fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user
+#### Additional DB fields of the recipient (additionalRecipientFields)
+Additional fields that may be substituted in the mail messages.
+#### Mail page type number (mailPageTypeNumber)
+Change this number only if another extension use the same. Default: 24
+#### MAIL modules position in the side navigation (mailModulePosition)
+If set to empty, the module will move to the end of all other modules
+#### Mail module page id (mailModulePageId)
+If set, page tree navigation will be hidden in MAIL module. Here you can add the uid of the MAIL sysfolder if you only have one.
+#### Delete unused markers in personalized mails (deleteUnusedMarkers)
+All markers/placeholder where no corresponding recipient data where found will not appear in personalized mails.
+#### Enable notification mail (notificationJob)
+Allow MAIL to send notification about start and end of a mailing job.
+#### Deactivate categories (deactivateCategories)
+Attention: If set, ALL category fields inside tt_content,fe_users,tt_address,tx_mail_domain_model_group will be disabled!
+#### Use http connection for fetching Newsletter-Content (useHttpToFetch)
+Even if your TYPO3 Backend is in SSL-Mode, the URL for fetching the newsletter contents will be http
+#### Mapping sys_dmail_category -> sys_category (directMailCategorySysCategoryMapping)
+Used by update wizard to migrate Direct Mail records to MAIL records.
+Format: 1:2,2:3,3:4 maps Direct mail category 1 to sys_category 2 and Direct mail category 2 to sys_category 3 and so on. If categories not found or set, new categories will be added.
+#### Parent sys_category used by sys_dmail_category -> sys_category migration (directMailCategorySysCategoryParentCategory)
+If the migrated categories should be attached to a parent sys_category
 
 ### TypoScript Template
 
@@ -240,12 +266,18 @@ See https://get.foundation/emails/docs/ for more info.
 Since this extension make use of the php package scssphp/scssphp it is not necessary to use a special build pipeline to create css out of scss.
 Thanks to Benjamin Kott at this place for the inspiration!
 
-As in EXT:bootstrap_package it is possible to add your own scss variables under this key an use it later inside of your mail template.
+As in EXT:bootstrap_package it is possible to add your own scss variables under this key an use it later inside your mail template.
 E.g. the constant `plugin.mail.settings.scss.my-own-color = #ff6600` will be available as scss variable $my-own-color in your own scss file.
 
-In the constants you also can adjust some logo settings (src, width and alt), used in the html mail template found under `EXT:mail/Resources/Private/Templates/Mail/Html.html`
+In the constants you also can adjust some logo settings (src, width and alt), used in the html mail template found here `EXT:mail/Resources/Private/Templates/Mail/Html.html`
 
 Furthermore, you can (of course) override all template, partial and layout paths of the mail template and the table based content elements as well.
+
+The typoscript setup uses some userfuncs to wrap every content element in special html comments, which also contain categories if set.
+
+To replace all css code to inline styles, mail brings an special typoscript object type: `EMOGRIFIER`
+
+And another one for transpiling scss to css: `SCSS`
 
 ### Page TSconfig
 
@@ -263,7 +295,7 @@ EXT:mail/Configuration/TsConfig/Page
 
 This extension needs a existing site configuration to work, which should be standard nowadays.
 
-There are two site configurations coming with this extension, both life inside the `Configuration/Site` folder.
+There are two site configurations coming with this extension, both life inside the `EXT:mail/Configuration/Site` folder.
 
 #### Transport.yaml
 This configuration should only be used as a copy base for your own mail transport settings.
@@ -274,7 +306,7 @@ If a property is not set via site config, there corresponding system setting is 
 The overrides do only affect the transport settings used by EXT:mail or its `MEDIAESSENZ\Mail\Mail\(Mailer|MailMessage)` classes.
 
 #### RecipientSources.yaml
-To add all recipient sources come with EXT:mail (fe_groups, fe_users, tt_address) you just can import this file inside your site configuration like this:
+To add all recipient sources come with MAIL (fe_groups, fe_users, tt_address) you just can import this file inside your site configuration like so:
 ```yaml
 imports:
   - { resource: "EXT:mail/Configuration/Site/RecipientSources.yaml" }
@@ -288,7 +320,7 @@ mail:
       title: 'LLL:EXT:extension/Resources/Private/Language/locallang.xlf:tx_extension_domain_model_address.title' #<- title of the recipient source
       icon: 'tcarecords-tx_extension_domain_model_address-default' #<- icon identifier
 ```
-To simplify things a bit, it is also possible to ignore the mail_html and mail_active fields (they not need to exists at all).
+To simplify things a bit, it is also possible to ignore the mail_html and mail_active fields (they not need to exist at all).
 To do this, just add `forceHtmlMail: true` or/and `ignoreMailActive: true` to your recipientSource configuration.
 
 If a table doesn't contain the upper mentioned fields, or the fields have different names, it is also possible to use an extbase model to map fields to the need.
@@ -302,10 +334,10 @@ mail:
       model: Vendor\Extension\Domain\Model\MailAddress #<- the extbase model
 ```
 Beside of the site configuration a model definition and a mapping configuration is needed as well.
-Check the included model `EXT:mail/Classes/Domain/Model/Address.php` and `EXT:mail/Configuration/Extbase/Persistence/Classes.php` to see how this can look like.
+Check the included model `EXT:mail/Classes/Domain/Model/Address.php` and `EXT:mail/Configuration/Extbase/Persistence/Classes.php` for how this can look like.
 
 The model needs to implement at least the included RecipientInterface.
-If you like to use categories, to send specific parts of a mail only to a specific group of recipients, the included CategoryInterface has to be implement as well.
+If you like to use categories, to send specific parts of a mail only to a specific group of recipients, the included CategoryInterface has to be implemented as well.
 
 Since this extension can handle simple tables and extbase models as well, and in the end its data only used to replace a simple placeholder like ###USER_name###, I decided to use simple arrays for transporting.
 
@@ -314,7 +346,7 @@ Btw.: The same method will be used by the csv-export inside the recipient group 
 
 ### Scheduler Task / Command Controller
 
-This extension comes with tree different command controller, which all can be added as task inside the TYPO3 scheduler module.
+MAIL comes with tree different command controller, which all can be added as task inside the TYPO3 scheduler module.
 
 #### MassMailingCommand (mail:mass-mailing: Add scheduled newsletter to sending queue)
 This command is responsible for adding scheduled mailings to the sending queue.
@@ -322,7 +354,7 @@ There are two mandatory parameters:
  - site-identifier
  - send-per-cycle
 
-The first one (site-identifier) is the identifier of the site configuration where mail can find its recipient sources configuration.
+The first one (site-identifier) is the identifier of the site configuration where MAIL can find its recipient sources configuration.
 You can find it inside the TYPO3 sites module under the "General" tab.
 
 The second (send-per-cycle) determine how many mails should be sent per cycle.
@@ -331,18 +363,20 @@ The time between a cycle can be defined in the "Frequency" field of a task.
 e.g. `* * * * *` will run the task every minute, if you put `50` into the send-per-cycle field, 50 Mails per minute will be sent.
 
 #### SpoolSendCommand (mail:spool:send: Process newsletter sending queue)
-This command controller can be used to send mail in a queue using a site specific mail transport configuration.
+This command controller can be used to send mail in a queue.
+It's basically the same coming with TYPO3, but it uses a site specific mail transport configuration.
 See site configuration `Transport.yaml` under Integration up in this manuel.
-It is not really needed by this extension, since the sending is already queued by the MassMailingCommand.
+To make this command controller work, it is also necessary to set `transport_spool_type` to `file` or `memory`. if the type was set to `file`, the `transport_spool_type` has to be set as well, e.g. to `upload/tx_mailspool/`.
+This command controller is not really needed by this extension, since the sending is already queued by the MassMailingCommand.
 But if a developer wants to use the extended Mail-Classes `MEDIAESSENZ\Mail\Mail\(Mailer|MailMessage)` inside their own extension, it can be usefully.
 
 #### AnalyzeBounceMailCommand (mail:analyse-bounce-mail: Analyze bounced newsletters from a configured mailbox.)
-This command fetches returned mails from the mail account defined in the return-path field of the mail configuration module.
+This command fetches returned mails from the mail account defined in the return-path field of the MAIL configuration module.
 Depends on special headers, the reason of the return will be added to the report of the corresponding mail.
 
 ## Developer Stuff
 
-This extension make use of several packages all found at packagist.org:
+MAIL make use of several packages all found at packagist.org:
  - scssphp/scssphp (https://github.com/scssphp/scssphp)
  - pelago/emogrifier (https://github.com/MyIntervals/emogrifier)
  - league/html-to-markdown (https://github.com/thephpleague/html-to-markdown)

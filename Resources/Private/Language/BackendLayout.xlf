@@ -5,7 +5,7 @@
         <header />
         <body>
             <trans-unit id="backend_layout.mail">
-                <source>Mail</source>
+                <source>MAIL</source>
             </trans-unit>
             <trans-unit id="backend_layout.column.border">
                 <source>Border</source>

@@ -115,7 +115,7 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectCheckBox',
                 'allowNonIdValues' => true,
-                'itemsProcFunc' => \MEDIAESSENZ\Mail\UserFunctions\RecordTypesProcFunc::class . '->itemsProcFunc',
+                'itemsProcFunc' => \MEDIAESSENZ\Mail\UserFunctions\RecipientSourcesProcFunc::class . '->itemsProcFunc',
             ],
         ],
         'list' => [
