@@ -127,8 +127,13 @@ mail {
     // do no use table markup for plain text since conversation is done by league/html-to-markdown package
     mail.10.html.templateName = Plain
     lib.contentElement.layoutRootPaths.200 >
+    lib.contentElement.layoutRootPaths.210 >
     lib.contentElement.templateRootPaths.200 >
+    lib.contentElement.templateRootPaths.210 >
     lib.contentElement.partialRootPaths.200 >
+    lib.contentElement.partialRootPaths.210 >
     plugin.tx_news.view.templateRootPaths.200 >
+    plugin.tx_news.view.templateRootPaths.210 >
     plugin.tx_news.view.layoutRootPaths.200 >
+    plugin.tx_news.view.layoutRootPaths.210 >
 [end]
