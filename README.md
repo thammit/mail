@@ -50,7 +50,8 @@ Next, switch to tab "Resources" and add this three static page TSconfig entries:
  - "Mail: Add simple mail backend layout (mail)"
  - "Mail: Default settings for mail pages (mail)"
 
-Press the good old floppy disc icon to save the data
+Press the good old floppy disc icon to save the data.
+
 After saving, a new backend layout "Mail" should be available under the "Appearance" tab.
 Choose it for this page and also for the subpages.
 
@@ -61,7 +62,7 @@ After this change to tab "Contains" and add this two static templates:
  - "Fluid Content Elements (fluid_styled_content)"
  - "Mail (mail)"
 
-Press the good old floppy disc icon again to save the data
+Press the good old floppy disc icon again to save the data.
 
 ### 5. Configure default settings
 Mail brings, like direct_mail, an own backend module to adjust some default settings used during creation of a new mailing.
@@ -72,14 +73,14 @@ Now, you have to choose the mail sysfolder, because the configuration will be st
 
 The input fields are split in several groups, which can be reached by clicking on there title.
 
-After filling all fields with your data, press save to store it as pageTS-Config in the page you selected before.
+After filling all fields with your data, press save to store it as Page TSconfig in the page you selected before.
 
 ### 6. Add a recipient group
 Since this extension is made to send personalized mails to groups of recipients, this groups has to be defined first.
 Mail comes with a lot of possibilities:
  - From pages
    - compare to direct_mail, mail is not limited to fe_groups, fe_users, tt_address and one custom table
-   - It is possible to add as many tables as needed, as long they have the needed fields or an extbase model which implements at least the RecipientInterface, defined in `Classes/Domain/Model/RecipientInterface.php`
+   - It is possible to add as many tables you like, as long they have the needed fields or an extbase model which implements at least the RecipientInterface, defined in `Classes/Domain/Model/RecipientInterface.php`
    - Beside the recipient source (table) it is also possible to set a starting point where the records should be taken from
    - Categories can also be set to filter the list of recipients to only those how have the at least one of them assigned as well
  - Static list
@@ -233,7 +234,7 @@ The static template of this extension can be found in `EXT:mail/Configuration/Ty
 and contains a constants file where you can change a lot of things.
 Most of them are also available by the constants editor and self explaining.
 
-All constants under the key `plugin.mail.settings.scss` are sass variables and identical with the values used by foundation mail.
+Beside `modifications`, all constants under the key `plugin.mail.settings.scss` are sass variables and identical with the values used by foundation mail.
 See https://get.foundation/emails/docs/ for more info.
 
 Since this extension make use of the php package scssphp/scssphp it is not necessary to use a special build pipeline to create css out of scss.
