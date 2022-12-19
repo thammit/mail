@@ -279,7 +279,7 @@ imports:
   - { resource: "EXT:mail/Configuration/Site/RecipientSources.yaml" }
 ```
 To add your own recipient source, just add another entry under the key `mail.recipientSources`.
-Here an (commented) example:
+Here is an example of how to add a table which has all necessary fields (at least uid, email, name, salutation, mail_html, mail_active):
 ```yaml
 mail:
   recipientSources:
@@ -287,8 +287,69 @@ mail:
       title: 'LLL:EXT:extension/Resources/Private/Language/locallang.xlf:tx_extension_domain_model_address.title' #<- title of the recipient source
       icon: 'tcarecords-tx_extension_domain_model_address-default' #<- icon identifier
 ```
+To simplify things a bit, it is also possible to ignore the mail_html and mail_active fields (they not need to exists at all).
+To do this, just add `forceHtmlMail: true` or/and `ignoreMailActive: true` to your recipientSource configuration.
+
+If a table doesn't contain the upper mentioned fields, or the fields have different names, it is also possible to use an extbase model to map fields to the need.
+A site configuration to do this could look like this:
+```yaml
+mail:
+  recipientSources:
+    tx_extension_domain_model_address: #<- Table name
+      title: 'LLL:EXT:extension/Resources/Private/Language/locallang.xlf:tx_extension_domain_model_address.title' #<- title of the recipient source
+      icon: 'tcarecords-tx_extension_domain_model_address-default' #<- icon identifier
+      model: Vendor\Extension\Domain\Model\MailAddress #<- the extbase model
+```
+Beside of the site configuration a model definition and a mapping configuration is needed as well.
+Check the included model `EXT:mail/Classes/Domain/Model/Address.php` and `EXT:mail/Configuration/Extbase/Persistence/Classes.php` to see how this can look like.
+
+The model needs to implement at least the included RecipientInterface.
+If you like to use categories, to send specific parts of a mail only to a specific group of recipients, the included CategoryInterface has to be implement as well.
+
+Since this extension can handle simple tables and extbase models as well, and in the end its data only used to replace a simple placeholder like ###USER_name###, I decided to use simple arrays for transporting.
+
+Because of this, every model needs to have the method getEnhancedData, which should return an array of all fields, which should serve as placeholder later on.
+Btw.: The same method will be used by the csv-export inside the recipient group module.
+
+### Scheduler Task / Command Controller
+
+This extension comes with tree different command controller, which all can be added as task inside the TYPO3 scheduler module.
+
+#### MassMailingCommand (mail:mass-mailing: Add scheduled newsletter to sending queue)
+This command is responsible for adding scheduled mailings to the sending queue.
+There are two mandatory parameters:
+ - site-identifier
+ - send-per-cycle
+
+The first one (site-identifier) is the identifier of the site configuration where mail can find its recipient sources configuration.
+You can find it inside the TYPO3 sites module under the "General" tab.
+
+The second (send-per-cycle) determine how many mails should be sent per cycle.
+
+The time between a cycle can be defined in the "Frequency" field of a task.
+e.g. `* * * * *` will run the task every minute, if you put `50` into the send-per-cycle field, 50 Mails per minute will be sent.
+
+#### SpoolSendCommand (mail:spool:send: Process newsletter sending queue)
+This command controller can be used to send mail in a queue using a site specific mail transport configuration.
+See site configuration `Transport.yaml` under Integration up in this manuel.
+It is not really needed by this extension, since the sending is already queued by the MassMailingCommand.
+But if a developer wants to use the extended Mail-Classes `MEDIAESSENZ\Mail\Mail\(Mailer|MailMessage)` inside their own extension, it can be usefully.
+
+#### AnalyzeBounceMailCommand (mail:analyse-bounce-mail: Analyze bounced newsletters from a configured mailbox.)
+This command fetches returned mails from the mail account defined in the return-path field of the mail configuration module.
+Depends on special headers, the reason of the return will be added to the report of the corresponding mail.
 
 ## Developer Stuff
+
+This extension make use of several packages all found at packagist.org:
+ - tedivm/fetch (https://github.com/tedious/Fetch)
+ - league/html-to-markdown (https://github.com/thephpleague/html-to-markdown)
+ - tburry/pquery (https://github.com/tburry/pquery)
+ - pelago/emogrifier (https://github.com/MyIntervals/emogrifier)
+ - scssphp/scssphp (https://github.com/scssphp/scssphp)
+
+Kudos to all involved coders who put her love and energy in it. Without her, this extension would not exist.
+
 
 Under the hood the extension make use of the pelago/emogrifier package, which converts all css to inline styles, which is unfortunately necessary for outlook and co.
 
