@@ -249,7 +249,7 @@ Furthermore, you can (of course) override all template, partial and layout paths
 
 ### Page TSconfig
 
-There are currently tree of such kind, who all can be found here:
+There are currently three of such kind, who all can be found here:
 ```
 EXT:mail/Configuration/TsConfig/Page
 ```
