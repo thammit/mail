@@ -28,5 +28,5 @@ useHttpToFetch = 0
 # cat=Direct Mail migration; type=string; label=Mapping sys_dmail_category -> sys_category: Used by update wizard to migrate Direct Mail records to MAIL records. Format: 1:2,2:3,3:4 maps Direct mail category 1 to sys_category 2 and Direct mail category 2 to sys_category 3 and so on. If categories not found or set, new categories will be added.
 directMailCategorySysCategoryMapping =
 
-# cat=Direct Mail migration; type=string; label=Parent sys_category used by direct mail -> sys category migration
+# cat=Direct Mail migration; type=int; label=Parent sys_category used by direct mail -> sys category migration
 directMailCategorySysCategoryParentCategory =

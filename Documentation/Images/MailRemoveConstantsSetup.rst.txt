@@ -1,0 +1,2 @@
+.. figure:: /Images/MailRemoveConstantsSetup.png
+   :class: with-shadow

@@ -1,0 +1,2 @@
+.. figure:: /Images/MailDefaultSettings.png
+   :class: with-shadow

@@ -1,0 +1,2 @@
+.. figure:: /Images/MailIncludeTypoScriptTemplates.png
+   :class: with-shadow

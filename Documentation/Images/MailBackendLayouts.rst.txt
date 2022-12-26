@@ -1,0 +1,2 @@
+.. figure:: /Images/MailBackendLayouts.png
+   :class: with-shadow

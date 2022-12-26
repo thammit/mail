@@ -1,0 +1,2 @@
+.. figure:: /Images/MailWizardSourceQuickMail.png
+   :class: with-shadow

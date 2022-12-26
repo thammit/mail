@@ -1,0 +1,2 @@
+.. figure:: /Images/MailQueue.png
+   :class: with-shadow

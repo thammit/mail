@@ -175,7 +175,7 @@ This is what can be done here.
 
 During moving your mouse over a row of categories the corresponding content elements on the right side gets highlighted.
 
-To see categories at this place, they must be defined before, off course.
+To see categories at this place, they must be defined before, of course.
 
 Here is an Page TSconfig example of how to restrict a list of categories to a specific parent category (has uid 1 in this example):
 ```

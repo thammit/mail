@@ -1,0 +1,2 @@
+.. figure:: /Images/MailPageModule.png
+   :class: with-shadow
