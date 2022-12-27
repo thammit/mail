@@ -1,6 +1,6 @@
 .. include:: /Includes.rst.txt
 
-.. _extensionConfiguration:
+.. _extension-configuration:
 
 =======================
 Extension Configuration

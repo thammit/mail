@@ -7,14 +7,15 @@ Dependencies
 ============
 
 MAIL make use of several packages all found at packagist.org:
- - friendsoftypo3/tt-address (https://github.com/friendsoftypo3/tt_address)
- - friendsoftypo3/jumpurl (https://github.com/friendsoftypo3/jumpurl)
- - typo3/cms-redirects (https://github.com/TYPO3/typo3/tree/main/typo3/sysext/redirects)
- - scssphp/scssphp (https://github.com/scssphp/scssphp)
- - pelago/emogrifier (https://github.com/MyIntervals/emogrifier)
- - league/html-to-markdown (https://github.com/thephpleague/html-to-markdown)
- - tburry/pquery (https://github.com/tburry/pquery)
- - tedivm/fetch (https://github.com/tedious/Fetch)
+
+*  friendsoftypo3/tt-address (https://github.com/friendsoftypo3/tt_address)
+*  friendsoftypo3/jumpurl (https://github.com/friendsoftypo3/jumpurl)
+*  typo3/cms-redirects (https://github.com/TYPO3/typo3/tree/main/typo3/sysext/redirects)
+*  scssphp/scssphp (https://github.com/scssphp/scssphp)
+*  pelago/emogrifier (https://github.com/MyIntervals/emogrifier)
+*  league/html-to-markdown (https://github.com/thephpleague/html-to-markdown)
+*  tburry/pquery (https://github.com/tburry/pquery)
+*  tedivm/fetch (https://github.com/tedious/Fetch)
 
 Kudos to all involved coders who put her love and energy in it. Without her, this extension would not exist.
 

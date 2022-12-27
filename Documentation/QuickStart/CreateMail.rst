@@ -38,7 +38,7 @@ Let's add a headline element first and enter this content inside the headline fi
 
 ..  code-block:: none
 
-      ###USER_salutation###`
+   ###USER_salutation###
 
 
 This is a marker or placeholder which will later be replaced by the individual recipient data.
@@ -47,22 +47,22 @@ There are a lot of other placeholders available:
 
 ..  code-block:: none
 
-      ###USER_uid###
-      ###USER_salutation###
-      ###USER_name###
-      ###USER_title###
-      ###USER_email###
-      ###USER_phone###
-      ###USER_www###
-      ###USER_address###
-      ###USER_company###
-      ###USER_city###
-      ###USER_zip###
-      ###USER_country###
-      ###USER_fax###
-      ###USER_firstname###
-      ###USER_first_name###
-      ###USER_last_name###
+   ###USER_uid###
+   ###USER_salutation###
+   ###USER_name###
+   ###USER_title###
+   ###USER_email###
+   ###USER_phone###
+   ###USER_www###
+   ###USER_address###
+   ###USER_company###
+   ###USER_city###
+   ###USER_zip###
+   ###USER_country###
+   ###USER_fax###
+   ###USER_firstname###
+   ###USER_first_name###
+   ###USER_last_name###
 
 Additional ALL as uppercase version:
 

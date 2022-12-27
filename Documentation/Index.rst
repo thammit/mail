@@ -17,7 +17,7 @@ Mail system
    en
 
 :Author:
-   Alexander Grein & Contributors
+   Alexander Grein
 
 :License:
    This document is published under the

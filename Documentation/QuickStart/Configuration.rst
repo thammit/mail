@@ -20,8 +20,8 @@ To add them all, just import the included yaml into your site configuration:
       imports:
          - { resource: "EXT:mail/Configuration/Site/RecipientSources.yaml" }
 
-Read more about how to add your own recipient sources
-:ref:`Reference <recipient-sources>` section.
+Read more about how to add your own recipient sources in the
+:ref:`Site configuration reference <site-configuration-recipient-sources>`.
 
 
 .. _add-mail-sysfolder:
@@ -37,12 +37,15 @@ and select :guilabel:`MAIL Module` under :guilabel:`Contains plugin`.
 
 .. include:: /Images/MailPageModule.rst.txt
 
+
 Next, switch to tab :guilabel:`Resources` and add this three static :guilabel:`Page TSconfig` entries:
-   - :guilabel:`MAIL: Remove not supported content element (mail)`
-   - :guilabel:`MAIL: Add simple mail backend layout (mail)`
-   - :guilabel:`MAIL: Default settings for mail pages (mail)`
+
+*  :guilabel:`MAIL: Remove not supported content element (mail)`
+*  :guilabel:`MAIL: Add simple mail backend layout (mail)`
+*  :guilabel:`MAIL: Default settings for mail pages (mail)`
 
 .. include:: /Images/MailPageTSconfig.rst.txt
+
 
 Press the good old floppy disc icon to save.
 
@@ -66,19 +69,21 @@ and click on :guilabel:`Edit the whole template record`.
 
 .. include:: /Images/MailRemoveConstantsSetup.rst.txt
 
+
 Switch to tab :guilabel:`Option` and check :guilabel:`Constants` and :guilabel:`Setup`
 to remove TypoScript settings from TypoScript records up in root-line.
 
 .. include:: /Images/MailIncludeTypoScriptTemplates.rst.txt
 
+
 Switch to tab :guilabel:`Includes` and add the following templates from the list
 to the right:
 
-   - :guilabel:`Fluid Content Elements (fluid_styled_content)`
-   - :guilabel:`MAIL (mail)`.
+*  :guilabel:`Fluid Content Elements (fluid_styled_content)`
+*  :guilabel:`MAIL (mail)`.
 
 Read more about possible configurations via TypoScript in the
-:ref:`Reference <typoscript>` section.
+:ref:`Reference <typoscript-page-view-settings>` section.
 
 
 .. _configure-default-settings:
@@ -106,7 +111,7 @@ After filling all fields with your data, press SAVE to store.
 Further reading
 ===============
 
-*  :ref:`Global extension configuration <extensionConfiguration>`
-*  :ref:`TypoScript <typoscript>`, mainly configuration for the frontend
-*  :ref:`TsConfig <tsconfig>`, configuration for the backend
-*  :ref:`Templating <quickTemplating>` customize the templates
+*  :ref:`Global extension configuration <extension-configuration>`
+*  :ref:`Site configuration <site-configuration>` (Recipient sources and mail transport settings)
+*  :ref:`TypoScript configuration <typoscript-page-view-settings>`
+*  :ref:`Page TSconfig configuration <page-ts-config>`

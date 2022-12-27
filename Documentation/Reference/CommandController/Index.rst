@@ -13,8 +13,9 @@ MassMailingCommand
 
 This command is responsible for adding scheduled mailings to the sending queue.
 There are two mandatory parameters:
- - site-identifier
- - send-per-cycle
+
+*  site-identifier
+*  send-per-cycle
 
 The first one (site-identifier) is the identifier of the site configuration where MAIL can find its recipient sources configuration.
 You can find it inside the TYPO3 sites module under the "General" tab.
