@@ -6,8 +6,8 @@
 Mail Report
 ===========
 
-If you have added links to internal or external pages inside the mail content and activate click tracking inside the MAIL
-configuration module, you are also able to see which links are clicked how many times.
+If you had included links to internal or external pages in the mail content and also enabled click tracking in the
+MAIL configuration module, you can also check which links were clicked and how often.
 To do this, move to the report's module by clicking on the pie chart icon:
 
 .. include:: /Images/MailReports.rst.txt
@@ -29,7 +29,7 @@ If someone with marketing skills could give me feedback about it, I would really
 The panel "Delivery failed" shows the different types of returned mails.
 
 ..  note::
-    This data only will be filled if return-path for mails is set and AnalyseBounceMail-Command-Controller is configured correctly.
+    This data only will be filled if return-path for mails is set and AnalyzeBounceMail-Command-Controller is configured correctly.
     :ref:`See Command Controller Reference <analyze-bounce-mail-command-controller>`
 
 If returned mails found, a forth box will appear, to view, delete or disable the corresponding recipients.
