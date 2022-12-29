@@ -1,13 +1,19 @@
 .. include:: /Includes.rst.txt
 
 .. highlight:: typoscript
+
+.. _typoscript-settings:
+
+==========
+TypoScript
+==========
+
 .. _typoscript-page-view-settings:
 
-==================
 Page View Settings
 ==================
 
-All view settings need to be prefixed with  :typoscript:`plugin.mail.view.page`.
+All page view settings need to be prefixed with  :typoscript:`plugin.mail.view.page`.
 
 
 .. only:: html
@@ -19,7 +25,7 @@ All view settings need to be prefixed with  :typoscript:`plugin.mail.view.page`.
 .. _ts-page-view-templates-root-path:
 
 templatesRootPath
-=================
+-----------------
 
 .. confval:: templatesRootPath
 
@@ -32,7 +38,7 @@ templatesRootPath
 .. _ts-page-view-partials-root-path:
 
 partialsRootPath
-================
+----------------
 
 .. confval:: partialsRootPath
 
@@ -45,7 +51,7 @@ partialsRootPath
 .. _ts-page-view-layouts-root-path:
 
 layoutsRootPath
-================
+---------------
 
 .. confval:: layoutsRootPath
 
@@ -55,11 +61,10 @@ layoutsRootPath
 
    Path to layouts root for mail pages (FE)
 
-=====================
 Content View Settings
 =====================
 
-All view settings need to be prefixed with  :typoscript:`plugin.mail.view.content`.
+All content view settings need to be prefixed with  :typoscript:`plugin.mail.view.content`.
 
 
 .. only:: html
@@ -71,7 +76,7 @@ All view settings need to be prefixed with  :typoscript:`plugin.mail.view.conten
 .. _ts-content-view-templates-root-path:
 
 templatesRootPath
-=================
+-----------------
 
 .. confval:: templatesRootPath
 
@@ -84,7 +89,7 @@ templatesRootPath
 .. _ts-content-view-partials-root-path:
 
 partialsRootPath
-================
+----------------
 
 .. confval:: partialsRootPath
 
@@ -97,7 +102,7 @@ partialsRootPath
 .. _ts-content-view-layouts-root-path:
 
 layoutsRootPath
-================
+---------------
 
 .. confval:: layoutsRootPath
 
@@ -109,7 +114,6 @@ layoutsRootPath
 
 .. _ts-content-header-settings:
 
-===============
 Header Settings
 ===============
 
@@ -125,7 +129,7 @@ All header settings need to be prefixed with  :typoscript:`plugin.mail.settings.
 .. _ts-content-header-title:
 
 title
-=====
+-----
 
 .. confval:: title
 
@@ -137,8 +141,8 @@ title
 
 .. _ts-content-header-image-src:
 
-image src
-=========
+image.src
+---------
 
 .. confval:: src
 
@@ -150,8 +154,8 @@ image src
 
 .. _ts-content-header-image-alt:
 
-image alt
-=========
+image.alt
+---------
 
 .. confval:: alt
 
@@ -163,8 +167,8 @@ image alt
 
 .. _ts-content-header-image-width:
 
-image width
-===========
+image.width
+-----------
 
 .. confval:: width
 
@@ -176,8 +180,8 @@ image width
 
 .. _ts-content-header-image-height:
 
-image height
-============
+image.height
+------------
 
 .. confval:: height
 
@@ -189,7 +193,6 @@ image height
 
 .. _ts-content-scss-settings:
 
-=============
 SCSS Settings
 =============
 
@@ -205,7 +208,7 @@ All scss settings need to be prefixed with  :typoscript:`plugin.mail.settings.sc
 .. _ts-content-scss-modification:
 
 modifications
-============
+------------
 
 .. confval:: modifications
 
@@ -218,7 +221,7 @@ modifications
 .. _ts-content-scss-primary-color:
 
 primary-color
-=============
+-------------
 
 .. confval:: primary-color
 
@@ -229,7 +232,7 @@ primary-color
    Primary color, used with components that support the `.primary` class
 
 secondary-color
-===============
+---------------
 
 .. confval:: secondary-color
 
@@ -240,7 +243,7 @@ secondary-color
    Secondary color, used with components that support the `.secondary` class
 
 success-color
-=============
+-------------
 
 .. confval:: success-color
 
@@ -251,7 +254,7 @@ success-color
    Color to indicate a positive status or action, used with the `.success` class
 
 warning-color
-=============
+-------------
 
 .. confval:: warning-color
 
@@ -262,7 +265,7 @@ warning-color
    Color to indicate a caution status or action, used with the `.warning` class
 
 alert-color
-===========
+-----------
 
 .. confval:: alert-color
 
@@ -273,7 +276,7 @@ alert-color
    Color to indicate a negative status or action, used with the `.alert` class
 
 light-gray
-==========
+----------
 
 .. confval:: light-gray
 
@@ -284,7 +287,7 @@ light-gray
    Color used for light gray UI items within Foundation
 
 medium-gray
-===========
+-----------
 
 .. confval:: medium-gray
 
@@ -295,7 +298,7 @@ medium-gray
    Color used for medium gray UI items within Foundation
 
 dark-gray
-=========
+---------
 
 .. confval:: dark-gray
 
@@ -306,7 +309,7 @@ dark-gray
    Color used for dark gray UI items within Foundation
 
 black
-=====
+-----
 
 .. confval:: black
 
@@ -317,7 +320,7 @@ black
    Color used for black ui items within Foundation
 
 white
-=====
+-----
 
 .. confval:: white
 
@@ -328,7 +331,7 @@ white
    Color used for white ui items within Foundation
 
 pre-color
-=========
+---------
 
 .. confval:: pre-color
 
@@ -339,7 +342,7 @@ pre-color
    Code color (<pre>)
 
 header-color
-============
+------------
 
 .. confval:: header-color
 
@@ -350,7 +353,7 @@ header-color
    Headlines color
 
 global-font-color
-=================
+-----------------
 
 .. confval:: global-font-color
 
@@ -361,7 +364,7 @@ global-font-color
    Text color
 
 header-background-color
-=======================
+-----------------------
 
 .. confval:: header-background-color
 
@@ -372,7 +375,7 @@ header-background-color
    Header background color
 
 body-background
-===============
+---------------
 
 .. confval:: body-background
 
@@ -383,7 +386,7 @@ body-background
    Body background color
 
 container-background-color
-==========================
+--------------------------
 
 .. confval:: container-background-color
 
@@ -394,7 +397,7 @@ container-background-color
    Container background color
 
 footer-background-color
-=======================
+-----------------------
 
 .. confval:: footer-background-color
 
@@ -405,7 +408,7 @@ footer-background-color
    Footer background color
 
 global-width
-============
+------------
 
 .. confval:: global-width
 
@@ -416,7 +419,7 @@ global-width
    Container width
 
 global-width-small
-==================
+------------------
 
 .. confval:: global-width-small
 
@@ -427,7 +430,7 @@ global-width-small
    Container width (small screens)
 
 global-gutter
-=============
+-------------
 
 .. confval:: global-gutter
 
@@ -438,7 +441,7 @@ global-gutter
    Gutter for grid elements
 
 global-gutter-small
-===================
+-------------------
 
 .. confval:: global-gutter-small
 
@@ -449,7 +452,7 @@ global-gutter-small
    Gutter for grid elements (small screens)
 
 global-padding
-==============
+--------------
 
 .. confval:: global-padding
 
@@ -460,7 +463,7 @@ global-padding
    Global padding
 
 global-margin
-=============
+-------------
 
 .. confval:: global-margin
 
@@ -471,7 +474,7 @@ global-margin
    Global margin
 
 global-radius
-=============
+-------------
 
 .. confval:: global-radius
 
@@ -482,7 +485,7 @@ global-radius
    Global radius
 
 global-rounded
-==============
+--------------
 
 .. confval:: global-rounded
 
@@ -493,7 +496,7 @@ global-rounded
    Global rounded radius of rounded-corners
 
 global-breakpoint
-=================
+-----------------
 
 .. confval:: global-breakpoint
 

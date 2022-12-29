@@ -1,0 +1,2 @@
+.. figure:: /Images/MailReports.png
+   :class: with-shadow

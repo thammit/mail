@@ -3,6 +3,7 @@
 .. _thanks:
 .. _sponsoring:
 
+==========
 Sponsoring
 ==========
 
@@ -13,12 +14,12 @@ please consider to give something back.
 Here are two ways to balance energy:
 
 Patreon
--------
+=======
 
 Support me on `patreon.com <https://www.patreon.com/alexandergrein>`__
 
 PayPal
-------
+======
 
 Support me on `paypal.com <https://www.paypal.me/AlexanderGrein/25>`__.
 

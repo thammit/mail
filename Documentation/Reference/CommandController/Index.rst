@@ -8,6 +8,8 @@ Command Controller
 
 MAIL comes with tree different command controller, which all can be added as task inside the TYPO3 scheduler module.
 
+.. _mass-mailing-command-controller:
+
 MassMailingCommand
 ==================
 
@@ -25,11 +27,15 @@ The second (send-per-cycle) determine how many mails should be sent per cycle.
 The time between a cycle can be defined in the "Frequency" field of a task.
 e.g. `* * * * *` will run the task every minute, if you put `50` into the send-per-cycle field, 50 Mails per minute will be sent.
 
+.. _analyze-bounce-mail-command-controller:
+
 AnalyzeBounceMailCommand
 ========================
 
 This command fetches returned mails from the mail account defined in the return-path field of the MAIL configuration module.
 Depends on special headers, the reason of the return will be added to the report of the corresponding mail.
+
+.. _spool-send-command-controller:
 
 SpoolSendCommand
 ================

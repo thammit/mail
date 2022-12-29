@@ -25,30 +25,30 @@ Mail
 .. _extension-configuration-default-recipient-fields:
 
 Default recipient fields `defaultRecipientFields`
-------------------------------------------------
+-------------------------------------------------
 
 .. confval:: defaultRecipientFields
 
-   :type: string (comma separated)
+   :type: string
    :Default: uid,salutation,name,title,email,phone,www,address,company,city,zip,country,fax,firstname,first_name,last_name
 
-   Default fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user.
+   Default (comma separated) fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user.
 
 .. _extension-configuration-additional-recipient-fields:
 
 Additional DB fields of the recipient `additionalRecipientFields`
-----------------------------------------------------------------
+-----------------------------------------------------------------
 
 .. confval:: additionalRecipientFields
 
-   :type: string (comma separated)
+   :type: string
    :Default:
 
-   Additional fields that may be substituted in the mail messages.
+   Additional (comma separated) fields that may be substituted in the mail messages.
 
 .. _extension-configuration-mail-page-type-number:
 
-Mail page type number `mailPageTypeNumber`
+MAIL page type number `mailPageTypeNumber`
 ------------------------------------------
 
 .. confval:: mailPageTypeNumber
@@ -72,7 +72,7 @@ MAIL modules position in the side navigation `mailModulePosition`
 
 .. _extension-configuration-mail-module-page-id:
 
-Mail module page id `mailModulePageId`
+MAIL module page id `mailModulePageId`
 -----------------------------------------------------------------
 
 .. confval:: mailModulePageId
@@ -100,7 +100,7 @@ Delete unused markers in personalized mails `deleteUnusedMarkers`
 .. _extension-configuration-notification-job:
 
 Enable notification mail `notificationJob`
-----------------------------------------
+-----------------------------------------
 
 .. confval:: notificationJob
 
@@ -152,7 +152,7 @@ Mapping sys_dmail_category -> sys_category `directMailCategorySysCategoryMapping
 .. _extension-configuration-direct-mail-category-sys-category-parent-category:
 
 Parent sys_category used by sys_dmail_category -> sys_category migration `directMailCategorySysCategoryParentCategory`
----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
 
 .. confval:: directMailCategorySysCategoryParentCategory
 

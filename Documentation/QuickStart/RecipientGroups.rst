@@ -8,7 +8,10 @@ Create recipient groups
 
 Since this extension is made to send personalized mails to groups of recipients, this groups has to be defined first.
 
+.. include:: /Images/MailRecipientGroups.rst.txt
+
 MAIL comes with a lot of possibilities:
+=======================================
 
 *  From pages
 

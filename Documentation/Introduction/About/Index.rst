@@ -2,6 +2,7 @@
 
 .. _whatDoesItDo:
 
+================
 What does it do?
 ================
 

@@ -32,7 +32,7 @@ friendsoftypo3/jumpurl
 Used for click tracking
 
 typo3/cms-redirects
-======================
+===================
 
 Used for redirects of shorted links in plain text mails
 
@@ -41,18 +41,17 @@ scssphp/scssphp
 
 This package transpiles scss files to css, which makes it possible to use the scss files of foundation mail and change there values (colors, dimensions) using typoscript constants.
 I had to modify the original scss from foundation a little, because the scssphp package could currently not handle sass modules like math, which were used on some places.
-See https://github.com/scssphp/scssphp/issues/421 for more information
-In the end, I just replaced all `math.div()` with `/`.
+See https://github.com/scssphp/scssphp/issues/421 for more information. Basically, I just replaced all `math.div()` with `/`.
 
 pelago/emogrifier
-================
+=================
 
 This package is needed to convert all css to inline styles, which is unfortunately necessary for outlook and co.
 
 league/html-to-markdown
 =======================
 
-This package is used to convert an html mail to a plain text (markdown) version using a middleware, just by adding `?plain=1`to the url.
+This package is used to convert an html mail to a plain text (markdown) version using a middleware, just by adding `?plain=1` to the url.
 It has the ability to add own converters, which is used by this extension to handle the mail boundaries, which wrapped around every content element.
 
 tburry/pquery
