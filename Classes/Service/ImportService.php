@@ -156,10 +156,10 @@ class ImportService
         $data['storageSelected'] = $this->configuration['storage'] ?? '';
 
         // remove existing option
-        $data['remove_existing'] = (bool)($this->configuration['remove_existing'] ?? false);
+        $data['removeExisting'] = (bool)($this->configuration['removeExisting'] ?? false);
 
         // first line in csv is to be ignored
-        $data['first_fieldname'] = (bool)($this->configuration['first_fieldname'] ?? false);
+        $data['firstFieldname'] = (bool)($this->configuration['firstFieldname'] ?? false);
 
         // csv separator
         $data['delimiter'] = $optDelimiter;
@@ -170,17 +170,17 @@ class ImportService
         $data['encapsulationSelected'] = $this->configuration['encapsulation'] ?? '';
 
         // import only valid email
-        $data['valid_email'] = (bool)($this->configuration['valid_email'] ?? false);
+        $data['validEmail'] = (bool)($this->configuration['validEmail'] ?? false);
 
         // only import distinct records
-        $data['remove_dublette'] = (bool)($this->configuration['remove_dublette'] ?? false);
+        $data['removeDublette'] = (bool)($this->configuration['removeDublette'] ?? false);
 
         // update the record instead renaming the new one
-        $data['update_unique'] = (bool)($this->configuration['update_unique'] ?? false);
+        $data['updateUnique'] = (bool)($this->configuration['updateUnique'] ?? false);
 
         // which field should be used to show uniqueness of the records
-        $data['record_unique'] = $optUnique;
-        $data['record_uniqueSelected'] = $this->configuration['record_unique'] ?? '';
+        $data['recordUnique'] = $optUnique;
+        $data['recordUniqueSelected'] = $this->configuration['recordUnique'] ?? '';
 
         return $data;
     }
@@ -188,11 +188,11 @@ class ImportService
     public function getCsvImportMappingData(): array
     {
         $defaultConf = [
-            'remove_existing' => false,
-            'first_fieldname' => false,
-            'valid_email' => false,
-            'remove_dublette' => false,
-            'update_unique' => false,
+            'removeExisting' => false,
+            'firstFieldname' => false,
+            'validEmail' => false,
+            'removeDublette' => false,
+            'updateUnique' => false,
         ];
         foreach ($defaultConf as $key => $value) {
             if (!isset($this->configuration[$key])) {
@@ -209,14 +209,14 @@ class ImportService
         $data['newFile'] = $this->configuration['newFile'];
         $data['newFileUid'] = $this->configuration['newFileUid'];
         $data['storage'] = $this->configuration['storage'];
-        $data['remove_existing'] = $this->configuration['remove_existing'];
-        $data['first_fieldname'] = $this->configuration['first_fieldname'];
+        $data['removeExisting'] = $this->configuration['removeExisting'];
+        $data['firstFieldname'] = $this->configuration['firstFieldname'];
         $data['delimiter'] = $this->configuration['delimiter'];
         $data['encapsulation'] = $this->configuration['encapsulation'];
-        $data['valid_email'] = $this->configuration['valid_email'];
-        $data['remove_dublette'] = $this->configuration['remove_dublette'];
-        $data['update_unique'] = $this->configuration['update_unique'];
-        $data['record_unique'] = $this->configuration['record_unique'];
+        $data['validEmail'] = $this->configuration['validEmail'];
+        $data['removeDublette'] = $this->configuration['removeDublette'];
+        $data['updateUnique'] = $this->configuration['updateUnique'];
+        $data['recordUnique'] = $this->configuration['recordUnique'];
         $data['all_html'] = (bool)($this->configuration['all_html'] ?? false);
         $data['error'] = $error ?? [];
 
@@ -236,7 +236,7 @@ class ImportService
 
         $columnNames = [];
         // show mapping form
-        if ($this->configuration['first_fieldname']) {
+        if ($this->configuration['firstFieldname']) {
             // read csv
             $csvData = $this->readCSV(4);
             $columnNames = $csvData[0];
@@ -294,7 +294,7 @@ class ImportService
             foreach ($configTreeStartingPointsArray as $startingPoint) {
                 $sysCategories = $this->categoryRepository->findByParent($startingPoint);
                 if ($sysCategories->count() > 0) {
-                    if ($data['update_unique']) {
+                    if ($data['updateUnique']) {
                         $data['showAddAllCategories'] = true;
                         $data['addAllCategories'] = (bool)($this->configuration['addAllCategories'] ?? false);
                     }
@@ -340,14 +340,14 @@ class ImportService
             'newFile' => $this->configuration['newFile'],
             'newFileUid' => $this->configuration['newFileUid'],
             'storage' => $this->configuration['storage'],
-            'remove_existing' => $this->configuration['remove_existing'],
-            'first_fieldname' => $this->configuration['first_fieldname'],
+            'removeExisting' => $this->configuration['removeExisting'],
+            'firstFieldname' => $this->configuration['firstFieldname'],
             'delimiter' => $this->configuration['delimiter'],
             'encapsulation' => $this->configuration['encapsulation'],
-            'valid_email' => $this->configuration['valid_email'],
-            'remove_dublette' => $this->configuration['remove_dublette'],
-            'update_unique' => $this->configuration['update_unique'],
-            'record_unique' => $this->configuration['record_unique'],
+            'validEmail' => $this->configuration['validEmail'],
+            'removeDublette' => $this->configuration['removeDublette'],
+            'updateUnique' => $this->configuration['updateUnique'],
+            'recordUnique' => $this->configuration['recordUnique'],
             'all_html' => (bool)($this->configuration['all_html'] ?? false),
             'addAllCategories' => (bool)($this->configuration['addAllCategories'] ?? false),
             'error' => $error ?? [],
@@ -356,7 +356,7 @@ class ImportService
         // starting import & show errors
         // read csv
         $csvData = $this->readCSV();
-        if ($this->configuration['first_fieldname']) {
+        if ($this->configuration['firstFieldname']) {
             // remove field names row
             $csvData = array_slice($csvData, 1);
         }
@@ -370,7 +370,7 @@ class ImportService
             $resultOrder = GeneralUtility::trimExplode(',', $this->pageTsConfiguration['resultOrder']);
         }
 
-        $defaultOrder = ['new', 'update', 'invalid_email', 'double'];
+        $defaultOrder = ['new', 'update', 'invalidEmail', 'double'];
         $diffOrder = array_diff($defaultOrder, $resultOrder);
         $endOrder = array_merge($resultOrder, $diffOrder);
 
@@ -410,7 +410,7 @@ class ImportService
         $filteredCSV = [];
 
         // empty table if flag is set
-        if ($this->configuration['remove_existing']) {
+        if ($this->configuration['removeExisting']) {
             $this->addressRepository->deleteRecordByPid((int)$this->configuration['storage']);
         }
 
@@ -421,7 +421,7 @@ class ImportService
             $invalidEmail = false;
             foreach ($dataArray as $kk => $fieldData) {
                 if ($this->configuration['map'][$kk] !== 'noMap') {
-                    if (($this->configuration['valid_email']) && ($this->configuration['map'][$kk] === 'email')) {
+                    if (($this->configuration['validEmail']) && ($this->configuration['map'][$kk] === 'email')) {
                         $invalidEmail = GeneralUtility::validEmail(trim($fieldData)) === false;
                         $tempData[$this->configuration['map'][$kk]] = trim($fieldData);
                     } else {
@@ -444,15 +444,15 @@ class ImportService
         }
 
         // remove duplicates from csv data
-        if ($this->configuration['remove_dublette']) {
-            $filteredCSV = CsvUtility::filterDuplicates($mappedCSV, $this->configuration['record_unique']);
+        if ($this->configuration['removeDublette']) {
+            $filteredCSV = CsvUtility::filterDuplicates($mappedCSV, $this->configuration['recordUnique']);
             unset($mappedCSV);
             $mappedCSV = $filteredCSV['clean'];
         }
 
         // array for the process_datamap();
         $data = [];
-        if ($this->configuration['update_unique']) {
+        if ($this->configuration['updateUnique']) {
             $user = [];
             $userID = [];
 
@@ -469,7 +469,7 @@ class ImportService
             // check user one by one, new or update
             $c = 1;
             foreach ($mappedCSV as $dataArray) {
-                $foundUser = array_keys($user, $dataArray[$this->configuration['record_unique']]);
+                $foundUser = array_keys($user, $dataArray[$this->configuration['recordUnique']]);
                 if (!empty($foundUser)) {
                     if (count($foundUser) === 1) {
                         $firstUser = $foundUser[0];
@@ -527,7 +527,7 @@ class ImportService
             }
         }
 
-        $resultImport['invalid_email'] = $invalidEmailCSV;
+        $resultImport['invalidEmail'] = $invalidEmailCSV;
         $resultImport['double'] = is_array($filteredCSV['double']) ? $filteredCSV['double'] : [];
 
         // start importing

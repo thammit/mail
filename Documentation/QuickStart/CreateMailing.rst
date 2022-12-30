@@ -30,8 +30,8 @@ Create mailing
 
    .. include:: /Images/MailWizardSettings.rst.txt
 
-   On this page you can check or change the settings of the mail.
-   Adding attachments is also possible.
+   On this page you can check and change the default settings of the mail, which are defined in the
+   :ref:`configuration module <configure-default-settings>`. Adding attachments is also possible.
 
    If done, click NEXT again to get to the category settings.
 

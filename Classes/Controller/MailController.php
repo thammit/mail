@@ -791,7 +791,7 @@ class MailController extends AbstractController
 
     protected function hideCategoryStep(Mail $mail = null): bool
     {
-        return (($mail ?? false) && $mail->isExternal()) || (isset($this->userTSConfiguration['hideSteps']) && $this->userTSConfiguration['hideSteps'] === 'categories');
+        return (($mail ?? false) && $mail->isExternal()) || ($this->userTSConfiguration['hideCategoryStep'] ?? false);
     }
 
     protected function getNavigation(int $currentStep, bool $hideCategoryStep): array

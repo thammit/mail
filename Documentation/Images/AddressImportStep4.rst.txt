@@ -1,0 +1,2 @@
+.. figure:: /Images/AddressImportStep1.png
+   :class: with-shadow

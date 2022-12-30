@@ -36,3 +36,59 @@ MAIL comes with a lot of possibilities:
 
 Some EXT:direct_mail power users may miss the possibility to define queries as sending groups.
 This feature is currently not available, and will maybe come with a future release. Sponsoring is highly welcome.
+
+Importing a csv list of addresses
+=================================
+
+This module also gives you the option to import a csv (comma-separates list) of addresses
+and create a recipient group containing the imported records afterwards.
+
+To make it easier to import csv records, there is a wizard, which
+guide you through the process.
+
+In the first step you can choose to upload a csv file or paste the
+records into a text field. You can use comma (;), semicolon (;), or
+colon (:) as field delimiter. This can be configured in the second
+step.
+
+.. include:: /Images/AddressImportStep1.rst.txt
+
+By clicking the NEXT button, the csv file or csv records are uploaded
+and the second step is shown. In this step you can specify the detail
+information of the csv data, such as field delimiter, field
+encapsulation, and field name in the first line. You can also specify
+the sys-folder, where the records should be imported to, the uniqueness
+of the records, rename or update the records if a similar record is
+found, or to empty the sys-folder before importing.
+
+.. include:: /Images/AddressImportStep2.rst.txt
+
+..  warning::
+   If you set the field “remove all Addresses in the storage folder before importing”,
+   all records in this sys-folder **WILL be physically deleted** .
+
+After specifying the configuration you can start mapping the fields.
+There are 3 columns in the mapping step. The description column shows
+the first row of the csv records (if you set in the configuration that
+the first row is the field names) or shows only field\_xx (where xx is
+continuous number).
+
+The mapping column shows only the list of field, which are part of
+tt\_address table. You must at least map the field “Name” and “Email”.
+
+The value column shows the first up to three rows from the csv
+records. They should help you to map the field.
+
+.. include:: /Images/AddressImportStep3.rst.txt
+.. include:: /Images/AddressImportStep4.rst.txt
+
+You can also set the HTML flag or categories to all records you are importing.
+In the select box, which contains the field names of tt\_address, there is also
+an entry “categories”. This entry can be mapped to a comma-separated
+list of sys_category IDs. This value will overwrite whatever
+categories you selected in the “Additional options” section.
+
+After mapping the fields you are ready to start the import process by pressing the IMPORT button.
+If finished a list of new imported, invalid email, updated and doublet records will be shown.
+
+.. include:: /Images/AddressImportStep5.rst.txt
