@@ -425,6 +425,18 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="recipient.import.chooseCsvFile" resname="recipient.import.chooseCsvFile">
                 <source>Choose a csv file from your local computer</source>
             </trans-unit>
+            <trans-unit id="recipient.import.result.new" resname="recipient.import.result.new">
+                <source>New emails</source>
+            </trans-unit>
+            <trans-unit id="recipient.import.result.update" resname="recipient.import.result.update">
+                <source>Updated emails</source>
+            </trans-unit>
+            <trans-unit id="recipient.import.result.invalidEmail" resname="recipient.import.result.invalidEmail">
+                <source>Invalid emails</source>
+            </trans-unit>
+            <trans-unit id="recipient.import.result.double" resname="recipient.import.result.double">
+                <source>Double emails</source>
+            </trans-unit>
             <trans-unit id="recipient.notification.disallowedCsvExport.message" resname="recipient.notification.disallowedCsvExport.message">
                 <source>CSV export failed. Insufficient access right.</source>
             </trans-unit>

@@ -80,9 +80,11 @@ The value column shows the first up to three rows from the csv
 records. They should help you to map the field.
 
 .. include:: /Images/AddressImportStep3.rst.txt
-.. include:: /Images/AddressImportStep4.rst.txt
 
 You can also set the HTML flag or categories to all records you are importing.
+
+.. include:: /Images/AddressImportStep4.rst.txt
+
 In the select box, which contains the field names of tt\_address, there is also
 an entry “categories”. This entry can be mapped to a comma-separated
 list of sys_category IDs. This value will overwrite whatever

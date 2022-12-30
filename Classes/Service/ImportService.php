@@ -387,7 +387,7 @@ class ImportService
             }
 
             $data['tables'][] = [
-                'header' => LanguageUtility::getLL('mailgroup_import_report_' . $order),
+                'header' => LanguageUtility::getLL('recipient.import.result.' . $order),
                 'rows' => $rowsTable,
             ];
         }
@@ -695,7 +695,7 @@ class ImportService
         if ($this->requestHost != $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
             $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!', [$this->refererHost, $this->requestHost]);
         } else {
-            $file = GeneralUtility::_GP('tx_mail_mail_mailrecipient')['file'];
+            $file = GeneralUtility::_GP('tx_mail_mailmail_mailrecipient')['file'];
             $extendedFileUtility->start($file);
             $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::cast(DuplicationBehavior::REPLACE));
             $tempFile = $extendedFileUtility->func_upload($file['upload']['1']);
@@ -746,7 +746,7 @@ class ImportService
     {
         /** @var Folder $folder */
         $folder = BackendUserUtility::getBackendUser()->getDefaultUploadTemporaryFolder();
-        return $folder->getPublicUrl() . '/importexport';
+        return $folder->getPublicUrl() . 'importexport';
     }
 
     /**

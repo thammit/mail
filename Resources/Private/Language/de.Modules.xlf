@@ -553,6 +553,22 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>Choose a csv file from your local computer</source>
                 <target>Wählen Sie eine CSV-Datei von Ihrem lokalen Computer</target>
             </trans-unit>
+            <trans-unit id="recipient.import.result.new" resname="recipient.import.result.new">
+                <source>New emails</source>
+                <target>Neue Emails</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.result.update" resname="recipient.import.result.update">
+                <source>Updated emails</source>
+                <target>Aktualisierte Emails</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.result.invalidEmail" resname="recipient.import.result.invalidEmail">
+                <source>Invalid emails</source>
+                <target>Ungültige Emails</target>
+            </trans-unit>
+            <trans-unit id="recipient.import.result.double" resname="recipient.import.result.double">
+                <source>Double emails</source>
+                <target>Doppelte Emails</target>
+            </trans-unit>
             <trans-unit id="recipient.notification.disallowedCsvExport.message" resname="recipient.notification.disallowedCsvExport.message">
                 <source>CSV export failed. Insufficient access right.</source>
                 <target>CSV-Export fehlgeschlagen. Unzureichendes Zugriffsrecht.</target>
