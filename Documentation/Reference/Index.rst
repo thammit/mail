@@ -15,7 +15,8 @@ In-depth reference for integrators and developers.
    ExtensionConfiguration/Index
    SiteConfiguration/Index
    TypoScript/Index
-   TsConfig/Index
+   PageTsConfig/Index
+   UserTsConfig/Index
    Events/Index
    CommandController/Index
    ViewHelpers/Index

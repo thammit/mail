@@ -70,7 +70,7 @@ uses the latest technologies provided by TYPO3 CMS.
          .. container:: card-body
 
             In-depth reference about certain aspects of this extension:
-            TypoScript, Page TSconfig, Site configuration etc
+            TypoScript, Page/User TSconfig, Site configuration etc
 
 .. Table of Contents
 
