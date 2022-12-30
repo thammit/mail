@@ -25,7 +25,7 @@ Backend related (modules)
 =========================
 
 All this MAIL configuration properties must be set in the Page TSconfig field of the MAIL
-sys-folder under the key :typoscript:`mod.web\_modules.mail`.
+sys-folder under the key :typoscript:`mod.web_modules.mail`.
 
 Most of these properties may conveniently be set using the :ref:`MAIL configuration module <configure-default-settings>`.
 
@@ -213,8 +213,8 @@ plainParams
    Note: The specified parameters will be added to the URL used to fetch the plain text content of the mail from a TYPO3 page.
 
    The default `&plain=1` will be handled by the Markdown Middleware come with this extension. This middleware
-   generates a markdown (text) version of a html page and keeps contend boundaries needed to separate content
-   blocks for specific categories.
+   generates a markdown (text) version of a html page and keeps content boundaries needed to separate content
+   blocks with specific categories.
 
 encoding
 --------
@@ -223,7 +223,7 @@ encoding
 
    :type: string
    :Default: quoted-printable
-   :Path: mod.web\_modules.mail.quickMailEncoding
+   :Path: mod.web\_modules.mail.encoding
 
    Content transfer encoding to use when sending mails.
 
@@ -477,7 +477,7 @@ sendPerCycle
 .. confval:: sendPerCycle
 
    :type: int
-   :Default: 0
+   :Default: 50
    :Path: mod.web\_modules.mail.sendPerCycle
 
    Send per circle for manual sending trigger via Queue module
