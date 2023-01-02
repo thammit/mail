@@ -30,7 +30,7 @@ Default recipient fields `defaultRecipientFields`
 .. confval:: defaultRecipientFields
 
    :type: string
-   :Default: uid,salutation,name,title,email,phone,www,address,company,city,zip,country,fax,firstname,first_name,last_name
+   :Default: uid, salutation, name, title, email, phone, www, address, company, city, zip, country, fax, firstname, first_name, last_name
 
    Default (comma separated) fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user.
 
