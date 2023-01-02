@@ -2,13 +2,16 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Mail',
-    'description' => 'Newsletter System for TYPO3',
+    'description' => 'Mail System for TYPO3',
     'category' => 'plugin',
-    'version' => '0.1.0',
-    'state' => 'beta',
+    'version' => '1.0.0',
+    'state' => 'stable',
     'constraints' => [
         'depends' => [
             'typo3' => '11.5.0-11.5.99',
+            'redirects' => '11.5.0-11.5.99',
+            'scheduler' => '11.5.0-11.5.99',
+            'fluid_styled_content' => '11.5.0-11.5.99',
             'jumpurl' => '8.0.0-8.99.99',
             'tt_address' => '6.0.0-6.99.99',
         ],

@@ -1,6 +1,6 @@
 {
     "name": "mediaessenz/mail",
-    "description": "Newsletter System for TYPO3",
+    "description": "Mail System for TYPO3",
     "type": "typo3-cms-extension",
     "keywords": [
         "TYPO3 CMS",
@@ -14,8 +14,10 @@
     "require": {
         "typo3/cms-core": "^11.5",
         "typo3/cms-redirects": "^11.5",
-        "friendsoftypo3/tt-address": "^6",
+        "typo3/cms-scheduler": "^11.5",
+        "typo3/cms-fluid-styled-content": "^11.5",
         "friendsoftypo3/jumpurl": "^8",
+        "friendsoftypo3/tt-address": "^6",
         "tedivm/fetch": "^0.7",
         "league/html-to-markdown": "^5",
         "tburry/pquery": "^1.1",
