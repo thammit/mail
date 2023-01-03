@@ -15,8 +15,10 @@ use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
 final class Configuration
@@ -210,5 +212,19 @@ final class Configuration
             'type' => 'web',
             'allowedTables' => '*',
         ];
+    }
+
+    public static function loadVendorLibraries(): void
+    {
+        // Vendor libraries are already available in Composer mode
+        if (Environment::isComposerMode()) {
+            return;
+        }
+
+        $vendorPharFile = GeneralUtility::getFileAbsFileName('EXT:mail/Resources/Private/PHP/mail-dependencies.phar');
+
+        if (file_exists($vendorPharFile)) {
+            require 'phar://' . $vendorPharFile . '/vendor/autoload.php';
+        }
     }
 }

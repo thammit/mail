@@ -9,7 +9,9 @@
     "homepage": "https://www.typo3-webagentur.com",
     "license": "GPL-2.0-or-later",
     "support": {
-        "issues": "https://gitlab.typo3-webagentur.com/mediaessenz/mail/issues"
+        "issues": "https://gitlab.com/mediaessenz/mail/issues",
+        "source": "https://gitlab.com/mediaessenz/mail",
+        "docs": "https://docs.typo3.org/p/mediaessenz/mail/main/en-us/"
     },
     "require": {
         "typo3/cms-core": "^11.5",
