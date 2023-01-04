@@ -466,7 +466,7 @@ class MailController extends AbstractController
 
                 $categories = [];
                 $ttContentPageTsConfig = BackendUtility::getTCEFORM_TSconfig('tt_content', $contentElementData);
-                if (is_array($ttContentPageTsConfig['categories'])) {
+                if (is_array($ttContentPageTsConfig['categories'] ?? false)) {
                     $configTreeStartingPoints = $ttContentPageTsConfig['categories']['config.']['treeConfig.']['startingPoints'] ?? false;
                     if ($configTreeStartingPoints) {
                         $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints, true);
