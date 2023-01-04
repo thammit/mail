@@ -101,48 +101,49 @@ class MailFactory
         if ($mail->isHtml()) {
             $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams());
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
+            if ($htmlContent !== false) {
+                $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
+                $glue = str_contains($baseUrl, '?') ? '&' : '?';
+                $clickTracking = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
+                $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
+                $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
+                $jumpUrlPrefix = $baseUrl . $glue .
+                    'mail=###MAIL_ID###' .
+                    ($trackingPrivacy ? '' : '&rid=###MAIL_RECIPIENT_SOURCE###-###USER_uid###') .
+                    '&aC=###MAIL_AUTHCODE###' .
+                    '&jumpurl=';
 
-            $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
-            $glue = str_contains($baseUrl, '?') ? '&' : '?';
-            $clickTracking = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
-            $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
-            $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
-            $jumpUrlPrefix = $baseUrl . $glue .
-                'mail=###MAIL_ID###' .
-                ($trackingPrivacy ? '' : '&rid=###MAIL_RECIPIENT_SOURCE###-###USER_uid###') .
-                '&aC=###MAIL_AUTHCODE###' .
-                '&jumpurl=';
-
-            $dom = pQuery::parseStr($htmlContent);
-            /** @var pQuery\IQuery $element */
-            foreach($dom->query('a,form,area') as $element) {
-                $hyperLinkAttribute = match ($element->tagName()) {
-                    'form' => 'action',
-                    default => 'href',
-                };
-                $originalHyperLink = $element->attr($hyperLinkAttribute);
-                if (!str_starts_with(trim($originalHyperLink), '#')) {
-                    $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
-                    if ($clickTracking && !$element->attr('data-do-not-track') && (!str_starts_with($originalHyperLink, 'mailto:') || $clickTrackingMailTo)) {
-                        $hyperLink = array_search($originalHyperLink, array_column($htmlLinks, 'ref'));
-                        if ($hyperLink === false) {
-                            $htmlLinks[] = [
-                                'tag' => $element->tagName(),
-                                'ref' => $originalHyperLink,
-                                'absRef' => $absoluteHyperlink,
-                                'title' => $element->attr('title') ?: $originalHyperLink,
-                            ];
-                            end($htmlLinks);
-                            $hyperLink = key($htmlLinks);
+                $dom = pQuery::parseStr($htmlContent);
+                /** @var pQuery\IQuery $element */
+                foreach($dom->query('a,form,area') as $element) {
+                    $hyperLinkAttribute = match ($element->tagName()) {
+                        'form' => 'action',
+                        default => 'href',
+                    };
+                    $originalHyperLink = $element->attr($hyperLinkAttribute);
+                    if (!str_starts_with(trim($originalHyperLink), '#')) {
+                        $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
+                        if ($clickTracking && !$element->attr('data-do-not-track') && (!str_starts_with($originalHyperLink, 'mailto:') || $clickTrackingMailTo)) {
+                            $hyperLink = array_search($originalHyperLink, array_column($htmlLinks, 'ref'));
+                            if ($hyperLink === false) {
+                                $htmlLinks[] = [
+                                    'tag' => $element->tagName(),
+                                    'ref' => $originalHyperLink,
+                                    'absRef' => $absoluteHyperlink,
+                                    'title' => $element->attr('title') ?: $originalHyperLink,
+                                ];
+                                end($htmlLinks);
+                                $hyperLink = key($htmlLinks);
+                            }
+                            $absoluteHyperlink = $jumpUrlPrefix . (string)$hyperLink;
                         }
-                        $absoluteHyperlink = $jumpUrlPrefix . (string)$hyperLink;
+                        $element->attr($hyperLinkAttribute, $absoluteHyperlink);
                     }
-                    $element->attr($hyperLinkAttribute, $absoluteHyperlink);
                 }
-            }
 
-            $mail->setHtmlContent($dom->html());
-            $mail->setHtmlLinks($htmlLinks);
+                $mail->setHtmlContent($dom->html());
+                $mail->setHtmlLinks($htmlLinks);
+            }
         }
 
         if ($mail->isPlain()) {
