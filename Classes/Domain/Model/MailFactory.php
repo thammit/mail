@@ -148,7 +148,10 @@ class MailFactory
 
         if ($mail->isPlain()) {
             $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams());
-            $mail->setPlainContent($this->fetchPlainTextContent($plainTextUrl));
+            $plainContent = $this->fetchPlainTextContent($plainTextUrl);
+            if ($plainContent !== false) {
+                $mail->setPlainContent($plainContent);
+            }
         }
 
         $mail->setMessageId(MailerUtility::generateMessageId());
