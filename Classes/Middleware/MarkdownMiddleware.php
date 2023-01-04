@@ -30,7 +30,7 @@ class MarkdownMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!$request->getQueryParams()['plain']) {
+        if (!($request->getQueryParams()['plain'] ?? false)) {
             return $handler->handle($request);
         }
         $response = $handler->handle($request);
