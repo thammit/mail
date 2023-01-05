@@ -14,7 +14,7 @@ MAIL make use of several packages all found at packagist.org:
 *  scssphp/scssphp (https://github.com/scssphp/scssphp)
 *  pelago/emogrifier (https://github.com/MyIntervals/emogrifier)
 *  league/html-to-markdown (https://github.com/thephpleague/html-to-markdown)
-*  tburry/pquery (https://github.com/tburry/pquery)
+*  masterminds/html5 (https://github.com/Masterminds/html5-php)
 *  tedivm/fetch (https://github.com/tedious/Fetch)
 
 Kudos to all involved coders who put her love and energy in it. Without her, this extension would not exist.
@@ -54,8 +54,8 @@ league/html-to-markdown
 This package is used to convert an html mail to a plain text (markdown) version using a middleware, just by adding `?plain=1` to the url.
 It has the ability to add own converters, which is used by this extension to handle the mail boundaries, which wrapped around every content element.
 
-tburry/pquery
-=============
+masterminds/html5
+=================
 
 This package is used on several places to extract specific parts of a mail (e.g. links, images, special data attributes).
 
