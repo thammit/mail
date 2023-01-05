@@ -63,7 +63,7 @@ abstract class AbstractController extends ActionController
         protected IconFactory           $iconFactory
     ) {
         try {
-            $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?? GeneralUtility::_GP('id'));
+            $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?: GeneralUtility::_GP('id'));
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
             $this->id = (int)GeneralUtility::_GP('id');
         }
