@@ -287,9 +287,9 @@ class ImportService
             ];
         }
 
-            // get categories from TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.startingPoints
+        // get categories from TCEFORM.tx_mail_domain_model_group.categories.config.treeConfig.startingPoints
         $configTreeStartingPoints = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['startingPoints'] ?? false;
-        if ($configTreeStartingPoints) {
+        if ($configTreeStartingPoints !== false) {
             $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints, true);
             foreach ($configTreeStartingPointsArray as $startingPoint) {
                 $sysCategories = $this->categoryRepository->findByParent($startingPoint);
@@ -306,6 +306,23 @@ class ImportService
                             'checked' => (int)($this->configuration['cat'][$sysCategory->getUid()] ?? 0) === $sysCategory->getUid(),
                         ];
                     }
+                }
+            }
+        } else {
+            // if no startingPoints set use all categories
+            $sysCategories = $this->categoryRepository->findAll();
+            if ($sysCategories->count() > 0) {
+                if ($data['updateUnique']) {
+                    $data['showAddAllCategories'] = true;
+                    $data['addAllCategories'] = (bool)($this->configuration['addAllCategories'] ?? false);
+                }
+                /** @var Category $sysCategory */
+                foreach ($sysCategories as $sysCategory) {
+                    $data['categories'][] = [
+                        'uid' => $sysCategory->getUid(),
+                        'title' => $sysCategory->getTitle(),
+                        'checked' => (int)($this->configuration['cat'][$sysCategory->getUid()] ?? 0) === $sysCategory->getUid(),
+                    ];
                 }
             }
         }
@@ -482,7 +499,7 @@ class ImportService
                         if (isset($this->configuration['cat']) && is_array($this->configuration['cat']) && !in_array('cats', $this->configuration['map'])) {
                             if ($this->configuration['addAllCategories']) {
                                 $configTreeStartingPoints = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['startingPoints'] ?? false;
-                                if ($configTreeStartingPoints) {
+                                if ($configTreeStartingPoints !== false) {
                                     $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints, true);
                                     foreach ($configTreeStartingPointsArray as $startingPoint) {
                                         $sysCategories = $this->categoryRepository->findByParent($startingPoint);
@@ -491,6 +508,14 @@ class ImportService
                                             foreach ($sysCategories as $sysCategory) {
                                                 $data['tt_address'][$firstUserUid]['categories'][] = $sysCategory->getUid();
                                             }
+                                        }
+                                    }
+                                } else {
+                                    $sysCategories = $this->categoryRepository->findAll();
+                                    if ($sysCategories->count() > 0) {
+                                        /** @var Category $sysCategory */
+                                        foreach ($sysCategories as $sysCategory) {
+                                            $data['tt_address'][$firstUserUid]['categories'][] = $sysCategory->getUid();
                                         }
                                     }
                                 }
@@ -528,7 +553,7 @@ class ImportService
         }
 
         $resultImport['invalidEmail'] = $invalidEmailCSV;
-        $resultImport['double'] = is_array($filteredCSV['double']) ? $filteredCSV['double'] : [];
+        $resultImport['double'] = is_array($filteredCSV['double'] ?? false) ? $filteredCSV['double'] : [];
 
         // start importing
         $this->dataHandler->enableLogging = 0;
@@ -606,7 +631,7 @@ class ImportService
         $encapsulation = ($encapsulation === 'singleQuote') ? "'" : $encapsulation;
         $encapsulation = ($encapsulation === 'doubleQuote') ? '"' : $encapsulation;
 
-        ini_set('auto_detect_line_endings', true);
+        @ini_set('auto_detect_line_endings', true);
         $handle = fopen($fileAbsolutePath, 'r');
         if ($handle === false) {
             return $data;

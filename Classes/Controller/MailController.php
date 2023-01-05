@@ -467,7 +467,7 @@ class MailController extends AbstractController
                 $ttContentPageTsConfig = BackendUtility::getTCEFORM_TSconfig('tt_content', $contentElementData);
                 if (is_array($ttContentPageTsConfig['categories'] ?? false)) {
                     $configTreeStartingPoints = $ttContentPageTsConfig['categories']['config.']['treeConfig.']['startingPoints'] ?? false;
-                    if ($configTreeStartingPoints) {
+                    if ($configTreeStartingPoints !== false) {
                         $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints, true);
                         foreach ($configTreeStartingPointsArray as $startingPoint) {
                             $ttContentCategories = $this->categoryRepository->findByParent($startingPoint);
@@ -478,6 +478,15 @@ class MailController extends AbstractController
                                     'checked' => in_array($category->getUid(), $categoriesRow),
                                 ];
                             }
+                        }
+                    } else {
+                        $ttContentCategories = $this->categoryRepository->findAll();
+                        foreach ($ttContentCategories as $category) {
+                            $categories[] = [
+                                'uid' => $category->getUid(),
+                                'title' => $category->getTitle(),
+                                'checked' => in_array($category->getUid(), $categoriesRow),
+                            ];
                         }
                     }
                 }
