@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use DOMElement;
 use Exception;
 use GuzzleHttp\Exception\RequestException;
+use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -67,6 +69,20 @@ class MailerUtility
     /*
      * CONTENT PARTS EXTRACTION
      */
+
+    /**
+     * @param string $mailContent
+     * @return string
+     */
+    public static function getMailBody(string $mailContent): string
+    {
+        $html = new HTML5();
+        $domDocument = $html->loadHTML($mailContent);
+        /** @var DOMElement $bodyElement */
+        $bodyElement = $domDocument->getElementsByTagName('body');
+
+        return str_replace('</body>', '</div>', str_replace('<body', '<div', $html->saveHTML($bodyElement)));
+    }
 
     /**
      * @param array $contentParts content parts

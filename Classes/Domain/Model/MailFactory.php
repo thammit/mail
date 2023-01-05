@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
+use DOMElement;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
+use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Exception\HtmlContentFetchFailedException;
 use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
@@ -14,7 +16,6 @@ use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
-use pQuery;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -113,35 +114,39 @@ class MailFactory
                     '&aC=###MAIL_AUTHCODE###' .
                     '&jumpurl=';
 
-                $dom = pQuery::parseStr($htmlContent);
-                /** @var pQuery\IQuery $element */
-                foreach($dom->query('a,form,area') as $element) {
-                    $hyperLinkAttribute = match ($element->tagName()) {
-                        'form' => 'action',
-                        default => 'href',
-                    };
-                    $originalHyperLink = $element->attr($hyperLinkAttribute);
-                    if (!str_starts_with(trim($originalHyperLink), '#')) {
-                        $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
-                        if ($clickTracking && !$element->attr('data-do-not-track') && (!str_starts_with($originalHyperLink, 'mailto:') || $clickTrackingMailTo)) {
-                            $hyperLink = array_search($originalHyperLink, array_column($htmlLinks, 'ref'));
-                            if ($hyperLink === false) {
-                                $htmlLinks[] = [
-                                    'tag' => $element->tagName(),
-                                    'ref' => $originalHyperLink,
-                                    'absRef' => $absoluteHyperlink,
-                                    'title' => $element->attr('title') ?: $originalHyperLink,
-                                ];
-                                end($htmlLinks);
-                                $hyperLink = key($htmlLinks);
+                $html = new HTML5();
+                $domDocument = $html->loadHTML($htmlContent);
+                foreach (['a', 'form', 'area'] as $tag) {
+                    $domElements = $domDocument->getElementsByTagName($tag);
+                    /** @var DOMElement $element */
+                    foreach ($domElements as $domElement) {
+                        $hyperLinkAttribute = match ($domElement->tagName) {
+                            'form' => 'action',
+                            default => 'href',
+                        };
+                        $originalHyperLink = $domElement->getAttribute('href');
+                        if (!str_starts_with(trim($originalHyperLink), '#')) {
+                            $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
+                            if ($clickTracking && !$domElement->getAttribute('data-do-not-track') && (!str_starts_with($originalHyperLink, 'mailto:') || $clickTrackingMailTo)) {
+                                $hyperLink = array_search($originalHyperLink, array_column($htmlLinks, 'ref'));
+                                if ($hyperLink === false) {
+                                    $htmlLinks[] = [
+                                        'tag' => $hyperLinkAttribute,
+                                        'ref' => $originalHyperLink,
+                                        'absRef' => $absoluteHyperlink,
+                                        'title' => $domElement->getAttribute('title') ?: $originalHyperLink,
+                                    ];
+                                    end($htmlLinks);
+                                    $hyperLink = key($htmlLinks);
+                                }
+                                $absoluteHyperlink = $jumpUrlPrefix . $hyperLink;
                             }
-                            $absoluteHyperlink = $jumpUrlPrefix . (string)$hyperLink;
+                            $domElement->setAttribute($hyperLinkAttribute, $absoluteHyperlink);
                         }
-                        $element->attr($hyperLinkAttribute, $absoluteHyperlink);
                     }
                 }
 
-                $mail->setHtmlContent($dom->html());
+                $mail->setHtmlContent($html->saveHTML($domDocument));
                 $mail->setHtmlLinks($htmlLinks);
             }
         }

@@ -6,6 +6,8 @@ namespace MEDIAESSENZ\Mail\Service;
 use DateTimeImmutable;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use DOMElement;
+use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
@@ -20,8 +22,6 @@ use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
-use PDO;
-use pQuery;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -31,7 +31,6 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -642,23 +641,27 @@ class MailerService implements LoggerAwareInterface
         if ($htmlContent) {
             if ($this->mail->isIncludeMedia()) {
                 // extract all media path from the mail message
-                $dom = pQuery::parseStr($htmlContent);
-                /** @var pQuery\IQuery $element */
-                foreach ($dom->query('img[!data-do-not-embed]') as $element) {
-                    $absoluteImagePath = MailerUtility::absRef($element->attr('src'), $this->mail->getRedirectUrl());
-                    // change image src to absolute path in case fetch and embed fails
-                    $element->attr('src', $absoluteImagePath);
-                    // fetch image from absolute url
-                    $response = $this->requestFactory->request($absoluteImagePath);
-                    if ($response->getStatusCode() === 200) {
-                        $baseName = basename($absoluteImagePath);
-                        // embed image into mail
-                        $mailMessage->embed($response->getBody()->getContents(), $baseName, $response->getHeaderLine('Content-Type'));
-                        // set image src to embed cid
-                        $element->attr('src', 'cid:' . $baseName);
+                $html = new HTML5();
+                $domDocument = $html->loadHTML($htmlContent);
+                $imageElements = $domDocument->getElementsByTagName('img');
+                /** @var DOMElement $imageElement */
+                foreach ($imageElements as $imageElement) {
+                    if (!$imageElement->hasAttribute('data-do-not-embed')) {
+                        $absoluteImagePath = MailerUtility::absRef($imageElement->getAttribute('src'), $this->mail->getRedirectUrl());
+                        // change image src to absolute path in case fetch and embed fails
+                        $imageElement->setAttribute('src', $absoluteImagePath);
+                        // fetch image from absolute url
+                        $response = $this->requestFactory->request($absoluteImagePath);
+                        if ($response->getStatusCode() === 200) {
+                            $baseName = basename($absoluteImagePath);
+                            // embed image into mail
+                            $mailMessage->embed($response->getBody()->getContents(), $baseName, $response->getHeaderLine('Content-Type'));
+                            // set image src to embed cid
+                            $imageElement->setAttribute('src', 'cid:' . $baseName);
+                        }
                     }
                 }
-                $mailMessage->html($dom->html());
+                $mailMessage->html($html->saveHTML($domDocument));
             } else {
                 // add html content part to mail
                 $mailMessage->html($htmlContent);

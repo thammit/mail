@@ -20,10 +20,10 @@ use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
-use pQuery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
@@ -45,7 +45,6 @@ use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
-use TYPO3\CMS\Extbase\Property\TypeConverter\ArrayConverter;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 use TYPO3\CMS\Extbase\Reflection\ReflectionService;
@@ -373,7 +372,7 @@ class MailController extends AbstractController
                 $this->view->assign('htmlToCanvasIframeSrc', $targetUrl);
             } catch (UnableToLinkToPageException $e) {
             }
-            $this->view->assign('mailBody', pQuery::parseStr($mail->getHtmlContent())->query('body')->html());
+            $this->view->assign('mailBody', MailerUtility::getMailBody($mail->getHtmlContent()));
             $this->pageRenderer->addRequireJsConfiguration([
                 'paths' => [
                     'html2canvas' => PathUtility::getPublicResourceWebPath('EXT:mail/Resources/Public/') . 'JavaScript/Contrib/html2canvas.min',
@@ -497,7 +496,7 @@ class MailController extends AbstractController
         $this->view->assignMultiple([
             'data' => $data,
             'mail' => $mail,
-            'mailBody' => pQuery::parseStr($mail->getHtmlContent())->query('body')->html(),
+            'mailBody' => MailerUtility::getMailBody($mail->getHtmlContent()),
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail))
         ]);
         $this->moduleTemplate->setContent($this->view->render());
