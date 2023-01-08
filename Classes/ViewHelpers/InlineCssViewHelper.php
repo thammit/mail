@@ -2,6 +2,7 @@
 
 namespace MEDIAESSENZ\Mail\ViewHelpers;
 
+use Closure;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -24,7 +25,7 @@ class InlineCssViewHelper extends AbstractViewHelper
     /**
      * @return void
      */
-    public function initializeArguments()
+    public function initializeArguments(): void
     {
         parent::initializeArguments();
         $this->registerArgument('path', 'string', 'The path and filename of the resource file.', true);
@@ -33,15 +34,15 @@ class InlineCssViewHelper extends AbstractViewHelper
 
     /**
      * @param array $arguments
-     * @param \Closure $renderChildrenClosure
+     * @param Closure $renderChildrenClosure
      * @param RenderingContextInterface $renderingContext
      * @return string
      */
     public static function renderStatic(
         array $arguments,
-        \Closure $renderChildrenClosure,
+        Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
-    )
+    ): string
     {
         $path = GeneralUtility::getFileAbsFileName($arguments['path']);
         $css = GeneralUtility::getUrl($path);

@@ -32,22 +32,20 @@ class EmogrifyViewHelper extends AbstractViewHelper
      * @return string
      * @throws ParseException
      */
-    public function render()
+    public function render(): string
     {
         $content = $this->renderChildren();
         $css = $this->arguments['css'];
         $extractContent = $this->arguments['extractContent'];
         $options = $this->arguments['options'];
 
-        $output = EmogrifierUtility::emogrify($content, $css, $extractContent, $options);
-
-        return $output;
+        return EmogrifierUtility::emogrify($content, $css, $extractContent, $options);
     }
 
     /**
      * @return ContentObjectRenderer
      */
-    protected static function getContentObject()
+    protected static function getContentObject(): ContentObjectRenderer
     {
         return $GLOBALS['TSFE']->cObj;
     }

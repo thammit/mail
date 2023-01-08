@@ -1,7 +1,7 @@
 .PHONY: build-mail-dependencies
 build-mail-dependencies:
 	composer update --no-dev --prefer-dist --optimize-autoloader --working-dir=Resources/Private/PHP
-	tools/box compile -c Resources/Private/PHP/box.json
+	box compile -c Resources/Private/PHP/box.json
 
 .PHONY: zip
 zip:

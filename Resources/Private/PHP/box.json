@@ -1,6 +1,8 @@
 {
     "blacklist": [
-        "box.json"
+        "box.json",
+        "mail-dependencies.phar",
+        "vendor.phar"
     ],
     "main": false,
     "output": "mail-dependencies.phar"

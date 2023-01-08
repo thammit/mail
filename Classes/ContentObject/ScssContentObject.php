@@ -4,9 +4,15 @@ namespace MEDIAESSENZ\Mail\ContentObject;
 
 use MEDIAESSENZ\Mail\Parser\ScssParser;
 use ScssPhp\ScssPhp\Exception\SassException;
-use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException;
+use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
+
+if (!Environment::isComposerMode() && !class_exists(ScssParser::class)) {
+    // @phpstan-ignore-next-line
+    require_once 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
+}
 
 class ScssContentObject extends AbstractContentObject
 {

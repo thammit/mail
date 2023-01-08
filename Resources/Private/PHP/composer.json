@@ -1,5 +1,9 @@
 {
     "description": "Dependencies of EXT:mail for TYPO3 non-composer installations",
+    "config": {
+        "prepend-autoloader": false,
+        "classmap-authoritative": true
+    },
     "require": {
         "tedivm/fetch": "^0.7",
         "league/html-to-markdown": "^5",

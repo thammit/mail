@@ -13,21 +13,16 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 
+if (!Environment::isComposerMode() && !class_exists(Version::class)) {
+    // @phpstan-ignore-next-line
+    require_once 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
+}
+
 /**
  * ScssParser
  */
 class ScssParser extends AbstractParser
 {
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        if (!class_exists('ScssPhp\ScssPhp\Version')) {
-            require_once ExtensionManagementUtility::extPath('mail') . '/Contrib/scssphp/scss.inc.php';
-        }
-    }
-
     /**
      * @param string $extension
      * @return bool
