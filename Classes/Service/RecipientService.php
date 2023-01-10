@@ -518,7 +518,7 @@ class RecipientService
     {
         $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
         if ($group->getQuery()) {
-            $queryGenerator->init('dmail_queryConfig', $table);
+            $queryGenerator->init('mail_queryConfig', $table);
             $queryGenerator->queryConfig = $queryGenerator->cleanUpQueryConfig(unserialize($group->getQuery()));
 
             $queryGenerator->extFieldLists['queryFields'] = 'uid';

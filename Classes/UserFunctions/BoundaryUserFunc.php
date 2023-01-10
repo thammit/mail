@@ -38,7 +38,7 @@ class BoundaryUserFunc
      * @param string $content Incoming HTML code which will be wrapped
      * @param array|null $conf Pointer to the conf array (TS)
      *
-     * @return    string        content of the email with dmail boundaries
+     * @return    string        content of the email with mail boundaries
      * @throws DBALException|Exception
      */
     public function insertContentBoundaries(string $content, ?array $conf = []): string

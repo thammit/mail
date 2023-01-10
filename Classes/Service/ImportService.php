@@ -560,23 +560,7 @@ class ImportService
         $this->dataHandler->start($data, []);
         $this->dataHandler->process_datamap();
 
-        /*
-         * Hook for doImport Mail
-         * will be called every time a record is inserted
-         * todo replace by PSR-14 Event Dispatcher
-         */
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail/mod3/class.tx_directmail_recipient_list.php']['doImport'])) {
-            $hookObjectsArr = [];
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['direct_mail/mod3/class.tx_directmail_recipient_list.php']['doImport'] as $classRef) {
-                $hookObjectsArr[] = GeneralUtility::makeInstance($classRef);
-            }
-
-            foreach ($hookObjectsArr as $hookObj) {
-                if (method_exists($hookObj, 'doImport')) {
-                    $hookObj->doImport($this, $data, $c);
-                }
-            }
-        }
+        // Todo Add PSR-14 event dispatcher to manipulate imported address after import
 
         return $resultImport;
     }

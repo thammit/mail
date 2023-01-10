@@ -349,7 +349,7 @@ class MailerUtility
         }
         if (($params['simulateUsergroup'] ?? false) && MathUtility::canBeInterpretedAsInteger($params['simulateUsergroup'])) {
             $glue = str_contains($url, '?') ? '&' : '?';
-            $url .= $glue . 'dmail_fe_group=' . (int)$params['simulateUsergroup'] . '&access_token=' . RegistryUtility::createAndGetAccessToken();
+            $url .= $glue . 'mail_fe_group=' . (int)$params['simulateUsergroup'] . '&access_token=' . RegistryUtility::createAndGetAccessToken();
         }
         return $url;
     }

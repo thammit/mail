@@ -19,7 +19,7 @@ class RegistryUtility
         /* @var Registry $registry */
         $registry = GeneralUtility::makeInstance(Registry::class);
         $accessToken = GeneralUtility::makeInstance(Random::class)->generateRandomHexString(32);
-        $registry->set('tx_directmail', 'accessToken', $accessToken);
+        $registry->set('tx_mail', 'accessToken', $accessToken);
 
         return $accessToken;
     }
@@ -35,8 +35,8 @@ class RegistryUtility
     {
         /* @var Registry $registry */
         $registry = GeneralUtility::makeInstance(Registry::class);
-        $registeredAccessToken = $registry->get('tx_directmail', 'accessToken');
-        $registry->remove('tx_directmail', 'accessToken');
+        $registeredAccessToken = $registry->get('tx_mail', 'accessToken');
+        $registry->remove('tx_mail', 'accessToken');
 
         return !empty($registeredAccessToken) && $registeredAccessToken === $accessToken;
     }

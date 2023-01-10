@@ -13,7 +13,7 @@ final class Constants
     const PANEL_QUICK_MAIL = 'quickmail';
     const PANEL_OPEN = 'open';
 
-    const CONTENT_SECTION_BOUNDARY = 'DMAILER_SECTION_BOUNDARY';
+    const CONTENT_SECTION_BOUNDARY = 'MAIL_SECTION_BOUNDARY';
 
     const MAIL_HEADER_IDENTIFIER = 'X-TYPO3MID';
 }

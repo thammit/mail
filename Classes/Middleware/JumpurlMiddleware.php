@@ -373,12 +373,12 @@ class JumpurlMiddleware implements MiddlewareInterface
     {
         $allowed = false;
 
-        // Check if jumpurl is a valid link to a "dmailerping.gif"
-        // Make $checkPath an absolute path pointing to dmailerping.gif, so it can get checked via ::isAllowedAbsPath()
+        // Check if jumpurl is a valid link to a "mailerping.gif"
+        // Make $checkPath an absolute path pointing to mailerping.gif, so it can get checked via ::isAllowedAbsPath()
         $checkPath = Environment::getPublicPath() . '/' . ltrim($target, '/');
 
-        // Now check if $checkPath is a valid path and points to a "/dmailerping.gif"
-        if (preg_match('#/dmailerping\\.(gif|png)$#', $checkPath) && (GeneralUtility::isAllowedAbsPath($checkPath) || GeneralUtility::isValidUrl($target))) {
+        // Now check if $checkPath is a valid path and points to a "/mailerping.gif"
+        if (preg_match('#/mailerping\\.(gif|png)$#', $checkPath) && (GeneralUtility::isAllowedAbsPath($checkPath) || GeneralUtility::isValidUrl($target))) {
             // set juHash as done for external_url in core: http://forge.typo3.org/issues/46071
             $allowed = true;
         } else {

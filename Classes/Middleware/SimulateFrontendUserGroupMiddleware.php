@@ -16,8 +16,8 @@ class SimulateFrontendUserGroupMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (GeneralUtility::_GET('dmail_fe_group') && GeneralUtility::_GET('access_token')) {
-            $frontendUserGroup = (int)GeneralUtility::_GET('dmail_fe_group');
+        if (GeneralUtility::_GET('mail_fe_group') && GeneralUtility::_GET('access_token')) {
+            $frontendUserGroup = (int)GeneralUtility::_GET('mail_fe_group');
             $accessToken = GeneralUtility::_GET('access_token');
             if ($frontendUserGroup > 0 && RegistryUtility::validateAndRemoveAccessToken($accessToken)) {
                 /** @var FrontendUserAuthentication $feUser */
