@@ -49,7 +49,7 @@ class JumpurlMiddleware implements MiddlewareInterface
 
     protected ?Mail $mail;
 
-    protected array $siteConfiguration = [];
+    protected array $recipientSources = [];
 
     /**
      * This is a preprocessor for the actual jumpurl extension to allow counting of clicked links
@@ -68,7 +68,7 @@ class JumpurlMiddleware implements MiddlewareInterface
             /** @var Site $site */
             $site = $request->getAttribute('site');
             if ($site instanceof Site) {
-                $this->siteConfiguration = $site->getConfiguration()['mail'] ?? [];
+                $this->recipientSources = $site->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
             }
             $mailUid = (int)$this->request->getQueryParams()['mail'];
             $submittedRecipient = $this->request->getQueryParams()['rid'] ?? '';
@@ -242,12 +242,11 @@ class JumpurlMiddleware implements MiddlewareInterface
             [$this->recipientSourceIdentifier, $recipientUid] = explode('-', $combinedRecipient);
         }
 
-        // todo get recipient source configuration from site configuration
-        $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$this->recipientSourceIdentifier] ?? false;
+        $recipientSourceConfiguration = $this->recipientSources[$this->recipientSourceIdentifier] ?? false;
 
         if ($recipientSourceConfiguration) {
             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
-            $recipientService->init($this->siteConfiguration);
+            $recipientService->init($this->recipientSources);
             $isSimpleList = $this->recipientSourceIdentifier === 'tx_mail_domain_model_group';
             if ($isSimpleList) {
                 $this->recipientRecord['uid'] = $recipientUid;

@@ -41,7 +41,7 @@ class RecipientService
     use DebugQueryTrait;
 
     protected array $allowedTables = ['fe_users', 'tt_address'];
-    protected array $siteConfiguration = [];
+    protected array $recipientSources = [];
 
     public function __construct(
         protected GroupRepository $groupRepository,
@@ -52,9 +52,9 @@ class RecipientService
     ) {
     }
 
-    public function init(array $siteConfiguration): void
+    public function init(array $recipientSources): void
     {
-        $this->siteConfiguration = $siteConfiguration;
+        $this->recipientSources = $recipientSources;
     }
 
     /**
@@ -293,7 +293,7 @@ class RecipientService
                 $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
-                        $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
+                        $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
                         if ($recipientSourceConfiguration) {
                             $recipientSourceIdentifier = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
                             $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
@@ -332,7 +332,7 @@ class RecipientService
                 break;
             case RecipientGroupType::STATIC:
                 // Static MM list
-                foreach ($this->siteConfiguration['recipientSources'] as $recipientSourceIdentifier => $recipientSourceConfiguration) {
+                foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
                     $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
                     $contains = $recipientSourceConfiguration['contains'] ?? false;
                     if ($contains) {

@@ -96,7 +96,7 @@ class RecipientController extends AbstractController
         $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group, true);
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
-            $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             $isCsv = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
             if (!$idList || (!$recipientSourceConfiguration && !$isCsv)) {
                 continue;
@@ -164,7 +164,7 @@ class RecipientController extends AbstractController
      */
     public function csvDownloadAction(Group $group, string $recipientSourceIdentifier): void
     {
-        $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
+        $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
         if (!$recipientSourceConfiguration && !($recipientSourceIdentifier === 'tx_mail_domain_model_group')) {
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
             $this->redirect('show');

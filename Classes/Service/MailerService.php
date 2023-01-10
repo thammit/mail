@@ -80,7 +80,7 @@ class MailerService implements LoggerAwareInterface
     protected array $htmlContentParts = [];
     protected array $plainContentParts = [];
     protected string $siteIdentifier = '';
-    protected array $siteConfiguration = [];
+    protected array $recipientSources = [];
     protected Site $site;
 
     public function __construct(
@@ -111,7 +111,7 @@ class MailerService implements LoggerAwareInterface
     {
         $this->siteIdentifier = $siteIdentifier;
         $this->site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
-        $this->siteConfiguration = $this->site->getConfiguration()['mail'] ?? [];
+        $this->recipientSources = $this->site->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
     }
 
     /**
@@ -240,7 +240,7 @@ class MailerService implements LoggerAwareInterface
             $recipientCategories = $recipientData['categories'] ?? [];
 
             $htmlContent = '';
-            if ($this->isHtml && (($recipientData['mail_html'] ?? false) || ($this->siteConfiguration['recipientSources'][$recipientSourceIdentifier]['forceHtmlMail'] ?? false))) {
+            if ($this->isHtml && (($recipientData['mail_html'] ?? false) || ($this->recipientSources[$recipientSourceIdentifier]['forceHtmlMail'] ?? false))) {
                 $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, $recipientCategories);
 
                 if ($htmlContent) {
@@ -322,7 +322,7 @@ class MailerService implements LoggerAwareInterface
                 $markers,
                 $recipient,
                 $recipientSourceIdentifier,
-                $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? []
+                $this->recipientSources[$recipientSourceIdentifier] ?? []
             )
         )->getMarkers();
 
@@ -352,7 +352,7 @@ class MailerService implements LoggerAwareInterface
             if (!$recipientIds) {
                 continue;
             }
-            $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             $isSimpleList = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
             if (!$recipientSourceConfiguration && !$isSimpleList) {
                 $this->logger->debug('No recipient source configuration found for ' . $recipientSourceIdentifier);
@@ -444,7 +444,7 @@ class MailerService implements LoggerAwareInterface
 
             // PSR-14 event dispatcher to manipulate recipient data
             // see MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData for example
-            $recipientSourceConfiguration = $this->siteConfiguration['recipientSources'][$recipientSourceIdentifier] ?? false;
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             if ($recipientSourceConfiguration) {
                 $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
             }

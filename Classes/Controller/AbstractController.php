@@ -40,7 +40,7 @@ abstract class AbstractController extends ActionController
     protected string $backendUserPermissions = '';
     protected array $pageTSConfiguration = [];
     protected array $userTSConfiguration = [];
-    protected array $siteConfiguration = [];
+    protected array $recipientSources = [];
     protected array $implodedParams = [];
     protected array $allowedTables = [];
     protected ModuleTemplate $moduleTemplate;
@@ -73,8 +73,8 @@ abstract class AbstractController extends ActionController
             $this->site = $this->siteFinder->getSiteByPageId($this->id);
             $this->siteIdentifier = $this->site->getIdentifier();
             $this->mailerService->setSiteIdentifier($this->siteIdentifier);
-            $this->siteConfiguration = $this->site->getConfiguration()['mail'] ?? [];
-            $this->recipientService->init($this->siteConfiguration);
+            $this->recipientSources = $this->site->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
+            $this->recipientService->init($this->recipientSources);
         } catch (SiteNotFoundException $e) {
             $this->siteIdentifier = '';
         }

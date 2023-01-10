@@ -36,7 +36,7 @@ class ReportService
     protected ?Mail $mail;
 
     protected array $responseTypesTable = [];
-    protected array $siteConfiguration = [];
+    protected array $recipientSources = [];
 
     public function __construct(
         protected LogRepository          $logRepository,
@@ -58,8 +58,8 @@ class ReportService
     public function init(Mail $mail): void
     {
         $this->mail = $mail;
-        $this->siteConfiguration = $this->siteFinder->getSiteByPageId($this->mail->getPid())->getConfiguration()['mail'] ?? [];
-        $this->recipientService->init($this->siteConfiguration);
+        $this->recipientSources = $this->siteFinder->getSiteByPageId($this->mail->getPid())->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
+        $this->recipientService->init($this->recipientSources);
         $this->responseTypesTable = $this->logRepository->findResponseTypesByMail($this->mail->getUid());
     }
 
@@ -173,14 +173,13 @@ class ReportService
     public function getReturnedDetailsData(array $returnCodes = []): array
     {
         $data = [];
-        $recipientSourcesConfiguration = $this->siteConfiguration['recipientSources'];
         $failedRecipientIds = $this->logRepository->findFailedRecipientIdsByMailAndReturnCodeGroupedByRecipientSource($this->mail->getUid(), $returnCodes);
         foreach ($failedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
             if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
                 $data[$recipientSourceIdentifier] = $recipientIds;
             } else {
                 // get site configuration
-                $recipientSourceConfiguration = $recipientSourcesConfiguration[$recipientSourceIdentifier];
+                $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
                 if ($recipientSourceConfiguration['model'] ?? false) {
                     $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration['model']);
                 } else {

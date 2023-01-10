@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Utility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ConfigurationUtility
@@ -29,6 +30,15 @@ class ConfigurationUtility
     public static function getExtensionConfiguration(string $path = ''): string
     {
         return GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('mail', $path);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getDefaultRecipientSources(): array
+    {
+        $loader = GeneralUtility::makeInstance(YamlFileLoader::class);
+        return $loader->load(GeneralUtility::getFileAbsFileName('EXT:mail/Configuration/Site/RecipientSources.yaml'))['mail']['recipientSources'] ?? [];
     }
 
     /**
