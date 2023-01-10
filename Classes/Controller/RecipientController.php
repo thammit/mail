@@ -15,9 +15,12 @@ use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
+use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
@@ -38,6 +41,7 @@ class RecipientController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws RouteNotFoundException
      */
     public function indexAction(): ResponseInterface
     {
@@ -70,6 +74,7 @@ class RecipientController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        $this->addLeftDocheaderButtons($this->id);
         $this->addDocheaderButtons();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -275,6 +280,34 @@ class RecipientController extends AbstractController
         $this->moduleTemplate->setContent($this->view->render());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
+    }
+
+    /**
+     * Create document header buttons of "overview" action
+     * @param int $pid
+     * @throws RouteNotFoundException
+     */
+    protected function addLeftDocheaderButtons(int $pid): void
+    {
+        $backendUriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $addNewButton = $buttonBar
+            ->makeLinkButton()
+            ->setIcon($this->iconFactory->getIcon('actions-add', Icon::SIZE_SMALL))
+            ->setClasses('btn btn-default text-uppercase')
+            ->setTitle(LanguageUtility::getLL('recipient.createMailGroup.message'))
+            ->setHref((string)$backendUriBuilder->buildUriFromRoute('record_edit', [
+                'edit' => ['tx_mail_domain_model_group' => [$pid => 'new']],
+                'returnUrl' => $this->uriBuilder->getRequest()->getAttribute('normalizedParams')->getRequestUrl()
+            ]));
+        $buttonBar->addButton($addNewButton);
+        $addCsvImportButton = $buttonBar
+            ->makeLinkButton()
+            ->setIcon($this->iconFactory->getIcon('content-csv', Icon::SIZE_SMALL, 'actions-arrow-up-alt'))
+            ->setClasses('btn btn-default text-uppercase')
+            ->setTitle(LanguageUtility::getLL('recipient.button.importCsv'))
+            ->setHref($this->uriBuilder->uriFor('csvImportWizard'));
+        $buttonBar->addButton($addCsvImportButton, ButtonBar::BUTTON_POSITION_LEFT, 2);
     }
 
     /**
