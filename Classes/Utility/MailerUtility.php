@@ -384,7 +384,7 @@ class MailerUtility
 
         // if the last char not a /, then assume it's an absolute
         $addr = parse_url($path);
-        return $addr['scheme'] . '://' . $addr['host'] . ($addr['port'] ? ':' . $addr['port'] : '') . '/' . $ref;
+        return $addr['scheme'] . '://' . $addr['host'] . (isset($addr['port']) ? ':' . $addr['port'] : '') . '/' . $ref;
     }
 
     /**

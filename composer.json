@@ -19,7 +19,7 @@
         "typo3/cms-scheduler": "^11.5",
         "typo3/cms-fluid-styled-content": "^11.5",
         "friendsoftypo3/jumpurl": "^8",
-        "friendsoftypo3/tt-address": "^6",
+        "friendsoftypo3/tt-address": "^6|^7",
         "tedivm/fetch": "^0.7",
         "league/html-to-markdown": "^5",
         "masterminds/html5": "^2.7.6",
