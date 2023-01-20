@@ -7,9 +7,9 @@ final class ManipulateMarkersEvent
 {
     public function __construct(
         private array $markers,
-        private readonly array $recipient,
-        private readonly string $recipientSourceIdentifier,
-        private readonly array $recipientSourceConfiguration
+        private array $recipient,
+        private string $recipientSourceIdentifier,
+        private array $recipientSourceConfiguration
     ) {
     }
 

@@ -35,9 +35,9 @@ class AnalyzeBounceMailCommand extends Command
     private LanguageService $languageService;
 
     public function __construct(
-        private readonly LanguageServiceFactory $languageServiceFactory,
-        private readonly Context $context,
-        private readonly LogRepository $logRepository,
+        private LanguageServiceFactory $languageServiceFactory,
+        private Context $context,
+        private LogRepository $logRepository,
         string $name = null
     )
     {

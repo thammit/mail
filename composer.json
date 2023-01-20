@@ -14,6 +14,7 @@
         "docs": "https://docs.typo3.org/p/mediaessenz/mail/main/en-us/"
     },
     "require": {
+        "php": "^8.0",
         "typo3/cms-core": "^11.5",
         "typo3/cms-redirects": "^11.5",
         "typo3/cms-scheduler": "^11.5",

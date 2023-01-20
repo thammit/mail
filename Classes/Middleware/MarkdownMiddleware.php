@@ -23,7 +23,7 @@ if (!Environment::isComposerMode() && !class_exists(TableConverter::class)) {
 class MarkdownMiddleware implements MiddlewareInterface
 {
 
-    public function __construct(private readonly ResponseFactoryInterface $responseFactory)
+    public function __construct(private ResponseFactoryInterface $responseFactory)
     {
     }
 

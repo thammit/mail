@@ -55,7 +55,7 @@ class MailFactory
      * @param SiteFinder $siteFinder
      * @throws SiteNotFoundException
      */
-    public function __construct(private readonly int $storageFolder, private readonly Context $context, private readonly SiteFinder $siteFinder)
+    public function __construct(private int $storageFolder, private Context $context, private SiteFinder $siteFinder)
     {
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($storageFolder)['mod.']['web_modules.']['mail.'] ?? [];
         $this->site = $this->siteFinder->getSiteByPageId($storageFolder);
