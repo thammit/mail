@@ -929,43 +929,43 @@ You may personalize the mails that will be sent to each recipient by inserting t
       </trans-unit>
       <trans-unit id="configuration.panel.default.header" resname="configuration.panel.default.header">
         <source>Default settings for new mails</source>
-        <target state="needs-translation">Default settings for new mails</target>
+        <target state="translated">Standardeinstellungen für neue Mails</target>
       </trans-unit>
       <trans-unit id="configuration.panel.default.tab.general" resname="configuration.panel.default.tab.general">
         <source>General</source>
-        <target state="needs-translation">General</target>
+        <target state="translated">Allgemein</target>
       </trans-unit>
       <trans-unit id="configuration.panel.default.tab.headers" resname="configuration.panel.default.tab.headers">
         <source>Headers</source>
-        <target state="needs-translation">Headers</target>
+        <target state="translated">Kopfzeilen</target>
       </trans-unit>
       <trans-unit id="configuration.panel.default.tab.content" resname="configuration.panel.default.tab.content">
         <source>Content</source>
-        <target state="needs-translation">Content</target>
+        <target state="translated">Inhalt</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.header" resname="configuration.panel.module.header">
         <source>Module settings</source>
-        <target state="needs-translation">Module settings</target>
+        <target state="translated">Moduleinstellungen</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.general" resname="configuration.panel.module.tab.general">
         <source>General</source>
-        <target state="needs-translation">General</target>
+        <target state="translated">Allgemein</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.tracking" resname="configuration.panel.module.tab.tracking">
         <source>Tracking</source>
-        <target state="needs-translation">Tracking</target>
+        <target state="translated">Tracking</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.test" resname="configuration.panel.module.tab.test">
         <source>Test mails</source>
-        <target state="needs-translation">Test mails</target>
+        <target state="translated">Test-Mails</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.quickmails" resname="configuration.panel.module.tab.quickmails">
         <source>Quick mails</source>
-        <target state="needs-translation">Quick mails</target>
+        <target state="translated">Kurznachrichten</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.defaults" resname="configuration.panel.module.tab.defaults">
         <source>Defaults for new mails</source>
-        <target state="needs-translation">Defaults for new mails</target>
+        <target state="translated">Standardeinstellungen für neue Mails</target>
       </trans-unit>
       <trans-unit id="configuration.notification.permissionError.message" approved="yes">
         <source>You do not have permissions to write configuration to page %s.</source>
@@ -1112,7 +1112,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
       </trans-unit>
       <trans-unit id="configuration.encoding" resname="configuration.encoding">
         <source>Content transfer encoding</source>
-        <target state="needs-translation">Content transfer encoding</target>
+        <target state="translated">Inhaltskodierung</target>
       </trans-unit>
       <trans-unit id="configuration.encoding.description" resname="configuration.encoding.description" approved="yes">
         <source>Select the default content transfer encoding of mails.</source>
