@@ -115,10 +115,13 @@
                 <source>General</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_mail.tab.headers">
-                <source>Mail headers</source>
+                <source>Header</source>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_mail.tab.sendOptions">
-                <source>Send options</source>
+            <trans-unit id="tx_mail_domain_model_mail.tab.content">
+                <source>Content</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.tab.distribution">
+                <source>Distribution</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_mail.transferEncoding">
                 <source>Content transfer encoding</source>

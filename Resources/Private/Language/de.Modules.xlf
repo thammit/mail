@@ -872,6 +872,14 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>Mail Queue</source>
                 <target>Mail Warteschlange</target>
             </trans-unit>
+            <trans-unit id="configuration.header" resname="configuration.header">
+                <source>Mail Settings</source>
+                <target>Mail Einstellungen</target>
+            </trans-unit>
+            <trans-unit id="configuration.panel.default.header" resname="configuration.panel.default.header">
+                <source>Default settings for new mails</source>
+                <target>Standardeinstellungen für neue Mails</target>
+            </trans-unit>
             <trans-unit id="configuration.notification.permissionError.message">
                 <source>You do not have permissions to write configuration to page %s.</source>
                 <target>Sie haben keine Berechtigung, die Konfiguration in die Seite %s zu schreiben.</target>
@@ -1017,8 +1025,8 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
                 <target state="translated">Wähle den Zeichensatz für Mails die auf externe Seite basieren, bei denen der Zeichensatz nicht automatisch bestimmt werden kann.</target>
 			</trans-unit>
 			<trans-unit id="configuration.encoding" resname="configuration.encoding">
-				<source>Default encoding of mails</source>
-                <target state="translated">Standardkodierung für Mails</target>
+				<source>Content transfer encoding</source>
+                <target state="translated">Kodierung der Inhaltsübertragung</target>
 			</trans-unit>
 			<trans-unit id="configuration.encoding.description" resname="configuration.encoding.description">
 				<source>Select the default content transfer encoding of mails.</source>
@@ -1183,10 +1191,6 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
             <trans-unit id="configuration.noEditPermissions" resname="configuration.noEditPermissions">
                 <source>You don't have permissions to change mail settings.</source>
                 <target>Sie haben keine Berechtigung zum Ändern der E-Mail-Einstellungen.</target>
-            </trans-unit>
-            <trans-unit id="configuration.header" resname="configuration.header">
-                <source>Mail Settings</source>
-                <target>Mail Einstellungen</target>
             </trans-unit>
 			<trans-unit id="scheduler.bounceMail.server" resname="scheduler.bounceMail.server">
 				<source>Server URL/IP</source>

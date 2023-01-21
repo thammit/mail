@@ -8,7 +8,9 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 
@@ -46,6 +48,7 @@ class ConfigurationController  extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        $this->configureOverViewDocHeader();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -82,5 +85,29 @@ class ConfigurationController  extends AbstractController
 
         }
         $this->redirect('index');
+    }
+
+    /**
+     * Create document header buttons of "overview" action
+     */
+    protected function configureOverViewDocHeader(): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $saveButton = $buttonBar->makeInputButton()
+            ->setName('save')
+            ->setValue('1')
+            ->setIcon($this->iconFactory->getIcon('actions-document-save', Icon::SIZE_SMALL))
+            ->setForm('mailConfigurationForm')->setShowLabelText(true)
+            ->setTitle(LanguageUtility::getLL('general.button.save'));
+        $buttonBar->addButton($saveButton);
+
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailConfiguration');
+        $arguments = [
+            'id' => $this->id,
+        ];
+        $displayName = 'Mail Configuration [' . $this->id . ']';
+        $shortCutButton->setArguments($arguments);
+        $shortCutButton->setDisplayName($displayName);
+        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
     }
 }

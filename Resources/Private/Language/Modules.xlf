@@ -683,6 +683,39 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="queue.header" resname="queue.header">
                 <source>Mail Queue</source>
             </trans-unit>
+            <trans-unit id="configuration.header" resname="configuration.header">
+                <source>Mail Settings</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.default.header" resname="configuration.panel.default.header">
+                <source>Default settings for new mails</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.default.tab.general" resname="configuration.panel.default.tab.general">
+                <source>General</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.default.tab.headers" resname="configuration.panel.default.tab.headers">
+                <source>Headers</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.default.tab.content" resname="configuration.panel.default.tab.content">
+                <source>Content</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.header" resname="configuration.panel.module.header">
+                <source>Module settings</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.general" resname="configuration.panel.module.tab.general">
+                <source>General</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.tracking" resname="configuration.panel.module.tab.tracking">
+                <source>Tracking</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.test" resname="configuration.panel.module.tab.test">
+                <source>Test mails</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.quickmails" resname="configuration.panel.module.tab.quickmails">
+                <source>Quick mails</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.defaults" resname="configuration.panel.module.tab.defaults">
+                <source>Defaults for new mails</source>
+            </trans-unit>
             <trans-unit id="configuration.notification.permissionError.message">
                 <source>You do not have permissions to write configuration to page %s.</source>
             </trans-unit>
@@ -792,7 +825,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 				<source>Specify the character set used in mails when they are built from external pages and character set cannot be auto-detected.</source>
 			</trans-unit>
 			<trans-unit id="configuration.encoding" resname="configuration.encoding">
-				<source>Default encoding of mails</source>
+				<source>Content transfer encoding</source>
 			</trans-unit>
 			<trans-unit id="configuration.encoding.description" resname="configuration.encoding.description">
 				<source>Select the default content transfer encoding of mails.</source>
@@ -915,9 +948,6 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			</trans-unit>
             <trans-unit id="configuration.noEditPermissions" resname="configuration.noEditPermissions">
                 <source>You don't have permissions to change mail settings.</source>
-            </trans-unit>
-            <trans-unit id="configuration.header" resname="configuration.header">
-                <source>Mail Settings</source>
             </trans-unit>
 			<trans-unit id="scheduler.bounceMail.server" resname="scheduler.bounceMail.server">
 				<source>Server URL/IP</source>

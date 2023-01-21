@@ -285,10 +285,11 @@ class MailController extends AbstractController
         $data = [];
         $table = 'tx_mail_domain_model_mail';
         $groups = [
-            'general' => ['type', 'sysLanguageUid', 'page', 'sendOptions', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
+            'general' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
             'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority'],
-            'content' => ['includeMedia', 'encoding', 'redirect', 'redirectAll', 'authCodeFields'],
+            'content' => ['encoding', 'sendOptions', 'includeMedia', 'encoding', 'redirect', 'redirectAll', 'authCodeFields'],
         ];
+        $readOnly = ['renderedSize'];
 
         if ($mail->isExternal()) {
             unset($groups['general'][array_search('sysLanguageUid', $groups['general'])]);
@@ -330,6 +331,10 @@ class MailController extends AbstractController
                     $data[$groupName][$property] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment', $table),
                         'value' => $value,
+                        'edit' => GeneralUtility::camelCaseToLowerCaseUnderscored($property),
+                        'class' => 'btn btn-default',
+                        'icon' => 'mail-attachment',
+                        'overlay' => ''
                     ];
                 } else {
                     if (method_exists($mail, $getter)) {
@@ -339,8 +344,20 @@ class MailController extends AbstractController
                         }
                         $data[$groupName][$property] = [
                             'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $table),
-                            'value' => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue),
+                            'value' => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '-',
+                            'edit' => in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
                         ];
+                    }
+                    if ($property === 'sysLanguageUid') {
+                        $data[$groupName][$property] = array_merge($data[$groupName][$property], [
+                            'value' => '',
+                            'icon' => $this->site->getLanguageById((int)$mail->$getter())->getFlagIdentifier()
+                        ]);
+                    }
+                    if ($property === 'renderedSize') {
+                        $data[$groupName][$property] = array_merge($data[$groupName][$property], [
+                            'value' => GeneralUtility::formatSize((int)$mail->$getter(), 'si') . 'B'
+                        ]);
                     }
                 }
             }
