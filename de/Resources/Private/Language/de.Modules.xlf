@@ -923,6 +923,50 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Mail Queue</source>
         <target state="final">Mail Warteschlange</target>
       </trans-unit>
+      <trans-unit id="configuration.header" resname="configuration.header" approved="yes">
+        <source>Mail Settings</source>
+        <target state="final">Mail Einstellungen</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.header" resname="configuration.panel.default.header">
+        <source>Default settings for new mails</source>
+        <target state="needs-translation">Default settings for new mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.tab.general" resname="configuration.panel.default.tab.general">
+        <source>General</source>
+        <target state="needs-translation">General</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.tab.headers" resname="configuration.panel.default.tab.headers">
+        <source>Headers</source>
+        <target state="needs-translation">Headers</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.tab.content" resname="configuration.panel.default.tab.content">
+        <source>Content</source>
+        <target state="needs-translation">Content</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.header" resname="configuration.panel.module.header">
+        <source>Module settings</source>
+        <target state="needs-translation">Module settings</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.general" resname="configuration.panel.module.tab.general">
+        <source>General</source>
+        <target state="needs-translation">General</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.tracking" resname="configuration.panel.module.tab.tracking">
+        <source>Tracking</source>
+        <target state="needs-translation">Tracking</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.test" resname="configuration.panel.module.tab.test">
+        <source>Test mails</source>
+        <target state="needs-translation">Test mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.quickmails" resname="configuration.panel.module.tab.quickmails">
+        <source>Quick mails</source>
+        <target state="needs-translation">Quick mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.defaults" resname="configuration.panel.module.tab.defaults">
+        <source>Defaults for new mails</source>
+        <target state="needs-translation">Defaults for new mails</target>
+      </trans-unit>
       <trans-unit id="configuration.notification.permissionError.message" approved="yes">
         <source>You do not have permissions to write configuration to page %s.</source>
         <target state="final">Sie haben keine Berechtigung, die Konfiguration in die Seite %s zu schreiben.</target>
@@ -1066,9 +1110,9 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
         <source>Specify the character set used in mails when they are built from external pages and character set cannot be auto-detected.</source>
         <target state="final">Wähle den Zeichensatz für Mails die auf externe Seite basieren, bei denen der Zeichensatz nicht automatisch bestimmt werden kann.</target>
       </trans-unit>
-      <trans-unit id="configuration.encoding" resname="configuration.encoding" approved="yes">
-        <source>Default encoding of mails</source>
-        <target state="final">Standardkodierung für Mails</target>
+      <trans-unit id="configuration.encoding" resname="configuration.encoding">
+        <source>Content transfer encoding</source>
+        <target state="needs-translation">Content transfer encoding</target>
       </trans-unit>
       <trans-unit id="configuration.encoding.description" resname="configuration.encoding.description" approved="yes">
         <source>Select the default content transfer encoding of mails.</source>
@@ -1233,10 +1277,6 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
       <trans-unit id="configuration.noEditPermissions" resname="configuration.noEditPermissions" approved="yes">
         <source>You don't have permissions to change mail settings.</source>
         <target state="final">Sie haben keine Berechtigung zum Ändern der E-Mail-Einstellungen.</target>
-      </trans-unit>
-      <trans-unit id="configuration.header" resname="configuration.header" approved="yes">
-        <source>Mail Settings</source>
-        <target state="final">Mail Einstellungen</target>
       </trans-unit>
       <trans-unit id="scheduler.bounceMail.server" resname="scheduler.bounceMail.server" approved="yes">
         <source>Server URL/IP</source>
