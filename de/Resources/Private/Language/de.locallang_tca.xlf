@@ -152,12 +152,16 @@
         <target state="translated">Generell</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.tab.headers">
-        <source>Mail headers</source>
-        <target state="translated">Mail headers</target>
+        <source>Header</source>
+        <target state="needs-translation">Header</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.tab.sendOptions">
-        <source>Send options</source>
-        <target state="translated">Versand-Optionen</target>
+      <trans-unit id="tx_mail_domain_model_mail.tab.content">
+        <source>Content</source>
+        <target state="needs-translation">Content</target>
+      </trans-unit>
+      <trans-unit id="tx_mail_domain_model_mail.tab.distribution">
+        <source>Distribution</source>
+        <target state="needs-translation">Distribution</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.transferEncoding">
         <source>Content transfer encoding</source>
