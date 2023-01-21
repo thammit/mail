@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="pages.module.I.5">
         <source>MAIL Module</source>
-        <target state="needs-translation">MAIL Module</target>
+        <target state="translated">MAIL Modul</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail">
         <source>Mails</source>
@@ -153,15 +153,15 @@
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.tab.headers">
         <source>Header</source>
-        <target state="needs-translation">Header</target>
+        <target state="translated">Header</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.tab.content">
         <source>Content</source>
-        <target state="needs-translation">Content</target>
+        <target state="translated">Inhalt</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.tab.distribution">
         <source>Distribution</source>
-        <target state="needs-translation">Distribution</target>
+        <target state="translated">Auslieferung</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.transferEncoding">
         <source>Content transfer encoding</source>
