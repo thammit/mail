@@ -3,11 +3,11 @@
 	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-11-01T12:00:00Z" product-name="mail">
 		<header />
 		<body>
-            <trans-unit id="general.button.next">
+            <trans-unit id="general.button.next" resname="general.button.next">
                 <source>Next</source>
                 <target>Weiter</target>
             </trans-unit>
-            <trans-unit id="general.button.back">
+            <trans-unit id="general.button.back" resname="general.button.back">
                 <source>Previous</source>
                 <target>Zurück</target>
             </trans-unit>
@@ -27,7 +27,7 @@
                 <source>Save</source>
                 <target>Speichern</target>
             </trans-unit>
-            <trans-unit id="general.button.send">
+            <trans-unit id="general.button.send" resname="general.button.send">
                 <source>Send</source>
                 <target>Senden</target>
             </trans-unit>
@@ -35,7 +35,7 @@
                 <source>Finish</source>
                 <target>Fertigstellen</target>
             </trans-unit>
-            <trans-unit id="general.button.sendTestMail">
+            <trans-unit id="general.button.sendTestMail" resname="general.button.sendTestMail">
                 <source>Send test mail to %s</source>
                 <target>Sende Test-Mail an %s</target>
             </trans-unit>
@@ -43,127 +43,127 @@
                 <source>Download CSV</source>
                 <target>CSV Herunterladen</target>
             </trans-unit>
-            <trans-unit id="general.notification.severity.info.title">
+            <trans-unit id="general.notification.severity.info.title" resname="general.notification.severity.info.title">
                 <source>Info</source>
                 <target>Info</target>
             </trans-unit>
-            <trans-unit id="general.notification.severity.notice.title">
+            <trans-unit id="general.notification.severity.notice.title" resname="general.notification.severity.notice.title">
                 <source>Notice</source>
                 <target>Hinweis</target>
             </trans-unit>
-            <trans-unit id="general.notification.severity.success.title">
+            <trans-unit id="general.notification.severity.success.title" resname="general.notification.severity.success.title">
                 <source>Success</source>
                 <target>Erfolgreich</target>
             </trans-unit>
-            <trans-unit id="general.notification.severity.warning.title">
+            <trans-unit id="general.notification.severity.warning.title" resname="general.notification.severity.warning.title">
                 <source>Warning</source>
                 <target>Warnung</target>
             </trans-unit>
-            <trans-unit id="general.notification.severity.error.title">
+            <trans-unit id="general.notification.severity.error.title" resname="general.notification.severity.error.title">
                 <source>Error</source>
                 <target>Fehler</target>
             </trans-unit>
-            <trans-unit id="mail.type.quickMail">
+            <trans-unit id="mail.type.quickMail" resname="mail.type.quickMail">
                 <source>Quick Mail</source>
                 <target>Kurznachricht</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.edit.title">
+            <trans-unit id="mail.wizard.edit.title" resname="mail.wizard.edit.title">
                 <source>Edit title/subject</source>
                 <target>Titel/Thema bearbeiten</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.settings.general">
+            <trans-unit id="mail.wizard.settings.general" resname="mail.wizard.settings.general">
                 <source>General</source>
                 <target>Allgemein</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.settings.headers">
+            <trans-unit id="mail.wizard.settings.headers" resname="mail.wizard.settings.headers">
                 <source>Headers</source>
                 <target>Kopfzeilen</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.settings.content">
+            <trans-unit id="mail.wizard.settings.content" resname="mail.wizard.settings.content">
                 <source>Content</source>
                 <target>Inhalte</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.testMail.groups">
+            <trans-unit id="mail.wizard.testMail.groups" resname="mail.wizard.testMail.groups">
                 <source>Group(s)</source>
                 <target>Gruppe(n)</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.noPageSelected.title">
+            <trans-unit id="mail.wizard.notification.noPageSelected.title" resname="mail.wizard.notification.noPageSelected.title">
                 <source>No valid page selected</source>
                 <target>Keine gültige Seite ausgewählt</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.noPageSelected.message">
+            <trans-unit id="mail.wizard.notification.noPageSelected.message" resname="mail.wizard.notification.noPageSelected.message">
                 <source>Please select a mail folder or page in the page tree.</source>
                 <target>Bitte wählen Sie einen Mail-Ordner oder eine Mail-Seite im Seitenbaum aus.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.externalUrlInvalid.message">
+            <trans-unit id="mail.wizard.notification.externalUrlInvalid.message" resname="mail.wizard.notification.externalUrlInvalid.message">
                 <source>Error during fetching external Urls: %s</source>
                 <target>Fehler beim Einlesen der externen Urls: %s</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.fetchSuccessfully.message">
+            <trans-unit id="mail.wizard.notification.fetchSuccessfully.message" resname="mail.wizard.notification.fetchSuccessfully.message">
                 <source>The page "%s" was fetched successfully.</source>
                 <target>Die Seite "%s" wurde erfolgreich ausgelesen.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.noHtmlBoundariesFound.message">
+            <trans-unit id="mail.wizard.notification.noHtmlBoundariesFound.message" resname="mail.wizard.notification.noHtmlBoundariesFound.message">
                 <source>The HTML content does not contain any mail boundaries.</source>
                 <target>Der HTML-Inhalt enthält keine Mail-Abgrenzungen.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.noPlainTextBoundariesFound.message">
+            <trans-unit id="mail.wizard.notification.noPlainTextBoundariesFound.message" resname="mail.wizard.notification.noPlainTextBoundariesFound.message">
                 <source>The plain text content does not contain any mail boundaries.</source>
                 <target>Der reine Textinhalt enthält keine Mail-Abgrenzungen.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.previewImageSaved.message">
+            <trans-unit id="mail.wizard.notification.previewImageSaved.message" resname="mail.wizard.notification.previewImageSaved.message">
                 <source>Preview image successfully saved.</source>
                 <target>Vorschaubild erfolgreich abgespeichert.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.previewImageCreationFailed.message">
+            <trans-unit id="mail.wizard.notification.previewImageCreationFailed.message" resname="mail.wizard.notification.previewImageCreationFailed.message">
                 <source>Preview image creation failed.</source>
                 <target>Generierung des Vorschaubildes fehlgeschlagen.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.categoriesUpdated.title">
+            <trans-unit id="mail.wizard.notification.categoriesUpdated.title" resname="mail.wizard.notification.categoriesUpdated.title">
                 <source>Categories applied</source>
                 <target>Kategorien gespeichert</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.categoryRestrictionSaveFailed.message">
+            <trans-unit id="mail.wizard.notification.categoryRestrictionSaveFailed.message" resname="mail.wizard.notification.categoryRestrictionSaveFailed.message">
                 <source>Category restrictions save failed.</source>
                 <target>Speichern von Kategorie-Einschränkungen fehlgeschlagen.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.updateContentFailed.message">
+            <trans-unit id="mail.wizard.notification.updateContentFailed.message" resname="mail.wizard.notification.updateContentFailed.message">
                 <source>Content update failed.</source>
                 <target>Aktualisierung der Inhalte fehlgeschlagen.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.categoriesUpdated.message">
+            <trans-unit id="mail.wizard.notification.categoriesUpdated.message" resname="mail.wizard.notification.categoriesUpdated.message">
                 <source>Categories restrictions successfully applied.</source>
                 <target>Kategorie-Einschränkungen erfolgreich gespeichert.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.testMailSent.title">
+            <trans-unit id="mail.wizard.notification.testMailSent.title" resname="mail.wizard.notification.testMailSent.title">
                 <source>Test mail successfully sent</source>
                 <target>Test Mail erfolgreich versandt</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.testMailSent.message">
+            <trans-unit id="mail.wizard.notification.testMailSent.message" resname="mail.wizard.notification.testMailSent.message">
                 <source>Recipient(s): %s</source>
                 <target>Empfänger: %s</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.missingRecipientGroup.message">
+            <trans-unit id="mail.wizard.notification.missingRecipientGroup.message" resname="mail.wizard.notification.missingRecipientGroup.message">
                 <source>Please select at least one recipient group.</source>
                 <target>Bitte wählen Sie mindestens eine Empfängergruppe aus.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.noRecipients.message">
+            <trans-unit id="mail.wizard.notification.noRecipients.message" resname="mail.wizard.notification.noRecipients.message">
                 <source>There are no recipients in the selected group(s).</source>
                 <target>Es gibt keine Empfänger in der/den ausgewählten Gruppen.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.finished.title">
+            <trans-unit id="mail.wizard.notification.finished.title" resname="mail.wizard.notification.finished.title">
                 <source>Mail scheduled for distribution</source>
                 <target>Mail für Versand eingeplant</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.finished.message">
+            <trans-unit id="mail.wizard.notification.finished.message" resname="mail.wizard.notification.finished.message">
                 <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
                 <target>Die E-Mail "%s" wurde erfolgreich für den Versand am %s eingeplant.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.deleted.title">
+            <trans-unit id="mail.wizard.notification.deleted.title" resname="mail.wizard.notification.deleted.title">
                 <source>Mail deleted</source>
                 <target>Mail gelöscht</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.notification.deleted.message">
+            <trans-unit id="mail.wizard.notification.deleted.message" resname="mail.wizard.notification.deleted.message">
                 <source>The mail "%s" was successfully deleted.</source>
                 <target>Die Mail "%s" wurde erfolgreich gelöscht.</target>
             </trans-unit>
@@ -359,27 +359,27 @@
                 <target><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
 			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target>
 		    </trans-unit>
-            <trans-unit id="mail.wizard.externalPage.alttitle">
+            <trans-unit id="mail.wizard.externalPage.alttitle" resname="mail.wizard.externalPage.alttitle">
                 <source>New mailing from external pages</source>
                 <target>Neues Mailing von externer Seite</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.externalPage.description">
+            <trans-unit id="mail.wizard.externalPage.description" resname="mail.wizard.externalPage.description">
                 <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
                 <target>Nach Eingabe der URL(s) und des Themas auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.internalPage.alttitle">
+            <trans-unit id="mail.wizard.internalPage.alttitle" resname="mail.wizard.internalPage.alttitle">
                 <source>New mailing from an internal page</source>
                 <target>Neues Mailing von interner Seite</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.internalPage.description">
+            <trans-unit id="mail.wizard.internalPage.description" resname="mail.wizard.internalPage.description">
                 <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
                 <target>Klicken Sie bei der gewünschten Seite auf WEITER, um mit weiteren Einstellungen (Format, Empfängergruppe, Sendezeit...) fortzufahren.</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.quickMail.alttitle">
+            <trans-unit id="mail.wizard.quickMail.alttitle" resname="mail.wizard.quickMail.alttitle">
                 <source>Create a quick mailing</source>
                 <target>Kurznachricht erstellen</target>
             </trans-unit>
-            <trans-unit id="mail.wizard.quickMail.description">
+            <trans-unit id="mail.wizard.quickMail.description" resname="mail.wizard.quickMail.description">
                 <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
                 <target>Nach Eingabe des Themas und der Nachricht auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
             </trans-unit>
@@ -589,11 +589,11 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>Import CSV</source>
                 <target>CSV importieren</target>
             </trans-unit>
-            <trans-unit id="report.general.groups">
+            <trans-unit id="report.general.groups" resname="report.general.groups">
                 <source>Recipient groups</source>
                 <target>Empfängergruppen</target>
             </trans-unit>
-            <trans-unit id="report.notification.recipientsDisabled.message">
+            <trans-unit id="report.notification.recipientsDisabled.message" resname="report.notification.recipientsDisabled.message">
                 <source>%s recipients successfully disabled.</source>
                 <target>%s Empfänger erfolgreich deaktiviert.</target>
             </trans-unit>
@@ -824,15 +824,15 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>Reply</source>
                 <target>Antwort</target>
             </trans-unit>
-            <trans-unit id="queue.notification.nothingToDo.title">
+            <trans-unit id="queue.notification.nothingToDo.title" resname="queue.notification.nothingToDo.title">
                 <source>Nothing to do</source>
                 <target>Nichts zu tun</target>
             </trans-unit>
-            <trans-unit id="queue.notification.nothingToDo.message">
+            <trans-unit id="queue.notification.nothingToDo.message" resname="queue.notification.nothingToDo.message">
                 <source>There are currently no mails in the queue.</source>
                 <target>Im Moment befinden sich keine Mails in der Warteschlange.</target>
             </trans-unit>
-            <trans-unit id="queue.notification.mailSendTriggered.message">
+            <trans-unit id="queue.notification.mailSendTriggered.message" resname="queue.notification.mailSendTriggered.message">
                 <source>Manual sending started!</source>
                 <target>Manueller Versand gestartet!</target>
             </trans-unit>
@@ -880,43 +880,43 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>Default settings for new mails</source>
                 <target>Standardeinstellungen für neue Mails</target>
             </trans-unit>
-            <trans-unit id="configuration.notification.permissionError.message">
+            <trans-unit id="configuration.notification.permissionError.message" resname="configuration.notification.permissionError.message">
                 <source>You do not have permissions to write configuration to page %s.</source>
                 <target>Sie haben keine Berechtigung, die Konfiguration in die Seite %s zu schreiben.</target>
             </trans-unit>
-            <trans-unit id="configuration.notification.savedOnPage.message">
+            <trans-unit id="configuration.notification.savedOnPage.message" resname="configuration.notification.savedOnPage.message">
                 <source>The configuration was successfully saved to the selected page %s.</source>
                 <target>Die Konfiguration wurde erfolgreich auf der ausgewählten Seite %s gespeichert.</target>
             </trans-unit>
-            <trans-unit id="configuration.notification.noChanges.message">
+            <trans-unit id="configuration.notification.noChanges.message" resname="configuration.notification.noChanges.message">
                 <source>No changes in the configuration detected.</source>
                 <target>Es wurden keine Änderungen an der Konfiguration festgestellt.</target>
             </trans-unit>
-            <trans-unit id="configuration.notification.savedFailed.message">
+            <trans-unit id="configuration.notification.savedFailed.message" resname="configuration.notification.savedFailed.message">
                 <source>The configuration was not saved to the selected page %s.</source>
                 <target>Die Konfiguration wurde nicht auf der ausgewählten Seite %s gespeichert.</target>
             </trans-unit>
-            <trans-unit id="configuration.authCodeFields.description">
+            <trans-unit id="configuration.authCodeFields.description" resname="configuration.authCodeFields.description">
                 <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
                 <target>Liste der Felder, die zur Berechnung von Authentifizierungscodes von Abmeldelinks und Sprung-URLs in E-Mails verwendet werden sollen.</target>
             </trans-unit>
-            <trans-unit id="configuration.fromEmail.description">
+            <trans-unit id="configuration.fromEmail.description" resname="configuration.fromEmail.description">
                 <source>Enter the sender email address. (Required)</source>
                 <target state="translated">E-Mail-Adresse des Senders. (Pflichtfeld)</target>
             </trans-unit>
-            <trans-unit id="configuration.fromEmail.details">
+            <trans-unit id="configuration.fromEmail.details" resname="configuration.fromEmail.details">
                 <source>This email address will appear as the originating address or sender address in the mails received by the recipients.</source>
                 <target>Diese E-Mail-Adresse wird in den von den Empfängern empfangenen E-Mails als Absenderadresse angezeigt.</target>
             </trans-unit>
-            <trans-unit id="configuration.fromName.description">
+            <trans-unit id="configuration.fromName.description" resname="configuration.fromName.description">
                 <source>Enter the sender name. (Required)</source>
                 <target state="translated">Namen des Senders eingeben. (Pflichtfeld)</target>
             </trans-unit>
-            <trans-unit id="configuration.fromName.details">
+            <trans-unit id="configuration.fromName.details" resname="configuration.fromName.details">
                 <source>This name will appear as the name of the author or sender in the mails received by the recipients.</source>
                 <target state="translated">Dieser Name wird als Name des Authors oder Absenders in den E-Mails beim Empfänger angezeigt.</target>
             </trans-unit>
-            <trans-unit id="configuration.includeMedia.description">
+            <trans-unit id="configuration.includeMedia.description" resname="configuration.includeMedia.description">
                 <source>Set this option if you want to embed images in HTML mails.</source>
                 <target>Setzen Sie diese Option, wenn Sie Bilder in HTML-Mails einbetten möchten.</target>
             </trans-unit>
@@ -926,43 +926,43 @@ If the option is not set, images are included in HTML content by absolute refere
                 <target><![CDATA[Wenn die Option aktiviert ist, werden Bilder kodiert und in die Nachrichten eingebettet. Gesendete Nachrichten werden dadurch größer.
 Wenn die Option NICHT gesetzt ist, werden Bilder in den HTML-Inhalt über einen absoluten Link zur Website eingebunden.]]></target>
 		    </trans-unit>
-            <trans-unit id="configuration.redirectAll.description">
+            <trans-unit id="configuration.redirectAll.description" resname="configuration.redirectAll.description">
                 <source>If set and if redirect is set, all links in plain text content will be redirected, not only links longer than 76 characters.</source>
                 <target>Wenn gesetzt und wenn redirect gesetzt ist, werden alle Links im reinen Textinhalt umgeleitet, nicht nur Links, die länger als 76 Zeichen sind.</target>
             </trans-unit>
-            <trans-unit id="configuration.organisation.description">
+            <trans-unit id="configuration.organisation.description" resname="configuration.organisation.description">
                 <source>Enter the name of the sending organization.</source>
                 <target>Geben Sie den Namen der sendenden Organisation ein.</target>
             </trans-unit>
-            <trans-unit id="configuration.organisation.details">
+            <trans-unit id="configuration.organisation.details" resname="configuration.organisation.details">
                 <source>The name of the organization will appear in the headers of the mails sent to subscribers.</source>
                 <target state="translated">Der Name der Organisation wird im Header der E-Mails an die Abonnenten angezeigt.</target>
             </trans-unit>
-            <trans-unit id="configuration.priority.description">
+            <trans-unit id="configuration.priority.description" resname="configuration.priority.description">
                 <source>Enter the email delivery priority.</source>
                 <target state="translated">Gib die E-Mail Priorität ein.</target>
             </trans-unit>
-            <trans-unit id="configuration.priority.details">
+            <trans-unit id="configuration.priority.details" resname="configuration.priority.details">
                 <source>The delivery priority will be set in the headers of the mails sent to subscribers.</source>
                 <target>Die Zustellpriorität wird in den Kopfzeilen der an die Abonnenten gesendeten Mails mitgeschickt.</target>
             </trans-unit>
-            <trans-unit id="configuration.replyToEmail.description">
+            <trans-unit id="configuration.replyToEmail.description" resname="configuration.replyToEmail.description">
                 <source>Enter the email address to which replys are sent. (Optional)</source>
                 <target state="translated">Gib die Antwortadresse ein auf welche die Antworten gesendet werden sollen. (Optional)</target>
             </trans-unit>
-            <trans-unit id="configuration.replyToEmail.details">
+            <trans-unit id="configuration.replyToEmail.details" resname="configuration.replyToEmail.details">
                 <source>If no reply address is specified, the sender email address will be used.</source>
                 <target state="translated">Die Senderadresse wird benutzt, wenn keine Antwortadresse konfiguriert wurde.</target>
             </trans-unit>
-            <trans-unit id="configuration.replyToName.description">
+            <trans-unit id="configuration.replyToName.description" resname="configuration.replyToName.description">
                 <source>Enter the name of the 'Reply To' email address. (Optional)</source>
                 <target state="translated">Gib den Namen der Antwortadresse an. (Optional)</target>
             </trans-unit>
-            <trans-unit id="configuration.replyToName.details">
+            <trans-unit id="configuration.replyToName.details" resname="configuration.replyToName.details">
                 <source>If no reply name is specified, the sender name will be used.</source>
                 <target state="translated">Der Sendername wird benutzt, wenn keine Antwortadresse konfiguriert wurde.</target>
             </trans-unit>
-            <trans-unit id="configuration.returnPath.description">
+            <trans-unit id="configuration.returnPath.description" resname="configuration.returnPath.description">
                 <source>Enter the return path email address here.</source>
                 <target>Geben Sie hier die E-Mail-Adresse ein, an die unzustellbare E-Mails zurückgesendet werden sollen.</target>
             </trans-unit>
@@ -972,27 +972,27 @@ If you put in the marker ###XID### it'll be substituted with the unique id of th
                 <target><![CDATA[Dies ist die Adresse, an die unzustellbare Mails zurückgeschickt werden.
 Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des E-Mail-Empfängers ersetzt.]]></target>
 		    </trans-unit>
-            <trans-unit id="configuration.sendOptions.description">
+            <trans-unit id="configuration.sendOptions.description" resname="configuration.sendOptions.description">
                 <source>Select the format of mail content.</source>
                 <target state="translated">Wähle das Format des E-Mail-Inhalts aus.</target>
             </trans-unit>
-            <trans-unit id="configuration.sendOptions.details">
+            <trans-unit id="configuration.sendOptions.details" resname="configuration.sendOptions.details">
                 <source>If in doubt, set it to 'Plain text and HTML'. The messages will then be sent with both formats included, and the recipients are normally able to select their preferred format.</source>
                 <target>Im Zweifelsfall sollten Sie die Einstellung 'Reiner Text und HTML' setzen. Die Nachrichten werden dann in beiden Formaten verschickt, und die Empfänger können normalerweise ihr bevorzugtes Format auswählen.</target>
             </trans-unit>
-            <trans-unit id="configuration.type.description">
+            <trans-unit id="configuration.type.description" resname="configuration.type.description">
                 <source>Type of source of the mail</source>
                 <target state="translated">Quelltyp der Mail</target>
             </trans-unit>
-            <trans-unit id="configuration.type.details">
+            <trans-unit id="configuration.type.details" resname="configuration.type.details">
                 <source>The mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External URL'.</source>
                 <target>Die Mail kann aus einer Seite aus dem Seitenbaum der TYPO3-Site zusammengestellt werden: 'TYPO3-Seite', oder von einer Seite einer anderen Site: 'Externe URL'.</target>
             </trans-unit>
-            <trans-unit id="configuration.redirect.description">
+            <trans-unit id="configuration.redirect.description" resname="configuration.redirect.description">
                 <source>Redirect long links found in plain text content.</source>
                 <target state="translated">Lange Links aus dem Klartext-Inhalt weiterleiten.</target>
             </trans-unit>
-            <trans-unit id="configuration.redirect.details">
+            <trans-unit id="configuration.redirect.details" resname="configuration.redirect.details">
                 <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the TYPO3 redirect module.</source>
                 <target>Wenn diese Option gesetzt ist, werden Links, die länger als 76 Zeichen sind, umgeleitet: Lange URLs werden durch eine /redirect-[hash]-URL ersetzt, die vom TYPO3 Redirect-Modul verarbeitet wird.</target>
             </trans-unit>

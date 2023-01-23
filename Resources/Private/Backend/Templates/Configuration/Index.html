@@ -403,33 +403,6 @@
     </f:if>
 </f:section>
 
-<f:comment><!--
-    Parameters:
-    - configuration: all configuration options
-    - index: numeric section index
-    - title: panel title
-    - section: section that renders content
---></f:comment>
-<f:section name="Panel">
-    <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="heading{index}">
-            <h4 class="panel-title">
-                <a role="button" data-bs-toggle="collapse" href="#collapse{index}"
-                   aria-expanded="true" aria-controls="collapse{index}" class="collapsed">
-                    <span class="caret"></span>
-                    <f:translate key="{lll}{title}"/>
-                </a>
-            </h4>
-        </div>
-        <div id="collapse{index}" class="panel-collapse collapse" data-bs-parent="#mail-configuration-accordion"
-             aria-labelledby="heading{index}">
-            <div class="panel-body">
-                <f:render section="{section}" arguments="{_all}"/>
-            </div>
-        </div>
-    </div>
-</f:section>
-
 <f:section name="help">
     <f:variable name="tooltip">
         <f:for each="{messages}" as="message">

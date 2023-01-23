@@ -4,19 +4,19 @@
     product-name="mail">
         <header />
         <body>
-            <trans-unit id="backend_layout.mail">
+            <trans-unit id="backend_layout.mail" resname="backend_layout.mail">
                 <source>MAIL</source>
             </trans-unit>
-            <trans-unit id="backend_layout.column.border">
+            <trans-unit id="backend_layout.column.border" resname="backend_layout.column.border">
                 <source>Border</source>
             </trans-unit>
-            <trans-unit id="backend_layout.column.contentbefore">
+            <trans-unit id="backend_layout.column.contentbefore" resname="backend_layout.column.contentbefore">
                 <source>Before Content</source>
             </trans-unit>
-            <trans-unit id="backend_layout.column.normal">
+            <trans-unit id="backend_layout.column.normal" resname="backend_layout.column.normal">
                 <source>Normal</source>
             </trans-unit>
-            <trans-unit id="backend_layout.column.contentafter">
+            <trans-unit id="backend_layout.column.contentafter" resname="backend_layout.column.contentafter">
                 <source>After Content</source>
             </trans-unit>
         </body>
