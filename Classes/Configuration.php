@@ -148,7 +148,7 @@ final class Configuration
             'queue',
             'after:report',
             [
-                QueueController::class => 'index,trigger,delete'
+                QueueController::class => 'index,saveConfiguration,trigger,delete'
             ],
             [
                 'navigationComponentId' => $navigationComponentId,

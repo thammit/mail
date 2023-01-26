@@ -74,5 +74,13 @@
             </f:for>
         </table>
     </div>
+    <div id="mail-queue-configuration-modal" class="hide">
+        <f:form action="saveConfiguration" id="mail-queue-configuration-form" class="mail-queue-configuration-form" target="list_frame">
+            <div class="form-group">
+                <label for="queueModalConfigure-title"><f:translate key="{lll}configuration.sendPerCycle" /></label>
+                <f:form.textfield name="sendPerCycle" type="number" additionalAttributes="{min: 1, max: 500}" id="queueModalConfigure-title" class="form-control" value="{sendPerCycle}" required="required" />
+            </div>
+        </f:form>
+    </div>
 </f:section>
 </html>

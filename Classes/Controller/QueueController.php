@@ -8,12 +8,16 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
@@ -25,6 +29,7 @@ class QueueController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws RouteNotFoundException
      */
     public function indexAction(): ResponseInterface
     {
@@ -45,13 +50,32 @@ class QueueController extends AbstractController
             'id' => $this->id,
             'data' => $data,
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
-            'trigger' => !(isset($this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger'])
+            'trigger' => !(isset($this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']),
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->configureOverViewDocHeader($this->request->getRequestTarget());
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueConfigurationModal');
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
+    }
+
+    /**
+     * @throws StopActionException
+     */
+    public function saveConfigurationAction(int $sendPerCycle): void
+    {
+        $pageTS['sendPerCycle'] = (string)$sendPerCycle;
+        $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, 'mod.web_modules.mail.');
+        if ($success) {
+            ViewUtility::addNotificationSuccess(
+                sprintf(LanguageUtility::getLL('configuration.notification.savedOnPage.message'), $this->id),
+                LanguageUtility::getLL('general.notification.severity.success.title')
+            );
+
+            $this->redirect('index');
+        }
+        $this->redirect('index');
     }
 
     /**
@@ -105,11 +129,27 @@ class QueueController extends AbstractController
     protected function configureOverViewDocHeader(string $requestUri): void
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+
+        $reloadButton = $buttonBar->makeInputButton()
+            ->setTitle('Configure')
+            ->setName('configure')
+            ->setDataAttributes([
+                'modal-identifier' => 'mail-queue-configuration-modal',
+                'modal-title' => 'Queue Settings',
+                'button-ok-text' => 'SAVE',
+                'button-close-text' => 'CANCEL'
+            ])
+            ->setClasses('js-mail-queue-configuration-modal')
+            ->setValue(1)
+            ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
+        $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+
         $reloadButton = $buttonBar->makeLinkButton()
             ->setHref($requestUri)
             ->setTitle(LanguageUtility::getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload'))
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
-        $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT);
+        $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT, 2);
+
 
         $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailQueue');
         $arguments = [
@@ -118,6 +158,6 @@ class QueueController extends AbstractController
         $displayName = 'Mail Queue [' . $this->id . ']';
         $shortCutButton->setArguments($arguments);
         $shortCutButton->setDisplayName($displayName);
-        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
+        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT, 3);
     }
 }
