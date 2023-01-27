@@ -21,11 +21,17 @@
             <trans-unit id="general.button.save" resname="general.button.save">
                 <source>Save</source>
             </trans-unit>
+            <trans-unit id="general.button.cancel" resname="general.button.cancel">
+                <source>Cancel</source>
+            </trans-unit>
             <trans-unit id="general.button.send" resname="general.button.send">
                 <source>Send</source>
             </trans-unit>
             <trans-unit id="general.button.finish" resname="general.button.finish">
                 <source>Finish</source>
+            </trans-unit>
+            <trans-unit id="general.button.configuration" resname="general.button.configuration">
+                <source>Configuration</source>
             </trans-unit>
             <trans-unit id="general.button.sendTestMail" resname="general.button.sendTestMail">
                 <source>Send test mail to %s</source>
@@ -176,6 +182,9 @@
             </trans-unit>
             <trans-unit id="mail.wizard.lastModified" resname="mail.wizard.lastModified">
                 <source>Last modified</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.step" resname="mail.wizard.step">
+                <source>Step</source>
             </trans-unit>
             <trans-unit id="mail.wizard.size" resname="mail.wizard.size">
                 <source>Size</source>
@@ -662,6 +671,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="queue.deliveryEnded" resname="queue.deliveryEnded">
                 <source>Delivery ended</source>
             </trans-unit>
+            <trans-unit id="queue.button.configuration" resname="queue.button.configuration">
+                <source>Queue configuration</source>
+            </trans-unit>
             <trans-unit id="queue.button.triggerManualSending" resname="queue.button.triggerManualSending">
                 <source>Start sending manually</source>
             </trans-unit>
@@ -703,6 +715,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
             </trans-unit>
             <trans-unit id="configuration.panel.module.tab.general" resname="configuration.panel.module.tab.general">
                 <source>General</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.protection" resname="configuration.panel.module.tab.protection">
+                <source>Protection</source>
             </trans-unit>
             <trans-unit id="configuration.panel.module.tab.tracking" resname="configuration.panel.module.tab.tracking">
                 <source>Tracking</source>

@@ -16,7 +16,6 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
@@ -74,7 +73,7 @@ class RecipientController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
-        $this->addLeftDocheaderButtons($this->id);
+        $this->addLeftDocheaderButtons($this->id, $this->request->getRequestTarget());
         $this->addDocheaderButtons();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -285,20 +284,20 @@ class RecipientController extends AbstractController
     /**
      * Create document header buttons of "overview" action
      * @param int $pid
+     * @param string $requestUri
      * @throws RouteNotFoundException
      */
-    protected function addLeftDocheaderButtons(int $pid): void
+    protected function addLeftDocheaderButtons(int $pid, string $requestUri): void
     {
-        $backendUriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
         $addNewButton = $buttonBar
             ->makeLinkButton()
             ->setIcon($this->iconFactory->getIcon('actions-add', Icon::SIZE_SMALL))
             ->setClasses('btn btn-default text-uppercase')
             ->setTitle(LanguageUtility::getLL('recipient.createMailGroup.message'))
-            ->setHref((string)$backendUriBuilder->buildUriFromRoute('record_edit', [
+            ->setHref((string)$this->backendUriBuilder->buildUriFromRoute('record_edit', [
                 'edit' => ['tx_mail_domain_model_group' => [$pid => 'new']],
-                'returnUrl' => $this->uriBuilder->getRequest()->getAttribute('normalizedParams')->getRequestUrl()
+                'returnUrl' => $requestUri
             ]));
         $buttonBar->addButton($addNewButton);
         $addCsvImportButton = $buttonBar

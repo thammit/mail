@@ -16,10 +16,8 @@ class Mail extends AbstractEntity
 {
     protected int $type = MailType::INTERNAL;
     protected int $page = 0;
-    /**
-     * @var ObjectStorage<FileReference>
-     */
-    protected ObjectStorage $attachment;
+    protected int $step = 1;
+    protected bool $sent = false;
     protected string $subject = '';
     protected string $fromEmail = '';
     protected string $fromName = '';
@@ -29,11 +27,14 @@ class Mail extends AbstractEntity
     protected int $priority = 3;
     protected string $encoding = 'quoted-printable';
     protected string $charset = 'iso-8859-1';
+    /**
+     * @var ObjectStorage<FileReference>
+     */
+    protected ObjectStorage $attachment;
     protected SendFormat $sendOptions;
     protected bool $includeMedia = false;
     protected string $htmlParams = '';
     protected string $plainParams = '';
-    protected bool $sent = false;
     protected int $renderedSize = 0;
     protected string $messageId = '';
     protected string $htmlContent = '';
@@ -146,6 +147,24 @@ class Mail extends AbstractEntity
     public function setPage(int $page): Mail
     {
         $this->page = $page;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStep(): int
+    {
+        return $this->step;
+    }
+
+    /**
+     * @param int $step
+     * @return Mail
+     */
+    public function setStep(int $step): Mail
+    {
+        $this->step = $step;
         return $this;
     }
 

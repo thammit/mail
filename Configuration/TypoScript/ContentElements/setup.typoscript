@@ -78,6 +78,7 @@ mail {
     10 = EMOGRIFIER
     10 {
         extractContent = 0
+        removeClassAttributes = 1
         css = COA
         css {
             10 = SCSS

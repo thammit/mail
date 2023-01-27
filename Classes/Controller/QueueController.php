@@ -12,12 +12,10 @@ use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
@@ -130,19 +128,19 @@ class QueueController extends AbstractController
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
 
-        $reloadButton = $buttonBar->makeInputButton()
-            ->setTitle('Configure')
+        $configurationButton = $buttonBar->makeInputButton()
+            ->setTitle(LanguageUtility::getLL('general.button.configuration'))
             ->setName('configure')
             ->setDataAttributes([
                 'modal-identifier' => 'mail-queue-configuration-modal',
-                'modal-title' => 'Queue Settings',
-                'button-ok-text' => 'SAVE',
-                'button-close-text' => 'CANCEL'
+                'modal-title' => LanguageUtility::getLL('queue.button.configuration'),
+                'button-ok-text' => LanguageUtility::getLL('general.button.save'),
+                'button-close-text' => LanguageUtility::getLL('general.button.cancel')
             ])
             ->setClasses('js-mail-queue-configuration-modal')
             ->setValue(1)
             ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
-        $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+        $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
 
         $reloadButton = $buttonBar->makeLinkButton()
             ->setHref($requestUri)

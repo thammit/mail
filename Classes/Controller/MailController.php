@@ -26,13 +26,14 @@ use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -135,6 +136,7 @@ class MailController extends AbstractController
         $this->view->assignMultiple([
             'panel' => $panelData,
             'pageInfo' => $this->pageInfo,
+            'hideCategoryStep' => $this->userTSConfiguration['hideCategoryStep'] ?? false,
             'navigation' => $this->getNavigation(1, $this->hideCategoryStep()),
             'mailSysFolderUid' => $this->id,
             'backendUser' => [
@@ -145,7 +147,7 @@ class MailController extends AbstractController
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());
-        $this->addDocheaderButtons();
+        $this->addIndexDocHeaderButtons();
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewModal');
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -235,6 +237,20 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
+     * @throws StopActionException
+     */
+    public function openMailAction(Mail $mail): void
+    {
+        if ($mail->getStep() > 1) {
+            $navigation = $this->getNavigation($mail->getStep() - 1, $this->hideCategoryStep($mail));
+            $this->redirect($navigation['nextAction'], null, null, ['mail' => $mail->getUid()]);
+        }
+        $this->redirect('index');
+    }
+
+    /**
+     * @param Mail $mail
+     * @return void
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws HtmlContentFetchFailedException
@@ -242,8 +258,9 @@ class MailController extends AbstractController
      * @throws PlainTextContentFetchFailedException
      * @throws StopActionException
      * @throws UnknownObjectException
+     * @throws ParseException
      */
-    public function openMailAction(Mail $mail): void
+    public function updateContentAction(Mail $mail): void
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = null;
@@ -267,21 +284,29 @@ class MailController extends AbstractController
             $mail->setCharset($newMail->getCharset());
 
             $this->mailRepository->update($mail);
-            $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
+            $this->redirect('settings', null, null, ['mail' => $mail->getUid(), 'updated' => 1]);
         }
         $this->redirect('index');
     }
 
     /**
      * @param Mail $mail
+     * @param ?bool $updated
      * @return ResponseInterface
+     * @throws IllegalObjectTypeException
      * @throws InvalidFileException
      * @throws NoSuchPropertyException
      * @throws RouteNotFoundException
      * @throws UnknownClassException
+     * @throws UnknownObjectException
      */
-    public function settingsAction(Mail $mail): ResponseInterface
+    public function settingsAction(Mail $mail, bool $updated = false): ResponseInterface
     {
+        $updatePreview = $mail->getStep() === 1 || $updated;
+        $mail->setStep(2);
+        $this->mailRepository->update($mail);
+        $this->mailRepository->persist();
+
         $data = [];
         $table = 'tx_mail_domain_model_mail';
         $groups = [
@@ -376,41 +401,54 @@ class MailController extends AbstractController
         ]);
 
         // Html2canvas stuff
-        if ($mail->isInternal()) {
-            try {
-                $targetUrl = BackendUtility::getPreviewUrl(
-                    $mail->getPage(),
-                    '',
-                    null,
-                    '',
-                    '',
-                    '&mailUid=' . $mail->getUid() . '&L=' . $mail->getSysLanguageUid()
-                );
-                $this->view->assign('htmlToCanvasIframeSrc', $targetUrl);
-            } catch (UnableToLinkToPageException $e) {
+        if ($mail->isInternal() || $mail->isExternal()) {
+            if ($updatePreview) {
+                try {
+                    $targetUrl = BackendUtility::getPreviewUrl(
+                        $mail->getPage(),
+                        '',
+                        null,
+                        '',
+                        '',
+                        '&mailUid=' . $mail->getUid() . '&L=' . $mail->getSysLanguageUid()
+                    );
+                    $this->view->assign('htmlToCanvasIframeSrc', $targetUrl);
+                } catch (UnableToLinkToPageException $e) {
+                }
+                $this->pageRenderer->addRequireJsConfiguration([
+                    'paths' => [
+                        'html2canvas' => PathUtility::getPublicResourceWebPath('EXT:mail/Resources/Public/') . 'JavaScript/Contrib/html2canvas.min',
+                    ],
+                ]);
+                $this->pageRenderer->loadRequireJsModule('html2canvas');
+                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewImage');
+                $savePreviewImageAjaxUri = $this->backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mail' => $mail->getUid()]);
+                $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
             }
             $this->view->assign('mailBody', MailerUtility::getMailBody($mail->getHtmlContent()));
-            $this->pageRenderer->addRequireJsConfiguration([
-                'paths' => [
-                    'html2canvas' => PathUtility::getPublicResourceWebPath('EXT:mail/Resources/Public/') . 'JavaScript/Contrib/html2canvas.min',
-                ],
-            ]);
-            $this->pageRenderer->loadRequireJsModule('html2canvas');
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewImage');
-            $backendUriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-            $savePreviewImageAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mail' => $mail->getUid()]);
-            $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
         }
 
         $this->moduleTemplate->setContent($this->view->render());
 
-        if (!$mail->isQuickMail()) {
+        if ($updatePreview && !$mail->isQuickMail()) {
             $this->addJsNotification(
                 sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'),
                     $mail->isInternal() ? $data['general']['page']['value'] :
                         trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /')),
                 LanguageUtility::getLL('general.notification.severity.success.title'));
         }
+
+        $uriParams = [
+            'id' => $this->id,
+            'tx_mail_mailmail_mailmail' =>
+            [
+                'mail' => $mail->getUid(),
+                'controller' => 'Mail',
+                'action' => 'updateContent',
+            ]
+        ];
+        $uri = $this->backendUriBuilder->buildUriFromRoutePath('/module/MailMail/MailMail', $uriParams);
+        $this->addSettingsDocHeaderButtons((string)$uri);
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -449,14 +487,20 @@ class MailController extends AbstractController
      * @param Mail $mail
      * @return ResponseInterface
      * @throws DBALException
-     * @throws InvalidQueryException
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws IllegalObjectTypeException
      * @throws RouteNotFoundException
+     * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function categoriesAction(Mail $mail): ResponseInterface
     {
+        $mail->setStep(3);
+        $this->mailRepository->update($mail);
+        $this->mailRepository->persist();
+
         $data = [];
         $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid($mail->getPage(), $mail->getSysLanguageUid());
+
 
         if ($rows) {
             $data = [
@@ -528,8 +572,7 @@ class MailController extends AbstractController
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/HighlightContent');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/UpdateCategoryRestrictions');
-        $backendUriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $saveCategoryRestrictionsAjaxUri = $backendUriBuilder->buildUriFromRoute('ajax_mail_save-category-restrictions', ['mail' => $mail->getUid()]);
+        $saveCategoryRestrictionsAjaxUri = $this->backendUriBuilder->buildUriFromRoute('ajax_mail_save-category-restrictions', ['mail' => $mail->getUid()]);
         $this->pageRenderer->addJsInlineCode('mail-configuration', 'var saveCategoryRestrictionsAjaxUri = \'' . $saveCategoryRestrictionsAjaxUri . '\'');
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -614,6 +657,10 @@ class MailController extends AbstractController
      */
     public function testMailAction(Mail $mail): ResponseInterface
     {
+        $mail->setStep($this->hideCategoryStep($mail) ? 3 : 4);
+        $this->mailRepository->update($mail);
+        $this->mailRepository->persist();
+
         $data = [];
         $ttAddressRepository = GeneralUtility::makeInstance(AddressRepository::class);
         $frontendUsersRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
@@ -706,6 +753,10 @@ class MailController extends AbstractController
      */
     public function scheduleSendingAction(Mail $mail): ResponseInterface
     {
+        $mail->setStep($this->hideCategoryStep($mail) ? 4 : 5);
+        $this->mailRepository->update($mail);
+        $this->mailRepository->persist();
+
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $this->view->assignMultiple([
             'groups' => $this->recipientService->getFinalSendingGroups($this->id),
@@ -875,7 +926,7 @@ class MailController extends AbstractController
         ];
     }
 
-    protected function addDocheaderButtons(): void
+    protected function addIndexDocHeaderButtons(): void
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
         $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailMail');
@@ -885,5 +936,22 @@ class MailController extends AbstractController
         $shortCutButton->setArguments($arguments);
         $shortCutButton->setDisplayName('Mail Wizard [' . $this->id . ']');
         $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
+    }
+
+    /**
+     * Create document header buttons of "overview" action
+     *
+     * @param string $reloadUri
+     */
+    protected function addSettingsDocHeaderButtons(string $reloadUri): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+
+        $reloadButton = $buttonBar->makeLinkButton()
+            ->setHref($reloadUri)
+            ->setTitle(LanguageUtility::getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload'))
+            ->setShowLabelText(true)
+            ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
+        $buttonBar->addButton($reloadButton);
     }
 }

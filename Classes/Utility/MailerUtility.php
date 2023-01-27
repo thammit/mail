@@ -4,10 +4,12 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use DOMElement;
+use DOMXPath;
 use Exception;
 use GuzzleHttp\Exception\RequestException;
 use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
+use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
@@ -17,6 +19,7 @@ use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
+use function Sabre\Uri\parse;
 
 class MailerUtility
 {
@@ -82,6 +85,106 @@ class MailerUtility
         $bodyElement = $domDocument->getElementsByTagName('body');
 
         return str_replace('</body>', '</div>', str_replace('<body', '<div', $html->saveHTML($bodyElement)));
+    }
+
+    /**
+     * @param string $mailContent
+     * @param array $tags
+     * @return string|false
+     */
+    public static function removeTags(string $mailContent, array $tags): string|false
+    {
+        $html = new HTML5();
+        $domDocument = $html->loadHTML($mailContent);
+        foreach ($tags as $tag) {
+            $tagNodes = $domDocument->getElementsByTagName($tag);
+            $remove = [];
+            foreach($tagNodes as $node)
+            {
+                $remove[] = $node;
+            }
+
+            foreach ($remove as $item)
+            {
+                $item->parentNode->removeChild($item);
+            }
+        }
+
+        return $domDocument->saveHTML();
+    }
+
+    /**
+     * @param string $mailContent
+     * @return string|false
+     */
+    public static function removeClassAttributes(string $mailContent): string|false
+    {
+        $html = new HTML5();
+        $domDocument = $html->loadHTML($mailContent);
+        $xpath = new DOMXPath($domDocument);
+        $nodes = $xpath->query("//@*[local-name() != 'class']");
+        foreach ($nodes as $node) {
+            $node->parentNode->removeAttribute('class');
+        }
+
+        return $domDocument->saveHTML();
+    }
+
+    /**
+     * @param string $mailContent
+     * @param string $htmlUrl
+     * @return string
+     */
+    public static function makeImageSourcesAbsolute(string $mailContent, string $htmlUrl = ''): string
+    {
+        $html = new HTML5();
+        $domDocument = $html->loadHTML($mailContent);
+        $imageNodes = $domDocument->getElementsByTagName('img');
+        /** @var DOMElement $imageNode */
+        foreach ($imageNodes as $imageNode) {
+            if ($imageNode->hasAttribute('src') && !str_starts_with($imageNode->getAttribute('src'), 'http')) {
+                $src = $imageNode->getAttribute('src');
+                if (!str_starts_with($src, 'http')) {
+                    if (str_starts_with($src, '/')) {
+                        $baseUrl = parse_url($htmlUrl, PHP_URL_SCHEME) . '://' . parse_url($htmlUrl, PHP_URL_HOST);
+                        $src = $baseUrl . $src;
+                    } else {
+                        $src = rtrim($htmlUrl, '/') . '/' . $src;
+                    }
+                    $imageNode->setAttribute('src', $src);
+                }
+            }
+        }
+
+        return $domDocument->saveHTML();
+    }
+
+    /**
+     * @throws ParseException
+     */
+    public static function addInlineStyles(string $mailContent, string $htmlUrl = ''): string
+    {
+        $html = new HTML5();
+        $domDocument = $html->loadHTML($mailContent);
+        $linkNodes = $domDocument->getElementsByTagName('link');
+        $stylesheetUrls = [];
+        /** @var DOMElement $linkNode */
+        foreach ($linkNodes as $linkNode) {
+            if ($linkNode->hasAttribute('rel') && $linkNode->getAttribute('rel') === 'stylesheet') {
+                $href = $linkNode->getAttribute('href');
+                if (!str_starts_with($href, 'http')) {
+                    if (str_starts_with($href, '/')) {
+                        $baseUrl = parse_url($htmlUrl, PHP_URL_SCHEME) . '://' . parse_url($htmlUrl, PHP_URL_HOST);
+                        $href = $baseUrl . $href;
+                    } else {
+                        $href = rtrim($htmlUrl, '/') . '/' . $href;
+                    }
+                }
+                $stylesheetUrls[] = self::fetchContentFromUrl($href);
+            }
+        }
+
+        return EmogrifierUtility::emogrify($mailContent, implode("\n", $stylesheetUrls), false);
     }
 
     /**

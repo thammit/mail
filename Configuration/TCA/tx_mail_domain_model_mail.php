@@ -197,6 +197,13 @@ return [
                 'size' => 2,
             ],
         ],
+        'step' => [
+            'label' => 'Step',
+            'exclude' => '1',
+            'config' => [
+                'type' => 'passthrough',
+            ],
+        ],
         'scheduled' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.scheduled',
             'exclude' => '1',

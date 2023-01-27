@@ -2,6 +2,7 @@
 
 namespace MEDIAESSENZ\Mail\ContentObject;
 
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 use MEDIAESSENZ\Mail\Utility\EmogrifierUtility;
@@ -30,6 +31,12 @@ class EmogrifierContentObject extends AbstractContentObject
             $options = $conf['options.'];
         }
 
-        return EmogrifierUtility::emogrify($content, $css, $extractContent, $options);
+        $contentWithInlineStyles = EmogrifierUtility::emogrify($content, $css, $extractContent, $options);
+
+        if ($conf['removeClassAttributes'] ?? false) {
+            $contentWithInlineStyles = MailerUtility::removeClassAttributes($contentWithInlineStyles);
+        }
+
+        return $contentWithInlineStyles;
     }
 }

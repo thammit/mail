@@ -16,6 +16,7 @@ use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -77,6 +78,7 @@ class MailFactory
         }
         $mail = $this->newMailFromPageTSConfiguration();
         $mail->setType(MailType::INTERNAL)
+            ->setStep(1)
             ->setPage($pageRecord['uid'])
             ->setSubject($pageRecord['title'] ?? '')
             ->setRedirectUrl(BackendDataUtility::getBaseUrl($pageUid))
@@ -173,11 +175,13 @@ class MailFactory
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws HtmlContentFetchFailedException
      * @throws PlainTextContentFetchFailedException
+     * @throws ParseException
      */
     public function fromExternalUrls(string $subject, string $htmlContentUrl = '', string $plainContentUrl = ''): ?Mail
     {
         $mail = $this->newMailFromPageTSConfiguration();
         $mail->setType(MailType::EXTERNAL)
+            ->setStep(1)
             ->setSubject($subject)
             ->setHtmlParams($htmlContentUrl)
             ->setPlainParams($plainContentUrl);
@@ -197,6 +201,12 @@ class MailFactory
             if ($htmlContent === false) {
                 throw new HtmlContentFetchFailedException;
             }
+
+            $htmlContent = MailerUtility::makeImageSourcesAbsolute($htmlContent, $htmlUrl);
+            $htmlContent = MailerUtility::addInlineStyles($htmlContent, $htmlUrl);
+            $htmlContent = MailerUtility::removeTags($htmlContent, ['style', 'link']);
+            $htmlContent = MailerUtility::removeClassAttributes($htmlContent);
+
             $matches = [];
             $res = preg_match('/<meta\s+http-equiv="Content-Type"\s+content="text\/html;\s+charset=([^"]+)"/m', $htmlContent, $matches);
             if ($res === 1) {
@@ -246,6 +256,7 @@ class MailFactory
 
         $mail = $this->newMailFromPageTSConfiguration();
         $mail->setType(MailType::EXTERNAL)
+            ->setStep(1)
             ->setFromName($senderName)
             ->setFromEmail($senderEmail)
             ->setSubject($subject)
@@ -306,6 +317,10 @@ class MailFactory
         $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $this->pageTSConfiguration);
         try {
             $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
+
+            // remove script tags
+            $htmlContent = MailerUtility::removeTags($htmlContent, ['script']);
+
             if ($htmlContent === false || MailerUtility::contentContainsFrameTag($htmlContent)) {
                 return false;
             } else {

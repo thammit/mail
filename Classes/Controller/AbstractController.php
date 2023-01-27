@@ -15,6 +15,7 @@ use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -60,7 +61,8 @@ abstract class AbstractController extends ActionController
         protected LogRepository         $logRepository,
         protected PageRepository        $pageRepository,
         protected CategoryRepository    $categoryRepository,
-        protected IconFactory           $iconFactory
+        protected IconFactory           $iconFactory,
+        protected UriBuilder            $backendUriBuilder
     ) {
         try {
             $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?: GeneralUtility::_GP('id'));

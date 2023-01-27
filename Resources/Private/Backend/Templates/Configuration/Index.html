@@ -15,10 +15,10 @@
         <f:form action="update" id="mailConfigurationForm" method="post" enctype="multipart/form-data">
             <div role="tabpanel">
                 <ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab2" data-store-last-tab="1">
-                    <li role="presentation" class="t3js-tabmenu-item">
-                        <a href="#tab-module-settings-general" title="" aria-controls="tab-module-settings-general" role="tab" data-bs-toggle="tab"
-                           aria-selected="true" class="active">
-                            {f:translate(key: '{lll}configuration.panel.module.tab.general')}
+                    <li role="presentation" class="t3js-tabmenu-item ">
+                        <a aria-selected="true" class="active" href="#tab-module-settings-defaults" title="" aria-controls="tab-module-settings-defaults" role="tab" data-bs-toggle="tab"
+                           aria-selected="false">
+                            {f:translate(key: '{lll}configuration.panel.module.tab.defaults')}
                         </a>
                     </li>
                     <li role="presentation" class="t3js-tabmenu-item ">
@@ -39,150 +39,14 @@
                             {f:translate(key: '{lll}configuration.panel.module.tab.quickmails')}
                         </a>
                     </li>
-                    <li role="presentation" class="t3js-tabmenu-item ">
-                        <a href="#tab-module-settings-defaults" title="" aria-controls="tab-module-settings-defaults" role="tab" data-bs-toggle="tab"
-                           aria-selected="false">
-                            {f:translate(key: '{lll}configuration.panel.module.tab.defaults')}
+                    <li role="presentation" class="t3js-tabmenu-item">
+                        <a href="#tab-module-settings-protection" title="" aria-controls="tab-module-settings-protection" role="tab" data-bs-toggle="tab">
+                            {f:translate(key: '{lll}configuration.panel.module.tab.protection')}
                         </a>
                     </li>
                 </ul>
                 <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="tab-module-settings-general">
-                        <div class="panel panel-tab">
-                            <div class="panel-body">
-                                <div class="mb-3">
-                                    <label for="httpUsername" class="form-label">
-                                        <f:translate key="{lll}configuration.httpUsername"/>
-                                        <f:render section="help"
-                                                  arguments="{messages: '{0: \'{lll}configuration.httpUsername.description\', 1: \'{lll}configuration.httpUsername.details\'}'}"/>
-                                    </label>
-                                    <f:form.textfield id="httpUsername" name="pageTS[httpUsername]" value="{configuration.httpUsername}"
-                                                      class="form-control"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="httpPassword" class="form-label">
-                                        <f:translate key="{lll}configuration.httpPassword"/>
-                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.httpPassword.description\'}'}"/>
-                                    </label>
-                                    <f:form.textfield id="httpPassword" name="pageTS[httpPassword]" value="{configuration.httpPassword}"
-                                                      class="form-control"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="simulateUsergroup" class="form-label">
-                                        <f:translate key="{lll}configuration.simulateUsergroup"/>
-                                        <f:render section="help"
-                                                  arguments="{messages: '{0: \'{lll}configuration.simulateUsergroup.description\', 1: \'{lll}configuration.simulateUsergroup.details\'}'}"/>
-                                    </label>
-                                    <f:form.textfield id="simulateUsergroup" name="pageTS[simulateUsergroup]"
-                                                      value="{configuration.simulateUsergroup}" class="form-control"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="sendPerCycle" class="form-label">
-                                        <f:translate key="{lll}configuration.sendPerCycle"/>
-                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.sendPerCycle.description\'}'}"/>
-                                    </label>
-                                    <f:form.textfield id="sendPerCycle" type="number" additionalAttributes="{min:1, max:500}"
-                                                      name="pageTS[sendPerCycle]" value="{configuration.sendPerCycle}" class="form-control"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-tracking">
-                        <div class="panel panel-tab">
-                            <div class="panel-body">
-                                <div class="form-check mb-3">
-                                    <f:form.checkbox id="clickTracking" class="form-check-input" name="pageTS[clickTracking]" value="1"
-                                                     checked="{configuration.clickTracking} == 1"/>
-                                    <label for="clickTracking" class="form-check-label">
-                                        <f:translate key="{lll}configuration.linksAndTracking.clickTracking"/>
-                                        <f:render section="help"
-                                                  arguments="{messages: '{0: \'{lll}configuration.linksAndTracking.clickTracking.description\'}'}"/>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <f:form.checkbox id="trackingPrivacy" class="form-check-input" name="pageTS[trackingPrivacy]" value="1"
-                                                     checked="{configuration.trackingPrivacy} == 1"/>
-                                    <label for="trackingPrivacy" class="form-check-label">
-                                        <f:translate key="{lll}configuration.trackingPrivacy"/>
-                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.trackingPrivacy.description\'}'}"/>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <f:form.checkbox id="clickTrackingMailTo" class="form-check-input" name="pageTS[clickTrackingMailTo]" value="1"
-                                                     checked="{configuration.clickTrackingMailTo} == 1"/>
-                                    <label for="clickTrackingMailTo" class="form-check-label">
-                                        <f:translate key="{lll}configuration.linksAndTracking.clickTracking.mailTo"/>
-                                        <f:render section="help"
-                                                  arguments="{messages: '{0: \'{lll}configuration.linksAndTracking.clickTracking.mailTo.description\'}'}"/>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-test">
-                        <div class="panel panel-tab">
-                            <div class="panel-body">
-                                <div class="mb-3">
-                                    <label for="testTtAddressUids" class="form-label">
-                                        <f:translate key="{lll}configuration.testAddressUids"/>
-                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.testAddressUids.description\'}'}"/>
-                                    </label>
-                                    <f:form.textfield id="testTtAddressUids" name="pageTS[testTtAddressUids]"
-                                                      value="{configuration.testTtAddressUids}" class="form-control"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="testMailGroupUids" class="form-label">
-                                        <f:translate key="{lll}configuration.testMailGroupUids"/>
-                                        <f:render section="help"
-                                                  arguments="{messages: '{0: \'{lll}configuration.testMailGroupUids.description\'}'}"/>
-                                    </label>
-                                    <f:form.textfield id="testMailGroupUids" name="pageTS[testMailGroupUids]"
-                                                      value="{configuration.testMailGroupUids}" class="form-control"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="testMailSubjectPrefix" class="form-label">
-                                        <f:translate key="{lll}configuration.testMailSubjectPrefix"/>
-                                        <f:render section="help"
-                                                  arguments="{messages: '{0: \'{lll}configuration.testMailSubjectPrefix.description\'}'}"/>
-                                    </label>
-                                    <f:form.textfield id="testMailSubjectPrefix" name="pageTS[testMailSubjectPrefix]"
-                                                      value="{configuration.testMailSubjectPrefix}" class="form-control"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-quickmails">
-                        <div class="panel panel-tab">
-                            <div class="panel-body">
-                                <div class="mb-3">
-                                    <label for="quickMailEncoding" class="form-label">
-                                        <f:translate key="{lll}configuration.quickmail.encoding"/>
-                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.quickmail.encoding\'}'}"/>
-                                    </label>
-                                    <f:form.select id="quickMailEncoding" name="pageTS[quickMailEncoding]"
-                                                   options="{quoted-printable: 'quoted-printable', base64: 'base64'}"
-                                                   value="{configuration.quickMailEncoding}" class="form-select form-control-adapt"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="quickMailCharset" class="form-label">
-                                        <f:translate key="{lll}configuration.quickmail.charset"/>
-                                        <f:render section="help"
-                                                  arguments="{messages: '{0: \'{lll}configuration.quickmail.charset.description\'}'}"/>
-                                    </label>
-                                    <f:form.select id="quickMailCharset" name="pageTS[quickMailCharset]" value="{configuration.quickMailCharset}"
-                                                   class="form-select form-control-adapt">
-                                        <f:for each="{charsets}" as="charset">
-                                            <f:form.select.option value="{charset}"
-                                                                  selected="{f:if(condition: '{charset -> f:format.case(mode:\'lower\')} == {configuration.quickMailCharset -> f:format.case(mode:\'lower\')}', then: 1, else: 0)}">
-                                                {charset}
-                                            </f:form.select.option>
-                                        </f:for>
-                                    </f:form.select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-defaults">
+                    <div role="tabpanel" class="tab-pane active" id="tab-module-settings-defaults">
                         <div class="panel panel-tab">
                             <div class="panel-body">
                                 <div role="tabpanel">
@@ -393,6 +257,133 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-tracking">
+                        <div class="panel panel-tab">
+                            <div class="panel-body">
+                                <div class="form-check mb-3">
+                                    <f:form.checkbox id="clickTracking" class="form-check-input" name="pageTS[clickTracking]" value="1"
+                                                     checked="{configuration.clickTracking} == 1"/>
+                                    <label for="clickTracking" class="form-check-label">
+                                        <f:translate key="{lll}configuration.linksAndTracking.clickTracking"/>
+                                        <f:render section="help"
+                                                  arguments="{messages: '{0: \'{lll}configuration.linksAndTracking.clickTracking.description\'}'}"/>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <f:form.checkbox id="trackingPrivacy" class="form-check-input" name="pageTS[trackingPrivacy]" value="1"
+                                                     checked="{configuration.trackingPrivacy} == 1"/>
+                                    <label for="trackingPrivacy" class="form-check-label">
+                                        <f:translate key="{lll}configuration.trackingPrivacy"/>
+                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.trackingPrivacy.description\'}'}"/>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <f:form.checkbox id="clickTrackingMailTo" class="form-check-input" name="pageTS[clickTrackingMailTo]" value="1"
+                                                     checked="{configuration.clickTrackingMailTo} == 1"/>
+                                    <label for="clickTrackingMailTo" class="form-check-label">
+                                        <f:translate key="{lll}configuration.linksAndTracking.clickTracking.mailTo"/>
+                                        <f:render section="help"
+                                                  arguments="{messages: '{0: \'{lll}configuration.linksAndTracking.clickTracking.mailTo.description\'}'}"/>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-test">
+                        <div class="panel panel-tab">
+                            <div class="panel-body">
+                                <div class="mb-3">
+                                    <label for="testTtAddressUids" class="form-label">
+                                        <f:translate key="{lll}configuration.testAddressUids"/>
+                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.testAddressUids.description\'}'}"/>
+                                    </label>
+                                    <f:form.textfield id="testTtAddressUids" name="pageTS[testTtAddressUids]"
+                                                      value="{configuration.testTtAddressUids}" class="form-control"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="testMailGroupUids" class="form-label">
+                                        <f:translate key="{lll}configuration.testMailGroupUids"/>
+                                        <f:render section="help"
+                                                  arguments="{messages: '{0: \'{lll}configuration.testMailGroupUids.description\'}'}"/>
+                                    </label>
+                                    <f:form.textfield id="testMailGroupUids" name="pageTS[testMailGroupUids]"
+                                                      value="{configuration.testMailGroupUids}" class="form-control"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="testMailSubjectPrefix" class="form-label">
+                                        <f:translate key="{lll}configuration.testMailSubjectPrefix"/>
+                                        <f:render section="help"
+                                                  arguments="{messages: '{0: \'{lll}configuration.testMailSubjectPrefix.description\'}'}"/>
+                                    </label>
+                                    <f:form.textfield id="testMailSubjectPrefix" name="pageTS[testMailSubjectPrefix]"
+                                                      value="{configuration.testMailSubjectPrefix}" class="form-control"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-quickmails">
+                        <div class="panel panel-tab">
+                            <div class="panel-body">
+                                <div class="mb-3">
+                                    <label for="quickMailEncoding" class="form-label">
+                                        <f:translate key="{lll}configuration.quickmail.encoding"/>
+                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.quickmail.encoding\'}'}"/>
+                                    </label>
+                                    <f:form.select id="quickMailEncoding" name="pageTS[quickMailEncoding]"
+                                                   options="{quoted-printable: 'quoted-printable', base64: 'base64'}"
+                                                   value="{configuration.quickMailEncoding}" class="form-select form-control-adapt"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="quickMailCharset" class="form-label">
+                                        <f:translate key="{lll}configuration.quickmail.charset"/>
+                                        <f:render section="help"
+                                                  arguments="{messages: '{0: \'{lll}configuration.quickmail.charset.description\'}'}"/>
+                                    </label>
+                                    <f:form.select id="quickMailCharset" name="pageTS[quickMailCharset]" value="{configuration.quickMailCharset}"
+                                                   class="form-select form-control-adapt">
+                                        <f:for each="{charsets}" as="charset">
+                                            <f:form.select.option value="{charset}"
+                                                                  selected="{f:if(condition: '{charset -> f:format.case(mode:\'lower\')} == {configuration.quickMailCharset -> f:format.case(mode:\'lower\')}', then: 1, else: 0)}">
+                                                {charset}
+                                            </f:form.select.option>
+                                        </f:for>
+                                    </f:form.select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="tab-module-settings-protection">
+                        <div class="panel panel-tab">
+                            <div class="panel-body">
+                                <div class="mb-3">
+                                    <label for="httpUsername" class="form-label">
+                                        <f:translate key="{lll}configuration.httpUsername"/>
+                                        <f:render section="help"
+                                                  arguments="{messages: '{0: \'{lll}configuration.httpUsername.description\', 1: \'{lll}configuration.httpUsername.details\'}'}"/>
+                                    </label>
+                                    <f:form.textfield id="httpUsername" name="pageTS[httpUsername]" value="{configuration.httpUsername}"
+                                                      class="form-control"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="httpPassword" class="form-label">
+                                        <f:translate key="{lll}configuration.httpPassword"/>
+                                        <f:render section="help" arguments="{messages: '{0: \'{lll}configuration.httpPassword.description\'}'}"/>
+                                    </label>
+                                    <f:form.textfield id="httpPassword" name="pageTS[httpPassword]" value="{configuration.httpPassword}"
+                                                      class="form-control"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="simulateUsergroup" class="form-label">
+                                        <f:translate key="{lll}configuration.simulateUsergroup"/>
+                                        <f:render section="help"
+                                                  arguments="{messages: '{0: \'{lll}configuration.simulateUsergroup.description\', 1: \'{lll}configuration.simulateUsergroup.details\'}'}"/>
+                                    </label>
+                                    <f:form.textfield id="simulateUsergroup" name="pageTS[simulateUsergroup]"
+                                                      value="{configuration.simulateUsergroup}" class="form-control"/>
                                 </div>
                             </div>
                         </div>

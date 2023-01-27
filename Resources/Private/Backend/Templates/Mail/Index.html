@@ -17,7 +17,7 @@
             <f:variable name="counter" value="{panel.open.data -> f:count()}"/>
             <f:variable name="title"><f:translate key="{lll}mail.wizard.openMails"/></f:variable>
             <f:render partial="Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:7, open:panel.open.open, counter: counter}" contentAs="panelBody">
-                <f:render section="OpenMailsPanel" arguments="{lll:lll, data: panel.open, mailSysFolderUid:mailSysFolderUid}" />
+                <f:render section="OpenMailsPanel" arguments="{lll:lll, data:panel.open, hideCategoryStep:hideCategoryStep, mailSysFolderUid:mailSysFolderUid}" />
             </f:render>
         </f:if>
         <f:if condition="{panel.internal}">
@@ -104,6 +104,7 @@
                 <th><f:translate key="{lll}mail.wizard.size"/></th>
                 <th><f:translate key="{lll}mail.wizard.attachment"/></th>
                 <th class="col-control nowrap"></th>
+                <th><f:translate key="{lll}mail.wizard.step"/></th>
                 <th class="col-control nowrap"></th>
             </tr>
             </thead>
@@ -126,6 +127,13 @@
                         <f:render section="previewButtons" arguments="{uid:data.page,pageId:data.pid}" />
                         <f:if condition="!{data.scheduledBegin}">
                             <f:link.action action="delete" arguments="{mail:data.uid}" class="btn btn-default" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:link.action>
+                        </f:if>
+                    </td>
+                    <td>
+                        {data.step} /
+                        <f:if condition="{data.external} || {hideCategoryStep}">
+                            <f:then>4</f:then>
+                            <f:else>5</f:else>
                         </f:if>
                     </td>
                     <td class="col-control nowrap">
