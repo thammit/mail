@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 use DateTimeImmutable;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
@@ -517,7 +518,7 @@ class Mail extends AbstractEntity
      */
     public function setHtmlContent(string $htmlContent): Mail
     {
-        $this->htmlContent = $htmlContent;
+        $this->htmlContent = MailerUtility::removeDoubleBrTags($htmlContent);
         $this->recalculateRenderSize();
         return $this;
     }
