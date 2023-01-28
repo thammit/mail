@@ -9,7 +9,6 @@ CREATE TABLE tx_mail_domain_model_mail
     message_id       varchar(100),
     sent             tinyint(1) unsigned DEFAULT '0'                NOT NULL,
     step             varchar(20)         DEFAULT ''                 NOT NULL,
-    next_step        varchar(20)         DEFAULT ''                 NOT NULL,
     scheduled        int(10) unsigned    DEFAULT '0'                NOT NULL,
     scheduled_begin  int(10) unsigned    DEFAULT '0'                NOT NULL,
     scheduled_end    int(10) unsigned    DEFAULT '0'                NOT NULL,
