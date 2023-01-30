@@ -378,7 +378,7 @@ class MailController extends AbstractController
         $table = 'tx_mail_domain_model_mail';
         $groups = [
             'general' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
-            'headers' => ['subject', 'fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority'],
+            'headers' => ['fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority'],
             'content' => ['encoding', 'sendOptions', 'includeMedia', 'encoding', 'redirect', 'redirectAll', 'authCodeFields'],
         ];
         $readOnly = ['renderedSize'];
