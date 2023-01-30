@@ -1,0 +1,56 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div class="mb-3">
+    <label for="encoding" class="form-label">
+        <f:translate key="{lll}configuration.encoding"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.encoding.description\'}'}"/>
+    </label>
+    <f:form.select id="encoding" name="pageTS[encoding]"
+                   options="{quoted-printable:'quoted-printable', base64:'base64', 8bit:'8bit'}"
+                   value="{configuration.encoding}" class="form-select form-control-adapt"/>
+</div>
+<div class="mb-3">
+    <label for="sendOptions" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.sendOptions"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.sendOptions.description\', 1: \'{lll}configuration.sendOptions.details\'}'}"/>
+    </label>
+    <f:form.select id="sendOptions" name="pageTS[sendOptions]" value="{configuration.sendOptions}" class="form-select form-control-adapt">
+        <f:form.select.option value="3">
+            <f:translate key="{lll}configuration.plainTextAndHtml"/>
+        </f:form.select.option>
+        <f:form.select.option value="1">
+            <f:translate key="{lll}configuration.plainTextOnly"/>
+        </f:form.select.option>
+        <f:form.select.option value="2">
+            <f:translate key="{lll}configuration.htmlOnly"/>
+        </f:form.select.option>
+    </f:form.select>
+</div>
+<div class="form-check mb-3">
+    <f:form.checkbox id="includeMedia" class="form-check-input" name="pageTS[includeMedia]" value="1" checked="{configuration.includeMedia} == 1"/>
+    <label for="includeMedia" class="form-check-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.includeMedia"/><f:render partial="Help"
+                  arguments="{messages: '{0: \'{lll}configuration.includeMedia.description\', 1: \'{lll}configuration.includeMedia.details\'}'}"/>
+    </label>
+</div>
+<div class="form-check mb-3">
+    <f:form.checkbox id="redirect" class="form-check-input" name="pageTS[redirect]" value="1" checked="{configuration.redirect} == 1"/>
+    <label for="redirect" class="form-check-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.redirect"/><f:render partial="Help"
+                  arguments="{messages: '{0: \'{lll}configuration.redirect.description\', 1: \'{lll}configuration.redirect.details\'}'}"/>
+    </label>
+</div>
+<div class="form-check mb-3">
+    <f:form.checkbox id="redirectAll" class="form-check-input" name="pageTS[redirectAll]" value="1" checked="{configuration.redirectAll} == 1"/>
+    <label for="redirectAll" class="form-check-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.redirectAll"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.redirectAll.description\'}'}"/>
+    </label>
+</div>
+<div class="mb-3">
+    <label for="authCodeFields" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.authCodeFields"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.authCodeFields.description\'}'}"/>
+    </label>
+    <f:form.textfield id="authCodeFields" name="pageTS[authCodeFields]" value="{configuration.authCodeFields}" class="form-control"/>
+</div>
+
+</html>

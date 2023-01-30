@@ -719,6 +719,18 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="configuration.panel.module.header" resname="configuration.panel.module.header">
                 <source>Module settings</source>
             </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.headers" resname="configuration.panel.module.tab.headers">
+                <source>Headers</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.internalPage" resname="configuration.panel.module.tab.internalPage">
+                <source>Internal Page</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.externalPage" resname="configuration.panel.module.tab.externalPage">
+                <source>External Page</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.content" resname="configuration.panel.module.tab.content">
+                <source>Content</source>
+            </trans-unit>
             <trans-unit id="configuration.panel.module.tab.general" resname="configuration.panel.module.tab.general">
                 <source>General</source>
             </trans-unit>
@@ -729,10 +741,13 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>Tracking</source>
             </trans-unit>
             <trans-unit id="configuration.panel.module.tab.test" resname="configuration.panel.module.tab.test">
-                <source>Test mails</source>
+                <source>Test Mails</source>
+            </trans-unit>
+            <trans-unit id="configuration.panel.module.tab.quickmail" resname="configuration.panel.module.tab.quickmail">
+                <source>Quick Mail</source>
             </trans-unit>
             <trans-unit id="configuration.panel.module.tab.quickmails" resname="configuration.panel.module.tab.quickmails">
-                <source>Quick mails</source>
+                <source>Quick Mails</source>
             </trans-unit>
             <trans-unit id="configuration.panel.module.tab.defaults" resname="configuration.panel.module.tab.defaults">
                 <source>Defaults for new mails</source>
