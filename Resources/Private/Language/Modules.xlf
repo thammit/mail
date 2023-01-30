@@ -6,6 +6,9 @@
             <trans-unit id="general.button.next" resname="general.button.next">
                 <source>Next</source>
             </trans-unit>
+            <trans-unit id="general.button.continue" resname="general.button.continue">
+                <source>Continue</source>
+            </trans-unit>
             <trans-unit id="general.button.back" resname="general.button.back">
                 <source>Back</source>
             </trans-unit>
