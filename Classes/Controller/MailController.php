@@ -984,21 +984,23 @@ class MailController extends AbstractController
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
 
-        $configurationButton = $buttonBar->makeInputButton()
-            ->setTitle(LanguageUtility::getLL('general.button.configuration'))
-            ->setName('configure')
-            ->setDataAttributes([
-                'bs-toggle' => 'modal',
-                'bs-target' => '#mail-configuration-modal',
-                'modal-identifier' => 'mail-configuration-modal',
-                'modal-title' => LanguageUtility::getLL('mail.button.configuration'),
-                'button-ok-text' => LanguageUtility::getLL('general.button.save'),
-                'button-close-text' => LanguageUtility::getLL('general.button.cancel')
-            ])
-            ->setClasses('js-mail-queue-configuration-modal')
-            ->setValue(1)
-            ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
-        $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+        if (!($this->userTSConfiguration['hideConfiguration'] ?? false)) {
+            $configurationButton = $buttonBar->makeInputButton()
+                ->setTitle(LanguageUtility::getLL('general.button.configuration'))
+                ->setName('configure')
+                ->setDataAttributes([
+                    'bs-toggle' => 'modal',
+                    'bs-target' => '#mail-configuration-modal',
+                    'modal-identifier' => 'mail-configuration-modal',
+                    'modal-title' => LanguageUtility::getLL('mail.button.configuration'),
+                    'button-ok-text' => LanguageUtility::getLL('general.button.save'),
+                    'button-close-text' => LanguageUtility::getLL('general.button.cancel')
+                ])
+                ->setClasses('js-mail-queue-configuration-modal')
+                ->setValue(1)
+                ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
+            $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+        }
 
         $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailMail');
         $arguments = [

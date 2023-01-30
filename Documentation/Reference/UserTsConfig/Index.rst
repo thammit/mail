@@ -2,7 +2,7 @@
 
 .. highlight:: typoscript
 
-.. _page-ts-config:
+.. _user-ts-config:
 
 ============
 User TSconfig
@@ -52,3 +52,27 @@ defaultTab
    :Path: tx_mail.defaultTab
 
    One of the keywords from hideTabs. If set, the chosen tab will be open by default.
+
+hideConfiguration
+-----------------
+
+.. confval:: hideConfiguration
+
+   :type: bool
+   :Default: open
+   :Path: tx_mail.hideConfiguration
+
+   Hide configuration button in mail module
+
+.. _user-ts-config-mail-module-page-id:
+
+mailModulePageId
+----------------
+
+.. confval:: mailModulePageId
+
+   :type: int
+   :Default: open
+   :Path: tx_mail.mailModulePageId
+
+   If extension configuration parameter :ref:`hideNavigation <extension-configuration-hide-navigation>` is set to 1, this value has to be set to the modul page id, since no navigation tree is available.

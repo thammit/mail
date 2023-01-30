@@ -1,4 +1,4 @@
-# cat=MAIL; type=string; label=Default recipient fields: Default fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user
+# cat=MAIL; type=string; label=Default recipient fields: Default fields will be available by markers in a mail message. e.g. name as ###USER_name### or ###USER_NAME### filled with (uppercase) value of the user.
 defaultRecipientFields = uid,salutation,name,title,email,phone,www,address,company,city,zip,country,fax,firstname,first_name,last_name
 
 # cat=MAIL; type=string; label=Additional DB fields of the recipient: Additional fields that may be substituted in the mail messages.
@@ -7,13 +7,16 @@ additionalRecipientFields =
 # cat=MAIL; type=int; label=MAIL page type number: Change this number only if another extension use the same.
 mailPageTypeNumber = 24
 
-# cat=MAIL; type=string; label=MAIL modules position in the side navigation: If set to empty, the module will move to the end of all other modules
+# cat=MAIL; type=string; label=MAIL modules position in the side navigation: If set to empty, the module will move to the end of all other modules.
 mailModulePosition = after:web
 
-# cat=MAIL; type=int; label=MAIL module page id: If set, page tree navigation will be hidden in mail module
+# cat=MAIL; type=int; label=MAIL module page id: If set, page tree navigation will be hidden in mail module.
 mailModulePageId =
 
-#cat=feature; type=boolean; label=Delete unused markers in personalized mails
+#cat=feature; type=boolean; label=Hide navigation: If set, page tree navigation will be hidden in mail module. User tsconfig parameter tx_mail.mailModulePageId has to be set!
+hideNavigation = 0
+
+#cat=feature; type=boolean; label=Delete unused markers in personalized mails.
 deleteUnusedMarkers = 1
 
 # cat=feature; type=boolean; label=Enable notification mail: Allow MAIL to send notification about start and end of a mailing job.
@@ -22,11 +25,11 @@ notificationJob = 1
 # cat=feature; type=boolean; label=Deactivate categories: Attention: If set, ALL category fields inside tt_content,fe_users,tt_address,tx_mail_domain_model_group will be disabled!
 deactivateCategories = 0
 
-# cat=feature; type=boolean; label=Use http connection for fetching Newsletter-Content: Even if your TYPO3 Backend is in SSL-Mode, the URL for fetching the newsletter contents will be http
+# cat=feature; type=boolean; label=Use http connection for fetching Newsletter-Content: Even if your TYPO3 Backend is in SSL-Mode, the URL for fetching the newsletter contents will be http.
 useHttpToFetch = 0
 
 # cat=Direct Mail migration; type=string; label=Mapping sys_dmail_category -> sys_category: Used by update wizard to migrate Direct Mail records to MAIL records. Format: 1:2,2:3,3:4 maps Direct mail category 1 to sys_category 2 and Direct mail category 2 to sys_category 3 and so on. If categories not found or set, new categories will be added.
 directMailCategorySysCategoryMapping =
 
-# cat=Direct Mail migration; type=int; label=Parent sys_category used by direct mail -> sys category migration
+# cat=Direct Mail migration; type=int; label=Parent sys_category used by direct mail -> sys category migration.
 directMailCategorySysCategoryParentCategory =

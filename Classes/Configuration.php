@@ -69,7 +69,7 @@ final class Configuration
     {
         $navigationComponentId = 'TYPO3/CMS/Backend/PageTree/PageTreeElement';
         try {
-            if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId'))) {
+            if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
                 $navigationComponentId = '';
             }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
@@ -159,6 +159,7 @@ final class Configuration
             ]
         );
 
+        /*
         ExtensionUtility::registerModule(
             'Mail',
             'Mail',
@@ -175,6 +176,7 @@ final class Configuration
                 'labels' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
             ]
         );
+        */
 
         $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';
     }

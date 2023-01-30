@@ -65,8 +65,18 @@ abstract class AbstractController extends ActionController
         protected IconFactory           $iconFactory,
         protected UriBuilder            $backendUriBuilder
     ) {
+        $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
         try {
-            $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?: GeneralUtility::_GP('id'));
+            $hideNavigation = (ConfigurationUtility::getExtensionConfiguration('hideNavigation') && ($this->userTSConfiguration['mailModulePageId'] ?? false)) || ConfigurationUtility::getExtensionConfiguration('mailModulePageId');
+            if (!$hideNavigation) {
+                $this->id = (int)GeneralUtility::_GP('id');
+            } else {
+                if (ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
+                    $this->id = (int)$this->userTSConfiguration['mailModulePageId'];
+                } else {
+                    $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?: GeneralUtility::_GP('id'));
+                }
+            }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
             $this->id = (int)GeneralUtility::_GP('id');
         }
@@ -89,7 +99,6 @@ abstract class AbstractController extends ActionController
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['mail.'] ?? [];
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
         $this->pageTSConfiguration['pid'] = $this->id;
-        $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
     }
 
     public function initializeAction()

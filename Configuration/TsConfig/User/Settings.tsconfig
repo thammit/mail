@@ -1,0 +1,7 @@
+tx_mail {
+    hideTabs =
+    hideCategoryStep = 0
+    defaultTab =
+    hideConfiguration = 1
+    mailModulePageId =
+}

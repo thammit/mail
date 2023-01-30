@@ -85,6 +85,18 @@ MAIL module page id `mailModulePageId`
 Feature
 =======
 
+.. _extension-configuration-hide-navigation:
+
+MAIL module page id `hideNavigation`
+-----------------------------------------------------------------
+
+.. confval:: hideNavigation
+
+   :type: bool
+   :Default:
+
+   Hide navigation: If set, page tree navigation will be hidden in mail module. User tsconfig parameter :ref:`tx_mail.mailModulePageId <user-ts-config-mail-module-page-id>` has to be set!
+
 .. _extension-configuration-delete-unused-markers:
 
 Delete unused markers in personalized mails `deleteUnusedMarkers`
