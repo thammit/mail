@@ -1,0 +1,75 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div role="tabpanel">
+    <ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab2" data-store-last-tab="1">
+        <li role="presentation" class="t3js-tabmenu-item ">
+            <a aria-selected="true" class="active" href="#tab-module-settings-defaults" title="" aria-controls="tab-module-settings-defaults" role="tab" data-bs-toggle="tab"
+               aria-selected="false">
+                {f:translate(key: '{lll}configuration.panel.module.tab.defaults')}
+            </a>
+        </li>
+        <li role="presentation" class="t3js-tabmenu-item ">
+            <a href="#tab-module-settings-tracking" title="" aria-controls="tab-module-settings-tracking" role="tab" data-bs-toggle="tab"
+               aria-selected="false">
+                {f:translate(key: '{lll}configuration.panel.module.tab.tracking')}
+            </a>
+        </li>
+        <li role="presentation" class="t3js-tabmenu-item ">
+            <a href="#tab-module-settings-test" title="" aria-controls="tab-module-settings-test" role="tab" data-bs-toggle="tab"
+               aria-selected="false">
+                {f:translate(key: '{lll}configuration.panel.module.tab.test')}
+            </a>
+        </li>
+        <li role="presentation" class="t3js-tabmenu-item ">
+            <a href="#tab-module-settings-quickmails" title="" aria-controls="tab-module-settings-quickmails" role="tab" data-bs-toggle="tab"
+               aria-selected="false">
+                {f:translate(key: '{lll}configuration.panel.module.tab.quickmails')}
+            </a>
+        </li>
+        <li role="presentation" class="t3js-tabmenu-item">
+            <a href="#tab-module-settings-protection" title="" aria-controls="tab-module-settings-protection" role="tab" data-bs-toggle="tab">
+                {f:translate(key: '{lll}configuration.panel.module.tab.protection')}
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="tab-module-settings-defaults">
+            <div class="panel panel-tab">
+                <div class="panel-body">
+                    <f:render partial="Configuration/Defaults" arguments="{_all}" />
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="tab-module-settings-tracking">
+            <div class="panel panel-tab">
+                <div class="panel-body">
+                    <f:render partial="Configuration/Tracking" arguments="{_all}" />
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="tab-module-settings-test">
+            <div class="panel panel-tab">
+                <div class="panel-body">
+                    <f:render partial="Configuration/Testing" arguments="{_all}" />
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="tab-module-settings-quickmails">
+            <div class="panel panel-tab">
+                <div class="panel-body">
+                    <f:render partial="Configuration/QuickMails" arguments="{_all}" />
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="tab-module-settings-protection">
+            <div class="panel panel-tab">
+                <div class="panel-body">
+                    <f:render partial="Configuration/Protection" arguments="{_all}" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

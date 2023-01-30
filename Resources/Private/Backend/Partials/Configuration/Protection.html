@@ -1,0 +1,24 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div class="mb-3">
+    <label for="httpUsername" class="form-label">
+        <f:translate key="{lll}configuration.httpUsername"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.httpUsername.description\', 1: \'{lll}configuration.httpUsername.details\'}'}"/>
+    </label>
+    <f:form.textfield id="httpUsername" name="pageTS[httpUsername]" value="{configuration.httpUsername}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="httpPassword" class="form-label">
+        <f:translate key="{lll}configuration.httpPassword"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.httpPassword.description\'}'}"/>
+    </label>
+    <f:form.textfield id="httpPassword" name="pageTS[httpPassword]" value="{configuration.httpPassword}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="simulateUsergroup" class="form-label">
+        <f:translate key="{lll}configuration.simulateUsergroup"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.simulateUsergroup.description\', 1: \'{lll}configuration.simulateUsergroup.details\'}'}"/>
+    </label>
+    <f:form.textfield id="simulateUsergroup" name="pageTS[simulateUsergroup]" value="{configuration.simulateUsergroup}" class="form-control"/>
+</div>
+
+</html>

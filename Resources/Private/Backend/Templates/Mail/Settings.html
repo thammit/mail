@@ -15,7 +15,9 @@
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2>
         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
-        {mail.subject}
+        {mail.subject} <be:link.editRecord uid="{mail.uid}" table="{table}" fields="subject">
+        <core:icon identifier="actions-open"/>
+    </be:link.editRecord>
     </h2>
     <div class="row justify-content-between">
         <div class="col-12 col-md-8">
@@ -67,6 +69,23 @@
                                                         </be:link.editRecord>
                                                     </f:then>
                                                     <f:else>{column.value}</f:else>
+                                                </f:if>
+                                            </td>
+                                            <td align="right">
+                                                <f:if condition="{field} == 'type'">
+                                                    <f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}" action="updateContent" controller="Mail" arguments="{mail: mail.uid}">
+                                                        <core:icon identifier="actions-refresh"/>
+                                                    </f:link.action>
+                                                </f:if>
+                                                <f:if condition="{field} == 'page'">
+                                                    <a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page}')}" title="{f:translate(key: '{lll}general.button.edit')}">
+                                                        <core:icon identifier="actions-file-edit"/>
+                                                    </a>
+                                                </f:if>
+                                                <f:if condition="{field} == 'attachment'">
+                                                    <be:link.editRecord class="btn btn-default" uid="{mail.uid}" table="{table}" fields="attachment">
+                                                        <core:icon identifier="mail-attachment"/>
+                                                    </be:link.editRecord>
                                                 </f:if>
                                             </td>
                                         </tr>

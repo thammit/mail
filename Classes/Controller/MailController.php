@@ -23,6 +23,7 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
+use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,6 +37,7 @@ use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
@@ -85,6 +87,29 @@ class MailController extends AbstractController
             $_GET['id'] = $this->pageInfo['pid'];
             $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id], $this->pageInfo['pid']);
         }
+
+        if (!isset($this->implodedParams['plainParams'])) {
+            $this->implodedParams['plainParams'] = '&plain=1';
+        }
+        if (!isset($this->implodedParams['quickMailCharset'])) {
+            $this->implodedParams['quickMailCharset'] = 'utf-8';
+        }
+        if (!isset($this->implodedParams['charset'])) {
+            $this->implodedParams['charset'] = 'utf-8';
+        }
+        if (!isset($this->implodedParams['sendPerCycle'])) {
+            $this->implodedParams['sendPerCycle'] = '50';
+        }
+
+        $this->view->assignMultiple([
+            'configuration' => $this->implodedParams,
+            'charsets' => array_unique(array_values(mb_list_encodings())),
+            'backendUser' => [
+                'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
+                'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
+                'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
+            ],
+        ]);
 
         $panels = [Constants::PANEL_OPEN, Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL];
         if ($this->userTSConfiguration['hideTabs'] ?? false) {
@@ -148,9 +173,44 @@ class MailController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->addIndexDocHeaderButtons();
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewModal');
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
+    }
+
+    /**
+     * @param array $pageTS
+     * @return void
+     * @throws StopActionException
+     */
+    public function updateConfigurationAction(array $pageTS): void
+    {
+        if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), Permission::PAGE_EDIT)) {
+            ViewUtility::addNotificationError(
+                sprintf(LanguageUtility::getLL('configuration.notification.permissionError.message'), $this->id),
+                LanguageUtility::getLL('general.notification.severity.error.title')
+            );
+
+            $this->redirect('index');
+        }
+        if ($pageTS) {
+            $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, 'mod.web_modules.mail.');
+            if ($success) {
+                ViewUtility::addNotificationSuccess(
+                    sprintf(LanguageUtility::getLL('configuration.notification.savedOnPage.message'), $this->id),
+                    LanguageUtility::getLL('general.notification.severity.success.title')
+                );
+
+                $this->redirect('index');
+            }
+            ViewUtility::addNotificationInfo(
+                sprintf(LanguageUtility::getLL('configuration.notification.noChanges.message'), $this->id),
+                LanguageUtility::getLL('queue.notification.nothingToDo.title')
+            );
+
+        }
+        $this->redirect('index');
     }
 
     /**
@@ -181,6 +241,7 @@ class MailController extends AbstractController
      * @param string $htmlUrl
      * @param string $plainTextUrl
      * @return void
+     * @throws ParseException
      * @throws StopActionException
      */
     public function createMailFromExternalUrlsAction(string $subject, string $htmlUrl, string $plainTextUrl): void
@@ -355,10 +416,8 @@ class MailController extends AbstractController
                     }
                     $data[$groupName][$property] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment', $table),
-                        'value' => $value,
+                        'value' => $value ?: '-',
                         'edit' => GeneralUtility::camelCaseToLowerCaseUnderscored($property),
-                        'class' => 'btn btn-default',
-                        'icon' => 'mail-attachment',
                         'overlay' => ''
                     ];
                 } else {
@@ -370,6 +429,7 @@ class MailController extends AbstractController
                         $data[$groupName][$property] = [
                             'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $table),
                             'value' => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '-',
+                            'rawValue' => $rawValue,
                             'edit' => in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
                         ];
                     }
@@ -397,7 +457,7 @@ class MailController extends AbstractController
             'table' => $table,
             'data' => $data,
             'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
-            'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail))
+            'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),
         ]);
 
         // Html2canvas stuff
@@ -437,18 +497,6 @@ class MailController extends AbstractController
                         trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /')),
                 LanguageUtility::getLL('general.notification.severity.success.title'));
         }
-
-        $uriParams = [
-            'id' => $this->id,
-            'tx_mail_mailmail_mailmail' =>
-            [
-                'mail' => $mail->getUid(),
-                'controller' => 'Mail',
-                'action' => 'updateContent',
-            ]
-        ];
-        $uri = $this->backendUriBuilder->buildUriFromRoutePath('/module/MailMail/MailMail', $uriParams);
-        $this->addSettingsDocHeaderButtons((string)$uri);
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -929,6 +977,23 @@ class MailController extends AbstractController
     protected function addIndexDocHeaderButtons(): void
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+
+        $configurationButton = $buttonBar->makeInputButton()
+            ->setTitle(LanguageUtility::getLL('general.button.configuration'))
+            ->setName('configure')
+            ->setDataAttributes([
+                'bs-toggle' => 'modal',
+                'bs-target' => '#mail-configuration-modal',
+                'modal-identifier' => 'mail-configuration-modal',
+                'modal-title' => LanguageUtility::getLL('mail.button.configuration'),
+                'button-ok-text' => LanguageUtility::getLL('general.button.save'),
+                'button-close-text' => LanguageUtility::getLL('general.button.cancel')
+            ])
+            ->setClasses('js-mail-queue-configuration-modal')
+            ->setValue(1)
+            ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
+        $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+
         $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailMail');
         $arguments = [
             'id' => $this->id,
