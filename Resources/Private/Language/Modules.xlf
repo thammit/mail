@@ -758,6 +758,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="configuration.notification.savedOnPage.message" resname="configuration.notification.savedOnPage.message">
                 <source>The configuration was successfully saved to the selected page %s.</source>
             </trans-unit>
+            <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message">
+                <source>Open Mails are not affected by most changes!</source>
+            </trans-unit>
             <trans-unit id="configuration.notification.noChanges.message" resname="configuration.notification.noChanges.message">
                 <source>No changes in the configuration detected.</source>
             </trans-unit>

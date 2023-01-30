@@ -201,6 +201,12 @@ class MailController extends AbstractController
                     sprintf(LanguageUtility::getLL('configuration.notification.savedOnPage.message'), $this->id),
                     LanguageUtility::getLL('general.notification.severity.success.title')
                 );
+                if ($this->mailRepository->findOpenByPid($this->id)->count() > 0) {
+                    ViewUtility::addNotificationWarning(
+                        LanguageUtility::getLL('configuration.notification.openMailsNotAffected.message'),
+                        LanguageUtility::getLL('general.notification.severity.warning.title')
+                    );
+                }
 
                 $this->redirect('index');
             }

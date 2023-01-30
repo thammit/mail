@@ -45,6 +45,7 @@ abstract class AbstractController extends ActionController
     protected array $implodedParams = [];
     protected array $allowedTables = [];
     protected ModuleTemplate $moduleTemplate;
+    protected int $notification = 1;
 
     /**
      * Constructor Method
@@ -125,6 +126,7 @@ abstract class AbstractController extends ActionController
             AbstractMessage::ERROR => 'error',
         ];
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-        $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS, 'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
+        $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification, 'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
+        $this->notification ++;
     }
 }
