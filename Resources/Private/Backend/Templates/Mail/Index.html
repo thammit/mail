@@ -72,7 +72,7 @@
                 <f:if condition="{addIconOverlay}">
                     <f:variable name="iconOverlay" value="{htmlPreviewLink.flagIcon}" />
                 </f:if>
-                <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{htmlPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{data.title}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
+                <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{htmlPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
             </f:for>
         </f:if>
         <f:if condition="{type} == 'textPreview'">
@@ -85,7 +85,7 @@
                 <f:if condition="{addIconOverlay}">
                     <f:variable name="iconOverlay" value="{textPreviewLink.flagIcon}" />
                 </f:if>
-                <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{textPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{data.title}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
+                <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{textPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
             </f:for>
         </f:if>
     </f:for>
@@ -124,7 +124,44 @@
                         <core:icon identifier="mail-attachment" size="small"/>
                     </f:if></td>
                     <td class="nowrap">
-                        <f:render section="previewButtons" arguments="{uid:data.page,pageId:data.pid}" />
+                        <f:if condition="{data.mailBody}">
+                            <button class="btn btn-default" title="{f:translate(key:'{lll}mail.wizard.htmlMailBody.title')}" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-html-body-{data.uid}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></button>
+                            <div class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-wizard-open-mail-preview-html-body-{data.uid}" tabindex="-1" aria-labelledby="mail-wizard-open-mail-preview-html-body-{data.uid}-label" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="mail-wizard-open-mail-preview-html-body-{data.uid}-label">{data.subject}</h5>
+                                            <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
+                                                <core:icon identifier="actions-close" />
+                                                <span class="visually-hidden">Close</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body nowrap-disabled">
+                                            {data.mailBody -> f:format.raw()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </f:if>
+                        <f:if condition="{data.plainContent}">
+                            <button class="btn btn-default" title="{f:translate(key:'{lll}mail.wizard.plainMailBody.title')}" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-plain-body-{data.uid}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></button>
+                            <div class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-wizard-open-mail-preview-plain-body-{data.uid}" tabindex="-1" aria-labelledby="mail-wizard-open-mail-preview-plain-body-{data.uid}-label" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="mail-wizard-open-mail-preview-plain-body-{data.uid}-label">{data.subject}</h5>
+                                            <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
+                                                <core:icon identifier="actions-close" />
+                                                <span class="visually-hidden">Close</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body nowrap-disabled">
+                                            {data.plainContent -> f:format.nl2br()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </f:if>
                         <f:if condition="!{data.scheduledBegin}">
                             <f:link.action action="delete" arguments="{mail:data.uid}" class="btn btn-default" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:link.action>
                         </f:if>
@@ -169,7 +206,7 @@
                                 <a href="{be:moduleLink(route:'web_layout', arguments:'{id: data.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.edit')}">
                                     <core:icon identifier="actions-page-open" size="small"/>
                                 </a>
-                                <f:render section="previewButtons" arguments="{uid:data.uid,pageId:data.pid}" />
+                                <f:render section="previewButtons" arguments="{uid:data.uid,title:data.title,pageId:data.pid}" />
                             </td>
                             <td class="col-control nowrap">
                                 <f:link.action action="createMailFromInternalPage" arguments="{page: data.uid}" class="btn btn-mail-theme text-uppercase"><f:translate key="{lll}general.button.next" default="Next" /></f:link.action>

@@ -523,6 +523,15 @@ class Mail extends AbstractEntity
         return $this;
     }
 
+    public function getMailBody(): string
+    {
+        if (str_contains($this->htmlContent, '<body')) {
+            // html content contains html tag -> return body
+            return MailerUtility::getMailBody($this->htmlContent);
+        }
+        return $this->htmlContent;
+    }
+
     /**
      * @return string
      */

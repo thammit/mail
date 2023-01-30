@@ -201,6 +201,12 @@
             <trans-unit id="mail.wizard.noMailPagesFound.message" resname="mail.wizard.noMailPagesFound.message">
                 <source>There are no pages in the mail module.</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.htmlMailBody.title" resname="mail.wizard.htmlMailBody.title">
+                <source>View mail HTML body</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.plainMailBody.title" resname="mail.wizard.plainMailBody.title">
+                <source>View mail plain text body</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.htmlPreviewLink.title" resname="mail.wizard.htmlPreviewLink.title">
                 <source>View page in HTML format</source>
             </trans-unit>
