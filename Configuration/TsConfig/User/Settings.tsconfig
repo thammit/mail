@@ -2,6 +2,7 @@ tx_mail {
     hideTabs =
     hideCategoryStep = 0
     defaultTab =
-    hideConfiguration = 1
+    hideConfiguration = 0
+    hideManualSending = 0
     mailModulePageId =
 }

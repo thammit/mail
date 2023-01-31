@@ -17,6 +17,7 @@ use MEDIAESSENZ\Mail\Exception\HtmlContentFetchFailedException;
 use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -142,7 +143,7 @@ class MailController extends AbstractController
                     $this->pageRepository->where_groupAccess = '';
                     $panelData['internal'] = [
                         'open' => $open,
-                        'data' => $this->pageRepository->getMenu($this->id)
+                        'data' => BackendDataUtility::addToolTipData($this->pageRepository->getMenu($this->id, 'uid,pid,title,fe_group,doktype,shortcut_mode'))
                     ];
                     break;
                 case Constants::PANEL_EXTERNAL:

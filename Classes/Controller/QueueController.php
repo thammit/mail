@@ -27,7 +27,6 @@ class QueueController extends AbstractController
      * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
-     * @throws RouteNotFoundException
      */
     public function indexAction(): ResponseInterface
     {
@@ -48,11 +47,11 @@ class QueueController extends AbstractController
             'id' => $this->id,
             'data' => $data,
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
-            'trigger' => !(isset($this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']) && $this->pageTSConfiguration['menu.']['mail.']['queue.']['disable_trigger']),
+            'showManualSending' => !($this->userTSConfiguration['hideManualSending'] ?? false),
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());
-        $this->configureOverViewDocHeader($this->request->getRequestTarget());
+        $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueConfigurationModal');
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -123,24 +122,27 @@ class QueueController extends AbstractController
      * Create document header buttons of "overview" action
      *
      * @param string $requestUri
+     * @param bool $showConfigurationButton
      */
-    protected function configureOverViewDocHeader(string $requestUri): void
+    protected function configureOverViewDocHeader(string $requestUri, bool $showConfigurationButton = false): void
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
 
-        $configurationButton = $buttonBar->makeInputButton()
-            ->setTitle(LanguageUtility::getLL('general.button.configuration'))
-            ->setName('configure')
-            ->setDataAttributes([
-                'modal-identifier' => 'mail-queue-configuration-modal',
-                'modal-title' => LanguageUtility::getLL('queue.button.configuration'),
-                'button-ok-text' => LanguageUtility::getLL('general.button.save'),
-                'button-close-text' => LanguageUtility::getLL('general.button.cancel')
-            ])
-            ->setClasses('js-mail-queue-configuration-modal')
-            ->setValue(1)
-            ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
-        $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+        if ($showConfigurationButton) {
+            $configurationButton = $buttonBar->makeInputButton()
+                ->setTitle(LanguageUtility::getLL('general.button.configuration'))
+                ->setName('configure')
+                ->setDataAttributes([
+                    'modal-identifier' => 'mail-queue-configuration-modal',
+                    'modal-title' => LanguageUtility::getLL('queue.button.configuration'),
+                    'button-ok-text' => LanguageUtility::getLL('general.button.save'),
+                    'button-close-text' => LanguageUtility::getLL('general.button.cancel')
+                ])
+                ->setClasses('js-mail-queue-configuration-modal')
+                ->setValue(1)
+                ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
+            $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+        }
 
         $reloadButton = $buttonBar->makeLinkButton()
             ->setHref($requestUri)

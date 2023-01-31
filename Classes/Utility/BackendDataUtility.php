@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
@@ -61,18 +62,23 @@ class BackendDataUtility
         ]);
     }
 
-    /**
-     * @param int $pageUid
-     * @return string
-     */
-    public static function getAbsoluteBaseUrlForMailPage(int $pageUid): string
+    public static function addToolTipData(array $pages): array
     {
-        $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
-        // Finding the domain to use
-        return $contentObjectRenderer->typolink_URL([
-            'parameter' => 't3://page?uid=' . $pageUid,
-            'forceAbsoluteUrl' => true,
-            'linkAccessRestrictedPages' => true,
-        ]);
+        $frontendUserGroupRepository = GeneralUtility::makeInstance(FrontendUserGroupRepository::class);
+        foreach ($pages as $key => $page) {
+            $toolTip = 'id=' . $page['uid'];
+            if ($page['fe_group']) {
+                $frontendUserGroupTitles = [];
+                $frontendUserGroupUids = GeneralUtility::intExplode(',', $page['fe_group'], true);
+                foreach ($frontendUserGroupUids as $frontendUserGroupUid) {
+                    $frontendUserGroup = $frontendUserGroupRepository->findRecordByUid($frontendUserGroupUid, ['title'], true);
+                    $frontendUserGroupTitles[] = $frontendUserGroup[0]['title'];
+                }
+                $toolTip .= ' - ' . LanguageUtility::getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.fe_group') . ' ' . implode(', ', $frontendUserGroupTitles);
+            }
+            $pages[$key]['toolTip'] = $toolTip;
+        }
+
+        return $pages;
     }
 }

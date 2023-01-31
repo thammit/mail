@@ -62,7 +62,18 @@ hideConfiguration
    :Default: open
    :Path: tx_mail.hideConfiguration
 
-   Hide configuration button in mail module
+   Hide configuration button in mail wizard and queue module
+
+hideManualSending
+-----------------
+
+.. confval:: hideManualSending
+
+   :type: bool
+   :Default: open
+   :Path: tx_mail.hideManualSending
+
+   Hide manual sending button in queue module
 
 .. _user-ts-config-mail-module-page-id:
 

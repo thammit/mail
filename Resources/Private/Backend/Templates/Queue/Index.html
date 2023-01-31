@@ -12,7 +12,7 @@
     <h1>
         <f:translate key="{lll}queue.header"/>
     </h1>
-    <f:if condition="{trigger}">
+    <f:if condition="{showManualSending}">
         <f:be.infobox title="{f:translate(key: '{lll}queue.manualSending')}">
             <p>
                 <f:translate key="{lll}queue.manualSending.description" arguments="{0: sendPerCycle}"/>

@@ -15,6 +15,12 @@
             <trans-unit id="general.button.edit" resname="general.button.edit">
                 <source>Edit</source>
             </trans-unit>
+            <trans-unit id="general.button.editPage" resname="general.button.editPage">
+                <source>Edit page</source>
+            </trans-unit>
+            <trans-unit id="general.button.editContent" resname="general.button.editContent">
+                <source>Edit content elements</source>
+            </trans-unit>
             <trans-unit id="general.button.delete" resname="general.button.delete">
                 <source>Delete</source>
             </trans-unit>
@@ -687,7 +693,7 @@ You may personalize the mails that will be sent to each recipient by inserting t
                 <source>Start sending manually</source>
             </trans-unit>
             <trans-unit id="queue.manualSending.description" resname="queue.manualSending.description">
-                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed within the settings module.</source>
+                <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent.</source>
             </trans-unit>
             <trans-unit id="queue.manualSending" resname="queue.manualSending">
                 <source>Manual delivery</source>

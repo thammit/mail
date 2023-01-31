@@ -95,7 +95,11 @@
                 <f:if condition="{addIconOverlay}">
                     <f:variable name="iconOverlay" value="{htmlPreviewLink.flagIcon}" />
                 </f:if>
-                <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{htmlPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></a>
+                <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{htmlPreviewLink.title}">
+                        <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/>
+                    </span>
+                </a>
             </f:for>
         </f:if>
         <f:if condition="{type} == 'textPreview'">
@@ -108,7 +112,11 @@
                 <f:if condition="{addIconOverlay}">
                     <f:variable name="iconOverlay" value="{textPreviewLink.flagIcon}" />
                 </f:if>
-                <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" title="{textPreviewLink.title}" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></a>
+                <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{textPreviewLink.title}">
+                        <core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/>
+                    </span>
+                </a>
             </f:for>
         </f:if>
     </f:for>
@@ -148,7 +156,11 @@
                     </f:if></td>
                     <td class="nowrap">
                         <f:if condition="{data.mailBody}">
-                            <button class="btn btn-default" title="{f:translate(key:'{lll}mail.wizard.htmlMailBody.title')}" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-html-body-{data.uid}"><core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/></button>
+                            <button class="btn btn-default" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-html-body-{data.uid}">
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key:'{lll}mail.wizard.htmlMailBody.title')}">
+                                    <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/>
+                                </span>
+                            </button>
                             <div class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-wizard-open-mail-preview-html-body-{data.uid}" tabindex="-1" aria-labelledby="mail-wizard-open-mail-preview-html-body-{data.uid}-label" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                                     <div class="modal-content">
@@ -167,7 +179,11 @@
                             </div>
                         </f:if>
                         <f:if condition="{data.plainContent}">
-                            <button class="btn btn-default" title="{f:translate(key:'{lll}mail.wizard.plainMailBody.title')}" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-plain-body-{data.uid}"><core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/></button>
+                            <button class="btn btn-default" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-plain-body-{data.uid}">
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key:'{lll}mail.wizard.plainMailBody.title')}">
+                                    <core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/>
+                                </span>
+                            </button>
                             <div class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-wizard-open-mail-preview-plain-body-{data.uid}" tabindex="-1" aria-labelledby="mail-wizard-open-mail-preview-plain-body-{data.uid}-label" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                                     <div class="modal-content">
@@ -186,7 +202,7 @@
                             </div>
                         </f:if>
                         <f:if condition="!{data.scheduledBegin}">
-                            <f:link.action action="delete" arguments="{mail:data.uid}" class="btn btn-default" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:link.action>
+                            <f:link.action action="delete" arguments="{mail:data.uid}" class="btn btn-default" data="{bs-toggle:'tooltip', bs-placement:'top'}" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:link.action>
                         </f:if>
                     </td>
                     <td>
@@ -223,12 +239,19 @@
                     <tbody>
                     <f:for each="{data.data}" as="data">
                         <tr class="db_list_normal">
-                            <td class="col-icon nowrap" style="width: 1%"><core:icon identifier="app-pagetree-mail" size="small"/></td>
+                            <td class="col-icon nowrap" style="width: 1%">
+                                <span data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="tooltip" data-bs-placement="right" title="{data.toolTip}">
+                                    <core:icon identifier="app-pagetree-mail" overlay="{f:if(condition: data.fe_group, then: 'overlay-frontenduser')}" size="small"/>
+                                </span>
+                            </td>
                             <td class="col-title col-responsive nowrap">{data.title}</td>
                             <td class="nowrap">
-                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: data.uid}')}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.edit')}">
+                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: data.uid}')}" class="btn btn-default" data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key: '{lll}general.button.editPage')}">
                                     <core:icon identifier="actions-page-open" size="small"/>
                                 </a>
+                                <mail:editMailPageContent uid="{data.uid}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.editContent')}" data="{bs-trigger:'hover focus', bs-container:'body', bs-toggle:'tooltip', bs-placement:'top'}">
+                                    <core:icon identifier="actions-document-edit" size="small"/>
+                                </mail:editMailPageContent>
                                 <f:render section="previewButtons" arguments="{uid:data.uid,title:data.title,pageId:data.pid}" />
                             </td>
                             <td class="col-control nowrap">
