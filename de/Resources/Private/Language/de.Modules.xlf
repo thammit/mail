@@ -1,0 +1,1335 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<xliff version="1.0">
+  <file source-language="en" datatype="plaintext" original="EXT:mail/Resources/Private/Language/Modules/Modules.xlf" date="2022-11-01T12:00:00Z" product-name="mail" target-language="de">
+    <header/>
+    <body>
+      <trans-unit id="general.button.next" approved="yes">
+        <source>Next</source>
+        <target state="final">Weiter</target>
+      </trans-unit>
+      <trans-unit id="general.button.back" approved="yes">
+        <source>Back</source>
+        <target state="final">Zurück</target>
+      </trans-unit>
+      <trans-unit id="general.button.edit" resname="general.button.edit" approved="yes">
+        <source>Edit</source>
+        <target state="final">Bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="general.button.delete" resname="general.button.delete" approved="yes">
+        <source>Delete</source>
+        <target state="final">Löschen</target>
+      </trans-unit>
+      <trans-unit id="general.button.update" resname="general.button.update" approved="yes">
+        <source>Update</source>
+        <target state="final">Aktualisieren</target>
+      </trans-unit>
+      <trans-unit id="general.button.save" resname="general.button.save" approved="yes">
+        <source>Save</source>
+        <target state="final">Speichern</target>
+      </trans-unit>
+      <trans-unit id="general.button.send" approved="yes">
+        <source>Send</source>
+        <target state="final">Senden</target>
+      </trans-unit>
+      <trans-unit id="general.button.finish" resname="general.button.finish" approved="yes">
+        <source>Finish</source>
+        <target state="final">Fertigstellen</target>
+      </trans-unit>
+      <trans-unit id="general.button.sendTestMail" approved="yes">
+        <source>Send test mail to %s</source>
+        <target state="final">Sende Test-Mail an %s</target>
+      </trans-unit>
+      <trans-unit id="general.button.downloadCsv" resname="general.button.downloadCsv" approved="yes">
+        <source>Download CSV</source>
+        <target state="final">CSV Herunterladen</target>
+      </trans-unit>
+      <trans-unit id="general.notification.severity.info.title" approved="yes">
+        <source>Info</source>
+        <target state="final">Info</target>
+      </trans-unit>
+      <trans-unit id="general.notification.severity.notice.title" approved="yes">
+        <source>Notice</source>
+        <target state="final">Hinweis</target>
+      </trans-unit>
+      <trans-unit id="general.notification.severity.success.title" approved="yes">
+        <source>Success</source>
+        <target state="final">Erfolgreich</target>
+      </trans-unit>
+      <trans-unit id="general.notification.severity.warning.title" approved="yes">
+        <source>Warning</source>
+        <target state="final">Warnung</target>
+      </trans-unit>
+      <trans-unit id="general.notification.severity.error.title" approved="yes">
+        <source>Error</source>
+        <target state="final">Fehler</target>
+      </trans-unit>
+      <trans-unit id="mail.type.quickMail" approved="yes">
+        <source>Quick Mail</source>
+        <target state="final">Kurznachricht</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.edit.title" approved="yes">
+        <source>Edit title/subject</source>
+        <target state="final">Titel/Thema bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.settings.general" approved="yes">
+        <source>General</source>
+        <target state="final">Allgemein</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.settings.headers" approved="yes">
+        <source>Headers</source>
+        <target state="final">Kopfzeilen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.settings.content" approved="yes">
+        <source>Content</source>
+        <target state="final">Inhalte</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.testMail.groups" approved="yes">
+        <source>Group(s)</source>
+        <target state="final">Gruppe(n)</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.externalUrlInvalid.message" approved="yes">
+        <source>Error during fetching external Urls: %s</source>
+        <target state="final">Fehler beim Einlesen der externen Urls: %s</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.noPageSelected.title" approved="yes">
+        <source>No valid page selected</source>
+        <target state="final">Keine gültige Seite ausgewählt</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.noPageSelected.message" approved="yes">
+        <source>Please select a mail folder or page in the page tree.</source>
+        <target state="final">Bitte wählen Sie einen Mail-Ordner oder eine Mail-Seite im Seitenbaum aus.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.fetchSuccessfully.message" approved="yes">
+        <source>The page "%s" was fetched successfully.</source>
+        <target state="final">Die Seite "%s" wurde erfolgreich ausgelesen.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.noHtmlBoundariesFound.message" approved="yes">
+        <source>The HTML content does not contain any mail boundaries.</source>
+        <target state="final">Der HTML-Inhalt enthält keine Mail-Abgrenzungen.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.noPlainTextBoundariesFound.message" approved="yes">
+        <source>The plain text content does not contain any mail boundaries.</source>
+        <target state="final">Der reine Textinhalt enthält keine Mail-Abgrenzungen.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.previewImageSaved.message" approved="yes">
+        <source>Preview image successfully saved.</source>
+        <target state="final">Vorschaubild erfolgreich abgespeichert.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.previewImageCreationFailed.message" approved="yes">
+        <source>Preview image creation failed.</source>
+        <target state="final">Generierung des Vorschaubildes fehlgeschlagen.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.categoriesUpdated.title" approved="yes">
+        <source>Categories applied</source>
+        <target state="final">Kategorien gespeichert</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.categoriesUpdated.message" approved="yes">
+        <source>Categories restrictions successfully applied.</source>
+        <target state="final">Kategorie-Einschränkungen erfolgreich gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.categoryRestrictionSaveFailed.message" approved="yes">
+        <source>Category restrictions save failed.</source>
+        <target state="final">Speichern von Kategorie-Einschränkungen fehlgeschlagen.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.updateContentFailed.message" approved="yes">
+        <source>Content update failed.</source>
+        <target state="final">Aktualisierung der Inhalte fehlgeschlagen.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.testMailSent.title" approved="yes">
+        <source>Test mail successfully sent</source>
+        <target state="final">Test Mail erfolgreich versandt</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.testMailSent.message" approved="yes">
+        <source>Recipient(s): %s</source>
+        <target state="final">Empfänger: %s</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.finished.title" approved="yes">
+        <source>Mail scheduled for distribution</source>
+        <target state="final">Mail für Versand eingeplant</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.missingRecipientGroup.message" approved="yes">
+        <source>Please select at least one recipient group.</source>
+        <target state="final">Bitte wählen Sie mindestens eine Empfängergruppe aus.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.noRecipients.message" approved="yes">
+        <source>There are no recipients in the selected group(s).</source>
+        <target state="final">Es gibt keine Empfänger in der/den ausgewählten Gruppen.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.finished.message" approved="yes">
+        <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
+        <target state="final">Die E-Mail "%s" wurde erfolgreich für den Versand am %s eingeplant.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.deleted.title" approved="yes">
+        <source>Mail deleted</source>
+        <target state="final">Mail gelöscht</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.deleted.message" approved="yes">
+        <source>The mail "%s" was successfully deleted.</source>
+        <target state="final">Die Mail "%s" wurde erfolgreich gelöscht.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.title" resname="mail.wizard.title" approved="yes">
+        <source>Mail Wizard</source>
+        <target state="final">Mail-Assistent</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.externalMailPlainTextUrl" resname="mail.wizard.externalMailPlainTextUrl" approved="yes">
+        <source>URL of plain text content</source>
+        <target state="final">URL des einfachen Textinhalts</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.externalMailSubject" resname="mail.wizard.externalMailSubject" approved="yes">
+        <source>Subject</source>
+        <target state="final">Betreff</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.externalPage" resname="mail.wizard.externalPage" approved="yes">
+        <source>External Page</source>
+        <target state="final">Externe Seite</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.internalPage" resname="mail.wizard.internalPage" approved="yes">
+        <source>Internal Page</source>
+        <target state="final">Interne Seite</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.openMails" resname="mail.wizard.openMails" approved="yes">
+        <source>Open Mails</source>
+        <target state="final">Offene Mails</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.quickMail" resname="mail.wizard.quickMail" approved="yes">
+        <source>Quick Mail</source>
+        <target state="final">Kurznachricht</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource" approved="yes">
+        <source>Please choose source</source>
+        <target state="final">Bitte Quelle auswählen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.settings" resname="mail.wizard.settings" approved="yes">
+        <source>Settings</source>
+        <target state="final">Einstellungen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.categories" resname="mail.wizard.categories" approved="yes">
+        <source>Categories</source>
+        <target state="final">Kategorien</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.testMail" resname="mail.wizard.testMail" approved="yes">
+        <source>Test Mail</source>
+        <target state="final">Test-Mail</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending" resname="mail.wizard.scheduleSending" approved="yes">
+        <source>Schedule sending</source>
+        <target state="final">Versandplanung</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.subject" resname="mail.wizard.subject" approved="yes">
+        <source>Subject</source>
+        <target state="final">Betreff</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.categories.restrictToCategories" resname="mail.wizard.categories.restrictToCategories" approved="yes">
+        <source>Restrict to categories</source>
+        <target state="final">Auf Kategorien einschränken</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.attachment" resname="mail.wizard.attachment" approved="yes">
+        <source>Attachment</source>
+        <target state="final">Anhang</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.categories.column" resname="mail.wizard.categories.column" approved="yes">
+        <source>Column</source>
+        <target state="final">Spalte</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.lastModified" resname="mail.wizard.lastModified" approved="yes">
+        <source>Last modified</source>
+        <target state="final">Zuletzt geändert</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.size" resname="mail.wizard.size" approved="yes">
+        <source>Size</source>
+        <target state="final">Größe</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.subject" resname="mail.wizard.subject" approved="yes">
+        <source>Subject</source>
+        <target state="final">Betreff</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.type" resname="mail.wizard.type" approved="yes">
+        <source>Type</source>
+        <target state="final">Typ</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.noMailPagesFound.title" resname="mail.wizard.noMailPagesFound.title" approved="yes">
+        <source>Select a mail</source>
+        <target state="final">Mail auswählen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.noMailPagesFound.message" resname="mail.wizard.noMailPagesFound.message" approved="yes">
+        <source>There are no pages in the mail module.</source>
+        <target state="final">Es gibt keine Seiten im Mail-Modul.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.htmlPreviewLink.title" resname="mail.wizard.htmlPreviewLink.title" approved="yes">
+        <source>View page in HTML format</source>
+        <target state="final">Seite im HTML-Format anzeigen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.plainTextPreviewLink.title" resname="mail.wizard.plainTextPreviewLink.title" approved="yes">
+        <source>View page in Text format</source>
+        <target state="final">Seite im Text-Format anzeigen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.quickmail.breakLines" resname="mail.wizard.quickmail.breakLines" approved="yes">
+        <source>Break lines to 76 char</source>
+        <target state="final">Zeilenumbruch auf 76 Zeichen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.quickmail.message" resname="mail.wizard.quickmail.message" approved="yes">
+        <source>Message</source>
+        <target state="final">Nachricht</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.quickmail.senderEmail" resname="mail.wizard.quickmail.senderEmail" approved="yes">
+        <source>Sender Email</source>
+        <target state="final">Absender E-Mail</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.quickmail.senderName" resname="mail.wizard.quickmail.senderName" approved="yes">
+        <source>Sender Name</source>
+        <target state="final">Absender Name</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleDraft" resname="mail.wizard.scheduleDraft" approved="yes">
+        <source>Save mail settings for recurring mailings</source>
+        <target state="final">Mail-Einstellungen für wiederkehrende Mailings speichern</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending.mailGroup" resname="mail.wizard.scheduleSending.mailGroup" approved="yes">
+        <source>Recipient group</source>
+        <target state="final">Empfängergruppe</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending.mailGroups" resname="mail.wizard.scheduleSending.mailGroups" approved="yes">
+        <source>Recipient groups</source>
+        <target state="final">Empfängergruppen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending.info.mailGroup.title" resname="mail.wizard.scheduleSending.info.mailGroup.title" approved="yes">
+        <source>Select recipients and time of sending</source>
+        <target state="final">Empfänger und Zeitpunkt des Versands auswählen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending.info.mailGroup.message" resname="mail.wizard.scheduleSending.info.mailGroup.message" xmlspace="preserve" approved="yes">
+        <source><![CDATA[Here you have to select at least one recipient group and the time of distribution.
+				After pressing FINISH, the mail will be added to the mail queue. There it is possible to delete it before the final sending is finished.]]></source>
+        <target state="final"><![CDATA[Hier müssen Sie mindestens eine Empfängergruppe und den Versandbeginn auswählen.
+				Nach Klick auf FERTIGSTELLEN wird die Mail in die Warteschlange aufgenommen. Dort kann sie gelöscht werden, bis der endgültige Versand abgeschlossen ist.]]></target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending.testMail" resname="mail.wizard.scheduleSending.testMail" approved="yes">
+        <source>Send this as test mail</source>
+        <target state="final">Als Test-Mail senden</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending.distributionTime" resname="mail.wizard.scheduleSending.distributionTime" approved="yes">
+        <source>Distribution time (hh:mm dd-mm-yyyy)</source>
+        <target state="final">Versandbeginn (hh:mm dd-mm-yyyy)</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.draftSaved.title" resname="mail.wizard.notification.draftSaved.title" approved="yes">
+        <source>Mail saved as draft</source>
+        <target state="final">Mail als Entwurf gespeichert</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.draftSaved.message" resname="mail.wizard.notification.draftSaved.message" approved="yes">
+        <source>The mail "%s" was successfully saved as draft for recurring sending within the scheduler.</source>
+        <target state="final">Die E-Mail "%s" wurde erfolgreich als Entwurf für den wiederholten Versand im Planer gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.scheduledForDistribution.title" resname="mail.wizard.notification.scheduledForDistribution.title" approved="yes">
+        <source>Mail scheduled for distribution</source>
+        <target state="final">Mail für Versand eingeplant</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.scheduledForDistribution.message" resname="mail.wizard.notification.scheduledForDistribution.message" approved="yes">
+        <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
+        <target state="final">Die E-Mail "%s" wurde erfolgreich für den Versand am %s eingeplant.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.testMail.individual" resname="mail.wizard.testMail.individual" approved="yes">
+        <source>Individual</source>
+        <target state="final">Individuell</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.testMail.mailGroup" resname="mail.wizard.testMail.mailGroup" approved="yes">
+        <source>Recipient group</source>
+        <target state="final">Empfängergruppe</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.testMail.mailGroup.message" resname="mail.wizard.testMail.mailGroup.message" approved="yes">
+        <source>Select a recipient group for the test mail.</source>
+        <target state="final">Wählen Sie eine Empfängergruppe für die Testmail aus.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.testMail.info.title" resname="mail.wizard.testMail.info.title" approved="yes">
+        <source>Send a simple test mail</source>
+        <target state="final">Senden Sie eine einfache Test-E-Mail</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.testMail.info.message" resname="mail.wizard.testMail.info.message" xmlspace="preserve" approved="yes">
+        <source><![CDATA[Here you can (optionally) send a simple test mail to one or more recipients, before you schedule the final sending on the NEXT page.
+				Beware: The generated mail will include ALL elements regardless of their categories. User fields will NOT be substituted with data.]]></source>
+        <target state="final"><![CDATA[Hier können Sie (optional) eine einfache Testmail an einen oder mehrere Empfänger senden, bevor Sie den endgültigen Versand auf der nächsten Seite planen.
+				Bitte beachten Sie: Die generierte Mail enthält ALLE Elemente, unabhängig von ihrer Kategorie. Die Benutzerfelder werden NICHT durch Daten ersetzt.]]></target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.scheduleSending.noRecipientGroupsFound.message" resname="mail.wizard.scheduleSending.noRecipientGroupsFound.message" approved="yes">
+        <source>No recipient groups found</source>
+        <target state="final">Keine Empfängergruppen gefunden</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.phpImapError" resname="scheduler.bounceMail.phpImapError" approved="yes">
+        <source>Please install PHP IMAP extension</source>
+        <target state="final">Bitte die PHP-IMAP-Erweiterung installieren</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.categories.alttitle" resname="mail.wizard.categories.alttitle" approved="yes">
+        <source>Assign categories to content elements</source>
+        <target state="final">Zuweisung von Kategorien zu Inhaltselementen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.categories.description" xml:space="preserve" approved="yes">
+			    <source><![CDATA[Content elements with assigned categories will appear in mails only if a recipient has assigned the same category in his profile.
+			Content elements without category restrictions will appear for in all mails.]]></source>
+		    <target state="final"><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
+			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target></trans-unit>
+      <trans-unit id="mail.wizard.externalPage.alttitle" approved="yes">
+        <source>New mailing from external pages</source>
+        <target state="final">Neues Mailing von externer Seite</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.externalPage.description" approved="yes">
+        <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+        <target state="final">Nach Eingabe der URL(s) und des Themas auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.internalPage.alttitle" approved="yes">
+        <source>New mailing from an internal page</source>
+        <target state="final">Neues Mailing von interner Seite</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.internalPage.description" approved="yes">
+        <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+        <target state="final">Klicken Sie bei der gewünschten Seite auf WEITER, um mit weiteren Einstellungen (Format, Empfängergruppe, Sendezeit...) fortzufahren.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.quickMail.alttitle" approved="yes">
+        <source>Create a quick mailing</source>
+        <target state="final">Kurznachricht erstellen</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.quickMail.description" approved="yes">
+        <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+        <target state="final">Nach Eingabe des Themas und der Nachricht auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.internalPage.description.old" xml:space="preserve">
+			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
+
+You may personalize the mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
+
+###USER_uid### (the unique id of the recipient)
+###USER_name### (full name)
+###USER_firstname### (first name calculated)
+###USER_NAME### and ###USER_FIRSTNAME### will insert uppercase versions of the equivalents
+###USER_title###
+###USER_email###
+###USER_phone###
+###USER_www###
+###USER_address###
+###USER_company###
+###USER_city###
+###USER_zip###
+###USER_country###
+###USER_fax###
+###MAIL_RECIPIENT_SOURCE###
+###MAIL_ID###
+###MAIL_AUTHCODE###]]></source>
+		    <target state="needs-translation"><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
+
+You may personalize the mails that will be sent to each recipient by inserting the following markers in content elements of the newsletter page. The markers will be substituted with the corresponding value found in each recipient record, whenever available:
+
+###USER_uid### (the unique id of the recipient)
+###USER_name### (full name)
+###USER_firstname### (first name calculated)
+###USER_NAME### and ###USER_FIRSTNAME### will insert uppercase versions of the equivalents
+###USER_title###
+###USER_email###
+###USER_phone###
+###USER_www###
+###USER_address###
+###USER_company###
+###USER_city###
+###USER_zip###
+###USER_country###
+###USER_fax###
+###MAIL_RECIPIENT_SOURCE###
+###MAIL_ID###
+###MAIL_AUTHCODE###]]></target></trans-unit>
+      <trans-unit id="recipient.header" resname="recipient.header" approved="yes">
+        <source>Mail recipient groups</source>
+        <target state="final">Mail Empfängergruppen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.header" resname="recipient.import.header" approved="yes">
+        <source>Import CSV into tt_address database table</source>
+        <target state="final">CSV in tt_address Datenbanktabelle importieren</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.dublette.description" resname="recipient.import.dublette.description" approved="yes">
+        <source>Filter email dublettes from csv data. If a dublette is found, only the first entry is imported.</source>
+        <target state="final">Filtere E-Mail-Dubletten aus CSV-Daten. Wenn eine Dublette gefunden wird, wird nur der erste Eintrag importiert.</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.validEmail.description" resname="recipient.import.validEmail.description" approved="yes">
+        <source>Only update/import valid emails from csv data.</source>
+        <target state="final">Nur gültige E-Mails aus csv-Daten aktualisieren/importieren.</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.notification.done.message" resname="recipient.import.notification.done.message" approved="yes">
+        <source>CSV import successfully finished.</source>
+        <target state="final">CSV-Import erfolgreich abgeschlossen.</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.encapsulation" resname="recipient.import.encapsulation" approved="yes">
+        <source>Field encapsulation character (data fields are encapsed with...)</source>
+        <target state="final">Feldkapselungszeichen (Datenfelder sind gekapselt mit...)</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.firstRowContainFieldNames" resname="recipient.import.firstRowContainFieldNames" approved="yes">
+        <source>First row of import file contain field names</source>
+        <target state="final">Die erste Zeile der Importdatei enthält Feldnamen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.settings" resname="recipient.import.settings" approved="yes">
+        <source>Import settings</source>
+        <target state="final">Import Einstellungen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.uploadCsv.subheader" resname="recipient.import.uploadCsv.subheader" approved="yes">
+        <source>Upload CSV</source>
+        <target state="final">CSV Hochladen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.allHtml" resname="recipient.import.allHtml" approved="yes">
+        <source>All recipients receive HTML mail</source>
+        <target state="final">Alle Empfänger erhalten HTML-Mails</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.categoryMapping" resname="recipient.import.categoryMapping" approved="yes">
+        <source>Categories</source>
+        <target state="final">Kategorien</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.assignAllCategories" resname="recipient.import.assignAllCategories" approved="yes">
+        <source>Assign the following categories to all recipients</source>
+        <target state="final">Weisen Sie allen Empfängern die folgenden Kategorien zu</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mappingCharset.subheader" resname="recipient.import.mappingCharset.subheader" approved="yes">
+        <source>Settings</source>
+        <target state="final">Einstellungen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mappingCharset.pleaseChoose" resname="recipient.import.mappingCharset.pleaseChoose" approved="yes">
+        <source>Please select the character set of the import file</source>
+        <target state="final">Bitte wählen Sie den Zeichensatz der Importdatei</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.fieldMapping" resname="recipient.import.fieldMapping" approved="yes">
+        <source>Field mapping</source>
+        <target state="final">Feldzuordnung</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.fieldMapping.additionalOptions" resname="recipient.import.fieldMapping.additionalOptions" approved="yes">
+        <source>Additional options</source>
+        <target state="final">Zusätzliche Optionen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.description" resname="recipient.import.mapping.description" approved="yes">
+        <source>Description</source>
+        <target state="final">Beschreibung</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.error" resname="recipient.import.mapping.error" approved="yes">
+        <source>Mapping error</source>
+        <target state="final">Zuordnungsfehler</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.error_detail" resname="recipient.import.mapping.error_detail" approved="yes">
+        <source>Please fix following error(s)</source>
+        <target state="final">Bitte beheben Sie folgende(n) Fehler</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.error_email" resname="recipient.import.mapping.error_email" approved="yes">
+        <source>&quot;Email&quot; field has to be mapped.</source>
+        <target state="final">"Email" Feld muss zugeordnet werden.</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.error_noMap" resname="recipient.import.mapping.error_noMap" approved="yes">
+        <source>No mapping is found. You have to map at least &quot;email&quot; field.</source>
+        <target state="final">Es wurde keine Zuordnung gefunden. Sie müssen mindestens das Feld "E-Mail" zuordnen.</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.mapTo" resname="recipient.import.mapping.mapTo" approved="yes">
+        <source>Maps to ...</source>
+        <target state="final">gehört zu ...</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.mapping" resname="recipient.import.mapping.mapping" approved="yes">
+        <source>Mapping</source>
+        <target state="final">Zuordnung</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.number" resname="recipient.import.mapping.number">
+        <source>#</source>
+        <target state="needs-translation">#</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.mapping.value" resname="recipient.import.mapping.value" approved="yes">
+        <source>Value</source>
+        <target state="final">Wert</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.or" resname="recipient.import.or" approved="yes">
+        <source>OR</source>
+        <target state="final">ODER</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.pasteCsv" resname="recipient.import.pasteCsv" approved="yes">
+        <source>Paste the CSV data</source>
+        <target state="final">CSV Daten einfügen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.recordUnique" resname="recipient.import.recordUnique" approved="yes">
+        <source>Specify the field which determines the uniqueness of imported users</source>
+        <target state="final">Geben Sie das Feld an, das die Einzigartigkeit der importierten Benutzer bestimmt</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.removeExisting" resname="recipient.import.removeExisting" approved="yes">
+        <source>Remove all Addresses in the storage folder before importing</source>
+        <target state="final">Alle Adressen im Speicherordner vor dem Importieren entfernen</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.separator" resname="recipient.import.separator" approved="yes">
+        <source>Field delimiter (data fields are separated by...)</source>
+        <target state="final">Feldtrenner (Datenfelder werden separiert von ..)</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.separator.colon" resname="recipient.import.separator.colon" approved="yes">
+        <source>colon [:]</source>
+        <target state="final">Doppelpunkt [:]</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.separator.comma" resname="recipient.import.separator.comma" approved="yes">
+        <source>comma [,]</source>
+        <target state="final">Komma [,]</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.separator.semicolon" resname="recipient.import.separator.semicolon" approved="yes">
+        <source>semicolon [;]</source>
+        <target state="final">Semicolon [;]</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.separator.tab" resname="recipient.import.separator.tab" approved="yes">
+        <source>horizontal tab [TAB]</source>
+        <target state="final">Tabulator [TAB]</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.storage" resname="recipient.import.storage" approved="yes">
+        <source>Please select the storage folder for the addresses to be imported.</source>
+        <target state="final">Bitte wählen Sie den Speicherordner für die zu importierenden Adressen.</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.updateUnique" resname="recipient.import.updateUnique" approved="yes">
+        <source>Update existing (unique) addresses</source>
+        <target state="final">Eindeutige Adressen aktualisieren</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.chooseCsvFile" resname="recipient.import.chooseCsvFile" approved="yes">
+        <source>Choose a csv file from your local computer</source>
+        <target state="final">Wählen Sie eine CSV-Datei von Ihrem lokalen Computer</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.result.new" resname="recipient.import.result.new" approved="yes">
+        <source>New emails</source>
+        <target state="final">Neue Emails</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.result.update" resname="recipient.import.result.update" approved="yes">
+        <source>Updated emails</source>
+        <target state="final">Aktualisierte Emails</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.result.invalidEmail" resname="recipient.import.result.invalidEmail" approved="yes">
+        <source>Invalid emails</source>
+        <target state="final">Ungültige Emails</target>
+      </trans-unit>
+      <trans-unit id="recipient.import.result.double" resname="recipient.import.result.double" approved="yes">
+        <source>Double emails</source>
+        <target state="final">Doppelte Emails</target>
+      </trans-unit>
+      <trans-unit id="recipient.notification.disallowedCsvExport.message" resname="recipient.notification.disallowedCsvExport.message" approved="yes">
+        <source>CSV export failed. Insufficient access right.</source>
+        <target state="final">CSV-Export fehlgeschlagen. Unzureichendes Zugriffsrecht.</target>
+      </trans-unit>
+      <trans-unit id="recipient.notification.noRecipientsFound.message" resname="recipient.notification.disallowedCsvExport.message" approved="yes">
+        <source>CSV export failed. No recipients found.</source>
+        <target state="final">CSV-Export fehlgeschlagen. Keine Empfänger gefunden.</target>
+      </trans-unit>
+      <trans-unit id="recipient.notification.noRecipientSourceConfigurationFound.message" resname="recipient.notification.disallowedCsvExport.message" approved="yes">
+        <source>CSV export failed. No recipient source configuration found.</source>
+        <target state="final">CSV-Export fehlgeschlagen. Keine Empfängerquellkonfiguration gefunden.</target>
+      </trans-unit>
+      <trans-unit id="recipient.createMailGroup" resname="recipient.createMailGroup" approved="yes">
+        <source>New recipient list</source>
+        <target state="final">Neue Empfängerliste</target>
+      </trans-unit>
+      <trans-unit id="recipient.createMailGroup.message" resname="recipient.createMailGroup.message" approved="yes">
+        <source>New group</source>
+        <target state="final">Neue Gruppe</target>
+      </trans-unit>
+      <trans-unit id="recipient.categories" resname="recipient.categories" approved="yes">
+        <source>Categories</source>
+        <target state="final">Kategorien</target>
+      </trans-unit>
+      <trans-unit id="recipient.htmlFormat" resname="recipient.htmlFormat" approved="yes">
+        <source>HTML Format</source>
+        <target state="final">HTML-Format</target>
+      </trans-unit>
+      <trans-unit id="recipient.button.importCsv" resname="recipient.button.importCsv" approved="yes">
+        <source>Import CSV</source>
+        <target state="final">CSV importieren</target>
+      </trans-unit>
+      <trans-unit id="report.general.htmlSource" approved="yes">
+        <source>HTML</source>
+        <target state="final">HTML</target>
+      </trans-unit>
+      <trans-unit id="report.general.plainSource" approved="yes">
+        <source>Plain text</source>
+        <target state="final">Einfacher Text</target>
+      </trans-unit>
+      <trans-unit id="report.general.groups" approved="yes">
+        <source>Recipient groups</source>
+        <target state="final">Empfängergruppen</target>
+      </trans-unit>
+      <trans-unit id="report.notification.recipientsDisabled.message" approved="yes">
+        <source>%s recipients successfully disabled.</source>
+        <target state="final">%s Empfänger erfolgreich deaktiviert.</target>
+      </trans-unit>
+      <trans-unit id="report.returned.recipientSource.tx_mail_domain_model_group" resname="report.returned.recipientSource.tx_mail_domain_model_group" approved="yes">
+        <source>Plain List</source>
+        <target state="final">Einfache Liste</target>
+      </trans-unit>
+      <trans-unit id="report.returned.recipientSource.tt_address" resname="report.returned.recipientSource.tt_address" approved="yes">
+        <source>Address Table [tt_address]</source>
+        <target state="final">Adressen Tabelle [tt_address]</target>
+      </trans-unit>
+      <trans-unit id="report.returned.recipientSource.fe_users" resname="report.returned.recipientSource.fe_users" approved="yes">
+        <source>Website User [fe_users]</source>
+        <target state="final">Webseitenbenutzer [fe_users]</target>
+      </trans-unit>
+      <trans-unit id="report.csvReturned" resname="report.csvReturned" approved="yes">
+        <source>CSV of recipients of returned mails</source>
+        <target state="final">CSV der Empfänger von zurückgesendeten Mails</target>
+      </trans-unit>
+      <trans-unit id="report.csvReturned.badHeader" resname="report.csvReturned.badHeader" approved="yes">
+        <source>CSV of returned recipients with error in header</source>
+        <target state="final">CSV der Empfänger von zurückgesendeten Mails mit Fehlern im Header</target>
+      </trans-unit>
+      <trans-unit id="report.csvReturned.badHost" resname="report.csvReturned.badHost" approved="yes">
+        <source>CSV of returned recipients with bad host</source>
+        <target state="final">CSV der Empfänger von zurückgesendeten Mails mit Fehler "Bad host"</target>
+      </trans-unit>
+      <trans-unit id="report.csvReturned.mailboxFull" resname="report.csvReturned.mailboxFull" approved="yes">
+        <source>CSV of returned recipients with mailbox full</source>
+        <target state="final">CSV der Empfänger von zurückgesendeten Mails mit Fehler "Mailbox voll"</target>
+      </trans-unit>
+      <trans-unit id="report.report.csvReturned.reasonUnknown" resname="report.report.csvReturned.reasonUnknown" approved="yes">
+        <source>CSV of returned recipients for unknown reason</source>
+        <target state="final">CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Fehler</target>
+      </trans-unit>
+      <trans-unit id="report.csvReturned.unknownRecipient" resname="report.csvReturned.unknownRecipient" approved="yes">
+        <source>CSV of returned recipients with unknown recipient</source>
+        <target state="final">CSV der Empfänger von zurückgesendeten Mails mit unbekanntem Empfänger</target>
+      </trans-unit>
+      <trans-unit id="report.response.clickedLinks" resname="report.response.clickedLinks" approved="yes">
+        <source>Clicked links</source>
+        <target state="final">Geklickte Links</target>
+      </trans-unit>
+      <trans-unit id="report.html" resname="report.html" approved="yes">
+        <source>HTML</source>
+        <target state="final">HTML</target>
+      </trans-unit>
+      <trans-unit id="report.html.linkNumber" resname="report.html.linkNumber" approved="yes">
+        <source>HTML Link #</source>
+        <target state="final">HTML-Link #</target>
+      </trans-unit>
+      <trans-unit id="report.html.mailsViewed" resname="report.html.mailsViewed" approved="yes">
+        <source>Mails viewed</source>
+        <target state="final">Mails angesehen</target>
+      </trans-unit>
+      <trans-unit id="report.badHost" resname="report.badHost" approved="yes">
+        <source>Bad host</source>
+        <target state="final">Falscher Host</target>
+      </trans-unit>
+      <trans-unit id="report.mail" resname="report.mail" approved="yes">
+        <source>Mail</source>
+        <target state="final">Mail</target>
+      </trans-unit>
+      <trans-unit id="report.disable.returned" resname="report.disable.returned" approved="yes">
+        <source>Disable returned recipients</source>
+        <target state="final">Empfänger deaktivieren</target>
+      </trans-unit>
+      <trans-unit id="report.disable.returned.badHeader" resname="report.disable.returned.badHeader" approved="yes">
+        <source>Disable returned recipients with error in header</source>
+        <target state="final">Deaktivieren Sie zurückgesendete Empfänger mit Fehler in der Kopfzeile</target>
+      </trans-unit>
+      <trans-unit id="report.disable.returned.badHost" resname="report.disable.returned.badHost" approved="yes">
+        <source>Disable returned recipients with bad host</source>
+        <target state="final">Deaktiviere Empfänger mit falschem Host</target>
+      </trans-unit>
+      <trans-unit id="report.disable.returned.mailboxFull" resname="report.disable.returned.mailboxFull" approved="yes">
+        <source>Disable returned recipients with mailbox full</source>
+        <target state="final">Deaktiviere Empfängern mit vollem Postfach</target>
+      </trans-unit>
+      <trans-unit id="report.disable.returned.reasonUnknown" resname="report.disable.returned.reasonUnknown" approved="yes">
+        <source>Disable returned recipients for unknown reason</source>
+        <target state="final">Deaktiviere Empfängern mit unbekannten Grund</target>
+      </trans-unit>
+      <trans-unit id="report.disable.returned.unknownRecipient" resname="report.disable.returned.unknownRecipient" approved="yes">
+        <source>Disable returned recipients with unknown recipient</source>
+        <target state="final">Deaktiviere Empfängern mit unbekannten Empfänger</target>
+      </trans-unit>
+      <trans-unit id="report.headerError" resname="report.headerError" approved="yes">
+        <source>Error in Header</source>
+        <target state="final">Fehler im Header</target>
+      </trans-unit>
+      <trans-unit id="report.performance" resname="report.performance" approved="yes">
+        <source>Performance</source>
+        <target state="final">Leistung</target>
+      </trans-unit>
+      <trans-unit id="report.performance.linksClickedPerRespondent" resname="report.performance.linksClickedPerRespondent" approved="yes">
+        <source>Total responses/Unique responses</source>
+        <target state="final">Antworten insgesamt/einzigartige Antworten</target>
+      </trans-unit>
+      <trans-unit id="report.returned" resname="report.returned" approved="yes">
+        <source>Returned recipients</source>
+        <target state="final">Zurückgesandte Empfänger</target>
+      </trans-unit>
+      <trans-unit id="report.returned.badHeader" resname="report.returned.badHeader" approved="yes">
+        <source>Returned recipients with error in header</source>
+        <target state="final">Empfänger mit Fehler in der Kopfzeile</target>
+      </trans-unit>
+      <trans-unit id="report.returned.badHost" resname="report.returned.badHost" approved="yes">
+        <source>Returned recipients with bad host</source>
+        <target state="final">Empfänger mit falschem Host</target>
+      </trans-unit>
+      <trans-unit id="report.returned.mailboxFull" resname="report.returned.mailboxFull" approved="yes">
+        <source>Returned recipients with mailbox full</source>
+        <target state="final">Empfänger mit vollem Postfach</target>
+      </trans-unit>
+      <trans-unit id="report.returned.reasonUnknown" resname="report.returned.reasonUnknown" approved="yes">
+        <source>Returned recipients for unknown reason</source>
+        <target state="final">Empfänger mit unbekanntem Grund</target>
+      </trans-unit>
+      <trans-unit id="report.returned.unknownRecipient" resname="report.returned.unknownRecipient" approved="yes">
+        <source>Returned recipients with unknown recipient</source>
+        <target state="final">Empfänger mit unbekanntem Empfänger</target>
+      </trans-unit>
+      <trans-unit id="report.mailboxFull" resname="report.mailboxFull" approved="yes">
+        <source>Mailbox full</source>
+        <target state="final">Postfach voll</target>
+      </trans-unit>
+      <trans-unit id="report.deliveryFailed" resname="report.deliveryFailed" approved="yes">
+        <source>Delivery failed</source>
+        <target state="final">Zustellung fehlgeschlagen</target>
+      </trans-unit>
+      <trans-unit id="report.mailsSent" resname="report.mailsSent" approved="yes">
+        <source>Mails sent</source>
+        <target state="final">Mails gesendet</target>
+      </trans-unit>
+      <trans-unit id="report.deliveryBegun" resname="report.deliveryBegun" approved="yes">
+        <source>Delivery begun</source>
+        <target state="final">Versand gestartet</target>
+      </trans-unit>
+      <trans-unit id="report.deliveryEnded" resname="report.deliveryEnded" approved="yes">
+        <source>Delivery ended</source>
+        <target state="final">Versand beendet</target>
+      </trans-unit>
+      <trans-unit id="report.header" resname="report.header" approved="yes">
+        <source>Mail Reports</source>
+        <target state="final">Mail Berichte</target>
+      </trans-unit>
+      <trans-unit id="report.show.header" resname="report.show.header" approved="yes">
+        <source>Mail Report</source>
+        <target state="final">Mail Bericht</target>
+      </trans-unit>
+      <trans-unit id="report.scheduled" resname="report.scheduled" approved="yes">
+        <source>Scheduled</source>
+        <target state="final">Geplant</target>
+      </trans-unit>
+      <trans-unit id="report.status" resname="report.status" approved="yes">
+        <source>Status</source>
+        <target state="final">Status</target>
+      </trans-unit>
+      <trans-unit id="report.subject" resname="report.subject" approved="yes">
+        <source>Subject</source>
+        <target state="final">Thema</target>
+      </trans-unit>
+      <trans-unit id="report.totalSent" resname="report.totalSent" approved="yes">
+        <source># sent</source>
+        <target state="final"># versandt</target>
+      </trans-unit>
+      <trans-unit id="report.plainText" resname="report.plainText" approved="yes">
+        <source>Plaintext</source>
+        <target state="final">Einfacher Text</target>
+      </trans-unit>
+      <trans-unit id="report.plainText.linkNumber" resname="report.plainText.linkNumber" approved="yes">
+        <source>Plaintext Link #</source>
+        <target state="final">Einfacher Text Link #</target>
+      </trans-unit>
+      <trans-unit id="report.reasonUnknown" resname="report.reasonUnknown" approved="yes">
+        <source>Reason unknown</source>
+        <target state="final">Grund unbekannt</target>
+      </trans-unit>
+      <trans-unit id="report.recipientUnknown" resname="report.recipientUnknown" approved="yes">
+        <source>Recipient unknown</source>
+        <target state="final">Empfänger unbekannt</target>
+      </trans-unit>
+      <trans-unit id="report.responses" resname="report.responses" approved="yes">
+        <source>Responses</source>
+        <target state="final">Antworten</target>
+      </trans-unit>
+      <trans-unit id="report.reactions" resname="report.reactions" approved="yes">
+        <source>Reactions</source>
+        <target state="final">Reaktionen</target>
+      </trans-unit>
+      <trans-unit id="report.total" resname="report.total" approved="yes">
+        <source>Total</source>
+        <target state="final">Gesamt</target>
+      </trans-unit>
+      <trans-unit id="report.total.returned" resname="report.total.returned" approved="yes">
+        <source>Total mails returned</source>
+        <target state="final">Zurückerhaltene Mails</target>
+      </trans-unit>
+      <trans-unit id="report.total.responses" resname="report.total.responses" approved="yes">
+        <source>Total responses (links clicked)</source>
+        <target state="final">Reaktionen (geklickte Links)</target>
+      </trans-unit>
+      <trans-unit id="report.uniqueResponses" resname="report.uniqueResponses" approved="yes">
+        <source>Unique responses (links clicked)</source>
+        <target state="final">Eindeutige Reaktionen (geklickte Links)</target>
+      </trans-unit>
+      <trans-unit id="report.deliveryBeginEnd" resname="report.deliveryBeginEnd" approved="yes">
+        <source>Delivery begun/ended</source>
+        <target state="final">Versand von/bis</target>
+      </trans-unit>
+      <trans-unit id="report.source" resname="report.source" approved="yes">
+        <source>Source</source>
+        <target state="final">Quelle</target>
+      </trans-unit>
+      <trans-unit id="report.from" resname="report.from" approved="yes">
+        <source>Sender</source>
+        <target state="final">Absender</target>
+      </trans-unit>
+      <trans-unit id="report.formatAttachments" resname="report.formatAttachments" approved="yes">
+        <source>Format/attachments</source>
+        <target state="final">Format/Anhänge</target>
+      </trans-unit>
+      <trans-unit id="report.includeMedia" resname="report.includeMedia" approved="yes">
+        <source>Include media</source>
+        <target state="final">Eingebundene Bilder</target>
+      </trans-unit>
+      <trans-unit id="report.recipients" resname="report.recipients" approved="yes">
+        <source>Recipients</source>
+        <target state="final">Empfänger</target>
+      </trans-unit>
+      <trans-unit id="report.replyTo" resname="report.replyTo" approved="yes">
+        <source>Reply</source>
+        <target state="final">Antwort</target>
+      </trans-unit>
+      <trans-unit id="queue.notification.nothingToDo.title" approved="yes">
+        <source>Nothing to do</source>
+        <target state="final">Nichts zu tun</target>
+      </trans-unit>
+      <trans-unit id="queue.notification.nothingToDo.message" approved="yes">
+        <source>There are currently no mails in the queue.</source>
+        <target state="final">Im Moment befinden sich keine Mails in der Warteschlange.</target>
+      </trans-unit>
+      <trans-unit id="queue.notification.mailSendTriggered.message" approved="yes">
+        <source>Manual sending started!</source>
+        <target state="final">Manueller Versand gestartet!</target>
+      </trans-unit>
+      <trans-unit id="queue.deliveryBegun" resname="queue.deliveryBegun" approved="yes">
+        <source>Delivery begun</source>
+        <target state="final">Versand gestartet</target>
+      </trans-unit>
+      <trans-unit id="queue.deliveryEnded" resname="queue.deliveryEnded" approved="yes">
+        <source>Delivery ended</source>
+        <target state="final">Versand beendet</target>
+      </trans-unit>
+      <trans-unit id="queue.button.triggerManualSending" resname="queue.button.triggerManualSending" approved="yes">
+        <source>Start sending manually</source>
+        <target state="final">Versand manuell starten</target>
+      </trans-unit>
+      <trans-unit id="queue.manualSending.description" resname="queue.manualSending.description" approved="yes">
+        <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent. This number can be changed within the settings module.</source>
+        <target state="final">Wenn TYPO3 nicht für den Versand von Mails über den mail:mass-mailing-Command Controller konfiguriert ist, können Sie den Versand auch durch Klick auf den folgenden Button manuell anstossen. Mit jedem Klick werden %s Mails versandt. Die Anzahl lässt sich über das Einstellungs-Modul ändern.</target>
+      </trans-unit>
+      <trans-unit id="queue.manualSending" resname="queue.manualSending" approved="yes">
+        <source>Manual delivery</source>
+        <target state="final">Manueller Versand</target>
+      </trans-unit>
+      <trans-unit id="queue.numberSent" resname="queue.numberSent" approved="yes">
+        <source># sent</source>
+        <target state="final"># versandt</target>
+      </trans-unit>
+      <trans-unit id="queue.scheduled" resname="queue.scheduled" approved="yes">
+        <source>Scheduled</source>
+        <target state="final">Geplant</target>
+      </trans-unit>
+      <trans-unit id="queue.subject" resname="queue.subject" approved="yes">
+        <source>Subject</source>
+        <target state="final">Thema</target>
+      </trans-unit>
+      <trans-unit id="queue.header" resname="queue.header" approved="yes">
+        <source>Mail Queue</source>
+        <target state="final">Mail Warteschlange</target>
+      </trans-unit>
+      <trans-unit id="configuration.header" resname="configuration.header" approved="yes">
+        <source>Mail Settings</source>
+        <target state="final">Mail Einstellungen</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.header" resname="configuration.panel.default.header">
+        <source>Default settings for new mails</source>
+        <target state="translated">Standardeinstellungen für neue Mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.tab.general" resname="configuration.panel.default.tab.general">
+        <source>General</source>
+        <target state="translated">Allgemein</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.tab.headers" resname="configuration.panel.default.tab.headers">
+        <source>Headers</source>
+        <target state="translated">Kopfzeilen</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.default.tab.content" resname="configuration.panel.default.tab.content">
+        <source>Content</source>
+        <target state="translated">Inhalt</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.header" resname="configuration.panel.module.header">
+        <source>Module settings</source>
+        <target state="translated">Moduleinstellungen</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.general" resname="configuration.panel.module.tab.general">
+        <source>General</source>
+        <target state="translated">Allgemein</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.tracking" resname="configuration.panel.module.tab.tracking">
+        <source>Tracking</source>
+        <target state="translated">Tracking</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.test" resname="configuration.panel.module.tab.test">
+        <source>Test mails</source>
+        <target state="translated">Test-Mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.quickmails" resname="configuration.panel.module.tab.quickmails">
+        <source>Quick mails</source>
+        <target state="translated">Kurznachrichten</target>
+      </trans-unit>
+      <trans-unit id="configuration.panel.module.tab.defaults" resname="configuration.panel.module.tab.defaults">
+        <source>Defaults for new mails</source>
+        <target state="translated">Standardeinstellungen für neue Mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.notification.permissionError.message" approved="yes">
+        <source>You do not have permissions to write configuration to page %s.</source>
+        <target state="final">Sie haben keine Berechtigung, die Konfiguration in die Seite %s zu schreiben.</target>
+      </trans-unit>
+      <trans-unit id="configuration.notification.savedOnPage.message" approved="yes">
+        <source>The configuration was successfully saved to the selected page %s.</source>
+        <target state="final">Die Konfiguration wurde erfolgreich auf der ausgewählten Seite %s gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="configuration.notification.noChanges.message" approved="yes">
+        <source>No changes in the configuration detected.</source>
+        <target state="final">Es wurden keine Änderungen an der Konfiguration festgestellt.</target>
+      </trans-unit>
+      <trans-unit id="configuration.notification.savedFailed.message" approved="yes">
+        <source>The configuration was not saved to the selected page %s.</source>
+        <target state="final">Die Konfiguration wurde nicht auf der ausgewählten Seite %s gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="configuration.authCodeFields.description" approved="yes">
+        <source>List of fields used in the calculation of the authentication code included in unsubscribe links and jump URL's of mails.</source>
+        <target state="final">Liste der Felder, die zur Berechnung von Authentifizierungscodes von Abmeldelinks und Sprung-URLs in E-Mails verwendet werden sollen.</target>
+      </trans-unit>
+      <trans-unit id="configuration.fromEmail.description" approved="yes">
+        <source>Enter the sender email address. (Required)</source>
+        <target state="final">E-Mail-Adresse des Senders. (Pflichtfeld)</target>
+      </trans-unit>
+      <trans-unit id="configuration.fromEmail.details" approved="yes">
+        <source>This email address will appear as the originating address or sender address in the mails received by the recipients.</source>
+        <target state="final">Diese E-Mail-Adresse wird in den von den Empfängern empfangenen E-Mails als Absenderadresse angezeigt.</target>
+      </trans-unit>
+      <trans-unit id="configuration.fromName.description" approved="yes">
+        <source>Enter the sender name. (Required)</source>
+        <target state="final">Namen des Senders eingeben. (Pflichtfeld)</target>
+      </trans-unit>
+      <trans-unit id="configuration.fromName.details" approved="yes">
+        <source>This name will appear as the name of the author or sender in the mails received by the recipients.</source>
+        <target state="final">Dieser Name wird als Name des Authors oder Absenders in den E-Mails beim Empfänger angezeigt.</target>
+      </trans-unit>
+      <trans-unit id="configuration.includeMedia.description" approved="yes">
+        <source>Set this option if you want to embed images in HTML mails.</source>
+        <target state="final">Setzen Sie diese Option, wenn Sie Bilder in HTML-Mails einbetten möchten.</target>
+      </trans-unit>
+      <trans-unit id="configuration.includeMedia.details" xml:space="preserve" approved="yes">
+			<source><![CDATA[If the option is set, images are encoded and embed into the messages. Sent messages will be heavier to transport.
+If the option is not set, images are included in HTML content by absolute reference (href) to their location on the site where they reside.]]></source>
+		    <target state="final"><![CDATA[Wenn die Option aktiviert ist, werden Bilder kodiert und in die Nachrichten eingebettet. Gesendete Nachrichten werden dadurch größer.
+Wenn die Option NICHT gesetzt ist, werden Bilder in den HTML-Inhalt über einen absoluten Link zur Website eingebunden.]]></target></trans-unit>
+      <trans-unit id="configuration.redirectAll.description" approved="yes">
+        <source>If set and if redirect is set, all links in plain text content will be redirected, not only links longer than 76 characters.</source>
+        <target state="final">Wenn gesetzt und wenn redirect gesetzt ist, werden alle Links im reinen Textinhalt umgeleitet, nicht nur Links, die länger als 76 Zeichen sind.</target>
+      </trans-unit>
+      <trans-unit id="configuration.organisation.description" approved="yes">
+        <source>Enter the name of the sending organization.</source>
+        <target state="final">Geben Sie den Namen der sendenden Organisation ein.</target>
+      </trans-unit>
+      <trans-unit id="configuration.organisation.details" approved="yes">
+        <source>The name of the organization will appear in the headers of the mails sent to subscribers.</source>
+        <target state="final">Der Name der Organisation wird im Header der E-Mails an die Abonnenten angezeigt.</target>
+      </trans-unit>
+      <trans-unit id="configuration.priority.description" approved="yes">
+        <source>Enter the email delivery priority.</source>
+        <target state="final">Gib die E-Mail Priorität ein.</target>
+      </trans-unit>
+      <trans-unit id="configuration.priority.details" approved="yes">
+        <source>The delivery priority will be set in the headers of the mails sent to subscribers.</source>
+        <target state="final">Die Zustellpriorität wird in den Kopfzeilen der an die Abonnenten gesendeten Mails mitgeschickt.</target>
+      </trans-unit>
+      <trans-unit id="configuration.replyToEmail.description" approved="yes">
+        <source>Enter the email address to which replys are sent. (Optional)</source>
+        <target state="final">Gib die Antwortadresse ein auf welche die Antworten gesendet werden sollen. (Optional)</target>
+      </trans-unit>
+      <trans-unit id="configuration.replyToEmail.details" approved="yes">
+        <source>If no reply address is specified, the sender email address will be used.</source>
+        <target state="final">Die Senderadresse wird benutzt, wenn keine Antwortadresse konfiguriert wurde.</target>
+      </trans-unit>
+      <trans-unit id="configuration.replyToName.description" approved="yes">
+        <source>Enter the name of the 'Reply To' email address. (Optional)</source>
+        <target state="final">Gib den Namen der Antwortadresse an. (Optional)</target>
+      </trans-unit>
+      <trans-unit id="configuration.replyToName.details" approved="yes">
+        <source>If no reply name is specified, the sender name will be used.</source>
+        <target state="final">Der Sendername wird benutzt, wenn keine Antwortadresse konfiguriert wurde.</target>
+      </trans-unit>
+      <trans-unit id="configuration.returnPath.description" approved="yes">
+        <source>Enter the return path email address here.</source>
+        <target state="final">Geben Sie hier die E-Mail-Adresse ein, an die unzustellbare E-Mails zurückgesendet werden sollen.</target>
+      </trans-unit>
+      <trans-unit id="configuration.returnPath.details" xml:space="preserve" approved="yes">
+			<source><![CDATA[This is the address to which non-deliverable mails will be returned to.
+If you put in the marker ###XID### it'll be substituted with the unique id of the mail recipient.
+Note that if PHP is executing in safe mode, the Direct mail module may not be able to set the return path to a value different than the value defined at the server level.]]></source>
+		    <target state="final"><![CDATA[Dies ist die Adresse, an die unzustellbare Mails zurückgeschickt werden.
+Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des E-Mail-Empfängers ersetzt.]]></target></trans-unit>
+      <trans-unit id="configuration.sendOptions.description" approved="yes">
+        <source>Select the format of mail content.</source>
+        <target state="final">Wähle das Format des E-Mail-Inhalts aus.</target>
+      </trans-unit>
+      <trans-unit id="configuration.sendOptions.details" approved="yes">
+        <source>If in doubt, set it to 'Plain text and HTML'. The messages will then be sent with both formats included, and the recipients are normally able to select their preferred format.</source>
+        <target state="final">Im Zweifelsfall sollten Sie die Einstellung 'Reiner Text und HTML' setzen. Die Nachrichten werden dann in beiden Formaten verschickt, und die Empfänger können normalerweise ihr bevorzugtes Format auswählen.</target>
+      </trans-unit>
+      <trans-unit id="configuration.type.description" approved="yes">
+        <source>Type of source of the Direct mail</source>
+        <target state="final">Quelltyp der Mail</target>
+      </trans-unit>
+      <trans-unit id="configuration.type.details" approved="yes">
+        <source>The mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External URL'.</source>
+        <target state="final">Die Mail kann aus einer Seite aus dem Seitenbaum der TYPO3-Site zusammengestellt werden: 'TYPO3-Seite', oder von einer Seite einer anderen Site: 'Externe URL'.</target>
+      </trans-unit>
+      <trans-unit id="configuration.redirect.description" approved="yes">
+        <source>Redirect long links found in plain text content.</source>
+        <target state="final">Lange Links aus dem Klartext-Inhalt weiterleiten.</target>
+      </trans-unit>
+      <trans-unit id="configuration.redirect.details" approved="yes">
+        <source>If set, links longer than 76 characters found in plain text content will be redirected: long URL's will be replaced by a /redirect-[hash] url handled by the TYPO3 redirect module.</source>
+        <target state="final">Wenn diese Option gesetzt ist, werden Links, die länger als 76 Zeichen sind, umgeleitet: Lange URLs werden durch eine /redirect-[hash]-URL ersetzt, die vom TYPO3 Redirect-Modul verarbeitet wird.</target>
+      </trans-unit>
+      <trans-unit id="configuration.htmlParams.description" resname="configuration.htmlParams.description" approved="yes">
+        <source>Enter the additional URL parameters used to fetch the HTML content from a TYPO3 page.</source>
+        <target state="final">Zusätzliche URL-Parameter, die für das Auslesen der HTML-Inhalten einer TYPO3 Seite benötigt werden.</target>
+      </trans-unit>
+      <trans-unit id="configuration.htmlParams.details" resname="configuration.htmlParams.details" approved="yes">
+        <source>The specified parameters will be added to the URL used to fetch the HTML content of the mail from a TYPO3 page. If in doubt, leave it blank.</source>
+        <target state="final">Die eingegebene Parameter werden der URL hinzugefügt, um die HTML Inhalte für die Mail von einer TYPO3 Seite auszulesen. Im Zweifel leer lassen.</target>
+      </trans-unit>
+      <trans-unit id="configuration.defaultFormat" resname="configuration.defaultFormat" approved="yes">
+        <source>Mail format (default)</source>
+        <target state="final">Mail Format (Standardeinstellungen)</target>
+      </trans-unit>
+      <trans-unit id="configuration.defaultFetchSettings" resname="configuration.defaultFetchSettings" approved="yes">
+        <source>Content fetching options (default)</source>
+        <target state="final">Auslesen der Inhalte (Standardeinstellungen)</target>
+      </trans-unit>
+      <trans-unit id="configuration.defaultHeaders" resname="configuration.defaultHeaders" approved="yes">
+        <source>Mail Headers (default)</source>
+        <target state="final">Mail Header (Standardeinstellungen)</target>
+      </trans-unit>
+      <trans-unit id="configuration.charset" resname="configuration.charset" approved="yes">
+        <source>Default character set for mails built from external pages</source>
+        <target state="final">Standard Zeichensatz für Mails, die auf externe Seiten basieren</target>
+      </trans-unit>
+      <trans-unit id="configuration.charset.description" resname="configuration.charset.description" approved="yes">
+        <source>Specify the character set used in mails when they are built from external pages and character set cannot be auto-detected.</source>
+        <target state="final">Wähle den Zeichensatz für Mails die auf externe Seite basieren, bei denen der Zeichensatz nicht automatisch bestimmt werden kann.</target>
+      </trans-unit>
+      <trans-unit id="configuration.encoding" resname="configuration.encoding">
+        <source>Content transfer encoding</source>
+        <target state="translated">Inhaltskodierung</target>
+      </trans-unit>
+      <trans-unit id="configuration.encoding.description" resname="configuration.encoding.description" approved="yes">
+        <source>Select the default content transfer encoding of mails.</source>
+        <target state="final">Wähle die Standardtransportkodierung für Mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.htmlOnly" resname="configuration.htmlOnly" approved="yes">
+        <source>HTML only</source>
+        <target state="final">Nur HTML</target>
+      </trans-unit>
+      <trans-unit id="configuration.httpPassword" resname="configuration.httpPassword" approved="yes">
+        <source>HTTP Password</source>
+        <target state="final">HTTP Passwort</target>
+      </trans-unit>
+      <trans-unit id="configuration.httpPassword.description" resname="configuration.httpPassword.description" approved="yes">
+        <source>If mail content is protected by HTTP authentication, enter the password here.</source>
+        <target state="final">Wenn die Mail-Inhalte mit HTTP Authentifikation geschützt sind, gibt hier das Kennwort ein.</target>
+      </trans-unit>
+      <trans-unit id="configuration.httpUsername" resname="configuration.httpUsername" approved="yes">
+        <source>HTTP Username</source>
+        <target state="final">HTTP Benutzername</target>
+      </trans-unit>
+      <trans-unit id="configuration.httpUsername.description" resname="configuration.httpUsername.description" approved="yes">
+        <source>If mail content is protected by HTTP authentication, enter the username here.</source>
+        <target state="final">Wenn die Mail-Inhalte mit HTTP Authentifikation geschützt sind, gibt den Benutzername ein.</target>
+      </trans-unit>
+      <trans-unit id="configuration.httpUsername.details" resname="configuration.httpUsername.details" xmlspace="preserve" approved="yes">
+        <source><![CDATA[The username and password is used to fetch mail content. They are NOT sent in the mail!
+	If you do not specify a username and password and the mail pages happen to be protected, an error will occur and no mail content will be fetched.]]></source>
+        <target state="final"><![CDATA[Benutzername und Kennwort werden nur benutzt, um Mail-Inhalte auszulesen. Sie werden NICHT in der Mail verschickt!
+                    Wenn Benutzername und Kennwort nicht angegeben sind, die auszulesende Seite aber mit einem Kennwort geschützt ist, wird es einen Fehler geben und keine Inhalten werden ausgelesen.]]></target>
+      </trans-unit>
+      <trans-unit id="configuration.trackingPrivacy" resname="configuration.trackingPrivacy" approved="yes">
+        <source>Privacy click tracking</source>
+        <target state="final">Anonyme Klickverfolgung</target>
+      </trans-unit>
+      <trans-unit id="configuration.trackingPrivacy.description" resname="configuration.trackingPrivacy.description" approved="yes">
+        <source>Set this option, to anonymize click tracking.</source>
+        <target state="final">Setze diese Option, um die Klickverfolgung zu anonymisieren</target>
+      </trans-unit>
+      <trans-unit id="configuration.additionalOptions" resname="configuration.additionalOptions" approved="yes">
+        <source>Additional module options</source>
+        <target state="final">Zusätzliche Moduleinstellungen</target>
+      </trans-unit>
+      <trans-unit id="configuration.additionalOptions.encoding" resname="configuration.additionalOptions.encoding" approved="yes">
+        <source>Content transfer encoding and character set</source>
+        <target state="final">Versandkodierung und Zeichensatz</target>
+      </trans-unit>
+      <trans-unit id="configuration.linksAndTracking" resname="configuration.linksAndTracking" approved="yes">
+        <source>Links and click tracking</source>
+        <target state="final">Links und Klickverfolgung</target>
+      </trans-unit>
+      <trans-unit id="configuration.linksAndTracking.clickTracking" resname="configuration.linksAndTracking.clickTracking" approved="yes">
+        <source>Click tracking</source>
+        <target state="final">Klickverfolgung</target>
+      </trans-unit>
+      <trans-unit id="configuration.linksAndTracking.clickTracking.description" resname="configuration.linksAndTracking.clickTracking.description" approved="yes">
+        <source>Check this option to enable tracking of clicks.</source>
+        <target state="final">Aktiviere diese Option, um die Klickverfolgung zu aktivieren.</target>
+      </trans-unit>
+      <trans-unit id="configuration.linksAndTracking.clickTracking.mailTo" resname="configuration.linksAndTracking.clickTracking.mailTo" approved="yes">
+        <source>Click tracking for mailto links</source>
+        <target state="final">Klickverfolgung für mailto-Links</target>
+      </trans-unit>
+      <trans-unit id="configuration.linksAndTracking.clickTracking.mailTo.description" resname="configuration.linksAndTracking.clickTracking.mailTo.description" approved="yes">
+        <source>Check this option to enable click tracking for mailto links.</source>
+        <target state="final">Aktiviere diese Option um Klickverfolgung für mailto-Links zu aktivieren.</target>
+      </trans-unit>
+      <trans-unit id="configuration.plainParams.description" resname="configuration.plainParams.description" approved="yes">
+        <source>Enter the additional URL parameters used to fetch the plain text content from a TYPO3 page.</source>
+        <target state="final">Gib hier die zusätzlichen URL-Parameter ein, die benötigt werden, um den reinen Textinhalt von einer TYPO3-Seite zu holen.</target>
+      </trans-unit>
+      <trans-unit id="configuration.plainParams.details" resname="configuration.plainParams.details" approved="yes">
+        <source>The specified parameters will be added to the URL used to fetch the plain text content of the mail from a TYPO3 page. If in doubt, set it to '&amp;plain=1'.</source>
+        <target state="final">Die angegebenen Parameter werden der URL hinzugefügt, die verwendet wird, um den reinen Textinhalt der E-Mail von einer TYPO3-Seite abzurufen. Im Zweifelsfall auf '&amp;plain=1' setzten.</target>
+      </trans-unit>
+      <trans-unit id="configuration.plainTextAndHtml" resname="configuration.plainTextAndHtml" approved="yes">
+        <source>Plain text and HTML</source>
+        <target state="final">Reiner Text und HTML</target>
+      </trans-unit>
+      <trans-unit id="configuration.plainTextOnly" resname="configuration.plainTextOnly" approved="yes">
+        <source>Plain text only</source>
+        <target state="final">Nur reiner Text</target>
+      </trans-unit>
+      <trans-unit id="configuration.priority.high" resname="configuration.priority.high" approved="yes">
+        <source>High</source>
+        <target state="final">Hoch</target>
+      </trans-unit>
+      <trans-unit id="configuration.priority.low" resname="configuration.priority.low" approved="yes">
+        <source>Low</source>
+        <target state="final">Niedrig</target>
+      </trans-unit>
+      <trans-unit id="configuration.priority.normal" resname="configuration.priority.normal" approved="yes">
+        <source>Normal</source>
+        <target state="final">Normal</target>
+      </trans-unit>
+      <trans-unit id="configuration.quickmail.charset" resname="configuration.quickmail.charset" approved="yes">
+        <source>Character set for quick mails</source>
+        <target state="final">Zeichensatz für Kurznachrichten</target>
+      </trans-unit>
+      <trans-unit id="configuration.quickmail.charset.description" resname="configuration.quickmail.charset.description" approved="yes">
+        <source>Specify the character set to use when sending quick mails.</source>
+        <target state="final">Geben Sie den Zeichensatz an, der beim Senden von Kurznachrichten verwendet werden soll.</target>
+      </trans-unit>
+      <trans-unit id="configuration.quickmail.encoding" resname="configuration.quickmail.encoding" approved="yes">
+        <source>Encoding for quick mails</source>
+        <target state="final">Kodierung für Kurznachrichten</target>
+      </trans-unit>
+      <trans-unit id="configuration.quickmail.encoding.description" resname="configuration.quickmail.encoding.description" approved="yes">
+        <source>Select the content transfer encoding to use when sending quick mails.</source>
+        <target state="final">Wählen Sie die Kodierung für die Übertragung von Inhalten, die beim Versand von Kurznachrichten verwendet werden soll.</target>
+      </trans-unit>
+      <trans-unit id="configuration.simulateUsergroup" resname="configuration.simulateUsergroup" approved="yes">
+        <source>Frontend User Group</source>
+        <target state="final">Frontend-Benutzergruppe</target>
+      </trans-unit>
+      <trans-unit id="configuration.simulateUsergroup.description" resname="configuration.simulateUsergroup.description" approved="yes">
+        <source>If mail content is protected by Frontend user authentication, enter the user group here.</source>
+        <target state="final">Wenn der E-Mail-Inhalt durch Frontend-Benutzerauthentifizierung geschützt ist, gibt hier die Benutzergruppe ein.</target>
+      </trans-unit>
+      <trans-unit id="configuration.simulateUsergroup.details" resname="configuration.simulateUsergroup.details" xmlspace="preserve" approved="yes">
+        <source><![CDATA[The usergroup with the uid specified is used to to fetch the mail content.
+	If you do not specify a usergroup uid and the page has frontend user restrictions, an error will occur and no mail content will be fetched.]]></source>
+        <target state="final"><![CDATA[Die Benutzergruppe mit der angegebenen UID wird zum Abrufen des E-Mail-Inhalts verwendet.
+                    Wenn Sie keine Benutzergruppen-UID angeben und die Seite Einschränkungen für Frontend-Benutzer aufweist, tritt ein Fehler auf und es wird kein E-Mail-Inhalt abgerufen.]]></target>
+      </trans-unit>
+      <trans-unit id="configuration.testMailGroupUids" resname="configuration.testMailGroupUids" approved="yes">
+        <source>Comma separated list of test recipients (group uids)</source>
+        <target state="final">Komma separierte Liste Testempfängern (Benutzergruppen-Uids)</target>
+      </trans-unit>
+      <trans-unit id="configuration.testMailGroupUids.description" resname="configuration.testMailGroupUids.description" approved="yes">
+        <source>Alternatively to send test-mails to individuals, you can send it to this groups.</source>
+        <target state="final">Alternativ zum Senden von Test-Mails an einzelne Personen, können diese an die hier festgelegte Gruppe(n) gesendet werden.</target>
+      </trans-unit>
+      <trans-unit id="configuration.testAddressUids" resname="configuration.testAddressUids" approved="yes">
+        <source>Comma separated list of test recipients (tt_address uids)</source>
+        <target state="final">Durch Kommata getrennte Liste von Testempfängern (tt_address uids)</target>
+      </trans-unit>
+      <trans-unit id="configuration.testAddressUids.description" resname="configuration.testAddressUids.description" approved="yes">
+        <source>Alternatively to send test-mails to individuals, you can send it to this addresses.</source>
+        <target state="final">Alternativ können Sie Test-E-Mails an Einzelpersonen auch an diese Adressen senden.</target>
+      </trans-unit>
+      <trans-unit id="configuration.testMailSubjectPrefix" resname="configuration.testMailSubjectPrefix" approved="yes">
+        <source>Subject prefix for test mails</source>
+        <target state="final">Betreff-Präfix für Test-Mails</target>
+      </trans-unit>
+      <trans-unit id="configuration.testMailSubjectPrefix.description" resname="configuration.testMailSubjectPrefix.description" approved="yes">
+        <source>Will be prepended to test mails subject</source>
+        <target state="final">Wird dem Betreff von Test-Mails vorangestellt</target>
+      </trans-unit>
+      <trans-unit id="configuration.sendPerCycle" resname="configuration.sendPerCycle" approved="yes">
+        <source>Send per click (only valid for manual trigger)</source>
+        <target state="final">Versand pro Klick (nur für manuellen Versand relevant)</target>
+      </trans-unit>
+      <trans-unit id="configuration.sendPerCycle.description" resname="configuration.sendPerCycle.description" approved="yes">
+        <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>
+        <target state="final">Dies ist die Anzahl der E-Mails, die pro Klick gesendet werden, wenn jemand den manuellen Auslöser im Warteschlangenmodul verwendet.</target>
+      </trans-unit>
+      <trans-unit id="configuration.externalMailHtmlUrl" resname="configuration.externalMailHtmlUrl" approved="yes">
+        <source>URL of HTML content</source>
+        <target state="final">URL des HTML Inhalts</target>
+      </trans-unit>
+      <trans-unit id="configuration.noEditPermissions" resname="configuration.noEditPermissions" approved="yes">
+        <source>You don't have permissions to change mail settings.</source>
+        <target state="final">Sie haben keine Berechtigung zum Ändern der E-Mail-Einstellungen.</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.server" resname="scheduler.bounceMail.server" approved="yes">
+        <source>Server URL/IP</source>
+        <target state="final">Server-URL/IP</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.csh.server" resname="scheduler.bounceMail.csh.server" approved="yes">
+        <source>URL or IP of the mail server</source>
+        <target state="final">URL oder IP des Mailservers</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.port" resname="scheduler.bounceMail.port" approved="yes">
+        <source>Port number</source>
+        <target state="final">Port Nummer</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.csh.port" resname="scheduler.bounceMail.csh.port" approved="yes">
+        <source>Port number of the mail server</source>
+        <target state="final">Port Nummer des Mailservers</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.user" resname="scheduler.bounceMail.user" approved="yes">
+        <source>Username</source>
+        <target state="final">Benutzername</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.csh.user" resname="scheduler.bounceMail.csh.user" approved="yes">
+        <source>Username to authenticate</source>
+        <target state="final">Benutzername zur Authentifizierung</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.password" resname="scheduler.bounceMail.password" approved="yes">
+        <source>Password</source>
+        <target state="final">Passwort</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.csh.password" resname="scheduler.bounceMail.csh.password" approved="yes">
+        <source>Password of the user</source>
+        <target state="final">Passwort des Benutzers</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.service" resname="scheduler.bounceMail.service" approved="yes">
+        <source>Type of mailserver</source>
+        <target state="final">Art des Mailservers</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.csh.service" resname="scheduler.bounceMail.csh.service" approved="yes">
+        <source>IMAP or POP3</source>
+        <target state="final">IMAP oder POP3</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.maxProcessed" resname="scheduler.bounceMail.maxProcessed" approved="yes">
+        <source>Number of bounce mail to be processed</source>
+        <target state="final">Anzahl der zu bearbeitenden Rückläufermails</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.csh.maxProcessed" resname="scheduler.bounceMail.csh.maxProcessed" approved="yes">
+        <source>Maximum number of bounce mail to be processed on one scheduler cycle</source>
+        <target state="final">Anzahl der zu bearbeitenden Rückläufermails pro Durchlauf</target>
+      </trans-unit>
+      <trans-unit id="scheduler.bounceMail.dataVerification" resname="scheduler.bounceMail.dataVerification" approved="yes">
+        <source><![CDATA[Connection using the given data is failed. Error message ]]></source>
+        <target state="final"><![CDATA[Verbindung mit den angegebenen Daten fehlgeschlagen. Fehlermeldung: ]]></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
