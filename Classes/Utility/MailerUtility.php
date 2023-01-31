@@ -17,9 +17,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
-use function Sabre\Uri\parse;
 
 class MailerUtility
 {
@@ -455,10 +453,7 @@ class MailerUtility
         if ($username && $password && preg_match('/^https?:\/\//', $url, $matches)) {
             $url = $matches[0] . $username . ':' . $password . '@' . substr($url, strlen($matches[0]));
         }
-        if (($params['simulateUsergroup'] ?? false) && MathUtility::canBeInterpretedAsInteger($params['simulateUsergroup'])) {
-            $glue = str_contains($url, '?') ? '&' : '?';
-            $url .= $glue . 'mail_fe_group=' . (int)$params['simulateUsergroup'] . '&access_token=' . RegistryUtility::createAndGetAccessToken();
-        }
+
         return $url;
     }
 

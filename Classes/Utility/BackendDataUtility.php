@@ -39,14 +39,19 @@ class BackendDataUtility
     /**
      * @param int $pageUid
      * @param string $params
+     * @param int $simulateUserGroup
      * @return string
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public static function getUrlForInternalPage(int $pageUid, string $params): string
+    public static function getUrlForInternalPage(int $pageUid, string $params, int $simulateUserGroup = 0): string
     {
         $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         $params = str_starts_with($params, '&') ? substr($params, 1) : $params;
+
+        if ($simulateUserGroup) {
+            $params .= '&mail_fe_group=' . $simulateUserGroup . '&access_token=' . RegistryUtility::createAndGetAccessToken();
+        }
 
         return $contentObjectRenderer->typolink_URL([
             'parameter' => 't3://page?uid=' . $pageUid . '&' . $params,

@@ -2,15 +2,6 @@
 
 return [
     'frontend' => [
-        'mail/simulate-frontend-user-group' => [
-            'target' => \MEDIAESSENZ\Mail\Middleware\SimulateFrontendUserGroupMiddleware::class,
-            'before' => [
-                'typo3/cms-redirects/redirecthandler',
-            ],
-            'after' => [
-                'typo3/cms-frontend/authentication',
-            ],
-        ],
         'mail/jumpurl' => [
             'target' => \MEDIAESSENZ\Mail\Middleware\JumpurlMiddleware::class,
             'before' => [

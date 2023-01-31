@@ -72,7 +72,7 @@ class MailFactory
     public function fromInternalPage(int $pageUid, int $languageUid = 0): ?Mail
     {
         $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
-        $pageRecord = $pageRepository->getPage($pageUid);
+        $pageRecord = $pageRepository->getPage($pageUid, true);
         if (!$pageRecord) {
             return null;
         }
@@ -102,7 +102,7 @@ class MailFactory
 
         $htmlLinks = [];
         if ($mail->isHtml()) {
-            $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams());
+            $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             if ($htmlContent !== false) {
                 $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
@@ -154,7 +154,7 @@ class MailFactory
         }
 
         if ($mail->isPlain()) {
-            $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams());
+            $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
             $plainContent = $this->fetchPlainTextContent($plainTextUrl);
             if ($plainContent !== false) {
                 $mail->setPlainContent($plainContent);

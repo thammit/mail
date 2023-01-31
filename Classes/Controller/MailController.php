@@ -139,6 +139,7 @@ class MailController extends AbstractController
                     ];
                     break;
                 case Constants::PANEL_INTERNAL:
+                    $this->pageRepository->where_groupAccess = '';
                     $panelData['internal'] = [
                         'open' => $open,
                         'data' => $this->pageRepository->getMenu($this->id)

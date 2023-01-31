@@ -62,6 +62,11 @@ services:
       - name: 'event.listener'
         identifier: 'normalizeRecipientData'
 
+  MEDIAESSENZ\Mail\EventListener\SimulateFrontendUserGroup:
+    tags:
+      - name: 'event.listener'
+        identifier: 'simulateFrontendUserGroup'
+
   MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter:
     tags:
       - name: extbase.type_converter
