@@ -3,267 +3,267 @@
   <file source-language="en" datatype="plaintext" original="messages" date="2022-11-16T17:00:00Z" target-language="de">
     <header/>
     <body>
-      <trans-unit id="mail_active" approved="yes">
+      <trans-unit id="mail_active" resname="mail_active" approved="yes">
         <source>Activate Mail</source>
         <target state="final">Aktiviere Mail</target>
       </trans-unit>
-      <trans-unit id="mail_html" approved="yes">
+      <trans-unit id="mail_html" resname="mail_html" approved="yes">
         <source>Accept HTML mails</source>
         <target state="final">Akzeptiert HTML Mails</target>
       </trans-unit>
-      <trans-unit id="mail_salutation" approved="yes">
+      <trans-unit id="mail_salutation" resname="mail_salutation" approved="yes">
         <source>Salutation</source>
         <target state="final">Anrede</target>
       </trans-unit>
-      <trans-unit id="pages.mail">
+      <trans-unit id="pages.mail" resname="pages.mail">
         <source>Mail</source>
         <target state="needs-translation">Mail</target>
       </trans-unit>
-      <trans-unit id="pages.module.I.5" approved="yes">
+      <trans-unit id="pages.module.I.5" resname="pages.module.I.5" approved="yes">
         <source>MAIL Module</source>
         <target state="final">MAIL Modul</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail">
+      <trans-unit id="tx_mail_domain_model_mail" resname="tx_mail_domain_model_mail">
         <source>Mails</source>
         <target state="needs-translation">Mails</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.htmlParams" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.htmlParams" resname="tx_mail_domain_model_mail.htmlParams" approved="yes">
         <source>Parameters, HTML</source>
         <target state="final">Parameter, HTML</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.htmlParams.ALT.1" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.htmlParams.ALT.1" resname="tx_mail_domain_model_mail.htmlParams.ALT.1" approved="yes">
         <source>URL for HTML content</source>
         <target state="final">URL für HTML-Inhalt</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.attachment" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.attachment" resname="tx_mail_domain_model_mail.attachment" approved="yes">
         <source>Attachments</source>
         <target state="final">Anhänge</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.authCodeFields" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.authCodeFields" resname="tx_mail_domain_model_mail.authCodeFields" approved="yes">
         <source>Fields used in the computation of authentication codes</source>
         <target state="final">Für die Berechnung der Authentifizierungscodes verwendete Felder</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.charset" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.charset" resname="tx_mail_domain_model_mail.charset" approved="yes">
         <source>character set</source>
         <target state="final">Zeichensatz</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.fromEmail" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.fromEmail" resname="tx_mail_domain_model_mail.fromEmail" approved="yes">
         <source>Sender email</source>
         <target state="final">Absender E-Mail</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.fromName" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.fromName" resname="tx_mail_domain_model_mail.fromName" approved="yes">
         <source>Sender name</source>
         <target state="final">Absender Name</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.includeMedia" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.includeMedia" resname="tx_mail_domain_model_mail.includeMedia" approved="yes">
         <source>Include images in HTML content</source>
         <target state="final">Bilder in HTML-Inhalt einbetten</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.sent" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.sent" resname="tx_mail_domain_model_mail.sent" approved="yes">
         <source>Is sent</source>
         <target state="final">Versand</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.redirectAll" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.redirectAll" resname="tx_mail_domain_model_mail.redirectAll" approved="yes">
         <source>Redirect not only links longer than 76 characters but ALL links</source>
         <target state="final">Alle Links weiterleiten, nicht nur die, die länger als 76 Zeichen sind</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.redirectUrl" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.redirectUrl" resname="tx_mail_domain_model_mail.redirectUrl" approved="yes">
         <source>Long links redirection url</source>
         <target state="final">Weiterleitungs-URL</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.organisation" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.organisation" resname="tx_mail_domain_model_mail.organisation" approved="yes">
         <source>Organization</source>
         <target state="final">Organisation</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.page" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.page" resname="tx_mail_domain_model_mail.page" approved="yes">
         <source>Page</source>
         <target state="final">Seite</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.plainParams" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.plainParams" resname="tx_mail_domain_model_mail.plainParams" approved="yes">
         <source>Parameters, Plain text</source>
         <target state="final">Parameter, reiner Text</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.plainParams.ALT.1" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.plainParams.ALT.1" resname="tx_mail_domain_model_mail.plainParams.ALT.1" approved="yes">
         <source>URL for plain text content</source>
         <target state="final">URL für reinen Text-Inhalt</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.priority" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.priority" resname="tx_mail_domain_model_mail.priority" approved="yes">
         <source>Priority</source>
         <target state="final">Priorität</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.priority.I.0" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.priority.I.0" resname="tx_mail_domain_model_mail.priority.I.0" approved="yes">
         <source>Low</source>
         <target state="final">Niedrig</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.priority.I.1">
+      <trans-unit id="tx_mail_domain_model_mail.priority.I.1" resname="tx_mail_domain_model_mail.priority.I.1">
         <source>Normal</source>
         <target state="needs-translation">Normal</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.priority.I.2" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.priority.I.2" resname="tx_mail_domain_model_mail.priority.I.2" approved="yes">
         <source>High</source>
         <target state="final">Hoch</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.renderedSize" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.renderedSize" resname="tx_mail_domain_model_mail.renderedSize" approved="yes">
         <source>Compiled size</source>
         <target state="final">Größe</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.replyToEmail" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.replyToEmail" resname="tx_mail_domain_model_mail.replyToEmail" approved="yes">
         <source>Reply email</source>
         <target state="final">Antwort-E-Mail</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.replyToName" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.replyToName" resname="tx_mail_domain_model_mail.replyToName" approved="yes">
         <source>Reply name</source>
         <target state="final">Antwort-Name</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.returnPath" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.returnPath" resname="tx_mail_domain_model_mail.returnPath" approved="yes">
         <source>Return Path</source>
         <target state="final">Return Path</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.scheduled" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.scheduled" resname="tx_mail_domain_model_mail.scheduled" approved="yes">
         <source>Scheduled time</source>
         <target state="final">Geplanter Zeitpunkt</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.scheduledBegin" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.scheduledBegin" resname="tx_mail_domain_model_mail.scheduledBegin" approved="yes">
         <source>Delivery start</source>
         <target state="final">Versandstart</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.scheduledEnd" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.scheduledEnd" resname="tx_mail_domain_model_mail.scheduledEnd" approved="yes">
         <source>Delivery end</source>
         <target state="final">Versandende</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.sendOptions" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.sendOptions" resname="tx_mail_domain_model_mail.sendOptions" approved="yes">
         <source>Format of mail content</source>
         <target state="final">Format des Mail-Inhalts</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.sendOptions.I.0" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.sendOptions.I.0" resname="tx_mail_domain_model_mail.sendOptions.I.0" approved="yes">
         <source>Plain text</source>
         <target state="final">Reiner Text</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.sendOptions.I.1">
+      <trans-unit id="tx_mail_domain_model_mail.sendOptions.I.1" resname="tx_mail_domain_model_mail.sendOptions.I.1">
         <source>HTML</source>
         <target state="needs-translation">HTML</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.subject" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.subject" resname="tx_mail_domain_model_mail.subject" approved="yes">
         <source>Subject</source>
         <target state="final">Thema</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.tab.general" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.tab.general" resname="tx_mail_domain_model_mail.tab.general" approved="yes">
         <source>General</source>
         <target state="final">Generell</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.tab.headers" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.tab.headers" resname="tx_mail_domain_model_mail.tab.headers" approved="yes">
         <source>Header</source>
         <target state="final">Header</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.tab.content" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.tab.content" resname="tx_mail_domain_model_mail.tab.content" approved="yes">
         <source>Content</source>
         <target state="final">Inhalt</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.tab.distribution" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.tab.distribution" resname="tx_mail_domain_model_mail.tab.distribution" approved="yes">
         <source>Distribution</source>
         <target state="final">Auslieferung</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.transferEncoding" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.transferEncoding" resname="tx_mail_domain_model_mail.transferEncoding" approved="yes">
         <source>Content transfer encoding</source>
         <target state="final">Inhaltskodierung</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.type.I.0" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.type.I.0" resname="tx_mail_domain_model_mail.type.I.0" approved="yes">
         <source>Internal page</source>
         <target state="final">Interne Seite</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.type.I.1" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.type.I.1" resname="tx_mail_domain_model_mail.type.I.1" approved="yes">
         <source>External page</source>
         <target state="final">Externe Seite</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.type.I.2" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.type.I.2" resname="tx_mail_domain_model_mail.type.I.2" approved="yes">
         <source>Draft of internal page</source>
         <target state="final">Entwurf einer internen Seite</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.type.I.3" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.type.I.3" resname="tx_mail_domain_model_mail.type.I.3" approved="yes">
         <source>Draft of external Page</source>
         <target state="final">Entwurf einer externen Seite</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.redirect" approved="yes">
+      <trans-unit id="tx_mail_domain_model_mail.redirect" resname="tx_mail_domain_model_mail.redirect" approved="yes">
         <source>Redirect links longer than 76 characters</source>
         <target state="final">Links mit mehr als 76 Zeichen weiterleiten</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group" resname="tx_mail_domain_model_group" approved="yes">
         <source>Recipient list</source>
         <target state="final">Empfängerliste</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.advanced" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.advanced" resname="tx_mail_domain_model_group.advanced" approved="yes">
         <source>Configuration</source>
         <target state="final">Konfiguration</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.csv" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.csv" resname="tx_mail_domain_model_group.csv" approved="yes">
         <source>List format</source>
         <target state="final">Listen-Format</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.csv.I.0" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.csv.I.0" resname="tx_mail_domain_model_group.csv.I.0" approved="yes">
         <source>Separate emails by space/comma/linebreak</source>
         <target state="final">Trennen Sie E-Mails durch Leerzeichen/Komma/Zeilenumbruch</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.csv.I.1">
+      <trans-unit id="tx_mail_domain_model_group.csv.I.1" resname="tx_mail_domain_model_group.csv.I.1">
         <source>CSV [name],[email]</source>
         <target state="needs-translation">CSV [name],[email]</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.list" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.list" resname="tx_mail_domain_model_group.list" approved="yes">
         <source>Recipients</source>
         <target state="final">Empfänger</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.mailGroups" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.mailGroups" resname="tx_mail_domain_model_group.mailGroups" approved="yes">
         <source>Other recipient lists</source>
         <target state="final">Andere Empfängerlisten</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.recursive" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.recursive" resname="tx_mail_domain_model_group.recursive" approved="yes">
         <source>Include page subtree</source>
         <target state="final">Inklusive Unterseiten</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.selectCategories" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.selectCategories" resname="tx_mail_domain_model_group.selectCategories" approved="yes">
         <source>Recipients must subscribe to one of the following categories</source>
         <target state="final">Empfänger müssen eine dieser Kategorien abonniert haben</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.staticList" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.staticList" resname="tx_mail_domain_model_group.staticList" approved="yes">
         <source>Recipients</source>
         <target state="final">Empfänger</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.0" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.type.I.0" resname="tx_mail_domain_model_group.type.I.0" approved="yes">
         <source>From pages</source>
         <target state="final">Von Seiten</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.1" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.type.I.1" resname="tx_mail_domain_model_group.type.I.1" approved="yes">
         <source>Plain list</source>
         <target state="final">Einfache Liste</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.2" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.type.I.2" resname="tx_mail_domain_model_group.type.I.2" approved="yes">
         <source>Static list</source>
         <target state="final">Statische Liste</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.3">
+      <trans-unit id="tx_mail_domain_model_group.type.I.3" resname="tx_mail_domain_model_group.type.I.3">
         <source>Special query</source>
         <target state="needs-translation">Special query</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.4" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.type.I.4" resname="tx_mail_domain_model_group.type.I.4" approved="yes">
         <source>From other recipient lists</source>
         <target state="final">Von anderen Empfängerlisten</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.5">
+      <trans-unit id="tx_mail_domain_model_group.type.I.5" resname="tx_mail_domain_model_group.type.I.5">
         <source>From Extbase Domain Model</source>
         <target state="needs-translation">From Extbase Domain Model</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.recipientSources" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.recipientSources" resname="tx_mail_domain_model_group.recipientSources" approved="yes">
         <source>Recipient sources</source>
         <target state="final">Empfängerquellen</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.recipientSources.I.0" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.recipientSources.I.0" resname="tx_mail_domain_model_group.recipientSources.I.0" approved="yes">
         <source>Addresses</source>
         <target state="final">Adressen</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.recipientSources.I.1" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.recipientSources.I.1" resname="tx_mail_domain_model_group.recipientSources.I.1" approved="yes">
         <source>Website user</source>
         <target state="final">Webseitenbenutzer</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.recipientSources.I.2" approved="yes">
+      <trans-unit id="tx_mail_domain_model_group.recipientSources.I.2" resname="tx_mail_domain_model_group.recipientSources.I.2" approved="yes">
         <source>Website User Groups</source>
         <target state="final">Webseitenbenutzergruppen</target>
       </trans-unit>
