@@ -52,35 +52,67 @@ abstract class AbstractController extends ActionController
      */
     public function __construct(
         protected ModuleTemplateFactory $moduleTemplateFactory,
-        protected PageRenderer          $pageRenderer,
-        protected SiteFinder            $siteFinder,
-        protected ReportService         $reportService,
-        protected MailerService         $mailerService,
-        protected RecipientService      $recipientService,
-        protected MailRepository        $mailRepository,
-        protected GroupRepository       $groupRepository,
-        protected LogRepository         $logRepository,
-        protected PageRepository        $pageRepository,
-        protected CategoryRepository    $categoryRepository,
-        protected IconFactory           $iconFactory,
-        protected UriBuilder            $backendUriBuilder
+        protected PageRenderer $pageRenderer,
+        protected SiteFinder $siteFinder,
+        protected ReportService $reportService,
+        protected MailerService $mailerService,
+        protected RecipientService $recipientService,
+        protected MailRepository $mailRepository,
+        protected GroupRepository $groupRepository,
+        protected LogRepository $logRepository,
+        protected PageRepository $pageRepository,
+        protected CategoryRepository $categoryRepository,
+        protected IconFactory $iconFactory,
+        protected UriBuilder $backendUriBuilder
     ) {
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
         try {
-            $hideNavigation = (ConfigurationUtility::getExtensionConfiguration('hideNavigation') && ($this->userTSConfiguration['mailModulePageId'] ?? false)) || ConfigurationUtility::getExtensionConfiguration('mailModulePageId');
+            $hideNavigation = (($this->userTSConfiguration['mailModulePageIds'] ?? false)) || ConfigurationUtility::getExtensionConfiguration('mailModulePageId');
             if (!$hideNavigation) {
                 $this->id = (int)GeneralUtility::_GP('id');
             } else {
                 if (ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
-                    $this->id = (int)$this->userTSConfiguration['mailModulePageId'];
-                } else {
                     $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?: GeneralUtility::_GP('id'));
+                    // hide page tree completely
+//                    $this->pageRenderer->addJsInlineCode('hidePageTree',
+//                        'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByClassName(\'t3js-scaffold-content-navigation\')[0].style.display = \'none\';});',
+//                        true, true);
+//                    $this->pageRenderer->addJsInlineCode('hidePageTree', 'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.remove(\'scaffold-content-navigation-expanded\');})', true, true);
+                } else {
+                    // hide page tree
+                    // $this->pageRenderer->addJsInlineCode('hidePageTree', 'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.remove(\'scaffold-content-navigation-expanded\');})', true, false);
+                    if ($this->userTSConfiguration['mailModulePageIds']) {
+//                        $mailModulePageIds = GeneralUtility::intExplode(',', $this->userTSConfiguration['mailModulePageIds'], true);
+                        $this->id = (int)GeneralUtility::_GP('id');
+//                        if (in_array((int)GeneralUtility::_GP('id'), $mailModulePageIds)) {
+//                        } else {
+//                            $subPages = $this->pageRepository->
+//                            $this->id = $mailModulePageIds[0];
+//                        }
+//                        if (count($mailModulePageIds) === 1) {
+                            // there is only one mail module page -> hide navigation completely
+                            // $this->pageRenderer->addJsInlineCode('hidePageTree', 'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByClassName(\'t3js-scaffold-content-navigation\')[0].style.display = \'none\';});', true, true);
+                            // $this->pageRenderer->addJsInlineCode('hidePageTree',
+                            //     'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.remove(\'scaffold-content-navigation-expanded\');})',
+                            //     true, false);
+//                        } else {
+                            // $this->pageRenderer->addJsInlineCode('hidePageTree',
+                            //    'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByClassName(\'t3js-scaffold-content-navigation\')[0].style.display = \'flex\';});',
+                            //    true, true);
+                            // $this->pageRenderer->addJsInlineCode('hidePageTree',
+                            //    'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.add(\'scaffold-content-navigation-expanded\');})',
+                            //    true, false);
+//                        }
+                    } else {
+                        if ($this->userTSConfiguration['mailModulePageId']) {
+                            $this->id = (int)$this->userTSConfiguration['mailModulePageId'];
+                        }
+                    }
                 }
             }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
             $this->id = (int)GeneralUtility::_GP('id');
         }
-
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         try {
             $this->site = $this->siteFinder->getSiteByPageId($this->id);
@@ -135,7 +167,8 @@ abstract class AbstractController extends ActionController
             AbstractMessage::ERROR => 'error',
         ];
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-        $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification, 'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
-        $this->notification ++;
+        $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
+            'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
+        $this->notification++;
     }
 }

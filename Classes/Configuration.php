@@ -10,6 +10,7 @@ use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\RecipientController;
 use MEDIAESSENZ\Mail\Controller\ReportController;
+use MEDIAESSENZ\Mail\Hooks\PageTreeRefresh;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -69,7 +70,7 @@ final class Configuration
     {
         $navigationComponentId = 'TYPO3/CMS/Backend/PageTree/PageTreeElement';
         try {
-            if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
+            if (false && !empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
                 $navigationComponentId = '';
             }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
@@ -179,6 +180,11 @@ final class Configuration
         */
 
         $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';
+    }
+
+    public static function registerHooks(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess']['MEDIAESSENZ/Mail'] = PageTreeRefresh::class . '->addJs';
     }
 
     public static function addTypoScriptContentObject(): void

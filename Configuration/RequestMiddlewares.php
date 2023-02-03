@@ -15,4 +15,12 @@ return [
             ],
         ],
     ],
+    'backend' => [
+        'mail/filter-page-tree' => [
+            'target' => \MEDIAESSENZ\Mail\Middleware\FilterPageTreeMiddleware::class,
+            'after' => [
+                'typo3/cms-backend/authentication'
+            ],
+        ],
+    ]
 ];
