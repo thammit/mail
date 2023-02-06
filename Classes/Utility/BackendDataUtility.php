@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
@@ -64,19 +64,8 @@ class BackendDataUtility
 
     public static function addToolTipData(array $pages): array
     {
-        $frontendUserGroupRepository = GeneralUtility::makeInstance(FrontendUserGroupRepository::class);
         foreach ($pages as $key => $page) {
-            $toolTip = 'id=' . $page['uid'];
-            if ($page['fe_group']) {
-                $frontendUserGroupTitles = [];
-                $frontendUserGroupUids = GeneralUtility::intExplode(',', $page['fe_group'], true);
-                foreach ($frontendUserGroupUids as $frontendUserGroupUid) {
-                    $frontendUserGroup = $frontendUserGroupRepository->findRecordByUid($frontendUserGroupUid, ['title'], true);
-                    $frontendUserGroupTitles[] = $frontendUserGroup[0]['title'];
-                }
-                $toolTip .= ' - ' . LanguageUtility::getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.fe_group') . ' ' . implode(', ', $frontendUserGroupTitles);
-            }
-            $pages[$key]['toolTip'] = $toolTip;
+            $pages[$key]['toolTip'] = BackendUtility::titleAttribForPages($page, '', false);
         }
 
         return $pages;

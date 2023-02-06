@@ -143,7 +143,7 @@ class MailController extends AbstractController
                     $this->pageRepository->where_groupAccess = '';
                     $panelData['internal'] = [
                         'open' => $open,
-                        'data' => BackendDataUtility::addToolTipData($this->pageRepository->getMenu($this->id, 'uid,pid,title,fe_group,doktype,shortcut_mode'))
+                        'data' => BackendDataUtility::addToolTipData($this->pageRepository->getMenu($this->id, 'uid,pid,title,fe_group,doktype,shortcut,shortcut_mode,mount_pid,nav_hide,hidden,starttime,endtime,t3ver_state'))
                     ];
                     break;
                 case Constants::PANEL_EXTERNAL:
