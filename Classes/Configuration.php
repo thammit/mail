@@ -185,6 +185,7 @@ final class Configuration
     public static function registerHooks(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess']['MEDIAESSENZ/Mail'] = PageTreeRefresh::class . '->addJs';
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/db_layout.php']['drawHeaderHook']['MEDIAESSENZ/Mail'] = PageTreeRefresh::class . '->addHeaderJs';
     }
 
     public static function addTypoScriptContentObject(): void
