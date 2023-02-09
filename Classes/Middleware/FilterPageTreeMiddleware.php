@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Middleware;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -14,6 +17,10 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 
 class FilterPageTreeMiddleware  implements MiddlewareInterface
 {
+    /**
+     * @throws DBALException
+     * @throws Exception
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         /** @var BackendUserAuthentication $backendUser */
@@ -30,14 +37,18 @@ class FilterPageTreeMiddleware  implements MiddlewareInterface
         if ($mailModulePageIds) {
             /** @var NormalizedParams $normalizedParams */
             $normalizedParams = $request->getAttribute('normalizedParams');
-            $refererIsMailModule = str_contains($normalizedParams->getHttpReferer(), '/module/MailMail/MailMail');
+            $refererIsMailModule = str_contains($normalizedParams->getHttpReferer(), '/module/MailMail/Mail');
             $routePath = $request->getAttribute('route')->getPath();
-            $requestIsMailModule = $routePath === '/module/MailMail/MailMail';
+            $requestIsMailModule = str_starts_with($routePath, '/module/MailMail/Mail');
             $requestIsPageTree = $routePath === '/ajax/page/tree/fetchData';
 
             if ($refererIsMailModule && $requestIsPageTree) {
                 $queryParams = $request->getQueryParams();
-                $queryParams['alternativeEntryPoints'] = GeneralUtility::intExplode(',', $mailModulePageIds);
+                if (trim($mailModulePageIds) === 'auto') {
+                    $queryParams['alternativeEntryPoints'] = GeneralUtility::makeInstance(PagesRepository::class)->findMailModulePageUids();
+                } else {
+                    $queryParams['alternativeEntryPoints'] = GeneralUtility::intExplode(',', $mailModulePageIds);
+                }
                 $request = $request->withQueryParams($queryParams);
             }
 

@@ -59,7 +59,7 @@ hideConfiguration
 .. confval:: hideConfiguration
 
    :type: bool
-   :Default: open
+   :Default: 0
    :Path: tx_mail.hideConfiguration
 
    Hide configuration button in mail wizard and queue module
@@ -70,7 +70,7 @@ hideManualSending
 .. confval:: hideManualSending
 
    :type: bool
-   :Default: open
+   :Default: 0
    :Path: tx_mail.hideManualSending
 
    Hide manual sending button in queue module
@@ -83,7 +83,26 @@ mailModulePageId
 .. confval:: mailModulePageId
 
    :type: int
-   :Default: open
+   :Default:
    :Path: tx_mail.mailModulePageId
 
-   If extension configuration parameter :ref:`hideNavigation <extension-configuration-hide-navigation>` is set to 1, this value has to be set to the modul page id, since no navigation tree is available.
+   If extension configuration parameter :ref:`hideNavigation <extension-configuration-hide-navigation>`
+   is set to 1 or :ref:`mailModulePageId` <extension-configuration-mail-module-page-id> is set to a mail
+   module page, this value can be set to a (different) mail module page id. This way it is possible to
+   show a user individual mail module.
+
+mailModulePageIds
+-----------------
+
+.. confval:: mailModulePageIds
+
+   :type: string
+   :Default:
+   :Path: tx_mail.mailModulePageIds
+
+   Reduces the page tree of the mail wizard module to a comma separated list of page uids.
+   If set to "auto", the list will be automatically taken from the pages database table,
+   based on the selected module (see :ref:`here <add-mail-sysfolder>`).
+
+   This setting is ignored if mailModulePageId or hideNavigation is set, because this will result in
+   no page tree at all!

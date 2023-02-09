@@ -70,7 +70,7 @@ final class Configuration
     {
         $navigationComponentId = 'TYPO3/CMS/Backend/PageTree/PageTreeElement';
         try {
-            if (false && !empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
+            if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
                 $navigationComponentId = '';
             }
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {

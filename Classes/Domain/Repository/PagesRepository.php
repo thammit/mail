@@ -58,6 +58,23 @@ class PagesRepository
     }
 
     /**
+     * @return array
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findMailModulePageUids(): array
+    {
+        $queryBuilder = $this->getQueryBuilder();
+
+        return array_column($queryBuilder
+            ->select('uid')
+            ->from($this->table)
+            ->where($queryBuilder->expr()->eq('module', $queryBuilder->createNamedParameter('mail')))
+            ->execute()
+            ->fetchAllAssociative(), 'uid');
+    }
+
+    /**
      * @param int $pageUid
      * @param string $tsConf
      * @return int

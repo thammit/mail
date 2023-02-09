@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
+use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\ReportService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
@@ -66,52 +69,22 @@ abstract class AbstractController extends ActionController
         protected UriBuilder $backendUriBuilder
     ) {
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
+        $this->id = (int)GeneralUtility::_GP('id');
         try {
-            $hideNavigation = (($this->userTSConfiguration['mailModulePageIds'] ?? false)) || ConfigurationUtility::getExtensionConfiguration('mailModulePageId');
-            if (!$hideNavigation) {
-                $this->id = (int)GeneralUtility::_GP('id');
-            } else {
-                if (ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
-                    $this->id = (int)(ConfigurationUtility::getExtensionConfiguration('mailModulePageId') ?: GeneralUtility::_GP('id'));
-                    // hide page tree completely
-//                    $this->pageRenderer->addJsInlineCode('hidePageTree',
-//                        'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByClassName(\'t3js-scaffold-content-navigation\')[0].style.display = \'none\';});',
-//                        true, true);
-//                    $this->pageRenderer->addJsInlineCode('hidePageTree', 'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.remove(\'scaffold-content-navigation-expanded\');})', true, true);
-                } else {
-                    // hide page tree
-                    // $this->pageRenderer->addJsInlineCode('hidePageTree', 'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.remove(\'scaffold-content-navigation-expanded\');})', true, false);
-                    if ($this->userTSConfiguration['mailModulePageIds']) {
-//                        $mailModulePageIds = GeneralUtility::intExplode(',', $this->userTSConfiguration['mailModulePageIds'], true);
-                        $this->id = (int)GeneralUtility::_GP('id');
-//                        if (in_array((int)GeneralUtility::_GP('id'), $mailModulePageIds)) {
-//                        } else {
-//                            $subPages = $this->pageRepository->
-//                            $this->id = $mailModulePageIds[0];
-//                        }
-//                        if (count($mailModulePageIds) === 1) {
-                            // there is only one mail module page -> hide navigation completely
-                            // $this->pageRenderer->addJsInlineCode('hidePageTree', 'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByClassName(\'t3js-scaffold-content-navigation\')[0].style.display = \'none\';});', true, true);
-                            // $this->pageRenderer->addJsInlineCode('hidePageTree',
-                            //     'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.remove(\'scaffold-content-navigation-expanded\');})',
-                            //     true, false);
-//                        } else {
-                            // $this->pageRenderer->addJsInlineCode('hidePageTree',
-                            //    'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByClassName(\'t3js-scaffold-content-navigation\')[0].style.display = \'flex\';});',
-                            //    true, true);
-                            // $this->pageRenderer->addJsInlineCode('hidePageTree',
-                            //    'window.addEventListener(\'DOMContentLoaded\', (event) => {top.document.getElementsByTagName(\'body\')[0].classList.add(\'scaffold-content-navigation-expanded\');})',
-                            //    true, false);
-//                        }
-                    } else {
-                        if ($this->userTSConfiguration['mailModulePageId']) {
-                            $this->id = (int)$this->userTSConfiguration['mailModulePageId'];
-                        }
-                    }
+            if (ConfigurationUtility::getExtensionConfiguration('mailModulePageId') || ($this->userTSConfiguration['mailModulePageId'] ?? false)) {
+                // if mailModulePageId was set in extension configuration -> use it as page id ...
+                $mailModulePageUid = (int)ConfigurationUtility::getExtensionConfiguration('mailModulePageId');
+                if ($this->userTSConfiguration['mailModulePageId'] ?? false) {
+                    // if mailModulePageId was set in user ts config -> use it as page id ...
+                    $mailModulePageUid = (int)$this->userTSConfiguration['mailModulePageId'];
+                }
+                $mailModulePageUids = GeneralUtility::makeInstance(PagesRepository::class)->findMailModulePageUids();
+                if (is_array($mailModulePageUids) && count($mailModulePageUids) > 0 && in_array($mailModulePageUid, $mailModulePageUids)) {
+                    // ... but only if page is mail module
+                    $this->id = $mailModulePageUid;
                 }
             }
-        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
-            $this->id = (int)GeneralUtility::_GP('id');
+        } catch (Exception|DBALException|ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
         }
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         try {
