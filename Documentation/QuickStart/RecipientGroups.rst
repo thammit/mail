@@ -46,6 +46,8 @@ and create a recipient group containing the imported records afterwards.
 To make it easier to import csv records, there is a wizard, which
 guide you through the process.
 
+.. include:: /Images/MailRecipientGroupsImportButton.rst.txt
+
 In the first step you can choose to upload a csv file or paste the
 records into a text field. You can use comma (;), semicolon (;), or
 colon (:) as field delimiter. This can be configured in the second

@@ -8,13 +8,7 @@ Quick start
 
 .. rst-class:: bignums-tip
 
-#. Installation:
-
-   .. code-block:: bash
-
-      composer require mediaessenz/mail
-
-   :ref:`Update database scheme and clear caches <quick-installation>`
+#. :ref:`Installation <quick-installation>`
 
 #. Configuration:
 
@@ -25,11 +19,9 @@ Quick start
    #.  :ref:`Include TypoScript templates <include-typoscript-templates>`
    #.  :ref:`Configure default settings <configure-default-settings>`
 
-#. Create recipient group:
+#. :ref:`Create recipient group <create-recipient-groups>`
 
-   :ref:`Create recipient group <create-recipient-groups>`
-
-#. Create first MAIL:
+#. Create first mail:
 
    #.  :ref:`Create MAIL page <create-mail-page>`
    #.  :ref:`Create MAIL content <create-mail-content>`
@@ -42,13 +34,9 @@ Quick start
    #.  :ref:`Test mail <mail-wizard-test-mail>`
    #.  :ref:`Schedule sending <mail-wizard-schedule-sending>`
 
-#. Send mail manually:
-
-   :ref:`Send mail manually <send-mail-manually>`
+#. :ref:`Send mail manually <send-mail-manually>`
 
 #. :ref:`Mail report <mail-report>`
-
-   :ref:`Mail report <mail-report>`
 
 .. toctree::
    :maxdepth: 5

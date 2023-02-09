@@ -6,17 +6,30 @@
 Quick installation
 ==================
 
-Currently only composer installation is supported.
+To add this extension to your existing TYPO3 system, you have tree options:
 
-.. code-block:: bash
+#. Composer installation (recommended)
 
-   composer require mediaessenz/mail
+   .. code-block:: bash
 
-Since TYPO3 11.5 the extension will be automatically installed.
-You do not have to activate it manually.
+      composer require mediaessenz/mail
+
+#. Extension manager
+
+   Open "Admin and maintenance tools" > "TYPO3 extension manager" and search for "mail".
+   Install it by clicking on the install button.
+
+#. Download
+
+   Download it from here: https://extensions.typo3.org/extension/mail and use the
+   extension manager to upload and install it.
+
 
 Update the database scheme
 --------------------------
+
+After the first install, depending of the way (composer or other), it could be
+necessary to update the database, to get ready for go.
 
 Open your TYPO3 backend with :ref:`system maintainer <t3start:system-maintainer>`
 permissions.
@@ -29,7 +42,9 @@ then click on :guilabel:`Analyze database` and create all.
 Clear all caches
 ----------------
 
-In the same module :guilabel:`Admin Tools > Maintenance` you can also
-conveniently clear all caches by clicking the button :guilabel:`Flush cache`.
+Clearing all caches after installing a new extension is always a good thing.
+
+In the same module like before, you can also conveniently do this by clicking the
+button :guilabel:`Flush cache`.
 
 .. include:: /Images/FlushCache.rst.txt

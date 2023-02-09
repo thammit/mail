@@ -30,8 +30,19 @@ Create mailing
 
    .. include:: /Images/MailWizardSettings.rst.txt
 
-   On this page you can check and change the default settings of the mail, which are defined in the
-   :ref:`configuration module <configure-default-settings>`. Adding attachments is also possible.
+   On this page you can check and adjust the settings of the mail, whose defaults can
+   be changed via the :ref:`configuration <configure-default-settings>` on the previous page.
+
+   You can either change individual values by clicking on them, or edit all of them at once
+   by clicking the edit button.
+
+   At this place it is also possible to add attachments by clicking on the paper clip button.
+
+   .. note::
+      Since the process of fetching, parsing, modifying, thumbnail generation and storing needs a
+      lot of time and energy, it happens automatically only once. If you have changed any content
+      on the source page (internal or external) you have to press the double cycle icon in the
+      type row to update the mail content.
 
    If done, click NEXT again to get to the category settings.
 

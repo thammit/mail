@@ -95,20 +95,24 @@ Quick configuration
 
 #. Configure default settings
 
-   MAIL brings – like EXT:direct_mail – an own backend module to adjust some default
-   settings, used e.g. by the MAIL wizard to create new mailings.
+   MAIL brings – similar to EXT:direct_mail – an easy way to adjust some default settings,
+   used by the mail creation wizard.
 
-   To use it, click on the blue cog icon (Configuration) on the left side at the bottom of
-   all other MAIL modules.
+   You find it by clicking on the cog button (Configuration) on the upper right corner of the
+   MAIL wizard module.
 
-   Here you have to choose the previous created mail sys-folder first, because the configuration will be
-   stored in its :guilabel:`Page TSconfig` field.
+   .. include:: /Images/MailDefaultSettingsButton.rst.txt
 
    The input fields are divided into several groups, which can be reached by clicking on their titles.
 
+   .. include:: /Images/MailDefaultSettings.rst.txt
+
    After filling all fields with your data, press SAVE to store.
 
-   .. include:: /Images/MailDefaultSettings.rst.txt
+..  tip::
+   All configurations done here will be stored in the :guilabel:`Page TSconfig` field of the
+   currently selected page. This way, it is possible to override settings in a deeper page tree level.
+
 
 Further reading
 ===============
