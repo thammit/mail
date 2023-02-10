@@ -11,7 +11,7 @@ final class Constants
     const PANEL_INTERNAL = 'internal';
     const PANEL_EXTERNAL = 'external';
     const PANEL_QUICK_MAIL = 'quickmail';
-    const PANEL_OPEN = 'open';
+    const PANEL_DRAFT = 'draft';
 
     const CONTENT_SECTION_BOUNDARY = 'MAIL_SECTION_BOUNDARY';
 

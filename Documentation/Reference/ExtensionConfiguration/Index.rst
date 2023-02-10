@@ -80,7 +80,23 @@ MAIL module page id `mailModulePageId`
    :type: int
    :Default:
 
-   If set, page tree navigation will be hidden in MAIL module. Here you can add the uid of the MAIL sys-folder if you only have one.
+   If set, page tree navigation will be hidden in MAIL module. Here you can
+   add the uid of the MAIL sys-folder if you only have one.
+
+.. _extension-configuration-mail-module-page-ids:
+
+MAIL module page id `mailModulePageIds`
+-----------------------------------------------------------------
+
+.. confval:: mailModulePageIds
+
+   :type: string
+   :Default: auto
+
+   Reduces the page tree of the mail modules to a comma separated list of page
+   uids. If set to "auto" (default), the list will be automatically taken from
+   the pages database table, based on the selected module. This value can be
+   overwritten via :ref:`userTS <user-ts-config-mail-module-page-id>`.
 
 Feature
 =======

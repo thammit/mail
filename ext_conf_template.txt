@@ -13,6 +13,9 @@ mailModulePosition = after:web
 # cat=MAIL; type=int; label=MAIL module page id: If set, page tree navigation will be hidden in mail module.
 mailModulePageId =
 
+# cat=MAIL; type=string; label=MAIL module page ids: Reduces the page tree of the mail modules to a comma separated list of page uids. If set to "auto" (default), the list will be automatically taken from the pages database table, based on the selected module
+mailModulePageIds = auto
+
 #cat=feature; type=boolean; label=Hide navigation: If set, page tree navigation will be hidden in mail module. User tsconfig parameter tx_mail.mailModulePageId has to be set!
 hideNavigation = 0
 

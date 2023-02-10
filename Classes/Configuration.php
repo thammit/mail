@@ -98,7 +98,7 @@ final class Configuration
             'mail',
             'top',
             [
-                MailController::class => 'index,updateConfiguration,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,openMail,updateContent,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete,noPageSelected'
+                MailController::class => 'index,updateConfiguration,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,draftMail,updateContent,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete,noPageSelected'
             ],
             [
                 'navigationComponentId' => $navigationComponentId,

@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Middleware;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -32,7 +33,10 @@ class FilterPageTreeMiddleware  implements MiddlewareInterface
             }
         }
 
-        $mailModulePageIds = $backendUser->getTSConfig()['tx_mail.']['mailModulePageIds'] ?? false;
+        $mailModulePageIds = ConfigurationUtility::getExtensionConfiguration('mailModulePageIds');
+        if ($backendUser->getTSConfig()['tx_mail.']['mailModulePageIds'] ?? false) {
+            $mailModulePageIds = $backendUser->getTSConfig()['tx_mail.']['mailModulePageIds'] ?? false;
+        }
 
         if ($mailModulePageIds) {
             /** @var NormalizedParams $normalizedParams */

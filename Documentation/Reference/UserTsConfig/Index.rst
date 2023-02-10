@@ -29,7 +29,7 @@ hideTabs
 
    *  quickmail: hide the quick mail option
 
-   *  open: hide the open mail option
+   *  draft: hide the draft mail option
 
 hideCategoryStep
 ----------------
@@ -48,10 +48,10 @@ defaultTab
 .. confval:: defaultTab
 
    :type: string
-   :Default: open
+   :Default: draft
    :Path: tx_mail.defaultTab
 
-   One of the keywords from hideTabs. If set, the chosen tab will be open by default.
+   One of the keywords from hideTabs. If set, the chosen tab will be draft by default.
 
 hideConfiguration
 -----------------
@@ -91,6 +91,8 @@ mailModulePageId
    module page, this value can be set to a (different) mail module page id. This way it is possible to
    show a user individual mail module.
 
+.. _user-ts-config-mail-module-page-id:
+
 mailModulePageIds
 -----------------
 
@@ -100,9 +102,11 @@ mailModulePageIds
    :Default:
    :Path: tx_mail.mailModulePageIds
 
-   Reduces the page tree of the mail wizard module to a comma separated list of page uids.
+   Reduces the page tree of the mail modules to a comma separated list of page uids.
    If set to "auto", the list will be automatically taken from the pages database table,
    based on the selected module (see :ref:`here <add-mail-sysfolder>`).
+   This value overrides the :ref:`extension configuration <extension-configuration-mail-module-page-ids>`
+   with the same name.
 
    This setting is ignored if mailModulePageId or hideNavigation is set, because this will result in
    no page tree at all!

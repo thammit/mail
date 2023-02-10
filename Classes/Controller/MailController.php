@@ -76,12 +76,12 @@ class MailController extends AbstractController
         }
         if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
             // the currently selected page is not a mail module sys folder
-            $openMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
-            if ($openMails->count() > 0) {
-                // there is already an open mail of this page -> use it
+            $draftMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
+            if ($draftMails->count() > 0) {
+                // there is already a draft mail of this page -> use it
                 // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
                 $_GET['id'] = $this->pageInfo['pid'];
-                $this->redirect('openMail', null, null, ['mail' => $openMails->getFirst()->getUid()], $this->pageInfo['pid']);
+                $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid()], $this->pageInfo['pid']);
             }
             // create a new mail of the page
             // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
@@ -112,7 +112,7 @@ class MailController extends AbstractController
             ],
         ]);
 
-        $panels = [Constants::PANEL_OPEN, Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL];
+        $panels = [Constants::PANEL_DRAFT, Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL];
         if ($this->userTSConfiguration['hideTabs'] ?? false) {
             $hidePanel = GeneralUtility::trimExplode(',', $this->userTSConfiguration['hideTabs']);
             foreach ($hidePanel as $hideTab) {
@@ -120,9 +120,9 @@ class MailController extends AbstractController
             }
         }
 
-        $openMails = $this->mailRepository->findOpenByPid($this->id);
+        $draftMails = $this->mailRepository->findOpenByPid($this->id);
 
-        $defaultTab = $openMails->count() > 0 ? Constants::PANEL_OPEN : Constants::PANEL_INTERNAL;
+        $defaultTab = $draftMails->count() > 0 ? Constants::PANEL_DRAFT : Constants::PANEL_INTERNAL;
         if ($this->userTSConfiguration['defaultTab'] ?? false) {
             if (in_array($this->userTSConfiguration['defaultTab'], $panels)) {
                 $defaultTab = $this->userTSConfiguration['defaultTab'];
@@ -133,10 +133,10 @@ class MailController extends AbstractController
         foreach ($panels as $panel) {
             $open = $defaultTab === $panel;
             switch ($panel) {
-                case Constants::PANEL_OPEN:
-                    $panelData['open'] = [
+                case Constants::PANEL_DRAFT:
+                    $panelData['draft'] = [
                         'open' => $open,
-                        'data' => $openMails
+                        'data' => $draftMails
                     ];
                     break;
                 case Constants::PANEL_INTERNAL:
@@ -205,7 +205,7 @@ class MailController extends AbstractController
                 );
                 if ($this->mailRepository->findOpenByPid($this->id)->count() > 0) {
                     ViewUtility::addNotificationWarning(
-                        LanguageUtility::getLL('configuration.notification.openMailsNotAffected.message'),
+                        LanguageUtility::getLL('configuration.notification.draftMailsNotAffected.message'),
                         LanguageUtility::getLL('general.notification.severity.warning.title')
                     );
                 }
@@ -308,7 +308,7 @@ class MailController extends AbstractController
      * @return void
      * @throws StopActionException
      */
-    public function openMailAction(Mail $mail): void
+    public function draftMailAction(Mail $mail): void
     {
         if ($mail->getStep() > 1) {
             $navigation = $this->getNavigation($mail->getStep() - 1, $this->hideCategoryStep($mail));
