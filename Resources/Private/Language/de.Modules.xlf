@@ -7,9 +7,9 @@
         <source>Next</source>
         <target state="final">Weiter</target>
       </trans-unit>
-      <trans-unit id="general.button.continue" resname="general.button.continue">
+      <trans-unit id="general.button.continue" resname="general.button.continue" approved="yes">
         <source>Continue</source>
-        <target state="needs-translation">Continue</target>
+        <target state="final">Fortfahren</target>
       </trans-unit>
       <trans-unit id="general.button.back" resname="general.button.back" approved="yes">
         <source>Back</source>
@@ -19,13 +19,13 @@
         <source>Edit</source>
         <target state="final">Bearbeiten</target>
       </trans-unit>
-      <trans-unit id="general.button.editPage" resname="general.button.editPage">
+      <trans-unit id="general.button.editPage" resname="general.button.editPage" approved="yes">
         <source>Edit page</source>
-        <target state="needs-translation">Edit page</target>
+        <target state="final">Seite bearbeiten</target>
       </trans-unit>
-      <trans-unit id="general.button.editContent" resname="general.button.editContent">
+      <trans-unit id="general.button.editContent" resname="general.button.editContent" approved="yes">
         <source>Edit content elements</source>
-        <target state="needs-translation">Edit content elements</target>
+        <target state="final">Inhaltselemente bearbeiten</target>
       </trans-unit>
       <trans-unit id="general.button.delete" resname="general.button.delete" approved="yes">
         <source>Delete</source>
@@ -39,9 +39,9 @@
         <source>Save</source>
         <target state="final">Speichern</target>
       </trans-unit>
-      <trans-unit id="general.button.cancel" resname="general.button.cancel">
+      <trans-unit id="general.button.cancel" resname="general.button.cancel" approved="yes">
         <source>Cancel</source>
-        <target state="needs-translation">Cancel</target>
+        <target state="final">Abbrechen</target>
       </trans-unit>
       <trans-unit id="general.button.send" resname="general.button.send" approved="yes">
         <source>Send</source>
@@ -51,9 +51,9 @@
         <source>Finish</source>
         <target state="final">Fertigstellen</target>
       </trans-unit>
-      <trans-unit id="general.button.configuration" resname="general.button.configuration">
+      <trans-unit id="general.button.configuration" resname="general.button.configuration" approved="yes">
         <source>Configuration</source>
-        <target state="needs-translation">Configuration</target>
+        <target state="final">Konfiguration</target>
       </trans-unit>
       <trans-unit id="general.button.sendTestMail" resname="general.button.sendTestMail" approved="yes">
         <source>Send test mail to %s</source>
@@ -255,9 +255,9 @@
         <source>Last modified</source>
         <target state="final">Zuletzt geändert</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.step" resname="mail.wizard.step">
+      <trans-unit id="mail.wizard.step" resname="mail.wizard.step" approved="yes">
         <source>Step</source>
-        <target state="needs-translation">Step</target>
+        <target state="final">Schritt</target>
       </trans-unit>
       <trans-unit id="mail.wizard.size" resname="mail.wizard.size" approved="yes">
         <source>Size</source>
@@ -279,13 +279,13 @@
         <source>There are no pages in the mail module.</source>
         <target state="final">Es gibt keine Seiten im Mail-Modul.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.htmlMailBody.title" resname="mail.wizard.htmlMailBody.title">
+      <trans-unit id="mail.wizard.htmlMailBody.title" resname="mail.wizard.htmlMailBody.title" approved="yes">
         <source>View mail HTML body</source>
-        <target state="needs-translation">View mail HTML body</target>
+        <target state="final">HTML Ansicht</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.plainMailBody.title" resname="mail.wizard.plainMailBody.title">
+      <trans-unit id="mail.wizard.plainMailBody.title" resname="mail.wizard.plainMailBody.title" approved="yes">
         <source>View mail plain text body</source>
-        <target state="needs-translation">View mail plain text body</target>
+        <target state="final">Text Ansicht</target>
       </trans-unit>
       <trans-unit id="mail.wizard.htmlPreviewLink.title" resname="mail.wizard.htmlPreviewLink.title" approved="yes">
         <source>View page in HTML format</source>
@@ -555,9 +555,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Mapping</source>
         <target state="final">Zuordnung</target>
       </trans-unit>
-      <trans-unit id="recipient.import.mapping.number" resname="recipient.import.mapping.number">
+      <trans-unit id="recipient.import.mapping.number" resname="recipient.import.mapping.number" approved="yes">
         <source>#</source>
-        <target state="needs-translation">#</target>
+        <target state="final">#</target>
       </trans-unit>
       <trans-unit id="recipient.import.mapping.value" resname="recipient.import.mapping.value" approved="yes">
         <source>Value</source>
@@ -927,17 +927,17 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Delivery ended</source>
         <target state="final">Versand beendet</target>
       </trans-unit>
-      <trans-unit id="queue.button.configuration" resname="queue.button.configuration">
+      <trans-unit id="queue.button.configuration" resname="queue.button.configuration" approved="yes">
         <source>Queue configuration</source>
-        <target state="needs-translation">Queue configuration</target>
+        <target state="final">Warteschlangenkonfiguration</target>
       </trans-unit>
       <trans-unit id="queue.button.triggerManualSending" resname="queue.button.triggerManualSending" approved="yes">
         <source>Start sending manually</source>
         <target state="final">Versand manuell starten</target>
       </trans-unit>
-      <trans-unit id="queue.manualSending.description" resname="queue.manualSending.description">
+      <trans-unit id="queue.manualSending.description" resname="queue.manualSending.description" approved="yes">
         <source>If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent.</source>
-        <target state="needs-translation">If TYPO3 is not configured to send mails with the mail:mass-mailing command controller, you can trigger a manually sending by click on the following button. With every click %s mails will be sent.</target>
+        <target state="final">Wenn TYPO3 nicht so konfiguriert ist, dass Mails mit dem mail:mass-Mailing-Controller gesendet werden, können Sie per Klick auf die folgende Schaltfläche ein manuelles Versenden auslösen. Mit jedem Klick werden %s E-Mails gesendet.</target>
       </trans-unit>
       <trans-unit id="queue.manualSending" resname="queue.manualSending" approved="yes">
         <source>Manual delivery</source>
@@ -983,45 +983,45 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Module settings</source>
         <target state="final">Moduleinstellungen</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.headers" resname="configuration.panel.module.tab.headers">
+      <trans-unit id="configuration.panel.module.tab.headers" resname="configuration.panel.module.tab.headers" approved="yes">
         <source>Headers</source>
-        <target state="needs-translation">Headers</target>
+        <target state="final">Kopfzeilen</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.internalPage" resname="configuration.panel.module.tab.internalPage">
+      <trans-unit id="configuration.panel.module.tab.internalPage" resname="configuration.panel.module.tab.internalPage" approved="yes">
         <source>Internal Page</source>
-        <target state="needs-translation">Internal Page</target>
+        <target state="final">Interne Seite</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.externalPage" resname="configuration.panel.module.tab.externalPage">
+      <trans-unit id="configuration.panel.module.tab.externalPage" resname="configuration.panel.module.tab.externalPage" approved="yes">
         <source>External Page</source>
-        <target state="needs-translation">External Page</target>
+        <target state="final">Externe Seite</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.content" resname="configuration.panel.module.tab.content">
+      <trans-unit id="configuration.panel.module.tab.content" resname="configuration.panel.module.tab.content" approved="yes">
         <source>Content</source>
-        <target state="needs-translation">Content</target>
+        <target state="final">Inhalt</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.general" resname="configuration.panel.module.tab.general" approved="yes">
         <source>General</source>
         <target state="final">Allgemein</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.protection" resname="configuration.panel.module.tab.protection">
+      <trans-unit id="configuration.panel.module.tab.protection" resname="configuration.panel.module.tab.protection" approved="yes">
         <source>Protection</source>
-        <target state="needs-translation">Protection</target>
+        <target state="final">Zugriff</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.tracking" resname="configuration.panel.module.tab.tracking" approved="yes">
         <source>Tracking</source>
         <target state="final">Tracking</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.test" resname="configuration.panel.module.tab.test">
+      <trans-unit id="configuration.panel.module.tab.test" resname="configuration.panel.module.tab.test" approved="yes">
         <source>Test Mails</source>
-        <target state="needs-translation">Test Mails</target>
+        <target state="final">Test-Mails</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.quickmail" resname="configuration.panel.module.tab.quickmail">
+      <trans-unit id="configuration.panel.module.tab.quickmail" resname="configuration.panel.module.tab.quickmail" approved="yes">
         <source>Quick Mail</source>
-        <target state="needs-translation">Quick Mail</target>
+        <target state="final">Kurznachricht</target>
       </trans-unit>
-      <trans-unit id="configuration.panel.module.tab.quickmails" resname="configuration.panel.module.tab.quickmails">
+      <trans-unit id="configuration.panel.module.tab.quickmails" resname="configuration.panel.module.tab.quickmails" approved="yes">
         <source>Quick Mails</source>
-        <target state="needs-translation">Quick Mails</target>
+        <target state="final">Kurznachrichten</target>
       </trans-unit>
       <trans-unit id="configuration.panel.module.tab.defaults" resname="configuration.panel.module.tab.defaults" approved="yes">
         <source>Defaults for new mails</source>
@@ -1035,9 +1035,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>The configuration was successfully saved to the selected page %s.</source>
         <target state="final">Die Konfiguration wurde erfolgreich auf der ausgewählten Seite %s gespeichert.</target>
       </trans-unit>
-      <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message">
+      <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message" approved="yes">
         <source>Open Mails are not affected by most changes!</source>
-        <target state="needs-translation">Open Mails are not affected by most changes!</target>
+        <target state="final">Offene Mails sind von den meisten Änderungen nicht betroffen!</target>
       </trans-unit>
       <trans-unit id="configuration.notification.noChanges.message" resname="configuration.notification.noChanges.message" approved="yes">
         <source>No changes in the configuration detected.</source>
