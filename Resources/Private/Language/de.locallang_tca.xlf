@@ -15,17 +15,17 @@
         <source>Salutation</source>
         <target state="final">Anrede</target>
       </trans-unit>
-      <trans-unit id="pages.mail" resname="pages.mail">
+      <trans-unit id="pages.mail" resname="pages.mail" approved="yes">
         <source>Mail</source>
-        <target state="needs-translation">Mail</target>
+        <target state="final">Mail</target>
       </trans-unit>
       <trans-unit id="pages.module.I.5" resname="pages.module.I.5" approved="yes">
         <source>MAIL Module</source>
         <target state="final">MAIL Modul</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail" resname="tx_mail_domain_model_mail">
+      <trans-unit id="tx_mail_domain_model_mail" resname="tx_mail_domain_model_mail" approved="yes">
         <source>Mails</source>
-        <target state="needs-translation">Mails</target>
+        <target state="final">Mails</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.htmlParams" resname="tx_mail_domain_model_mail.htmlParams" approved="yes">
         <source>Parameters, HTML</source>
@@ -95,9 +95,9 @@
         <source>Low</source>
         <target state="final">Niedrig</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.priority.I.1" resname="tx_mail_domain_model_mail.priority.I.1">
+      <trans-unit id="tx_mail_domain_model_mail.priority.I.1" resname="tx_mail_domain_model_mail.priority.I.1" approved="yes">
         <source>Normal</source>
-        <target state="needs-translation">Normal</target>
+        <target state="final">Normal</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.priority.I.2" resname="tx_mail_domain_model_mail.priority.I.2" approved="yes">
         <source>High</source>
@@ -139,9 +139,9 @@
         <source>Plain text</source>
         <target state="final">Reiner Text</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_mail.sendOptions.I.1" resname="tx_mail_domain_model_mail.sendOptions.I.1">
+      <trans-unit id="tx_mail_domain_model_mail.sendOptions.I.1" resname="tx_mail_domain_model_mail.sendOptions.I.1" approved="yes">
         <source>HTML</source>
-        <target state="needs-translation">HTML</target>
+        <target state="final">HTML</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_mail.subject" resname="tx_mail_domain_model_mail.subject" approved="yes">
         <source>Subject</source>
@@ -203,9 +203,9 @@
         <source>Separate emails by space/comma/linebreak</source>
         <target state="final">Trennen Sie E-Mails durch Leerzeichen/Komma/Zeilenumbruch</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.csv.I.1" resname="tx_mail_domain_model_group.csv.I.1">
+      <trans-unit id="tx_mail_domain_model_group.csv.I.1" resname="tx_mail_domain_model_group.csv.I.1" approved="yes">
         <source>CSV [name],[email]</source>
-        <target state="needs-translation">CSV [name],[email]</target>
+        <target state="final">CSV [name],[email]</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_group.list" resname="tx_mail_domain_model_group.list" approved="yes">
         <source>Recipients</source>
@@ -239,17 +239,17 @@
         <source>Static list</source>
         <target state="final">Statische Liste</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.3" resname="tx_mail_domain_model_group.type.I.3">
+      <trans-unit id="tx_mail_domain_model_group.type.I.3" resname="tx_mail_domain_model_group.type.I.3" approved="yes">
         <source>Special query</source>
-        <target state="needs-translation">Special query</target>
+        <target state="final">Spezielle Abfrage</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_group.type.I.4" resname="tx_mail_domain_model_group.type.I.4" approved="yes">
         <source>From other recipient lists</source>
         <target state="final">Von anderen Empfängerlisten</target>
       </trans-unit>
-      <trans-unit id="tx_mail_domain_model_group.type.I.5" resname="tx_mail_domain_model_group.type.I.5">
+      <trans-unit id="tx_mail_domain_model_group.type.I.5" resname="tx_mail_domain_model_group.type.I.5" approved="yes">
         <source>From Extbase Domain Model</source>
-        <target state="needs-translation">From Extbase Domain Model</target>
+        <target state="final">Von einem Extbase Domain Model</target>
       </trans-unit>
       <trans-unit id="tx_mail_domain_model_group.recipientSources" resname="tx_mail_domain_model_group.recipientSources" approved="yes">
         <source>Recipient sources</source>
