@@ -30,7 +30,7 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class RecipientController extends AbstractController
 {
-    protected string $defaultCsvExportFields = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html,tstamp';
+    protected string $defaultCsvExportFields = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html,mail_active,tstamp';
 
     /**
      * @return ResponseInterface
@@ -204,6 +204,7 @@ class RecipientController extends AbstractController
         $importService->init($this->id, $this->request);
 
         $this->view->assign('data', $importService->getCsvImportUploadData());
+        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 1]);
 
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -211,13 +212,46 @@ class RecipientController extends AbstractController
     }
 
     /**
+     * @throws StopActionException
+     */
+    public function csvImportWizardUploadCsvAction(): void
+    {
+        /* @var $importService ImportService */
+        $importService = GeneralUtility::makeInstance(ImportService::class);
+        $importService->init($this->id, $this->request);
+
+        if (!$importService->uploadCsv()) {
+            ViewUtility::addFlashMessageError('An error occurred during csv import', 'Error');
+            $this->redirect('csvImportWizard');
+        }
+        $this->redirect('csvImportWizardStepConfiguration');
+    }
+
+    /**
+     * @param array $configuration
+     * @return void
+     * @throws AspectNotFoundException
+     * @throws StopActionException
+     * @throws \TYPO3\CMS\Core\Resource\Exception
+     */
+    public function csvImportWizardImportCsvAction(array $configuration = []): void
+    {
+        /* @var $importService ImportService */
+        $importService = GeneralUtility::makeInstance(ImportService::class);
+        $importService->init($this->id, $this->request, $configuration);
+
+        if (!$importService->importCsv()) {
+            ViewUtility::addFlashMessageError('An error occurred during csv import', 'Error');
+            $this->redirect('csvImportWizard');
+        }
+        $this->redirect('csvImportWizardStepConfiguration');
+    }
+
+    /**
      * @param array $configuration
      * @return ResponseInterface
-     * @throws AspectNotFoundException
      * @throws DBALException
      * @throws Exception
-     * @throws \TYPO3\CMS\Core\Resource\Exception
-     * @throws StopActionException
      * @throws \Exception
      */
     public function csvImportWizardStepConfigurationAction(array $configuration = []): ResponseInterface
@@ -226,12 +260,8 @@ class RecipientController extends AbstractController
         $importService = GeneralUtility::makeInstance(ImportService::class);
         $importService->init($this->id, $this->request, $configuration);
 
-        if (!$importService->uploadOrImportCsv()) {
-            ViewUtility::addFlashMessageError('An error occurred during csv import', 'Error');
-            $this->redirect('csvImportWizard');
-        }
-
         $this->view->assign('data', $importService->getCsvImportConfigurationData());
+        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 2]);
 
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -250,6 +280,7 @@ class RecipientController extends AbstractController
         $importService->init($this->id, $this->request, $configuration);
 
         $this->view->assign('data', $importService->getCsvImportMappingData());
+        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 3]);
 
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -275,6 +306,7 @@ class RecipientController extends AbstractController
         }
 
         $this->view->assign('data', $importService->startCsvImport());
+        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 4]);
 
         $this->moduleTemplate->setContent($this->view->render());
 

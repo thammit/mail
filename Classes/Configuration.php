@@ -115,7 +115,7 @@ final class Configuration
             'recipient',
             'after:mail',
             [
-                RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport'
+                RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardUploadCsv,csvImportWizardImportCsv,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport'
             ],
             [
                 'navigationComponentId' => $navigationComponentId,

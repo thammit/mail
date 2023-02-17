@@ -50,28 +50,143 @@ abstract class AbstractController extends ActionController
     protected ModuleTemplate $moduleTemplate;
     protected int $notification = 1;
 
+    protected ?ModuleTemplateFactory $moduleTemplateFactory = null;
+    protected ?PageRenderer $pageRenderer = null;
+    protected ?SiteFinder $siteFinder = null;
+    protected ?ReportService $reportService;
+    protected ?MailerService $mailerService = null;
+    protected ?RecipientService $recipientService = null;
+    protected ?MailRepository $mailRepository = null;
+    protected ?GroupRepository $groupRepository = null;
+    protected ?LogRepository $logRepository = null;
+    protected ?PageRepository $pageRepository = null;
+    protected ?CategoryRepository $categoryRepository = null;
+    protected ?IconFactory $iconFactory = null;
+    protected ?UriBuilder $backendUriBuilder = null;
+
     /**
-     * Constructor Method
+     * @param ModuleTemplateFactory $moduleTemplateFactory
+     * @return void
      */
-    public function __construct(
-        protected ModuleTemplateFactory $moduleTemplateFactory,
-        protected PageRenderer $pageRenderer,
-        protected SiteFinder $siteFinder,
-        protected ReportService $reportService,
-        protected MailerService $mailerService,
-        protected RecipientService $recipientService,
-        protected MailRepository $mailRepository,
-        protected GroupRepository $groupRepository,
-        protected LogRepository $logRepository,
-        protected PageRepository $pageRepository,
-        protected CategoryRepository $categoryRepository,
-        protected IconFactory $iconFactory,
-        protected UriBuilder $backendUriBuilder
-    ) {
+    public function injectModuleTemplateFactory(ModuleTemplateFactory $moduleTemplateFactory): void
+    {
+        $this->moduleTemplateFactory = $moduleTemplateFactory;
+    }
+
+    /**
+     * @param PageRenderer $pageRenderer
+     * @return void
+     */
+    public function injectPageRenderer(PageRenderer $pageRenderer): void
+    {
+        $this->pageRenderer = $pageRenderer;
+    }
+
+    /**
+     * @param SiteFinder $siteFinder
+     * @return void
+     */
+    public function injectSiteFinder(SiteFinder $siteFinder): void
+    {
+        $this->siteFinder = $siteFinder;
+    }
+
+    /**
+     * @param ReportService $reportService
+     * @return void
+     */
+    public function injectReportService(ReportService $reportService): void
+    {
+        $this->reportService = $reportService;
+    }
+
+    /**
+     * @param MailerService $mailerService
+     * @return void
+     */
+    public function injectMailerService(MailerService $mailerService): void
+    {
+        $this->mailerService = $mailerService;
+    }
+
+    /**
+     * @param RecipientService $recipientService
+     * @return void
+     */
+    public function injectRecipientService(RecipientService $recipientService): void
+    {
+        $this->recipientService = $recipientService;
+    }
+
+    /**
+     * @param MailRepository $mailRepository
+     * @return void
+     */
+    public function injectMailRepository(MailRepository $mailRepository): void
+    {
+        $this->mailRepository = $mailRepository;
+    }
+
+    /**
+     * @param GroupRepository $groupRepository
+     * @return void
+     */
+    public function injectGroupRepository(GroupRepository $groupRepository): void
+    {
+        $this->groupRepository = $groupRepository;
+    }
+
+    /**
+     * @param LogRepository $logRepository
+     * @return void
+     */
+    public function injectLogRepository(LogRepository $logRepository): void
+    {
+        $this->logRepository = $logRepository;
+    }
+
+    /**
+     * @param PageRepository $pageRepository
+     * @return void
+     */
+    public function injectPageRepository(PageRepository $pageRepository): void
+    {
+        $this->pageRepository = $pageRepository;
+    }
+
+    /**
+     * @param CategoryRepository $categoryRepository
+     * @return void
+     */
+    public function injectCategoryRepository(CategoryRepository $categoryRepository): void
+    {
+        $this->categoryRepository = $categoryRepository;
+    }
+
+    /**
+     * @param IconFactory $iconFactory
+     * @return void
+     */
+    public function injectIconFactory(IconFactory $iconFactory): void
+    {
+        $this->iconFactory = $iconFactory;
+    }
+
+    /**
+     * @param UriBuilder $uriBuilder
+     * @return void
+     */
+    public function injectUriBuilder(UriBuilder $uriBuilder): void
+    {
+        $this->backendUriBuilder = $uriBuilder;
+    }
+
+    public function initializeAction()
+    {
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
         $this->id = (int)GeneralUtility::_GP('id');
         try {
-            if (ConfigurationUtility::getExtensionConfiguration('mailModulePageId') || ($this->userTSConfiguration['mailModulePageId'] ?? false)) {
+            if (($this->userTSConfiguration['mailModulePageId'] ?? false) || ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) {
                 // if mailModulePageId was set in extension configuration -> use it as page id ...
                 $mailModulePageUid = (int)ConfigurationUtility::getExtensionConfiguration('mailModulePageId');
                 if ($this->userTSConfiguration['mailModulePageId'] ?? false) {
@@ -104,10 +219,7 @@ abstract class AbstractController extends ActionController
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->id)['mod.']['web_modules.']['mail.'] ?? [];
         $this->implodedParams = TypoScriptUtility::implodeTSParams($this->pageTSConfiguration);
         $this->pageTSConfiguration['pid'] = $this->id;
-    }
 
-    public function initializeAction()
-    {
         $notifications = $this->getFlashMessageQueue(ViewUtility::NOTIFICATIONS)->getAllMessagesAndFlush();
         if ($notifications) {
             foreach ($notifications as $notification) {

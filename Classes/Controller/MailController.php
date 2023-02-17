@@ -77,15 +77,13 @@ class MailController extends AbstractController
         if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
             // the currently selected page is not a mail module sys folder
             $draftMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
+            // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+            $_GET['id'] = $this->pageInfo['pid'];
             if ($draftMails->count() > 0) {
                 // there is already a draft mail of this page -> use it
-                // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
-                $_GET['id'] = $this->pageInfo['pid'];
                 $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid()], $this->pageInfo['pid']);
             }
             // create a new mail of the page
-            // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
-            $_GET['id'] = $this->pageInfo['pid'];
             $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id], $this->pageInfo['pid']);
         }
 
@@ -517,6 +515,8 @@ class MailController extends AbstractController
      */
     public function savePreviewImageAction(ServerRequestInterface $request): ResponseInterface
     {
+        // language service has to be set here, because method is called by ajax route, which doesn't call initializeAction
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         $dataUrl = $request->getBody()->getContents() ?? null;
         $mailUid = (int)($request->getQueryParams()['mail'] ?? 0);
 
@@ -640,6 +640,8 @@ class MailController extends AbstractController
      */
     public function updateCategoryRestrictionsAction(ServerRequestInterface $request): ResponseInterface
     {
+        // language service has to be set here, because method is called by ajax route, which doesn't call initializeAction
+        LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         $mail = $this->mailRepository->findByUid((int)($request->getQueryParams()['mail'] ?? 0));
         $contentCategories = json_decode($request->getBody()->getContents() ?? null, true);
         $contentElementUid = $contentCategories['content'] ?? 0;
