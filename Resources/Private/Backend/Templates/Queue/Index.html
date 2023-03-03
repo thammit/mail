@@ -44,8 +44,7 @@
                 </th>
             </tr>
             </thead>
-            <f:for each="{data}" as="row">
-                <f:variable name="mail" value="{row.mail}" />
+            <f:for each="{mails}" as="mail">
                 <tr>
                     <td class="col-icon nowrap">
                         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail"/>
@@ -56,17 +55,17 @@
                     <td class="nowrap">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y H:i')}</td>
                     <td class="nowrap">
                         <div class="progress">
-                            <f:if condition="{row.percentOfSent} == 100">
+                            <f:if condition="{mail.percentOfSent} == 100">
                                 <f:variable name="finished" value="bg-success"/>
                             </f:if>
-                            <div class="progress-bar {finished}" role="progressbar" style="width: {row.percentOfSent}%"
-                                 aria-valuenow="{row.sent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">
-                                {row.sent}/{mail.numberOfRecipients}
+                            <div class="progress-bar {finished}" role="progressbar" style="width: {mail.percentOfSent}%"
+                                 aria-valuenow="{mail.numberOfSent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">
+                                {mail.numberOfSent}/{mail.numberOfRecipients}
                             </div>
                         </div>
                     </td>
                     <td class="col-control nowrap">
-                        <f:if condition="{row.delete}">
+                        <f:if condition="!{mail.scheduledBegin} || !{mail.scheduledEnd}">
                             <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
                         </f:if>
                     </td>

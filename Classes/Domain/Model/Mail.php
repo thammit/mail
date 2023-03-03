@@ -629,6 +629,9 @@ class Mail extends AbstractEntity
         if ($recipients = $this->getRecipients()) {
             $numberOfRecipients = array_sum(array_map('count', $recipients));
         }
+        if ($numberOfRecipients < $this->getNumberOfSent()) {
+            return $this->getNumberOfSent();
+        }
         return $numberOfRecipients;
     }
 
@@ -655,7 +658,11 @@ class Mail extends AbstractEntity
      */
     public function getPercentOfSent(): int
     {
-        $percentOfSent = 100 / $this->getNumberOfRecipients() * $this->getNumberOfSent();
+        $numberOfRecipients = $this->getNumberOfRecipients();
+        if ($numberOfRecipients === 0) {
+            return 100;
+        }
+        $percentOfSent = 100 / $numberOfRecipients * $this->getNumberOfSent();
         if ($percentOfSent > 100) {
             $percentOfSent = 100;
         }

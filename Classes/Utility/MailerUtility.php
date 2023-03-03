@@ -499,21 +499,4 @@ class MailerUtility
     {
         return (int)round(microtime(true) * 1000);
     }
-
-    /**
-     * @param int $sent
-     * @param int $numberOfRecipients
-     * @return int
-     */
-    public static function calculatePercentOfSend(int $sent, int $numberOfRecipients): int
-    {
-        $percentOfSent = 100 / $numberOfRecipients * $sent;
-        if ($percentOfSent > 100) {
-            $percentOfSent = 100;
-        }
-        if ($percentOfSent < 0) {
-            $percentOfSent = 0;
-        }
-        return (int)$percentOfSent;
-    }
 }

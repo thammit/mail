@@ -30,22 +30,18 @@ class QueueController extends AbstractController
      */
     public function indexAction(): ResponseInterface
     {
-        $data = [];
+        $mails = [];
         $scheduledMails = $this->mailRepository->findScheduledByPid($this->id)->toArray();
         /** @var Mail $mail */
         foreach ($scheduledMails as $mail) {
-            $sent = $this->logRepository->countByMailUid($mail->getUid());
-
-            $data[] = [
-                'mail' => $mail,
-                'sent' => $sent,
-                'percentOfSent' => MailerUtility::calculatePercentOfSend($sent, $mail->getNumberOfRecipients()),
-                'delete' => !$mail->getScheduledBegin() || !$mail->getScheduledEnd(),
-            ];
+            $mail->setNumberOfSent($this->logRepository->countByMailUid($mail->getUid()));
+            if ($mail->getNumberOfRecipients() > 0) {
+                $mails[] = $mail;
+            }
         }
         $this->view->assignMultiple([
             'id' => $this->id,
-            'data' => $data,
+            'mails' => $mails,
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
             'showManualSending' => !($this->userTSConfiguration['hideManualSending'] ?? false),
         ]);
