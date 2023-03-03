@@ -334,12 +334,8 @@ class RecipientService
                 // Static MM list
                 foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
                     $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
-                    $contains = $recipientSourceConfiguration['contains'] ?? false;
-                    if ($contains) {
-                        $idLists[$contains] = array_unique(array_merge($idLists[$contains] ?? [], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), true)));
-                    } else {
-                        $idLists[$recipientSourceIdentifier] = array_unique(array_merge($idLists[$recipientSourceIdentifier] ?? [], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive)));
-                    }
+                    $idListKey = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
+                    $idLists[$idListKey] = array_unique(array_merge($idLists[$idListKey] ?? [], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive)));
                 }
                 break;
 //            case RecipientGroupType::QUERY:
