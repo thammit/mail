@@ -1,6 +1,6 @@
 {
     "name": "mediaessenz/mail",
-    "description": "Powerful mail system for TYPO3",
+    "description": "Powerful newsletter system for TYPO3",
     "type": "typo3-cms-extension",
     "keywords": [
         "TYPO3",

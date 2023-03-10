@@ -2,12 +2,12 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Mail',
-    'description' => 'Powerful mail system for TYPO3',
+    'description' => 'Powerful newsletter system for TYPO3',
     'category' => 'plugin',
     'author' => 'Alexander Grein',
     'author_email' => 'alexander.grein@gmail.com',
     'author_company' => 'MEDIA::ESSENZ',
-    'version' => '1.7.6',
+    'version' => '1.7.7',
     'state' => 'stable',
     'constraints' => [
         'depends' => [
