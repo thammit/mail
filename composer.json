@@ -1,12 +1,22 @@
 {
     "name": "mediaessenz/mail",
-    "description": "Mail System for TYPO3",
+    "description": "Powerful mail system for TYPO3",
     "type": "typo3-cms-extension",
     "keywords": [
-        "TYPO3 CMS",
-        "plugin"
+        "TYPO3",
+        "extension",
+        "newsletter",
+        "mailing",
+        "mail",
+        "directmail"
     ],
     "homepage": "https://www.typo3-webagentur.com",
+    "authors": [
+        {
+            "name": "Alexander Grein",
+            "role": "Developer"
+        }
+    ],
     "license": "GPL-2.0-or-later",
     "support": {
         "issues": "https://gitlab.com/mediaessenz/mail/issues",
