@@ -3,11 +3,11 @@
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Mail',
     'description' => 'Powerful newsletter system for TYPO3',
-    'category' => 'plugin',
+    'category' => 'module',
     'author' => 'Alexander Grein',
     'author_email' => 'alexander.grein@gmail.com',
     'author_company' => 'MEDIA::ESSENZ',
-    'version' => '1.7.7',
+    'version' => '1.7.8',
     'state' => 'stable',
     'constraints' => [
         'depends' => [
@@ -23,5 +23,10 @@ $EM_CONF[$_EXTKEY] = [
         ],
         'suggests' => [
         ],
+    ],
+    'autoload' => [
+        'psr-4' => [
+            'MEDIAESSENZ\\Mail\\' => 'Classes'
+        ]
     ],
 ];
