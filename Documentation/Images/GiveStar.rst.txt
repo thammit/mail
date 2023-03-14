@@ -1,0 +1,2 @@
+.. figure:: /Images/GiveStar.png
+   :class: with-shadow

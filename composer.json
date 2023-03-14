@@ -17,6 +17,16 @@
             "role": "Developer"
         }
     ],
+    "funding": [
+        {
+            "type": "patreon",
+            "url": "https://www.patreon.com/alexandergrein"
+        },
+        {
+            "type": "paypal",
+            "url": "https://www.paypal.me/AlexanderGrein/25"
+        }
+    ],
     "license": "GPL-2.0-or-later",
     "support": {
         "issues": "https://gitlab.com/mediaessenz/mail/issues",
