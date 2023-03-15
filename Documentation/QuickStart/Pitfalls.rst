@@ -34,19 +34,19 @@ Jumpurl Error Messages
 
 The current version of jumpurl found in ter (8.0.3) has some php 8 issues:
 
-   - https://github.com/FriendsOfTYPO3/jumpurl/issues/33
-   - https://github.com/FriendsOfTYPO3/jumpurl/issues/36
-   - https://github.com/FriendsOfTYPO3/jumpurl/issues/37
+*   https://github.com/FriendsOfTYPO3/jumpurl/issues/33
+*   https://github.com/FriendsOfTYPO3/jumpurl/issues/36
+*   https://github.com/FriendsOfTYPO3/jumpurl/issues/37
 
 There is already a pending pull request, which unfortunately stuck in that state
 since a while:
 
-   - https://github.com/FriendsOfTYPO3/jumpurl/pull/35
+*   https://github.com/FriendsOfTYPO3/jumpurl/pull/35
 
 To help your self out, you could download the zip of the pull request repo, which
 contains the necessary fixes under this url:
 
-   - https://github.com/woodyc79/jumpurl_t3v11/archive/refs/heads/master.zip
+*   https://github.com/woodyc79/jumpurl_t3v11/archive/refs/heads/master.zip
 
 After downloading, rename the master.zip to jumpurl_8.0.3.zip and upload it within
 the extension manager.
