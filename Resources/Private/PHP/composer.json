@@ -2,9 +2,13 @@
     "description": "Dependencies of EXT:mail for TYPO3 non-composer installations",
     "config": {
         "prepend-autoloader": false,
-        "classmap-authoritative": true
+        "classmap-authoritative": true,
+        "platform": {
+            "php": "8.0"
+        }
     },
     "require": {
+        "php": "^8.0",
         "tedivm/fetch": "^0.7",
         "league/html-to-markdown": "^5",
         "pelago/emogrifier": "^6",
