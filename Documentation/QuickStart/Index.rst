@@ -38,6 +38,8 @@ Quick start
 
 #. :ref:`Mail report <mail-report>`
 
+#. :ref:`Pitfalls <pitfalls>`
+
 .. toctree::
    :maxdepth: 5
    :titlesonly:
@@ -50,3 +52,4 @@ Quick start
    CreateMailing
    SendMail
    MailReport
+   Pitfalls

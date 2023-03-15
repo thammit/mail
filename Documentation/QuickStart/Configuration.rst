@@ -23,6 +23,10 @@ Quick configuration
        imports:
           - { resource: "EXT:mail/Configuration/Site/RecipientSources.yaml" }
 
+   ..  note::
+      If no entries with the key prefix mail.recipientSources found in your site
+      configuration, the default configuration from the upper path will be used.
+
    Read more about how to add your own recipient sources in the
    :ref:`Site configuration reference <site-configuration-recipient-sources>`.
 
