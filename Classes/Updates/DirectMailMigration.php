@@ -44,10 +44,11 @@ class DirectMailMigration implements UpgradeWizardInterface
         if ($this->hasSysDmailRecordsToMigrate()) {
             // sys_dmail -> tx_mail_domain_model_mail
             $connectionMail = $this->getConnectionPool()->getConnectionForTable('tx_mail_domain_model_mail');
-            foreach ($this->getSysDmailRecordsToMigrate() as $record) {
+            $sysDmailRecordsToMigrate = $this->getSysDmailRecordsToMigrate();
+            foreach ($sysDmailRecordsToMigrate as $record) {
                 $alreadyMigrated = $connectionMail->count('*', 'tx_mail_domain_model_mail', ['uid' => $record['uid']]);
                 if ($alreadyMigrated === 0) {
-                    $mailContent = unserialize(base64_decode($record['mailContent']));
+                    $mailContent = unserialize(base64_decode($record['mailContent'] ?? ''));
                     $connectionMail->insert('tx_mail_domain_model_mail',
                         [
                             'uid' => $record['uid'],
@@ -114,7 +115,8 @@ class DirectMailMigration implements UpgradeWizardInterface
                 0b00001110 => 'fe_groups,fe_users',
                 0b00001111 => 'fe_groups,tt_address,fe_users',
             ];
-            foreach ($this->getSysDmailGroupRecordsToMigrate() as $record) {
+            $sysDmailGroupRecordsToMigrate = $this->getSysDmailGroupRecordsToMigrate();
+            foreach ($sysDmailGroupRecordsToMigrate as $record) {
                 $alreadyMigrated = $connectionGroup->count('*', 'tx_mail_domain_model_group', ['uid' => $record['uid']]);
                 if ($alreadyMigrated === 0) {
                     $connectionGroup->insert('tx_mail_domain_model_group',
@@ -142,7 +144,8 @@ class DirectMailMigration implements UpgradeWizardInterface
         if ($this->hasSysDmailLogRecordsToMigrate()) {
             // sys_dmail_maillog -> tx_mail_domain_model_log
             $connectionLog = $this->getConnectionPool()->getConnectionForTable('tx_mail_domain_model_log');
-            foreach ($this->getSysDmailLogRecordsToMigrate() as $record) {
+            $sysDmailLogRecordsToMigrate = $this->getSysDmailLogRecordsToMigrate();
+            foreach ($sysDmailLogRecordsToMigrate as $record) {
                 $alreadyMigrated = $connectionLog->count('*', 'tx_mail_domain_model_log', ['uid' => $record['uid']]);
                 if ($alreadyMigrated === 0) {
                     // Change plain and html format to match send options of mail table
@@ -194,8 +197,8 @@ class DirectMailMigration implements UpgradeWizardInterface
                 $directMailCategorySysCategoryParentCategory = 0;
             }
 
-
-            foreach ($this->getSysDmailCategoryRecordsToMigrate() as $record) {
+            $sysDmailCategoryRecordsToMigrate = $this->getSysDmailCategoryRecordsToMigrate();
+            foreach ($sysDmailCategoryRecordsToMigrate as $record) {
                 $sysCategoryUid = $directMailCategorySysCategoryMappings[$record['uid']] ?? 0;
                 $sysCategoryExists = $connectionCategory->count('*', 'sys_category', ['uid' => $sysCategoryUid]);
                 if ($sysCategoryExists === 0) {
