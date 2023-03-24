@@ -249,8 +249,8 @@ class DirectMailMigration implements UpgradeWizardInterface
                     $sysCategoryUid = $directMailCategorySysCategoryMappings[$record['uid_foreign']];
                     $connectionSysCategoryRecordMm->insert('sys_category_record_mm',
                         [
-                            'uid_local' => $record['uid_local'],
-                            'uid_foreign' => $sysCategoryUid,
+                            'uid_local' => $sysCategoryUid,
+                            'uid_foreign' => $record['uid_local'],
                             'tablenames' => $config['tablenames'],
                             'sorting' => $record['sorting'],
                             'sorting_foreign' => $record['sorting_foreign'],
