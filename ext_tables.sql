@@ -107,7 +107,7 @@ CREATE TABLE fe_users
     mail_html       tinyint(1) unsigned DEFAULT '0' NOT NULL,
     mail_salutation varchar(255)        DEFAULT ''  NOT NULL,
     categories      int(3) unsigned     DEFAULT '0' NOT NULL,
-    KEY mail (mail_active, mail_html)
+    KEY mail (mail_active, email, mail_html)
 );
 
 CREATE TABLE tt_address
@@ -115,5 +115,5 @@ CREATE TABLE tt_address
     mail_active     tinyint(1) unsigned DEFAULT '0' NOT NULL,
     mail_html       tinyint(1) unsigned DEFAULT '0' NOT NULL,
     mail_salutation varchar(255)        DEFAULT ''  NOT NULL,
-    KEY mail (mail_active, mail_html)
+    KEY mail (mail_active, email, mail_html)
 );

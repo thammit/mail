@@ -7,12 +7,12 @@ mail:
     fe_users:
       title: 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recipientSources.I.1'
       icon: 'status-user-frontend'
-      model: MEDIAESSENZ\Mail\Domain\Model\FrontendUser
-      #csvExportFields: [uid,name,first_name,middle_name,last_name,title,email,telephone,www,address,company,city,zip,country,fax,categories,mail_html,tstamp]
+      #model: MEDIAESSENZ\Mail\Domain\Model\FrontendUser
+      csvExportFields: [uid,name,first_name,middle_name,last_name,title,email,telephone,www,address,company,city,zip,country,fax,categories,mail_html,tstamp]
     tt_address:
       title: 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recipientSources.I.0'
       icon: 'tcarecords-tt_address-default'
-      model: MEDIAESSENZ\Mail\Domain\Model\Address
+      #model: MEDIAESSENZ\Mail\Domain\Model\Address
       #ignoreMailActive: true
       #forceHtmlMail: true
-      #csvExportFields: [uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html,tstamp]
+      csvExportFields: [uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html,tstamp]

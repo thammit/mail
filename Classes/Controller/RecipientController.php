@@ -187,7 +187,7 @@ class RecipientController extends AbstractController
                 $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $recipientSourceConfiguration['model'], []);
             } else {
                 $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceIdentifier, $csvExportFields);
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceIdentifier, $csvExportFields, true);
             }
         }
         CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);

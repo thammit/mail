@@ -25,14 +25,21 @@ The overrides do only affect the transport settings used by EXT:mail or its `MED
 RecipientSources.yaml
 =====================
 
-To add all recipient sources come with MAIL (fe_groups, fe_users, tt_address) you just has to import this file into your site configuration like so:
+To add all recipient sources come with MAIL (fe_groups, fe_users, tt_address) you has nothing to do.
+
+MAIL imports the settings stored in this file:
 
 .. code-block:: yaml
 
    imports:
       - { resource: "EXT:mail/Configuration/Site/RecipientSources.yaml" }
 
-To add your own recipient source, just add another entry under the key `mail.recipientSources`.
+If you would like to add your own recipient sources, just add it to your site configuration under the key `mail.recipientSources`.
+
+..  note::
+   If you add your own configuration, you also have to add the fe_groups and fe_users config from the mentioned file.
+   Otherwise MAIL will not work correctly.
+
 Here is an example of how to add a table which has all necessary fields (at least uid, email, name, salutation, mail_html, mail_active):
 
 .. code-block:: yaml
@@ -68,3 +75,6 @@ Since this extension can handle simple tables and extbase models as well, and in
 
 Because of this, every model needs to have a getEnhancedData method, which must return an array of all fields, which should serve as placeholder later on.
 Btw.: The same method will be used by the csv-export inside the recipient group module.
+
+..  note::
+   Since using a domain model for a recipient source brings extbase into the game, working with large recipient groups can become a game of patience.
