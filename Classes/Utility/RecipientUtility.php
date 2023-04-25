@@ -3,12 +3,20 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
+use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use PDO;
+use TYPO3\CMS\Backend\Tree\View\PageTreeView;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class RecipientUtility
 {
@@ -156,4 +164,101 @@ class RecipientUtility
          */
         return array_map('unserialize', array_unique(array_map('serialize', $plainList)));
     }
+
+    /**
+     * @param RecipientInterface|DomainObjectInterface $recipient
+     * @param array $getters
+     * @param bool $withCategoryUidsArray
+     * @return array
+     */
+    public static function getFlatRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $getters, bool $withCategoryUidsArray = false): array
+    {
+        $values = [];
+        foreach ($getters as $field => $getter) {
+            $categoryUids = $withCategoryUidsArray && $field === 'categories';
+            if ($field === 'categories' && !$recipient instanceof CategoryInterface && !method_exists($recipient, $getter)) {
+                $values[$field] = $categoryUids ? [] : '';
+                continue;
+            }
+            $value = $recipient->$getter();
+            if ($value instanceof ObjectStorage) {
+                if ($value->count() > 0) {
+                    $titles = [];
+                    foreach ($value as $item) {
+                        if ($categoryUids) {
+                            $titles[] = $item->getUid();
+                        } else {
+                            if (method_exists($item, 'getTitle')) {
+                                $titles[] = $item->getTitle();
+                            } else {
+                                if (method_exists($item, 'getName')) {
+                                    $titles[] = $item->getName();
+                                } else {
+                                    $titles[] = $item->getUid();
+                                }
+                            }
+                        }
+                    }
+                    if ($categoryUids) {
+                        $values[$field] = $titles;
+                    } else {
+                        $values[$field] = implode(', ', $titles);
+                    }
+                } else {
+                    $values[$field] = $categoryUids ? [] : '';
+                }
+            } else {
+                if (is_bool($value)) {
+                    $values[$field] = $value ? '1' : '0';
+                } else {
+                    if ($value instanceof DateTime || $value instanceof DateTimeImmutable) {
+                        $values[$field] = $value->format('c');
+                    } else {
+                        $values[$field] = (string)$value;
+                    }
+                }
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param string $pagesCSV
+     * @param bool $recursive
+     * @return array
+     */
+    public static function getRecursivePagesList(string $pagesCSV, bool $recursive): array
+    {
+        if (empty($pagesCSV)) {
+            return [];
+        }
+
+        $pages = GeneralUtility::intExplode(',', $pagesCSV, true);
+
+        if (!$recursive) {
+            return $pages;
+        }
+
+        $pageIdArray = [];
+
+        foreach ($pages as $pageUid) {
+            if ($pageUid > 0) {
+                $backendUserPermissions = BackendUserUtility::backendUserPermissions();
+                $pageInfo = BackendUtility::readPageAccess($pageUid, $backendUserPermissions);
+                if (is_array($pageInfo)) {
+                    $pageIdArray[] = $pageUid;
+                    // Finding tree and offer setting of values recursively.
+                    $tree = GeneralUtility::makeInstance(PageTreeView::class);
+                    $tree->init('AND ' . $backendUserPermissions);
+                    $tree->makeHTML = 0;
+                    $tree->setRecs = 0;
+                    $tree->getTree($pageUid, 10000);
+                    $pageIdArray = array_merge($pageIdArray, $tree->ids);
+                }
+            }
+        }
+        return array_unique($pageIdArray);
+    }
+
 }

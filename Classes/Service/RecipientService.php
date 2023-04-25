@@ -8,7 +8,6 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
-use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
@@ -144,7 +143,7 @@ class RecipientService
      * @param array $uidListOfRecipients List of recipient IDs
      * @param string $modelName model name
      * @param array $fields Field to be selected. If empty enhanced model data will be returned
-     * @param bool $categoryUidsArray
+     * @param bool $withCategoryUidsArray
      * @param int $limit limit of results
      *
      * @return array recipients' data
@@ -154,7 +153,7 @@ class RecipientService
         array $uidListOfRecipients,
         string $modelName,
         array $fields = ['uid', 'name', 'email', 'categories', 'mail_html'],
-        bool $categoryUidsArray = false,
+        bool $withCategoryUidsArray = false,
         int $limit = 0
     ): array {
         if (!$uidListOfRecipients || !$modelName) {
@@ -175,72 +174,32 @@ class RecipientService
         $recipients = $query->execute();
 //        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
 
-        foreach ($recipients as $recipient) {
-            if ($recipient instanceof RecipientInterface || $recipient instanceof DomainObjectInterface) {
-                $data[$recipient->getUid()] = empty($fields) ? $recipient->getEnhancedData() : $this->getRecipientModelData($recipient, $fields, $categoryUidsArray);
+        $firstRecipient = $recipients->getFirst();
+        if (!$firstRecipient instanceof RecipientInterface && !$firstRecipient instanceof DomainObjectInterface) {
+            return $data;
+        }
+
+        $getters = [];
+        $hasFields = !empty($fields);
+        if ($hasFields) {
+            foreach ($fields as $field) {
+                $propertyName = ucfirst(str_contains($field, '_') ? str_replace(' ', '', ucwords(str_replace('_', ' ', $field))) : $field);
+                if (method_exists($firstRecipient, 'get' . $propertyName)) {
+                    $getters[$field] = 'get' . $propertyName;
+                } else {
+                    if (method_exists($firstRecipient, 'is' . $propertyName)) {
+                        $getters[$field] = 'is' . $propertyName;
+                    }
+                }
             }
+        }
+
+        foreach ($recipients as $recipient) {
+            $data[$recipient->getUid()] = $hasFields ? RecipientUtility::getFlatRecipientModelData($recipient, $getters,
+                $withCategoryUidsArray) : $recipient->getEnhancedData();
         }
 
         return $data;
-    }
-
-    /**
-     * @param RecipientInterface|DomainObjectInterface $recipient
-     * @param array $fields
-     * @param bool $categoryUidsArray
-     * @return array
-     */
-    protected function getRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $fields, bool $categoryUidsArray = false): array
-    {
-        $values = [];
-        foreach ($fields as $field) {
-            $getter = 'get' . ucfirst($field);
-            $categoryUids = $categoryUidsArray && $field === 'categories';
-            if ($field === 'categories' && !$recipient instanceof CategoryInterface && !method_exists($recipient, $getter)) {
-                $values[$field] = $categoryUids ? [] : '';
-                continue;
-            }
-            if (str_contains($field, '_')) {
-                // convert snake_case field name to camelCase
-                $camelCaseFieldName = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $field))));
-                $getter = 'get' . ucfirst($camelCaseFieldName);
-            }
-            if (method_exists($recipient, $getter)) {
-                $value = $recipient->$getter();
-                if ($value instanceof ObjectStorage) {
-                    if ($value->count() > 0) {
-                        $titles = [];
-                        foreach ($value as $item) {
-                            if ($categoryUids) {
-                                $titles[] = $item->getUid();
-                            } else {
-                                if (method_exists($item, 'getTitle')) {
-                                    $titles[] = $item->getTitle();
-                                } else {
-                                    if (method_exists($item, 'getName')) {
-                                        $titles[] = $item->getName();
-                                    }
-                                }
-                            }
-                        }
-                        if ($categoryUids) {
-                            $values[$field] = $titles;
-                        } else {
-                            $values[$field] = implode(', ', $titles);
-                        }
-                    } else {
-                        $values[$field] = $categoryUids ? [] : '';
-                    }
-                } else {
-                    $values[$field] = $value;
-                }
-            }
-            $getter = 'is' . ucfirst($camelCaseFieldName ?? $field);
-            if (method_exists($recipient, $getter)) {
-                $values[$field] = $recipient->$getter() ? '1' : '0';
-            }
-        }
-        return $values;
     }
 
     /**
@@ -310,7 +269,7 @@ class RecipientService
         switch ($group->getType()) {
             case RecipientGroupType::PAGES:
                 // From pages
-                $pages = $this->getRecursivePagesList($group->getPages(), $group->isRecursive());
+                $pages = RecipientUtility::getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
                         $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
@@ -355,7 +314,8 @@ class RecipientService
                 foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
                     $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
                     $idListKey = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
-                    $idLists[$idListKey] = array_unique(array_merge($idLists[$idListKey] ?? [], $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive)));
+                    $idLists[$idListKey] = array_unique(array_merge($idLists[$idListKey] ?? [],
+                        $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive)));
                 }
                 break;
 //            case RecipientGroupType::QUERY:
@@ -398,8 +358,12 @@ class RecipientService
     /**
      * @throws InvalidQueryException
      */
-    protected function getRecipientUidListByModelNameAndPageUidListAndCategories(string $modelName, array $storagePageIds, ObjectStorage $categories, bool $ignoreMailActive = false): array
-    {
+    protected function getRecipientUidListByModelNameAndPageUidListAndCategories(
+        string $modelName,
+        array $storagePageIds,
+        ObjectStorage $categories,
+        bool $ignoreMailActive = false
+    ): array {
         $recipientUids = [];
         $query = $this->persistenceManager->createQueryForType($modelName);
         if ($storagePageIds) {
@@ -453,8 +417,12 @@ class RecipientService
      * @throws Exception
      * @throws DBALException
      */
-    protected function getRecipientUidListByTableAndPageUidListAndCategories(string $table, array $pages, ObjectStorage $categories, bool $ignoreMailActive = false): array
-    {
+    protected function getRecipientUidListByTableAndPageUidListAndCategories(
+        string $table,
+        array $pages,
+        ObjectStorage $categories,
+        bool $ignoreMailActive = false
+    ): array {
         $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
         $queryBuilder = $this->getQueryBuilder($table);
 
@@ -467,7 +435,7 @@ class RecipientService
             // get recipients without category restriction
             if ($table === 'fe_groups') {
                 return array_column($queryBuilder
-                    ->selectLiteral('DISTINCT fe_users.uid', 'fe_users.email')
+                    ->select('fe_users.uid')
                     ->from('fe_users', 'fe_users')
                     ->from('fe_groups', 'fe_groups')
                     ->where(
@@ -483,7 +451,7 @@ class RecipientService
                     ->fetchAllAssociative(), 'uid');
             } else {
                 return array_column($queryBuilder
-                    ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
+                    ->select($switchTable . '.uid')
                     ->from($switchTable)
                     ->where(
                         $queryBuilder->expr()->and()
@@ -492,7 +460,6 @@ class RecipientService
                             ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
                     )
                     ->orderBy($switchTable . '.uid')
-                    ->addOrderBy($switchTable . '.email')
                     ->executeQuery()
                     ->fetchAllAssociative(), 'uid');
             }
@@ -570,15 +537,9 @@ class RecipientService
         }
 
         if ($table === 'fe_groups') {
-            $res = $queryBuilder
-                ->selectLiteral('DISTINCT fe_users.uid', 'fe_users.email')
+            $idList = array_column($queryBuilder
+                ->select('fe_users.uid')
                 ->from('tx_mail_group_mm', 'tx_mail_group_mm')
-                ->innerJoin(
-                    'tx_mail_group_mm',
-                    'tx_mail_domain_model_group',
-                    'tx_mail_domain_model_group',
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
-                )
                 ->innerJoin(
                     'tx_mail_group_mm',
                     'fe_groups',
@@ -595,23 +556,16 @@ class RecipientService
                     $queryBuilder->expr()->and()
                         ->add($mailActiveExpression)
                         ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                 )
                 ->orderBy('fe_users.uid')
-                ->addOrderBy('fe_users.email')
-                ->execute();
+                ->execute()
+                ->fetchAllAssociative(), 'uid');
         } else {
-            $res = $queryBuilder
-                ->selectLiteral('DISTINCT ' . $switchTable . '.uid', $switchTable . '.email')
+            $idList = array_column($queryBuilder
+                ->select($switchTable . '.uid')
                 ->from('tx_mail_group_mm', 'tx_mail_group_mm')
-                ->innerJoin(
-                    'tx_mail_group_mm',
-                    'tx_mail_domain_model_group',
-                    'tx_mail_domain_model_group',
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
-                )
                 ->innerJoin(
                     'tx_mail_group_mm',
                     $switchTable,
@@ -622,26 +576,18 @@ class RecipientService
                     $queryBuilder->expr()->and()
                         ->add($mailActiveExpression)
                         ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.deleted', $queryBuilder->createNamedParameter(0, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
                 )
                 ->orderBy($switchTable . '.uid')
-                ->addOrderBy($switchTable . '.email')
-                ->execute();
-        }
-
-        $idList = [];
-
-        while ($row = $res->fetchAssociative()) {
-            $idList[] = $row['uid'];
+                ->execute()
+                ->fetchAllAssociative(), 'uid');
         }
 
         if ($table === 'fe_groups') {
             // get the uid of the current fe_group
-            $res = $queryBuilder->resetQueryParts()
-                ->selectLiteral('DISTINCT fe_groups.uid')
-                ->from('fe_groups', 'fe_groups')
+            $frontendUserGroups = array_column($queryBuilder->resetQueryParts()
+                ->select('fe_groups.uid')
                 ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
                 ->leftJoin(
                     'tx_mail_domain_model_group',
@@ -649,47 +595,49 @@ class RecipientService
                     'tx_mail_group_mm',
                     $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
                 )
+                ->leftJoin(
+                    'tx_mail_group_mm',
+                    'fe_groups',
+                    'fe_groups',
+                    $queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign'))
+                )
                 ->where(
                     $queryBuilder->expr()->and()
                         ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($mailGroupUid, PDO::PARAM_INT)))
-                        ->add($queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign')))
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter('fe_groups')))
                 )
-                ->execute();
+                ->execute()
+                ->fetchAllAssociative(), 'uid');
 
-            @[$groupId] = $res->fetchAllAssociative();
+            if ($frontendUserGroups) {
+                foreach ($frontendUserGroups as $frontendUserGroup) {
+                    // recursively get all subgroups of this fe_groups
+                    $subgroups = $this->getRecursiveFrontendUserGroups($frontendUserGroup);
 
-            // recursively get all subgroups of this fe_group
-            if (is_integer($groupId)) {
-                $subgroups = $this->getRecursiveFrontendUserGroups($groupId);
+                    if ($subgroups) {
+                        $subGroupExpressions = [];
+                        foreach ($subgroups as $subgroup) {
+                            $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', (string)$subgroup);
+                        }
 
-                if ($subgroups) {
-                    $subGroupExpressions = [];
-                    foreach ($subgroups as $subgroup) {
-                        $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', $subgroup);
-                    }
-
-                    // fetch all fe_users from these subgroups
-                    $res = $queryBuilder->resetQueryParts()
-                        ->selectLiteral('DISTINCT fe_users.uid', 'fe_users.email')
-                        ->from('fe_groups', 'fe_groups')
-                        ->innerJoin(
-                            'fe_groups',
-                            'fe_users',
-                            'fe_users'
-                        )
-                        ->orWhere(...$subGroupExpressions)
-                        ->andWhere(
-                            $queryBuilder->expr()->and()
-                                ->add($mailActiveExpression)
-                                ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
-                        )
-                        ->orderBy('fe_users.uid')
-                        ->addOrderBy('fe_users.email')
-                        ->execute();
-
-                    while ($row = $res->fetchAssociative()) {
-                        $idList[] = $row['uid'];
+                        // fetch all fe_users from these subgroups
+                        $idList = array_merge($idList, array_column($queryBuilder->resetQueryParts()
+                            ->select('fe_users.uid')
+                            ->from('fe_groups', 'fe_groups')
+                            ->innerJoin(
+                                'fe_groups',
+                                'fe_users',
+                                'fe_users'
+                            )
+                            ->orWhere(...$subGroupExpressions)
+                            ->andWhere(
+                                $queryBuilder->expr()->and()
+                                    ->add($mailActiveExpression)
+                                    ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
+                            )
+                            ->orderBy('fe_users.uid')
+                            ->execute()
+                            ->fetchAllAssociative(), 'uid'));
                     }
                 }
             }
@@ -733,7 +681,7 @@ class RecipientService
         if ($queryTable != $table || $queryConfig != $group->getQuery()) {
             $recordTypes = [];
             if ($queryTable === 'tt_address') {
-                $recordTypes ='tt_address';
+                $recordTypes = 'tt_address';
             } else {
                 if ($queryTable === 'fe_users') {
                     $recordTypes = 'fe_users';
@@ -750,71 +698,6 @@ class RecipientService
     /*
      * H E L P E R
      */
-
-    /**
-     * @param Group $group
-     * @param int $recursion
-     * @return Group[]
-     */
-    protected function getRecursiveGroups(Group $group, int $recursion = 0): array
-    {
-        $recursion++;
-        if ($recursion > 20) {
-            return [];
-        }
-        $groups = [];
-        if ($group->getType() !== RecipientGroupType::OTHER) {
-            $groups = [$group];
-        }
-        $childGroups = $group->getChildren();
-        if ($group->getType() === RecipientGroupType::OTHER && $childGroups->count() > 0) {
-            /** @var Group $childGroup */
-            foreach ($childGroups as $childGroup) {
-                $collect = $this->getRecursiveGroups($childGroup, $recursion);
-                $groups = array_merge_recursive($groups, $collect);
-            }
-        }
-
-        return $groups;
-    }
-
-    /**
-     * @param string $pagesCSV
-     * @param bool $recursive
-     * @return array
-     */
-    protected function getRecursivePagesList(string $pagesCSV, bool $recursive): array
-    {
-        if (empty($pagesCSV)) {
-            return [];
-        }
-
-        $pages = GeneralUtility::intExplode(',', $pagesCSV, true);
-
-        if (!$recursive) {
-            return $pages;
-        }
-
-        $pageIdArray = [];
-
-        foreach ($pages as $pageUid) {
-            if ($pageUid > 0) {
-                $backendUserPermissions = BackendUserUtility::backendUserPermissions();
-                $pageInfo = BackendUtility::readPageAccess($pageUid, $backendUserPermissions);
-                if (is_array($pageInfo)) {
-                    $pageIdArray[] = $pageUid;
-                    // Finding tree and offer setting of values recursively.
-                    $tree = GeneralUtility::makeInstance(PageTreeView::class);
-                    $tree->init('AND ' . $backendUserPermissions);
-                    $tree->makeHTML = 0;
-                    $tree->setRecs = 0;
-                    $tree->getTree($pageUid, 10000);
-                    $pageIdArray = array_merge($pageIdArray, $tree->ids);
-                }
-            }
-        }
-        return array_unique($pageIdArray);
-    }
 
     /**
      * Get all subgroups recursively.
@@ -836,7 +719,8 @@ class RecipientService
 
         $queryBuilder = $this->getQueryBuilder($table);
 
-        $res = $queryBuilder->selectLiteral('DISTINCT fe_groups.uid')
+        $res = $queryBuilder
+            ->select('fe_groups.uid')
             ->from($table, $table)
             ->join(
                 $table,
@@ -869,7 +753,7 @@ class RecipientService
             $groupArr = array_merge($groupArr, $this->getRecursiveFrontendUserGroups($row['uid']));
         }
 
-        return $groupArr;
+        return array_unique($groupArr);
     }
 
     /**
