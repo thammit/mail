@@ -27,6 +27,10 @@ return [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/group.svg'
     ],
+    'mail-group-edit' => [
+        'provider' => SvgIconProvider::class,
+        'source' => 'EXT:mail/Resources/Public/Icons/group-edit.svg'
+    ],
     'mail-log' => [
         'provider' => SvgIconProvider::class,
         'source' => 'EXT:mail/Resources/Public/Icons/mail.svg'

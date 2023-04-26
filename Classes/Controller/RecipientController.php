@@ -88,6 +88,7 @@ class RecipientController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws RouteNotFoundException
      */
     public function showAction(Group $group): ResponseInterface
     {
@@ -144,6 +145,7 @@ class RecipientController extends AbstractController
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());
+        $this->addLeftDocheaderBackEditButtons($group->getUid(), $this->request->getRequestTarget());
         $this->addDocheaderButtons($group->getTitle());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -342,6 +344,34 @@ class RecipientController extends AbstractController
     }
 
     /**
+     * Create document header buttons of "show" action
+     * @param int $uid
+     * @param string $requestUri
+     * @throws RouteNotFoundException
+     */
+    protected function addLeftDocheaderBackEditButtons(int $uid, string $requestUri): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $addBackButton = $buttonBar
+            ->makeLinkButton()
+            ->setIcon($this->iconFactory->getIcon('actions-view-go-back', Icon::SIZE_SMALL))
+            ->setClasses('btn btn-default text-uppercase')
+            ->setTitle(LanguageUtility::getLL('general.button.back'))
+            ->setHref($this->uriBuilder->uriFor('index'));
+        $buttonBar->addButton($addBackButton);
+        $addEditGroupButton = $buttonBar
+            ->makeLinkButton()
+            ->setIcon($this->iconFactory->getIcon('mail-group-edit', Icon::SIZE_SMALL))
+            ->setClasses('btn btn-default text-uppercase')
+            ->setTitle(LanguageUtility::getLL('general.button.edit'))
+            ->setHref((string)$this->backendUriBuilder->buildUriFromRoute('record_edit', [
+                'edit' => ['tx_mail_domain_model_group' => [$uid => 'edit']],
+                'returnUrl' => $requestUri
+            ]));
+        $buttonBar->addButton($addEditGroupButton, ButtonBar::BUTTON_POSITION_LEFT, 2);
+    }
+
+    /**
      * Create document header buttons of "overview" action
      * @param string $groupName
      */
@@ -359,9 +389,13 @@ class RecipientController extends AbstractController
         foreach ($potentialArguments as $argument => $subArguments) {
             if (!empty($this->request->getQueryParams()[$argument])) {
                 foreach ($subArguments as $subArgument) {
-                    $arguments[$argument][$subArgument] = $this->request->getQueryParams()[$argument][$subArgument];
+                    if ($this->request->getQueryParams()[$argument][$subArgument] ?? false) {
+                        $arguments[$argument][$subArgument] = $this->request->getQueryParams()[$argument][$subArgument];
+                    }
                 }
-                $displayName = 'Mail Group: ' . $groupName . ' [' . $arguments['tx_mail_mailmail_mailrecipient']['group'] . ']';
+                if ($arguments['tx_mail_mailmail_mailrecipient']['group'] ?? false) {
+                    $displayName = 'Mail Group: ' . $groupName . ' [' . $arguments['tx_mail_mailmail_mailrecipient']['group'] . ']';
+                }
             }
         }
         $shortCutButton->setArguments($arguments);
