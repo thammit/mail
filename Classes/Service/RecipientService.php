@@ -16,6 +16,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
+use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use PDO;
@@ -266,7 +267,7 @@ class RecipientService
         switch ($group->getType()) {
             case RecipientGroupType::PAGES:
                 // From pages
-                $pages = RecipientUtility::getRecursivePagesList($group->getPages(), $group->isRecursive());
+                $pages = BackendDataUtility::getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
                         $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;

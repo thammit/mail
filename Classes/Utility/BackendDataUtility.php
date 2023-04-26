@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use TYPO3\CMS\Backend\Tree\View\PageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -70,4 +71,43 @@ class BackendDataUtility
 
         return $pages;
     }
+
+    /**
+     * @param string $pagesCSV
+     * @param bool $recursive
+     * @return array
+     */
+    public static function getRecursivePagesList(string $pagesCSV, bool $recursive): array
+    {
+        if (empty($pagesCSV)) {
+            return [];
+        }
+
+        $pages = GeneralUtility::intExplode(',', $pagesCSV, true);
+
+        if (!$recursive) {
+            return $pages;
+        }
+
+        $pageIdArray = [];
+
+        foreach ($pages as $pageUid) {
+            if ($pageUid > 0) {
+                $backendUserPermissions = BackendUserUtility::backendUserPermissions();
+                $pageInfo = BackendUtility::readPageAccess($pageUid, $backendUserPermissions);
+                if (is_array($pageInfo)) {
+                    $pageIdArray[] = $pageUid;
+                    // Finding tree and offer setting of values recursively.
+                    $tree = GeneralUtility::makeInstance(PageTreeView::class);
+                    $tree->init('AND ' . $backendUserPermissions);
+                    $tree->makeHTML = 0;
+                    $tree->setRecs = 0;
+                    $tree->getTree($pageUid, 10000);
+                    $pageIdArray = array_merge($pageIdArray, $tree->ids);
+                }
+            }
+        }
+        return array_unique($pageIdArray);
+    }
+
 }

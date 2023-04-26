@@ -10,8 +10,6 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use PDO;
-use TYPO3\CMS\Backend\Tree\View\PageTreeView;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -117,6 +115,7 @@ class RecipientUtility
             $preKey = $uid_or_record;
         }
         $authCode = $preKey . '||' . $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'];
+
         return substr(md5($authCode), 0, $codeLength);
     }
 
@@ -136,6 +135,7 @@ class RecipientUtility
             $out[$c]['name'] = '';
             $c++;
         }
+
         return $out;
     }
 
@@ -222,43 +222,4 @@ class RecipientUtility
 
         return $values;
     }
-
-    /**
-     * @param string $pagesCSV
-     * @param bool $recursive
-     * @return array
-     */
-    public static function getRecursivePagesList(string $pagesCSV, bool $recursive): array
-    {
-        if (empty($pagesCSV)) {
-            return [];
-        }
-
-        $pages = GeneralUtility::intExplode(',', $pagesCSV, true);
-
-        if (!$recursive) {
-            return $pages;
-        }
-
-        $pageIdArray = [];
-
-        foreach ($pages as $pageUid) {
-            if ($pageUid > 0) {
-                $backendUserPermissions = BackendUserUtility::backendUserPermissions();
-                $pageInfo = BackendUtility::readPageAccess($pageUid, $backendUserPermissions);
-                if (is_array($pageInfo)) {
-                    $pageIdArray[] = $pageUid;
-                    // Finding tree and offer setting of values recursively.
-                    $tree = GeneralUtility::makeInstance(PageTreeView::class);
-                    $tree->init('AND ' . $backendUserPermissions);
-                    $tree->makeHTML = 0;
-                    $tree->setRecs = 0;
-                    $tree->getTree($pageUid, 10000);
-                    $pageIdArray = array_merge($pageIdArray, $tree->ids);
-                }
-            }
-        }
-        return array_unique($pageIdArray);
-    }
-
 }
