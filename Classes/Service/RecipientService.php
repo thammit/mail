@@ -99,36 +99,36 @@ class RecipientService
         array $fields = ['uid', 'name', 'email', 'categories', 'mail_html'],
         bool $categoriesAsList = false
     ): array {
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
-
+        if (!$uidListOfRecipients) {
+            return [];
+        }
         $data = [];
-        if (count($uidListOfRecipients)) {
-            $res = $queryBuilder
-                ->select(...$fields)
-                ->from($table)
-                ->where($queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidListOfRecipients, Connection::PARAM_INT_ARRAY)))
-                ->execute();
+        $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
+        $res = $queryBuilder
+            ->select(...$fields)
+            ->from($table)
+            ->where($queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidListOfRecipients, Connection::PARAM_INT_ARRAY)))
+            ->execute();
 
-            $replaceCategories = in_array('categories', $fields);
-            while ($row = $res->fetchAssociative()) {
-                if ($replaceCategories) {
-                    if ($row['categories'] ?? false) {
-                        $items = $this->getCategoriesOfRecipient($row['uid'], $table);
-                        if ($items) {
-                            if ($categoriesAsList) {
-                                $row['categories'] = implode(', ', array_column($items, 'title'));
-                            } else {
-                                $row['categories'] = $items;
-                            }
+        $replaceCategories = in_array('categories', $fields);
+        while ($row = $res->fetchAssociative()) {
+            if ($replaceCategories) {
+                if ($row['categories'] ?? false) {
+                    $items = $this->getCategoriesOfRecipient($row['uid'], $table);
+                    if ($items) {
+                        if ($categoriesAsList) {
+                            $row['categories'] = implode(', ', array_column($items, 'title'));
                         } else {
-                            $row['categories'] = $categoriesAsList ? '' : [];
+                            $row['categories'] = $items;
                         }
                     } else {
                         $row['categories'] = $categoriesAsList ? '' : [];
                     }
+                } else {
+                    $row['categories'] = $categoriesAsList ? '' : [];
                 }
-                $data[$row['uid']] = $row;
             }
+            $data[$row['uid']] = $row;
         }
 
         return $data;
@@ -173,7 +173,7 @@ class RecipientService
 
         $firstRecipient = $recipients->getFirst();
         if (!$firstRecipient instanceof RecipientInterface && !$firstRecipient instanceof DomainObjectInterface) {
-            return $data;
+            return [];
         }
 
         $getters = [];
@@ -212,7 +212,7 @@ class RecipientService
     public function getRecipientsUidListsGroupedByRecipientSource(ObjectStorage $groups): array
     {
         // If supplied with an empty array, quit instantly as there is nothing to do
-        if (count($groups) === 0) {
+        if ($groups->count() === 0) {
             return [];
         }
 
