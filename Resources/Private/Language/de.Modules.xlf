@@ -211,6 +211,10 @@
         <source>Open Mails</source>
         <target state="final">Offene Mails</target>
       </trans-unit>
+      <trans-unit id="mail.wizard.draftMails" resname="mail.wizard.draftMails">
+        <source>Draft Mails</source>
+        <target state="needs-translation">Draft Mails</target>
+      </trans-unit>
       <trans-unit id="mail.wizard.quickMail" resname="mail.wizard.quickMail" approved="yes">
         <source>Quick Mail</source>
         <target state="final">Kurznachricht</target>
@@ -1035,9 +1039,13 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>The configuration was successfully saved to the selected page %s.</source>
         <target state="final">Die Konfiguration wurde erfolgreich auf der ausgewählten Seite %s gespeichert.</target>
       </trans-unit>
-      <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message" approved="yes">
-        <source>Open Mails are not affected by most changes!</source>
-        <target state="final">Offene Mails sind von den meisten Änderungen nicht betroffen!</target>
+      <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message">
+        <source>Open mails are not affected by most changes!</source>
+        <target state="needs-translation">Open mails are not affected by most changes!</target>
+      </trans-unit>
+      <trans-unit id="configuration.notification.draftMailsNotAffected.message" resname="configuration.notification.draftMailsNotAffected.message">
+        <source>Draft mails are not affected by most changes!</source>
+        <target state="needs-translation">Draft mails are not affected by most changes!</target>
       </trans-unit>
       <trans-unit id="configuration.notification.noChanges.message" resname="configuration.notification.noChanges.message" approved="yes">
         <source>No changes in the configuration detected.</source>
