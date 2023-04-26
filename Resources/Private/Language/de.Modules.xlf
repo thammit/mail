@@ -211,9 +211,9 @@
         <source>Open Mails</source>
         <target state="final">Offene Mails</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.draftMails" resname="mail.wizard.draftMails">
+      <trans-unit id="mail.wizard.draftMails" resname="mail.wizard.draftMails" approved="yes">
         <source>Draft Mails</source>
-        <target state="needs-translation">Draft Mails</target>
+        <target state="final">Mail-Entwürfe</target>
       </trans-unit>
       <trans-unit id="mail.wizard.quickMail" resname="mail.wizard.quickMail" approved="yes">
         <source>Quick Mail</source>
@@ -1039,13 +1039,13 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>The configuration was successfully saved to the selected page %s.</source>
         <target state="final">Die Konfiguration wurde erfolgreich auf der ausgewählten Seite %s gespeichert.</target>
       </trans-unit>
-      <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message">
+      <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message" approved="yes">
         <source>Open mails are not affected by most changes!</source>
-        <target state="needs-translation">Open mails are not affected by most changes!</target>
+        <target state="final">Die meisten Änderungen haben keinen Einfluss auf offene Mails!</target>
       </trans-unit>
-      <trans-unit id="configuration.notification.draftMailsNotAffected.message" resname="configuration.notification.draftMailsNotAffected.message">
+      <trans-unit id="configuration.notification.draftMailsNotAffected.message" resname="configuration.notification.draftMailsNotAffected.message" approved="yes">
         <source>Draft mails are not affected by most changes!</source>
-        <target state="needs-translation">Draft mails are not affected by most changes!</target>
+        <target state="final">Die meisten Änderungen haben keinen Einfluss auf Mail-Entwürfe!</target>
       </trans-unit>
       <trans-unit id="configuration.notification.noChanges.message" resname="configuration.notification.noChanges.message" approved="yes">
         <source>No changes in the configuration detected.</source>
