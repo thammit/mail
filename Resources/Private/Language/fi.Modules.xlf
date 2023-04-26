@@ -211,6 +211,10 @@
         <source>Open Mails</source>
         <target state="needs-translation">Open Mails</target>
       </trans-unit>
+      <trans-unit id="mail.wizard.draftMails" resname="mail.wizard.draftMails">
+        <source>Draft Mails</source>
+        <target state="needs-translation">Draft Mails</target>
+      </trans-unit>
       <trans-unit id="mail.wizard.quickMail" resname="mail.wizard.quickMail">
         <source>Quick Mail</source>
         <target state="needs-translation">Quick Mail</target>
@@ -1036,8 +1040,12 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <target state="needs-translation">The configuration was successfully saved to the selected page %s.</target>
       </trans-unit>
       <trans-unit id="configuration.notification.openMailsNotAffected.message" resname="configuration.notification.openMailsNotAffected.message">
-        <source>Open Mails are not affected by most changes!</source>
-        <target state="needs-translation">Open Mails are not affected by most changes!</target>
+        <source>Open mails are not affected by most changes!</source>
+        <target state="needs-translation">Open mails are not affected by most changes!</target>
+      </trans-unit>
+      <trans-unit id="configuration.notification.draftMailsNotAffected.message" resname="configuration.notification.draftMailsNotAffected.message">
+        <source>Draft mails are not affected by most changes!</source>
+        <target state="needs-translation">Draft mails are not affected by most changes!</target>
       </trans-unit>
       <trans-unit id="configuration.notification.noChanges.message" resname="configuration.notification.noChanges.message">
         <source>No changes in the configuration detected.</source>
