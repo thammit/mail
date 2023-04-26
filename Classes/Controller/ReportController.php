@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -59,6 +60,7 @@ class ReportController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+        $this->addLeftDocheaderBackButtons();
         $this->addDocheaderButtons($this->request->getRequestTarget());
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -408,14 +410,33 @@ class ReportController extends AbstractController
         foreach ($potentialArguments as $argument => $subArguments) {
             if (!empty($this->request->getQueryParams()[$argument])) {
                 foreach ($subArguments as $subArgument) {
-                    $arguments[$argument][$subArgument] = $this->request->getQueryParams()[$argument][$subArgument];
+                    if ($this->request->getQueryParams()[$argument][$subArgument] ?? false) {
+                        $arguments[$argument][$subArgument] = $this->request->getQueryParams()[$argument][$subArgument];
+                    }
                 }
-                $displayName = 'Mail Report [' . $arguments['tx_mail_mailmail_mailreport']['mail'] . ']';
+                if ($arguments['tx_mail_mailmail_mailreport']['mail'] ?? false) {
+                    $displayName = 'Mail Report [' . $arguments['tx_mail_mailmail_mailreport']['mail'] . ']';
+                }
             }
         }
         $shortCutButton->setArguments($arguments);
         $shortCutButton->setDisplayName($displayName);
         $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
+    }
+
+    /**
+     * Create document header back buttons of "show" action
+     */
+    protected function addLeftDocheaderBackButtons(): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $addBackButton = $buttonBar
+            ->makeLinkButton()
+            ->setIcon($this->iconFactory->getIcon('actions-view-go-back', Icon::SIZE_SMALL))
+            ->setClasses('btn btn-default text-uppercase')
+            ->setTitle(LanguageUtility::getLL('general.button.back'))
+            ->setHref($this->uriBuilder->uriFor('index'));
+        $buttonBar->addButton($addBackButton);
     }
 
 }
