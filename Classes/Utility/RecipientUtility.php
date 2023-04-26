@@ -40,8 +40,8 @@ class RecipientUtility
             ->from($relationTable, $relationTable)
             ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_foreign = ' . $table . '.uid')
             ->where(
-                $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table)),
-                $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table))
             )
             ->execute();
 
@@ -78,43 +78,41 @@ class RecipientUtility
      */
     public static function normalizeListOfEmailAddresses(string $emailAddresses): string
     {
-        $addresses = preg_split('|[' . chr(10) . ',;]|', $emailAddresses);
+        $rawAddressList = preg_split('|[' . chr(10) . ',;]|', $emailAddresses);
+        $cleanAddressList = [];
 
-        foreach ($addresses as $key => $val) {
-            $addresses[$key] = trim($val);
-            if (!GeneralUtility::validEmail($addresses[$key])) {
-                unset($addresses[$key]);
+        foreach ($rawAddressList as $email) {
+            $email = trim($email);
+            if (GeneralUtility::validEmail($email)) {
+                $cleanAddressList[] = $email;
             }
         }
 
-        return implode(',', array_keys(array_flip($addresses)));
+        // remove duplicates and return clean list
+        return implode(',', array_keys(array_flip($cleanAddressList)));
     }
 
     /**
-     * Standard authentication code (used in Direct Mail, checkJumpUrl and setfixed links computations)
+     * authentication code
      *
-     * @param int|array $uid_or_record Uid (int) or record (array)
-     * @param string $fields List of fields from the record if that is given.
-     * @param int $codeLength Length of returned authentication code.
-     * @return string MD5 hash of 8 chars.
+     * @param array $record record
+     * @param string $fields list of fields
+     * @param int $codeLength length of returned authentication code
+     * @return string hash
      */
-    public static function stdAuthCode(int|array $uid_or_record, string $fields = '', int $codeLength = 8): string
+    public static function stdAuthCode(array $record, string $fields = '', int $codeLength = 8): string
     {
-        if (is_array($uid_or_record)) {
-            $recCopy_temp = [];
-            if ($fields) {
-                $fieldArr = GeneralUtility::trimExplode(',', $fields, true);
-                foreach ($fieldArr as $k => $v) {
-                    $recCopy_temp[$k] = $uid_or_record[$v];
-                }
-            } else {
-                $recCopy_temp = $uid_or_record;
+        $prefixFields = [];
+        if ($fields) {
+            $fieldArray = GeneralUtility::trimExplode(',', $fields, true);
+            foreach ($fieldArray as $key => $value) {
+                $prefixFields[$key] = $record[$value];
             }
-            $preKey = implode('|', $recCopy_temp);
         } else {
-            $preKey = $uid_or_record;
+            $prefixFields = $record;
         }
-        $authCode = $preKey . '||' . $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'];
+        $prefix = implode('|', $prefixFields);
+        $authCode = $prefix . '||' . $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'];
 
         return substr(md5($authCode), 0, $codeLength);
     }
@@ -129,11 +127,8 @@ class RecipientUtility
     public static function reArrangePlainMails(array $plainMails): array
     {
         $out = [];
-        $c = 0;
-        foreach ($plainMails as $v) {
-            $out[$c]['email'] = trim($v);
-            $out[$c]['name'] = '';
-            $c++;
+        foreach ($plainMails as $email) {
+            $out[] = ['email' => trim($email), 'name' => ''];
         }
 
         return $out;
