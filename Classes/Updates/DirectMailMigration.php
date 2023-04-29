@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Install\Updates\DatabaseUpdatedPrerequisite;
 use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
@@ -258,6 +259,54 @@ class DirectMailMigration implements UpgradeWizardInterface
                         ]);
                 }
             }
+
+            // update number of categories of fe_users
+            $frontendUsersQueryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('fe_users');
+            $frontendUsersQueryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+            $frontendUsersWithCategories = $frontendUsersQueryBuilder->select('fe_users.uid')->from('fe_users')
+                ->join( 'fe_users', 'sys_category_record_mm', 'mm', 'mm.uid_foreign = fe_users.uid')->execute()->fetchAllAssociative();
+            $sysCategoryMmQueryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('sys_category_record_mm');
+
+            foreach ($frontendUsersWithCategories as $frontendUsersWithCategory) {
+                $numberOfCategories = $sysCategoryMmQueryBuilder->count('*')
+                    ->from('sys_category_record_mm')
+                    ->where(
+                        $sysCategoryMmQueryBuilder->expr()->eq('uid_foreign', $frontendUsersWithCategory['uid']),
+                        $sysCategoryMmQueryBuilder->expr()->eq('tablenames', $sysCategoryMmQueryBuilder->createNamedParameter('fe_users')),
+                        $sysCategoryMmQueryBuilder->expr()->eq('fieldname', $sysCategoryMmQueryBuilder->createNamedParameter('categories'))
+                    )
+                    ->groupBy('uid_foreign')->execute()->fetchOne();
+                $frontendUsersQueryBuilder->resetQueryParts()->update('fe_users')
+                    ->set('categories', $numberOfCategories)
+                    ->where(
+                        $frontendUsersQueryBuilder->expr()->eq('uid', $frontendUsersWithCategory['uid'])
+                    )
+                    ->execute();
+            }
+
+            // update number of categories of tt_address
+            $ttAddressQueryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('tt_address');
+            $ttAddressQueryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+            $ttAddressWithCategories = $ttAddressQueryBuilder->select('tt_address.uid')->from('tt_address')
+                ->join( 'tt_address', 'sys_category_record_mm', 'mm', 'mm.uid_foreign = tt_address.uid')->execute()->fetchAllAssociative();
+
+            foreach ($ttAddressWithCategories as $ttAddressWithCategory) {
+                $numberOfCategories = $sysCategoryMmQueryBuilder->count('*')
+                    ->from('sys_category_record_mm')
+                    ->where(
+                        $sysCategoryMmQueryBuilder->expr()->eq('uid_foreign', $ttAddressWithCategory['uid']),
+                        $sysCategoryMmQueryBuilder->expr()->eq('tablenames', $sysCategoryMmQueryBuilder->createNamedParameter('tt_address')),
+                        $sysCategoryMmQueryBuilder->expr()->eq('fieldname', $sysCategoryMmQueryBuilder->createNamedParameter('categories'))
+                    )
+                    ->groupBy('uid_foreign')->execute()->fetchOne();
+                $ttAddressQueryBuilder->resetQueryParts()->update('tt_address')
+                    ->set('categories', $numberOfCategories)
+                    ->where(
+                        $ttAddressQueryBuilder->expr()->eq('uid', $ttAddressWithCategory['uid'])
+                    )
+                    ->execute();
+            }
+
         }
 
         if ($this->hasSysDmailGroupRecordsToMigrate()) {
