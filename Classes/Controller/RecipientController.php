@@ -30,7 +30,7 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class RecipientController extends AbstractController
 {
-    protected string $defaultCsvExportFields = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_html,mail_active,tstamp';
+    protected string $defaultCsvExportFields = 'uid,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_salutation,mail_html,mail_active,tstamp';
 
     /**
      * @return ResponseInterface
