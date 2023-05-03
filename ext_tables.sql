@@ -91,7 +91,7 @@ CREATE TABLE tx_mail_domain_model_log
     tstamp           int(11) unsigned     DEFAULT '0' NOT NULL,
     url              tinyblob                         NULL,
     parse_time       int(11) unsigned     DEFAULT '0' NOT NULL,
-    response_type    tinyint(1) unsigned  DEFAULT '0' NOT NULL,
+    response_type    tinyint(1)           DEFAULT '0' NOT NULL,
     format_sent      tinyint(1) unsigned  DEFAULT '0' NOT NULL,
     url_id           tinyint(1) unsigned  DEFAULT '0' NOT NULL,
     return_content   mediumblob                       NULL,

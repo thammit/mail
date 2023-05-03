@@ -76,19 +76,19 @@ class JumpurlMiddleware implements MiddlewareInterface
             $jumpUrl = $this->request->getQueryParams()['jumpurl'];
             $this->mail = GeneralUtility::makeInstance(MailRepository::class)->findByUid($mailUid);
 
+            $this->initRecipientRecord($submittedRecipient);
             $urlId = 0;
             if (MathUtility::canBeInterpretedAsInteger($jumpUrl) && $this->mail instanceof Mail) {
                 $urlId = (int)$jumpUrl;
-                $this->initRecipientRecord($submittedRecipient);
-                $jumpUrl = $this->getTargetUrl($jumpUrl);
+                $jumpUrlTargetUrl = $this->getTargetUrl($urlId);
 
                 // try to build the ready-to-use target url
                 if (!empty($this->recipientRecord)) {
                     $this->validateAuthCode($submittedAuthCode);
-                    $jumpUrl = $this->substituteMarkersFromTargetUrl($jumpUrl);
+                    $jumpUrlTargetUrl = $this->substituteMarkersFromTargetUrl($jumpUrlTargetUrl);
                 }
                 // jumpUrl generation failed. Early exit here
-                if (empty($jumpUrl)) {
+                if (empty($jumpUrlTargetUrl)) {
                     die('Error: No further link. Please report error to the mail sender.');
                 }
 
@@ -96,23 +96,22 @@ class JumpurlMiddleware implements MiddlewareInterface
                 // jumpUrl is not an integer -- then this is a URL, that means that the "mail ping"
                 // functionality was used to count the number of "opened mails" received (url, mail ping)
 
-                if ($this->isAllowedJumpUrlTarget($jumpUrl)) {
+                $jumpUrlTargetUrl = $jumpUrl;
+
+                if ($this->isAllowedJumpUrlTarget($jumpUrlTargetUrl)) {
                     $this->responseType = ResponseType::PING;
                 }
-
-                // to count the mail ping correctly, we need something unique
-                $recipientUid = $submittedAuthCode;
             }
 
             if ($this->responseType !== ResponseType::ALL) {
                 $mailLogParams = [
                     'mail' => $mailUid,
                     'tstamp' => time(),
-                    'url' => $jumpUrl,
+                    'url' => $jumpUrlTargetUrl,
                     'response_type' => $this->responseType,
                     'url_id' => $urlId,
                     'recipient_source' => $this->recipientSourceIdentifier,
-                    'recipient_uid' => (int)($recipientUid ?? $this->recipientRecord['uid']),
+                    'recipient_uid' => $this->recipientRecord['uid'] ?? hexdec($submittedAuthCode)
                 ];
                 if ($this->hasRecentLog($mailLogParams) === false) {
                     GeneralUtility::makeInstance(ConnectionPool::class)
@@ -123,9 +122,9 @@ class JumpurlMiddleware implements MiddlewareInterface
         }
 
         // finally - finish preprocessing of the jumpurl params
-        if (!empty($jumpUrl)) {
-            $queryParamsToPass['juHash'] = $this->calculateJumpUrlHash($jumpUrl);
-            $queryParamsToPass['jumpurl'] = $jumpUrl;
+        if (!empty($jumpUrlTargetUrl)) {
+            $queryParamsToPass['juHash'] = $this->calculateJumpUrlHash($jumpUrlTargetUrl);
+            $queryParamsToPass['jumpurl'] = $jumpUrlTargetUrl;
         }
 
         return $handler->handle($request->withQueryParams($queryParamsToPass));
@@ -235,12 +234,13 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function initRecipientRecord(string $combinedRecipient): void
     {
+        if (!$combinedRecipient) {
+            return;
+        }
+
         // this will split up the "rid=fe_users-13667", where the first part
         // is the DB table name and the second part the UID of the record in the DB table
-        $recipientUid = '';
-        if (!empty($combinedRecipient)) {
-            [$this->recipientSourceIdentifier, $recipientUid] = explode('-', $combinedRecipient);
-        }
+        [$this->recipientSourceIdentifier, $recipientUid] = explode('-', $combinedRecipient);
 
         $recipientSourceConfiguration = $this->recipientSources[$this->recipientSourceIdentifier] ?? false;
 
@@ -370,16 +370,14 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function isAllowedJumpUrlTarget(string $target): bool
     {
-        $allowed = false;
-
-        // Check if jumpurl is a valid link to a "mailerping.gif"
+        // Check if jumpurl is a valid link to a "mailerping.gif" or .png
         // Make $checkPath an absolute path pointing to mailerping.gif, so it can get checked via ::isAllowedAbsPath()
         $checkPath = Environment::getPublicPath() . '/' . ltrim($target, '/');
 
         // Now check if $checkPath is a valid path and points to a "/mailerping.gif"
         if (preg_match('#/mailerping\\.(gif|png)$#', $checkPath) && (GeneralUtility::isAllowedAbsPath($checkPath) || GeneralUtility::isValidUrl($target))) {
             // set juHash as done for external_url in core: http://forge.typo3.org/issues/46071
-            $allowed = true;
+            return true;
         } else {
             if (GeneralUtility::isValidUrl($target)) {
                 // if it's a valid URL, throw exception
@@ -387,7 +385,7 @@ class JumpurlMiddleware implements MiddlewareInterface
             }
         }
 
-        return $allowed;
+        return false;
     }
 
 }

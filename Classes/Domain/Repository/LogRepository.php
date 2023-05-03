@@ -84,7 +84,6 @@ class LogRepository extends Repository
      * @param int $responseType
      * @return int
      * @throws DBALException
-     * @throws Exception
      */
     public function countByMailAndResponseType(int $mailUid, int $responseType): int
     {
@@ -95,13 +94,12 @@ class LogRepository extends Repository
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $responseType)
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, PDO::PARAM_INT))
             )
             ->groupBy('recipient_uid')
             ->addGroupBy('recipient_source')
-            ->orderBy('COUNT(*)')
             ->executeQuery()
-            ->fetchOne();
+            ->rowCount();
     }
 
     /**

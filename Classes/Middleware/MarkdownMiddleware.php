@@ -28,8 +28,6 @@ class MarkdownMiddleware implements MiddlewareInterface
     }
 
     /**
-     * This is a preprocessor for the actual jumpurl extension to allow counting of clicked links
-     *
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
