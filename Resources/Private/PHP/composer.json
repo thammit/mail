@@ -11,7 +11,7 @@
         "php": "^8.0",
         "tedivm/fetch": "^0.7",
         "league/html-to-markdown": "^5",
-        "pelago/emogrifier": "^6",
+        "pelago/emogrifier": "^7",
         "scssphp/scssphp": "^1.8.1"
     }
 }
