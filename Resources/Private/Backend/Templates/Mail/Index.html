@@ -273,18 +273,18 @@
 
 <f:section name="ExternalPanel">
     <f:render partial="InfoBox" arguments="{field: 'mail.wizard.externalPage'}" />
-    <f:form action="createMailFromExternalUrls" object="external" method="post" enctype="multipart/form-data">
+    <f:form action="createMailFromExternalUrls" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="externalMailHtmlUri" class="form-label"><f:translate key="{lll}configuration.externalMailHtmlUrl"/></label>
-            <f:form.textfield id="externalMailHtmlUri" type="url" placeholder="https://" property="htmlUrl" name="htmlUrl" class="form-control"/>
+            <f:form.textfield id="externalMailHtmlUri" type="url" placeholder="https://" name="htmlUrl" class="form-control"/>
         </div>
         <div class="mb-3">
             <label for="externalMailPlainUri" class="form-label"><f:translate key="{lll}mail.wizard.externalMailPlainTextUrl"/></label>
-            <f:form.textfield id="externalMailPlainUri" type="url" placeholder="https://" property="plainUrl" name="plainTextUrl" class="form-control"/>
+            <f:form.textfield id="externalMailPlainUri" type="url" placeholder="https://" name="plainTextUrl" class="form-control"/>
         </div>
         <div class="mb-3">
             <label for="subjectForExternalMail" class="form-label"><f:translate key="{lll}mail.wizard.externalMailSubject"/></label>
-            <f:form.textfield id="subjectForExternalMail" type="text" placeholder="{f:translate(key: '{lll}mail.wizard.subject')}" property="subject" name="subject" class="form-control" required="1" />
+            <f:form.textfield id="subjectForExternalMail" type="text" placeholder="{f:translate(key: '{lll}mail.wizard.subject')}" name="subject" class="form-control" required="1" />
         </div>
         <button class="btn btn-mail-theme text-uppercase" type="submit"><f:translate key="{lll}general.button.next" default="Next" /></button>
     </f:form>
@@ -292,7 +292,7 @@
 
 <f:section name="QuickMailPanel">
     <f:render partial="InfoBox" arguments="{field: 'mail.wizard.quickMail'}" />
-    <f:form action="createQuickMail" method="post" object="quickMail" enctype="multipart/form-data">
+    <f:form action="createQuickMail" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="quickmailFromName" class="form-label"><f:translate key="{lll}mail.wizard.quickmail.senderName"/></label>
             <f:form.textfield id="quickmailFromName" type="text" name="fromName" value="{data.fromName}" class="form-control" required="1" />

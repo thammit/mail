@@ -337,7 +337,7 @@ class MailFactory
             $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
 
             // remove script tags
-            $htmlContent = MailerUtility::removeTags($htmlContent, ['script']);
+            $htmlContent = MailerUtility::removeTags((string)$htmlContent, ['script']);
 
             if ($htmlContent === false || MailerUtility::contentContainsFrameTag($htmlContent)) {
                 return false;

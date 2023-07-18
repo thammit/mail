@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Exception;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Generic\Query;
@@ -17,6 +18,7 @@ trait DebugQueryTrait
      * @param string|null $title
      * @param bool $replaceParams if true replaces the params in SQL statement with values, otherwise dumps the array of params. @see self::renderDebug()
      *
+     * @return string
      * @throws Exception
      */
     protected function debugQuery(QueryBuilder|Query $query, string $title = null, bool $replaceParams = true): string

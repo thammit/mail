@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use PDO;
 
 class TtContentRepository
@@ -16,8 +15,7 @@ class TtContentRepository
      * @param int $pid
      * @param int $sysLanguageUid
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findByPidAndSysLanguageUid(int $pid, int $sysLanguageUid): array
     {
@@ -38,7 +36,7 @@ class TtContentRepository
             )
             ->orderBy('colPos')
             ->addOrderBy('sorting')
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
     }
 }

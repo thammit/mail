@@ -46,10 +46,10 @@ class FrontendUserRepository extends Repository implements RecipientRepositoryIn
             foreach ($categories as $category) {
                 $categoryConstrains[] = $query->logicalOr($query->contains('categories', $category->getUid()));
             }
-            $constrains[] = $query->logicalOr($categoryConstrains);
+            $constrains[] = $query->logicalOr(...$categoryConstrains);
         }
         $query->matching(
-            $query->logicalAnd($constrains)
+            $query->logicalAnd(...$constrains)
         );
         return $query->execute();
     }

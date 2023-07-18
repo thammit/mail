@@ -25,7 +25,7 @@ use TYPO3\CMS\Extbase\Property\PropertyMappingConfigurationInterface;
 use TYPO3\CMS\Extbase\Property\TypeConverter\AbstractTypeConverter;
 
 /**
- * Converter which transforms from different input formats into DateTime objects.
+ * Converter which transforms from different input formats into DateTimeImmutable objects.
  *
  * Source can be either a string or an array. The date string is expected to be formatted
  * according to DEFAULT_DATE_FORMAT.
@@ -116,13 +116,13 @@ class DateTimeImmutableConverter extends AbstractTypeConverter
     }
 
     /**
-     * Converts $source to a \DateTime using the configured dateFormat
+     * Converts $source to a \DateTimeImmutable using the configured dateFormat
      *
      * @param string|int|array $source the string to be converted to a \DateTime object
      * @param string $targetType must be "DateTime"
      * @param array $convertedChildProperties not used currently
      * @param PropertyMappingConfigurationInterface|null $configuration
-     * @return object|null
+     * @return DateTimeImmutable|\TYPO3\CMS\Extbase\Error\Error|null
      * @throws InvalidPropertyMappingConfigurationException
      * @throws TypeConverterException
      * @internal only to be used within Extbase, not part of TYPO3 Core API.
@@ -145,7 +145,7 @@ class DateTimeImmutableConverter extends AbstractTypeConverter
                 }
                 $dateAsString = sprintf('%d-%d-%d', $source['year'], $source['month'], $source['day']);
             } else {
-                throw new TypeConverterException('Could not convert the given source into a DateTime object because it was not an array with a valid date as a string', 1308003914);
+                throw new TypeConverterException('Could not convert the given source into a DateTimeImmutable object because it was not an array with a valid date as a string', 1308003914);
             }
             if (isset($source['dateFormat']) && $source['dateFormat'] !== '') {
                 $dateFormat = $source['dateFormat'];
@@ -208,8 +208,8 @@ class DateTimeImmutableConverter extends AbstractTypeConverter
         if ($dateFormat === null) {
             return self::DEFAULT_DATE_FORMAT;
         }
-        if ($dateFormat !== null && !is_string($dateFormat)) {
-            throw new InvalidPropertyMappingConfigurationException('CONFIGURATION_DATE_FORMAT must be of type string, "' . (is_object($dateFormat) ? get_class($dateFormat) : gettype($dateFormat)) . '" given', 1307719569);
+        if (!is_string($dateFormat)) {
+            throw new InvalidPropertyMappingConfigurationException('CONFIGURATION_DATE_FORMAT must be of type string, "' . get_debug_type($dateFormat) . '" given', 1307719569);
         }
         return $dateFormat;
     }

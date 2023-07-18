@@ -10,7 +10,7 @@
     --mail-color: #ffffff;
 }
 
-.btn-mail-theme {
+.btn.btn-mail-theme {
     --bs-btn-color: var(--mail-color);
     --bs-btn-bg: var(--mail-background-color);
     --bs-btn-border-color: var(--mail-border-color);
@@ -29,6 +29,7 @@
 
 .bg-mail-theme {
     --bs-bg-opacity: 1;
+    --badge-default-color: #fff;
     background-color: rgba(var(--mail-primary-rgb),var(--bs-bg-opacity)) !important;
 }
 

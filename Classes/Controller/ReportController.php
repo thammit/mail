@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use JetBrains\PhpStorm\NoReturn;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
@@ -11,13 +10,11 @@ use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
@@ -26,7 +23,6 @@ class ReportController extends AbstractController
 {
     /**
      * @throws Exception
-     * @throws DBALException
      */
     public function indexAction(): ResponseInterface
     {
@@ -41,7 +37,6 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws SiteNotFoundException
      * @throws ExtensionConfigurationExtensionNotConfiguredException
@@ -69,7 +64,6 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -89,12 +83,10 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
-     * @throws StopActionException
      * @throws UnknownObjectException
      */
     public function disableTotalReturnedAction(Mail $mail): void
@@ -109,7 +101,6 @@ class ReportController extends AbstractController
      * @param Mail $mail
      * @param string $recipientSource
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -123,7 +114,6 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -142,28 +132,25 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @return void
-     * @throws DBALException
+     * @return ResponseInterface
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
-     * @throws StopActionException
      * @throws UnknownObjectException
      */
-    public function disableUnknownAction(Mail $mail): void
+    public function disableUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
-        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @param string $recipientSource
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -177,7 +164,6 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -196,28 +182,25 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @return void
-     * @throws DBALException
+     * @return ResponseInterface
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
-     * @throws StopActionException
      * @throws UnknownObjectException
      */
-    public function disableFullAction(Mail $mail): void
+    public function disableFullAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
-        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @param string $recipientSource
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -231,7 +214,6 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -250,28 +232,25 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @return void
-     * @throws DBALException
+     * @return ResponseInterface
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
-     * @throws StopActionException
      * @throws UnknownObjectException
      */
-    public function disableBadHostAction(Mail $mail): void
+    public function disableBadHostAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
-        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @param string $recipientSource
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -285,7 +264,6 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -304,28 +282,25 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @return void
-     * @throws DBALException
+     * @return ResponseInterface
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
-     * @throws StopActionException
      * @throws UnknownObjectException
      */
-    public function disableBadHeaderAction(Mail $mail): void
+    public function disableBadHeaderAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
-        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @param string $recipientSource
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -339,7 +314,6 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -358,28 +332,25 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @return void
-     * @throws DBALException
+     * @return ResponseInterface
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
-     * @throws StopActionException
      * @throws UnknownObjectException
      */
-    public function disableReasonUnknownAction(Mail $mail): void
+    public function disableReasonUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
-        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @param string $recipientSource
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
@@ -399,7 +370,7 @@ class ReportController extends AbstractController
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT);
 
-        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailReport');
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('mail_report');
         $arguments = [
             'id' => $this->id,
         ];

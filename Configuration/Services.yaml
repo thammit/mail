@@ -71,5 +71,15 @@ services:
     tags:
       - name: extbase.type_converter
         priority: 10
-        target: \DateTimeImmutable
-        sources: int,string
+        target: DateTimeImmutable
+        sources: int,string,array
+
+  MEDIAESSENZ\Mail\ContentObject\EmogrifierContentObject:
+    tags:
+      - name: frontend.contentobject
+        identifier: 'EMOGRIFIER'
+
+  MEDIAESSENZ\Mail\ContentObject\ScssContentObject:
+    tags:
+      - name: frontend.contentobject
+        identifier: 'SCSS'

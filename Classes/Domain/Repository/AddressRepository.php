@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
-use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
-use PDO;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
@@ -29,10 +27,10 @@ class AddressRepository extends \FriendsOfTYPO3\TtAddress\Domain\Repository\Addr
             foreach ($categories as $category) {
                 $categoryConstrains[] = $query->logicalOr($query->contains('categories', $category->getUid()));
             }
-            $constrains[] = $query->logicalOr($categoryConstrains);
+            $constrains[] = $query->logicalOr(...$categoryConstrains);
         }
         $query->matching(
-            $query->logicalAnd($constrains)
+            $query->logicalAnd(...$constrains)
         );
         return $query->execute();
     }

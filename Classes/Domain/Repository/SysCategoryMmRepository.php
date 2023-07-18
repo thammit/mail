@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
-
 class SysCategoryMmRepository
 {
     use RepositoryTrait;
@@ -16,8 +13,7 @@ class SysCategoryMmRepository
      * @param string $tableNames
      * @param string $fieldName
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findByUidForeignTableNameFieldName(int $uidForeign, string $tableNames, string $fieldName = 'categories'): array
     {
@@ -31,7 +27,7 @@ class SysCategoryMmRepository
                 $queryBuilder->expr()->eq('tablenames', $queryBuilder->createNamedParameter($tableNames)),
                 $queryBuilder->expr()->eq('fieldname', $queryBuilder->createNamedParameter($fieldName))
             )
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
     }
 }

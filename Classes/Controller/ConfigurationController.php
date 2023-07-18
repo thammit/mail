@@ -12,7 +12,6 @@ use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 
 class ConfigurationController  extends AbstractController
 {
@@ -55,10 +54,9 @@ class ConfigurationController  extends AbstractController
 
     /**
      * @param array $pageTS
-     * @return void
-     * @throws StopActionException
+     * @return ResponseInterface
      */
-    public function updateAction(array $pageTS): void
+    public function updateAction(array $pageTS): ResponseInterface
     {
         if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), Permission::PAGE_EDIT)) {
             ViewUtility::addNotificationError(
@@ -66,7 +64,7 @@ class ConfigurationController  extends AbstractController
                 LanguageUtility::getLL('general.notification.severity.error.title')
             );
 
-            $this->redirect('index');
+            return $this->redirect('index');
         }
         if ($pageTS) {
             $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, $this->tsConfigPrefix);
@@ -76,7 +74,7 @@ class ConfigurationController  extends AbstractController
                     LanguageUtility::getLL('general.notification.severity.success.title')
                 );
 
-                $this->redirect('index');
+                return $this->redirect('index');
             }
             ViewUtility::addNotificationInfo(
                 sprintf(LanguageUtility::getLL('configuration.notification.noChanges.message'), $this->id),
@@ -84,7 +82,7 @@ class ConfigurationController  extends AbstractController
             );
 
         }
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**

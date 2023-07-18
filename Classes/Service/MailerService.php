@@ -311,7 +311,7 @@ class MailerService implements LoggerAwareInterface
 
         foreach ($rowFieldsArray as $substField) {
             if ($recipient[$substField] ?? false) {
-                $markers['###USER_' . $substField . '###'] = $this->charsetConverter->conv($recipient[$substField], $this->backendCharset, $this->charset);
+                $markers['###USER_' . $substField . '###'] = $this->charsetConverter->conv((string)$recipient[$substField], $this->backendCharset, $this->charset);
             }
         }
 
@@ -533,7 +533,6 @@ class MailerService implements LoggerAwareInterface
 
     /**
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException

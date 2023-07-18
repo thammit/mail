@@ -3,20 +3,16 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
@@ -24,9 +20,8 @@ class QueueController extends AbstractController
 {
     /**
      * @return ResponseInterface
-     * @throws DBALException
-     * @throws Exception
      * @throws InvalidQueryException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function indexAction(): ResponseInterface
     {
@@ -53,10 +48,7 @@ class QueueController extends AbstractController
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
-    /**
-     * @throws StopActionException
-     */
-    public function saveConfigurationAction(int $sendPerCycle): void
+    public function saveConfigurationAction(int $sendPerCycle): ResponseInterface
     {
         $pageTS['sendPerCycle'] = (string)$sendPerCycle;
         $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, 'mod.web_modules.mail.');
@@ -66,28 +58,27 @@ class QueueController extends AbstractController
                 LanguageUtility::getLL('general.notification.severity.success.title')
             );
 
-            $this->redirect('index');
+            return $this->redirect('index');
         }
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
-     * @return void
-     * @throws StopActionException
-     * @throws DBALException
+     * @return ResponseInterface
      * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws InvalidQueryException
      * @throws \TYPO3\CMS\Core\Exception
      */
-    public function triggerAction(): void
+    public function triggerAction(): ResponseInterface
     {
         if (!$this->mailRepository->findMailToSend()) {
             ViewUtility::addNotificationInfo(
                 LanguageUtility::getLL('queue.notification.nothingToDo.message'),
                 LanguageUtility::getLL('queue.notification.nothingToDo.title')
             );
-            $this->redirect('index');
+            return $this->redirect('index');
         }
         $this->mailerService->start((int)($this->pageTSConfiguration['sendPerCycle'] ?? 50));
         $this->mailerService->handleQueue();
@@ -95,23 +86,22 @@ class QueueController extends AbstractController
             LanguageUtility::getLL('queue.notification.mailSendTriggered.message'),
             LanguageUtility::getLL('general.notification.severity.success.title')
         );
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
      * @param Mail $mail
-     * @return void
-     * @throws StopActionException
+     * @return ResponseInterface
      * @throws IllegalObjectTypeException
      */
-    public function deleteAction(Mail $mail):void
+    public function deleteAction(Mail $mail):ResponseInterface
     {
         $this->mailRepository->remove($mail);
         ViewUtility::addNotificationSuccess(
             LanguageUtility::getLL('queue.notification.missingRecipientGroup.message'),
             LanguageUtility::getLL('general.notification.severity.success.title')
         );
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
@@ -147,7 +137,7 @@ class QueueController extends AbstractController
         $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT, 2);
 
 
-        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailQueue');
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('mail_queue');
         $arguments = [
             'id' => $this->id,
         ];

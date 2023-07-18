@@ -67,7 +67,7 @@
                         <tr>
                             <td>{iterator.cycle}</td>
                             <td>
-                                {row.mapping_description -> f:format.html()}
+                                {row.mapping_description -> f:format.raw()}
                             </td>
                             <td>
                                 <f:if condition="{data.fields -> f:count()}">
@@ -84,7 +84,7 @@
                                         <f:for each="{row.mapping_value}" as="mv">
                                             <tr>
                                                 <td>
-                                                    {mv -> f:format.html()}
+                                                    {mv -> f:format.raw()}
                                                 </td>
                                             </tr>
                                         </f:for>

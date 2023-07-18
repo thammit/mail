@@ -4,9 +4,12 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use JetBrains\PhpStorm\NoReturn;
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Http\ResponseFactory;
+use TYPO3\CMS\Core\Http\StreamFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CsvUtility
@@ -169,10 +172,10 @@ class CsvUtility
      * Send csv values as download by sending appropriate HTML header
      *
      * @param array $rows Values to be put into csv
-     *
-     * @return void Sent HML header for a file download
+     * @param string $filenamePrefix
+     * @return ResponseInterface file download
      */
-    #[NoReturn] public static function downloadCSV(array $rows, string $filenamePrefix = 'mail_recipients'): void
+    #[NoReturn] public static function downloadCSV(array $rows, string $filenamePrefix = 'mail_recipients'): ResponseInterface
     {
         $lines = [];
         if (count($rows)) {
@@ -184,9 +187,16 @@ class CsvUtility
             }
         }
 
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename=' . $filenamePrefix . '_' . date('dmy-Hi') . '.csv');
-        echo implode(CR . LF, $lines);
-        exit;
+        $responseFactory = GeneralUtility::makeInstance(ResponseFactory::class);
+        $streamFactory = GeneralUtility::makeInstance(StreamFactory::class);
+
+        return $responseFactory->createResponse()
+            ->withAddedHeader('Content-Type', 'application/octet-stream')
+            ->withAddedHeader('Content-Disposition', 'attachment; filename=' . $filenamePrefix . '_' . date('dmy-Hi') . '.csv')
+            ->withBody($streamFactory->createStream(implode(CR . LF, $lines)));
+//        header('Content-Type: application/octet-stream');
+//        header('Content-Disposition: attachment; filename=' . $filenamePrefix . '_' . date('dmy-Hi') . '.csv');
+//        echo implode(CR . LF, $lines);
+//        exit;
     }
 }

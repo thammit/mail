@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -58,8 +56,7 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findRecordByUid(int $uid, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -80,8 +77,7 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findRecordByUidList(array $uidList, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -102,8 +98,7 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findRecordByPid(int $pid, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -124,8 +119,7 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findRecordByPidList(array $pidList, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -143,7 +137,6 @@ trait RepositoryTrait
     /**
      * @param int $uid
      * @return int
-     * @throws DBALException
      */
     public function deleteRecordByUid(int $uid): int
     {
@@ -160,7 +153,6 @@ trait RepositoryTrait
     /**
      * @param int $pid
      * @return int
-     * @throws DBALException
      */
     public function deleteRecordByPid(int $pid): int
     {

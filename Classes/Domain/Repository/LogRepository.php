@@ -3,14 +3,10 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use PDO;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class LogRepository extends Repository
@@ -26,8 +22,7 @@ class LogRepository extends Repository
     /**
      * @param int $mailUid
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findResponseTypesByMail(int $mailUid): array
     {
@@ -40,7 +35,7 @@ class LogRepository extends Repository
             ->from($this->table)
             ->where($queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
             ->groupBy('response_type')
-            ->execute();
+            ->executeQuery();
 
         while ($row = $statement->fetchAssociative()) {
             $responseTypes[$row['response_type']] = $row['COUNT(*)'];
@@ -70,7 +65,7 @@ class LogRepository extends Repository
             )
             ->groupBy('return_code')
             ->orderBy('COUNT(*)')
-            ->execute();
+            ->executeQuery();
 
         while ($row = $statement->fetchAssociative()) {
             $returnCodes[$row['return_code']] = $row['COUNT(*)'];
@@ -83,7 +78,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @param int $responseType
      * @return int
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function countByMailAndResponseType(int $mailUid, int $responseType): int
     {
@@ -105,8 +100,7 @@ class LogRepository extends Repository
     /**
      * @param int $mailUid
      * @return int
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function countByMailUid(int $mailUid): int
     {
@@ -131,8 +125,7 @@ class LogRepository extends Repository
      * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return array list of recipients
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findRecipientsByMailUidAndRecipientSourceIdentifier(int $mailUid, string $recipientSourceIdentifier): array
     {
@@ -146,15 +139,14 @@ class LogRepository extends Repository
                 $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
             )
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative(), 'recipient_uid');
     }
 
     /**
      * @param int $mailUid
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findFormatSentByMail(int $mailUid): array
     {
@@ -171,7 +163,7 @@ class LogRepository extends Repository
                 $queryBuilder->expr()->eq('response_type', ResponseType::ALL),
             )
             ->groupBy('format_sent')
-            ->execute();
+            ->executeQuery();
 
         while ($row = $statement->fetchAssociative()) {
             $formatSent[$row['format_sent']] = $row['COUNT(*)'];
@@ -185,8 +177,7 @@ class LogRepository extends Repository
      * @param string $recipientSourceIdentifier
      * @param int $mailUid
      * @return bool|array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid(int $recipientUid, string $recipientSourceIdentifier, int $mailUid): bool|array
     {
@@ -202,7 +193,7 @@ class LogRepository extends Repository
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
             )
             ->setMaxResults(1)
-            ->execute()
+            ->executeQuery()
             ->fetchAssociative();
     }
 
@@ -211,8 +202,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @param int $responseType 1 for html, 2 for plain
      * @return array
-     * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findMostPopularLinksByMailAndResponseType(int $mailUid, int $responseType = ResponseType::HTML): array
     {
@@ -229,7 +219,7 @@ class LogRepository extends Repository
             )
             ->groupBy('url_id')
             ->orderBy('COUNT(*)')
-            ->execute();
+            ->executeQuery();
 
         while ($row = $statement->fetchAssociative()) {
             $popularLinks[$row['url_id']] = $row['COUNT(*)'];
@@ -242,8 +232,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @param array $returnCodes
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findFailedRecipientIdsByMailAndReturnCodeGroupedByRecipientSource(int $mailUid, array $returnCodes = []): array
     {
@@ -271,7 +260,7 @@ class LogRepository extends Repository
             }
         }
 
-        $result = $statement->execute();
+        $result = $statement->executeQuery();
         $idLists = [];
 
         while ($row = $result->fetchAssociative()) {

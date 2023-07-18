@@ -5,8 +5,6 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
@@ -45,11 +43,11 @@ class MailRepository extends Repository
     {
         $query = $this->createQuery();
         $query->matching(
-            $query->logicalAnd([
+            $query->logicalAnd(
                 $query->equals('scheduled', 0),
                 $query->equals('sent', 0),
                 $query->equals('pid', $pid),
-            ])
+            )
         );
         return $query->execute();
     }
@@ -63,12 +61,12 @@ class MailRepository extends Repository
     {
         $query = $this->createQuery();
         $query->matching(
-            $query->logicalAnd([
+            $query->logicalAnd(
                 $query->equals('scheduled', 0),
                 $query->equals('sent', 0),
                 $query->equals('page', $page),
                 $query->equals('pid', $pid),
-            ])
+            )
         );
         return $query->execute();
     }
@@ -80,10 +78,10 @@ class MailRepository extends Repository
     {
         $query = $this->createQuery();
         $query->matching(
-            $query->logicalAnd([
+            $query->logicalAnd(
                 $query->equals('pid', $pid),
                 $query->greaterThan('scheduled', 0),
-            ])
+            )
         );
         $query->setOrderings(['scheduled' => QueryInterface::ORDER_DESCENDING]);
         return $query->execute();
@@ -97,12 +95,12 @@ class MailRepository extends Repository
         $query = $this->createQuery();
         $query->getQuerySettings()->setIgnoreEnableFields(true);
         $query->matching(
-            $query->logicalAnd([
+            $query->logicalAnd(
                 $query->logicalNot($query->equals('scheduled', 0)),
                 $query->lessThan('scheduled', new DateTimeImmutable('now')),
                 $query->equals('scheduledEnd', 0),
                 $query->logicalNot($query->in('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL]))
-            ])
+            )
         );
         $query->setOrderings(['scheduled' => QueryInterface::ORDER_ASCENDING]);
 
@@ -112,8 +110,7 @@ class MailRepository extends Repository
     /**
      * @param int $pid
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findSentByPid(int $pid): array
     {
@@ -146,7 +143,7 @@ class MailRepository extends Repository
             ->groupBy('l.mail')
             ->orderBy('m.scheduled', 'DESC')
             ->addOrderBy('m.scheduled_begin', 'DESC')
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative()
         );
     }

@@ -5,7 +5,6 @@ namespace MEDIAESSENZ\Mail;
 
 use MEDIAESSENZ\Mail\ContentObject\EmogrifierContentObject;
 use MEDIAESSENZ\Mail\ContentObject\ScssContentObject;
-use MEDIAESSENZ\Mail\Controller\ConfigurationController;
 use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\RecipientController;
@@ -68,116 +67,118 @@ final class Configuration
      */
     public static function registerBackendModules(): void
     {
-        $navigationComponentId = 'TYPO3/CMS/Backend/PageTree/PageTreeElement';
-        try {
-            if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
-                $navigationComponentId = '';
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            $navigationComponentId = 'TYPO3/CMS/Backend/PageTree/PageTreeElement';
+            try {
+                if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
+                    $navigationComponentId = '';
+                }
+            } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
             }
-        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
-        }
-        $modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePosition') ?? 'after:web';
-        ExtensionUtility::registerModule(
-            'Mail',
-            'mail',
-            '',
-            $modulePosition,
-            [],
-            [
-                'access' => 'group,user',
-                'name' => 'Mail',
-                'iconIdentifier' => 'mail-module-main',
-                'labels' => [
-                    'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/MainModule.xlf',
+            $modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePosition') ?? 'after:web';
+            ExtensionUtility::registerModule(
+                'Mail',
+                'mail',
+                '',
+                $modulePosition,
+                [],
+                [
+                    'access' => 'group,user',
+                    'name' => 'Mail',
+                    'iconIdentifier' => 'mail-module-main',
+                    'labels' => [
+                        'll_ref' => 'LLL:EXT:mail/Resources/Private/Language/MainModule.xlf',
+                    ],
                 ],
-            ],
-        );
+            );
 
-        ExtensionUtility::registerModule(
-            'Mail',
-            'Mail',
-            'mail',
-            'top',
-            [
-                MailController::class => 'index,updateConfiguration,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,draftMail,updateContent,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete,noPageSelected'
-            ],
-            [
-                'navigationComponentId' => $navigationComponentId,
-                'access' => 'group,user',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-mail',
-                'labels' => 'LLL:EXT:mail/Resources/Private/Language/MailModule.xlf',
-            ]
-        );
+            ExtensionUtility::registerModule(
+                'Mail',
+                'Mail',
+                'mail',
+                'top',
+                [
+                    MailController::class => 'index,updateConfiguration,createMailFromInternalPage,createMailFromExternalUrls,createQuickMail,draftMail,updateContent,settings,categories,updateCategories,testMail,sendTestMail,scheduleSending,finish,delete,noPageSelected',
+                ],
+                [
+                    'navigationComponentId' => $navigationComponentId,
+                    'access' => 'group,user',
+                    'workspaces' => 'online',
+                    'iconIdentifier' => 'mail-module-mail',
+                    'labels' => 'LLL:EXT:mail/Resources/Private/Language/MailModule.xlf',
+                ]
+            );
 
-        ExtensionUtility::registerModule(
-            'Mail',
-            'Mail',
-            'recipient',
-            'after:mail',
-            [
-                RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardUploadCsv,csvImportWizardImportCsv,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport'
-            ],
-            [
-                'navigationComponentId' => $navigationComponentId,
-                'access' => 'group,user',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-recipient',
-                'labels' => 'LLL:EXT:mail/Resources/Private/Language/RecipientModule.xlf',
-            ]
-        );
+            ExtensionUtility::registerModule(
+                'Mail',
+                'Mail',
+                'recipient',
+                'after:mail',
+                [
+                    RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardUploadCsv,csvImportWizardImportCsv,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport',
+                ],
+                [
+                    'navigationComponentId' => $navigationComponentId,
+                    'access' => 'group,user',
+                    'workspaces' => 'online',
+                    'iconIdentifier' => 'mail-module-recipient',
+                    'labels' => 'LLL:EXT:mail/Resources/Private/Language/RecipientModule.xlf',
+                ]
+            );
 
-        ExtensionUtility::registerModule(
-            'Mail',
-            'Mail',
-            'report',
-            'after:recipient',
-            [
-                ReportController::class => 'index,show,showTotalReturned,disableTotalReturned,csvExportTotalReturned,showUnknown,disableUnknown,csvExportUnknown,showFull,disableFull,csvExportFull,showBadHost,disableBadHost,csvExportBadHost,showBadHeader,disableBadHeader,csvExportBadHeader,showReasonUnknown,disableReasonUnknown,csvExportReasonUnknown'
-            ],
-            [
-                'navigationComponentId' => $navigationComponentId,
-                'access' => 'group,user',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-report',
-                'labels' => 'LLL:EXT:mail/Resources/Private/Language/ReportModule.xlf',
-            ]
-        );
+            ExtensionUtility::registerModule(
+                'Mail',
+                'Mail',
+                'report',
+                'after:recipient',
+                [
+                    ReportController::class => 'index,show,showTotalReturned,disableTotalReturned,csvExportTotalReturned,showUnknown,disableUnknown,csvExportUnknown,showFull,disableFull,csvExportFull,showBadHost,disableBadHost,csvExportBadHost,showBadHeader,disableBadHeader,csvExportBadHeader,showReasonUnknown,disableReasonUnknown,csvExportReasonUnknown',
+                ],
+                [
+                    'navigationComponentId' => $navigationComponentId,
+                    'access' => 'group,user',
+                    'workspaces' => 'online',
+                    'iconIdentifier' => 'mail-module-report',
+                    'labels' => 'LLL:EXT:mail/Resources/Private/Language/ReportModule.xlf',
+                ]
+            );
 
-        ExtensionUtility::registerModule(
-            'Mail',
-            'Mail',
-            'queue',
-            'after:report',
-            [
-                QueueController::class => 'index,saveConfiguration,trigger,delete'
-            ],
-            [
-                'navigationComponentId' => $navigationComponentId,
-                'access' => 'group,user',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-queue',
-                'labels' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
-            ]
-        );
+            ExtensionUtility::registerModule(
+                'Mail',
+                'Mail',
+                'queue',
+                'after:report',
+                [
+                    QueueController::class => 'index,saveConfiguration,trigger,delete',
+                ],
+                [
+                    'navigationComponentId' => $navigationComponentId,
+                    'access' => 'group,user',
+                    'workspaces' => 'online',
+                    'iconIdentifier' => 'mail-module-queue',
+                    'labels' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
+                ]
+            );
 
-        /*
-        ExtensionUtility::registerModule(
-            'Mail',
-            'Mail',
-            'configuration',
-            'after:queue',
-            [
-                ConfigurationController::class => 'index,update'
-            ],
-            [
-                'navigationComponentId' => $navigationComponentId,
-                'access' => 'group,user',
-                'workspaces' => 'online',
-                'iconIdentifier' => 'mail-module-configuration',
-                'labels' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
-            ]
-        );
-        */
+            /*
+            ExtensionUtility::registerModule(
+                'Mail',
+                'Mail',
+                'configuration',
+                'after:queue',
+                [
+                    ConfigurationController::class => 'index,update'
+                ],
+                [
+                    'navigationComponentId' => $navigationComponentId,
+                    'access' => 'group,user',
+                    'workspaces' => 'online',
+                    'iconIdentifier' => 'mail-module-configuration',
+                    'labels' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
+                ]
+            );
+            */
+        }
 
         $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';
     }
@@ -190,12 +191,14 @@ final class Configuration
 
     public static function addTypoScriptContentObject(): void
     {
-        $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
-            'EMOGRIFIER' => EmogrifierContentObject::class
-        ]);
-        $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'], [
-            'SCSS' => ScssContentObject::class
-        ]);
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] ?? [], [
+                'EMOGRIFIER' => EmogrifierContentObject::class,
+            ]);
+            $GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] = array_merge($GLOBALS['TYPO3_CONF_VARS']['FE']['ContentObjects'] ?? [], [
+                'SCSS' => ScssContentObject::class,
+            ]);
+        }
     }
 
     public static function directMailMigration(): void
@@ -205,8 +208,7 @@ final class Configuration
 
     public static function registerTypeConverter(): void
     {
-        if ((new Typo3Version())->getMajorVersion() < 12)
-        {
+        if ((new Typo3Version())->getMajorVersion() < 12) {
             ExtensionUtility::registerTypeConverter(DateTimeImmutableConverter::class);
         }
     }

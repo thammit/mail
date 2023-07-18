@@ -35,7 +35,7 @@ class MailerUtility
         $requestFactory = GeneralUtility::makeInstance(RequestFactory::class);
         try {
             $response = $requestFactory->request($url);
-        } catch (Exception) {
+        } catch (Exception $exception) {
             return false;
         }
         return MailerUtility::removeDoubleBrTags($response->getBody()->getContents());

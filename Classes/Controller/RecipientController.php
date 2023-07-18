@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
@@ -22,7 +21,6 @@ use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
@@ -34,7 +32,6 @@ class RecipientController extends AbstractController
 
     /**
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
@@ -82,7 +79,6 @@ class RecipientController extends AbstractController
     /**
      * @param Group $group
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
@@ -154,30 +150,28 @@ class RecipientController extends AbstractController
     /**
      * @param Group $group
      * @param string $recipientSourceIdentifier
-     * @return void
-     * @throws DBALException
+     * @return ResponseInterface
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
-     * @throws StopActionException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
-    public function csvDownloadAction(Group $group, string $recipientSourceIdentifier): void
+    public function csvDownloadAction(Group $group, string $recipientSourceIdentifier): ResponseInterface
     {
         $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
         if (!$recipientSourceConfiguration && !($recipientSourceIdentifier === 'tx_mail_domain_model_group')) {
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
-            $this->redirect('show');
+            return $this->redirect('show');
         }
         if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceIdentifier)) {
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
-            $this->redirect('show');
+            return $this->redirect('show');
         }
         $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
         if (!array_key_exists($recipientSourceIdentifier, $idLists) || count($idLists[$recipientSourceIdentifier]) === 0) {
             ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
-            $this->redirect('show');
+            return $this->redirect('show');
         }
 
         $idList = $idLists[$recipientSourceIdentifier];
@@ -192,7 +186,7 @@ class RecipientController extends AbstractController
                 $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceIdentifier, $csvExportFields, true);
             }
         }
-        CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);
+        return CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);
     }
 
     /**
@@ -214,9 +208,9 @@ class RecipientController extends AbstractController
     }
 
     /**
-     * @throws StopActionException
+     * @throws \Exception
      */
-    public function csvImportWizardUploadCsvAction(): void
+    public function csvImportWizardUploadCsvAction(): ResponseInterface
     {
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
@@ -224,19 +218,18 @@ class RecipientController extends AbstractController
 
         if (!$importService->uploadCsv()) {
             ViewUtility::addFlashMessageError('An error occurred during csv import', 'Error');
-            $this->redirect('csvImportWizard');
+            return $this->redirect('csvImportWizard');
         }
-        $this->redirect('csvImportWizardStepConfiguration');
+        return $this->redirect('csvImportWizardStepConfiguration');
     }
 
     /**
      * @param array $configuration
-     * @return void
+     * @return ResponseInterface
      * @throws AspectNotFoundException
-     * @throws StopActionException
      * @throws \TYPO3\CMS\Core\Resource\Exception
      */
-    public function csvImportWizardImportCsvAction(array $configuration = []): void
+    public function csvImportWizardImportCsvAction(array $configuration = []): ResponseInterface
     {
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
@@ -244,15 +237,14 @@ class RecipientController extends AbstractController
 
         if (!$importService->importCsv()) {
             ViewUtility::addFlashMessageError('An error occurred during csv import', 'Error');
-            $this->redirect('csvImportWizard');
+            return $this->redirect('csvImportWizard');
         }
-        $this->redirect('csvImportWizardStepConfiguration');
+        return $this->redirect('csvImportWizardStepConfiguration');
     }
 
     /**
      * @param array $configuration
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
      * @throws \Exception
      */
@@ -292,9 +284,7 @@ class RecipientController extends AbstractController
     /**
      * @param array $configuration
      * @return ResponseInterface
-     * @throws DBALException
      * @throws Exception
-     * @throws StopActionException
      * @throws \Exception
      */
     public function csvImportWizardStepStartImportAction(array $configuration = []): ResponseInterface
@@ -304,7 +294,7 @@ class RecipientController extends AbstractController
         $importService->init($this->id, $this->request, $configuration);
 
         if (!$importService->validateMapping()) {
-            $this->redirect('csvImportWizardStepMapping', null, null, ['configuration' => $configuration]);
+            return $this->redirect('csvImportWizardStepMapping', null, null, ['configuration' => $configuration]);
         }
 
         $this->view->assign('data', $importService->startCsvImport());
@@ -378,7 +368,7 @@ class RecipientController extends AbstractController
     protected function addDocheaderButtons(string $groupName = ''): void
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
-        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailRecipient');
+        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('mail_recipient');
         $arguments = [
             'id' => $this->id,
         ];

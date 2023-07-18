@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
@@ -28,6 +27,7 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\Entity\Site;
@@ -63,6 +63,8 @@ abstract class AbstractController extends ActionController
     protected ?CategoryRepository $categoryRepository = null;
     protected ?IconFactory $iconFactory = null;
     protected ?UriBuilder $backendUriBuilder = null;
+
+    protected int $typo3MajorVersion = 11;
 
     /**
      * @param ModuleTemplateFactory $moduleTemplateFactory
@@ -183,8 +185,16 @@ abstract class AbstractController extends ActionController
 
     public function initializeAction()
     {
+        $this->typo3MajorVersion = (GeneralUtility::makeInstance(Typo3Version::class))->getMajorVersion();
+
+        if ($this->typo3MajorVersion < 12) {
+            $this->id = (int)GeneralUtility::_GP('id');
+        } else {
+            $this->id = (int)($this->request->getParsedBody()['id'] ?? $this->request->getQueryParams()['id'] ?? 0);
+        }
+
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
-        $this->id = (int)GeneralUtility::_GP('id');
+
         try {
             if (($this->userTSConfiguration['mailModulePageId'] ?? false) || ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) {
                 // if mailModulePageId was set in extension configuration -> use it as page id ...
@@ -223,7 +233,7 @@ abstract class AbstractController extends ActionController
         $notifications = $this->getFlashMessageQueue(ViewUtility::NOTIFICATIONS)->getAllMessagesAndFlush();
         if ($notifications) {
             foreach ($notifications as $notification) {
-                $this->addJsNotification($notification->getMessage(), $notification->getTitle(), $notification->getSeverity());
+                $this->addJsNotification($notification->getMessage(), $notification->getTitle(), $this->typo3MajorVersion < 12 ? $notification->getSeverity() : $notification->getSeverity()->value);
             }
         }
         $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);

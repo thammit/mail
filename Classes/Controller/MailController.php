@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\DBALException;
 use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use FriendsOfTYPO3\TtAddress\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Constants;
@@ -34,7 +33,6 @@ use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
@@ -43,7 +41,6 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
@@ -67,12 +64,11 @@ class MailController extends AbstractController
      * @return ResponseInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws StopActionException
      */
     public function indexAction(): ResponseInterface
     {
         if ($this->id === 0 || ($this->pageInfo['doktype'] !== (int)ConfigurationUtility::getExtensionConfiguration('mailPageTypeNumber') && $this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME)) {
-            $this->redirect('noPageSelected');
+            return $this->redirect('noPageSelected');
         }
         if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
             // the currently selected page is not a mail module sys folder
@@ -81,10 +77,10 @@ class MailController extends AbstractController
             $_GET['id'] = $this->pageInfo['pid'];
             if ($draftMails->count() > 0) {
                 // there is already a draft mail of this page -> use it
-                $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid()], $this->pageInfo['pid']);
+                return $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid()], $this->pageInfo['pid']);
             }
             // create a new mail of the page
-            $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id], $this->pageInfo['pid']);
+            return $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id], $this->pageInfo['pid']);
         }
 
         if (!isset($this->implodedParams['plainParams'])) {
@@ -181,10 +177,9 @@ class MailController extends AbstractController
 
     /**
      * @param array $pageTS
-     * @return void
-     * @throws StopActionException
+     * @return ResponseInterface
      */
-    public function updateConfigurationAction(array $pageTS): void
+    public function updateConfigurationAction(array $pageTS): ResponseInterface
     {
         if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), Permission::PAGE_EDIT)) {
             ViewUtility::addNotificationError(
@@ -192,7 +187,7 @@ class MailController extends AbstractController
                 LanguageUtility::getLL('general.notification.severity.error.title')
             );
 
-            $this->redirect('index');
+            return $this->redirect('index');
         }
         if ($pageTS) {
             $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, 'mod.web_modules.mail.');
@@ -208,7 +203,7 @@ class MailController extends AbstractController
                     );
                 }
 
-                $this->redirect('index');
+                return $this->redirect('index');
             }
             ViewUtility::addNotificationInfo(
                 sprintf(LanguageUtility::getLL('configuration.notification.noChanges.message'), $this->id),
@@ -216,22 +211,22 @@ class MailController extends AbstractController
             );
 
         }
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
      * @param int $page
+     * @return ResponseInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws StopActionException
      */
-    public function createMailFromInternalPageAction(int $page): void
+    public function createMailFromInternalPageAction(int $page): ResponseInterface
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         // todo add multi language support
         $newMail = $mailFactory->fromInternalPage($page);
         if ($newMail instanceof Mail) {
-            $this->addNewMailAndRedirectToSettings($newMail);
+            return $this->addNewMailAndRedirectToSettings($newMail);
         }
 
         ViewUtility::addNotificationError(
@@ -239,18 +234,17 @@ class MailController extends AbstractController
             LanguageUtility::getLL('general.notification.severity.error.title')
         );
 
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
      * @param string $subject
      * @param string $htmlUrl
      * @param string $plainTextUrl
-     * @return void
+     * @return ResponseInterface
      * @throws ParseException
-     * @throws StopActionException
      */
-    public function createMailFromExternalUrlsAction(string $subject, string $htmlUrl, string $plainTextUrl): void
+    public function createMailFromExternalUrlsAction(string $subject, string $htmlUrl, string $plainTextUrl): ResponseInterface
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         try {
@@ -265,10 +259,10 @@ class MailController extends AbstractController
                 LanguageUtility::getLL('general.notification.severity.error.title')
             );
 
-            $this->redirect('index');
+            return $this->redirect('index');
         }
 
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
@@ -277,57 +271,55 @@ class MailController extends AbstractController
      * @param string $fromName
      * @param string $fromEmail
      * @param bool $breakLines
-     * @return void
-     * @throws StopActionException
+     * @return ResponseInterface
      */
-    public function createQuickMailAction(string $subject, string $message, string $fromName, string $fromEmail, bool $breakLines): void
+    public function createQuickMailAction(string $subject, string $message, string $fromName, string $fromEmail, bool $breakLines): ResponseInterface
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = $mailFactory->fromText($subject, $message, $fromName, $fromEmail, $breakLines);
         if ($newMail instanceof Mail) {
             $this->addNewMailAndRedirectToSettings($newMail);
         }
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
-     * @throws StopActionException
+     * @param Mail $mail
+     * @return ResponseInterface
      */
-    protected function addNewMailAndRedirectToSettings(Mail $mail): void
+    protected function addNewMailAndRedirectToSettings(Mail $mail): ResponseInterface
     {
         $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
         $persistenceManager->add($mail);
         $persistenceManager->persistAll();
-        $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
-     * @return void
-     * @throws StopActionException
+     * @return ResponseInterface
      */
-    public function draftMailAction(Mail $mail): void
+    public function draftMailAction(Mail $mail): ResponseInterface
     {
         if ($mail->getStep() > 1) {
             $navigation = $this->getNavigation($mail->getStep() - 1, $this->hideCategoryStep($mail));
-            $this->redirect($navigation['nextAction'], null, null, ['mail' => $mail->getUid()]);
+            return $this->redirect($navigation['nextAction'], null, null, ['mail' => $mail->getUid()]);
         }
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
      * @param Mail $mail
-     * @return void
+     * @return ResponseInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws HtmlContentFetchFailedException
      * @throws IllegalObjectTypeException
-     * @throws PlainTextContentFetchFailedException
-     * @throws StopActionException
-     * @throws UnknownObjectException
      * @throws ParseException
+     * @throws PlainTextContentFetchFailedException
+     * @throws UnknownObjectException
      */
-    public function updateContentAction(Mail $mail): void
+    public function updateContentAction(Mail $mail): ResponseInterface
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = null;
@@ -337,7 +329,7 @@ class MailController extends AbstractController
                 // it's an external mail -> fetch content again
                 $newMail = $mailFactory->fromExternalUrls($mail->getSubject(), $mail->getHtmlParams(), $mail->getPlainParams());
             } else {
-                $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
+                return $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
             }
         } else {
             $newMail = $mailFactory->fromInternalPage($mail->getPage(), $mail->getSysLanguageUid());
@@ -351,9 +343,9 @@ class MailController extends AbstractController
             $mail->setCharset($newMail->getCharset());
 
             $this->mailRepository->update($mail);
-            $this->redirect('settings', null, null, ['mail' => $mail->getUid(), 'updated' => 1]);
+            return $this->redirect('settings', null, null, ['mail' => $mail->getUid(), 'updated' => 1]);
         }
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
@@ -542,7 +534,6 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws IllegalObjectTypeException
      * @throws RouteNotFoundException
      * @throws UnknownObjectException
@@ -706,7 +697,6 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
@@ -777,10 +767,9 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @param string $recipients
-     * @throws StopActionException
-     * @throws Exception
+     * @return ResponseInterface
      */
-    public function sendTestMailAction(Mail $mail, string $recipients = ''): void
+    public function sendTestMailAction(Mail $mail, string $recipients = ''): ResponseInterface
     {
         // normalize addresses:
         $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
@@ -796,13 +785,12 @@ class MailController extends AbstractController
             sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), $addressList),
             LanguageUtility::getLL('mail.wizard.notification.testMailSent.title')
         );
-        $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws DBALException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
@@ -845,17 +833,18 @@ class MailController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @throws DBALException
-     * @throws StopActionException
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
-     * @throws \Exception
      */
-    public function finishAction(Mail $mail): void
+    public function finishAction(Mail $mail): ResponseInterface
     {
         if ($mail->getRecipientGroups()->count() === 0) {
             ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'), LanguageUtility::getLL('general.notification.severity.warning.title'));
-            $this->redirect('scheduleSending', null, null, [
+            return $this->redirect('scheduleSending', null, null, [
                 'mail' => $mail]);
         }
 
@@ -867,7 +856,7 @@ class MailController extends AbstractController
                 LanguageUtility::getLL('general.notification.severity.warning.title')
             );
 
-            $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
+            return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
         }
 
         // Update the record:
@@ -903,15 +892,15 @@ class MailController extends AbstractController
             LanguageUtility::getLL('mail.wizard.notification.finished.title')
         );
 
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     /**
      * @param Mail $mail
-     * @throws StopActionException
+     * @return ResponseInterface
      * @throws IllegalObjectTypeException
      */
-    public function deleteAction(Mail $mail): void
+    public function deleteAction(Mail $mail): ResponseInterface
     {
         $this->mailRepository->remove($mail);
 
@@ -920,7 +909,7 @@ class MailController extends AbstractController
             LanguageUtility::getLL('mail.wizard.notification.deleted.title')
         );
 
-        $this->redirect('index');
+        return $this->redirect('index');
     }
 
     protected function hideCategoryStep(Mail $mail = null): bool
@@ -1006,13 +995,16 @@ class MailController extends AbstractController
             $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
         }
 
-        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('MailMail_MailMail');
-        $arguments = [
-            'id' => $this->id,
-        ];
-        $shortCutButton->setArguments($arguments);
-        $shortCutButton->setDisplayName('Mail Wizard [' . $this->id . ']');
-        $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
+        if ($this->id) {
+            $shortCutButton = $buttonBar->makeShortcutButton()
+                ->setRouteIdentifier('mail_mail')
+                ->setDisplayName('Mail Wizard [' . $this->id . ']')
+                ->setArguments([
+                    'id' => $this->id,
+                ])
+            ;
+            $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT);
+        }
     }
 
     /**

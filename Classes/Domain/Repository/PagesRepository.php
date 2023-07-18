@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use PDO;
 
 class PagesRepository
@@ -16,8 +15,7 @@ class PagesRepository
      * @param int $pageUid
      * @param int $langUid
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function selectPageByL10nAndSysLanguageUid(int $pageUid, int $langUid): array
     {
@@ -28,15 +26,14 @@ class PagesRepository
             ->from($this->table)
             ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)))
             ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, PDO::PARAM_INT)))
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
     }
 
     /**
      * @param string $permsClause
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function selectSubfolders(string $permsClause): array
     {
@@ -53,14 +50,13 @@ class PagesRepository
                 )
             )
             ->orderBy('uid')
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
     }
 
     /**
      * @return array
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findMailModulePageUids(): array
     {
@@ -70,7 +66,7 @@ class PagesRepository
             ->select('uid')
             ->from($this->table)
             ->where($queryBuilder->expr()->eq('module', $queryBuilder->createNamedParameter('mail')))
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative(), 'uid');
     }
 
