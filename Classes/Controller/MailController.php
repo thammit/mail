@@ -449,7 +449,7 @@ class MailController extends AbstractController
                         }
                         $data[$groupName][$property] = [
                             'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $table),
-                            'value' => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '-',
+                            'value' => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '',
                             'rawValue' => $rawValue,
                             'edit' => in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
                             'icon' => 'actions-open'
@@ -457,8 +457,8 @@ class MailController extends AbstractController
                     }
                     if ($property === 'sysLanguageUid') {
                         $data[$groupName][$property] = array_merge($data[$groupName][$property], [
-                            'value' => '',
-                            'icon' => $this->site->getLanguageById((int)$mail->$getter())->getFlagIdentifier()
+                            'value' => $this->site->getLanguageById((int)$mail->$getter())->getTitle(),
+                            'icon' => 'actions-open'
                         ]);
                     }
                     if ($property === 'renderedSize') {
