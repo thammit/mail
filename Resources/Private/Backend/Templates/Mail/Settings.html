@@ -162,7 +162,7 @@
                 </div>
                 <f:if condition="{mail.page}">
                     <a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page}')}" title="{f:translate(key: '{lll}general.button.edit')}">
-                        <core:icon identifier="actions-file-edit"/>
+                        <core:icon identifier="app-pagetree-mail" overlay="actions-open"/>
                     </a>
                 </f:if>
                 <f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}" action="updateContent" controller="Mail" arguments="{mail: mail.uid}">
