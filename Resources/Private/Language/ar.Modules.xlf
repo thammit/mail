@@ -83,6 +83,34 @@
         <source>Error</source>
         <target state="needs-translation">Error</target>
       </trans-unit>
+      <trans-unit id="shortcut.wizard" resname="shortcut.wizard">
+        <source>Mail Wizard</source>
+        <target state="needs-translation">Mail Wizard</target>
+      </trans-unit>
+      <trans-unit id="shortcut.recipientGroups" resname="shortcut.recipientGroups">
+        <source>Mail Groups</source>
+        <target state="needs-translation">Mail Groups</target>
+      </trans-unit>
+      <trans-unit id="shortcut.recipientGroup" resname="shortcut.recipientGroup">
+        <source>Mail Group</source>
+        <target state="needs-translation">Mail Group</target>
+      </trans-unit>
+      <trans-unit id="shortcut.reports" resname="shortcut.reports">
+        <source>Mail Reports</source>
+        <target state="needs-translation">Mail Reports</target>
+      </trans-unit>
+      <trans-unit id="shortcut.report" resname="shortcut.report">
+        <source>Mail Report</source>
+        <target state="needs-translation">Mail Report</target>
+      </trans-unit>
+      <trans-unit id="shortcut.report" resname="shortcut.report">
+        <source>Mail Report</source>
+        <target state="needs-translation">Mail Report</target>
+      </trans-unit>
+      <trans-unit id="shortcut.queue" resname="shortcut.queue">
+        <source>Mail Queue</source>
+        <target state="needs-translation">Mail Queue</target>
+      </trans-unit>
       <trans-unit id="mail.type.quickMail" resname="mail.type.quickMail">
         <source>Quick Mail</source>
         <target state="needs-translation">Quick Mail</target>
