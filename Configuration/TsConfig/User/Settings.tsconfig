@@ -5,4 +5,11 @@ tx_mail {
     hideConfiguration = 0
     hideManualSending = 0
     mailModulePageId =
+    settings {
+        general = type,sysLanguageUid,page,plainParams,htmlParams,attachment,renderedSize
+        headers = fromEmail,fromName,replyToEmail,replyToName,returnPath,organisation,priority
+        content = encoding,sendOptions,includeMedia,redirect,redirectAll,authCodeFields
+        readOnly = renderedSize
+        hideEditAllButton = 0
+    }
 }

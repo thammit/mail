@@ -105,21 +105,37 @@
     background-color: var(--mail-background-color);
 }
 
-.mail-wizard-preview {
-    width:320px;
+.mail-wizard-categories .mail-wizard-preview {
     height:450px;
-    overflow-x: hidden;
     overflow-y:scroll;
     scroll-behavior: smooth;
 }
-.mail-wizard-preview-body {
-    width:600px;
-    height:600px;
-    overflow:visible;
-    transform: scale(0.5) translate(-50%, -50%);
+
+@media (min-width: 768px) {
+
+    .mail-wizard-categories .mail-wizard-preview {
+        width:320px;
+        height:450px;
+        overflow-x: hidden;
+        overflow-y:scroll;
+        scroll-behavior: smooth;
+    }
+    .mail-wizard-categories .mail-wizard-preview-body {
+        width:600px;
+        height:100%;
+        overflow:visible;
+        transform: scale(0.5) translate(-50%, -50%);
+    }
 }
-.mail-wizard-preview-body::before {
+
+
+.mail-wizard-preview-body > div {
+    position:relative;
+}
+
+.mail-wizard-preview-body > div::before {
     position:absolute;
+    z-index:1040;
     content:"";
     display:block;
     top:0;

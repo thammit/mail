@@ -5,21 +5,21 @@ defined('TYPO3') or die();
 $feUsersCols = [
     'mail_active' => [
         'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:mail_active',
-        'exclude' => '1',
+        'exclude' => true,
         'config' => [
             'type' => 'check'
         ]
     ],
     'mail_html' => [
         'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:mail_html',
-        'exclude' => '1',
+        'exclude' => true,
         'config' => [
             'type' => 'check'
         ]
     ],
     'mail_salutation' => [
         'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:mail_salutation',
-        'exclude' => '1',
+        'exclude' => true,
         'config' => [
             'type' => 'input'
         ]

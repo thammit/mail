@@ -27,14 +27,12 @@ return [
                 'items' => [
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.type.I.0', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.type.I.1', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::EXTERNAL],
-//                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.type.I.2', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_INTERNAL],
-//                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.type.I.3', \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_EXTERNAL],
                 ],
                 'default' => \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL,
             ],
         ],
         'sys_language_uid' => [
-            'exclude' => 1,
+            'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language',
             'config' => [
                 'type' => 'language',
@@ -44,12 +42,13 @@ return [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.subject',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
+                'size' => 30,
                 'max' => '120',
                 'eval' => 'trim,required',
             ],
         ],
         'page' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.page',
             'config' => [
                 'type' => 'group',
@@ -61,60 +60,67 @@ return [
             ],
         ],
         'from_email' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.fromEmail',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
-                'max' => '80',
+                'size' => 30,
+                'max' => 80,
                 'eval' => 'trim,required',
             ],
         ],
         'from_name' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.fromName',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
+                'size' => 30,
                 'eval' => 'trim',
-                'max' => '80',
+                'max' => 80,
             ],
         ],
         'reply_to_email' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.replyToEmail',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
+                'size' => 30,
                 'eval' => 'trim',
-                'max' => '80',
+                'max' => 80,
             ],
         ],
         'reply_to_name' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.replyToName',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
+                'size' => 30,
                 'eval' => 'trim',
-                'max' => '80',
+                'max' => 80,
             ],
         ],
         'return_path' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.returnPath',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
+                'size' => 30,
                 'eval' => 'trim',
-                'max' => '80',
+                'max' => 80,
             ],
         ],
         'organisation' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.organisation',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
+                'size' => 30,
                 'eval' => 'trim',
-                'max' => '80',
+                'max' => 80,
             ],
         ],
         'encoding' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.transferEncoding',
             'config' => [
                 'type' => 'select',
@@ -128,16 +134,18 @@ return [
             ],
         ],
         'charset' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.charset',
             'config' => [
                 'type' => 'input',
-                'size' => '15',
+                'size' => 15,
                 'max' => '20',
                 'eval' => 'trim',
                 'default' => 'iso-8859-1',
             ],
         ],
         'priority' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.priority',
             'config' => [
                 'type' => 'select',
@@ -151,6 +159,7 @@ return [
             ],
         ],
         'send_options' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sendOptions',
             'config' => [
                 'type' => 'check',
@@ -163,6 +172,7 @@ return [
             ],
         ],
         'include_media' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.includeMedia',
             'config' => [
                 'type' => 'check',
@@ -170,28 +180,29 @@ return [
             ],
         ],
         'html_params' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.htmlParams',
             'config' => [
                 'type' => 'input',
-                'size' => '15',
-                'max' => '80',
+                'size' => 15,
+                'max' => 80,
                 'eval' => 'trim',
                 'default' => '',
             ],
         ],
         'plain_params' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.plainParams',
             'config' => [
                 'type' => 'input',
-                'size' => '15',
-                'max' => '80',
+                'size' => 15,
+                'max' => 80,
                 'eval' => 'trim',
                 'default' => '&plain=1',
             ],
         ],
         'sent' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sent',
-            'exclude' => '1',
             'config' => [
                 'type' => 'none',
                 'size' => 2,
@@ -199,17 +210,15 @@ return [
         ],
         'step' => [
             'label' => 'Step',
-            'exclude' => '1',
             'config' => [
                 'type' => 'passthrough',
             ],
         ],
         'scheduled' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.scheduled',
-            'exclude' => '1',
             'config' => [
                 'type' => 'none',
-                'cols' => '30',
+                'cols' => 30,
                 'format' => 'datetime',
                 'default' => 0,
             ],
@@ -218,7 +227,7 @@ return [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.scheduledBegin',
             'config' => [
                 'type' => 'none',
-                'cols' => '15',
+                'cols' => 15,
                 'format' => 'datetime',
                 'default' => 0,
             ],
@@ -227,12 +236,13 @@ return [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.scheduledEnd',
             'config' => [
                 'type' => 'none',
-                'cols' => '15',
+                'cols' => 15,
                 'format' => 'datetime',
                 'default' => 0,
             ],
         ],
         'redirect' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.redirect',
             'config' => [
                 'type' => 'check',
@@ -240,39 +250,42 @@ return [
             ],
         ],
         'redirect_url' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.redirectUrl',
             'config' => [
                 'type' => 'input',
-                'size' => '15',
-                'max' => '80',
+                'size' => 15,
+                'max' => 80,
                 'eval' => 'trim',
                 'default' => '',
             ],
         ],
         'redirect_all' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.redirectAll',
             'config' => [
                 'type' => 'check',
             ],
         ],
         'auth_code_fields' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.authCodeFields',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
+                'size' => 30,
                 'eval' => 'trim',
-                'max' => '80',
+                'max' => 80,
                 'default' => 'uid,name,email,password',
             ],
         ],
         'rendered_size' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.renderedSize',
-            'exclude' => '1',
             'config' => [
                 'type' => 'none',
             ],
         ],
         'attachment' => [
+            'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.attachment',
             'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
                 'attachment',
@@ -302,6 +315,7 @@ return [
             ),
         ],
         'recipient_groups' => [
+            'exclude' => true,
             'label' => 'Recipient Groups',
             'config' => [
                 'type' => 'select',

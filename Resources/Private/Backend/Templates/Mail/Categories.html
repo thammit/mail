@@ -17,7 +17,7 @@
         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
         {mail.subject}
     </h2>
-    <div class="row justify-content-between">
+    <div class="row justify-content-between mail-wizard-categories">
         <div class="col-12 col-md-8">
             <f:form action="updateCategories" arguments="{mail:mail.uid}" method="post" enctype="multipart/form-data">
                 <f:render partial="InfoBox" arguments="{field: 'mail.wizard.categories'}"/>

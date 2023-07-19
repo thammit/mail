@@ -30,7 +30,7 @@ return [
     ],
     'columns' => [
         'hidden' => [
-            'exclude' => 1,
+            'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.hidden',
             'config' => [
                 'type' => 'check',
@@ -40,8 +40,8 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.title',
             'config' => [
                 'type' => 'input',
-                'size' => '30',
-                'max' => '120',
+                'size' => 30,
+                'max' => 120,
                 'eval' => 'trim,required',
                 'default' => ''
             ],
@@ -50,8 +50,8 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.description',
             'config' => [
                 'type' => 'text',
-                'cols' => '40',
-                'rows' => '3',
+                'cols' => 40,
+                'rows' => 3,
             ],
         ],
         'type' => [
@@ -76,9 +76,9 @@ return [
                 'internal_type' => 'db',
                 'allowed' => 'tt_address,fe_users,fe_groups',
                 'MM' => 'tx_mail_group_mm',
-                'size' => '20',
-                'maxitems' => '100000',
-                'minitems' => '0',
+                'size' => 20,
+                'maxitems' => 100000,
+                'minitems' => 0,
             ],
         ],
         'pages' => [
@@ -87,9 +87,9 @@ return [
                 'type' => 'group',
                 'internal_type' => 'db',
                 'allowed' => 'pages',
-                'size' => '3',
-                'maxitems' => '22',
-                'minitems' => '0',
+                'size' => 3,
+                'maxitems' => 22,
+                'minitems' => 0,
             ],
         ],
         'children' => [
@@ -98,9 +98,9 @@ return [
                 'type' => 'group',
                 'internal_type' => 'db',
                 'allowed' => 'tx_mail_domain_model_group',
-                'size' => '3',
-                'minitems' => '0',
-                'maxitems' => '22',
+                'size' => 3,
+                'minitems' => 0,
+                'maxitems' => 22,
             ],
         ],
         'recursive' => [
@@ -122,8 +122,8 @@ return [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.list',
             'config' => [
                 'type' => 'text',
-                'cols' => '48',
-                'rows' => '10',
+                'cols' => 48,
+                'rows' => 10,
             ],
         ],
         'csv' => [

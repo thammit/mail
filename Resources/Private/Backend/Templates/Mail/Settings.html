@@ -13,174 +13,161 @@
         <f:translate key="{lll}mail.wizard.title"/>
     </h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <h2>
-        <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
-        {mail.subject} <be:link.editRecord uid="{mail.uid}" table="{table}" fields="subject">
-        <core:icon identifier="actions-open"/>
-    </be:link.editRecord>
-    </h2>
-    <div class="row justify-content-between">
-        <div class="col-12 col-md-8">
-            <h3>
-                <f:translate key="{lll}mail.wizard.settings"/>
-            </h3>
-            <div role="tabpanel">
-                <ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab" data-store-last-tab="1">
-                    <li role="presentation" class="t3js-tabmenu-item">
-                        <a href="#tab-1" title="" aria-controls="tab-1" role="tab" data-bs-toggle="tab"
-                           aria-selected="true" class="active">
-                            <f:translate key="{lll}mail.wizard.settings.general" default="Composition"/>
-                        </a>
-                    </li>
-                    <li role="presentation" class="t3js-tabmenu-item ">
-                        <a href="#tab-2" title="" aria-controls="tab-2" role="tab" data-bs-toggle="tab"
-                           aria-selected="false">
-                            <f:translate key="{lll}mail.wizard.settings.headers" default="Headers"/>
-                        </a>
-                    </li>
-                    <li role="presentation" class="t3js-tabmenu-item ">
-                        <a href="#tab-3" title="" aria-controls="tab-3" role="tab" data-bs-toggle="tab"
-                           aria-selected="false">
-                            <f:translate key="{lll}mail.wizard.settings.content" default="Content"/>
-                        </a>
-                    </li>
-                </ul>
-                <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="tab-1">
-                        <div class="panel panel-tab">
-                            <div class="panel-body">
-                                <table class="table table-striped table-hover">
-                                    <tbody>
-                                    <f:for each="{data.general}" as="column" key="field">
-                                        <tr>
-                                            <th style="width:20%; min-width:200px">{column.title}</th>
-                                            <td>
-                                                <f:if condition="{column.edit}">
-                                                    <f:then>
-                                                        <be:link.editRecord uid="{mail.uid}" table="{table}"
-                                                                            fields="{column.edit}">
-                                                            <span class="{column.class}">
-                                                            <f:if condition="{column.icon}">
-                                                                <core:icon identifier="{column.icon}"
-                                                                           overlay="{column.overlay}"/>
-                                                            </f:if>
-                                                                {column.value}
-                                                            </span>
-                                                        </be:link.editRecord>
-                                                    </f:then>
-                                                    <f:else>{column.value}</f:else>
-                                                </f:if>
-                                            </td>
-                                            <td align="right">
-                                                <f:if condition="{field} == 'type'">
-                                                    <f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}" action="updateContent" controller="Mail" arguments="{mail: mail.uid}">
-                                                        <core:icon identifier="actions-refresh"/>
-                                                    </f:link.action>
-                                                </f:if>
-                                                <f:if condition="{field} == 'page'">
-                                                    <a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page}')}" title="{f:translate(key: '{lll}general.button.edit')}">
-                                                        <core:icon identifier="actions-file-edit"/>
-                                                    </a>
-                                                </f:if>
-                                                <f:if condition="{field} == 'attachment'">
-                                                    <be:link.editRecord class="btn btn-default" uid="{mail.uid}" table="{table}" fields="attachment">
-                                                        <core:icon identifier="mail-attachment"/>
-                                                    </be:link.editRecord>
-                                                </f:if>
-                                            </td>
-                                        </tr>
-                                    </f:for>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="tab-2">
-                        <div class="panel panel-tab">
-                            <div class="panel-body">
-                                <table class="table table-striped table-hover">
-                                    <tbody>
-                                    <f:for each="{data.headers}" as="column">
-                                        <tr>
-                                            <th style="width:20%; min-width:300px">{column.title}</th>
-                                            <td>
-                                                <f:if condition="{column.edit}">
-                                                    <f:then>
-                                                        <be:link.editRecord uid="{mail.uid}" table="{table}"
-                                                                            fields="{column.edit}">
-                                                            <span class="{column.class}">
-                                                            <f:if condition="{column.icon}">
-                                                                <core:icon identifier="{column.icon}"
-                                                                           overlay="{column.overlay}"/>
-                                                            </f:if>
-                                                                {column.value}
-                                                            </span>
-                                                        </be:link.editRecord>
-                                                    </f:then>
-                                                    <f:else>{column.value}</f:else>
-                                                </f:if>
-                                            </td>
-                                        </tr>
-                                    </f:for>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="tab-3">
-                        <div class="panel panel-tab">
-                            <div class="panel-body">
-                                <table class="table table-striped table-hover">
-                                    <tbody>
-                                    <f:for each="{data.content}" as="column">
-                                        <tr>
-                                            <th style="width:20%; min-width:300px">{column.title}</th>
-                                            <td>
-                                                <f:if condition="{column.edit}">
-                                                    <f:then>
-                                                        <be:link.editRecord uid="{mail.uid}" table="{table}"
-                                                                            fields="{column.edit}">
-                                                            <span class="{column.class}">
-                                                            <f:if condition="{column.icon}">
-                                                                <core:icon identifier="{column.icon}"
-                                                                           overlay="{column.overlay}"/>
-                                                            </f:if>
-                                                                {column.value}
-                                                            </span>
-                                                        </be:link.editRecord>
-                                                    </f:then>
-                                                    <f:else>{column.value}</f:else>
-                                                </f:if>
-                                            </td>
-                                        </tr>
-                                    </f:for>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <f:if condition="{allowEdit} && !{mail.sent}">
+    <div class="row justify-content-start">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+            <h2>
+                <f:variable name="wizardSettings"><f:translate key="{lll}mail.wizard.settings"/></f:variable>
+                {wizardSettings}
+                <f:if condition="!{hideEditAllButton}">
+                    <f:if condition="{allowEdit} && !{mail.sent}">
+                        <f:then>
+                            <be:link.editRecord uid="{mail.uid}" table="{table}" class="ml-2" title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: wizardSettings}')}">
+                                <core:icon identifier="actions-open"/>
+                            </be:link.editRecord>
+                        </f:then>
+                        <f:else>
+                            <f:be.infobox state="1">
+                                <f:translate key="{lll}configuration.noEditPermissions"/>
+                            </f:be.infobox>
+                        </f:else>
+                    </f:if>
+                </f:if>
+            </h2>
+            <f:if condition="{noTabs}">
                 <f:then>
-                    <be:link.editRecord uid="{mail.uid}" table="{table}" class="btn btn-default mb-3">
-                        <core:icon identifier="actions-open"/>
-                        <f:translate key="{lll}general.button.edit"/>
-                    </be:link.editRecord>
+                    <div class="panel panel-default p-4 pb-0">
+                    <f:for each="{data.general}" as="column" key="field">
+                        <dl class="row">
+                            <dt class="col-sm-3">{column.title}</dt>
+                            <dd class="col-sm-9">
+                                {column.value}
+                                <f:if condition="{column.edit}">
+                                    <be:link.editRecord uid="{mail.uid}" table="{table}" fields="{column.edit}" title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: column.title}')}" class="float-end">
+                                       <core:icon identifier="{column.icon}" overlay="{column.overlay}"/>
+                                    </be:link.editRecord>
+                                </f:if>
+                            </dd>
+                        </dl>
+                    </f:for>
+                    </div>
                 </f:then>
                 <f:else>
-                    <f:be.infobox state="1">
-                        <f:translate key="{lll}configuration.noEditPermissions"/>
-                    </f:be.infobox>
+                    <div role="tabpanel">
+                        <ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab" data-store-last-tab="1">
+                            <li role="presentation" class="t3js-tabmenu-item">
+                                <a href="#tab-1" title="" aria-controls="tab-1" role="tab" data-bs-toggle="tab"
+                                   aria-selected="true" class="active">
+                                    <f:translate key="{lll}mail.wizard.settings.general" default="Composition"/>
+                                </a>
+                            </li>
+                            <f:if condition="{data.headers}">
+                                <li role="presentation" class="t3js-tabmenu-item ">
+                                    <a href="#tab-2" title="" aria-controls="tab-2" role="tab" data-bs-toggle="tab"
+                                       aria-selected="false">
+                                        <f:translate key="{lll}mail.wizard.settings.headers" default="Headers"/>
+                                    </a>
+                                </li>
+                            </f:if>
+                            <f:if condition="{data.content}">
+                                <li role="presentation" class="t3js-tabmenu-item ">
+                                    <a href="#tab-3" title="" aria-controls="tab-3" role="tab" data-bs-toggle="tab"
+                                       aria-selected="false">
+                                        <f:translate key="{lll}mail.wizard.settings.content" default="Content"/>
+                                    </a>
+                                </li>
+                            </f:if>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="tab-1">
+                                <div class="panel panel-tab">
+                                    <div class="panel-body">
+                                        <table class="table table-striped table-hover">
+                                            <tbody>
+                                            <f:for each="{data.general}" as="column" key="field">
+                                                <tr>
+                                                    <th style="width:20%; min-width:200px">{column.title}</th>
+                                                    <td>{column.value}</td>
+                                                    <td class="text-right">
+                                                        <f:if condition="{column.edit}">
+                                                            <be:link.editRecord class="btn btn-default" uid="{mail.uid}" table="{table}" fields="{column.edit}" title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: column.title}')}">
+                                                                <core:icon identifier="{column.icon}"/>
+                                                            </be:link.editRecord>
+                                                        </f:if>
+                                                    </td>
+                                                </tr>
+                                            </f:for>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="tab-2">
+                                <div class="panel panel-tab">
+                                    <div class="panel-body">
+                                        <table class="table table-striped table-hover">
+                                            <tbody>
+                                            <f:for each="{data.headers}" as="column">
+                                                <tr>
+                                                    <th style="width:20%; min-width:200px">{column.title}</th>
+                                                    <td>{column.value}</td>
+                                                    <td class="text-right">
+                                                        <f:if condition="{column.edit}">
+                                                            <be:link.editRecord class="btn btn-default" uid="{mail.uid}" table="{table}" fields="{column.edit}" title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: column.title}')}">
+                                                                <core:icon identifier="{column.icon}"/>
+                                                            </be:link.editRecord>
+                                                        </f:if>
+                                                    </td>
+                                                </tr>
+                                            </f:for>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="tab-3">
+                                <div class="panel panel-tab">
+                                    <div class="panel-body">
+                                        <table class="table table-striped table-hover">
+                                            <tbody>
+                                            <f:for each="{data.content}" as="column">
+                                                <tr>
+                                                    <th style="width:20%; min-width:200px">{column.title}</th>
+                                                    <td>{column.value}</td>
+                                                    <td class="text-right">
+                                                        <f:if condition="{column.edit}">
+                                                            <be:link.editRecord class="btn btn-default" uid="{mail.uid}" table="{table}" fields="{column.edit}" title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: column.title}')}">
+                                                                <core:icon identifier="{column.icon}"/>
+                                                            </be:link.editRecord>
+                                                        </f:if>
+                                                    </td>
+                                                </tr>
+                                            </f:for>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </f:else>
             </f:if>
         </div>
+    </div>
+    <div class="row justify-content-start">
         <f:if condition="{mailBody}">
-            <div class="col-12 col-md-4">
-                <div class="mail-wizard-preview">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                <div class="mail-wizard-preview panel panel-default mb-2">
                     <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">{mailBody -> f:format.raw()}
                     </div>
                 </div>
+                <f:if condition="{mail.page}">
+                    <a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page}')}" title="{f:translate(key: '{lll}general.button.edit')}">
+                        <core:icon identifier="actions-file-edit"/>
+                    </a>
+                </f:if>
+                <f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}" action="updateContent" controller="Mail" arguments="{mail: mail.uid}">
+                    <core:icon identifier="actions-refresh"/>
+                </f:link.action>
             </div>
         </f:if>
     </div>

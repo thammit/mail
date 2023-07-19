@@ -369,11 +369,30 @@ class MailController extends AbstractController
         $data = [];
         $table = 'tx_mail_domain_model_mail';
         $groups = [
-            'general' => ['type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
+            'general' => ['subject', 'type', 'sysLanguageUid', 'page', 'plainParams', 'htmlParams', 'attachment', 'renderedSize'],
             'headers' => ['fromEmail', 'fromName', 'replyToEmail', 'replyToName', 'returnPath', 'organisation', 'priority'],
-            'content' => ['encoding', 'sendOptions', 'includeMedia', 'encoding', 'redirect', 'redirectAll', 'authCodeFields'],
+            'content' => ['encoding', 'sendOptions', 'includeMedia', 'redirect', 'redirectAll', 'authCodeFields'],
         ];
+        if (isset($this->userTSConfiguration['settings.']['general'])) {
+            $groups['general'] = GeneralUtility::trimExplode(',', $this->userTSConfiguration['settings.']['general'], true);
+        }
+        if (isset($this->userTSConfiguration['settings.']['headers'])) {
+            $groups['headers'] = GeneralUtility::trimExplode(',', $this->userTSConfiguration['settings.']['headers'], true);
+        }
+        if (isset($this->userTSConfiguration['settings.']['content'])) {
+            $groups['content'] = GeneralUtility::trimExplode(',', $this->userTSConfiguration['settings.']['content'], true);
+        }
+        if (empty($groups['headers']) && empty($groups['content'])) {
+            $this->view->assign('noTabs', true);
+        }
+        if (isset($this->userTSConfiguration['settings.']['hideEditAllButton'])) {
+            $this->view->assign('hideEditAllButton', (bool)$this->userTSConfiguration['settings.']['hideEditAllButton']);
+        }
+
         $readOnly = ['renderedSize'];
+        if (isset($this->userTSConfiguration['settings.']['readOnly'])) {
+            $readOnly = GeneralUtility::trimExplode(',', $this->userTSConfiguration['settings.']['readOnly'], true);
+        }
 
         if ($mail->isExternal()) {
             unset($groups['general'][array_search('sysLanguageUid', $groups['general'])]);
@@ -386,6 +405,9 @@ class MailController extends AbstractController
             }
             if ($mail->isQuickMail()) {
                 unset($groups['content'][array_search('includeMedia', $groups['content'])]);
+                if (isset($groups['general'][array_search('includeMedia', $groups['general'])])) {
+                    unset($groups['general'][array_search('includeMedia', $groups['general'])]);
+                }
             }
         }
 
@@ -414,9 +436,10 @@ class MailController extends AbstractController
                     }
                     $data[$groupName][$property] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField('attachment', $table),
-                        'value' => $value ?: '-',
-                        'edit' => GeneralUtility::camelCaseToLowerCaseUnderscored($property),
-                        'overlay' => ''
+                        'value' => $value ?: '',
+                        'edit' => in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
+                        'icon' => 'mail-attachment',
+                        'overlay' => '',
                     ];
                 } else {
                     if (method_exists($mail, $getter)) {
@@ -429,6 +452,7 @@ class MailController extends AbstractController
                             'value' => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '-',
                             'rawValue' => $rawValue,
                             'edit' => in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
+                            'icon' => 'actions-open'
                         ];
                     }
                     if ($property === 'sysLanguageUid') {
@@ -489,10 +513,14 @@ class MailController extends AbstractController
         $this->moduleTemplate->setContent($this->view->render());
 
         if ($updatePreview && !$mail->isQuickMail()) {
+            if ($mail->isInternal()) {
+                $messageValue = BackendUtility::getProcessedValue($tableName, 'page', $mail->getPage());
+            } else {
+                $messageValue = trim(BackendUtility::getProcessedValue($tableName, 'plainParams', $mail->getPlainParams()) . ' / '. BackendUtility::getProcessedValue($tableName, 'htmlParams', $mail->getHtmlParams()), ' /');
+            }
             $this->addJsNotification(
                 sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'),
-                    $mail->isInternal() ? $data['general']['page']['value'] :
-                        trim(($data['general']['plainParams']['value'] ?? '') . ' / ' . ($data['general']['htmlParams']['value'] ?? ''), ' /')),
+                    $messageValue),
                 LanguageUtility::getLL('general.notification.severity.success.title'));
         }
 
