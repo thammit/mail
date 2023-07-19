@@ -183,15 +183,11 @@ abstract class AbstractController extends ActionController
         $this->backendUriBuilder = $uriBuilder;
     }
 
-    public function initializeAction()
+    public function initializeAction(): void
     {
-        $this->typo3MajorVersion = (GeneralUtility::makeInstance(Typo3Version::class))->getMajorVersion();
+        $this->typo3MajorVersion = (new Typo3Version())->getMajorVersion();
 
-        if ($this->typo3MajorVersion < 12) {
-            $this->id = (int)GeneralUtility::_GP('id');
-        } else {
-            $this->id = (int)($this->request->getParsedBody()['id'] ?? $this->request->getQueryParams()['id'] ?? 0);
-        }
+        $this->id = (int)($this->request->getParsedBody()['id'] ?? $this->request->getQueryParams()['id'] ?? 0);
 
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
 
@@ -209,7 +205,7 @@ abstract class AbstractController extends ActionController
                     $this->id = $mailModulePageUid;
                 }
             }
-        } catch (Exception|DBALException|ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
         }
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         try {
@@ -263,7 +259,7 @@ abstract class AbstractController extends ActionController
         ];
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
-            'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . ($message ?? '') . '\');');
+            'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . $message . '\');');
         $this->notification++;
     }
 }

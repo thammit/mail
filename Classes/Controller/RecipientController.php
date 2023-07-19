@@ -368,14 +368,16 @@ class RecipientController extends AbstractController
     protected function addDocheaderButtons(string $groupName = ''): void
     {
         $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
-        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('mail_recipient');
+        $routeIdentifier = $this->typo3MajorVersion < 12 ? 'MailMail_MailRecipient' : 'mail_recipient';
+        $shortCutButton = $buttonBar->makeShortcutButton()
+            ->setRouteIdentifier($routeIdentifier);
         $arguments = [
             'id' => $this->id,
         ];
         $potentialArguments = [
             'tx_mail_mailmail_mailrecipient' => ['group', 'action', 'controller'],
         ];
-        $displayName = 'Mail Groups [' . $this->id . ']';
+        $displayName = LanguageUtility::getLL('shortcut.recipientGroups') . ' [' . $this->id . ']';
         foreach ($potentialArguments as $argument => $subArguments) {
             if (!empty($this->request->getQueryParams()[$argument])) {
                 foreach ($subArguments as $subArgument) {
@@ -384,7 +386,7 @@ class RecipientController extends AbstractController
                     }
                 }
                 if ($arguments['tx_mail_mailmail_mailrecipient']['group'] ?? false) {
-                    $displayName = 'Mail Group: ' . $groupName . ' [' . $arguments['tx_mail_mailmail_mailrecipient']['group'] . ']';
+                    $displayName = LanguageUtility::getLL('shortcut.recipientGroup') . ': ' . $groupName . ' [' . $arguments['tx_mail_mailmail_mailrecipient']['group'] . ']';
                 }
             }
         }

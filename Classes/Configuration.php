@@ -159,25 +159,6 @@ final class Configuration
                     'labels' => 'LLL:EXT:mail/Resources/Private/Language/QueueModule.xlf',
                 ]
             );
-
-            /*
-            ExtensionUtility::registerModule(
-                'Mail',
-                'Mail',
-                'configuration',
-                'after:queue',
-                [
-                    ConfigurationController::class => 'index,update'
-                ],
-                [
-                    'navigationComponentId' => $navigationComponentId,
-                    'access' => 'group,user',
-                    'workspaces' => 'online',
-                    'iconIdentifier' => 'mail-module-configuration',
-                    'labels' => 'LLL:EXT:mail/Resources/Private/Language/ConfigurationModule.xlf',
-                ]
-            );
-            */
         }
 
         $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';

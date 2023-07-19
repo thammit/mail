@@ -996,9 +996,10 @@ class MailController extends AbstractController
         }
 
         if ($this->id) {
+            $routeIdentifier = $this->typo3MajorVersion < 12 ? 'MailMail_MailMail' : 'mail_mail';
             $shortCutButton = $buttonBar->makeShortcutButton()
-                ->setRouteIdentifier('mail_mail')
-                ->setDisplayName('Mail Wizard [' . $this->id . ']')
+                ->setRouteIdentifier($routeIdentifier)
+                ->setDisplayName(LanguageUtility::getLL('shortcut.wizard') . ' [' . $this->id . ']')
                 ->setArguments([
                     'id' => $this->id,
                 ])

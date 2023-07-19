@@ -194,9 +194,5 @@ class CsvUtility
             ->withAddedHeader('Content-Type', 'application/octet-stream')
             ->withAddedHeader('Content-Disposition', 'attachment; filename=' . $filenamePrefix . '_' . date('dmy-Hi') . '.csv')
             ->withBody($streamFactory->createStream(implode(CR . LF, $lines)));
-//        header('Content-Type: application/octet-stream');
-//        header('Content-Disposition: attachment; filename=' . $filenamePrefix . '_' . date('dmy-Hi') . '.csv');
-//        echo implode(CR . LF, $lines);
-//        exit;
     }
 }

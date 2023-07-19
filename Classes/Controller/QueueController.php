@@ -136,14 +136,13 @@ class QueueController extends AbstractController
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT, 2);
 
-
-        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('mail_queue');
-        $arguments = [
-            'id' => $this->id,
-        ];
-        $displayName = 'Mail Queue [' . $this->id . ']';
-        $shortCutButton->setArguments($arguments);
-        $shortCutButton->setDisplayName($displayName);
+        $routeIdentifier = $this->typo3MajorVersion < 12 ? 'MailMail_MailQueue' : 'mail_queue';
+        $shortCutButton = $buttonBar->makeShortcutButton()
+            ->setRouteIdentifier($routeIdentifier)
+            ->setDisplayName(LanguageUtility::getLL('shortcut.queue') . ' [' . $this->id . ']')
+            ->setArguments([
+                'id' => $this->id,
+            ]);
         $buttonBar->addButton($shortCutButton, ButtonBar::BUTTON_POSITION_RIGHT, 3);
     }
 }

@@ -63,6 +63,27 @@
             <trans-unit id="general.notification.severity.error.title" resname="general.notification.severity.error.title">
                 <source>Error</source>
             </trans-unit>
+            <trans-unit id="shortcut.wizard" resname="shortcut.wizard">
+                <source>Mail Wizard</source>
+            </trans-unit>
+            <trans-unit id="shortcut.recipientGroups" resname="shortcut.recipientGroups">
+                <source>Mail Groups</source>
+            </trans-unit>
+            <trans-unit id="shortcut.recipientGroup" resname="shortcut.recipientGroup">
+                <source>Mail Group</source>
+            </trans-unit>
+            <trans-unit id="shortcut.reports" resname="shortcut.reports">
+                <source>Mail Reports</source>
+            </trans-unit>
+            <trans-unit id="shortcut.report" resname="shortcut.report">
+                <source>Mail Report</source>
+            </trans-unit>
+            <trans-unit id="shortcut.report" resname="shortcut.report">
+                <source>Mail Report</source>
+            </trans-unit>
+            <trans-unit id="shortcut.queue" resname="shortcut.queue">
+                <source>Mail Queue</source>
+            </trans-unit>
             <trans-unit id="mail.type.quickMail" resname="mail.type.quickMail">
                 <source>Quick Mail</source>
             </trans-unit>

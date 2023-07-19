@@ -370,14 +370,16 @@ class ReportController extends AbstractController
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($reloadButton, ButtonBar::BUTTON_POSITION_RIGHT);
 
-        $shortCutButton = $buttonBar->makeShortcutButton()->setRouteIdentifier('mail_report');
+        $routeIdentifier = $this->typo3MajorVersion < 12 ? 'MailMail_MailReport' : 'mail_report';
+        $shortCutButton = $buttonBar->makeShortcutButton()
+            ->setRouteIdentifier($routeIdentifier);
         $arguments = [
             'id' => $this->id,
         ];
         $potentialArguments = [
             'tx_mail_mailmail_mailreport' => ['mail', 'action', 'controller'],
         ];
-        $displayName = 'Mail Reports [' . $this->id . ']';
+        $displayName = LanguageUtility::getLL('shortcut.reports') . ' [' . $this->id . ']';
         foreach ($potentialArguments as $argument => $subArguments) {
             if (!empty($this->request->getQueryParams()[$argument])) {
                 foreach ($subArguments as $subArgument) {
@@ -386,7 +388,7 @@ class ReportController extends AbstractController
                     }
                 }
                 if ($arguments['tx_mail_mailmail_mailreport']['mail'] ?? false) {
-                    $displayName = 'Mail Report [' . $arguments['tx_mail_mailmail_mailreport']['mail'] . ']';
+                    $displayName = LanguageUtility::getLL('shortcut.report') . ' [' . $arguments['tx_mail_mailmail_mailreport']['mail'] . ']';
                 }
             }
         }
