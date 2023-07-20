@@ -120,7 +120,7 @@
     <tr>
         <th style="width:20%; min-width:200px">{field.title}</th>
         <td>{field.value}</td>
-        <td class="text-right">
+        <td class="text-right text-end">
             <f:if condition="{field.edit}">
                 <be:link.editRecord class="btn btn-default" uid="{mailUid}" table="tx_mail_domain_model_mail" fields="{field.edit}" title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: field.title}')}">
                     <core:icon identifier="actions-open"/>
