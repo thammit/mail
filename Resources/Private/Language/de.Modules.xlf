@@ -135,6 +135,10 @@
         <source>Content</source>
         <target state="final">Inhalte</target>
       </trans-unit>
+      <trans-unit id="mail.wizard.settings.source" resname="mail.wizard.settings.source">
+        <source>Source</source>
+        <target state="needs-translation">Source</target>
+      </trans-unit>
       <trans-unit id="mail.wizard.testMail.groups" resname="mail.wizard.testMail.groups" approved="yes">
         <source>Group(s)</source>
         <target state="final">Gruppe(n)</target>
