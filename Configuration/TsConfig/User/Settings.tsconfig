@@ -10,7 +10,7 @@ tx_mail {
         general = subject,fromEmail,fromName,organisation,attachment
         headers = replyToEmail,replyToName,returnPath,priority
         content = sendOptions,includeMedia,redirect,redirectAll,authCodeFields
-        source = type,renderedSize,page,sysLanguageUid,plainParams,htmlParams,
+        source = type,renderedSize,page,sysLanguageUid,plainParams,htmlParams
     }
     readOnlySettings = type,renderedSize
     settingsWithoutTabs = 0

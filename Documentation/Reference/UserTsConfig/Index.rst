@@ -91,7 +91,7 @@ mailModulePageId
    module page, this value can be set to a (different) mail module page id. This way it is possible to
    show a user individual mail module.
 
-.. _user-ts-config-mail-module-page-id:
+.. _user-ts-config-mail-module-page-ids:
 
 mailModulePageIds
 -----------------
@@ -110,3 +110,99 @@ mailModulePageIds
 
    This setting is ignored if mailModulePageId or hideNavigation is set, because this will result in
    no page tree at all!
+
+.. _user-ts-config-hideEditAllSettingsButton:
+
+hideEditAllSettingsButton
+-------------------------
+
+.. confval:: hideEditAllSettingsButton
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.hideEditAllSettingsButton
+
+   Hide edit all settings button in mail wizard settings step.
+
+.. _user-ts-config-settingsWithoutTabs:
+
+settingsWithoutTabs
+-------------------
+
+.. confval:: settingsWithoutTabs
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.settingsWithoutTabs
+
+   Show settings in mail wizard settings step without tabs.
+
+.. _user-ts-config-settings-general:
+
+settings.general
+----------------
+
+.. confval:: settings.general
+
+   :type: string
+   :Default: subject,fromEmail,fromName,organisation,attachment
+   :Path: tx_mail.settings.general
+
+   Comma separated list of general fields which should be visible in the mail wizard settings step.
+
+.. _user-ts-config-settings-headers:
+
+settings.headers
+----------------
+
+.. confval:: settings.headers
+
+   :type: string
+   :Default: replyToEmail,replyToName,returnPath,priority
+   :Path: tx_mail.settings.headers
+
+   Comma separated list of headers fields which should be visible in the mail wizard settings step.
+
+.. _user-ts-config-settings-content:
+
+settings.content
+----------------
+
+.. confval:: settings.content
+
+   :type: string
+   :Default: sendOptions,includeMedia,redirect,redirectAll,authCodeFields
+   :Path: tx_mail.settings.content
+
+   Comma separated list of content fields which should be visible in the mail wizard settings step.
+
+.. _user-ts-config-settings-source:
+
+settings.source
+---------------
+
+.. confval:: settings.source
+
+   :type: string
+   :Default: type,renderedSize,page,sysLanguageUid,plainParams,htmlParams
+   :Path: tx_mail.settings.source
+
+   Comma separated list of source fields which should be visible in the mail wizard settings step.
+
+.. _user-ts-config-readOnlySettings:
+
+readOnlySettings
+----------------
+
+.. confval:: readOnlySettings
+
+   :type: string
+   :Default: type,renderedSize
+   :Path: tx_mail.readOnlySettings
+
+   Comma separated list of fields which should be read only in the mail wizard settings step.
+   Attention: this is only a visual restriction! If the user has the rights to change the corresponding
+   fields of the tx_mail_domain_model_mail table he/she will be able to do this by clicking the
+   "edit complete record" button! To prevent this, you have to restrict the fields in the usergroup
+   settings (exclude fields) as well.
+
