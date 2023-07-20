@@ -177,6 +177,19 @@ class Mail extends AbstractEntity
         return $this->attachment;
     }
 
+    public function getAttachmentCsv(): string
+    {
+        $value = '';
+        if ($this->attachment->count() > 0) {
+            $attachments = [];
+            foreach ($this->attachment as $attachment) {
+                $attachments[] = $attachment->getOriginalResource()->getName();
+            }
+            $value = implode(', ', $attachments);
+        }
+        return $value;
+    }
+
     /**
      * @param ObjectStorage<File> $attachment
      * @return Mail

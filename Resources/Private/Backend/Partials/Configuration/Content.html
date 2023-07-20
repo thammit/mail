@@ -2,6 +2,8 @@
       xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
+<f:comment>
+    <!-- since symmfony mailer currently does not allow to change mail encoding this configuration makes no sense -->
 <div class="mb-3">
     <label for="encoding" class="form-label">
         <f:translate key="{lll}configuration.encoding"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.encoding.description\'}'}"/>
@@ -10,6 +12,7 @@
                    options="{quoted-printable:'quoted-printable', base64:'base64', 8bit:'8bit'}"
                    value="{configuration.encoding}" class="form-select form-control-adapt"/>
 </div>
+</f:comment>
 <div class="mb-3">
     <label for="sendOptions" class="form-label">
         <f:translate key="{lll2}tx_mail_domain_model_mail.sendOptions"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.sendOptions.description\', 1: \'{lll}configuration.sendOptions.details\'}'}"/>

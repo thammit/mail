@@ -109,5 +109,4 @@ class BackendDataUtility
         }
         return array_unique($pageIdArray);
     }
-
 }

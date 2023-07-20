@@ -2,6 +2,8 @@
       xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
+<f:comment>
+<!-- since symmfony mailer currently does not allow to change mail encoding this configuration makes no sense -->
 <div class="mb-3">
     <label for="quickMailEncoding" class="form-label">
         <f:translate key="{lll}configuration.quickmail.encoding"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.quickmail.encoding\'}'}"/>
@@ -10,6 +12,7 @@
                    options="{quoted-printable: 'quoted-printable', base64: 'base64'}"
                    value="{configuration.quickMailEncoding}" class="form-select form-control-adapt"/>
 </div>
+</f:comment>
 <div class="mb-3">
     <label for="quickMailCharset" class="form-label">
         <f:translate key="{lll}configuration.quickmail.charset"/><f:render partial="Help" arguments="{messages: '{0: \'{lll}configuration.quickmail.charset.description\'}'}"/>

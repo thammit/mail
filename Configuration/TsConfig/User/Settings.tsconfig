@@ -5,11 +5,13 @@ tx_mail {
     hideConfiguration = 0
     hideManualSending = 0
     mailModulePageId =
+    hideEditAllSettingsButton = 0
     settings {
-        general = type,sysLanguageUid,page,plainParams,htmlParams,attachment,renderedSize
-        headers = fromEmail,fromName,replyToEmail,replyToName,returnPath,organisation,priority
-        content = encoding,sendOptions,includeMedia,redirect,redirectAll,authCodeFields
-        readOnly = renderedSize
-        hideEditAllButton = 0
+        general = subject,fromEmail,fromName,organisation,attachment
+        headers = replyToEmail,replyToName,returnPath,priority
+        content = sendOptions,includeMedia,redirect,redirectAll,authCodeFields
+        source = type,renderedSize,page,sysLanguageUid,plainParams,htmlParams,
     }
+    readOnlySettings = type,renderedSize
+    settingsWithoutTabs = 0
 }

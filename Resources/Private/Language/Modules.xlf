@@ -102,6 +102,9 @@
             <trans-unit id="mail.wizard.settings.content" resname="mail.wizard.settings.content">
                 <source>Content</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.settings.source" resname="mail.wizard.settings.source">
+                <source>Source</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.testMail.groups" resname="mail.wizard.testMail.groups">
                 <source>Group(s)</source>
             </trans-unit>
