@@ -18,7 +18,7 @@
             <f:be.infobox state="-1" title="{f:translate(key: '{lll}mail.wizard.scheduleSending.info.mailGroup.title')}">
                 <f:format.nl2br><f:translate key="{lll}mail.wizard.scheduleSending.info.mailGroup.message"/></f:format.nl2br>
             </f:be.infobox>
-            <div class="row mb-3">
+            <div class="row mb-3 gy-3">
                 <f:if condition="{groups}">
                     <f:then>
                         <f:variable name="numberOfRecipientGroups" value="{groups -> f:count()}"/>
@@ -53,12 +53,13 @@
                         <f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
                     </label>
                     <div class="input-group">
-                        <f:form.textfield additionalAttributes="{autocomplete:'off'}" data="{date-type:'datetime'}" class="form-control t3js-datetimepicker t3js-clearable" id="distributionTime"
+                        <f:form.textfield additionalAttributes="{autocomplete:'off'}" data="{date-type:'datetime'}" class="form-control t3js-datetimepicker" id="distributionTime"
                                property="scheduled" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
+
                         <label class="mb-0 btn btn-default" for="distributionTime">
                             <span class="t3js-icon icon icon-size-small icon-state-default icon-actions-calendar" data-identifier="actions-calendar">
                                 <span class="icon-markup">
-                                    <svg class="icon-color"><use xlink:href="/typo3/sysext/core/Resources/Public/Icons/T3Icons/sprites/actions.svg#actions-calendar"/></svg>
+                                    <svg class="icon-color"><use xlink:href="{f:uri.resource(extensionName: 'core', path: 'Icons/T3Icons/sprites/actions.svg')}#actions-calendar"/></svg>
                                 </span>
                             </span>
                         </label>
