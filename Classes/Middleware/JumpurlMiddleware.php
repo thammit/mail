@@ -77,7 +77,7 @@ class JumpurlMiddleware implements MiddlewareInterface
 
             $this->initRecipientRecord($submittedRecipient);
             $urlId = 0;
-            if (MathUtility::canBeInterpretedAsInteger(abs($jumpUrl)) && $this->mail instanceof Mail) {
+            if ((MathUtility::canBeInterpretedAsInteger($jumpUrl) || $jumpUrl === '-0') && $this->mail instanceof Mail) {
                 $this->responseType = $jumpUrl === '-0' || (int)$jumpUrl < 0 ? ResponseType::PLAIN : ResponseType::HTML;
                 $urlId = abs((int)$jumpUrl);
                 $jumpUrlTargetUrl = $this->getTargetUrl($urlId);
