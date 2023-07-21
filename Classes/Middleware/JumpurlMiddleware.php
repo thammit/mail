@@ -2,7 +2,6 @@
 
 namespace MEDIAESSENZ\Mail\Middleware;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
@@ -136,8 +135,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      *
      * @param array $mailLogParameters
      * @return bool
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function hasRecentLog(array $mailLogParameters): bool
     {
@@ -171,7 +169,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      * @param string $fields The fields to select, default is "*"
      *
      * @return int|array Returns array (the record) if found, otherwise blank/0 (zero)
-     * @throws DBALException|Exception
+     * @throws \Doctrine\DBAL\Exception
      * @see getPage_noCheck()
      */
     public function getRawRecord(string $table, int $uid, string $fields = '*'): int|array
@@ -224,7 +222,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      * Will split the combined recipient parameter into the table and uid and fetches the record if successful.
      *
      * @param string $combinedRecipient eg. "fe_users-13667".
-     * @throws DBALException|Exception
+     * @throws Exception
      * @throws InvalidQueryException
      */
     protected function initRecipientRecord(string $combinedRecipient): void
