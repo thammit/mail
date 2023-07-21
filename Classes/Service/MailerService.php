@@ -405,7 +405,7 @@ class MailerService implements LoggerAwareInterface
                         ->from($recipientSourceIdentifier)
                         ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
                         ->setMaxResults($this->sendPerCycle)
-                        ->execute();
+                        ->executeQuery();
 
                     while ($recipientData = $queryResult->fetchAssociative()) {
                         $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
@@ -677,7 +677,6 @@ class MailerService implements LoggerAwareInterface
             $files = MailerUtility::getAttachments($this->mailUid);
             /** @var FileReference $file */
             foreach ($files as $file) {
-                // $mailMessage->attachFromPath($file->getForLocalProcessing(false));
                 $mailMessage->attach($file->getContents(), $file->getName(), $file->getMimeType());
             }
         }

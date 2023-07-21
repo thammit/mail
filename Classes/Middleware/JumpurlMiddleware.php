@@ -78,8 +78,9 @@ class JumpurlMiddleware implements MiddlewareInterface
 
             $this->initRecipientRecord($submittedRecipient);
             $urlId = 0;
-            if (MathUtility::canBeInterpretedAsInteger($jumpUrl) && $this->mail instanceof Mail) {
-                $urlId = (int)$jumpUrl;
+            if (MathUtility::canBeInterpretedAsInteger(abs($jumpUrl)) && $this->mail instanceof Mail) {
+                $this->responseType = $jumpUrl === '-0' || (int)$jumpUrl < 0 ? ResponseType::PLAIN : ResponseType::HTML;
+                $urlId = abs((int)$jumpUrl);
                 $jumpUrlTargetUrl = $this->getTargetUrl($urlId);
 
                 // try to build the ready-to-use target url
@@ -157,7 +158,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                 $queryBuilder->expr()->gte('tstamp', $queryBuilder->createNamedParameter($mailLogParameters['tstamp'] - 10, PDO::PARAM_INT))
             );
 
-        $existingLog = $query->execute()->fetchOne();
+        $existingLog = $query->executeQuery()->fetchOne();
 
         return (int)$existingLog > 0;
     }
@@ -183,7 +184,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                     $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
                     $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0))
                 )
-                ->execute();
+                ->executeQuery();
 
             $row = $res->fetchAllAssociative();
 
@@ -214,13 +215,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      */
     protected function getTargetUrl(int $targetIndex): ?string
     {
-        if ($targetIndex >= 0) {
-            $this->responseType = ResponseType::HTML;
-            $targetUrl = $this->mail->getHtmlLinks()[$targetIndex]['absRef'] ?? null;
-        } else {
-            $this->responseType = ResponseType::PLAIN;
-            $targetUrl = $this->mail->getPlainLinks()[abs($targetIndex)] ?? null;
-        }
+        $targetUrl = $this->mail->getHtmlLinks()[$targetIndex]['absRef'] ?? null;
 
         return htmlspecialchars_decode(urldecode($targetUrl));
     }

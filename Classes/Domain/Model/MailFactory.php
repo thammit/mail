@@ -100,22 +100,22 @@ class MailFactory
             }
         }
 
+        $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
+        $glue = str_contains($baseUrl, '?') ? '&' : '?';
+        $clickTracking = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
+        $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
+        $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
+        $jumpUrlPrefix = $baseUrl . $glue .
+            'mail=###MAIL_ID###' .
+            ($trackingPrivacy ? '' : '&rid=###MAIL_RECIPIENT_SOURCE###-###USER_uid###') .
+            '&aC=###MAIL_AUTHCODE###' .
+            '&jumpurl=';
+
         $htmlLinks = [];
         if ($mail->isHtml()) {
             $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             if ($htmlContent !== false) {
-                $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
-                $glue = str_contains($baseUrl, '?') ? '&' : '?';
-                $clickTracking = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
-                $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
-                $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
-                $jumpUrlPrefix = $baseUrl . $glue .
-                    'mail=###MAIL_ID###' .
-                    ($trackingPrivacy ? '' : '&rid=###MAIL_RECIPIENT_SOURCE###-###USER_uid###') .
-                    '&aC=###MAIL_AUTHCODE###' .
-                    '&jumpurl=';
-
                 $html = new HTML5();
                 $domDocument = $html->loadHTML($htmlContent);
                 foreach (['a', 'form', 'area'] as $tag) {
@@ -126,7 +126,7 @@ class MailFactory
                             'form' => 'action',
                             default => 'href',
                         };
-                        $originalHyperLink = $domElement->getAttribute('href');
+                        $originalHyperLink = $domElement->getAttribute($hyperLinkAttribute);
                         if (!str_starts_with(trim($originalHyperLink), '#')) {
                             $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
                             if ($clickTracking && !$domElement->getAttribute('data-do-not-track') && (!str_starts_with($originalHyperLink, 'mailto:') || $clickTrackingMailTo)) {
@@ -175,6 +175,9 @@ class MailFactory
             $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
             $plainContent = $this->fetchPlainTextContent($plainTextUrl);
             if ($plainContent !== false) {
+                foreach ($htmlLinks as $key => $htmlLink) {
+                    $plainContent = str_replace($htmlLink['absRef'], $jumpUrlPrefix . '-' . $key, $plainContent);
+                }
                 $mail->setPlainContent($plainContent);
             }
         }

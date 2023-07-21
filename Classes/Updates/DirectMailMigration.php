@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Updates;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -37,7 +36,6 @@ class DirectMailMigration implements UpgradeWizardInterface
 
     /**
      * @return bool
-     * @throws DBALException
      * @throws Exception
      */
     public function executeUpdate(): bool
@@ -264,7 +262,7 @@ class DirectMailMigration implements UpgradeWizardInterface
             $frontendUsersQueryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('fe_users');
             $frontendUsersQueryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
             $frontendUsersWithCategories = $frontendUsersQueryBuilder->select('fe_users.uid')->from('fe_users')
-                ->join( 'fe_users', 'sys_category_record_mm', 'mm', 'mm.uid_foreign = fe_users.uid')->execute()->fetchAllAssociative();
+                ->join( 'fe_users', 'sys_category_record_mm', 'mm', 'mm.uid_foreign = fe_users.uid')->executeQuery()->fetchAllAssociative();
             $sysCategoryMmQueryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('sys_category_record_mm');
 
             foreach ($frontendUsersWithCategories as $frontendUsersWithCategory) {
@@ -275,20 +273,20 @@ class DirectMailMigration implements UpgradeWizardInterface
                         $sysCategoryMmQueryBuilder->expr()->eq('tablenames', $sysCategoryMmQueryBuilder->createNamedParameter('fe_users')),
                         $sysCategoryMmQueryBuilder->expr()->eq('fieldname', $sysCategoryMmQueryBuilder->createNamedParameter('categories'))
                     )
-                    ->groupBy('uid_foreign')->execute()->fetchOne();
+                    ->groupBy('uid_foreign')->executeQuery()->fetchOne();
                 $frontendUsersQueryBuilder->resetQueryParts()->update('fe_users')
                     ->set('categories', $numberOfCategories)
                     ->where(
                         $frontendUsersQueryBuilder->expr()->eq('uid', $frontendUsersWithCategory['uid'])
                     )
-                    ->execute();
+                    ->executeQuery();
             }
 
             // update number of categories of tt_address
             $ttAddressQueryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('tt_address');
             $ttAddressQueryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
             $ttAddressWithCategories = $ttAddressQueryBuilder->select('tt_address.uid')->from('tt_address')
-                ->join( 'tt_address', 'sys_category_record_mm', 'mm', 'mm.uid_foreign = tt_address.uid')->execute()->fetchAllAssociative();
+                ->join( 'tt_address', 'sys_category_record_mm', 'mm', 'mm.uid_foreign = tt_address.uid')->executeQuery()->fetchAllAssociative();
 
             foreach ($ttAddressWithCategories as $ttAddressWithCategory) {
                 $numberOfCategories = $sysCategoryMmQueryBuilder->count('*')
@@ -298,13 +296,13 @@ class DirectMailMigration implements UpgradeWizardInterface
                         $sysCategoryMmQueryBuilder->expr()->eq('tablenames', $sysCategoryMmQueryBuilder->createNamedParameter('tt_address')),
                         $sysCategoryMmQueryBuilder->expr()->eq('fieldname', $sysCategoryMmQueryBuilder->createNamedParameter('categories'))
                     )
-                    ->groupBy('uid_foreign')->execute()->fetchOne();
+                    ->groupBy('uid_foreign')->executeQuery()->fetchOne();
                 $ttAddressQueryBuilder->resetQueryParts()->update('tt_address')
                     ->set('categories', $numberOfCategories)
                     ->where(
                         $ttAddressQueryBuilder->expr()->eq('uid', $ttAddressWithCategory['uid'])
                     )
-                    ->execute();
+                    ->executeQuery();
             }
 
         }
@@ -372,7 +370,6 @@ class DirectMailMigration implements UpgradeWizardInterface
 
 
     /**
-     * @throws DBALException
      * @throws Exception
      */
     public function updateNecessary(): bool
@@ -389,7 +386,6 @@ class DirectMailMigration implements UpgradeWizardInterface
 
     /**
      * @throws Exception
-     * @throws DBALException
      */
     protected function hasSysDmailRecordsToMigrate(): bool
     {
@@ -405,7 +401,6 @@ class DirectMailMigration implements UpgradeWizardInterface
 
     /**
      * @throws Exception
-     * @throws DBALException
      */
     protected function hasSysDmailGroupRecordsToMigrate(): bool
     {
@@ -421,7 +416,6 @@ class DirectMailMigration implements UpgradeWizardInterface
 
     /**
      * @throws Exception
-     * @throws DBALException
      */
     protected function hasSysDmailLogRecordsToMigrate(): bool
     {
@@ -437,7 +431,6 @@ class DirectMailMigration implements UpgradeWizardInterface
 
     /**
      * @throws Exception
-     * @throws DBALException
      */
     protected function hasSysDmailCategoryRecordsToMigrate(): bool
     {
@@ -452,8 +445,6 @@ class DirectMailMigration implements UpgradeWizardInterface
     }
 
     /**
-     * @throws DBALException
-     * @throws Exception
      */
     protected function getSysDmailRecordsToMigrate(): array
     {
@@ -461,8 +452,6 @@ class DirectMailMigration implements UpgradeWizardInterface
     }
 
     /**
-     * @throws DBALException
-     * @throws Exception
      */
     protected function getSysDmailGroupRecordsToMigrate(): array
     {
@@ -470,8 +459,6 @@ class DirectMailMigration implements UpgradeWizardInterface
     }
 
     /**
-     * @throws DBALException
-     * @throws Exception
      */
     protected function getSysDmailLogRecordsToMigrate(): array
     {
@@ -479,7 +466,7 @@ class DirectMailMigration implements UpgradeWizardInterface
     }
 
     /**
-     * @throws DBALException
+     * @return array
      * @throws Exception
      */
     protected function getSysDmailCategoryRecordsToMigrate(): array
@@ -495,6 +482,9 @@ class DirectMailMigration implements UpgradeWizardInterface
         return $queryBuilder;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function tableExists(string $table): bool
     {
         return $this->getConnectionPool()

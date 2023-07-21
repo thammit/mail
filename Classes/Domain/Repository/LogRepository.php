@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use PDO;
@@ -22,7 +22,7 @@ class LogRepository extends Repository
     /**
      * @param int $mailUid
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findResponseTypesByMail(int $mailUid): array
     {
@@ -47,7 +47,6 @@ class LogRepository extends Repository
     /**
      * @param int $mailUid
      * @return array
-     * @throws DBALException
      * @throws Exception
      */
     public function findReturnCodesByMail(int $mailUid): array
@@ -78,7 +77,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @param int $responseType
      * @return int
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function countByMailAndResponseType(int $mailUid, int $responseType): int
     {
@@ -100,7 +99,7 @@ class LogRepository extends Repository
     /**
      * @param int $mailUid
      * @return int
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function countByMailUid(int $mailUid): int
     {
@@ -125,7 +124,7 @@ class LogRepository extends Repository
      * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return array list of recipients
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findRecipientsByMailUidAndRecipientSourceIdentifier(int $mailUid, string $recipientSourceIdentifier): array
     {
@@ -146,7 +145,7 @@ class LogRepository extends Repository
     /**
      * @param int $mailUid
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findFormatSentByMail(int $mailUid): array
     {
@@ -177,7 +176,7 @@ class LogRepository extends Repository
      * @param string $recipientSourceIdentifier
      * @param int $mailUid
      * @return bool|array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid(int $recipientUid, string $recipientSourceIdentifier, int $mailUid): bool|array
     {
@@ -202,7 +201,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @param int $responseType 1 for html, 2 for plain
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findMostPopularLinksByMailAndResponseType(int $mailUid, int $responseType = ResponseType::HTML): array
     {
@@ -232,7 +231,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @param array $returnCodes
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findFailedRecipientIdsByMailAndReturnCodeGroupedByRecipientSource(int $mailUid, array $returnCodes = []): array
     {

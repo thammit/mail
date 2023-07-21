@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Service;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception;
 use JetBrains\PhpStorm\NoReturn;
 use MEDIAESSENZ\Mail\Domain\Model\Address;
 use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
@@ -51,7 +50,6 @@ class ReportService
     /**
      * @param Mail $mail
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws SiteNotFoundException
      */
@@ -105,7 +103,6 @@ class ReportService
     /**
      *
      * @return array
-     * @throws DBALException
      * @throws Exception
      */
     public function getPerformanceData(): array
@@ -144,7 +141,6 @@ class ReportService
     }
 
     /**
-     * @throws DBALException
      * @throws Exception
      */
     public function getReturnedData(): array
@@ -166,9 +162,10 @@ class ReportService
     /**
      * @param array $returnCodes
      * @return array
-     * @throws DBALException
+     * @throws Exception
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function getReturnedDetailsData(array $returnCodes = []): array
     {
@@ -237,11 +234,10 @@ class ReportService
 
     /**
      * @return array
-     * @throws DBALException
-     * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws SiteNotFoundException
+     * @throws Exception
      */
     public function getResponsesData(): array
     {

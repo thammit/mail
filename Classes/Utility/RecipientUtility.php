@@ -5,8 +5,7 @@ namespace MEDIAESSENZ\Mail\Utility;
 
 use DateTime;
 use DateTimeImmutable;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use PDO;
@@ -25,7 +24,6 @@ class RecipientUtility
      * @param int $uid Uid of the recipient
      *
      * @return array list of categories
-     * @throws DBALException
      * @throws Exception
      */
     public static function getListOfRecipientCategories(string $table, int $uid): array
@@ -43,7 +41,7 @@ class RecipientUtility
                 $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table))
             )
-            ->execute();
+            ->executeQuery();
 
         $recipientCategories = [];
         while ($row = $statement->fetchAssociative()) {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception;
 use JetBrains\PhpStorm\NoReturn;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
@@ -37,10 +37,10 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws Exception
      * @throws SiteNotFoundException
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws Exception
      */
     public function showAction(Mail $mail): ResponseInterface
     {
@@ -67,6 +67,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function showTotalReturnedAction(Mail $mail): ResponseInterface
     {
@@ -88,6 +89,7 @@ class ReportController extends AbstractController
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function disableTotalReturnedAction(Mail $mail): void
     {
@@ -104,6 +106,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     #[NoReturn] public function csvExportTotalReturnedAction(Mail $mail, string $recipientSource): void
     {
@@ -117,6 +120,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function showUnknownAction(Mail $mail): ResponseInterface
     {
@@ -138,6 +142,7 @@ class ReportController extends AbstractController
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function disableUnknownAction(Mail $mail): ResponseInterface
     {
@@ -154,6 +159,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     #[NoReturn] public function csvExportUnknownAction(Mail $mail, string $recipientSource): void
     {
@@ -167,6 +173,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function showFullAction(Mail $mail): ResponseInterface
     {
@@ -188,6 +195,7 @@ class ReportController extends AbstractController
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function disableFullAction(Mail $mail): ResponseInterface
     {
@@ -204,6 +212,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     #[NoReturn] public function csvExportFullAction(Mail $mail, string $recipientSource): void
     {
@@ -217,6 +226,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function showBadHostAction(Mail $mail): ResponseInterface
     {
@@ -238,6 +248,7 @@ class ReportController extends AbstractController
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function disableBadHostAction(Mail $mail): ResponseInterface
     {
@@ -254,6 +265,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     #[NoReturn] public function csvExportBadHostAction(Mail $mail, string $recipientSource): void
     {
@@ -267,6 +279,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function showBadHeaderAction(Mail $mail): ResponseInterface
     {
@@ -288,6 +301,7 @@ class ReportController extends AbstractController
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function disableBadHeaderAction(Mail $mail): ResponseInterface
     {
@@ -304,6 +318,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     #[NoReturn] public function csvExportBadHeaderAction(Mail $mail, string $recipientSource): void
     {
@@ -317,6 +332,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function showReasonUnknownAction(Mail $mail): ResponseInterface
     {
@@ -338,6 +354,7 @@ class ReportController extends AbstractController
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function disableReasonUnknownAction(Mail $mail): ResponseInterface
     {
@@ -354,6 +371,7 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     #[NoReturn] public function csvExportReasonUnknownAction(Mail $mail, string $recipientSource): void
     {

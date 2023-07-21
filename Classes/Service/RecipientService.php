@@ -109,7 +109,7 @@ class RecipientService
             ->select(...$fields)
             ->from($table)
             ->where($queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidListOfRecipients, Connection::PARAM_INT_ARRAY)))
-            ->execute();
+            ->executeQuery();
 
         $replaceCategories = in_array('categories', $fields);
         while ($row = $res->fetchAssociative()) {
@@ -558,7 +558,7 @@ class RecipientService
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
                 )
                 ->orderBy('fe_users.uid')
-                ->execute()
+                ->executeQuery()
                 ->fetchAllAssociative(), 'uid');
         } else {
             $idList = array_column($queryBuilder
@@ -578,7 +578,7 @@ class RecipientService
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
                 )
                 ->orderBy($switchTable . '.uid')
-                ->execute()
+                ->executeQuery()
                 ->fetchAllAssociative(), 'uid');
         }
 
@@ -604,7 +604,7 @@ class RecipientService
                         ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($mailGroupUid, PDO::PARAM_INT)))
                         ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter('fe_groups')))
                 )
-                ->execute()
+                ->executeQuery()
                 ->fetchAllAssociative(), 'uid');
 
             if ($frontendUserGroups) {
@@ -634,7 +634,7 @@ class RecipientService
                                     ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
                             )
                             ->orderBy('fe_users.uid')
-                            ->execute()
+                            ->executeQuery()
                             ->fetchAllAssociative(), 'uid'));
                     }
                 }
@@ -741,7 +741,7 @@ class RecipientService
             ->where(
                 $queryBuilder->expr()->inSet('fe_groups.subgroup', (string)$groupId)
             )
-            ->execute();
+            ->executeQuery();
         $groupArr = [];
 
         while ($row = $res->fetchAssociative()) {
@@ -775,7 +775,7 @@ class RecipientService
                     ->add($queryBuilder->expr()->eq('mm.tablenames', $queryBuilder->createNamedParameter($table)))
                     ->add($queryBuilder->expr()->eq('mm.fieldname', $queryBuilder->createNamedParameter($categoryFieldName)))
             )
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
     }
 
