@@ -106,13 +106,7 @@ class DateTimeImmutableConverter extends AbstractTypeConverter
             // todo: this check does not make sense as this converter is only called on \DateTime targets
             return false;
         }
-        if (is_array($source)) {
-            return true;
-        }
-        if (is_int($source)) {
-            return true;
-        }
-        return is_string($source);
+        return is_array($source) || is_int($source) || is_string($source);
     }
 
     /**

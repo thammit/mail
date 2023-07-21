@@ -52,18 +52,44 @@
                     <label for="distributionTime" class="form-label h4 mb-2">
                         <f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
                     </label>
-                    <div class="input-group">
-                        <f:form.textfield additionalAttributes="{autocomplete:'off'}" data="{date-type:'datetime'}" class="form-control t3js-datetimepicker" id="distributionTime"
-                               property="scheduled" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
-
-                        <label class="mb-0 btn btn-default" for="distributionTime">
-                            <span class="t3js-icon icon icon-size-small icon-state-default icon-actions-calendar" data-identifier="actions-calendar">
-                                <span class="icon-markup">
-                                    <svg class="icon-color"><use xlink:href="{f:uri.resource(extensionName: 'core', path: 'Icons/T3Icons/sprites/actions.svg')}#actions-calendar"/></svg>
-                                </span>
-                            </span>
-                        </label>
-                    </div>
+                    <f:if condition="{useTypo3DateTimeWebComponent}">
+                        <f:then>
+                            <typo3-formengine-element-datetime class="formengine-field-item t3js-formengine-field-item" recordFieldId="mail-distribution-time">
+                                <div class="input-group">
+                                    <input autocomplete="off"
+                                           id="mail-distribution-time"
+                                           class="t3js-datetimepicker form-control hasDefaultValue"
+                                           data-date-type="datetime"
+                                           data-formengine-validation-rules="[]"
+                                           data-formengine-input-params="{&quot;field&quot;:&quot;mail[scheduled]&quot;,&quot;evalList&quot;:&quot;datetime&quot;}"
+                                           data-formengine-input-name="mail[scheduled]"
+                                           value="{f:format.date(format:'H:i d-m-Y',date:'now')}"/>
+                                    <f:form.hidden property="scheduled" value="{f:format.date(format:'Y-m-d\TH:i:s\Z',date:'now')}" />
+                                    <button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
+                                        <core:icon identifier="actions-edit-pick-date"/>
+                                    </button>
+                                </div>
+                            </typo3-formengine-element-datetime>
+                        </f:then>
+                        <f:else>
+                            <div class="input-group">
+                                <f:form.textfield additionalAttributes="{autocomplete:'off'}"
+                                                  id="distributionTime"
+                                                  class="form-control t3js-datetimepicker"
+                                                  data="{date-type:'datetime'}"
+                                                  property="scheduled"
+                                                  value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
+                                <label class="mb-0 btn btn-default" for="distributionTime">
+                                    <core:icon identifier="actions-edit-pick-date"/>
+                                    <span class="t3js-icon icon icon-size-small icon-state-default icon-actions-calendar" data-identifier="actions-calendar">
+                                        <span class="icon-markup">
+                                            <svg class="icon-color"><use xlink:href="{f:uri.resource(extensionName: 'core', path: 'Icons/T3Icons/sprites/actions.svg')}#actions-calendar"/></svg>
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+                        </f:else>
+                    </f:if>
                 </div>
                 <f:comment>
                     <div class="form-check mb-3">

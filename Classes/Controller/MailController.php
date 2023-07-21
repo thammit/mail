@@ -814,10 +814,15 @@ class MailController extends AbstractController
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
+            'useTypo3DateTimeWebComponent' => $this->typo3MajorVersion > 11
         ]);
         $this->moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
+
+        if ($this->typo3MajorVersion < 12) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
+        } else {
+            $this->pageRenderer->loadJavaScriptModule('@typo3/backend/form-engine/element/datetime-element.js');
+        }
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -827,11 +832,12 @@ class MailController extends AbstractController
      */
     public function initializeFinishAction(): void
     {
+        $format = $this->typo3MajorVersion < 12 ? 'H:i d-m-Y' : null;
         if ($this->arguments->hasArgument('mail')) {
             $this->arguments->getArgument('mail')
                 ->getPropertyMappingConfiguration()
                 ->forProperty('scheduled')
-                ->setTypeConverterOption(DateTimeImmutableConverter::class, DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, 'H:i d-m-Y');
+                ->setTypeConverterOption(DateTimeImmutableConverter::class, DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, $format);
         }
     }
 
@@ -863,6 +869,14 @@ class MailController extends AbstractController
             );
 
             return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
+        }
+
+        if ($this->typo3MajorVersion > 11) {
+            // scheduled timezone is utc and must be converted to server time zone
+            $scheduled = $mail->getScheduled();
+            $serverTimeZone = @date_default_timezone_get();
+            $scheduledWithCorrectTimeZone = $scheduled->setTimezone(new \DateTimeZone($serverTimeZone))->setTime((int)$scheduled->format('H'), (int)$scheduled->format('i'));
+            $mail->setScheduled($scheduledWithCorrectTimeZone);
         }
 
         // Update the record:
