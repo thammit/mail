@@ -301,7 +301,6 @@ class MailerUtility
             'pid' => 0,
             'updatedon' => time(),
             'createdon' => time(),
-            'createdby' => 0,
             'deleted' => 0,
             'disabled' => 0,
             'starttime' => 0,
