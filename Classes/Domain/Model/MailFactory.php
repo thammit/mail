@@ -176,6 +176,7 @@ class MailFactory
             $plainContent = $this->fetchPlainTextContent($plainTextUrl);
             if ($plainContent !== false) {
                 foreach ($htmlLinks as $key => $htmlLink) {
+                    // replace links found in html content in plain content as well, but with negative jumpUrl id
                     $plainContent = str_replace($htmlLink['absRef'], $jumpUrlPrefix . '-' . $key, $plainContent);
                 }
                 $mail->setPlainContent($plainContent);
