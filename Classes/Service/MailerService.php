@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Service;
 
 use DateTimeImmutable;
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
 use Masterminds\HTML5;
@@ -340,9 +339,9 @@ class MailerService implements LoggerAwareInterface
      * returns true if sending is completed
      *
      * @return boolean
-     * @throws DBALException
      * @throws Exception
      * @throws \TYPO3\CMS\Core\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function massSend(): bool
     {
@@ -431,11 +430,11 @@ class MailerService implements LoggerAwareInterface
      * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return void
-     * @throws DBALException
      * @throws Exception
      * @throws \TYPO3\CMS\Core\Exception
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function sendSingleMailAndAddLogEntry(array $recipientData, string $recipientSourceIdentifier): void
     {
@@ -537,6 +536,7 @@ class MailerService implements LoggerAwareInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws \TYPO3\CMS\Core\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function handleQueue(): void
     {
