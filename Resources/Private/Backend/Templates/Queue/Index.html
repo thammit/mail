@@ -21,7 +21,7 @@
         </f:be.infobox>
     </f:if>
     <div class="panel panel-default">
-        <table class="table table-striped table-hover">
+        <table class="table table-striped table-hover mb-0">
             <thead>
             <tr>
                 <th class="col-icon nowrap"></th>
@@ -44,6 +44,7 @@
                 </th>
             </tr>
             </thead>
+            <tbody>
             <f:for each="{mails}" as="mail">
                 <tr>
                     <td class="col-icon nowrap">
@@ -65,21 +66,43 @@
                         </div>
                     </td>
                     <td class="col-control nowrap">
-                        <f:if condition="!{mail.scheduledBegin} || !{mail.scheduledEnd}">
+                        <f:if condition="!{mail.scheduledBegin} || !{mail.scheduledEnd} || ({mail.numberOfSent} == 0 && {finished})">
                             <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
                         </f:if>
                     </td>
                 </tr>
             </f:for>
+            </tbody>
         </table>
     </div>
-    <div id="mail-queue-configuration-modal" class="hide">
-        <f:form action="saveConfiguration" id="mail-queue-configuration-form" class="mail-queue-configuration-form" target="list_frame">
-            <div class="form-group">
-                <label for="queueModalConfigure-title"><f:translate key="{lll}configuration.sendPerCycle" /></label>
-                <f:form.textfield name="sendPerCycle" type="number" additionalAttributes="{min: 1, max: 500}" id="queueModalConfigure-title" class="form-control" value="{sendPerCycle}" required="required" />
+    <div style="--bs-modal-zindex:1051;" class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-queue-configuration-modal" tabindex="-1" aria-labelledby="mail-queue-configuration-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mail-queue-configuration-modal-label"><f:translate key="{lll}configuration.panel.module.header" /></h5>
+                    <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
+                        <core:icon identifier="actions-close" />
+                        <span class="visually-hidden"><f:translate key="{lll}general.button.cancel" /></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <f:form action="saveConfiguration" id="mail-queue-configuration-form" class="mail-queue-configuration-formx" target="list_frame">
+                        <div class="form-group">
+                            <label for="queueModalConfigure-sendPerCycle-title"><f:translate key="{lll}configuration.sendPerCycle" /></label>
+                            <f:form.textfield name="sendPerCycle" type="number" additionalAttributes="{min: 1, max: 500}" id="queueModalConfigure-sendPerCycle-title" class="form-control" value="{sendPerCycle}" required="required" />
+                        </div>
+                        <div class="form-group">
+                            <label for="queueModalConfigure-queueLimit-title"><f:translate key="{lll}configuration.sendPerCycle" /></label>
+                            <f:form.textfield name="queueLimit" type="number" additionalAttributes="{min: 0, max: 100}" id="queueModalConfigure-queueLimit-title" class="form-control" value="{queueLimit}" required="required" />
+                        </div>
+                    </f:form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal"><f:translate key="{lll}general.button.cancel" /></button>
+                    <button type="submit" form="mail-queue-configuration-form" class="btn btn-primary"><f:translate key="{lll}general.button.save" /></button>
+                </div>
             </div>
-        </f:form>
+        </div>
     </div>
 </f:section>
 </html>

@@ -26,7 +26,7 @@ class QueueController extends AbstractController
     public function indexAction(): ResponseInterface
     {
         $mails = [];
-        $scheduledMails = $this->mailRepository->findScheduledByPid($this->id)->toArray();
+        $scheduledMails = $this->mailRepository->findScheduledByPid($this->id, (int)($this->pageTSConfiguration['queueLimit'] ?? 10))->toArray();
         /** @var Mail $mail */
         foreach ($scheduledMails as $mail) {
             $mail->setNumberOfSent($this->logRepository->countByMailUid($mail->getUid()));
@@ -38,19 +38,20 @@ class QueueController extends AbstractController
             'id' => $this->id,
             'mails' => $mails,
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
+            'queueLimit' => (int)($this->pageTSConfiguration['queueLimit'] ?? 10),
             'showManualSending' => !($this->userTSConfiguration['hideManualSending'] ?? false),
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueConfigurationModal');
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
-    public function saveConfigurationAction(int $sendPerCycle): ResponseInterface
+    public function saveConfigurationAction(int $sendPerCycle, int $queueLimit): ResponseInterface
     {
         $pageTS['sendPerCycle'] = (string)$sendPerCycle;
+        $pageTS['queueLimit'] = (string)$queueLimit;
         $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, 'mod.web_modules.mail.');
         if ($success) {
             ViewUtility::addNotificationSuccess(
@@ -96,9 +97,10 @@ class QueueController extends AbstractController
      */
     public function deleteAction(Mail $mail):ResponseInterface
     {
+        $this->logRepository->deleteByMailUid($mail->getUid());
         $this->mailRepository->remove($mail);
         ViewUtility::addNotificationSuccess(
-            LanguageUtility::getLL('queue.notification.missingRecipientGroup.message'),
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
             LanguageUtility::getLL('general.notification.severity.success.title')
         );
         return $this->redirect('index');
@@ -119,6 +121,8 @@ class QueueController extends AbstractController
                 ->setTitle(LanguageUtility::getLL('general.button.configuration'))
                 ->setName('configure')
                 ->setDataAttributes([
+                    'bs-toggle' => 'modal',
+                    'bs-target' => '#mail-queue-configuration-modal',
                     'modal-identifier' => 'mail-queue-configuration-modal',
                     'modal-title' => LanguageUtility::getLL('queue.button.configuration'),
                     'button-ok-text' => LanguageUtility::getLL('general.button.save'),

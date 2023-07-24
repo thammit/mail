@@ -366,6 +366,22 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     */
+    public function deleteAction(Mail $mail):ResponseInterface
+    {
+        $this->logRepository->deleteByMailUid($mail->getUid());
+        $this->mailRepository->remove($mail);
+        ViewUtility::addNotificationSuccess(
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
+            LanguageUtility::getLL('general.notification.severity.success.title')
+        );
+        return $this->redirect('index');
+    }
+
+    /**
+     * @param Mail $mail
      * @param string $recipientSource
      * @return void
      * @throws Exception

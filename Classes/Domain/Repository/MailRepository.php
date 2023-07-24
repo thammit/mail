@@ -74,7 +74,7 @@ class MailRepository extends Repository
     /**
      * @throws InvalidQueryException
      */
-    public function findScheduledByPid(int $pid): QueryResultInterface|array
+    public function findScheduledByPid(int $pid, int $limit = 10): QueryResultInterface|array
     {
         $query = $this->createQuery();
         $query->matching(
@@ -84,6 +84,10 @@ class MailRepository extends Repository
             )
         );
         $query->setOrderings(['scheduled' => QueryInterface::ORDER_DESCENDING]);
+
+        if ($limit) {
+            $query->setLimit($limit);
+        }
         return $query->execute();
     }
 

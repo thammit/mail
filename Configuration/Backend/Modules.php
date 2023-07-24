@@ -114,6 +114,7 @@ return [
                 'showReasonUnknown',
                 'disableReasonUnknown',
                 'csvExportReasonUnknown',
+                'delete',
             ],
         ],
     ],

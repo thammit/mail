@@ -482,6 +482,18 @@ sendPerCycle
 
    Send per circle for manual sending trigger via Queue module
 
+
+queueLimit
+----------
+
+.. confval:: queueLimit
+
+   :type: int
+   :Default: 10
+   :Path: mod.web\_modules.mail.queueLimit
+
+   Number of mailings listed in queue module. If zero (0) all current and past mails will be visible.
+
 storage
 -------
 

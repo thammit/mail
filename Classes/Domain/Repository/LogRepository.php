@@ -268,4 +268,18 @@ class LogRepository extends Repository
 
         return $idLists;
     }
+
+    /**
+     * @param int $mailUid
+     * @return void
+     */
+    public function deleteByMailUid(int $mailUid) {
+        $queryBuilder = $this->getQueryBuilder();
+
+        $queryBuilder
+            ->delete($this->table)
+            ->where(
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT))
+            )->executeStatement();
+    }
 }
