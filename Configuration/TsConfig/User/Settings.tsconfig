@@ -4,7 +4,6 @@ tx_mail {
     defaultTab =
     hideConfiguration = 0
     hideManualSending = 0
-    queueLimit = 10
     mailModulePageId =
     hideEditAllSettingsButton = 0
     settings {
