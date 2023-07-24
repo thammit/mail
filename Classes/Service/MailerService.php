@@ -452,7 +452,7 @@ class MailerService implements LoggerAwareInterface
             $log = GeneralUtility::makeInstance(Log::class);
             $log->setMail($this->mail);
             $log->setRecipientSource($recipientSourceIdentifier);
-            $log->setRecipientUid($recipientData['uid']);
+            $log->setRecipientUid((int)$recipientData['uid']);
             $log->setEmail($recipientData['email']);
             $this->logRepository->add($log);
             $this->logRepository->persist();
