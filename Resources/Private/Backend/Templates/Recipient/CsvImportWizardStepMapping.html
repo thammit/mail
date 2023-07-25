@@ -108,14 +108,7 @@
                 </label>
             </div>
             <f:if condition="{data.categories -> f:count()}">
-                <f:if condition="{data.showAddAllCategories}">
-                    <div class="form-check">
-                        <f:form.checkbox class="form-check-input" id="addAllCategories" name="configuration[addAllCategories]" value="1" checked="{data.addAllCategories}"/>
-                        <label class="form-check-label" for="addAllCategories">
-                            <f:translate key="{lll}recipient.import.assignAllCategories"/>
-                        </label>
-                    </div>
-                </f:if>
+                <h4><f:translate key="{lll}recipient.import.assignAllCategories"/></h4>
                 <f:for each="{data.categories}" as="category">
                     <div class="form-check">
                         <f:form.checkbox class="form-check-input" id="category{category.uid}" name="configuration[categories][{category.uid}]" value="{category.uid}"

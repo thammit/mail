@@ -12,8 +12,11 @@ use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
+use MEDIAESSENZ\Mail\Events\AdditionalMailHeadersEvent;
 use MEDIAESSENZ\Mail\Events\ManipulateMarkersEvent;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
+use MEDIAESSENZ\Mail\Events\ScheduledSendBegunEvent;
+use MEDIAESSENZ\Mail\Events\ScheduledSendFinishedEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
@@ -271,7 +274,6 @@ class MailerService implements LoggerAwareInterface
             $mailIdentifierHeaderWithoutHash = MailerUtility::buildMailIdentifierHeaderWithoutHash($this->mailUid, $recipientSourceIdentifier, (int)$recipientData['uid']);
             $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($mailIdentifierHeaderWithoutHash);
 
-            // todo what is this for?
             $this->mail->setReturnPath(str_replace('###XID###', $mailIdentifierHeaderWithoutHash, $this->mail->getReturnPath()));
 
             if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
@@ -554,20 +556,26 @@ class MailerService implements LoggerAwareInterface
         $startTime = MailerUtility::getMilliseconds();
 
         $this->logger->debug('Invoked at ' . date('h:i:s d-m-Y'));
-        $mail = $this->mailRepository->findMailToSend();
-        if ($mail instanceof Mail) {
-            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\' processed...');
-            $this->prepare($mail->getUid());
+        $this->mail = $this->mailRepository->findMailToSend();
+        if ($this->mail instanceof Mail) {
+            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $this->mail->getUid() . ', \'' . $this->mail->getSubject() . '\' processed...');
+            $this->prepare($this->mail->getUid());
 
             if (!$this->mail->getScheduledBegin()) {
-                // todo add PSR-14 event to manipulate mail before scheduled send begins
+                // PSR-14 event to manipulate mail before scheduled send begins
+                $this->eventDispatcher->dispatch(
+                    new ScheduledSendBegunEvent($this->mail)
+                );
                 $this->setJobBegin();
             }
 
             $finished = $this->massSend();
 
             if ($finished) {
-                // todo add PSR-14 event to manipulate mail before scheduled send ends
+                // PSR-14 event to manipulate mail after scheduled send finished
+                $this->eventDispatcher->dispatch(
+                    new ScheduledSendFinishedEvent($this->mail)
+                );
                 $this->setJobEnd();
             }
         } else {
@@ -620,7 +628,11 @@ class MailerService implements LoggerAwareInterface
             $header->addTextHeader('Organization', $this->organisation);
         }
 
-        // todo add PSR-14 event to modify mail headers
+        // PSR-14 event to modify mail headers
+        $this->eventDispatcher->dispatch(
+            new AdditionalMailHeadersEvent($header, $this->mail, $this->TYPO3MID, $this->organisation, $this->siteIdentifier)
+        )->getHeaders();
+
 
         $mailMessage->send();
         unset($mailMessage);

@@ -3,33 +3,36 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Service;
 
-use Doctrine\DBAL\DBALException;
 use Exception;
-use MEDIAESSENZ\Mail\Domain\Model\Address;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
+use MEDIAESSENZ\Mail\Events\ManipulateCsvImportDataEvent;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\SysLog\Type as SystemLogType;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\File\ExtendedFileUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Request;
+use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 class ImportService
@@ -42,6 +45,7 @@ class ImportService
     protected array $pageTsConfiguration = [];
 
     protected int $pageId;
+    protected RequestInterface $request;
     protected string $refererHost;
     protected string $requestHost;
 
@@ -51,7 +55,8 @@ class ImportService
         protected AddressRepository $addressRepository,
         protected CategoryRepository $categoryRepository,
         protected PagesRepository $pagesRepository,
-        protected DataHandler $dataHandler
+        protected DataHandler $dataHandler,
+        protected EventDispatcherInterface $eventDispatcher
     ) {
         $this->backendUserAuthentication = $GLOBALS['BE_USER'];
     }
@@ -68,6 +73,7 @@ class ImportService
     public function init(int $pageId, Request $request, array $configuration = []): void
     {
         $this->pageId = $pageId;
+        $this->request = $request;
         $this->requestHost = $request->getUri()->getHost();
         $this->refererHost = parse_url($request->getServerParams()['HTTP_REFERER'], PHP_URL_HOST);
 
@@ -121,8 +127,7 @@ class ImportService
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function getCsvImportConfigurationData(): array
     {
@@ -211,20 +216,14 @@ class ImportService
         $this->configuration['updateUnique'] ??= false;
         $this->configuration['charset'] ??= 'UTF-8';
 
-        $data = $this->prepareData([
-            'mapping_cats' => [],
-            'showAddAllCategories' => false,
-            'addAllCategories' => false,
-        ]);
+        $data = $this->prepareData();
 
         // show charset selector
-        $cs = array_unique(array_values(mb_list_encodings()));
-        $charSets = [];
-        foreach ($cs as $charset) {
-            $charSets[] = ['val' => $charset, 'text' => $charset];
+        $charsets = array_unique(array_values(mb_list_encodings()));
+        foreach ($charsets as $charset) {
+            $data['charsets'][] = ['val' => $charset, 'text' => $charset];
         }
 
-        $data['charsets'] = $charSets;
         $data['charset'] = $this->configuration['charset'] ?? 'UTF-8';
 
         $columnNames = [];
@@ -267,11 +266,13 @@ class ImportService
             ];
         }
         // add 'no value'
-        array_unshift($mapFields, ['noMap', LanguageUtility::getLL('recipient.import.mapping.mapTo')]);
         $mapFields[] = [
-            'cats',
+            'categories',
             LanguageUtility::getLL('recipient.import.categoryMapping'),
         ];
+
+        usort($mapFields, fn($a, $b) => strcmp(strtolower($a[1]), strtolower($b[1])));
+        array_unshift($mapFields, ['noMap', '']);
         reset($columnNames);
         reset($csvData);
 
@@ -317,8 +318,7 @@ class ImportService
 
     /**
      * @return array
-     * @throws DBALException
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function startCsvImport(): array
     {
@@ -326,7 +326,6 @@ class ImportService
             'hiddenMap' => [],
             'hiddenCat' => [],
             'charset' => $this->configuration['charset'],
-            'addAllCategories' => (bool)($this->configuration['addAllCategories'] ?? false),
         ]);
 
         // starting import & show errors
@@ -401,8 +400,7 @@ class ImportService
      * @param array $csvData The csv raw data
      *
      * @return array Array containing double, updated and invalid-email records
-     * @throws DBALException
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function doImport(array $csvData): array
     {
@@ -416,22 +414,26 @@ class ImportService
 
         $mappedCSV = [];
         $invalidEmailCSV = [];
-        foreach ($csvData as $dataArray) {
+        foreach ($csvData as $csvRow) {
             $tempData = [];
             $invalidEmail = false;
-            foreach ($dataArray as $kk => $fieldData) {
-                if ($this->configuration['map'][$kk] !== 'noMap') {
-                    if (($this->configuration['validEmail']) && ($this->configuration['map'][$kk] === 'email')) {
-                        $invalidEmail = GeneralUtility::validEmail(trim($fieldData)) === false;
-                        $tempData[$this->configuration['map'][$kk]] = trim($fieldData);
-                    } elseif ($this->configuration['map'][$kk] !== 'cats') {
-                        $tempData[$this->configuration['map'][$kk]] = $fieldData;
-                    } else {
-                        $tempCats = explode(',', $fieldData);
-                        foreach ($tempCats as $catC => $tempCat) {
-                            $tempData['categories'][$catC] = $tempCat;
+            foreach ($csvRow as $fieldName => $fieldValue) {
+                $fieldKey = $this->configuration['map'][$fieldName];
+                switch ($fieldKey) {
+                    case 'noMap':
+                        break;
+                    case 'email':
+                        if ($this->configuration['validEmail']) {
+                            $email = trim($fieldValue);
+                            $invalidEmail = !GeneralUtility::validEmail($email);
+                            $tempData[$fieldKey] = $email;
                         }
-                    }
+                        break;
+                    case 'categories':
+                        $tempData[$fieldKey] = GeneralUtility::intExplode(',', $fieldValue, true);
+                        break;
+                    default:
+                        $tempData[$fieldKey] = trim($fieldValue);
                 }
             }
             if ($invalidEmail) {
@@ -448,132 +450,58 @@ class ImportService
             $mappedCSV = $filteredCSV['clean'];
         }
 
-        // array for the process_datamap();
+        // build array for data handler;
         $data = [];
         if ($this->configuration['updateUnique']) {
-            $user = [];
-            $userID = [];
+            $addresses = $this->addressRepository->findRecordByPid((int)$this->configuration['storage'], ['uid', 'email', 'name', 'mail_active'], true);
 
-            $addresses = $this->addressRepository->findByPid((int)$this->configuration['storage']);
-
-            if ($addresses->count() > 0) {
-                /** @var Address $address */
-                foreach ($addresses as $address) {
-                    $user[] = $address->getEmail();
-                    $userID[] = $address->getUid();
-                }
-            }
-
-            // check user one by one, new or update
-            $c = 1;
-            foreach ($mappedCSV as $dataArray) {
-                $uniqueUserIds = array_keys($user, $dataArray[$this->configuration['recordUnique']]);
-                if (!empty($uniqueUserIds)) {
-                    if (count($uniqueUserIds) === 1) {
-                        $firstUser = $uniqueUserIds[0];
-                        $firstUserUid = $userID[$firstUser];
-                        $data['tt_address'][$firstUserUid] = $dataArray;
-                        $data['tt_address'][$firstUserUid]['pid'] = $this->configuration['storage'];
-                        $data['tt_address'][$firstUserUid]['mail_active'] = 1;
-                        if ($this->configuration['all_html']) {
-                            $data['tt_address'][$firstUserUid]['mail_html'] = $this->configuration['all_html'];
-                        }
-                        if (isset($this->configuration['cat']) && is_array($this->configuration['cat']) && !in_array('cats',
-                                $this->configuration['map'], true)) {
-                            if ($this->configuration['addAllCategories']) {
-                                $configTreeStartingPoints = BackendUtility::getPagesTSconfig($this->pageId)['TCEFORM.']['tx_mail_domain_model_group.']['categories.']['config.']['treeConfig.']['startingPoints'] ?? false;
-                                if ($configTreeStartingPoints !== false) {
-                                    $configTreeStartingPointsArray = GeneralUtility::intExplode(',',
-                                        $configTreeStartingPoints, true);
-                                    foreach ($configTreeStartingPointsArray as $startingPoint) {
-                                        $sysCategories = $this->categoryRepository->findByParent($startingPoint);
-                                        if ($sysCategories->count() > 0) {
-                                            /** @var Category $sysCategory */
-                                            foreach ($sysCategories as $sysCategory) {
-                                                $data['tt_address'][$firstUserUid]['categories'][] = $sysCategory->getUid();
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    $sysCategories = $this->categoryRepository->findAll();
-                                    if ($sysCategories->count() > 0) {
-                                        /** @var Category $sysCategory */
-                                        foreach ($sysCategories as $sysCategory) {
-                                            $data['tt_address'][$firstUserUid]['categories'][] = $sysCategory->getUid();
-                                        }
-                                    }
-                                }
-                            } else {
-                                // Add selected categories
-                                foreach ($this->configuration['categories'] as $category) {
-                                    $data['tt_address'][$firstUserUid]['categories'][] = $category;
-                                }
-                            }
-                        }
-                    } else {
-                        // which one to update? all?
-                        foreach ($uniqueUserIds as $userId) {
-                            $data['tt_address'][$userID[$userId]] = $dataArray;
-                            $data['tt_address'][$userID[$userId]]['pid'] = $this->configuration['storage'];
-                        }
+            // check addresses one by one, new or update
+            foreach ($mappedCSV as $index => $dataArray) {
+                $uniqueAddresses = array_filter($addresses, fn($address) => $address[$this->configuration['recordUnique']] === $dataArray[$this->configuration['recordUnique']]);
+                if ($uniqueAddresses) {
+                    // update existing address
+                    foreach ($uniqueAddresses as $address) {
+                        $data['tt_address'][$address['uid']] = $this->buildAddressData($dataArray, (bool)$address['mail_active']);
                     }
                     $resultImport['update'][] = $dataArray;
                 } else {
-                    // write new user
-                    $this->addDataArray($data, 'NEW' . $c, $dataArray);
+                    // write new address
+                    $data['tt_address']['NEW' . ($index + 1)] = $this->buildAddressData($dataArray, true);
                     $resultImport['new'][] = $dataArray;
-                    // counter
-                    $c++;
                 }
             }
         } else {
-            // no update, import all
-            $c = 1;
-            foreach ($mappedCSV as $dataArray) {
-                $this->addDataArray($data, 'NEW' . $c, $dataArray);
+            // add addresses
+            foreach ($mappedCSV as $index => $dataArray) {
+                $data['tt_address']['NEW' . ($index + 1)] = $this->buildAddressData($dataArray, true);
                 $resultImport['new'][] = $dataArray;
-                $c++;
             }
         }
 
         $resultImport['invalidEmail'] = $invalidEmailCSV;
-        $resultImport['double'] = is_array($filteredCSV['double'] ?? false) ? $filteredCSV['double'] : [];
+        $resultImport['double'] = $filteredCSV['double'] ?? [];
+
+        // PSR-14 event dispatcher for further import data manipulation
+        $data = $this->eventDispatcher->dispatch(new ManipulateCsvImportDataEvent($data, $this->configuration))->getData();
 
         // start importing
         $this->dataHandler->enableLogging = 0;
         $this->dataHandler->start($data, []);
         $this->dataHandler->process_datamap();
 
-        // Todo Add PSR-14 event dispatcher to manipulate imported address after import
-
         return $resultImport;
     }
 
-    /**
-     * Prepare insert array for the TCE
-     *
-     * @param array $data Array for the TCE
-     * @param string $id Record ID
-     * @param array $dataArray The data to be imported
-     *
-     * @return void
-     */
-    public function addDataArray(array &$data, string $id, array $dataArray): void
+    protected function buildAddressData(array $data, $activateMail): array
     {
-        $data['tt_address'][$id] = $dataArray;
-        $data['tt_address'][$id]['pid'] = $this->configuration['storage'];
-        $data['tt_address'][$id]['mail_active'] = 1;
+        $data['pid'] = $this->configuration['storage'];
+        $data['mail_active'] = $activateMail ? 1 : 0;
         if ($this->configuration['all_html']) {
-            $data['tt_address'][$id]['mail_html'] = 1;
+            $data['mail_html'] = $this->configuration['all_html'];
         }
-        if (isset($this->configuration['categories']) && is_array($this->configuration['categories']) && !in_array('cats',
-                $this->configuration['map'], true)) {
-            foreach ($this->configuration['categories'] as $k => $v) {
-                if ($v) {
-                    $data['tt_address'][$id]['categories'][$k] = (int)$v;
-                }
-            }
-        }
+        $data['categories'] = implode(',', array_unique(array_merge($data['categories'] ?? [], $this->configuration['categories'] ?? [])));
+
+        return $data;
     }
 
     /**
@@ -641,7 +569,9 @@ class ImportService
 
         // Checking referer / executing:
         if ($this->requestHost !== $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
-            $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!',
+            $this->backendUserAuthentication->writelog(
+                SystemLogType::FILE, 0, 2, 0,
+                'Referer host "%s" and server host "%s" did not match!',
                 [$this->refererHost, $this->requestHost]);
         } else {
             // new file
@@ -676,7 +606,7 @@ class ImportService
      * Upload file and set $this->configuration['newFile'] and $this->configuration['newFileUid']
      *
      * @return bool
-     * @throws Exception
+     * @throws \TYPO3\CMS\Core\Resource\Exception
      */
     public function uploadCsv(): bool
     {
@@ -692,10 +622,16 @@ class ImportService
             $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
 
             if ($this->requestHost !== $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
-                $extendedFileUtility->writeLog(0, 2, 1, 'Referer host "%s" and server host "%s" did not match!',
+                $this->backendUserAuthentication->writelog(
+                    SystemLogType::FILE, 0, 2, 1,
+                    'Referer host "%s" and server host "%s" did not match!',
                     [$this->refererHost, $this->requestHost]);
             } else {
-                $file = GeneralUtility::_GP('tx_mail_mailmail_mailrecipient')['file'];
+                if ((new Typo3Version())->getMajorVersion() < 12) {
+                    $file = GeneralUtility::_GP('tx_mail_mailmail_mailrecipient')['file'];
+                } else {
+                    $file = $this->request->getParsedBody()['file'] ?? $this->request->getQueryParams()['file'] ?? null;
+                }
                 $extendedFileUtility->start($file);
                 $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::cast(DuplicationBehavior::REPLACE));
                 $tempFile = $extendedFileUtility->func_upload($file['upload']['1']);
@@ -770,10 +706,6 @@ class ImportService
     protected function addCategoryData(QueryResultInterface $sysCategories, array $data): array
     {
         if ($sysCategories->count() > 0) {
-            if ($data['updateUnique']) {
-                $data['showAddAllCategories'] = true;
-                $data['addAllCategories'] = (bool)($this->configuration['addAllCategories'] ?? false);
-            }
             /** @var Category $sysCategory */
             foreach ($sysCategories as $sysCategory) {
                 $data['categories'][] = [

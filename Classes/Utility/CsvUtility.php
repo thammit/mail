@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use JetBrains\PhpStorm\NoReturn;
+use MEDIAESSENZ\Mail\Domain\Model\Category;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -175,7 +177,7 @@ class CsvUtility
      * @param string $filenamePrefix
      * @return ResponseInterface file download
      */
-    #[NoReturn] public static function downloadCSV(array $rows, string $filenamePrefix = 'mail_recipients'): ResponseInterface
+    public static function downloadCSV(array $rows, string $filenamePrefix = 'mail_recipients'): ResponseInterface
     {
         $lines = [];
         if (count($rows)) {
