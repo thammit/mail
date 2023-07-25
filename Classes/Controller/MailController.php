@@ -420,6 +420,7 @@ class MailController extends AbstractController
         $tableName = $dataMap->getTableName();
         $reflectionService = GeneralUtility::makeInstance(ReflectionService::class);
         $classSchema = $reflectionService->getClassSchema($className);
+        $backendUserIsAllowedToEditMailSettingsRecord = BackendUserUtility::getBackendUser()->check('tables_modify', $tableName);
 
         foreach ($groups as $groupName => $properties) {
             foreach ($properties as $property) {
@@ -444,7 +445,7 @@ class MailController extends AbstractController
                     $fieldGroups[$groupName][$property] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $tableName),
                         'value' => $value,
-                        'edit' => in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
+                        'edit' => ($backendUserIsAllowedToEditMailSettingsRecord && in_array($property, $readOnly)) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
                     ];
                 }
             }
@@ -453,7 +454,6 @@ class MailController extends AbstractController
         $this->view->assignMultiple([
             'mail' => $mail,
             'fieldGroups' => $fieldGroups,
-            'allowEdit' => BackendUserUtility::getBackendUser()->check('tables_modify', $tableName),
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),
         ]);
 
@@ -625,6 +625,7 @@ class MailController extends AbstractController
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/UpdateCategoryRestrictions');
         $saveCategoryRestrictionsAjaxUri = $this->backendUriBuilder->buildUriFromRoute('ajax_mail_save-category-restrictions', ['mail' => $mail->getUid()]);
         $this->pageRenderer->addJsInlineCode('mail-configuration', 'var saveCategoryRestrictionsAjaxUri = \'' . $saveCategoryRestrictionsAjaxUri . '\'');
+        $this->addDocHeaderHelpButton();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -764,6 +765,7 @@ class MailController extends AbstractController
             ],
         ]);
         $this->moduleTemplate->setContent($this->view->render());
+        $this->addDocHeaderHelpButton();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -823,6 +825,7 @@ class MailController extends AbstractController
         } else {
             $this->pageRenderer->loadJavaScriptModule('@typo3/backend/form-engine/element/datetime-element.js');
         }
+        $this->addDocHeaderHelpButton();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -1043,5 +1046,25 @@ class MailController extends AbstractController
             ->setShowLabelText(true)
             ->setIcon($this->iconFactory->getIcon('actions-refresh', Icon::SIZE_SMALL));
         $buttonBar->addButton($reloadButton);
+    }
+
+    /**
+     * Create document header help button
+     */
+    protected function addDocHeaderHelpButton(): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+
+        $helpButton = $buttonBar->makeInputButton()
+            ->setTitle('Help')
+            ->setName('Help')
+            ->setDataAttributes([
+                'bs-toggle' => 'modal',
+                'bs-target' => '#mail-help-modal',
+            ])
+            ->setClasses('js-mail-queue-configuration-modal')
+            ->setValue(1)
+            ->setIcon($this->iconFactory->getIcon('actions-system-help-open', Icon::SIZE_SMALL));
+        $buttonBar->addButton($helpButton, ButtonBar::BUTTON_POSITION_RIGHT);
     }
 }

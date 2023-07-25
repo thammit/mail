@@ -1,37 +1,39 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
-      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
-      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
-      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
-      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
-      data-namespace-typo3-fluid="true">
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
 
 <f:layout name="Default"/>
 
 <f:section name="content">
-    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1>
-        <f:translate key="{lll}report.show.header"/>
-    </h1>
-    <h2><core:iconForRecord row="{uid: mail.uid, type: 0}" table="tx_mail_domain_model_mail" size="default" /> {mail.subject} [{mail.uid}]</h2>
-    <div class="row">
-        <div class="col-12 col-xl-6">
-            <f:render partial="Report/General" arguments="{data:general, mail:mail, lll:lll}"/>
-        </div>
-        <f:if condition="{performance}">
-            <div class="col-12 col-xl-6">
-                <f:render partial="Report/Performance" arguments="{data:performance, lll:lll}"/>
-            </div>
-        </f:if>
-        <f:if condition="{returned}">
-            <div class="col-12 col-xl-6">
-                <f:render partial="Report/Returned" arguments="{data:returned, mail:mail, lll:lll}"/>
-            </div>
-        </f:if>
-        <f:if condition="{responses}">
-            <div class="col-12 col-xl-6">
-                <f:render partial="Report/Responses" arguments="{data:responses, lll:lll}"/>
-            </div>
-        </f:if>
-    </div>
+	<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+	<h1>
+		<f:translate key="{lll}report.show.header"/>
+	</h1>
+	<h2>
+		<core:iconForRecord row="{uid: mail.uid, type: 0}" table="tx_mail_domain_model_mail" size="default"/>
+		{mail.subject} [{mail.uid}]
+	</h2>
+	<div class="row">
+		<div class="col-12 col-lg-6">
+			<f:render partial="Report/General" arguments="{data:general, mail:mail, lll:lll}"/>
+			<f:if condition="{performance}">
+				<f:render partial="Report/Performance" arguments="{data:performance, lll:lll}"/>
+			</f:if>
+			<f:if condition="{returned}">
+				<f:render partial="Report/Returned" arguments="{data:returned, mail:mail, lll:lll}"/>
+			</f:if>
+			<f:if condition="{responses}">
+				<f:render partial="Report/Responses" arguments="{data:responses, lll:lll}"/>
+			</f:if>
+		</div>
+		<div class="col-12 col-lg-6">
+			<div class="mail-wizard-preview panel panel-default mb-2">
+				<div class="mail-wizard-preview-body" id="mail-wizard-preview-body">{mailBody -> f:format.raw()}</div>
+			</div>
+		</div>
+	</div>
 </f:section>
 </html>

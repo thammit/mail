@@ -1,0 +1,27 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
+
+<div class="t3js-modal modal fade modal-type-default modal-severity-info modal-style-default modal-size-medium" id="mail-help-modal">
+	<div class="modal-dialog modal-dialog-scrollable">
+		<div class="t3js-modal-content modal-content">
+			<div class="modal-header">
+				<h4 class="t3js-modal-title modal-title"><f:translate key="{titleLanguageKey}"/></h4>
+				<button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
+					<core:icon identifier="actions-close" />
+					<span class="visually-hidden"><f:translate key="{lll}general.button.cancel" /></span>
+				</button>
+			</div>
+			<div class="t3js-modal-body modal-body">
+				<f:be.infobox state="-1" >
+					<f:format.nl2br><f:translate key="{bodyLanguageKey}"/></f:format.nl2br>
+				</f:be.infobox>
+			</div>
+		</div>
+	</div>
+</div>
+
+</html>

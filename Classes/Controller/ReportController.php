@@ -8,6 +8,7 @@ use JetBrains\PhpStorm\NoReturn;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
@@ -47,12 +48,12 @@ class ReportController extends AbstractController
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
+            'mailBody' => MailerUtility::getMailBody($mail->getHtmlContent()),
             'general' => $this->reportService->getGeneralData(),
             'performance' => $this->reportService->getPerformanceData(),
             'returned' => $this->reportService->getReturnedData(),
             'responses' => $this->reportService->getResponsesData(),
         ]);
-
         $this->moduleTemplate->setContent($this->view->render());
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->addLeftDocheaderBackButtons();

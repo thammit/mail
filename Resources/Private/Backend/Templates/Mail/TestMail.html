@@ -9,14 +9,11 @@
 
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}mail.wizard.title"/></h1>
+    <h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.testMail"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
-    <h3><f:translate key="{lll}mail.wizard.testMail"/></h3>
+    <f:render partial="HelpModal" arguments="{titleLanguageKey: '{lll}mail.wizard.testMail.info.title', bodyLanguageKey: '{lll}mail.wizard.testMail.info.message'}"/>
     <div class="mb-4">
-        <f:be.infobox state="-1" title="{f:translate(key: '{lll}mail.wizard.testMail.info.title')}">
-            <f:format.nl2br><f:translate key="{lll}mail.wizard.testMail.info.message"/></f:format.nl2br>
-        </f:be.infobox>
         <h4><f:translate key="{lll}mail.wizard.testMail.individual"/></h4>
         <div class="row mb-3">
             <div class="col-12 col-xl-8 col-xxl-6">

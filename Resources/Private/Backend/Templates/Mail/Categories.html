@@ -10,21 +10,19 @@
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1>
-        <f:translate key="{lll}mail.wizard.title"/>
+        <f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.categories"/>
     </h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
     <h2>
         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
         {mail.subject}
     </h2>
+    <f:render partial="HelpModal" arguments="{titleLanguageKey: '{lll}mail.wizard.categories.alttitle', bodyLanguageKey: '{lll}mail.wizard.categories.description'}"/>
     <div class="row justify-content-between mail-wizard-categories">
         <div class="col-12 col-md-8">
             <f:form action="updateCategories" arguments="{mail:mail.uid}" method="post" enctype="multipart/form-data">
-                <f:render partial="InfoBox" arguments="{field: 'mail.wizard.categories'}"/>
+
                 <f:if condition="{data.rows}">
-                    <h3>
-                        <f:translate key="{lll}mail.wizard.categories"/>
-                    </h3>
                     <div class="panel panel-default">
                         <div class="table-fit">
                             <table class="table table-striped table-hover">

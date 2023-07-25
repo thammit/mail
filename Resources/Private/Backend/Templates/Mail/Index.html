@@ -10,9 +10,8 @@
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
-    <h1><f:translate key="{lll}mail.wizard.title"/></h1>
+    <h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.selectSource"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <h2><f:translate key="{lll}mail.wizard.selectSource"/>:</h2>
     <div class="panel-group" id="mail-wizard-source-select-panel">
         <f:if condition="{panel.draft.data}">
             <f:variable name="counter" value="{panel.draft.data -> f:count()}"/>

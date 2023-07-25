@@ -11,13 +11,11 @@
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1><f:translate key="{lll}mail.wizard.title"/></h1>
     <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
+    <f:render partial="HelpModal" arguments="{titleLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.title', bodyLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.message'}"/>
     <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
     <h3><f:translate key="{lll}mail.wizard.scheduleSending"/></h3>
     <f:form action="finish" object="{mail}" objectName="mail" method="post" enctype="multipart/form-data">
         <div class="mb-4">
-            <f:be.infobox state="-1" title="{f:translate(key: '{lll}mail.wizard.scheduleSending.info.mailGroup.title')}">
-                <f:format.nl2br><f:translate key="{lll}mail.wizard.scheduleSending.info.mailGroup.message"/></f:format.nl2br>
-            </f:be.infobox>
             <div class="row mb-3 gy-3">
                 <f:if condition="{groups}">
                     <f:then>
