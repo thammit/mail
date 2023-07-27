@@ -5,8 +5,10 @@ namespace MEDIAESSENZ\Mail\Controller;
 
 use Doctrine\DBAL\Exception;
 use JetBrains\PhpStorm\NoReturn;
+use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
+use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
@@ -27,6 +29,18 @@ class ReportController extends AbstractController
      */
     public function indexAction(): ResponseInterface
     {
+        if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
+            // current selected page has no mail module configuration -> redirect to closest mail module page
+            $mailModulePageId = BackendDataUtility::getClosestMailModulePageId($this->id);
+            if ($mailModulePageId) {
+                if ($this->typo3MajorVersion < 12) {
+                    // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+                    $_GET['id'] = $mailModulePageId;
+                }
+                return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
+            }
+        }
+
         $this->view->assign('mails', $this->mailRepository->findSentByPid($this->id));
 
         $this->moduleTemplate->setContent($this->view->render());

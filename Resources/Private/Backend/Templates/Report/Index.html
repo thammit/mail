@@ -72,7 +72,9 @@
                         <core:icon identifier="{identifier}"/>
                     </td>
                     <td>
-                        <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
+                        <f:if condition="{mail.sent}">
+                            <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
+                        </f:if>
                     </td>
                 </tr>
             </f:for>

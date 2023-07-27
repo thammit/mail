@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use MEDIAESSENZ\Mail\Constants;
 use TYPO3\CMS\Backend\Tree\View\PageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -108,5 +109,23 @@ class BackendDataUtility
             }
         }
         return array_unique($pageIdArray);
+    }
+
+    /**
+     * @param int $id
+     * @return int|bool
+     */
+    public static function getClosestMailModulePageId(int $id): int|bool
+    {
+        $rootLine = BackendUtility::BEgetRootLine($id);
+        array_shift($rootLine);
+        rsort($rootLine);
+        foreach ($rootLine as $page) {
+            if ($page['module'] === Constants::MAIL_MODULE_NAME) {
+                return (int)$page['uid'];
+            }
+        }
+
+        return false;
     }
 }

@@ -877,9 +877,6 @@ class MailController extends AbstractController
             $mail->setScheduled($scheduledWithCorrectTimeZone);
         }
 
-        // Update the record:
-        $mail->setSent(true);
-
 //        if (false && $this->isTestMail) {
 //            $updateFields['subject'] = ($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '') . ' ' . $row['subject'];
 //        }
@@ -903,6 +900,7 @@ class MailController extends AbstractController
 //            );
 //        }
 
+        // Update the record:
         $this->mailRepository->update($mail);
 
         ViewUtility::addNotificationSuccess(

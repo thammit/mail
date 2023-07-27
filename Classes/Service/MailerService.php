@@ -499,6 +499,7 @@ class MailerService implements LoggerAwareInterface
     protected function setJobEnd(): void
     {
         $this->mail->setScheduledEnd(new DateTimeImmutable('now'));
+        $this->mail->setSent(true);
         $this->mailRepository->update($this->mail);
         $this->mailRepository->persist();
 

@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use DateTimeImmutable;
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
@@ -23,7 +24,7 @@ class MailRepository extends Repository
     use RepositoryTrait;
     protected string $table = 'tx_mail_domain_model_mail';
 
-    public function initializeObject()
+    public function initializeObject(): void
     {
         $querySettings = GeneralUtility::makeInstance(Typo3QuerySettings::class);
         $querySettings->setRespectStoragePage(false);
@@ -45,7 +46,6 @@ class MailRepository extends Repository
         $query->matching(
             $query->logicalAnd(
                 $query->equals('scheduled', 0),
-                $query->equals('sent', 0),
                 $query->equals('pid', $pid),
             )
         );
@@ -63,7 +63,6 @@ class MailRepository extends Repository
         $query->matching(
             $query->logicalAnd(
                 $query->equals('scheduled', 0),
-                $query->equals('sent', 0),
                 $query->equals('page', $page),
                 $query->equals('pid', $pid),
             )
@@ -114,7 +113,7 @@ class MailRepository extends Repository
     /**
      * @param int $pid
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function findSentByPid(int $pid): array
     {
@@ -122,12 +121,7 @@ class MailRepository extends Repository
 
         return GeneralUtility::makeInstance(DataMapper::class)->map(Mail::class, $queryBuilder
             ->selectLiteral(
-            'm.uid',
-            'm.subject',
-            'm.scheduled',
-            'm.scheduled_begin',
-            'm.scheduled_end',
-            'm.recipients',
+            'm.*',
             'COUNT(l.mail) AS number_of_sent'
             )
             ->from('tx_mail_domain_model_mail', 'm')
@@ -139,8 +133,8 @@ class MailRepository extends Repository
             )
             ->where(
                 $queryBuilder->expr()->eq('m.pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], Connection::PARAM_INT_ARRAY)),
-                $queryBuilder->expr()->eq('m.sent', $queryBuilder->createNamedParameter(1, PDO::PARAM_INT)),
+                $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], ArrayParameterType::INTEGER)),
+                $queryBuilder->expr()->gte('m.scheduled', 0),
                 $queryBuilder->expr()->eq('l.response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
                 $queryBuilder->expr()->neq('l.format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, PDO::PARAM_INT)),
             )

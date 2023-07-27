@@ -204,8 +204,7 @@ return [
         'sent' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sent',
             'config' => [
-                'type' => 'none',
-                'size' => 2,
+                'type' => 'passthrough',
             ],
         ],
         'step' => [
