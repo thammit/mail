@@ -147,6 +147,14 @@
         <source>Error during fetching external Urls: %s</source>
         <target state="final">Fehler beim Einlesen der externen Urls: %s</target>
       </trans-unit>
+      <trans-unit id="mail.wizard.notification.fetchContentFromUrlError.message" resname="mail.wizard.notification.fetchContentFromUrlError.message">
+        <source>Error during fetching content from url "%s": %s</source>
+        <target state="needs-translation">Error during fetching content from url "%s": %s</target>
+      </trans-unit>
+      <trans-unit id="mail.wizard.notification.contentContainFrameTagsError.message" resname="mail.wizard.notification.contentContainFrameTagsError.message">
+        <source>Error during fetching content from url "%s". The content contains frame tags, which is not allowed.</source>
+        <target state="needs-translation">Error during fetching content from url "%s". The content contains frame tags, which is not allowed.</target>
+      </trans-unit>
       <trans-unit id="mail.wizard.notification.noPageSelected.title" resname="mail.wizard.notification.noPageSelected.title" approved="yes">
         <source>No valid page selected</source>
         <target state="final">Keine gültige Seite ausgewählt</target>
