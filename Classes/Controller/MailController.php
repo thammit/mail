@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use Doctrine\DBAL\Exception;
 use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use FriendsOfTYPO3\TtAddress\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Constants;
@@ -75,13 +76,13 @@ class MailController extends AbstractController
             // the currently selected page is not a mail module sys folder
             $draftMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
             // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
-            $_GET['id'] = $this->pageInfo['pid'];
+//            $_GET['id'] = $this->pageInfo['pid'];
             if ($draftMails->count() > 0) {
                 // there is already a draft mail of this page -> use it
-                return $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid()], $this->pageInfo['pid']);
+                return $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid(), 'id' => $this->pageInfo['pid']]);
             }
             // create a new mail of the page
-            return $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id], $this->pageInfo['pid']);
+            return $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id, 'id' => $this->pageInfo['pid']]);
         }
 
         if (!isset($this->implodedParams['plainParams'])) {
@@ -244,7 +245,6 @@ class MailController extends AbstractController
      * @param string $htmlUrl
      * @param string $plainTextUrl
      * @return ResponseInterface
-     * @throws ParseException
      */
     public function createMailFromExternalUrlsAction(string $subject, string $htmlUrl, string $plainTextUrl): ResponseInterface
     {
@@ -252,16 +252,9 @@ class MailController extends AbstractController
         try {
             $newMail = $mailFactory->fromExternalUrls($subject, $htmlUrl, $plainTextUrl);
             if ($newMail instanceof Mail) {
-                $this->addNewMailAndRedirectToSettings($newMail);
+                return $this->addNewMailAndRedirectToSettings($newMail);
             }
-        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
-        } catch (HtmlContentFetchFailedException|PlainTextContentFetchFailedException) {
-            ViewUtility::addNotificationError(
-                sprintf(LanguageUtility::getLL('mail.wizard.notification.externalUrlInvalid.message'), trim($htmlUrl . ' / ' . $plainTextUrl, ' /')),
-                LanguageUtility::getLL('general.notification.severity.error.title')
-            );
-
-            return $this->redirect('index');
+        } catch (\Exception) {
         }
 
         return $this->redirect('index');
@@ -280,7 +273,7 @@ class MailController extends AbstractController
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = $mailFactory->fromText($subject, $message, $fromName, $fromEmail, $breakLines);
         if ($newMail instanceof Mail) {
-            $this->addNewMailAndRedirectToSettings($newMail);
+            return $this->addNewMailAndRedirectToSettings($newMail);
         }
         return $this->redirect('index');
     }
@@ -706,7 +699,7 @@ class MailController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function testMailAction(Mail $mail): ResponseInterface
     {
@@ -801,7 +794,7 @@ class MailController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function scheduleSendingAction(Mail $mail): ResponseInterface
     {
@@ -851,7 +844,7 @@ class MailController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public function finishAction(Mail $mail): ResponseInterface
     {

@@ -1,112 +1,158 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
-      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
-      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
-      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
-      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
-      data-namespace-typo3-fluid="true">
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
 
 <f:layout name="Default"/>
 
 <f:section name="content">
-    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.settings"/></h1>
-    <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <div class="row justify-content-start">
-        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <f:if condition="{settingsWithoutTabs}">
-                <f:then>
-                    <div class="panel panel-tab">
-                        <div class="panel-body">
-                            <table class="table table-striped table-hover">
-                                <tbody>
-                                    <f:for each="{fieldGroups}" as="fields">
-                                        <f:for each="{fields}" as="field">
-                                            <f:render section="tableRow" arguments="{field:field, mailUid:mail.uid}"/>
-                                        </f:for>
-                                    </f:for>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </f:then>
-                <f:else>
-                    <div role="tabpanel">
-                        <ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab" data-store-last-tab="1">
-                            <f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
-                                <f:if condition="{fields}">
-                                    <f:render section="tabSelector" arguments="{tabId:'tab-{groupName}',title:'{f:translate(key: \'{lll}mail.wizard.settings.{groupName}\')}',active:fieldGroupIterator.isFirst}"/>
-                                </f:if>
-                            </f:for>
-                        </ul>
-                        <div class="tab-content">
-                            <f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
-                                <f:if condition="{fields}">
-                                    <f:render section="tabContent" arguments="{tabId:'tab-{groupName}',mailUid:mail.uid,fields:fields,active:fieldGroupIterator.isFirst}"/>
-                                </f:if>
-                            </f:for>
-                        </div>
-                    </div>
-                </f:else>
-            </f:if>
-        </div>
-    </div>
-    <div class="row justify-content-start">
-        <f:if condition="{mailBody}">
-            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-                <div class="mail-wizard-preview panel panel-default mb-2">
-                    <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">{mailBody -> f:format.raw()}</div>
-                </div>
-                <f:if condition="{mail.page}">
-                    <a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page}')}" title="{f:translate(key: '{lll}general.button.edit')}">
-                        <core:icon identifier="app-pagetree-mail" overlay="actions-open"/>
-                    </a>
-                </f:if>
-                <f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}" action="updateContent" controller="Mail" arguments="{mail: mail.uid}">
-                    <core:icon identifier="actions-refresh"/>
-                </f:link.action>
-            </div>
-        </f:if>
-    </div>
-    <f:render partial="Wizard/Navigation"
-              arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
+	<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+	<h1>
+		<f:translate key="{lll}mail.wizard.title"/>
+		:
+		<f:translate key="{lll}mail.wizard.settings"/>
+	</h1>
+	<f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
+	<div class="row justify-content-start">
+		<div class="col-12 col-md-10 col-lg-8 col-xl-6">
+			<f:if condition="{settingsWithoutTabs}">
+				<f:then>
+					<div class="panel panel-tab">
+						<div class="panel-body">
+							<table class="table table-striped table-hover">
+								<tbody>
+								<f:for each="{fieldGroups}" as="fields">
+									<f:for each="{fields}" as="field">
+										<f:render section="tableRow" arguments="{field:field, mailUid:mail.uid}"/>
+									</f:for>
+								</f:for>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</f:then>
+				<f:else>
+					<div role="tabpanel">
+						<ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab" data-store-last-tab="1">
+							<f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
+								<f:if condition="{fields}">
+									<f:render section="tabSelector"
+											  arguments="{tabId:'tab-{groupName}',title:'{f:translate(key: \'{lll}mail.wizard.settings.{groupName}\')}',active:fieldGroupIterator.isFirst}"/>
+								</f:if>
+							</f:for>
+						</ul>
+						<div class="tab-content">
+							<f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
+								<f:if condition="{fields}">
+									<f:render section="tabContent" arguments="{tabId:'tab-{groupName}',mailUid:mail.uid,fields:fields,active:fieldGroupIterator.isFirst}"/>
+								</f:if>
+							</f:for>
+						</div>
+					</div>
+				</f:else>
+			</f:if>
+		</div>
+	</div>
+	<div class="row justify-content-start">
+		<div class="col-12 col-md-10 col-lg-8 col-xl-6">
+			<f:if condition="{mail.htmlContent} && {mail.plainContent}">
+				<f:then>
+					<div role="tabpanel">
+						<ul class="nav nav-tabs t3js-tabs" role="tablist" id="tabs-tab" data-store-last-tab="1">
+							<f:render section="tabSelector" arguments="{tabId:'tab-mail-html',title:'HTML',active:1}"/>
+							<f:render section="tabSelector" arguments="{tabId:'tab-mail-text',title:'Text',active:0}"/>
+						</ul>
+						<div class="tab-content">
+							<div role="tabpanel" class="tab-pane active" id="tab-mail-html">
+								<div class="panel panel-tab">
+									<div class="panel-body mail-wizard-preview">
+										<div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
+											{mailBody -> f:format.raw()}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div role="tabpanel" class="tab-pane" id="tab-mail-text">
+								<div class="panel panel-tab">
+									<div class="panel-body">
+										<f:if condition="{mail.plainContent}">
+											<pre>{mail.plainContent -> f:format.raw() -> mail:removeMailBoundaries()}</pre>
+										</f:if>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</f:then>
+				<f:else>
+					<div class="mail-wizard-preview panel panel-default mb-2">
+						<div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
+							<f:if condition="{mail.plainContent}">
+								<pre class="p-4">{mail.plainContent -> f:format.raw() -> mail:removeMailBoundaries()}</pre>
+							</f:if>
+							<f:if condition="{mail.htmlContent}">
+								{mailBody -> f:format.raw()}
+							</f:if>
+						</div>
+					</div>
+				</f:else>
+			</f:if>
+			<f:if condition="{mailBody}">
+				<f:if condition="{mail.page}">
+					<a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page}')}" title="{f:translate(key: '{lll}general.button.edit')}">
+						<core:icon identifier="app-pagetree-mail" overlay="actions-open"/>
+					</a>
+				</f:if>
+				<f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}" action="updateContent"
+							   controller="Mail" arguments="{mail: mail.uid}">
+					<core:icon identifier="actions-refresh"/>
+				</f:link.action>
+			</f:if>
+		</div>
+	</div>
+	<f:render partial="Wizard/Navigation"
+			  arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
 </f:section>
 
 <f:section name="tabSelector">
-    <li role="presentation" class="t3js-tabmenu-item">
-        <a href="#{tabId}" title="" aria-controls="{tabId}" role="tab" data-bs-toggle="tab"
-           aria-selected="{f:if(condition: '{active}', then: 'true', else:'false')}" class="{f:if(condition: '{active}', then: 'active')}">
-            {title}
-        </a>
-    </li>
+	<li role="presentation" class="t3js-tabmenu-item">
+		<a href="#{tabId}" title="" aria-controls="{tabId}" role="tab" data-bs-toggle="tab"
+		   aria-selected="{f:if(condition: '{active}', then: 'true', else:'false')}" class="{f:if(condition: '{active}', then: 'active')}">
+			{title}
+		</a>
+	</li>
 </f:section>
 
 <f:section name="tabContent">
-    <div role="tabpanel" class="tab-pane {f:if(condition: '{active}', then: 'active')}" id="{tabId}">
-        <div class="panel panel-tab">
-            <div class="panel-body">
-                <table class="table table-striped table-hover">
-                    <tbody>
-                    <f:for each="{fields}" as="field">
-                        <f:render section="tableRow" arguments="{field:field, mailUid:mailUid}"/>
-                    </f:for>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+	<div role="tabpanel" class="tab-pane {f:if(condition: '{active}', then: 'active')}" id="{tabId}">
+		<div class="panel panel-tab">
+			<div class="panel-body">
+				<table class="table table-striped table-hover">
+					<tbody>
+					<f:for each="{fields}" as="field">
+						<f:render section="tableRow" arguments="{field:field, mailUid:mailUid}"/>
+					</f:for>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 </f:section>
 
 <f:section name="tableRow">
-    <tr>
-        <th style="width:20%; min-width:200px">{field.title}</th>
-        <td>{field.value}</td>
-        <td class="text-right text-end">
-            <f:if condition="{field.edit}">
-                <be:link.editRecord class="btn btn-default" uid="{mailUid}" table="tx_mail_domain_model_mail" fields="{field.edit}" title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: field.title}')}">
-                    <core:icon identifier="actions-open"/>
-                </be:link.editRecord>
-            </f:if>
-        </td>
-    </tr>
+	<tr>
+		<th style="width:20%; min-width:200px">{field.title}</th>
+		<td>{field.value}</td>
+		<td class="text-right text-end">
+			<f:if condition="{field.edit}">
+				<be:link.editRecord class="btn btn-default" uid="{mailUid}" table="tx_mail_domain_model_mail" fields="{field.edit}"
+									title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: field.title}')}">
+					<core:icon identifier="actions-open"/>
+				</be:link.editRecord>
+			</f:if>
+		</td>
+	</tr>
 </f:section>
 </html>

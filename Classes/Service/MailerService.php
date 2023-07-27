@@ -556,15 +556,15 @@ class MailerService implements LoggerAwareInterface
         $startTime = MailerUtility::getMilliseconds();
 
         $this->logger->debug('Invoked at ' . date('h:i:s d-m-Y'));
-        $this->mail = $this->mailRepository->findMailToSend();
-        if ($this->mail instanceof Mail) {
-            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $this->mail->getUid() . ', \'' . $this->mail->getSubject() . '\' processed...');
-            $this->prepare($this->mail->getUid());
+        $mail = $this->mailRepository->findMailToSend();
+        if ($mail instanceof Mail) {
+            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\' processed...');
+            $this->prepare($mail->getUid());
 
-            if (!$this->mail->getScheduledBegin()) {
+            if (!$mail->getScheduledBegin()) {
                 // PSR-14 event to manipulate mail before scheduled send begins
                 $this->eventDispatcher->dispatch(
-                    new ScheduledSendBegunEvent($this->mail)
+                    new ScheduledSendBegunEvent($mail)
                 );
                 $this->setJobBegin();
             }
@@ -574,7 +574,7 @@ class MailerService implements LoggerAwareInterface
             if ($finished) {
                 // PSR-14 event to manipulate mail after scheduled send finished
                 $this->eventDispatcher->dispatch(
-                    new ScheduledSendFinishedEvent($this->mail)
+                    new ScheduledSendFinishedEvent($mail)
                 );
                 $this->setJobEnd();
             }

@@ -57,7 +57,6 @@ class RecipientService
     /**
      * @param int $pageId
      * @return array
-     * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
@@ -92,7 +91,6 @@ class RecipientService
      *
      * @return array recipients' data
      * @throws Exception
-     * @throws DBALException
      */
     public function getRecipientsDataByUidListAndTable(
         array $uidListOfRecipients,

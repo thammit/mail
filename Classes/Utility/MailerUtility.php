@@ -6,9 +6,9 @@ namespace MEDIAESSENZ\Mail\Utility;
 use DOMElement;
 use DOMXPath;
 use Exception;
-use GuzzleHttp\Exception\RequestException;
 use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Exception\FetchContentFailedException;
 use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -26,19 +26,22 @@ class MailerUtility
      */
 
     /**
-     * @param $url
-     * @return string|bool
-     * @throws RequestException $exception
+     * @param string $url
+     * @param string $username
+     * @param string $password
+     * @return string
+     * @throws FetchContentFailedException
      */
-    public static function fetchContentFromUrl($url): string|bool
+    public static function fetchContentFromUrl(string $url, string $username = '', string $password = ''): string
     {
+        $url = self::addUsernameAndPasswordToUrl($url, $username, $password);
         $requestFactory = GeneralUtility::makeInstance(RequestFactory::class);
         try {
             $response = $requestFactory->request($url);
         } catch (Exception $exception) {
-            return false;
+            throw new FetchContentFailedException($exception->getMessage(), 1690448922, $exception);
         }
-        return MailerUtility::removeDoubleBrTags($response->getBody()->getContents());
+        return self::removeDoubleBrTags($response->getBody()->getContents());
     }
 
 
@@ -137,9 +140,9 @@ class MailerUtility
     /**
      * @param string $mailContent
      * @param array $tags
-     * @return string|false
+     * @return string
      */
-    public static function removeTags(string $mailContent, array $tags): string|false
+    public static function removeTags(string $mailContent, array $tags): string
     {
         $html = new HTML5();
         $domDocument = $html->loadHTML($mailContent);
@@ -162,9 +165,9 @@ class MailerUtility
 
     /**
      * @param string $mailContent
-     * @return string|false
+     * @return string
      */
-    public static function removeClassAttributes(string $mailContent): string|false
+    public static function removeClassAttributes(string $mailContent): string
     {
         $html = new HTML5();
         $domDocument = $html->loadHTML($mailContent);
@@ -227,7 +230,13 @@ class MailerUtility
                         $href = rtrim($htmlUrl, '/') . '/' . $href;
                     }
                 }
-                $stylesheetUrls[] = self::fetchContentFromUrl($href);
+                try {
+                    $stylesheetUrls[] = self::fetchContentFromUrl($href);
+                } catch (FetchContentFailedException $exception) {
+                    ViewUtility::addNotificationError(
+                        sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $href, $exception->getMessage()),
+                        LanguageUtility::getLL('general.notification.severity.error.title'));
+                }
             }
         }
 
@@ -264,7 +273,7 @@ class MailerUtility
         $messageWithReplacedLinks = preg_replace_callback(
             '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
             function (array $matches) use ($lengthLimit, $baseUrl, $sourceHost) {
-                return $baseUrl . static::createRedirect($matches[0], $lengthLimit, $sourceHost);
+                return $baseUrl . self::createRedirect($matches[0], $lengthLimit, $sourceHost);
             },
             $message
         );
@@ -440,16 +449,18 @@ class MailerUtility
      * username and password are configured in the configuration module
      *
      * @param string $url The URL
-     * @param array $params Parameters from pageTS
-     *
+     * @param string $username
+     * @param string $password
      * @return string The new URL with username and password
      */
-    public static function addUsernameAndPasswordToUrl(string $url, array $params): string
+    public static function addUsernameAndPasswordToUrl(string $url, string $username = '', string $password = ''): string
     {
-        $username = $params['httpUsername'] ?? '';
-        $password = $params['httpPassword'] ?? '';
+        if (!$username || !$password) {
+            return $url;
+        }
+
         $matches = [];
-        if ($username && $password && preg_match('/^https?:\/\//', $url, $matches)) {
+        if (preg_match('/^https?:\/\//', $url, $matches)) {
             $url = $matches[0] . $username . ':' . $password . '@' . substr($url, strlen($matches[0]));
         }
 

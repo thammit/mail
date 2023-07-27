@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DOMElement;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
 use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Exception\FetchContentFailedException;
 use MEDIAESSENZ\Mail\Exception\HtmlContentFetchFailedException;
 use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
@@ -216,7 +215,7 @@ class MailFactory
             $mail->setRedirectUrl($htmlUrl);
             $htmlContent = $this->fetchHtmlContent($htmlUrl);
             if ($htmlContent === false) {
-                throw new HtmlContentFetchFailedException;
+                throw new HtmlContentFetchFailedException();
             }
 
             $htmlContent = MailerUtility::makeImageSourcesAbsolute($htmlContent, $htmlUrl);
@@ -239,10 +238,10 @@ class MailFactory
             // deactivate plain text mail sending option
             $mail->removePlainSendOption();
         } else {
-            $plainTextUrl = MailerUtility::getUrlForExternalPage($mail->getHtmlParams());
+            $plainTextUrl = MailerUtility::getUrlForExternalPage($mail->getPlainParams());
             $plainContent = $this->fetchPlainTextContent($plainTextUrl);
             if ($plainContent === false) {
-                throw new PlainTextContentFetchFailedException;
+                throw new PlainTextContentFetchFailedException();
             }
         }
 
@@ -331,24 +330,36 @@ class MailFactory
      */
     protected function fetchHtmlContent(string $htmlUrl): bool|string
     {
-        $htmlContentUrlWithUsernameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($htmlUrl, $this->pageTSConfiguration);
         try {
-            $htmlContent = MailerUtility::fetchContentFromUrl($htmlContentUrlWithUsernameAndPassword);
+            $htmlContent = MailerUtility::fetchContentFromUrl(
+                $htmlUrl,
+                    $this->pageTSConfiguration['httpUsername'] ?? '',
+                    $this->pageTSConfiguration['httpPassword'] ?? ''
+            );
 
             // remove script tags
-            $htmlContent = MailerUtility::removeTags((string)$htmlContent, ['script']);
+            $htmlContent = MailerUtility::removeTags($htmlContent, ['script']);
 
-            if ($htmlContent === false || MailerUtility::contentContainsFrameTag($htmlContent)) {
+            if (MailerUtility::contentContainsFrameTag($htmlContent)) {
+                // content contains frame tag
+                ViewUtility::addNotificationError(
+                    sprintf(LanguageUtility::getLL('mail.wizard.notification.contentContainFrameTagsError.message'), $htmlUrl),
+                    LanguageUtility::getLL('general.notification.severity.error.title'));
                 return false;
-            } else {
-                if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
-                    ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.noHtmlBoundariesFound.message'),
-                        LanguageUtility::getLL('general.notification.severity.warning.title'));
-                }
-
-                return $htmlContent;
             }
-        } catch (RequestException|ConnectException) {
+
+            if (!MailerUtility::contentContainsBoundaries($htmlContent)) {
+                // content doesn't contain mail boundaries
+                ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.noHtmlBoundariesFound.message'),
+                    LanguageUtility::getLL('general.notification.severity.warning.title'));
+            }
+
+            return $htmlContent;
+
+        } catch (FetchContentFailedException $exception) {
+            ViewUtility::addNotificationError(
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $htmlUrl, $exception->getMessage()),
+                LanguageUtility::getLL('general.notification.severity.error.title'));
             return false;
         }
     }
@@ -359,19 +370,24 @@ class MailFactory
      */
     protected function fetchPlainTextContent(string $plainTextUrl): bool|string
     {
-        $plainContentUrlWithUserNameAndPassword = MailerUtility::addUsernameAndPasswordToUrl($plainTextUrl, $this->pageTSConfiguration);
         try {
-            $plainContent = MailerUtility::fetchContentFromUrl($plainContentUrlWithUserNameAndPassword);
-            if ($plainContent === false) {
-                return false;
-            } else {
-                if (!MailerUtility::contentContainsBoundaries($plainContent)) {
-                    ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.noPlainTextBoundariesFound.message'),
-                        LanguageUtility::getLL('general.notification.severity.warning.title'));
-                }
-                return $plainContent;
+            $plainContent = MailerUtility::fetchContentFromUrl(
+                $plainTextUrl,
+                    $this->pageTSConfiguration['httpUsername'] ?? '',
+                    $this->pageTSConfiguration['httpPassword'] ?? ''
+            );
+
+            if (!MailerUtility::contentContainsBoundaries($plainContent)) {
+                ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.noPlainTextBoundariesFound.message'),
+                    LanguageUtility::getLL('general.notification.severity.warning.title'));
             }
-        } catch (RequestException|ConnectException) {
+
+            return $plainContent;
+
+        } catch (FetchContentFailedException $exception) {
+            ViewUtility::addNotificationError(
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $plainTextUrl, $exception->getMessage()),
+                LanguageUtility::getLL('general.notification.severity.error.title'));
             return false;
         }
     }
