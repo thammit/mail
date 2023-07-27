@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use DateTimeImmutable;
-use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
@@ -133,7 +133,7 @@ class MailRepository extends Repository
             )
             ->where(
                 $queryBuilder->expr()->eq('m.pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], ArrayParameterType::INTEGER)),
+                $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], Connection::PARAM_INT_ARRAY)),
                 $queryBuilder->expr()->gte('m.scheduled', 0),
                 $queryBuilder->expr()->eq('l.response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
                 $queryBuilder->expr()->neq('l.format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, PDO::PARAM_INT)),
