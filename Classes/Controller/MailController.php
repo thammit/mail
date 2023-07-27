@@ -75,8 +75,10 @@ class MailController extends AbstractController
         if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
             // the currently selected page is not a mail module sys folder
             $draftMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
-            // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
-//            $_GET['id'] = $this->pageInfo['pid'];
+            if ($this->typo3MajorVersion < 12) {
+                // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+                $_GET['id'] = $this->pageInfo['pid'];
+            }
             if ($draftMails->count() > 0) {
                 // there is already a draft mail of this page -> use it
                 return $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid(), 'id' => $this->pageInfo['pid']]);
