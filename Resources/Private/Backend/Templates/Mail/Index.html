@@ -154,7 +154,7 @@
                         <core:icon identifier="mail-attachment" size="small"/>
                     </f:if></td>
                     <td class="nowrap">
-                        <f:if condition="{data.mailBody}">
+                        <f:if condition="{data.htmlContent}">
                             <button class="btn btn-default" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-html-body-{data.uid}">
                                 <span data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key:'{lll}mail.wizard.htmlMailBody.title')}">
                                     <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/>
@@ -171,7 +171,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body nowrap-disabled">
-                                            {data.mailBody -> f:format.raw()}
+                                            <div>{data.htmlContent -> mail:getBodyContent()}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -194,7 +194,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body nowrap-disabled">
-                                            {data.plainContent -> f:format.nl2br()}
+                                            <pre class="p-4" style="white-space: pre-wrap;">{data.plainContent -> mail:removeMailBoundaries()}</pre>
                                         </div>
                                     </div>
                                 </div>

@@ -62,7 +62,6 @@ class ReportController extends AbstractController
         $this->reportService->init($mail);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'mailBody' => MailerUtility::getMailBody($mail->getHtmlContent()),
             'general' => $this->reportService->getGeneralData(),
             'performance' => $this->reportService->getPerformanceData(),
             'returned' => $this->reportService->getReturnedData(),

@@ -19,6 +19,9 @@ mailModulePageIds = auto
 #cat=feature; type=boolean; label=Hide navigation: If set, page tree navigation will be hidden in mail module. User tsconfig parameter tx_mail.mailModulePageId has to be set!
 hideNavigation = 0
 
+#cat=feature; type=boolean; label=Store thumbnails: If set, html2canvas is used to store a thumbnail of html mails in the database (column: preview_image, format: data:image/jpeg;base64,...). Currently not used, but it is possible to use it in e.g fluid templates by adding a <image src="{mail.previewImage}" />
+createMailThumbnails = 0
+
 #cat=feature; type=boolean; label=Delete unused markers in personalized mails.
 deleteUnusedMarkers = 1
 

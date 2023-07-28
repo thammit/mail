@@ -1,5 +1,5 @@
 define(['html2canvas'], function(html2canvas) {
-    html2canvas(document.querySelector('#mail-wizard-preview-body'), { scale: 1, height: document.querySelector('#mail-wizard-preview-body').scrollHeight / 2, logging: true }).then(function(canvas) {
+    html2canvas(document.querySelector('#mail-wizard-preview-body'), { scale: 1, logging: true }).then(function(canvas) {
         window.fetch(window.savePreviewImageAjaxUri, {
             method: 'POST',
             body: canvas.toDataURL('image/jpeg', 0.8)

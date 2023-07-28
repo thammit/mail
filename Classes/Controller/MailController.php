@@ -349,6 +349,8 @@ class MailController extends AbstractController
      * @param Mail $mail
      * @param ?bool $updated
      * @return ResponseInterface
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws IllegalObjectTypeException
      * @throws InvalidFileException
      * @throws NoSuchPropertyException
@@ -440,7 +442,8 @@ class MailController extends AbstractController
                     $fieldGroups[$groupName][$property] = [
                         'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $tableName),
                         'value' => $value,
-                        'edit' => ($backendUserIsAllowedToEditMailSettingsRecord && in_array($property, $readOnly)) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
+                        'edit' => ($backendUserIsAllowedToEditMailSettingsRecord && in_array($property,
+                                $readOnly)) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
                     ];
                 }
             }
@@ -452,21 +455,9 @@ class MailController extends AbstractController
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),
         ]);
 
-        // Html2canvas stuff
         if ($mail->isInternal() || $mail->isExternal()) {
-            if ($updatePreview) {
-                try {
-                    $targetUrl = BackendUtility::getPreviewUrl(
-                        $mail->getPage(),
-                        '',
-                        null,
-                        '',
-                        '',
-                        '&mailUid=' . $mail->getUid() . '&L=' . $mail->getSysLanguageUid()
-                    );
-                    $this->view->assign('htmlToCanvasIframeSrc', $targetUrl);
-                } catch (UnableToLinkToPageException $e) {
-                }
+            if ($updatePreview && ConfigurationUtility::getExtensionConfiguration('createMailThumbnails')) {
+                // add html2canvas stuff
                 $this->pageRenderer->addRequireJsConfiguration([
                     'paths' => [
                         'html2canvas' => PathUtility::getPublicResourceWebPath('EXT:mail/Resources/Public/') . 'JavaScript/Contrib/html2canvas.min',
@@ -477,7 +468,6 @@ class MailController extends AbstractController
                 $savePreviewImageAjaxUri = $this->backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mail' => $mail->getUid()]);
                 $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
             }
-            $this->view->assign('mailBody', MailerUtility::getMailBody($mail->getHtmlContent()));
         }
 
         $this->moduleTemplate->setContent($this->view->render());
@@ -612,7 +602,6 @@ class MailController extends AbstractController
         $this->view->assignMultiple([
             'data' => $data,
             'mail' => $mail,
-            'mailBody' => MailerUtility::getMailBody($mail->getHtmlContent()),
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail)),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
@@ -811,7 +800,7 @@ class MailController extends AbstractController
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
-            'useTypo3DateTimeWebComponent' => $this->typo3MajorVersion > 11
+            'useTypo3DateTimeWebComponent' => $this->typo3MajorVersion > 11,
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
@@ -873,7 +862,8 @@ class MailController extends AbstractController
             // scheduled timezone is utc and must be converted to server time zone
             $scheduled = $mail->getScheduled();
             $serverTimeZone = @date_default_timezone_get();
-            $scheduledWithCorrectTimeZone = $scheduled->setTimezone(new \DateTimeZone($serverTimeZone))->setTime((int)$scheduled->format('H'), (int)$scheduled->format('i'));
+            $scheduledWithCorrectTimeZone = $scheduled->setTimezone(new \DateTimeZone($serverTimeZone))->setTime((int)$scheduled->format('H'),
+                (int)$scheduled->format('i'));
             $mail->setScheduled($scheduledWithCorrectTimeZone);
         }
 

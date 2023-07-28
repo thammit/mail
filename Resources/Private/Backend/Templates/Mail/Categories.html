@@ -77,10 +77,12 @@
                 </f:if>
             </f:form>
         </div>
-        <f:if condition="{mailBody}">
+        <f:if condition="{mail.htmlContent}">
             <div class="col-12 col-md-4">
                 <div class="mail-wizard-preview" id="mail-wizard-preview">
-                    <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">{mailBody -> f:format.raw()}</div>
+                    <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
+                        <div>{mail.htmlContent -> mail:getBodyContent()}</div>
+                    </div>
                 </div>
             </div>
         </f:if>

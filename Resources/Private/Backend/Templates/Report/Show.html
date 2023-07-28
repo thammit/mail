@@ -29,11 +29,15 @@
 				<f:render partial="Report/Responses" arguments="{data:responses, lll:lll}"/>
 			</f:if>
 		</div>
-		<div class="col-12 col-lg-6">
-			<div class="mail-wizard-preview panel panel-default mb-2">
-				<div class="mail-wizard-preview-body" id="mail-wizard-preview-body">{mailBody -> f:format.raw()}</div>
+		<f:if condition="{mail.htmlContent}">
+			<div class="col-12 col-lg-6">
+				<div class="mail-wizard-preview panel panel-default mb-2">
+					<div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
+						<div>{mail.htmlContent -> mail:getBodyContent()}</div>
+					</div>
+				</div>
 			</div>
-		</div>
+		</f:if>
 	</div>
 </f:section>
 </html>

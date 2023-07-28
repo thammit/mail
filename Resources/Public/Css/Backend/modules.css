@@ -105,6 +105,15 @@
     background-color: var(--mail-background-color);
 }
 
+.mail-wizard-settings .mail-wizard-preview {
+    max-height: 50vh;
+    overflow-y:scroll;
+}
+
+.mail-wizard-settings pre {
+    white-space: pre-wrap;
+}
+
 .mail-wizard-categories .mail-wizard-preview {
     height:450px;
     overflow-y:scroll;

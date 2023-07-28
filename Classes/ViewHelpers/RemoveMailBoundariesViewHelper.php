@@ -10,7 +10,12 @@ class RemoveMailBoundariesViewHelper extends AbstractViewHelper
     /**
      * @var bool
      */
-    protected $escapeOutput = true;
+    protected $escapeChildren = true;
+
+    /**
+     * @var bool
+     */
+    protected $escapeOutput = false;
 
     public string $boundaryStartWrap = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_ | -->';
     public string $boundaryEnd = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
