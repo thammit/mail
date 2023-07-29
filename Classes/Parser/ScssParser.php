@@ -13,9 +13,9 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 
-if (!Environment::isComposerMode() && !class_exists(Version::class)) {
+if (!class_exists(Compiler::class) && !Environment::isComposerMode()) {
     // @phpstan-ignore-next-line
-    require_once 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
+    @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
 }
 
 /**

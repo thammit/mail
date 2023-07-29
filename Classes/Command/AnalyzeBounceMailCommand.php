@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Command;
 
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use Fetch\Message;
 use Fetch\Server;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
@@ -17,16 +16,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Database\Connection;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-if (!Environment::isComposerMode() && !class_exists(Message::class)) {
+if (!class_exists(Server::class) && !Environment::isComposerMode()) {
     // @phpstan-ignore-next-line
-    require_once 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
+    @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
 }
 
 class AnalyzeBounceMailCommand extends Command
@@ -49,7 +46,7 @@ class AnalyzeBounceMailCommand extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    public function configure()
+    public function configure(): void
     {
         $this->setDescription('This command will get bounce mail from the configured mailbox')
             ->addOption(
@@ -95,7 +92,6 @@ class AnalyzeBounceMailCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -189,7 +185,6 @@ class AnalyzeBounceMailCommand extends Command
      * @param Message $message the message object
      * @return bool true if bounce mail can be parsed, else false
      * @throws DBALException
-     * @throws Exception
      */
     private function processBounceMail(Message $message): bool
     {
@@ -200,15 +195,11 @@ class AnalyzeBounceMailCommand extends Command
             return false;
         }
 
-        $analyzeResult = BounceMailUtility::analyseReturnError($message->getMessageBody());
-
         $row = $this->logRepository->findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid($mailData['recipient_uid'], $mailData['recipient_source'], $mailData['mail']);
 
         if ($row) {
-            $tableName = 'tx_mail_domain_model_log';
-            /** @var Connection $connection */
-            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
             try {
+                $analyzeResult = BounceMailUtility::analyseReturnError($message->getMessageBody());
                 $insertFields = [
                     'tstamp' => $this->context->getPropertyFromAspect('date', 'timestamp'),
                     'response_type' => ResponseType::FAILED,
@@ -216,13 +207,11 @@ class AnalyzeBounceMailCommand extends Command
                     'recipient_uid' => (int)$mailData['recipient_uid'],
                     'recipient_source' => $mailData['recipient_source'],
                     'email' => $row['email'],
-                    'return_content' => json_encode($analyzeResult),
+                    'return_content' => json_encode($analyzeResult, JSON_THROW_ON_ERROR),
                     'return_code' => (int)$analyzeResult['reason'],
                 ];
-                $connection->insert($tableName, $insertFields);
-                $lastInsertId = $connection->lastInsertId($tableName);
 
-                return (bool)$lastInsertId;
+                return $this->logRepository->insertRecord($insertFields) === 1;
             } catch (\Exception $e) {
             }
         }

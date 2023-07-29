@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -56,7 +58,8 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
+     * @throws Exception
      */
     public function findRecordByUid(int $uid, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -77,7 +80,8 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
+     * @throws Exception
      */
     public function findRecordByUidList(array $uidList, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -98,7 +102,8 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
+     * @throws Exception
      */
     public function findRecordByPid(int $pid, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -119,7 +124,8 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
+     * @throws Exception
      */
     public function findRecordByPidList(array $pidList, array $fields = ['*'], bool $withoutRestrictions = false): array
     {
@@ -135,8 +141,19 @@ trait RepositoryTrait
     }
 
     /**
+     * @param array $data
+     * @param array $types
+     * @return int
+     */
+    public function insertRecord(array $data = [], array $types = []): int
+    {
+        return $this->getConnection($this->table)->insert($this->table, $data, $types);
+    }
+
+    /**
      * @param int $uid
      * @return int
+     * @throws DBALException
      */
     public function deleteRecordByUid(int $uid): int
     {
@@ -153,6 +170,7 @@ trait RepositoryTrait
     /**
      * @param int $pid
      * @return int
+     * @throws DBALException
      */
     public function deleteRecordByPid(int $pid): int
     {

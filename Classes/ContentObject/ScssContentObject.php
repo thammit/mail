@@ -4,15 +4,8 @@ namespace MEDIAESSENZ\Mail\ContentObject;
 
 use MEDIAESSENZ\Mail\Parser\ScssParser;
 use ScssPhp\ScssPhp\Exception\SassException;
-use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
-
-if (!Environment::isComposerMode() && !class_exists(ScssParser::class)) {
-    // @phpstan-ignore-next-line
-    require_once 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
-}
 
 class ScssContentObject extends AbstractContentObject
 {
@@ -24,7 +17,6 @@ class ScssContentObject extends AbstractContentObject
     /**
      * @param array $conf
      * @return string
-     * @throws SassException
      */
     public function render($conf = []): string
     {
@@ -57,8 +49,9 @@ class ScssContentObject extends AbstractContentObject
             if (!$parser->supports(pathinfo($absoluteFile)['extension'])) {
                 return '';
             }
-            return file_get_contents(GeneralUtility::getFileAbsFileName($parser->compile($file, $settings)));
-        } catch (\Exception $exception) {
+            $cacheFile = $parser->compile($file, $settings);
+            return file_get_contents(GeneralUtility::getFileAbsFileName($cacheFile));
+        } catch (\Exception|SassException $exception) {
             return '/* ERROR DURING SCSS COMPILATION: ' . $exception->getMessage() . ' */';
         }
     }
@@ -76,7 +69,7 @@ class ScssContentObject extends AbstractContentObject
         // Fetch settings
         $prefix = 'plugin.mail.settings.' . $extension . '.';
         foreach ($constants as $constant => $value) {
-            if (strpos($constant, $prefix) === 0) {
+            if (str_starts_with($constant, $prefix)) {
                 $variables[substr($constant, strlen($prefix))] = $value;
             }
         }

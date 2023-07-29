@@ -276,7 +276,7 @@ class MailerService implements LoggerAwareInterface
 
             $this->mail->setReturnPath(str_replace('###XID###', $mailIdentifierHeaderWithoutHash, $this->mail->getReturnPath()));
 
-            if (($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) && GeneralUtility::validEmail($recipientData['email'])) {
+            if (GeneralUtility::validEmail($recipientData['email']) && ($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML))) {
                 $this->sendMailToRecipient(
                     new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
                     $htmlContent,
@@ -381,41 +381,39 @@ class MailerService implements LoggerAwareInterface
                         return false;
                     }
                 }
-            } else {
-                if ($recipientSourceConfiguration['model'] ?? false) {
-                    $recipientService = GeneralUtility::makeInstance(RecipientService::class);
-                    $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
-                        $recipientIds,
-                        $recipientSourceConfiguration['model'],
-                        ['uid', 'name', 'email', 'categories', 'mail_html'],
-                        true,
-                        $this->sendPerCycle
-                    );
-                    foreach ($recipientsData as $recipientData) {
-                        $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
-                        $numberOfSentMailsOfGroup++;
-                        $numberOfSentMails++;
-                        if ($numberOfSentMails >= $this->sendPerCycle) {
-                            return false;
-                        }
+            } elseif ($recipientSourceConfiguration['model'] ?? false) {
+                $recipientService = GeneralUtility::makeInstance(RecipientService::class);
+                $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
+                    $recipientIds,
+                    $recipientSourceConfiguration['model'],
+                    ['uid', 'name', 'email', 'categories', 'mail_html'],
+                    true,
+                    $this->sendPerCycle
+                );
+                foreach ($recipientsData as $recipientData) {
+                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                    $numberOfSentMailsOfGroup++;
+                    $numberOfSentMails++;
+                    if ($numberOfSentMails >= $this->sendPerCycle) {
+                        return false;
                     }
-                } else {
-                    $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
-                    $queryResult = $queryBuilder
-                        ->select('*')
-                        ->from($recipientSourceIdentifier)
-                        ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
-                        ->setMaxResults($this->sendPerCycle)
-                        ->executeQuery();
+                }
+            } else {
+                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
+                $queryResult = $queryBuilder
+                    ->select('*')
+                    ->from($recipientSourceIdentifier)
+                    ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
+                    ->setMaxResults($this->sendPerCycle)
+                    ->executeQuery();
 
-                    while ($recipientData = $queryResult->fetchAssociative()) {
-                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
-                        $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
-                        $numberOfSentMailsOfGroup++;
-                        $numberOfSentMails++;
-                        if ($numberOfSentMails >= $this->sendPerCycle) {
-                            return false;
-                        }
+                while ($recipientData = $queryResult->fetchAssociative()) {
+                    $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
+                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                    $numberOfSentMailsOfGroup++;
+                    $numberOfSentMails++;
+                    if ($numberOfSentMails >= $this->sendPerCycle) {
+                        return false;
                     }
                 }
             }

@@ -10,33 +10,18 @@ class RemoveMailBoundariesViewHelper extends AbstractViewHelper
     /**
      * @var bool
      */
-    protected $escapeChildren = true;
+    protected $escapeChildren = false;
 
     /**
      * @var bool
      */
-    protected $escapeOutput = false;
-
-    public string $boundaryStartWrap = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_ | -->';
-    public string $boundaryEnd = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
+    protected $escapeOutput = true;
 
     /**
      * @return string
      */
     public function render(): string
     {
-        $content = $this->renderChildren();
-        $searchString = $this->wrap('[\d,]*', $this->boundaryStartWrap);
-        $content = preg_replace('/' . $searchString . '/', '', $content);
-        return preg_replace('/' . $this->boundaryEnd . '/', '', $content);
-    }
-
-    public function wrap($content, $wrap, $char = '|')
-    {
-        if ($wrap) {
-            $wrapArr = explode($char, $wrap);
-            $content = trim($wrapArr[0] ?? '') . $content . trim($wrapArr[1] ?? '');
-        }
-        return $content;
+        return preg_replace('/<!--' . Constants::CONTENT_SECTION_BOUNDARY .'_([\d,]*|END)-->/', '', $this->renderChildren());
     }
 }
