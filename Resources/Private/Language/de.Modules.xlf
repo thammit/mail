@@ -19,9 +19,9 @@
         <source>Edit</source>
         <target state="final">Bearbeiten</target>
       </trans-unit>
-      <trans-unit id="general.button.editField" resname="general.button.editField">
+      <trans-unit id="general.button.editField" resname="general.button.editField" approved="yes">
         <source>Edit %s</source>
-        <target state="needs-translation">Edit %s</target>
+        <target state="final">%s bearbeiten</target>
       </trans-unit>
       <trans-unit id="general.button.editPage" resname="general.button.editPage" approved="yes">
         <source>Edit page</source>
@@ -87,33 +87,33 @@
         <source>Error</source>
         <target state="final">Fehler</target>
       </trans-unit>
-      <trans-unit id="shortcut.wizard" resname="shortcut.wizard">
+      <trans-unit id="shortcut.wizard" resname="shortcut.wizard" approved="yes">
         <source>Mail Wizard</source>
-        <target state="needs-translation">Mail Wizard</target>
+        <target state="final">Mail-Assistent</target>
       </trans-unit>
-      <trans-unit id="shortcut.recipientGroups" resname="shortcut.recipientGroups">
+      <trans-unit id="shortcut.recipientGroups" resname="shortcut.recipientGroups" approved="yes">
         <source>Mail Groups</source>
-        <target state="needs-translation">Mail Groups</target>
+        <target state="final">Mail Empfängergruppen</target>
       </trans-unit>
-      <trans-unit id="shortcut.recipientGroup" resname="shortcut.recipientGroup">
+      <trans-unit id="shortcut.recipientGroup" resname="shortcut.recipientGroup" approved="yes">
         <source>Mail Group</source>
-        <target state="needs-translation">Mail Group</target>
+        <target state="final">Mail Empfängergruppe</target>
       </trans-unit>
-      <trans-unit id="shortcut.reports" resname="shortcut.reports">
+      <trans-unit id="shortcut.reports" resname="shortcut.reports" approved="yes">
         <source>Mail Reports</source>
-        <target state="needs-translation">Mail Reports</target>
+        <target state="final">Mail Berichte</target>
       </trans-unit>
-      <trans-unit id="shortcut.report" resname="shortcut.report">
+      <trans-unit id="shortcut.report" resname="shortcut.report" approved="yes">
         <source>Mail Report</source>
-        <target state="needs-translation">Mail Report</target>
+        <target state="final">Mail Bericht</target>
       </trans-unit>
-      <trans-unit id="shortcut.report" resname="shortcut.report">
+      <trans-unit id="shortcut.report" resname="shortcut.report" approved="yes">
         <source>Mail Report</source>
-        <target state="needs-translation">Mail Report</target>
+        <target state="final">Mail Bericht</target>
       </trans-unit>
-      <trans-unit id="shortcut.queue" resname="shortcut.queue">
+      <trans-unit id="shortcut.queue" resname="shortcut.queue" approved="yes">
         <source>Mail Queue</source>
-        <target state="needs-translation">Mail Queue</target>
+        <target state="final">Mail Warteschlange</target>
       </trans-unit>
       <trans-unit id="mail.type.quickMail" resname="mail.type.quickMail" approved="yes">
         <source>Quick Mail</source>
@@ -135,9 +135,9 @@
         <source>Content</source>
         <target state="final">Inhalte</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.settings.source" resname="mail.wizard.settings.source">
+      <trans-unit id="mail.wizard.settings.source" resname="mail.wizard.settings.source" approved="yes">
         <source>Source</source>
-        <target state="needs-translation">Source</target>
+        <target state="final">Quelle</target>
       </trans-unit>
       <trans-unit id="mail.wizard.testMail.groups" resname="mail.wizard.testMail.groups" approved="yes">
         <source>Group(s)</source>
@@ -147,13 +147,13 @@
         <source>Error during fetching external Urls: %s</source>
         <target state="final">Fehler beim Einlesen der externen Urls: %s</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.fetchContentFromUrlError.message" resname="mail.wizard.notification.fetchContentFromUrlError.message">
+      <trans-unit id="mail.wizard.notification.fetchContentFromUrlError.message" resname="mail.wizard.notification.fetchContentFromUrlError.message" approved="yes">
         <source>Error during fetching content from url "%s": %s</source>
-        <target state="needs-translation">Error during fetching content from url "%s": %s</target>
+        <target state="final">Fehler beim Abrufen von Inhalten über Url "%s": %s</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.contentContainFrameTagsError.message" resname="mail.wizard.notification.contentContainFrameTagsError.message">
+      <trans-unit id="mail.wizard.notification.contentContainFrameTagsError.message" resname="mail.wizard.notification.contentContainFrameTagsError.message" approved="yes">
         <source>Error during fetching content from url "%s". The content contains frame tags, which is not allowed.</source>
-        <target state="needs-translation">Error during fetching content from url "%s". The content contains frame tags, which is not allowed.</target>
+        <target state="final">Fehler beim Abrufen von Inhalten über Url "%s". Der Inhalt enthält Frame-Tags, was nicht erlaubt ist.</target>
       </trans-unit>
       <trans-unit id="mail.wizard.notification.noPageSelected.title" resname="mail.wizard.notification.noPageSelected.title" approved="yes">
         <source>No valid page selected</source>
@@ -1386,9 +1386,9 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
         <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>
         <target state="final">Dies ist die Anzahl der E-Mails, die pro Klick gesendet werden, wenn jemand den manuellen Auslöser im Warteschlangenmodul verwendet.</target>
       </trans-unit>
-      <trans-unit id="configuration.queueLimit" resname="configuration.queueLimit">
+      <trans-unit id="configuration.queueLimit" resname="configuration.queueLimit" approved="yes">
         <source>Maximal visible queue items</source>
-        <target state="needs-translation">Maximal visible queue items</target>
+        <target state="final">Maximale sichtbare Warteschlangen-Elemente</target>
       </trans-unit>
       <trans-unit id="configuration.externalMailHtmlUrl" resname="configuration.externalMailHtmlUrl" approved="yes">
         <source>URL of HTML content</source>
