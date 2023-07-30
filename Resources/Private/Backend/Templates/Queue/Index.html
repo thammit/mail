@@ -12,7 +12,7 @@
     <h1>
         <f:translate key="{lll}queue.header"/>
     </h1>
-    <f:if condition="{showManualSending}">
+    <f:if condition="!{hideManualSendingButton}">
         <f:be.infobox title="{f:translate(key: '{lll}queue.manualSending')}">
             <p>
                 <f:translate key="{lll}queue.manualSending.description" arguments="{0: sendPerCycle}"/>
@@ -40,8 +40,10 @@
                 <th class="nowrap" style="min-width: 200px;">
                     <f:translate key="{lll}queue.numberSent"/>
                 </th>
-                <th class="col-control nowrap">
-                </th>
+                <f:if condition="!{hideDeleteRunningSendingButton}">
+                    <th class="col-control nowrap">
+                    </th>
+                </f:if>
             </tr>
             </thead>
             <tbody>
@@ -65,11 +67,13 @@
                             </div>
                         </div>
                     </td>
-                    <td class="col-control nowrap">
-                        <f:if condition="!{mail.sent}">
-                            <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
-                        </f:if>
-                    </td>
+                    <f:if condition="!{hideDeleteRunningSendingButton}">
+                        <td class="col-control nowrap">
+                            <f:if condition="!{mail.sent} || ({mail.scheduledEnd} && !{mail.numberOfSent})">
+                                <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
+                            </f:if>
+                        </td>
+                    </f:if>
                 </tr>
             </f:for>
             </tbody>
@@ -92,7 +96,7 @@
                             <f:form.textfield name="sendPerCycle" type="number" additionalAttributes="{min: 1, max: 500}" id="queueModalConfigure-sendPerCycle-title" class="form-control" value="{sendPerCycle}" required="required" />
                         </div>
                         <div class="form-group">
-                            <label for="queueModalConfigure-queueLimit-title"><f:translate key="{lll}configuration.sendPerCycle" /></label>
+                            <label for="queueModalConfigure-queueLimit-title"><f:translate key="{lll}configuration.queueLimit" /></label>
                             <f:form.textfield name="queueLimit" type="number" additionalAttributes="{min: 0, max: 100}" id="queueModalConfigure-queueLimit-title" class="form-control" value="{queueLimit}" required="required" />
                         </div>
                     </f:form>

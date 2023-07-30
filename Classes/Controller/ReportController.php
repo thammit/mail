@@ -41,7 +41,10 @@ class ReportController extends AbstractController
             }
         }
 
-        $this->view->assign('mails', $this->mailRepository->findSentByPid($this->id));
+        $this->view->assignMultiple([
+            'mails' => $this->mailRepository->findSentByPid($this->id),
+            'hideDeleteReportButton' => $this->userTSConfiguration['hideDeleteReportButton'] ?? false,
+        ]);
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->addDocheaderButtons($this->request->getRequestTarget());

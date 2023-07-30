@@ -1,11 +1,10 @@
 tx_mail {
-    hideTabs =
-    hideCategoryStep = 0
-    defaultTab =
-    hideConfiguration = 0
-    hideManualSending = 0
     mailModulePageId =
+    defaultTab =
+    hideTabs =
+    hideConfiguration = 0
     hideEditAllSettingsButton = 0
+    settingsWithoutTabs = 0
     settings {
         general = subject,fromEmail,fromName,organisation,attachment
         headers = replyToEmail,replyToName,returnPath,priority
@@ -13,5 +12,8 @@ tx_mail {
         source = type,renderedSize,page,sysLanguageUid,plainParams,htmlParams
     }
     readOnlySettings = type,renderedSize
-    settingsWithoutTabs = 0
+    hideCategoryStep = 0
+    hideDeleteReportButton = 0
+    hideManualSendingButton = 0
+    hideDeleteRunningSendingButton = 0
 }

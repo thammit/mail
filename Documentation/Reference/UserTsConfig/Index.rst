@@ -4,11 +4,12 @@
 
 .. _user-ts-config:
 
-============
+=============
 User TSconfig
-============
+=============
 
-The following properties may be used in the User TSConfig (BE user or BE usergroups) to disable some options in the MAIL wizard.
+The following properties may be used in user TSConfig (BE user or BE usergroups) to configure parts of the different
+MAIL modules.
 
 hideTabs
 --------
@@ -19,7 +20,7 @@ hideTabs
    :Default:
    :Path: tx_mail.hideTabs
 
-   Hide the options of mail sources in the first step. To hide more than one options, you can separate the values with comma.
+   Comma separated list of not needed mail sources in the mail wizard.
 
    Available value:
 
@@ -31,17 +32,6 @@ hideTabs
 
    *  draft: hide the draft mail option
 
-hideCategoryStep
-----------------
-
-.. confval:: hideCategoryStep
-
-   :type: bool
-   :Default: 0
-   :Path: tx_mail.hideCategoryStep
-
-   Hide category step.
-
 defaultTab
 ----------
 
@@ -51,7 +41,7 @@ defaultTab
    :Default: draft
    :Path: tx_mail.defaultTab
 
-   One of the keywords from hideTabs. If set, the chosen tab will be draft by default.
+   Possible options: internal, external, quickmail, draft
 
 hideConfiguration
 -----------------
@@ -62,54 +52,7 @@ hideConfiguration
    :Default: 0
    :Path: tx_mail.hideConfiguration
 
-   Hide configuration button in mail wizard and queue module
-
-hideManualSending
------------------
-
-.. confval:: hideManualSending
-
-   :type: bool
-   :Default: 0
-   :Path: tx_mail.hideManualSending
-
-   Hide manual sending button in queue module
-
-.. _user-ts-config-mail-module-page-id:
-
-mailModulePageId
-----------------
-
-.. confval:: mailModulePageId
-
-   :type: int
-   :Default:
-   :Path: tx_mail.mailModulePageId
-
-   If extension configuration parameter :ref:`hideNavigation <extension-configuration-hide-navigation>`
-   is set to 1 or :ref:`mailModulePageId` <extension-configuration-mail-module-page-id> is set to a mail
-   module page, this value can be set to a (different) mail module page id. This way it is possible to
-   show a user individual mail module.
-
-.. _user-ts-config-mail-module-page-ids:
-
-mailModulePageIds
------------------
-
-.. confval:: mailModulePageIds
-
-   :type: string
-   :Default:
-   :Path: tx_mail.mailModulePageIds
-
-   Reduces the page tree of the mail modules to a comma separated list of page uids.
-   If set to "auto", the list will be automatically taken from the pages database table,
-   based on the selected module (see :ref:`here <add-mail-sysfolder>`).
-   This value overrides the :ref:`extension configuration <extension-configuration-mail-module-page-ids>`
-   with the same name.
-
-   This setting is ignored if mailModulePageId or hideNavigation is set, because this will result in
-   no page tree at all!
+   Hide configuration button in mail wizard and queue module.
 
 .. _user-ts-config-hideEditAllSettingsButton:
 
@@ -135,7 +78,7 @@ settingsWithoutTabs
    :Default: 0
    :Path: tx_mail.settingsWithoutTabs
 
-   Show settings in mail wizard settings step without tabs.
+   Show settings wizard step without tabs.
 
 .. _user-ts-config-settings-general:
 
@@ -161,7 +104,7 @@ settings.headers
    :Default: replyToEmail,replyToName,returnPath,priority
    :Path: tx_mail.settings.headers
 
-   Comma separated list of headers fields which should be visible in the mail wizard settings step.
+   Comma separated list of header fields which should be visible in the mail wizard settings step.
 
 .. _user-ts-config-settings-content:
 
@@ -206,3 +149,82 @@ readOnlySettings
    "edit complete record" button! To prevent this, you have to restrict the fields in the usergroup
    settings (exclude fields) as well.
 
+hideCategoryStep
+----------------
+
+.. confval:: hideCategoryStep
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.hideCategoryStep
+
+   Hide the category mail wizard step.
+
+hideManualSendingButton
+-----------------------
+
+.. confval:: hideManualSendingButton
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.hideManualSendingButton
+
+   Hide manual sending button in queue module.
+
+hideDeleteRunningSendingButton
+------------------------------
+
+.. confval:: hideDeleteRunningSendingButton
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.hideDeleteRunningSendingButton
+
+   Hide delete running sending button in queue module.
+
+hideDeleteReportButton
+----------------------
+
+.. confval:: hideDeleteReportButton
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.hideDeleteReportButton
+
+   Hide delete report button in report module.
+
+.. _user-ts-config-mail-module-page-id:
+
+mailModulePageId
+----------------
+
+.. confval:: mailModulePageId
+
+   :type: int
+   :Default:
+   :Path: tx_mail.mailModulePageId
+
+   If extension configuration parameter :ref:`hideNavigation <extension-configuration-hide-navigation>`
+   is set to 1 or :ref:`mailModulePageId` <extension-configuration-mail-module-page-id> is set to a mail
+   module page, this value can be set to a (different) mail module page id. This way it is possible to
+   show a user individual mail module.
+
+.. _user-ts-config-mail-module-page-ids:
+
+mailModulePageIds
+-----------------
+
+.. confval:: mailModulePageIds
+
+   :type: string
+   :Default:
+   :Path: tx_mail.mailModulePageIds
+
+   Reduces the page tree of the mail modules to a comma separated list of page uids.
+   If set to "auto", the list will be automatically taken from the pages database table,
+   based on the selected module (see :ref:`here <add-mail-sysfolder>`).
+   This value overrides the :ref:`extension configuration <extension-configuration-mail-module-page-ids>`
+   with the same name.
+
+   This setting is ignored if mailModulePageId or hideNavigation is set, because this will result in
+   no page tree at all!

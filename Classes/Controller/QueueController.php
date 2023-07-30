@@ -53,7 +53,8 @@ class QueueController extends AbstractController
             'mails' => $mails,
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
             'queueLimit' => (int)($this->pageTSConfiguration['queueLimit'] ?? 10),
-            'showManualSending' => !($this->userTSConfiguration['hideManualSending'] ?? false),
+            'hideManualSendingButton' => $this->userTSConfiguration['hideManualSendingButton'] ?? false,
+            'hideDeleteRunningSendingButton' => $this->userTSConfiguration['hideDeleteRunningSendingButton'] ?? false,
         ]);
 
         $this->moduleTemplate->setContent($this->view->render());

@@ -33,8 +33,10 @@
                 <th class="nowrap">
                     <f:translate key="{lll}report.status"/>
                 </th>
-                <th class="col-control nowrap">
-                </th>
+                <f:if condition="!{hideDeleteReportButton}">
+                    <th class="col-control nowrap">
+                    </th>
+                </f:if>
             </tr>
             </thead>
             <tbody>
@@ -71,11 +73,13 @@
                         </f:if>
                         <core:icon identifier="{identifier}"/>
                     </td>
-                    <td>
-                        <f:if condition="{mail.sent}">
-                            <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
-                        </f:if>
-                    </td>
+                    <f:if condition="!{hideDeleteReportButton}">
+                        <td>
+                            <f:if condition="{mail.sent}">
+                                <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
+                            </f:if>
+                        </td>
+                    </f:if>
                 </tr>
             </f:for>
             </tbody>
