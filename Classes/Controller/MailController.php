@@ -42,6 +42,7 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException;
+use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
@@ -307,6 +308,7 @@ class MailController extends AbstractController
 
     /**
      * @param Mail $mail
+     * @param string $tabId
      * @return ResponseInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
@@ -316,7 +318,7 @@ class MailController extends AbstractController
      * @throws PlainTextContentFetchFailedException
      * @throws UnknownObjectException
      */
-    public function updateContentAction(Mail $mail): ResponseInterface
+    public function updateContentAction(Mail $mail, string $tabId = ''): ResponseInterface
     {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = null;
@@ -340,7 +342,7 @@ class MailController extends AbstractController
             $mail->setCharset($newMail->getCharset());
 
             $this->mailRepository->update($mail);
-            return $this->redirect('settings', null, null, ['mail' => $mail->getUid(), 'updated' => 1]);
+            return $this->redirect('settings', null, null, ['mail' => $mail->getUid(), 'updated' => 1, 'tabId' => $tabId]);
         }
         return $this->redirect('index');
     }
@@ -348,6 +350,7 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @param ?bool $updated
+     * @param string $tabId
      * @return ResponseInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
@@ -357,10 +360,29 @@ class MailController extends AbstractController
      * @throws RouteNotFoundException
      * @throws UnknownClassException
      * @throws UnknownObjectException
+     * @throws StopActionException
      */
-    public function settingsAction(Mail $mail, bool $updated = false): ResponseInterface
+    public function settingsAction(Mail $mail, bool $updated = false, string $tabId = ''): ResponseInterface
     {
         $updatePreview = $mail->getStep() === 1 || $updated;
+
+        if (!$mail->getSendOptions()->hasFormat(SendFormat::HTML)) {
+            $mail->setHtmlContent('');
+        } elseif (!$mail->getHtmlContent()) {
+            return $this->redirect('updateContent', null, null, [
+                'mail' => $mail->getUid(),
+                'tabId' => $tabId
+            ]);
+        }
+        if (!$mail->getSendOptions()->hasFormat(SendFormat::PLAIN)) {
+            $mail->setPlainContent('');
+        } elseif (!$mail->getPlainContent()) {
+            return $this->redirect('updateContent', null, null, [
+                'mail' => $mail->getUid(),
+                'tabId' => $tabId
+            ]);
+        }
+
         $mail->setStep(2);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
@@ -450,6 +472,8 @@ class MailController extends AbstractController
         }
 
         $this->view->assignMultiple([
+            'id' => $this->id,
+            'activeTabId' => $tabId,
             'mail' => $mail,
             'fieldGroups' => $fieldGroups,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),
