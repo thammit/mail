@@ -1387,6 +1387,10 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
         <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>
         <target state="needs-translation">This is the number of mails send per click if someone uses the manual trigger in the queue module.</target>
       </trans-unit>
+      <trans-unit id="configuration.queueLimit" resname="configuration.queueLimit">
+        <source>Maximal visible queue items</source>
+        <target state="needs-translation">Maximal visible queue items</target>
+      </trans-unit>
       <trans-unit id="configuration.externalMailHtmlUrl" resname="configuration.externalMailHtmlUrl">
         <source>URL of HTML content</source>
         <target state="needs-translation">URL of HTML content</target>
