@@ -1386,6 +1386,10 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
         <source>This is the number of mails send per click if someone uses the manual trigger in the queue module.</source>
         <target state="final">Dies ist die Anzahl der E-Mails, die pro Klick gesendet werden, wenn jemand den manuellen Auslöser im Warteschlangenmodul verwendet.</target>
       </trans-unit>
+      <trans-unit id="configuration.queueLimit" resname="configuration.queueLimit">
+        <source>Maximal visible queue items</source>
+        <target state="needs-translation">Maximal visible queue items</target>
+      </trans-unit>
       <trans-unit id="configuration.externalMailHtmlUrl" resname="configuration.externalMailHtmlUrl" approved="yes">
         <source>URL of HTML content</source>
         <target state="final">URL des HTML Inhalts</target>
