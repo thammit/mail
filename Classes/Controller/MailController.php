@@ -474,6 +474,7 @@ class MailController extends AbstractController
         $this->view->assignMultiple([
             'id' => $this->id,
             'activeTabId' => $tabId,
+            'routeIdentifier' => $this->typo3MajorVersion < 12 ? 'MailMail_MailMail' : 'mail_mail',
             'mail' => $mail,
             'fieldGroups' => $fieldGroups,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),

@@ -71,7 +71,7 @@
                                                 <f:variable name="active">{fieldGroupIterator.isFirst}</f:variable>
                                             </f:else>
                                         </f:if>
-										<f:render section="tabContent" arguments="{tabId:tabId,mailUid:mail.uid,fields:fields,active:active,id:id}"/>
+										<f:render section="tabContent" arguments="{tabId:tabId,mailUid:mail.uid,fields:fields,active:active,id:id, routeIdentifier:routeIdentifier}"/>
 									</f:if>
 								</f:for>
 							</div>
@@ -161,7 +161,7 @@
 				<table class="table table-striped table-hover">
 					<tbody>
 					<f:for each="{fields}" as="field">
-						<f:render section="tableRow" arguments="{field:field, mailUid:mailUid, tabId:tabId, id:id}"/>
+						<f:render section="tableRow" arguments="{field:field, mailUid:mailUid, tabId:tabId, id:id, routeIdentifier:routeIdentifier}"/>
 					</f:for>
 					</tbody>
 				</table>
@@ -177,7 +177,7 @@
 		<td class="text-right text-end">
 			<f:if condition="{field.edit}">
                 <f:if condition="{tabId}">
-                    <f:variable name="returnUrl"><be:moduleLink route="MailMail_MailMail" arguments="{id:id,tx_mail_mailmail_mailmail:{mail:mailUid,tabId:tabId,controller:'Mail',action:'settings'}}"/></f:variable>
+                    <f:variable name="returnUrl"><be:moduleLink route="{routeIdentifier}" arguments="{id:id,tx_mail_mailmail_mailmail:{mail:mailUid,tabId:tabId,controller:'Mail',action:'settings'}}"/></f:variable>
                 </f:if>
 				<be:link.editRecord class="btn btn-default" uid="{mailUid}" table="tx_mail_domain_model_mail" fields="{field.edit}" returnUrl="{returnUrl}"
 									title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: field.title}')}">

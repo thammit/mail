@@ -599,6 +599,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="report.headerError" resname="report.headerError">
                 <source>Error in Header</source>
             </trans-unit>
+            <trans-unit id="report.content" resname="report.content">
+                <source>Content</source>
+            </trans-unit>
             <trans-unit id="report.performance" resname="report.performance">
                 <source>Performance</source>
             </trans-unit>
