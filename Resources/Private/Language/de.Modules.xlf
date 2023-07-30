@@ -811,6 +811,10 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Error in Header</source>
         <target state="final">Fehler im Header</target>
       </trans-unit>
+      <trans-unit id="report.content" resname="report.content">
+        <source>Content</source>
+        <target state="needs-translation">Content</target>
+      </trans-unit>
       <trans-unit id="report.performance" resname="report.performance" approved="yes">
         <source>Performance</source>
         <target state="final">Leistung</target>
