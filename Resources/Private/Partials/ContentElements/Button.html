@@ -1,0 +1,38 @@
+<f:variable name="buttonClasses" value="button" />
+<f:if condition="{expanded}">
+	<f:variable name="buttonClasses" value="{buttonClasses} expanded" />
+</f:if>
+<f:if condition="{color}">
+	<f:variable name="buttonClasses" value="{buttonClasses} {color}" />
+</f:if>
+<f:if condition="{radius}">
+	<f:variable name="buttonClasses" value="{buttonClasses} radius" />
+</f:if>
+<f:if condition="{rounded}">
+	<f:variable name="buttonClasses" value="{buttonClasses} rounded" />
+</f:if>
+
+<table class="{buttonClasses}">
+	<tbody>
+	<tr>
+		<td>
+			<table>
+				<tbody>
+				<tr>
+					<td>
+						<f:if condition="{expanded}">
+							<f:then>
+								<center><a href="{href}" align="center" class="float-center">{text}</a></center>
+							</f:then>
+							<f:else>
+								<a href="{href}">{text}</a>
+							</f:else>
+						</f:if>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</td>
+	</tr>
+	</tbody>
+</table>

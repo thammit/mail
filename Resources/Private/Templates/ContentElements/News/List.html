@@ -9,21 +9,19 @@
     <f:then>
         <f:for each="{news}" as="newsItem" iteration="iterator">
             <tr>
-                <td class="float-center" valign="top" colspan="2">
-                    <h3>
-                        <b>
-                            {newsItem.title}
-                        </b>
-                    </h3>
+                <td valign="top" colspan="2">
+                    <h2>{newsItem.title}</h2>
                 </td>
             </tr>
             <tr>
                 <td valign="top" width="80%">
-                    {newsItem.teaser}
+                    <p>{newsItem.teaser}</p>
+                    <f:variable name="href"><n:link uriOnly="1" newsItem="{newsItem}" settings="{settings}" title="{newsItem.title}" configuration="{forceAbsoluteUrl:1}" /></f:variable>
+                    <f:render partial="ContentElements/Button" arguments="{href:href, text:'{f:translate(key: \'more-link\')}', rounded:1}"></f:render>
                 </td>
                 <td valign="top" width="20%">
                     <f:alias map="{mediaElement: newsItem.mediaPreviews.0}">
-                        <n:link newsItem="{newsItem}" settings="{settings}" title="{newsItem.title}" class="btn btn-primary" configuration="{forceAbsoluteUrl:1}">
+                        <n:link newsItem="{newsItem}" settings="{settings}" title="{newsItem.title}" configuration="{forceAbsoluteUrl:1}">
                             <f:if condition="{mediaElement.originalResource.type} == 2">
                                 <f:then>
                                     <f:image
@@ -44,13 +42,6 @@
                             </f:if>
                         </n:link>
                     </f:alias>
-                </td>
-            </tr>
-            <tr>
-                <td align="right" colspan="2" style="text-align: right;">
-                    <n:link newsItem="{newsItem}" settings="{settings}" title="{newsItem.title}" class="btn btn-primary" configuration="{forceAbsoluteUrl:1}">
-                        <f:translate key="more-link"/>
-                    </n:link>
                 </td>
             </tr>
             <tr>
