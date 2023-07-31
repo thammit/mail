@@ -29,5 +29,21 @@ See `MEDIAESSENZ\Mail\EventListener\ManipulateAddressRecipient` and `MEDIAESSENZ
 ..  note::
     Need an entry in a `Services.yaml` as well.
 
+AdditionalMailHeadersEvent
+==========================
+Adds possibility to modify mail headers
+
+ManipulateCsvImportDataEvent
+============================
+Adds possibility to modify csv import data
+
+ScheduledSendBegunEvent
+=======================
+Adds possibility do something after scheduled sending begun
+
+ScheduledSendFinishedEvent
+==========================
+Adds possibility do something after scheduled sending finished
+
 More to come ...
 ================

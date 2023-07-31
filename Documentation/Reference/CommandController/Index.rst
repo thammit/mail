@@ -47,3 +47,11 @@ To make this command controller work, it is also necessary to set `transport_spo
 This command controller is not really needed by this extension, since the sending is already queued by the MassMailingCommand.
 But if a developer wants to use the extended Mail-Classes `MEDIAESSENZ\Mail\Mail\(Mailer|MailMessage)` inside their own extension, it can be usefully.
 
+
+.. _clear-scss-parser-cache-command-controller:
+
+ClearScssParserCacheCommand
+===========================
+
+This command controller clears the scss parser cache files located in typo3temp/assets/mail/css.
+This cache is also cleared after a mail report is deleted.

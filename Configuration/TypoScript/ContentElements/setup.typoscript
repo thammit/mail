@@ -83,6 +83,7 @@ mail {
         css {
             10 = SCSS
             10.file = EXT:mail/Resources/Public/Scss/foundation-emails.scss
+            10.cacheTags = mail
             20 = SCSS
             20.file = {$plugin.mail.settings.scss.modifications}
         }

@@ -8,5 +8,6 @@ TCAdefaults {
         no_follow = 1
         no_search = 1
         target = _blank
+        cache_tags = mail
     }
 }

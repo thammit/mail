@@ -2,6 +2,7 @@
 
 namespace MEDIAESSENZ\Mail\ContentObject;
 
+use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Parser\ScssParser;
 use ScssPhp\ScssPhp\Exception\SassException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -9,11 +10,6 @@ use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 
 class ScssContentObject extends AbstractContentObject
 {
-
-    protected string $tempDirectory = 'typo3temp/assets/mail/css/';
-
-    protected string $tempDirectoryRelativeToRoot = '../../../../';
-
     /**
      * @param array $conf
      * @return string
@@ -21,6 +17,7 @@ class ScssContentObject extends AbstractContentObject
     public function render($conf = []): string
     {
         $file = $conf['file'];
+        $cacheTags = $conf['cacheTags'] ?? '';
         if (!$file) {
             return '';
         }
@@ -33,8 +30,9 @@ class ScssContentObject extends AbstractContentObject
                 'info' => $fileInfo
             ],
             'cache' => [
-                'tempDirectory' => $this->tempDirectory,
-                'tempDirectoryRelativeToRoot' => $this->tempDirectoryRelativeToRoot,
+                'tempDirectory' => Constants::SCSS_PARSER_TEMP_DIR,
+                'tempDirectoryRelativeToRoot' => Constants::SCSS_PARSER_TEMP_DIR_RELATIVE_TO_ROOT,
+                'tags' => $cacheTags
             ],
             'options' => [
                 'override' => false,

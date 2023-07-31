@@ -58,7 +58,7 @@ class ScssParser extends AbstractParser
             $result = $this->parseFile($file, $settings);
             GeneralUtility::writeFile(GeneralUtility::getFileAbsFileName($cacheFile), $result['css']);
             GeneralUtility::writeFile(GeneralUtility::getFileAbsFileName($cacheFileMeta), serialize($result['cache']));
-            $this->clearPageCaches();
+            $this->clearPageCaches($settings['cache']['tags']);
         }
 
         return $cacheFile;

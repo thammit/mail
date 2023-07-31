@@ -16,4 +16,7 @@ final class Constants
     const CONTENT_SECTION_BOUNDARY = 'MAIL_SECTION_BOUNDARY';
 
     const MAIL_HEADER_IDENTIFIER = 'X-TYPO3MID';
+
+    const SCSS_PARSER_TEMP_DIR = 'typo3temp/assets/mail/css/';
+    const SCSS_PARSER_TEMP_DIR_RELATIVE_TO_ROOT = '../../../../';
 }

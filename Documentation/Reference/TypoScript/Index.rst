@@ -505,3 +505,15 @@ global-breakpoint
    :Path: plugin.mail.settings.scss
 
    Global media query to switch from desktop to mobile styles
+
+
+Content Objects
+===============
+
+This extension brings two new content object :typoscript:`EMOGRIFIER` and :typoscript:`SCSS`
+
+:typoscript:`EMOGRIFIER` is used to transform all given css files to inline styles.
+
+:typoscript:`SCSS` is used to transform given scss files to css.
+
+See `EXT:mail/Configuration/TypoScript/ContentElements/setup.typoscript` for how to use.

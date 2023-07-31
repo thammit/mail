@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Parser;
 
 use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -72,6 +73,11 @@ abstract class AbstractParser implements ParserInterface
             $needCompilation = true;
         }
 
+        if ($needCompilation) {
+            unlink($cacheFile);
+            unlink($cacheFileMeta);
+        }
+
         return $needCompilation;
     }
 
@@ -101,8 +107,7 @@ abstract class AbstractParser implements ParserInterface
      */
     protected function getCacheIdentifier(string $file, array $settings): string
     {
-        $filehash = md5($file);
-        $hash = hash('sha256', $filehash . serialize($settings));
+        $hash = hash('sha256', md5($file) . serialize($settings));
         $extension = pathinfo($file, PATHINFO_EXTENSION);
 
         return basename($file, '.' . $extension) . '-' . $hash;
@@ -118,10 +123,16 @@ abstract class AbstractParser implements ParserInterface
 
     /**
      * Clear all page caches
-     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException
+     * @param string $cacheTags
+     * @throws NoSuchCacheGroupException
      */
-    protected function clearPageCaches(): void
+    protected function clearPageCaches(string $cacheTags = ''): void
     {
-        GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroup('pages');
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
+        if ($cacheTags) {
+            $cacheManager->flushCachesInGroupByTags('pages', GeneralUtility::trimExplode(',', $cacheTags, true));
+        } else {
+            $cacheManager->flushCachesInGroup('pages');
+        }
     }
 }
