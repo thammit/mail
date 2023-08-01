@@ -263,9 +263,9 @@
         <source>Quick Mail</source>
         <target state="final">Kurznachricht</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource">
+      <trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource" approved="yes">
         <source>Select source</source>
-        <target state="needs-translation">Select source</target>
+        <target state="final">Quelle wählen</target>
       </trans-unit>
       <trans-unit id="mail.wizard.settings" resname="mail.wizard.settings" approved="yes">
         <source>Settings</source>
@@ -444,29 +444,29 @@
 			Content elements without category restrictions will appear for in all mails.]]></source>
 		    <target state="final"><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
 			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target></trans-unit>
-      <trans-unit id="mail.wizard.externalPage.alttitle" resname="mail.wizard.externalPage.alttitle">
+      <trans-unit id="mail.wizard.externalPage.alttitle" resname="mail.wizard.externalPage.alttitle" approved="yes">
         <source>Create mailing from external pages</source>
-        <target state="needs-translation">Create mailing from external pages</target>
+        <target state="final">Mailing von externen Seiten erstellen</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.externalPage.description" resname="mail.wizard.externalPage.description">
+      <trans-unit id="mail.wizard.externalPage.description" resname="mail.wizard.externalPage.description" approved="yes">
         <source>Enter data and click NEXT to continue.</source>
-        <target state="needs-translation">Enter data and click NEXT to continue.</target>
+        <target state="final">Daten eingeben und auf WEITER klicken, um vorzufahren.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.internalPage.alttitle" resname="mail.wizard.internalPage.alttitle">
+      <trans-unit id="mail.wizard.internalPage.alttitle" resname="mail.wizard.internalPage.alttitle" approved="yes">
         <source>Create mailing from internal page</source>
-        <target state="needs-translation">Create mailing from internal page</target>
+        <target state="final">Mailing von interner Seite erstellen</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.internalPage.description" resname="mail.wizard.internalPage.description">
+      <trans-unit id="mail.wizard.internalPage.description" resname="mail.wizard.internalPage.description" approved="yes">
         <source>Click NEXT at the page of your choice to continue.</source>
-        <target state="needs-translation">Click NEXT at the page of your choice to continue.</target>
+        <target state="final">WEITER bei der Seite Ihrer Wahl anklicken, um vorzufahren.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.quickMail.alttitle" resname="mail.wizard.quickMail.alttitle">
+      <trans-unit id="mail.wizard.quickMail.alttitle" resname="mail.wizard.quickMail.alttitle" approved="yes">
         <source>Create quick mailing</source>
-        <target state="needs-translation">Create quick mailing</target>
+        <target state="final">Kurznachricht erstellen</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.quickMail.description" resname="mail.wizard.quickMail.description">
+      <trans-unit id="mail.wizard.quickMail.description" resname="mail.wizard.quickMail.description" approved="yes">
         <source>Enter data and click NEXT to continue.</source>
-        <target state="needs-translation">Enter data and click NEXT to continue.</target>
+        <target state="final">Daten eingeben und WEITER klicken, um fortzufahren.</target>
       </trans-unit>
       <trans-unit id="mail.wizard.internalPage.description.old" xml:space="preserve">
 			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
@@ -811,9 +811,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Error in Header</source>
         <target state="final">Fehler im Header</target>
       </trans-unit>
-      <trans-unit id="report.content" resname="report.content">
+      <trans-unit id="report.content" resname="report.content" approved="yes">
         <source>Content</source>
-        <target state="needs-translation">Content</target>
+        <target state="final">Inhalt</target>
       </trans-unit>
       <trans-unit id="report.performance" resname="report.performance" approved="yes">
         <source>Performance</source>
