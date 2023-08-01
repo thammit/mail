@@ -199,7 +199,7 @@
                 <source>Quick Mail</source>
             </trans-unit>
             <trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource">
-                <source>Please choose source</source>
+                <source>Select source</source>
             </trans-unit>
             <trans-unit id="mail.wizard.settings" resname="mail.wizard.settings">
                 <source>Settings</source>
@@ -334,22 +334,22 @@
 			Content elements without category restrictions will appear for in all mails.]]></source>
 		    </trans-unit>
             <trans-unit id="mail.wizard.externalPage.alttitle" resname="mail.wizard.externalPage.alttitle">
-                <source>New mailing from external pages</source>
+                <source>Create mailing from external pages</source>
             </trans-unit>
             <trans-unit id="mail.wizard.externalPage.description" resname="mail.wizard.externalPage.description">
-                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+                <source>Enter data and click NEXT to continue.</source>
             </trans-unit>
             <trans-unit id="mail.wizard.internalPage.alttitle" resname="mail.wizard.internalPage.alttitle">
-                <source>New mailing from an internal page</source>
+                <source>Create mailing from internal page</source>
             </trans-unit>
             <trans-unit id="mail.wizard.internalPage.description" resname="mail.wizard.internalPage.description">
-                <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
+                <source>Click NEXT at the page of your choice to continue.</source>
             </trans-unit>
             <trans-unit id="mail.wizard.quickMail.alttitle" resname="mail.wizard.quickMail.alttitle">
-                <source>Create a quick mailing</source>
+                <source>Create quick mailing</source>
             </trans-unit>
             <trans-unit id="mail.wizard.quickMail.description" resname="mail.wizard.quickMail.description">
-                <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
+                <source>Enter data and click NEXT to continue.</source>
             </trans-unit>
             <trans-unit id="mail.wizard.internalPage.description.old" xml:space="preserve">
 			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.

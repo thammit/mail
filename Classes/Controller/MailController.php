@@ -21,7 +21,6 @@ use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
-use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
@@ -36,13 +35,11 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
-use TYPO3\CMS\Core\Routing\UnableToLinkToPageException;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
@@ -139,11 +136,17 @@ class MailController extends AbstractController
                     ];
                     break;
                 case Constants::PANEL_INTERNAL:
-                    $this->pageRepository->where_groupAccess = '';
                     $panelData['internal'] = [
                         'open' => $open,
-                        'data' => BackendDataUtility::addToolTipData($this->pageRepository->getMenu($this->id,
-                            'uid,pid,title,fe_group,doktype,shortcut,shortcut_mode,mount_pid,nav_hide,hidden,starttime,endtime,t3ver_state')),
+                        'data' => BackendDataUtility::addToolTipData(
+                            $this->pageRepository->getMenu(
+                                $this->id,
+                                'uid,pid,title,fe_group,doktype,shortcut,shortcut_mode,mount_pid,nav_hide,hidden,starttime,endtime,t3ver_state',
+                                'sorting',
+                                'AND hidden = 0',
+                                false
+                            )
+                        ),
                     ];
                     break;
                 case Constants::PANEL_EXTERNAL:
@@ -360,7 +363,6 @@ class MailController extends AbstractController
      * @throws RouteNotFoundException
      * @throws UnknownClassException
      * @throws UnknownObjectException
-     * @throws StopActionException
      */
     public function settingsAction(Mail $mail, bool $updated = false, string $tabId = ''): ResponseInterface
     {
