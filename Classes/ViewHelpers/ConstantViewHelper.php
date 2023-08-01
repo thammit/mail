@@ -40,6 +40,9 @@ class ConstantViewHelper extends AbstractViewHelper
     ) {
         $constantName = $arguments['name'];
         $classFQN = $arguments['classFQN'];
-        return constant("$classFQN::$constantName") ?? null;
+        if ($classFQN) {
+            return constant("$classFQN::$constantName") ?? null;
+        }
+        return constant($constantName) ?? null;
     }
 }

@@ -45,5 +45,7 @@ ScheduledSendFinishedEvent
 ==========================
 Adds possibility do something after scheduled sending finished
 
-More to come ...
-================
+
+Need more?
+----------
+Please contact me
