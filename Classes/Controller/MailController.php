@@ -81,6 +81,18 @@ class MailController extends AbstractController
                 // there is already a draft mail of this page -> use it
                 return $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid(), 'id' => $this->pageInfo['pid']]);
             }
+            if ($this->pageInfo['hidden']) {
+                $mailModulePageId = BackendDataUtility::getClosestMailModulePageId($this->id);
+                if ($mailModulePageId) {
+                    if ($this->typo3MajorVersion < 12) {
+                        // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+                        $_GET['id'] = $mailModulePageId;
+                    }
+                    return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
+                } else {
+                    return $this->redirect('noPageSelected');
+                }
+            }
             // create a new mail of the page
             return $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id, 'id' => $this->pageInfo['pid']]);
         }

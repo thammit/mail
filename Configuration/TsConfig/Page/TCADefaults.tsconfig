@@ -11,3 +11,7 @@ TCAdefaults {
         cache_tags = mail
     }
 }
+TCEMAIN.table.pages {
+#    disablePrependAtCopy = 1
+    disableHideAtCopy = 1
+}
