@@ -263,9 +263,9 @@
         <source>Quick Mail</source>
         <target state="final">Kurznachricht</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource" approved="yes">
-        <source>Please choose source</source>
-        <target state="final">Bitte Quelle auswählen</target>
+      <trans-unit id="mail.wizard.selectSource" resname="mail.wizard.selectSource">
+        <source>Select source</source>
+        <target state="needs-translation">Select source</target>
       </trans-unit>
       <trans-unit id="mail.wizard.settings" resname="mail.wizard.settings" approved="yes">
         <source>Settings</source>
@@ -444,29 +444,29 @@
 			Content elements without category restrictions will appear for in all mails.]]></source>
 		    <target state="final"><![CDATA[Inhaltselemente mit zugewiesenen Kategorien erscheinen nur in Mails, wenn ein Empfänger die gleiche Kategorie in seinem Profil zugewiesen hat.
 			Inhaltselemente ohne Kategoriebeschränkung erscheinen in allen Mails.]]></target></trans-unit>
-      <trans-unit id="mail.wizard.externalPage.alttitle" resname="mail.wizard.externalPage.alttitle" approved="yes">
-        <source>New mailing from external pages</source>
-        <target state="final">Neues Mailing von externer Seite</target>
+      <trans-unit id="mail.wizard.externalPage.alttitle" resname="mail.wizard.externalPage.alttitle">
+        <source>Create mailing from external pages</source>
+        <target state="needs-translation">Create mailing from external pages</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.externalPage.description" resname="mail.wizard.externalPage.description" approved="yes">
-        <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
-        <target state="final">Nach Eingabe der URL(s) und des Themas auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
+      <trans-unit id="mail.wizard.externalPage.description" resname="mail.wizard.externalPage.description">
+        <source>Enter data and click NEXT to continue.</source>
+        <target state="needs-translation">Enter data and click NEXT to continue.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.internalPage.alttitle" resname="mail.wizard.internalPage.alttitle" approved="yes">
-        <source>New mailing from an internal page</source>
-        <target state="final">Neues Mailing von interner Seite</target>
+      <trans-unit id="mail.wizard.internalPage.alttitle" resname="mail.wizard.internalPage.alttitle">
+        <source>Create mailing from internal page</source>
+        <target state="needs-translation">Create mailing from internal page</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.internalPage.description" resname="mail.wizard.internalPage.description" approved="yes">
-        <source>Click at the page of your choice on NEXT to continue with further settings (format, receiver group, sending time...)</source>
-        <target state="final">Klicken Sie bei der gewünschten Seite auf WEITER, um mit weiteren Einstellungen (Format, Empfängergruppe, Sendezeit...) fortzufahren.</target>
+      <trans-unit id="mail.wizard.internalPage.description" resname="mail.wizard.internalPage.description">
+        <source>Click NEXT at the page of your choice to continue.</source>
+        <target state="needs-translation">Click NEXT at the page of your choice to continue.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.quickMail.alttitle" resname="mail.wizard.quickMail.alttitle" approved="yes">
-        <source>Create a quick mailing</source>
-        <target state="final">Kurznachricht erstellen</target>
+      <trans-unit id="mail.wizard.quickMail.alttitle" resname="mail.wizard.quickMail.alttitle">
+        <source>Create quick mailing</source>
+        <target state="needs-translation">Create quick mailing</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.quickMail.description" resname="mail.wizard.quickMail.description" approved="yes">
-        <source>Click on NEXT to continue with further settings (receiver group, sending time...)</source>
-        <target state="final">Nach Eingabe des Themas und der Nachricht auf WEITER klicken, um mit weiteren Einstellungen (Empfängergruppe, Sendezeit...) fortzufahren.</target>
+      <trans-unit id="mail.wizard.quickMail.description" resname="mail.wizard.quickMail.description">
+        <source>Enter data and click NEXT to continue.</source>
+        <target state="needs-translation">Enter data and click NEXT to continue.</target>
       </trans-unit>
       <trans-unit id="mail.wizard.internalPage.description.old" xml:space="preserve">
 			<source><![CDATA[A newsletter is basically a regular TYPO3 page which resides in the mail folder. Clicking on this link will lead you to a combined page creation and first content element creation form. After creating the page, you may add more content to it.
