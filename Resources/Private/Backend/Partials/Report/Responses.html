@@ -9,6 +9,10 @@
     <f:translate key="{lll}report.reactions"/>
 </h2>
 
+<f:variable name="cropLength" value="70" />
+<f:if condition="{mail.plainAndHtml}">
+    <f:variable name="cropLength" value="50" />
+</f:if>
 <div class="panel panel-default mb-3">
     <div class="table-fit">
         <table class="table table-striped table-hover">
@@ -18,24 +22,28 @@
                     <f:translate key="{lll}report.response.clickedLinks"/>
                 </th>
                 <th>
-                    <f:translate key="{lll}report.html"/>
-                </th>
-                <th>
-                    <f:translate key="{lll}report.plainText"/>
-                </th>
-                <th>
                     <f:translate key="{lll}report.total"/>
                 </th>
+                <f:if condition="{mail.plainAndHtml}">
+                    <th>
+                        <f:translate key="{lll}report.html"/>
+                    </th>
+                    <th>
+                        <f:translate key="{lll}report.plainText"/>
+                    </th>
+                </f:if>
             </tr>
             </thead>
             <tbody>
             <f:for each="{data}" as="row">
                 <tr>
                     <td><a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget">{row.label ->
-                        f:format.crop(maxCharacters:40)}</a></td>
-                    <td>{row.htmlCounter}</td>
-                    <td>{row.plainCounter}</td>
+                        f:format.crop(maxCharacters:cropLength)}</a></td>
                     <td>{row.totalCounter}</td>
+                    <f:if condition="{mail.plainAndHtml}">
+                        <td>{row.htmlCounter}</td>
+                        <td>{row.plainCounter}</td>
+                    </f:if>
                 </tr>
             </f:for>
             </tbody>

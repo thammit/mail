@@ -1,0 +1,50 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
+
+<f:section name="tabSelector">
+	<li role="presentation" class="t3js-tabmenu-item">
+		<a href="#{tabId}" title="" aria-controls="{tabId}" role="tab" data-bs-toggle="tab"
+		   aria-selected="{f:if(condition: '{active}', then: 'true', else:'false')}" class="{f:if(condition: '{active}', then: 'active')}">
+			{title}
+		</a>
+	</li>
+</f:section>
+
+<f:section name="tabContent">
+	<div role="tabpanel" class="tab-pane {f:if(condition: '{active}', then: 'active')}" id="{tabId}">
+		<div class="panel panel-tab">
+			<div class="panel-body">
+				<table class="table table-striped table-hover">
+					<tbody>
+					<f:for each="{fields}" as="field">
+						<f:render section="tableRow" arguments="{field:field, mailUid:mailUid, tabId:tabId}"/>
+					</f:for>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</f:section>
+
+<f:section name="tableRow">
+	<tr>
+		<th style="width:20%; min-width:200px">{field.title}</th>
+		<td>{field.value}</td>
+		<td class="text-right text-end">
+			<f:if condition="{field.edit}">
+				<f:if condition="{tabId}">
+					<f:variable name="returnUrl"><f:uri.action action="settings" arguments="{mail:mailUid,tabId:tabId}"/></f:variable>
+				</f:if>
+				<be:link.editRecord class="btn btn-default" uid="{mailUid}" table="tx_mail_domain_model_mail" fields="{field.edit}" returnUrl="{returnUrl}"
+									title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: field.title}')}">
+					<core:icon identifier="actions-open"/>
+				</be:link.editRecord>
+			</f:if>
+		</td>
+	</tr>
+</f:section>
+</html>

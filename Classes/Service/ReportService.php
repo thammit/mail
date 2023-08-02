@@ -62,45 +62,6 @@ class ReportService
     }
 
     /**
-     * @return array
-     */
-    public function getGeneralData(): array
-    {
-        $plainSource = '';
-        $htmlSource = '';
-        if ($this->mail->isHtml()) {
-            if ($this->mail->isExternal()) {
-                $htmlSource = $this->mail->getHtmlParams();
-            } else {
-                $htmlSource = BackendUtility::getRecord('pages', $this->mail->getPage(), 'title')['title'];
-                if ($this->mail->getHtmlParams()) {
-                    $htmlSource .= '; ' . $this->mail->getHtmlParams();
-                }
-            }
-        }
-        if ($this->mail->isPlain()) {
-            if ($this->mail->isExternal()) {
-                $plainSource = $this->mail->getPlainParams();
-            } else {
-                $plainSource = BackendUtility::getRecord('pages', $this->mail->getPage(), 'title')['title'];
-                if ($this->mail->getPlainParams()) {
-                    $plainSource .= '; ' . $this->mail->getPlainParams();
-                }
-            }
-        }
-
-        return [
-            'htmlSource' => $htmlSource,
-            'plainSource' => $plainSource,
-            'type' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'type', $this->mail->getType()),
-            'priority' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'priority', $this->mail->getPriority()),
-            'sendOptions' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'send_options',
-                    (string)$this->mail->getSendOptions()) . ($this->mail->getAttachment() ? '; ' : ''),
-            'includeMedia' => BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'include_media', $this->mail->isIncludeMedia()),
-        ];
-    }
-
-    /**
      *
      * @return array
      * @throws Exception

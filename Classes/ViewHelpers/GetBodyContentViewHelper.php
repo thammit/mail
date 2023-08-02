@@ -24,10 +24,15 @@ class GetBodyContentViewHelper extends AbstractViewHelper
         $parser = new HTML5();
         $document = $parser->loadHTML($content);
         $bodyContent = '';
-        $bodyChildNodes = $document->getElementsByTagName('body')->item(0)->childNodes;
-
-        foreach ($bodyChildNodes as $node) {
+        $bodyDomNode = $document->getElementsByTagName('body')->item(0);
+        if ($bodyHasStyle = $bodyDomNode->hasAttribute('style')) {
+            $bodyContent .= '<div style="' . $bodyDomNode->getAttribute('style') . '">';
+        }
+        foreach ($bodyDomNode->childNodes as $node) {
             $bodyContent .= $document->saveHTML($node);
+        }
+        if ($bodyHasStyle) {
+            $bodyContent .= '</div>';
         }
 
         return MailerUtility::removeDoubleBrTags($bodyContent);

@@ -9,24 +9,19 @@
 
 <f:section name="content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1>
-        <f:translate key="{lll}report.show.header"/>
-    </h1>
-    <h2>
-        <core:iconForRecord row="{uid: mail.uid, type: 0}" table="tx_mail_domain_model_mail" size="default"/>
-        {mail.subject} [{mail.uid}]
-    </h2>
+    <h1><f:translate key="{lll}report.show.header"/>: {mail.subject} [{mail.uid}]</h1>
     <div class="row">
         <div class="col-12 col-lg-6">
-            <f:render partial="Report/General" arguments="{data:general, mail:mail, lll:lll}"/>
+            <h2><f:translate key="{lll}report.settings"/></h2>
+            <f:render partial="Settings" arguments="{_all}" />
             <f:if condition="{performance}">
-                <f:render partial="Report/Performance" arguments="{data:performance, lll:lll}"/>
+                <f:render partial="Report/Performance" arguments="{data:performance, mail:mail, lll:lll}"/>
             </f:if>
             <f:if condition="{returned}">
                 <f:render partial="Report/Returned" arguments="{data:returned, mail:mail, lll:lll}"/>
             </f:if>
             <f:if condition="{responses}">
-                <f:render partial="Report/Responses" arguments="{data:responses, lll:lll}"/>
+                <f:render partial="Report/Responses" arguments="{data:responses, mail:mail, lll:lll}"/>
             </f:if>
         </div>
         <f:if condition="{mail.htmlContent} && {mail.plainContent}">
@@ -43,9 +38,7 @@
                                 <div class="panel panel-tab">
                                     <div class="panel-body mail-wizard-preview">
                                         <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
-                                            <div>
-                                                {mail.htmlContent -> mail:getBodyContent()}
-                                            </div>
+                                            {mail.htmlContent -> mail:getBodyContent()}
                                         </div>
                                     </div>
                                 </div>
@@ -70,9 +63,7 @@
                                 <pre class="p-4" style="white-space: pre-wrap;">{mail.plainContent -> mail:removeMailBoundaries()}</pre>
                             </f:if>
                             <f:if condition="{mail.htmlContent}">
-                                <div>
-                                    {mail.htmlContent -> mail:getBodyContent()}
-                                </div>
+                                {mail.htmlContent -> mail:getBodyContent()}
                             </f:if>
                         </div>
                     </div>

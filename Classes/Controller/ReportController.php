@@ -21,6 +21,8 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
+use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 
 class ReportController extends AbstractController
 {
@@ -55,17 +57,19 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
-     * @throws SiteNotFoundException
+     * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws Exception
+     * @throws SiteNotFoundException
+     * @throws NoSuchPropertyException
+     * @throws UnknownClassException
      */
     public function showAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
+        $this->assignFieldGroups($mail, true);
         $this->view->assignMultiple([
             'mail' => $mail,
-            'general' => $this->reportService->getGeneralData(),
             'performance' => $this->reportService->getPerformanceData(),
             'returned' => $this->reportService->getReturnedData(),
             'responses' => $this->reportService->getResponsesData(),

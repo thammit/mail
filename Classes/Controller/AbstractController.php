@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
@@ -12,9 +12,11 @@ use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\ReportService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
+use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -32,8 +34,13 @@ use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
+use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
+use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
+use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 
 abstract class AbstractController extends ActionController
 {
@@ -261,5 +268,112 @@ abstract class AbstractController extends ActionController
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
             'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . $message . '\');');
         $this->notification++;
+    }
+
+    /**
+     * @param Mail $mail
+     * @param bool $forceReadOnly
+     * @return void
+     * @throws NoSuchPropertyException
+     * @throws UnknownClassException
+     */
+    protected function assignFieldGroups(Mail $mail, bool $forceReadOnly = false): void
+    {
+        $fieldGroups = [];
+        $groups = [
+            'general' => ['subject', 'fromEmail', 'fromName', 'organisation', 'attachment'],
+            'headers' => ['replyToEmail', 'replyToName', 'returnPath', 'priority'],
+            'content' => ['sendOptions', 'includeMedia', 'redirect', 'redirectAll', 'authCodeFields'],
+            'source' => ['type', 'renderedSize', 'page', 'sysLanguageUid', 'plainParams', 'htmlParams'],
+        ];
+
+        if (isset($this->userTSConfiguration['settings.'])) {
+            foreach ($this->userTSConfiguration['settings.'] as $groupName => $fields) {
+                $fieldsArray = GeneralUtility::trimExplode(',', $fields, true);
+                if ($fieldsArray) {
+                    $groups[$groupName] = $fieldsArray;
+                } else {
+                    unset($groups[$groupName]);
+                }
+            }
+        }
+
+        if ($this->userTSConfiguration['settingsWithoutTabs'] ?? count($groups) === 1) {
+            $this->view->assign('settingsWithoutTabs', true);
+        }
+
+        if ($forceReadOnly || isset($this->userTSConfiguration['hideEditAllSettingsButton'])) {
+            $this->view->assign('hideEditAllSettingsButton', $forceReadOnly || $this->userTSConfiguration['hideEditAllSettingsButton']);
+        }
+
+        $readOnly = ['type', 'renderedSize'];
+        if (isset($this->userTSConfiguration['readOnlySettings'])) {
+            $readOnly = GeneralUtility::trimExplode(',', $this->userTSConfiguration['readOnlySettings'], true);
+        }
+
+        if ($mail->isExternal()) {
+            $groups = ArrayUtility::removeArrayEntryByValue($groups, 'sysLanguageUid');
+            $groups = ArrayUtility::removeArrayEntryByValue($groups, 'page');
+            if (!$mail->getHtmlParams() || $mail->isQuickMail()) {
+                $groups = ArrayUtility::removeArrayEntryByValue($groups, 'htmlParams');
+            }
+            if (!$mail->getPlainParams() || $mail->isQuickMail()) {
+                $groups = ArrayUtility::removeArrayEntryByValue($groups, 'plainParams');
+            }
+            if ($mail->isQuickMail()) {
+                $groups = ArrayUtility::removeArrayEntryByValue($groups, 'includeMedia');
+            }
+        }
+
+        if (!$mail->isPlain() || ($forceReadOnly && !$mail->getPlainParams())) {
+            $groups = ArrayUtility::removeArrayEntryByValue($groups, 'plainParams');
+        }
+
+        if (!$mail->isHtml() || ($forceReadOnly && !$mail->getHtmlParams())) {
+            $groups = ArrayUtility::removeArrayEntryByValue($groups, 'htmlParams');
+        }
+
+        $className = get_class($mail);
+        $dataMapFactory = GeneralUtility::makeInstance(DataMapFactory::class);
+        $dataMap = $dataMapFactory->buildDataMap($className);
+        $tableName = $dataMap->getTableName();
+        $reflectionService = GeneralUtility::makeInstance(ReflectionService::class);
+        $classSchema = $reflectionService->getClassSchema($className);
+        $backendUserIsAllowedToEditMailSettingsRecord = BackendUserUtility::getBackendUser()->check('tables_modify', $tableName);
+        if ($forceReadOnly) {
+            $backendUserIsAllowedToEditMailSettingsRecord = false;
+        }
+
+        foreach ($groups as $groupName => $properties) {
+            foreach ($properties as $property) {
+                $getter = 'get' . ucfirst($property);
+                if (!method_exists($mail, $getter)) {
+                    $getter = 'is' . ucfirst($property);
+                }
+                if (method_exists($mail, $getter)) {
+                    $columnName = $dataMap->getColumnMap($classSchema->getProperty($property)->getName())->getColumnName();
+                    $rawValue = $mail->$getter();
+                    if ($rawValue instanceof SendFormat) {
+                        $rawValue = (string)$rawValue;
+                    }
+                    $value = match ($property) {
+                        'type' => ($mail->isQuickMail() ? LanguageUtility::getLL('mail.type.quickMail') : (BackendUtility::getProcessedValue($tableName,
+                            $columnName, $rawValue) ?: '')),
+                        'sysLanguageUid' => $this->site->getLanguageById((int)$rawValue)->getTitle(),
+                        'renderedSize' => GeneralUtility::formatSize((int)$rawValue, 'si') . 'B',
+                        'attachment' => $mail->getAttachmentCsv(),
+                        'page' => (BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '') . ($mail->isInternal() ? ' [' . $rawValue . ']' : ''),
+                        default => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '',
+                    };
+                    $fieldGroups[$groupName][$property] = [
+                        'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $tableName),
+                        'value' => $value,
+                        'edit' => !$backendUserIsAllowedToEditMailSettingsRecord || in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
+                    ];
+                }
+            }
+        }
+
+        $this->view->assign('fieldGroups', $fieldGroups);
     }
 }

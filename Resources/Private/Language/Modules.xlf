@@ -578,6 +578,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="report.mail" resname="report.mail">
                 <source>Mail</source>
             </trans-unit>
+            <trans-unit id="report.settings" resname="report.settings">
+                <source>Settings</source>
+            </trans-unit>
             <trans-unit id="report.disable.returned" resname="report.disable.returned">
                 <source>Disable returned recipients</source>
             </trans-unit>

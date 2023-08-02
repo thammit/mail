@@ -18,66 +18,7 @@
 	<div class="mail-wizard-settings">
 		<div class="row justify-content-start">
 			<div class="col-12 col-md-10 col-lg-8 col-xl-6">
-				<f:if condition="{settingsWithoutTabs}">
-					<f:then>
-						<div class="panel panel-tab">
-							<div class="panel-body">
-								<table class="table table-striped table-hover">
-									<tbody>
-									<f:for each="{fieldGroups}" as="fields">
-										<f:for each="{fields}" as="field">
-											<f:render section="tableRow" arguments="{field:field, mailUid:mail.uid}"/>
-										</f:for>
-									</f:for>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</f:then>
-					<f:else>
-						<div role="tabpanel">
-							<ul class="nav nav-tabs t3js-tabs" role="tablist" id="settings-tabs-tab" data-store-last-tab="1">
-								<f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
-									<f:if condition="{fields}">
-                                        <f:variable name="tabId" value="tab-{groupName}" />
-                                        <f:if condition="{activeTabId}">
-                                            <f:then>
-                                                <f:if condition="{activeTabId} == {tabId}'">
-                                                    <f:then><f:variable name="active" value="1"/></f:then>
-                                                    <f:else><f:variable name="active" value="0"/></f:else>
-                                                </f:if>
-                                            </f:then>
-                                            <f:else>
-                                                <f:variable name="active">{fieldGroupIterator.isFirst}</f:variable>
-                                            </f:else>
-                                        </f:if>
-										<f:render section="tabSelector"
-												  arguments="{tabId:tabId,title:'{f:translate(key: \'{lll}mail.wizard.settings.{groupName}\')}',active:active}"/>
-									</f:if>
-								</f:for>
-							</ul>
-							<div class="tab-content">
-								<f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
-									<f:if condition="{fields}">
-                                        <f:variable name="tabId" value="tab-{groupName}" />
-                                        <f:if condition="{activeTabId}">
-                                            <f:then>
-                                                <f:if condition="{activeTabId} == {tabId}'">
-                                                    <f:then><f:variable name="active" value="1"/></f:then>
-                                                    <f:else><f:variable name="active" value="0"/></f:else>
-                                                </f:if>
-                                            </f:then>
-                                            <f:else>
-                                                <f:variable name="active">{fieldGroupIterator.isFirst}</f:variable>
-                                            </f:else>
-                                        </f:if>
-										<f:render section="tabContent" arguments="{tabId:tabId,mailUid:mail.uid,fields:fields,active:active}"/>
-									</f:if>
-								</f:for>
-							</div>
-						</div>
-					</f:else>
-				</f:if>
+				<f:render partial="Settings" arguments="{_all}" />
 			</div>
 		</div>
 		<div class="row justify-content-start">
@@ -86,17 +27,15 @@
 					<f:then>
 						<div role="tabpanel">
 							<ul class="nav nav-tabs t3js-tabs" role="tablist" id="preview-tabs-tab" data-store-last-tab="1">
-								<f:render section="tabSelector" arguments="{tabId:'tab-mail-html',title:'HTML',active:1}"/>
-								<f:render section="tabSelector" arguments="{tabId:'tab-mail-text',title:'Text',active:0}"/>
+								<f:render partial="Tabs" section="tabSelector" arguments="{tabId:'tab-mail-html',title:'HTML',active:1}"/>
+								<f:render partial="Tabs" section="tabSelector" arguments="{tabId:'tab-mail-text',title:'Text',active:0}"/>
 							</ul>
 							<div class="tab-content">
 								<div role="tabpanel" class="tab-pane active" id="tab-mail-html">
 									<div class="panel panel-tab">
 										<div class="panel-body mail-wizard-preview">
 											<div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
-												<div>
-													{mail.htmlContent -> mail:getBodyContent()}
-												</div>
+												{mail.htmlContent -> mail:getBodyContent()}
 											</div>
 										</div>
 									</div>
@@ -118,9 +57,7 @@
 									<pre class="p-4">{mail.plainContent -> mail:removeMailBoundaries()}</pre>
 								</f:if>
 								<f:if condition="{mail.htmlContent}">
-									<div>
-										{mail.htmlContent -> mail:getBodyContent()}
-									</div>
+									{mail.htmlContent -> mail:getBodyContent()}
 								</f:if>
 							</div>
 						</div>
@@ -143,48 +80,5 @@
 		<f:render partial="Wizard/Navigation"
 				  arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
 	</div>
-</f:section>
-
-<f:section name="tabSelector">
-	<li role="presentation" class="t3js-tabmenu-item">
-		<a href="#{tabId}" title="" aria-controls="{tabId}" role="tab" data-bs-toggle="tab"
-		   aria-selected="{f:if(condition: '{active}', then: 'true', else:'false')}" class="{f:if(condition: '{active}', then: 'active')}">
-			{title}
-		</a>
-	</li>
-</f:section>
-
-<f:section name="tabContent">
-	<div role="tabpanel" class="tab-pane {f:if(condition: '{active}', then: 'active')}" id="{tabId}">
-		<div class="panel panel-tab">
-			<div class="panel-body">
-				<table class="table table-striped table-hover">
-					<tbody>
-					<f:for each="{fields}" as="field">
-						<f:render section="tableRow" arguments="{field:field, mailUid:mailUid, tabId:tabId}"/>
-					</f:for>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-</f:section>
-
-<f:section name="tableRow">
-	<tr>
-		<th style="width:20%; min-width:200px">{field.title}</th>
-		<td>{field.value}</td>
-		<td class="text-right text-end">
-			<f:if condition="{field.edit}">
-                <f:if condition="{tabId}">
-                    <f:variable name="returnUrl"><f:uri.action action="settings" arguments="{mail:mailUid,tabId:tabId}"/></f:variable>
-                </f:if>
-				<be:link.editRecord class="btn btn-default" uid="{mailUid}" table="tx_mail_domain_model_mail" fields="{field.edit}" returnUrl="{returnUrl}"
-									title="{f:translate(key:'{lll}general.button.editField', arguments: '{0: field.title}')}">
-					<core:icon identifier="actions-open"/>
-				</be:link.editRecord>
-			</f:if>
-		</td>
-	</tr>
 </f:section>
 </html>

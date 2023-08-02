@@ -401,94 +401,11 @@ class MailController extends AbstractController
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
-        $fieldGroups = [];
-        $groups = [
-            'general' => ['subject', 'fromEmail', 'fromName', 'organisation', 'attachment'],
-            'headers' => ['replyToEmail', 'replyToName', 'returnPath', 'priority'],
-            'content' => ['sendOptions', 'includeMedia', 'redirect', 'redirectAll', 'authCodeFields'],
-            'source' => ['type', 'renderedSize', 'page', 'sysLanguageUid', 'plainParams', 'htmlParams'],
-        ];
-
-        if (isset($this->userTSConfiguration['settings.'])) {
-            foreach ($this->userTSConfiguration['settings.'] as $groupName => $fields) {
-                $fieldsArray = GeneralUtility::trimExplode(',', $fields, true);
-                if ($fieldsArray) {
-                    $groups[$groupName] = $fieldsArray;
-                } else {
-                    unset($groups[$groupName]);
-                }
-            }
-        }
-
-        if ($this->userTSConfiguration['settingsWithoutTabs'] ?? count($groups) === 1) {
-            $this->view->assign('settingsWithoutTabs', true);
-        }
-
-        if (isset($this->userTSConfiguration['hideEditAllSettingsButton'])) {
-            $this->view->assign('hideEditAllSettingsButton', (bool)$this->userTSConfiguration['hideEditAllSettingsButton']);
-        }
-
-        $readOnly = ['type', 'renderedSize'];
-        if (isset($this->userTSConfiguration['readOnlySettings'])) {
-            $readOnly = GeneralUtility::trimExplode(',', $this->userTSConfiguration['readOnlySettings'], true);
-        }
-
-        if ($mail->isExternal()) {
-            $groups = ArrayUtility::removeArrayEntryByValue($groups, 'sysLanguageUid');
-            $groups = ArrayUtility::removeArrayEntryByValue($groups, 'page');
-            if (!$mail->getHtmlParams() || $mail->isQuickMail()) {
-                $groups = ArrayUtility::removeArrayEntryByValue($groups, 'htmlParams');
-            }
-            if (!$mail->getPlainParams() || $mail->isQuickMail()) {
-                $groups = ArrayUtility::removeArrayEntryByValue($groups, 'plainParams');
-            }
-            if ($mail->isQuickMail()) {
-                $groups = ArrayUtility::removeArrayEntryByValue($groups, 'includeMedia');
-            }
-        }
-
-        $className = get_class($mail);
-        $dataMapFactory = GeneralUtility::makeInstance(DataMapFactory::class);
-        $dataMap = $dataMapFactory->buildDataMap($className);
-        $tableName = $dataMap->getTableName();
-        $reflectionService = GeneralUtility::makeInstance(ReflectionService::class);
-        $classSchema = $reflectionService->getClassSchema($className);
-        $backendUserIsAllowedToEditMailSettingsRecord = BackendUserUtility::getBackendUser()->check('tables_modify', $tableName);
-
-        foreach ($groups as $groupName => $properties) {
-            foreach ($properties as $property) {
-                $getter = 'get' . ucfirst($property);
-                if (!method_exists($mail, $getter)) {
-                    $getter = 'is' . ucfirst($property);
-                }
-                if (method_exists($mail, $getter)) {
-                    $columnName = $dataMap->getColumnMap($classSchema->getProperty($property)->getName())->getColumnName();
-                    $rawValue = $mail->$getter();
-                    if ($rawValue instanceof SendFormat) {
-                        $rawValue = (string)$rawValue;
-                    }
-                    $value = match ($property) {
-                        'type' => ($mail->isQuickMail() ? LanguageUtility::getLL('mail.type.quickMail') : (BackendUtility::getProcessedValue($tableName,
-                            $columnName, $rawValue) ?: '')),
-                        'sysLanguageUid' => $this->site->getLanguageById((int)$rawValue)->getTitle(),
-                        'renderedSize' => GeneralUtility::formatSize((int)$rawValue, 'si') . 'B',
-                        'attachment' => $mail->getAttachmentCsv(),
-                        default => BackendUtility::getProcessedValue($tableName, $columnName, $rawValue) ?: '',
-                    };
-                    $fieldGroups[$groupName][$property] = [
-                        'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $tableName),
-                        'value' => $value,
-                        'edit' => ($backendUserIsAllowedToEditMailSettingsRecord && in_array($property,
-                                $readOnly)) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
-                    ];
-                }
-            }
-        }
+        $this->assignFieldGroups($mail);
 
         $this->view->assignMultiple([
             'activeTabId' => $tabId,
             'mail' => $mail,
-            'fieldGroups' => $fieldGroups,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),
         ]);
 
@@ -511,10 +428,10 @@ class MailController extends AbstractController
 
         if ($updatePreview && !$mail->isQuickMail()) {
             if ($mail->isInternal()) {
-                $messageValue = BackendUtility::getProcessedValue($tableName, 'page', $mail->getPage());
+                $messageValue = BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'page', $mail->getPage());
             } else {
-                $messageValue = trim(BackendUtility::getProcessedValue($tableName, 'plainParams',
-                        $mail->getPlainParams()) . ' / ' . BackendUtility::getProcessedValue($tableName, 'htmlParams', $mail->getHtmlParams()), ' /');
+                $messageValue = trim(BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'plainParams',
+                        $mail->getPlainParams()) . ' / ' . BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'htmlParams', $mail->getHtmlParams()), ' /');
             }
             $this->addJsNotification(
                 sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'),
