@@ -458,7 +458,7 @@
       </trans-unit>
       <trans-unit id="mail.wizard.internalPage.description" resname="mail.wizard.internalPage.description" approved="yes">
         <source>Click NEXT at the page of your choice to continue.</source>
-        <target state="final">WEITER bei der Seite Ihrer Wahl anklicken, um vorzufahren.</target>
+        <target state="final">Bei der Seite Ihrer Wahl auf WEITER anklicken, um vorzufahren.</target>
       </trans-unit>
       <trans-unit id="mail.wizard.quickMail.alttitle" resname="mail.wizard.quickMail.alttitle" approved="yes">
         <source>Create quick mailing</source>
@@ -783,9 +783,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Mail</source>
         <target state="final">Mail</target>
       </trans-unit>
-      <trans-unit id="report.settings" resname="report.settings">
+      <trans-unit id="report.settings" resname="report.settings" approved="yes">
         <source>Settings</source>
-        <target state="needs-translation">Settings</target>
+        <target state="final">Einstellungen</target>
       </trans-unit>
       <trans-unit id="report.disable.returned" resname="report.disable.returned" approved="yes">
         <source>Disable returned recipients</source>
