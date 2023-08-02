@@ -78,7 +78,7 @@ settingsWithoutTabs
    :Default: 0
    :Path: tx_mail.settingsWithoutTabs
 
-   Show settings wizard step without tabs.
+   Show mail settings in wizard step and report without tabs.
 
 .. _user-ts-config-settings-general:
 
@@ -91,7 +91,7 @@ settings.general
    :Default: subject,fromEmail,fromName,organisation,attachment
    :Path: tx_mail.settings.general
 
-   Comma separated list of general fields which should be visible in the mail wizard settings step.
+   Comma separated list of general fields which should be visible in the mail wizard settings step and report.
 
 .. _user-ts-config-settings-headers:
 
@@ -104,7 +104,7 @@ settings.headers
    :Default: replyToEmail,replyToName,returnPath,priority
    :Path: tx_mail.settings.headers
 
-   Comma separated list of header fields which should be visible in the mail wizard settings step.
+   Comma separated list of header fields which should be visible in the mail wizard settings step and report.
 
 .. _user-ts-config-settings-content:
 
@@ -117,7 +117,7 @@ settings.content
    :Default: sendOptions,includeMedia,redirect,redirectAll,authCodeFields
    :Path: tx_mail.settings.content
 
-   Comma separated list of content fields which should be visible in the mail wizard settings step.
+   Comma separated list of content fields which should be visible in the mail wizard settings step and report.
 
 .. _user-ts-config-settings-source:
 
@@ -130,7 +130,7 @@ settings.source
    :Default: type,renderedSize,page,sysLanguageUid,plainParams,htmlParams
    :Path: tx_mail.settings.source
 
-   Comma separated list of source fields which should be visible in the mail wizard settings step.
+   Comma separated list of source fields which should be visible in the mail wizard settings step and report.
 
 .. _user-ts-config-readOnlySettings:
 
