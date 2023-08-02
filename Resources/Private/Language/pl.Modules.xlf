@@ -783,6 +783,10 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Mail</source>
         <target state="needs-translation">Mail</target>
       </trans-unit>
+      <trans-unit id="report.settings" resname="report.settings">
+        <source>Settings</source>
+        <target state="needs-translation">Settings</target>
+      </trans-unit>
       <trans-unit id="report.disable.returned" resname="report.disable.returned">
         <source>Disable returned recipients</source>
         <target state="needs-translation">Disable returned recipients</target>
