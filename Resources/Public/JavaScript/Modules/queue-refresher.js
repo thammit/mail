@@ -2,7 +2,7 @@ import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
 
 class QueueRefresher {
     constructor() {
-        const selector = '.mail-queue-table tbody .tr:not(.table-success) .progress-bar';
+        const selector = '.mail-queue-table tbody tr:not(.table-success) .progress-bar';
         //const selector = '.mail-queue-table tbody .progress-bar';
         document.querySelectorAll(selector).forEach((runningProgressBar) => {
             const interval = setInterval(function () {
