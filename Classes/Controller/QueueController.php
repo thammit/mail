@@ -135,10 +135,11 @@ class QueueController extends AbstractController
     {
         $queryParams = $request->getQueryParams();
         $mail = $this->mailRepository->findByUid((int)$queryParams['mail']);
-        $finished = $mail->isSent() && (!$mail->getScheduledEnd() || $mail->getNumberOfSent());
+        $numberOfSent = $this->logRepository->countByMailUid((int)$queryParams['mail']);
+        $finished = $mail->isSent() && (!$mail->getScheduledEnd() || $numberOfSent);
         return $this->jsonResponse(json_encode([
             'finished' => $finished,
-            'numberOfSent' => $this->logRepository->countByMailUid((int)$queryParams['mail'])
+            'numberOfSent' => $numberOfSent
         ]));
     }
 
