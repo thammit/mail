@@ -264,7 +264,11 @@ abstract class AbstractController extends ActionController
             AbstractMessage::WARNING => 'warning',
             AbstractMessage::ERROR => 'error',
         ];
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+//        if ($this->typo3MajorVersion < 12) {
+//            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
+//        } else {
+//            $this->pageRenderer->loadJavaScriptModule('@typo3/backend/notification.js');
+//        }
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
             'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . $message . '\');');
         $this->notification++;

@@ -22,7 +22,6 @@ use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
-use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
@@ -43,11 +42,9 @@ use TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
-use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
-use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 
 class MailController extends AbstractController
 {
@@ -190,8 +187,13 @@ class MailController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->addIndexDocHeaderButtons();
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewModal');
+        if ($this->typo3MajorVersion < 12) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewModal');
+        } else {
+            $this->pageRenderer->loadJavaScriptModule('@typo3/backend/tooltip.js');
+            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/preview-modal.js');
+        }
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -412,15 +414,18 @@ class MailController extends AbstractController
         if ($mail->isInternal() || $mail->isExternal()) {
             if ($updatePreview && ConfigurationUtility::getExtensionConfiguration('createMailThumbnails')) {
                 // add html2canvas stuff
-                $this->pageRenderer->addRequireJsConfiguration([
-                    'paths' => [
-                        'html2canvas' => PathUtility::getPublicResourceWebPath('EXT:mail/Resources/Public/') . 'JavaScript/Contrib/html2canvas.min',
-                    ],
-                ]);
-                $this->pageRenderer->loadRequireJsModule('html2canvas');
-                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewImage');
-                $savePreviewImageAjaxUri = $this->backendUriBuilder->buildUriFromRoute('ajax_mail_save-preview-image', ['mail' => $mail->getUid()]);
-                $this->pageRenderer->addJsInlineCode('mail-configuration', 'var savePreviewImageAjaxUri = \'' . $savePreviewImageAjaxUri . '\'');
+                $this->pageRenderer->addJsInlineCode('mail-configuration', 'var mailUid = ' . $mail->getUid());
+                if ($this->typo3MajorVersion < 12) {
+                    $this->pageRenderer->addRequireJsConfiguration([
+                        'paths' => [
+                            'html2canvas' => PathUtility::getPublicResourceWebPath('EXT:mail/Resources/Public/') . 'JavaScript/Contrib/html2canvas.min',
+                        ],
+                    ]);
+                    $this->pageRenderer->loadRequireJsModule('html2canvas');
+                    $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewImage');
+                } else {
+                    $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/preview-image.js');
+                }
             }
         }
 
@@ -452,8 +457,9 @@ class MailController extends AbstractController
     {
         // language service has to be set here, because method is called by ajax route, which doesn't call initializeAction
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
-        $dataUrl = $request->getBody()->getContents() ?? null;
-        $mailUid = (int)($request->getQueryParams()['mail'] ?? 0);
+        $bodyContents = json_decode($request->getBody()->getContents() ?? null, true);
+        $mailUid = $bodyContents['mailUid'] ?? 0;
+        $dataUrl = $bodyContents['dataUrl'] ?? 0;
 
         if ($dataUrl && $mailUid) {
             $mail = $this->mailRepository->findByUid($mailUid);
@@ -481,6 +487,7 @@ class MailController extends AbstractController
      * @throws RouteNotFoundException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      */
     public function categoriesAction(Mail $mail): ResponseInterface
     {
@@ -559,10 +566,12 @@ class MailController extends AbstractController
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail)),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/HighlightContent');
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/UpdateCategoryRestrictions');
-        $saveCategoryRestrictionsAjaxUri = $this->backendUriBuilder->buildUriFromRoute('ajax_mail_save-category-restrictions', ['mail' => $mail->getUid()]);
-        $this->pageRenderer->addJsInlineCode('mail-configuration', 'var saveCategoryRestrictionsAjaxUri = \'' . $saveCategoryRestrictionsAjaxUri . '\'');
+        $this->pageRenderer->addJsInlineCode('mail-configuration', 'var mailUid = ' . $mail->getUid());
+        if ($this->typo3MajorVersion < 12) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/Categories');
+        } else {
+            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/categories.js');
+        }
         $this->addDocHeaderHelpButton();
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -576,8 +585,10 @@ class MailController extends AbstractController
     {
         // language service has to be set here, because method is called by ajax route, which doesn't call initializeAction
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
-        $mail = $this->mailRepository->findByUid((int)($request->getQueryParams()['mail'] ?? 0));
+
         $contentCategories = json_decode($request->getBody()->getContents() ?? null, true);
+        $mailUid = $contentCategories['mailUid'] ?? 0;
+        $mail = $this->mailRepository->findByUid((int)$mailUid);
         $contentElementUid = $contentCategories['content'] ?? 0;
         $categories = $contentCategories['categories'] ?? [];
 

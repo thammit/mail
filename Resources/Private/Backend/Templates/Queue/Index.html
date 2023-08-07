@@ -21,7 +21,7 @@
         </f:be.infobox>
     </f:if>
     <div class="panel panel-default">
-        <table class="table table-striped table-hover mb-0">
+        <table class="mail-queue-table table table-striped table-hover mb-0">
             <thead>
             <tr>
                 <th class="col-icon nowrap"></th>
@@ -48,7 +48,8 @@
             </thead>
             <tbody>
             <f:for each="{mails}" as="mail">
-                <tr>
+                <f:variable name="finished"><f:if condition="!{mail.sent} || ({mail.scheduledEnd} && !{mail.numberOfSent})"><f:then>0</f:then><f:else>1</f:else></f:if></f:variable>
+                <tr class="{f:if(condition: finished, then:'table-success')}">
                     <td class="col-icon nowrap">
                         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail"/>
                     </td>
@@ -58,10 +59,14 @@
                     <td class="nowrap">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y H:i')}</td>
                     <td class="nowrap">
                         <div class="progress">
-                            <f:if condition="{mail.percentOfSent} == 100">
-                                <f:variable name="finished" value="bg-success"/>
+                            <f:variable name="progressBarClasses" value="progress-bar progress-bar-striped progress-bar-animated"/>
+                            <f:if condition="{mail.finished}">
+                                <f:variable name="progressBarClasses" value="progress-bar"/>
                             </f:if>
-                            <div class="progress-bar {finished}" role="progressbar" style="width: {mail.percentOfSent}%"
+                            <f:if condition="{mail.percentOfSent} == 100">
+                                <f:variable name="progressBarClasses" value="progress-bar bg-success"/>
+                            </f:if>
+                            <div data-mail-uid="{mail.uid}" class="{progressBarClasses}" role="progressbar" style="width: {mail.percentOfSent}%"
                                  aria-valuenow="{mail.numberOfSent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">
                                 {mail.numberOfSent}/{mail.numberOfRecipients}
                             </div>
@@ -69,8 +74,8 @@
                     </td>
                     <f:if condition="!{hideDeleteRunningSendingButton}">
                         <td class="col-control nowrap">
-                            <f:if condition="!{mail.sent} || ({mail.scheduledEnd} && !{mail.numberOfSent})">
-                                <f:link.action action="delete" arguments="{mail: mail}" class="btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
+                            <f:if condition="!{finished}">
+                                <f:link.action action="delete" arguments="{mail: mail}" class="mail-delete-button btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
                             </f:if>
                         </td>
                     </f:if>

@@ -83,7 +83,6 @@ class RecipientController extends AbstractController
         $this->view->assign('data', $data);
 
         $this->moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->addLeftDocheaderButtons($this->id, $this->request->getRequestTarget());
         $this->addDocheaderButtons();
 

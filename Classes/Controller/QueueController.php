@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -59,6 +60,12 @@ class QueueController extends AbstractController
 
         $this->moduleTemplate->setContent($this->view->render());
         $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));
+
+        if ($this->typo3MajorVersion < 12) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueRefresher');
+        } else {
+            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/queue-refresher.js');
+        }
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
@@ -119,6 +126,20 @@ class QueueController extends AbstractController
             LanguageUtility::getLL('general.notification.severity.success.title')
         );
         return $this->redirect('index');
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function state(ServerRequestInterface $request): ResponseInterface
+    {
+        $queryParams = $request->getQueryParams();
+        $mail = $this->mailRepository->findByUid((int)$queryParams['mail']);
+        $finished = $mail->isSent() && (!$mail->getScheduledEnd() || $mail->getNumberOfSent());
+        return $this->jsonResponse(json_encode([
+            'finished' => $finished,
+            'numberOfSent' => $this->logRepository->countByMailUid((int)$queryParams['mail'])
+        ]));
     }
 
     /**

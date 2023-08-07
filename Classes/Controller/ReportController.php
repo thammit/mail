@@ -75,7 +75,6 @@ class ReportController extends AbstractController
             'responses' => $this->reportService->getResponsesData(),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
         $this->addLeftDocheaderBackButtons();
         $this->addDocheaderButtons($this->request->getRequestTarget());
 
