@@ -6,7 +6,7 @@ define([], function() {
             window.fetch(TYPO3.settings.ajaxUrls.mail_queue_state + '&mail=' + parseInt(runningProgressBar.dataset.mailUid))
             .then((response) => {
                 if (!response.ok) {
-                    response.json().then((result) => { top.TYPO3.Notification.error(result.title, result.message);});
+                    response.json().then((result) => { console.error(result);});
                     throw new Error(response.statusText);
                 }
                 return response.json();
