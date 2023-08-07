@@ -2,7 +2,7 @@ define([], function() {
     "use strict";
     const selector = '.mail-queue-table tbody tr:not(.table-success) .progress-bar';
     document.querySelectorAll(selector).forEach((runningProgressBar) => {
-        const interval = setInterval(function () {
+        const interval = setInterval(() => {
             window.fetch(TYPO3.settings.ajaxUrls.mail_queue_state + '&mail=' + parseInt(runningProgressBar.dataset.mailUid))
             .then((response) => {
                 if (!response.ok) {
