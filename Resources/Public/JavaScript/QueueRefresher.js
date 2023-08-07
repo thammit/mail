@@ -27,7 +27,7 @@ define([], function() {
                 }
                 runningProgressBar.style.width = `${percentOfSent}%`;
                 runningProgressBar.setAttribute('aria-valuenow', String(result.sent));
-                runningProgressBar.innerText = `${result.sent}/${numberOfRecipients}`;
+                runningProgressBar.innerText = `${numberOfSent}/${numberOfRecipients}`;
                 if (finished || percentOfSent === 100) {
                     runningProgressBar.className = percentOfSent === 100 ? 'progress-bar bg-success' : 'progress-bar';
                     const mailDeleteButton = runningProgressBar.closest('tr').querySelector('.mail-delete-button');
