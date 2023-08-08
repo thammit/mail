@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail;
 final class Constants
 {
     const MAIL_MODULE_NAME = 'mail';
+    const MAIL_REDIRECT = 24;
     const DEFAULT_MAIL_PAGE_TYPE = 24;
 
     const PANEL_INTERNAL = 'internal';

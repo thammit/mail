@@ -40,18 +40,9 @@ class QueueController extends AbstractController
             }
         }
 
-        $mails = [];
-        $scheduledMails = $this->mailRepository->findScheduledByPid($this->id, (int)($this->pageTSConfiguration['queueLimit'] ?? 10))->toArray();
-        /** @var Mail $mail */
-        foreach ($scheduledMails as $mail) {
-            $mail->setNumberOfSent($this->logRepository->countByMailUid($mail->getUid()));
-            if ($mail->getNumberOfRecipients() > 0) {
-                $mails[] = $mail;
-            }
-        }
         $this->view->assignMultiple([
             'id' => $this->id,
-            'mails' => $mails,
+            'mails' => $this->mailRepository->findScheduledByPid($this->id, (int)($this->pageTSConfiguration['queueLimit'] ?? 10)),
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
             'queueLimit' => (int)($this->pageTSConfiguration['queueLimit'] ?? 10),
             'hideManualSendingButton' => $this->userTSConfiguration['hideManualSendingButton'] ?? false,
@@ -92,6 +83,7 @@ class QueueController extends AbstractController
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws InvalidQueryException
+     * @throws \Doctrine\DBAL\Exception
      * @throws \TYPO3\CMS\Core\Exception
      */
     public function triggerAction(): ResponseInterface
@@ -128,18 +120,16 @@ class QueueController extends AbstractController
         return $this->redirect('index');
     }
 
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     */
     public function state(ServerRequestInterface $request): ResponseInterface
     {
-        $queryParams = $request->getQueryParams();
-        $mail = $this->mailRepository->findByUid((int)$queryParams['mail']);
-        $numberOfSent = $this->logRepository->countByMailUid((int)$queryParams['mail']);
-        $finished = $mail->isSent() && (!$mail->getScheduledEnd() || $numberOfSent);
+        /** @var Mail $mail */
+        $mail = $this->mailRepository->findByUid((int)($request->getQueryParams()['mail']));
         return $this->jsonResponse(json_encode([
-            'finished' => $finished,
-            'numberOfSent' => $numberOfSent
+            'sent' => $mail->isSent(),
+            'numberOfSent' => $mail->getNumberOfSent(),
+            'percentOfSent' => $mail->getPercentOfSent(),
+            'scheduledBegin' => $mail->getScheduledBegin() ? $mail->getScheduledBegin()->format('d.m.Y H:i') : '',
+            'scheduledEnd' => $mail->getScheduledEnd() ? $mail->getScheduledEnd()->format('d.m.Y H:i') : '',
         ]));
     }
 

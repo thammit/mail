@@ -285,7 +285,7 @@ class MailFactory
         if ($mail->isRedirect()) {
             $plainContent = MailerUtility::shortUrlsInPlainText(
                 $plainContent,
-                $mail->isRedirectAll() ? 0 : 76,
+                $mail,
                 BackendDataUtility::getBaseUrl($this->storageFolder),
                 $this->site->getLanguageById($mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
             );

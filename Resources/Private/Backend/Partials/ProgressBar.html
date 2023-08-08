@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
+
+<div class="progress">
+	<f:variable name="progressBarClasses" value="progress-bar"/>
+	<f:if condition="{mail.sent}">
+		<f:then>
+			<f:if condition="{mail.percentOfSent} == 100">
+				<f:then>
+					<f:variable name="progressBarClasses" value="{progressBarClasses} bg-success"/>
+				</f:then>
+				<f:else>
+					<f:variable name="progressBarClasses" value="{progressBarClasses} bg-warning"/>
+				</f:else>
+			</f:if>
+		</f:then>
+		<f:else>
+			<f:variable name="progressBarClasses" value="{progressBarClasses} progress-bar-striped progress-bar-animated"/>
+		</f:else>
+	</f:if>
+	<div data-mail-uid="{mail.uid}" title="{mail.numberOfSent}/{mail.numberOfRecipients}" class="{progressBarClasses}" role="progressbar" style="width: {mail.percentOfSent}%"
+		 aria-valuenow="{mail.numberOfSent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">
+		{mail.percentOfSent}%
+	</div>
+</div>
+</html>

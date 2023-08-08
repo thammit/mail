@@ -51,6 +51,12 @@ class ReportController extends AbstractController
         $this->moduleTemplate->setContent($this->view->render());
         $this->addDocheaderButtons($this->request->getRequestTarget());
 
+        if ($this->typo3MajorVersion < 12) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueRefresher');
+        } else {
+            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/queue-refresher.js');
+        }
+
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 

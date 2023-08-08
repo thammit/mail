@@ -8,6 +8,7 @@ use DOMXPath;
 use Exception;
 use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Exception\FetchContentFailedException;
 use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -15,6 +16,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\RequestFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
@@ -263,17 +265,19 @@ class MailerUtility
      * This function is about preserving long links in messages.
      *
      * @param string $message Message content
-     * @param int $lengthLimit Length limit; Default = 76 or 0 for all
+     * @param Mail $mail
      * @param string $baseUrl
      * @param string $sourceHost
      * @return string Processed message content
      */
-    public static function shortUrlsInPlainText(string $message, int $lengthLimit, string $baseUrl, string $sourceHost = '*'): string
+    public static function shortUrlsInPlainText(string $message, Mail $mail, string $baseUrl, string $sourceHost = '*'): string
     {
+        $lengthLimit = $mail->isRedirectAll() ? 0 : 76;
+        $mailUid = $mail->getUid() ?? 0;
         $messageWithReplacedLinks = preg_replace_callback(
             '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
-            function (array $matches) use ($lengthLimit, $baseUrl, $sourceHost) {
-                return $baseUrl . self::createRedirect($matches[0], $lengthLimit, $sourceHost);
+            function (array $matches) use ($mailUid, $lengthLimit, $baseUrl, $sourceHost) {
+                return $baseUrl . self::createRedirect($matches[0], $lengthLimit, $sourceHost, $mailUid);
             },
             $message
         );
@@ -293,7 +297,7 @@ class MailerUtility
     /**
      * @return string The created redirect url
      */
-    public static function createRedirect(string $targetLink, int $lengthLimit, string $sourceHost): string
+    public static function createRedirect(string $targetLink, int $lengthLimit, string $sourceHost, int $mailUid): string
     {
         if (strlen($targetLink) <= $lengthLimit) {
             return $targetLink;
@@ -326,6 +330,12 @@ class MailerUtility
             'disable_hitcount' => 0,
             'protected' => 1,
         ];
+
+        if ((new Typo3Version())->getMajorVersion() >= 12) {
+            // add own creation type and mail uid to filter and delete old mail redirect
+            $record['creation_type'] = \MEDIAESSENZ\Mail\Constants::MAIL_REDIRECT;
+            $record['description'] = 'tx_domain_model_mail:' . $mailUid;
+        }
 
         $connection->insert('sys_redirect', $record);
         return $sourcePath;

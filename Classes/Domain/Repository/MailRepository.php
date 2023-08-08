@@ -121,8 +121,7 @@ class MailRepository extends Repository
 
         return GeneralUtility::makeInstance(DataMapper::class)->map(Mail::class, $queryBuilder
             ->selectLiteral(
-            'm.*',
-            'COUNT(l.mail) AS number_of_sent'
+            'm.*'
             )
             ->from('tx_mail_domain_model_mail', 'm')
             ->leftJoin(

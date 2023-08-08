@@ -4,9 +4,12 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DateTimeImmutable;
+use Doctrine\DBAL\Exception;
+use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
@@ -642,7 +645,7 @@ class Mail extends AbstractEntity
         if ($recipients = $this->getRecipients()) {
             $numberOfRecipients = array_sum(array_map('count', $recipients));
         }
-        if ($numberOfRecipients < $this->getNumberOfSent()) {
+        if ($numberOfRecipients === 0) {
             return $this->getNumberOfSent();
         }
         return $numberOfRecipients;
@@ -653,6 +656,12 @@ class Mail extends AbstractEntity
      */
     public function getNumberOfSent(): int
     {
+        try {
+            $logRepository = GeneralUtility::makeInstance(LogRepository::class);
+            $this->numberOfSent = $logRepository->countByMailUid($this->uid);
+        } catch (Exception) {
+            $this->numberOfSent = 0;
+        }
         return $this->numberOfSent ?? 0;
     }
 
@@ -672,7 +681,7 @@ class Mail extends AbstractEntity
     public function getPercentOfSent(): int
     {
         $numberOfRecipients = $this->getNumberOfRecipients();
-        if ($numberOfRecipients === 0) {
+        if ($numberOfRecipients === 0 || $this->sent) {
             return 100;
         }
         $percentOfSent = 100 / $numberOfRecipients * $this->getNumberOfSent();

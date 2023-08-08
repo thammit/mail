@@ -19,6 +19,7 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
@@ -272,6 +273,18 @@ abstract class AbstractController extends ActionController
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
             'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . $message . '\');');
         $this->notification++;
+    }
+
+    /**
+     * @param null|string $json
+     * @param int $errorCode
+     * @return ResponseInterface
+     */
+    protected function jsonErrorResponse(string $json = null, int $errorCode = 400): ResponseInterface
+    {
+        return $this->responseFactory->createResponse($errorCode)
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
+            ->withBody($this->streamFactory->createStream($json ?? $this->view->render()));
     }
 
     /**
