@@ -23,6 +23,10 @@
         <source>After Content</source>
         <target state="needs-translation">After Content</target>
       </trans-unit>
+      <trans-unit id="backend_layout.back_to_mail_wizard" resname="backend_layout.back_to_mail_wizard">
+        <source>Back to  mail wizard</source>
+        <target state="needs-translation">Back to  mail wizard</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
