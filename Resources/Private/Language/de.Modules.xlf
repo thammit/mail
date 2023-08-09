@@ -895,9 +895,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source># sent</source>
         <target state="final"># versandt</target>
       </trans-unit>
-      <trans-unit id="report.progress" resname="report.progress">
+      <trans-unit id="report.progress" resname="report.progress" approved="yes">
         <source>Delivery progress</source>
-        <target state="needs-translation">Delivery progress</target>
+        <target state="final">Versand-Fortschritt</target>
       </trans-unit>
       <trans-unit id="report.plainText" resname="report.plainText" approved="yes">
         <source>Plaintext</source>
@@ -1007,9 +1007,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source># sent</source>
         <target state="final"># versandt</target>
       </trans-unit>
-      <trans-unit id="queue.progress" resname="queue.progress">
+      <trans-unit id="queue.progress" resname="queue.progress" approved="yes">
         <source>Delivery progress</source>
-        <target state="needs-translation">Delivery progress</target>
+        <target state="final">Versand-Fortschritt</target>
       </trans-unit>
       <trans-unit id="queue.scheduled" resname="queue.scheduled" approved="yes">
         <source>Scheduled</source>
