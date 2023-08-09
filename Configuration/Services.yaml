@@ -84,6 +84,11 @@ services:
         identifier: 'mediaessenz/mail/asset-renderer-pagetree-refresh'
         event: TYPO3\CMS\Core\Page\Event\BeforeJavaScriptsRenderingEvent
 
+  MEDIAESSENZ\Mail\EventListener\AddBackToMailWizardButton:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/add-back-to-mail-wizard-button'
+
   MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter:
     tags:
       - name: extbase.type_converter

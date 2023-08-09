@@ -9,6 +9,7 @@ use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\RecipientController;
 use MEDIAESSENZ\Mail\Controller\ReportController;
+use MEDIAESSENZ\Mail\Hooks\AddBackToMailWizardButton;
 use MEDIAESSENZ\Mail\Hooks\PageTreeRefresh;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
@@ -166,6 +167,7 @@ final class Configuration
     {
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess']['MEDIAESSENZ/Mail'] = PageTreeRefresh::class . '->addJs';
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/db_layout.php']['drawHeaderHook']['MEDIAESSENZ/Mail'] = PageTreeRefresh::class . '->addHeaderJs';
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/db_layout.php']['drawHeaderHook']['MEDIAESSENZ/MailWizardBackButton'] = AddBackToMailWizardButton::class . '->render';
     }
 
     public static function addTypoScriptContentObject(): void

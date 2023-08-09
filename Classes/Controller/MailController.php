@@ -374,7 +374,6 @@ class MailController extends AbstractController
      * @throws IllegalObjectTypeException
      * @throws InvalidFileException
      * @throws NoSuchPropertyException
-     * @throws RouteNotFoundException
      * @throws UnknownClassException
      * @throws UnknownObjectException
      */

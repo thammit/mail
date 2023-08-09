@@ -19,6 +19,9 @@
             <trans-unit id="backend_layout.column.contentafter" resname="backend_layout.column.contentafter">
                 <source>After Content</source>
             </trans-unit>
+            <trans-unit id="backend_layout.back_to_mail_wizard" resname="backend_layout.back_to_mail_wizard">
+                <source>Back to  mail wizard</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

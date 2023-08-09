@@ -245,7 +245,7 @@
                             </td>
                             <td class="col-title col-responsive nowrap">{data.title}</td>
                             <td class="nowrap">
-                                <a href="{be:moduleLink(route:'web_layout', arguments:'{id: data.uid}')}" class="btn btn-default" data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key: '{lll}general.button.editPage')}">
+                                <a href="{be:moduleLink(route:'web_layout', currentUrlParameterName: 'mailReturnPath', arguments:'{id: data.uid}')}"  class="btn btn-default" data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key: '{lll}general.button.editPage')}">
                                     <core:icon identifier="actions-page-open" size="small"/>
                                 </a>
                                 <mail:editMailPageContent uid="{data.uid}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.editContent')}" data="{bs-trigger:'hover focus', bs-container:'body', bs-toggle:'tooltip', bs-placement:'top'}">
