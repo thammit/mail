@@ -267,9 +267,9 @@
         <source>Website User Groups</source>
         <target state="final">Webseitenbenutzergruppen</target>
       </trans-unit>
-      <trans-unit id="sys_redirect.creation_type" resname="sys_redirect.creation_type">
+      <trans-unit id="sys_redirect.creation_type" resname="sys_redirect.creation_type" approved="yes">
         <source>Mail redirect</source>
-        <target state="needs-translation">Mail redirect</target>
+        <target state="final">Mail Redirect</target>
       </trans-unit>
     </body>
   </file>
