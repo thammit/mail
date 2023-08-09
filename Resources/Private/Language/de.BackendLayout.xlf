@@ -3,29 +3,29 @@
   <file source-language="en" datatype="plaintext" original="messages" date="2022-10-30T19:31:39Z" product-name="mail" target-language="de">
     <header/>
     <body>
-      <trans-unit id="backend_layout.mail" resname="backend_layout.mail">
+      <trans-unit id="backend_layout.mail" resname="backend_layout.mail" approved="yes">
         <source>MAIL</source>
-        <target state="needs-translation">MAIL</target>
+        <target state="final">MAIL</target>
       </trans-unit>
-      <trans-unit id="backend_layout.column.border" resname="backend_layout.column.border">
+      <trans-unit id="backend_layout.column.border" resname="backend_layout.column.border" approved="yes">
         <source>Border</source>
-        <target state="needs-translation">Border</target>
+        <target state="final">Rand</target>
       </trans-unit>
-      <trans-unit id="backend_layout.column.contentbefore" resname="backend_layout.column.contentbefore">
+      <trans-unit id="backend_layout.column.contentbefore" resname="backend_layout.column.contentbefore" approved="yes">
         <source>Before Content</source>
-        <target state="needs-translation">Before Content</target>
+        <target state="final">Vor dem Inhalt</target>
       </trans-unit>
-      <trans-unit id="backend_layout.column.normal" resname="backend_layout.column.normal">
+      <trans-unit id="backend_layout.column.normal" resname="backend_layout.column.normal" approved="yes">
         <source>Normal</source>
-        <target state="needs-translation">Normal</target>
+        <target state="final">Normal</target>
       </trans-unit>
-      <trans-unit id="backend_layout.column.contentafter" resname="backend_layout.column.contentafter">
+      <trans-unit id="backend_layout.column.contentafter" resname="backend_layout.column.contentafter" approved="yes">
         <source>After Content</source>
-        <target state="needs-translation">After Content</target>
+        <target state="final">Nach dem Inhalt</target>
       </trans-unit>
-      <trans-unit id="backend_layout.back_to_mail_wizard" resname="backend_layout.back_to_mail_wizard">
+      <trans-unit id="backend_layout.back_to_mail_wizard" resname="backend_layout.back_to_mail_wizard" approved="yes">
         <source>Back to  mail wizard</source>
-        <target state="needs-translation">Back to  mail wizard</target>
+        <target state="final">Zurück zum Mail-Assistenten</target>
       </trans-unit>
     </body>
   </file>
