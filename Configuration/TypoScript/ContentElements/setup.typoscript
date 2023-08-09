@@ -9,133 +9,143 @@ tt_content.stdWrap.postUserFunc = MEDIAESSENZ\Mail\UserFunctions\BoundaryUserFun
 
 // boundaries for the sitemap
 tt_content.menu.20.3.renderObj {
-    outerWrap.cObject = USER
-    outerWrap.cObject {
-        userFunc = MEDIAESSENZ\Mail\UserFunctions\BoundaryUserFunc->insertSitemapBoundaries
-    }
+	outerWrap.cObject = USER
+	outerWrap.cObject {
+		userFunc = MEDIAESSENZ\Mail\UserFunctions\BoundaryUserFunc->insertSitemapBoundaries
+	}
 }
 
 // table based content elements
 lib {
-    contentElement {
-        templateRootPaths {
-            200 = EXT:mail/Resources/Private/Templates/ContentElements/
-            210 = {$plugin.mail.view.content.templatesRootPath}
-        }
+	contentElement {
+		templateRootPaths {
+			200 = EXT:mail/Resources/Private/Templates/ContentElements/
+			210 = {$plugin.mail.view.content.templatesRootPath}
+		}
 
-        partialRootPaths {
-            200 = EXT:mail/Resources/Private/Partials/
-            210 = {$plugin.mail.view.content.partialsRootPath}
-        }
+		partialRootPaths {
+			200 = EXT:mail/Resources/Private/Partials/
+			210 = {$plugin.mail.view.content.partialsRootPath}
+		}
 
-        layoutRootPaths {
-            200 = EXT:mail/Resources/Private/Layouts/
-            210 = {$plugin.mail.view.content.layoutsRootPath}
-        }
-    }
-    parseFunc {
-        tags {
-            a.typolink.forceAbsoluteUrl = 1
-            link.typolink.forceAbsoluteUrl = 1
-        }
-    }
-    parseFunc_RTE {
-        tags {
-            a.typolink.forceAbsoluteUrl = 1
-            link.typolink.forceAbsoluteUrl = 1
-        }
-    }
+		layoutRootPaths {
+			200 = EXT:mail/Resources/Private/Layouts/
+			210 = {$plugin.mail.view.content.layoutsRootPath}
+		}
+	}
+
+	parseFunc {
+		tags {
+			a.typolink.forceAbsoluteUrl = 1
+			link.typolink.forceAbsoluteUrl = 1
+		}
+	}
+
+	parseFunc_RTE {
+		tags {
+			a.typolink.forceAbsoluteUrl = 1
+			link.typolink.forceAbsoluteUrl = 1
+		}
+	}
 }
 
 // Settings for EXT:news
 plugin.tx_news {
-    view {
-        templateRootPaths {
-            200 = EXT:mail/Resources/Private/Templates/ContentElements/
-            210 = {$plugin.mail.view.content.templatesRootPath}
-        }
-        partialRootPaths {
-            200 = EXT:mail/Resources/Private/Partials/
-            210 = {$plugin.mail.view.content.partialsRootPath}
-        }
-        layoutRootPaths {
-            200 = EXT:mail/Resources/Private/Layouts/
-            210 = {$plugin.mail.view.content.layoutsRootPath}
-        }
-    }
+	view {
+		templateRootPaths {
+			200 = EXT:mail/Resources/Private/Templates/ContentElements/
+			210 = {$plugin.mail.view.content.templatesRootPath}
+		}
+
+		partialRootPaths {
+			200 = EXT:mail/Resources/Private/Partials/
+			210 = {$plugin.mail.view.content.partialsRootPath}
+		}
+
+		layoutRootPaths {
+			200 = EXT:mail/Resources/Private/Layouts/
+			210 = {$plugin.mail.view.content.layoutsRootPath}
+		}
+	}
 }
 
 mail = PAGE
 mail {
-    typeNum = 0
-    config {
-        disableAllHeaderCode = 1
-        disablePrefixComment = 1
-        admPanel = 0
-        xhtml_cleaning = 0
-        contentObjectExceptionHandler = 0
-    }
-    10 = EMOGRIFIER
-    10 {
-        extractContent = 0
-        removeClassAttributes = 1
-        css = COA
-        css {
-            10 = SCSS
-            10.file = EXT:mail/Resources/Public/Scss/foundation-emails.scss
-            10.cacheTags = mail
-            20 = SCSS
-            20.file = {$plugin.mail.settings.scss.modifications}
-        }
-        html = FLUIDTEMPLATE
-        html {
-            templateName = Html
-            templateRootPaths {
-                0 = EXT:mail/Resources/Private/Templates/Mail/
-                10 = {$plugin.mail.view.page.templatesRootPath}
-            }
-            partialRootPaths {
-                0 = EXT:mail/Resources/Private/Partials/
-                10 = {$plugin.mail.view.page.partialsRootPath}
-            }
-            layoutRootPaths {
-                0 = EXT:mail/Resources/Private/Layouts/
-                10 = {$plugin.mail.view.page.layoutsRootPath}
-            }
-            settings {
-                header {
-                    title = {$plugin.mail.settings.header.title}
-                    image {
-                        src = {$plugin.mail.settings.header.image.src}
-                        alt = {$plugin.mail.settings.header.image.alt}
-                        width = {$plugin.mail.settings.header.image.width}
-                        height = {$plugin.mail.settings.header.image.height}
-                    }
-                }
-            }
-            variables {
-                termsPid = TEXT
-                termsPid.value = {$termsPid}
-                privacyPid = TEXT
-                privacyPid.value = {$privacyPid}
-                currentPid = TEXT
-                currentPid.data = TSFE:id
-            }
-        }
-    }
+	typeNum = 0
+	config {
+		disableAllHeaderCode = 1
+		disablePrefixComment = 1
+		admPanel = 0
+		xhtml_cleaning = 0
+		contentObjectExceptionHandler = 0
+	}
+
+	10 = EMOGRIFIER
+	10 {
+		extractContent = 0
+		removeClassAttributes = 1
+		css = COA
+		css {
+			10 = SCSS
+			10.file = EXT:mail/Resources/Public/Scss/foundation-emails.scss
+			10.cacheTags = mail
+			20 = SCSS
+			20.file = {$plugin.mail.settings.scss.modifications}
+		}
+
+		html = FLUIDTEMPLATE
+		html {
+			templateName = Html
+			templateRootPaths {
+				0 = EXT:mail/Resources/Private/Templates/Mail/
+				10 = {$plugin.mail.view.page.templatesRootPath}
+			}
+
+			partialRootPaths {
+				0 = EXT:mail/Resources/Private/Partials/
+				10 = {$plugin.mail.view.page.partialsRootPath}
+			}
+
+			layoutRootPaths {
+				0 = EXT:mail/Resources/Private/Layouts/
+				10 = {$plugin.mail.view.page.layoutsRootPath}
+			}
+
+			settings {
+				header {
+					title = {$plugin.mail.settings.header.title}
+					image {
+						src = {$plugin.mail.settings.header.image.src}
+						alt = {$plugin.mail.settings.header.image.alt}
+						width = {$plugin.mail.settings.header.image.width}
+						height = {$plugin.mail.settings.header.image.height}
+					}
+				}
+			}
+
+			variables {
+				termsPid = TEXT
+				termsPid.value = {$termsPid}
+				privacyPid = TEXT
+				privacyPid.value = {$privacyPid}
+				currentPid = TEXT
+				currentPid.data = TSFE:id
+			}
+		}
+	}
 }
 
 [traverse(request.getQueryParams(), 'plain')  == 1]
-    // do no use table markup for plain text since conversation is done by league/html-to-markdown package
-    mail.10.html.templateName = Plain
-    lib.contentElement.layoutRootPaths.200 >
-    lib.contentElement.layoutRootPaths.210 >
-    lib.contentElement.templateRootPaths.200 >
-    lib.contentElement.templateRootPaths.210 >
-    lib.contentElement.partialRootPaths.200 >
-    lib.contentElement.partialRootPaths.210 >
-    plugin.tx_news.view.templateRootPaths.200 >
-    plugin.tx_news.view.templateRootPaths.210 >
-    plugin.tx_news.view.layoutRootPaths.200 >
-    plugin.tx_news.view.layoutRootPaths.210 >
+	// do no use table markup for plain text since conversation is done by league/html-to-markdown package
+	mail.10.html.templateName = Plain
+	lib.contentElement.layoutRootPaths.200 >
+	lib.contentElement.layoutRootPaths.210 >
+	lib.contentElement.templateRootPaths.200 >
+	lib.contentElement.templateRootPaths.210 >
+	lib.contentElement.partialRootPaths.200 >
+	lib.contentElement.partialRootPaths.210 >
+	plugin.tx_news.view.templateRootPaths.200 >
+	plugin.tx_news.view.templateRootPaths.210 >
+	plugin.tx_news.view.layoutRootPaths.200 >
+	plugin.tx_news.view.layoutRootPaths.210 >
 [end]

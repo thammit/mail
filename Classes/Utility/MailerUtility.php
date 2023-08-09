@@ -194,7 +194,7 @@ class MailerUtility
         $imageNodes = $domDocument->getElementsByTagName('img');
         /** @var DOMElement $imageNode */
         foreach ($imageNodes as $imageNode) {
-            if ($imageNode->hasAttribute('src') && !str_starts_with($imageNode->getAttribute('src'), 'http')) {
+            if ($imageNode->hasAttribute('src')) {
                 $src = $imageNode->getAttribute('src');
                 if (!str_starts_with($src, 'http')) {
                     if (str_starts_with($src, '/')) {

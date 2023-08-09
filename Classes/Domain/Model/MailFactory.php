@@ -147,15 +147,18 @@ class MailFactory
                     }
                 }
 
-                if ($clickTracking) {
-                    // Tracking pixel
+                if ($clickTracking || !$mail->isIncludeMedia()) {
                     $images = $domDocument->getElementsByTagName('img');
                     /** @var DOMElement $image */
                     foreach ($images as $image) {
-                        if ($image->hasAttribute('data-mailer-ping')) {
+                        if ($clickTracking && $image->hasAttribute('data-mailer-ping')) {
+                            // Tracking pixel
                             $image->setAttribute('src', $jumpUrlPrefix . $image->getAttribute('src'));
                             // Replace only first image src with jumpurl
-                            break;
+                            $clickTracking = false;
+                        } else if (!$mail->isIncludeMedia() && $image->hasAttribute('src') && !str_starts_with($image->getAttribute('src'), 'http')) {
+                            // convert all relative image urls to absolute urls
+                            $image->setAttribute('src', MailerUtility::absRef($image->getAttribute('src'), $mail->getRedirectUrl()));
                         }
                     }
                 }
