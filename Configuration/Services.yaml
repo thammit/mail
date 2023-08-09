@@ -49,29 +49,40 @@ services:
   MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers:
     tags:
       - name: 'event.listener'
-        identifier: 'addUpperCaseMarkers'
+        identifier: 'mediaessenz/mail/add-upper-case-markers'
 
   MEDIAESSENZ\Mail\EventListener\ManipulateFrontendUserRecipient:
     tags:
       - name: 'event.listener'
-        identifier: 'manipulateFrontendUserRecipient'
-        before: 'normalizeRecipientData'
+        identifier: 'mediaessenz/mail/manipulate-frontend-user-recipient'
+        before: 'mediaessenz/mail/normalize-recipient-data'
 
   MEDIAESSENZ\Mail\EventListener\ManipulateAddressRecipient:
     tags:
       - name: 'event.listener'
-        identifier: 'manipulateAddressRecipient'
-        before: 'normalizeRecipientData'
+        identifier: 'mediaessenz/mail/manipulate-address-recipient'
+        before: 'mediaessenz/mail/normalize-recipient-data'
 
   MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData:
     tags:
       - name: 'event.listener'
-        identifier: 'normalizeRecipientData'
+        identifier: 'mediaessenz/mail/normalize-recipient-data'
 
   MEDIAESSENZ\Mail\EventListener\SimulateFrontendUserGroup:
     tags:
       - name: 'event.listener'
-        identifier: 'simulateFrontendUserGroup'
+        identifier: 'mediaessenz/mail/simulate-frontend-user-group'
+
+  MEDIAESSENZ\Mail\EventListener\PageTreeRefresh:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/page-tree-refresh'
+
+  MEDIAESSENZ\Mail\EventListener\AssetRenderer\PageTreeRefresh:
+    tags:
+      - name: event.listener
+        identifier: 'mediaessenz/mail/asset-renderer-pagetree-refresh'
+        event: TYPO3\CMS\Core\Page\Event\BeforeJavaScriptsRenderingEvent
 
   MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter:
     tags:

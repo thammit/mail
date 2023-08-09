@@ -15,7 +15,7 @@ $modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePos
 $modulePositionArray = explode(':', $modulePosition);
 $navigationComponent = '@typo3/backend/page-tree/page-tree-element';
 try {
-    if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
+    if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || (int)ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
         $navigationComponent = '';
     }
 } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
