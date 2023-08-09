@@ -201,6 +201,9 @@
             <trans-unit id="tx_mail_domain_model_group.recipientSources.I.2" resname="tx_mail_domain_model_group.recipientSources.I.2">
                 <source>Website User Groups</source>
             </trans-unit>
+            <trans-unit id="sys_redirect.creation_type" resname="sys_redirect.creation_type">
+                <source>Mail redirect</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

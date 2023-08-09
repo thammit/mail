@@ -333,7 +333,7 @@ class MailerUtility
 
         if ((new Typo3Version())->getMajorVersion() >= 12) {
             // add own creation type and mail uid to filter and delete old mail redirect
-            $record['creation_type'] = \MEDIAESSENZ\Mail\Constants::MAIL_REDIRECT;
+            $record['creation_type'] = (int)(\MEDIAESSENZ\Mail\Utility\ConfigurationUtility::getExtensionConfiguration('mailRedirectCreationTypeNumber') ?? \MEDIAESSENZ\Mail\Constants::DEFAULT_MAIL_REDIRECT_CREATION_TYPE);
             $record['description'] = 'tx_domain_model_mail:' . $mailUid;
         }
 
