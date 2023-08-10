@@ -1407,6 +1407,10 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
         <source>Maximal visible queue items</source>
         <target state="needs-translation">Maximal visible queue items</target>
       </trans-unit>
+      <trans-unit id="configuration.refreshRate" resname="configuration.refreshRate">
+        <source>Automatic refresh of delivery progress bars in seconds</source>
+        <target state="needs-translation">Automatic refresh of delivery progress bars in seconds</target>
+      </trans-unit>
       <trans-unit id="configuration.externalMailHtmlUrl" resname="configuration.externalMailHtmlUrl">
         <source>URL of HTML content</source>
         <target state="needs-translation">URL of HTML content</target>
