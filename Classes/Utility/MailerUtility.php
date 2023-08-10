@@ -522,7 +522,7 @@ class MailerUtility
 
     public static function removeDuplicateValues($array) {
         foreach ($array as &$subArray) {
-            $subArray = array_unique($subArray);
+            $subArray = array_values(array_unique($subArray));
         }
         return $array;
     }

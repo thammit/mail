@@ -201,7 +201,6 @@ class RecipientService
     /**
      * @param ObjectStorage<Group> $groups
      * @return array
-     * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
