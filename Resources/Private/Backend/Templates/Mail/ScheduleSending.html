@@ -1,112 +1,115 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
-      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
-      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
-      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
-      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
-      data-namespace-typo3-fluid="true">
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
 
 <f:layout name="Default"/>
 
 <f:section name="content">
-    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-    <h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.scheduleSending"/></h1>
-    <f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
-    <f:render partial="HelpModal" arguments="{titleLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.title', bodyLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.message'}"/>
-    <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
-    <f:form action="finish" object="{mail}" objectName="mail" method="post" enctype="multipart/form-data">
-        <div class="mb-4">
-            <div class="row mb-3 gy-3">
-                <f:if condition="{groups}">
-                    <f:then>
-                        <f:variable name="numberOfRecipientGroups" value="{groups -> f:count()}"/>
-                        <f:if condition="{numberOfRecipientGroups} == 1">
-                            <f:variable name="checked" value="1" />
-                        </f:if>
-                        <div class="col-12 col-md-6">
-                            <h4>
-                                <f:translate key="{lll}mail.wizard.scheduleSending.mailGroups"/>
-                            </h4>
-                            <ul class="list-group">
-                            <f:for each="{groups}" as="group">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <label class="form-check-label" for="mailgroups-{group.uid}">
-                                    <f:form.checkbox class="form-check-input me-1" checked="{checked}" property="recipientGroups" multiple="1" value="{group.uid}" id="mailgroups-{group.uid}"/>
-                                        {group.title}
-                                    </label>
-                                        <span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
-                                </li>
-                            </f:for>
-                            </ul>
-                        </div>
-                    </f:then>
-                    <f:else>
-                        <div class="col-12 col-md-6">
-                        <f:be.infobox state="2">
-                            <f:translate key="{lll}mail.wizard.scheduleSending.noRecipientGroupsFound.message"/>
-                        </f:be.infobox>
-                        </div>
-                    </f:else>
-                </f:if>
-                <div class="col-12 col-md-6">
-                    <label for="distributionTime" class="form-label h4 mb-2">
-                        <f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
-                    </label>
-                    <f:if condition="{useTypo3DateTimeWebComponent}">
-                        <f:then>
-                            <typo3-formengine-element-datetime class="formengine-field-item t3js-formengine-field-item" recordFieldId="mail-distribution-time">
-                                <div class="input-group">
-                                    <input autocomplete="off"
-                                           id="mail-distribution-time"
-                                           class="t3js-datetimepicker form-control hasDefaultValue"
-                                           data-date-type="datetime"
-                                           data-formengine-validation-rules="[]"
-                                           data-formengine-input-params="{&quot;field&quot;:&quot;mail[scheduled]&quot;,&quot;evalList&quot;:&quot;datetime&quot;}"
-                                           data-formengine-input-name="mail[scheduled]"
-                                           value="{f:format.date(format:'H:i d-m-Y',date:'now')}"/>
-                                    <f:form.hidden property="scheduled" value="{f:format.date(format:'Y-m-d\TH:i:s\Z',date:'now')}" />
-                                    <button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
-                                        <core:icon identifier="actions-edit-pick-date"/>
-                                    </button>
-                                </div>
-                            </typo3-formengine-element-datetime>
-                        </f:then>
-                        <f:else>
-                            <div class="input-group">
-                                <f:form.textfield additionalAttributes="{autocomplete:'off'}"
-                                                  id="mail-distribution-time"
-                                                  class="form-control t3js-datetimepicker"
-                                                  data="{date-type:'datetime'}"
-                                                  property="scheduled"
-                                                  value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
-                                <label class="mb-0 btn btn-default" for="mail-distribution-time">
-                                    <core:icon identifier="actions-edit-pick-date"/>
-                                </label>
-                            </div>
-                        </f:else>
-                    </f:if>
-                </div>
-                <f:comment>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" name="isTestMail" id="tx-directmail-sendtestmail-check" value="1"/>
-                        <label class="form-check-label" for="tx-directmail-sendtestmail-check">
-                            <f:translate key="{lll}mail.wizard.scheduleSending.testMail"/>
-                        </label>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" name="saveDraft" id="tx-directmail-savedraft-check" value="1"/>
-                        <label class="form-check-label" for="tx-directmail-savedraft-check">
-                            <f:translate key="{lll}mail.wizard.scheduleDraft"/>
-                        </label>
-                    </div>
-                </f:comment>
-            </div>
-            <f:if condition="{groups}">
-                <f:form.button class="btn btn-lg btn-mail-theme text-uppercase" type="Submit">
-                    <f:translate key="{lll}general.button.finish"/>
-                </f:form.button>
-            </f:if>
-        </div>
-    </f:form>
-    <f:render partial="Wizard/Navigation" arguments="{mail:mailUid, previousAction: navigation.previousAction, lll:lll}"/>
+	<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+	<h1>
+		<f:translate key="{lll}mail.wizard.title"/>
+		:
+		<f:translate key="{lll}mail.wizard.scheduleSending"/>
+	</h1>
+	<f:render partial="Wizard/Steps" arguments="{navigation: navigation}"/>
+	<f:render partial="HelpModal"
+			  arguments="{titleLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.title', bodyLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.message'}"/>
+	<h2>
+		<core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
+		{title}
+	</h2>
+	<f:form id="mail-wizard-schedule-sending-form" action="finish" object="{mail}" objectName="mail" method="post" enctype="multipart/form-data">
+		<div class="mb-4">
+			<div class="row mb-3 gy-3">
+				<f:if condition="{groups}">
+					<f:then>
+						<f:variable name="numberOfRecipientGroups" value="{groups -> f:count()}"/>
+						<f:if condition="{numberOfRecipientGroups} == 1">
+							<f:variable name="checked" value="1"/>
+						</f:if>
+						<div class="col-12 col-md-6">
+							<h4>
+								<f:translate key="{lll}mail.wizard.scheduleSending.mailGroups"/>
+							</h4>
+							<ul class="list-group">
+								<f:for each="{groups}" as="group">
+									<li class="list-group-item d-flex justify-content-between align-items-center">
+										<label class="form-check-label" for="mailgroups-{group.uid}">
+											<f:form.checkbox class="form-check-input me-1" checked="{checked}" property="recipientGroups" multiple="1" value="{group.uid}"
+															 id="mailgroups-{group.uid}"/>
+											{group.title}
+										</label>
+										<span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
+									</li>
+								</f:for>
+							</ul>
+						</div>
+					</f:then>
+					<f:else>
+						<div class="col-12 col-md-6">
+							<f:be.infobox state="2">
+								<f:translate key="{lll}mail.wizard.scheduleSending.noRecipientGroupsFound.message"/>
+							</f:be.infobox>
+						</div>
+					</f:else>
+				</f:if>
+				<div class="col-12 col-md-6">
+					<label for="distributionTime" class="form-label h4 mb-2">
+						<f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
+					</label>
+					<f:variable name="now">{f:format.date(format:'H:i d-m-Y',date:'now')}</f:variable>
+					<f:variable name="nowISO">{f:format.date(format:'Y-m-d\TH:i:s\Z',date:'now')}</f:variable>
+					<f:if condition="{v12}">
+						<f:then>
+							<div class="input-group">
+								<input id="mail-distribution-time" data-date-type="datetime" data-date-mindate="{now}"
+									   class="form-control" value="{now}" autocomplete="off"/>
+								<f:form.hidden property="scheduled" value="{nowISO}"/>
+								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
+									<core:icon identifier="actions-edit-pick-date"/>
+								</button>
+							</div>
+						</f:then>
+						<f:else>
+							<div class="input-group">
+								<f:form.textfield additionalAttributes="{autocomplete:'off'}"
+												  id="mail-distribution-time"
+												  class="form-control t3js-datetimepicker"
+												  data="{date-type:'datetime', date-mindate:now}"
+												  property="scheduled"
+												  value="{now}"/>
+								<label class="mb-0 btn btn-default" for="mail-distribution-time">
+									<core:icon identifier="actions-edit-pick-date"/>
+								</label>
+							</div>
+						</f:else>
+					</f:if>
+				</div>
+				<f:comment>
+					<div class="form-check mb-3">
+						<input class="form-check-input" type="checkbox" name="isTestMail" id="tx-directmail-sendtestmail-check" value="1"/>
+						<label class="form-check-label" for="tx-directmail-sendtestmail-check">
+							<f:translate key="{lll}mail.wizard.scheduleSending.testMail"/>
+						</label>
+					</div>
+					<div class="form-check mb-3">
+						<input class="form-check-input" type="checkbox" name="saveDraft" id="tx-directmail-savedraft-check" value="1"/>
+						<label class="form-check-label" for="tx-directmail-savedraft-check">
+							<f:translate key="{lll}mail.wizard.scheduleDraft"/>
+						</label>
+					</div>
+				</f:comment>
+			</div>
+			<f:if condition="{groups}">
+				<f:form.button disabled="{v12}" id="mail-wizard-schedule-sending-form-submit-button" class="btn btn-lg btn-mail-theme text-uppercase" type="Submit">
+					<f:translate key="{lll}general.button.finish"/>
+				</f:form.button>
+			</f:if>
+		</div>
+	</f:form>
+	<f:render partial="Wizard/Navigation" arguments="{mail:mailUid, previousAction: navigation.previousAction, lll:lll}"/>
 </f:section>
 </html>

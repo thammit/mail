@@ -413,7 +413,7 @@ class MailController extends AbstractController
         if ($mail->isInternal() || $mail->isExternal()) {
             if ($updatePreview && ConfigurationUtility::getExtensionConfiguration('createMailThumbnails')) {
                 // add html2canvas stuff
-                $this->pageRenderer->addJsInlineCode('mail-configuration', 'var mailUid = ' . $mail->getUid());
+                $this->pageRenderer->addInlineSetting('Mail', 'mailUid', $mail->getUid());
                 if ($this->typo3MajorVersion < 12) {
                     $this->pageRenderer->addRequireJsConfiguration([
                         'paths' => [
@@ -564,7 +564,7 @@ class MailController extends AbstractController
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail)),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
-        $this->pageRenderer->addJsInlineCode('mail-configuration', 'var mailUid = ' . $mail->getUid());
+        $this->pageRenderer->addInlineSetting('Mail', 'mailUid', $mail->getUid());
         if ($this->typo3MajorVersion < 12) {
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/Categories');
         } else {
@@ -725,9 +725,9 @@ class MailController extends AbstractController
 
         if ($addressList) {
             $this->mailerService->start();
-            $this->mailerService->prepare($mail->getUid());
+            $this->mailerService->prepare($mail);
             $this->mailerService->setSubjectPrefix($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '');
-            $this->mailerService->sendSimpleMail($addressList);
+            $this->mailerService->sendSimpleMail($mail, $addressList);
         }
 
         ViewUtility::addNotificationSuccess(
@@ -759,14 +759,14 @@ class MailController extends AbstractController
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
-            'useTypo3DateTimeWebComponent' => $this->typo3MajorVersion > 11,
+            'v12' => $this->typo3MajorVersion >= 12,
         ]);
         $this->moduleTemplate->setContent($this->view->render());
 
         if ($this->typo3MajorVersion < 12) {
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
         } else {
-            $this->pageRenderer->loadJavaScriptModule('@typo3/backend/form-engine/element/datetime-element.js');
+            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/schedule-sending.js');
         }
         $this->addDocHeaderHelpButton();
 
@@ -807,6 +807,8 @@ class MailController extends AbstractController
         }
 
         $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()));
+
+        $mail->setNumberOfRecipients($this->recipientService->getNumberOfRecipientsByGroups($mail->getRecipientGroups()));
 
         if ($mail->getNumberOfRecipients() === 0) {
             ViewUtility::addNotificationWarning(

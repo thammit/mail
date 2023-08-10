@@ -1,5 +1,4 @@
 define([], function() {
-    "use strict";
     const previewModals = document.getElementsByClassName('js-mail-preview-modal');
     const previewModalIframe = document.getElementById('previewModal').getElementsByTagName('iframe');
     const previewModalTitle = document.getElementById('previewModal').getElementsByClassName('modal-title');

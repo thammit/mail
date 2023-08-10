@@ -494,6 +494,18 @@ queueLimit
 
    Number of mailings listed in queue module. If zero (0) all current and past mails will be visible.
 
+refreshRate
+-----------
+
+.. confval:: refreshRate
+
+   :type: int
+   :Default: 5
+   :Path: mod.web\_modules.mail.refreshRate
+
+   Number of seconds between automatic refreshing of delivery progress bars. Set to 0, to stop automatic
+   refreshing.
+
 storage
 -------
 

@@ -27,7 +27,7 @@ define([], function() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    mailUid: window.mailUid,
+                    mailUid: TYPO3.settings.Mail.mailUid,
                     content: parseInt(element.dataset.content),
                     ategories
                 })

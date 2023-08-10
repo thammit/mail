@@ -519,4 +519,27 @@ class MailerUtility
     {
         return (int)round(microtime(true) * 1000);
     }
+
+    public static function removeDuplicateValues($array) {
+        foreach ($array as &$subArray) {
+            $subArray = array_unique($subArray);
+        }
+        return $array;
+    }
+
+    public static function calculateDeliveryProgress(Mail $mail): int
+    {
+        $numberOfRecipients = $mail->getNumberOfRecipients();
+        if ($numberOfRecipients === 0 || $mail->isSent()) {
+            return 100;
+        }
+        $percentOfSent = 100 / $numberOfRecipients * $mail->getNumberOfRecipientsHandled();
+        if ($percentOfSent > 100) {
+            $percentOfSent = 100;
+        }
+        if ($percentOfSent < 0) {
+            $percentOfSent = 0;
+        }
+        return (int)$percentOfSent;
+    }
 }

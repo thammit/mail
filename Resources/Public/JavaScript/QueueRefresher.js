@@ -14,12 +14,12 @@ define([], function () {
                 return response.json();
             }).then((result) => {
                 const sent = Boolean(result.sent);
-                const numberOfSent = parseInt(result.numberOfSent);
-                const percentOfSent = parseInt(result.percentOfSent);
+                const recipientsHandled = parseInt(result.recipientsHandled);
+                const deliveryProgress = parseInt(result.deliveryProgress);
                 const numberOfRecipients = parseInt(runningProgressBar.getAttribute('aria-valuemax'));
-                runningProgressBar.style.width = `${percentOfSent}%`;
-                runningProgressBar.innerText = `${percentOfSent}%`;
-                runningProgressBar.setAttribute('title', `${numberOfSent}/${numberOfRecipients}`);
+                runningProgressBar.style.width = `${deliveryProgress}%`;
+                runningProgressBar.innerText = `${deliveryProgress}%`;
+                runningProgressBar.setAttribute('title', `${recipientsHandled}/${numberOfRecipients}`);
                 runningProgressBar.setAttribute('aria-valuenow', String(result.sent));
                 const tableRow = runningProgressBar.closest('tr');
                 const scheduledBegin = tableRow.querySelector('.mail-scheduled-begin');
@@ -44,6 +44,6 @@ define([], function () {
                     }
                 }
             });
-        }, 60000);
+        }, TYPO3.settings.Mail.refreshRate * 1000);
     });
 });

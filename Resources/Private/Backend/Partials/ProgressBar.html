@@ -9,7 +9,7 @@
 	<f:variable name="progressBarClasses" value="progress-bar"/>
 	<f:if condition="{mail.sent}">
 		<f:then>
-			<f:if condition="{mail.percentOfSent} == 100">
+			<f:if condition="{mail.deliveryProgress} == 100">
 				<f:then>
 					<f:variable name="progressBarClasses" value="{progressBarClasses} bg-success"/>
 				</f:then>
@@ -22,9 +22,9 @@
 			<f:variable name="progressBarClasses" value="{progressBarClasses} progress-bar-striped progress-bar-animated"/>
 		</f:else>
 	</f:if>
-	<div data-mail-uid="{mail.uid}" title="{mail.numberOfSent}/{mail.numberOfRecipients}" class="{progressBarClasses}" role="progressbar" style="width: {mail.percentOfSent}%"
-		 aria-valuenow="{mail.numberOfSent}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">
-		{mail.percentOfSent}%
+	<div data-mail-uid="{mail.uid}" title="{mail.numberOfRecipientsHandled}/{mail.numberOfRecipients}" class="{progressBarClasses}" role="progressbar" style="width: {mail.deliveryProgress}%"
+		 aria-valuenow="{mail.numberOfRecipientsHandled}" aria-valuemin="0" aria-valuemax="{mail.numberOfRecipients}">
+		{mail.deliveryProgress}%
 	</div>
 </div>
 </html>

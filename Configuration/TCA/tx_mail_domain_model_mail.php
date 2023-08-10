@@ -204,7 +204,8 @@ return [
         'sent' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sent',
             'config' => [
-                'type' => 'passthrough',
+                'type' => 'check',
+                'readOnly' => true,
             ],
         ],
         'step' => [
@@ -318,6 +319,7 @@ return [
             'label' => 'Recipient Groups',
             'config' => [
                 'type' => 'select',
+                'readOnly' => true,
                 'renderType' => 'selectCheckBox',
                 'renderMode' => 'checkbox',
                 'foreign_table' => 'tx_mail_domain_model_group',
@@ -380,6 +382,33 @@ return [
                 'type' => 'passthrough'
             ]
         ],
+        'number_of_recipients' => [
+            'label' => 'Number of recipients',
+            'config' => [
+                'type' => 'input',
+                'readOnly' => true,
+            ]
+        ],
+        'recipients_handled' => [
+            'label' => 'Recipients handled',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
+        'number_of_recipients_handled' => [
+            'label' => 'Number of recipients handled',
+            'config' => [
+                'type' => 'input',
+                'readOnly' => true,
+            ]
+        ],
+        'delivery_progress' => [
+            'label' => 'Delivery progress in %',
+            'config' => [
+                'type' => 'input',
+                'readOnly' => true,
+            ]
+        ],
         'number_of_sent' => [
             'label' => 'number of sent',
             'config' => [
@@ -398,30 +427,31 @@ return [
 			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type,sys_language_uid, page, plain_params, html_params, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
-            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, recipient_groups,
+            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
 		'],
         \MEDIAESSENZ\Mail\Type\Enumeration\MailType::EXTERNAL => ['showitem' => '
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.htmlParams.ALT.1, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
-            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, recipient_groups,
+            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
 		'],
         \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_INTERNAL => ['showitem' => '
 			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type,sys_language_uid, page, plain_params, html_params, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
-            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, recipient_groups,
+            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
 		'],
         \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_EXTERNAL => ['showitem' => '
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.htmlParams.ALT.1, attachment,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
-            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, recipient_groups,
+            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
 		'],
     ],
     'palettes' => [
         '1' => ['showitem' => 'scheduled_begin, scheduled_end, sent'],
         'from' => ['showitem' => 'from_email, from_name'],
         'reply' => ['showitem' => 'reply_to_email, reply_to_name'],
+        'progress' => ['showitem' => 'number_of_recipients, number_of_recipients_handled, delivery_progress, sent'],
     ],
 ];

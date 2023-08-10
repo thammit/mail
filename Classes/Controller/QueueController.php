@@ -24,7 +24,6 @@ class QueueController extends AbstractController
     /**
      * @return ResponseInterface
      * @throws InvalidQueryException
-     * @throws \Doctrine\DBAL\Exception
      */
     public function indexAction(): ResponseInterface
     {
@@ -40,11 +39,14 @@ class QueueController extends AbstractController
             }
         }
 
+        $refreshRate = (int)($this->pageTSConfiguration['refreshRate'] ?? 5);
+
         $this->view->assignMultiple([
             'id' => $this->id,
             'mails' => $this->mailRepository->findScheduledByPid($this->id, (int)($this->pageTSConfiguration['queueLimit'] ?? 10)),
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
             'queueLimit' => (int)($this->pageTSConfiguration['queueLimit'] ?? 10),
+            'refreshRate' => $refreshRate,
             'hideManualSendingButton' => $this->userTSConfiguration['hideManualSendingButton'] ?? false,
             'hideDeleteRunningSendingButton' => $this->userTSConfiguration['hideDeleteRunningSendingButton'] ?? false,
         ]);
@@ -52,19 +54,23 @@ class QueueController extends AbstractController
         $this->moduleTemplate->setContent($this->view->render());
         $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));
 
-        if ($this->typo3MajorVersion < 12) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueRefresher');
-        } else {
-            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/queue-refresher.js');
+        if ($refreshRate) {
+            $this->pageRenderer->addInlineSetting('Mail', 'refreshRate', $refreshRate);
+            if ($this->typo3MajorVersion < 12) {
+                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueRefresher');
+            } else {
+                $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/queue-refresher.js');
+            }
         }
 
         return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 
-    public function saveConfigurationAction(int $sendPerCycle, int $queueLimit): ResponseInterface
+    public function saveConfigurationAction(int $sendPerCycle, int $queueLimit, int $refreshRate): ResponseInterface
     {
         $pageTS['sendPerCycle'] = (string)$sendPerCycle;
         $pageTS['queueLimit'] = (string)$queueLimit;
+        $pageTS['refreshRate'] = (string)$refreshRate;
         $success = TypoScriptUtility::updatePagesTSConfig($this->id, $pageTS, 'mod.web_modules.mail.');
         if ($success) {
             ViewUtility::addNotificationSuccess(
@@ -126,8 +132,8 @@ class QueueController extends AbstractController
         $mail = $this->mailRepository->findByUid((int)($request->getQueryParams()['mail']));
         return $this->jsonResponse(json_encode([
             'sent' => $mail->isSent(),
-            'numberOfSent' => $mail->getNumberOfSent(),
-            'percentOfSent' => $mail->getPercentOfSent(),
+            'recipientsHandled' => $mail->getNumberOfRecipientsHandled(),
+            'deliveryProgress' => $mail->getDeliveryProgress(),
             'scheduledBegin' => $mail->getScheduledBegin() ? $mail->getScheduledBegin()->format('d.m.Y H:i') : '',
             'scheduledEnd' => $mail->getScheduledEnd() ? $mail->getScheduledEnd()->format('d.m.Y H:i') : '',
         ]));

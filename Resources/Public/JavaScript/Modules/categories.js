@@ -53,4 +53,4 @@ class Categories {
         }
 }
 
-new Categories(window.mailUid);
+new Categories(TYPO3.settings.Mail.mailUid);

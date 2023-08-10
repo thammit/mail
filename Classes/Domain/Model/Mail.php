@@ -66,20 +66,28 @@ class Mail extends AbstractEntity
     protected string $redirectUrl = '';
     protected string $authCodeFields = '';
     /**
+     * @var ObjectStorage<Group>
+     */
+    protected ObjectStorage $recipientGroups;
+    /**
      * query info (do not delete this annotation block!)
      * @var string
      */
     protected string $recipients = '[]';
+    /**
+     * query info (do not delete this annotation block!)
+     * @var string
+     */
+    protected string $recipientsHandled = '[]';
     /**
      * numberOfSent (do not change this annotation block or the property definition!)
      * see https://forge.typo3.org/issues/98224
      * @Transient
      */
     protected $numberOfSent;
-    /**
-     * @var ObjectStorage<Group>
-     */
-    protected ObjectStorage $recipientGroups;
+    protected int $numberOfRecipients = 0;
+    protected int $numberOfRecipientsHandled = 0;
+    protected int $deliveryProgress = 0;
     protected int $sysLanguageUid = 0;
     protected ?DateTimeImmutable $lastModified = null;
 
@@ -639,16 +647,59 @@ class Mail extends AbstractEntity
         return $this;
     }
 
+    /**
+     * @param int $numberOfRecipients
+     * @return Mail
+     */
+    public function setNumberOfRecipients(int $numberOfRecipients): Mail{
+        $this->numberOfRecipients = $numberOfRecipients;
+        return $this;
+    }
+
     public function getNumberOfRecipients(): int
     {
-        $numberOfRecipients = 0;
-        if ($recipients = $this->getRecipients()) {
-            $numberOfRecipients = array_sum(array_map('count', $recipients));
-        }
-        if ($numberOfRecipients === 0) {
-            return $this->getNumberOfSent();
-        }
-        return $numberOfRecipients;
+        return $this->numberOfRecipients;
+//        $numberOfRecipients = 0;
+//        if ($recipients = $this->getRecipients()) {
+//            $numberOfRecipients = array_sum(array_map('count', $recipients));
+//        }
+//        if ($numberOfRecipients === 0) {
+//            return $this->getNumberOfSent();
+//        }
+//        return $numberOfRecipients;
+    }
+
+    public function getRecipientsHandled(): array
+    {
+        return json_decode($this->recipientsHandled, true, 512,  JSON_OBJECT_AS_ARRAY);
+    }
+
+    public function setRecipientsHandled(array $recipientsHandled): Mail
+    {
+        $this->recipientsHandled = json_encode($recipientsHandled);
+        return $this;
+    }
+
+    public function getNumberOfRecipientsHandled(): int
+    {
+        return $this->numberOfRecipientsHandled;
+    }
+
+    public function setNumberOfRecipientsHandled(int $numberOfRecipientsHandled): Mail
+    {
+        $this->numberOfRecipientsHandled = $numberOfRecipientsHandled;
+        return $this;
+    }
+
+    public function getDeliveryProgress(): int
+    {
+        return $this->deliveryProgress;
+    }
+
+    public function setDeliveryProgress(int $deliveryProgress): Mail
+    {
+        $this->deliveryProgress = $deliveryProgress;
+        return $this;
     }
 
     /**
@@ -673,25 +724,6 @@ class Mail extends AbstractEntity
     {
         $this->numberOfSent = $numberOfSent;
         return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPercentOfSent(): int
-    {
-        $numberOfRecipients = $this->getNumberOfRecipients();
-        if ($numberOfRecipients === 0 || $this->sent) {
-            return 100;
-        }
-        $percentOfSent = 100 / $numberOfRecipients * $this->getNumberOfSent();
-        if ($percentOfSent > 100) {
-            $percentOfSent = 100;
-        }
-        if ($percentOfSent < 0) {
-            $percentOfSent = 0;
-        }
-        return (int)$percentOfSent;
     }
 
     /**

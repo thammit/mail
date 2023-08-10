@@ -43,6 +43,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class MailerService implements LoggerAwareInterface
@@ -60,7 +61,6 @@ class MailerService implements LoggerAwareInterface
      * @var array the mail parts (HTML and Plain, incl. href and link to media)
      */
     protected Mail $mail;
-    protected int $mailUid = 0;
     protected int $sendPerCycle = 50;
     protected bool $isHtml = false;
     protected bool $isPlain = false;
@@ -157,25 +157,23 @@ class MailerService implements LoggerAwareInterface
     /**
      * Preparing the Email. Headers are set in global variables
      *
-     * @param int $mailUid
+     * @param Mail $mail
      *
      * @return void
      */
-    public function prepare(int $mailUid): void
+    public function prepare(Mail $mail): void
     {
-        $this->mailUid = $mailUid;
-        $this->mail = $this->mailRepository->findByUid($mailUid);
-        $this->charset = $this->mail->getType() === MailType::INTERNAL ? 'utf-8' : strtolower($this->mail->getCharset());
-        $this->subject = $this->charsetConverter->conv($this->mail->getSubject(), $this->backendCharset, $this->charset);
-        $this->fromName = ($this->mail->getFromName() ? $this->charsetConverter->conv($this->mail->getFromName(), $this->backendCharset, $this->charset) : '');
-        $this->replyToName = ($this->mail->getReplyToName() ? $this->charsetConverter->conv($this->mail->getReplyToName(), $this->backendCharset, $this->charset) : '');
-        $this->organisation = ($this->mail->getOrganisation() ? $this->charsetConverter->conv($this->mail->getOrganisation(), $this->backendCharset, $this->charset) : '');
-        $this->priority = MathUtility::forceIntegerInRange($this->mail->getPriority(), 1, 5);
-        $this->isHtml = (bool)($this->mail->getHtmlContent() ?? false);
-        $this->isPlain = (bool)($this->mail->getPlainContent() ?? false);
-        $this->authCodeFieldList = $this->mail->getAuthCodeFields() ?: 'uid';
-        $this->attachment = $this->mail->getAttachment()->count();
-        $this->htmlContentParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getHtmlContent());
+        $this->charset = $mail->getType() === MailType::INTERNAL ? 'utf-8' : strtolower($mail->getCharset());
+        $this->subject = $this->charsetConverter->conv($mail->getSubject(), $this->backendCharset, $this->charset);
+        $this->fromName = ($mail->getFromName() ? $this->charsetConverter->conv($mail->getFromName(), $this->backendCharset, $this->charset) : '');
+        $this->replyToName = ($mail->getReplyToName() ? $this->charsetConverter->conv($mail->getReplyToName(), $this->backendCharset, $this->charset) : '');
+        $this->organisation = ($mail->getOrganisation() ? $this->charsetConverter->conv($mail->getOrganisation(), $this->backendCharset, $this->charset) : '');
+        $this->priority = MathUtility::forceIntegerInRange($mail->getPriority(), 1, 5);
+        $this->isHtml = (bool)($mail->getHtmlContent() ?? false);
+        $this->isPlain = (bool)($mail->getPlainContent() ?? false);
+        $this->authCodeFieldList = $mail->getAuthCodeFields() ?: 'uid';
+        $this->attachment = $mail->getAttachment()->count();
+        $this->htmlContentParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $mail->getHtmlContent());
         foreach ($this->htmlContentParts as $bKey => $bContent) {
             $this->htmlContentParts[$bKey] = explode('-->', $bContent, 2);
             // remove useless HTML comments
@@ -183,7 +181,7 @@ class MailerService implements LoggerAwareInterface
                 $this->htmlContentParts[$bKey][1] = MailerUtility::removeHtmlComments($this->htmlContentParts[$bKey][1]);
             }
         }
-        $this->plainContentParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $this->mail->getPlainContent());
+        $this->plainContentParts = explode('<!--' . Constants::CONTENT_SECTION_BOUNDARY, '_END-->' . $mail->getPlainContent());
         foreach ($this->plainContentParts as $bKey => $bContent) {
             $this->plainContentParts[$bKey] = explode('-->', $bContent, 2);
         }
@@ -192,17 +190,19 @@ class MailerService implements LoggerAwareInterface
     /**
      * Send a simple email (without personalizing)
      *
+     * @param Mail $mail
      * @param string $addressList comma separated list of emails
      *
      * @return void
      */
-    public function sendSimpleMail(string $addressList): void
+    public function sendSimpleMail(Mail $mail, string $addressList): void
     {
         $addressList = str_replace(';', ',', $addressList);
         $recipients = explode(',', $addressList);
 
         foreach ($recipients as $recipient) {
             $this->sendMailToRecipient(
+                $mail,
                 $recipient,
                 MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts),
                 MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts)
@@ -213,13 +213,15 @@ class MailerService implements LoggerAwareInterface
     /**
      * Replace the marker with recipient data and then send it
      *
+     * @param Mail $mail
      * @param array $recipientData Recipient data
      * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return SendFormat Which kind of email is sent, 1 = HTML, 2 = plain, 3 = both
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function sendPersonalizedMail(array $recipientData, string $recipientSourceIdentifier): SendFormat
+    public function sendPersonalizedMail(Mail $mail, array $recipientData, string $recipientSourceIdentifier): SendFormat
     {
         $formatSent = new SendFormat(SendFormat::NONE);
 
@@ -235,7 +237,7 @@ class MailerService implements LoggerAwareInterface
 
             $additionalMarkers = [
                 '###MAIL_RECIPIENT_SOURCE###' => $recipientSourceIdentifier,
-                '###MAIL_ID###' => $this->mailUid,
+                '###MAIL_ID###' => $mail->getUid(),
                 '###MAIL_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
             ];
 
@@ -259,25 +261,26 @@ class MailerService implements LoggerAwareInterface
 
                 if ($plainContent) {
                     $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $recipientSourceIdentifier, $additionalMarkers);
-                    if ($this->mail->isRedirect() || $this->mail->isRedirectAll()) {
+                    if ($mail->isRedirect() || $mail->isRedirectAll()) {
                         $plainContent = MailerUtility::shortUrlsInPlainText(
                             $plainContent,
-                            $this->mail->isRedirectAll() ? 0 : 76,
-                            $this->mail->getRedirectUrl(),
-                            $this->site->getLanguageById($this->mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
+                            $mail,
+                            $mail->getRedirectUrl(),
+                            $this->site->getLanguageById($mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
                         );
                     }
                     $formatSent->set(SendFormat::PLAIN);
                 }
             }
 
-            $mailIdentifierHeaderWithoutHash = MailerUtility::buildMailIdentifierHeaderWithoutHash($this->mailUid, $recipientSourceIdentifier, (int)$recipientData['uid']);
+            $mailIdentifierHeaderWithoutHash = MailerUtility::buildMailIdentifierHeaderWithoutHash($mail->getUid(), $recipientSourceIdentifier, (int)$recipientData['uid']);
             $this->TYPO3MID = MailerUtility::buildMailIdentifierHeader($mailIdentifierHeaderWithoutHash);
 
-            $this->mail->setReturnPath(str_replace('###XID###', $mailIdentifierHeaderWithoutHash, $this->mail->getReturnPath()));
+            $mail->setReturnPath(str_replace('###XID###', $mailIdentifierHeaderWithoutHash, $mail->getReturnPath()));
 
             if (GeneralUtility::validEmail($recipientData['email']) && ($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML))) {
                 $this->sendMailToRecipient(
+                    $mail,
                     new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
                     $htmlContent,
                     $plainContent
@@ -340,15 +343,19 @@ class MailerService implements LoggerAwareInterface
      * Mass send to recipient in the list
      * returns true if sending is completed
      *
+     * @param Mail $mail
      * @return boolean
-     * @throws Exception
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws \TYPO3\CMS\Core\Exception
+     * @throws InvalidQueryException
      */
-    protected function massSend(): bool
+    protected function massSend(Mail $mail): bool
     {
+        $finished = true;
         $numberOfSentMails = 0;
-        $groupedRecipientIds = $this->mail->getRecipients();
+        $groupedRecipientIds = $mail->getRecipients();
         foreach ($groupedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
             if (!$recipientIds) {
                 continue;
@@ -362,7 +369,7 @@ class MailerService implements LoggerAwareInterface
             $numberOfSentMailsOfGroup = 0;
 
             // get already handled recipient uids
-            $alreadyHandledRecipientIds = $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($this->mail->getUid(), $recipientSourceIdentifier);
+            $alreadyHandledRecipientIds = $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($mail->getUid(), $recipientSourceIdentifier);
 
             // reduce $recipientIds to unhandled recipient
             $recipientIds = array_diff($recipientIds, $alreadyHandledRecipientIds);
@@ -374,11 +381,12 @@ class MailerService implements LoggerAwareInterface
                     $recipientUid++;
                     $recipientData['uid'] = $recipientUid;
                     $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, (int)$groupUid);
-                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                    $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                     $numberOfSentMailsOfGroup++;
                     $numberOfSentMails++;
                     if ($numberOfSentMails >= $this->sendPerCycle) {
-                        return false;
+                        $finished = false;
+                        break;
                     }
                 }
             } elseif ($recipientSourceConfiguration['model'] ?? false) {
@@ -391,11 +399,12 @@ class MailerService implements LoggerAwareInterface
                     $this->sendPerCycle
                 );
                 foreach ($recipientsData as $recipientData) {
-                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                    $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                     $numberOfSentMailsOfGroup++;
                     $numberOfSentMails++;
                     if ($numberOfSentMails >= $this->sendPerCycle) {
-                        return false;
+                        $finished = false;
+                        break;
                     }
                 }
             } else {
@@ -409,36 +418,49 @@ class MailerService implements LoggerAwareInterface
 
                 while ($recipientData = $queryResult->fetchAssociative()) {
                     $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
-                    $this->sendSingleMailAndAddLogEntry($recipientData, $recipientSourceIdentifier);
+                    $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                     $numberOfSentMailsOfGroup++;
                     $numberOfSentMails++;
                     if ($numberOfSentMails >= $this->sendPerCycle) {
-                        return false;
+                        $finished = false;
+                        break;
                     }
                 }
             }
 
+            $mail->setRecipientsHandled(MailerUtility::removeDuplicateValues(array_merge_recursive(
+                $mail->getRecipientsHandled(),
+                [$recipientSourceIdentifier => $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($mail->getUid(), $recipientSourceIdentifier)]
+            )));
+            $mail->setNumberOfRecipientsHandled($mail->getNumberOfRecipientsHandled() + $numberOfSentMails);
+            $mail->setDeliveryProgress(MailerUtility::calculateDeliveryProgress($mail));
+            $this->mailRepository->update($mail);
+            $this->mailRepository->persist();
+
             $this->logger->debug('Sending ' . $numberOfSentMailsOfGroup . ' mails from recipient source ' . $recipientSourceIdentifier);
+            if (!$finished) {
+                break;
+            }
         }
-        return true;
+        return $finished;
     }
 
     /**
      * Sending the email and write to log.
      *
+     * @param Mail $mail
      * @param array $recipientData Recipient's data array
      * @param string $recipientSourceIdentifier Recipient source identifier
      *
      * @return void
-     * @throws Exception
-     * @throws \TYPO3\CMS\Core\Exception
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws \TYPO3\CMS\Core\Exception
      */
-    protected function sendSingleMailAndAddLogEntry(array $recipientData, string $recipientSourceIdentifier): void
+    protected function sendSingleMailAndAddLogEntry(Mail $mail, array $recipientData, string $recipientSourceIdentifier): void
     {
-        if ($this->logRepository->findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid((int)$recipientData['uid'], $recipientSourceIdentifier, $this->mail->getUid()) === false) {
+        if ($this->logRepository->findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid((int)$recipientData['uid'], $recipientSourceIdentifier, $mail->getUid()) === false) {
             $parseTime = MailerUtility::getMilliseconds();
 
             // PSR-14 event dispatcher to manipulate recipient data
@@ -450,7 +472,7 @@ class MailerService implements LoggerAwareInterface
 
             // Add mail log entry
             $log = GeneralUtility::makeInstance(Log::class);
-            $log->setMail($this->mail);
+            $log->setMail($mail);
             $log->setRecipientSource($recipientSourceIdentifier);
             $log->setRecipientUid((int)$recipientData['uid']);
             $log->setEmail($recipientData['email']);
@@ -458,7 +480,7 @@ class MailerService implements LoggerAwareInterface
             $this->logRepository->persist();
 
             // Send mail to recipient
-            $formatSent = $this->sendPersonalizedMail($recipientData, $recipientSourceIdentifier);
+            $formatSent = $this->sendPersonalizedMail($mail, $recipientData, $recipientSourceIdentifier);
 
             // try to store the sending return code
             $log->setFormatSent($formatSent);
@@ -471,18 +493,21 @@ class MailerService implements LoggerAwareInterface
     /**
      * Set job begin and send a notification to admin if activated in extension settings (notificationJob = 1)
      *
+     * @param Mail $mail
      * @return void
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
-    protected function setJobBegin(): void
+    protected function setJobBegin(Mail $mail): void
     {
-        $this->mail->setScheduledBegin(new DateTimeImmutable('now'));
-        $this->mailRepository->update($this->mail);
+        $mail->setScheduledBegin(new DateTimeImmutable('now'));
+        $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                'Mail Uid ' . $this->mail->getUid() . ' Job begin',
+                $mail,
+                'Mail Uid ' . $mail->getUid() . ' Job begin',
                 'Job begin: ' . date('d-m-y h:i:s')
             );
         }
@@ -491,40 +516,44 @@ class MailerService implements LoggerAwareInterface
     /**
      * Set job end and send a notification to admin if activated in extension settings (notificationJob = 1)
      *
+     * @param Mail $mail
      * @return void
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
-    protected function setJobEnd(): void
+    protected function setJobEnd(Mail $mail): void
     {
-        $this->mail->setScheduledEnd(new DateTimeImmutable('now'));
-        $this->mail->setSent(true);
-        $this->mailRepository->update($this->mail);
+        $mail->setScheduledEnd(new DateTimeImmutable('now'));
+        $mail->setSent(true);
+        $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
         if ($this->notificationJob === true) {
             $this->notifySenderAboutJobState(
-                'Mail Uid ' . $this->mail->getUid() . ' Job end',
+                $mail,
+                'Mail Uid ' . $mail->getUid() . ' Job end',
                 'Job end: ' . date('d-m-y h:i:s')
             );
         }
     }
 
     /**
+     * @param Mail $mail
      * @param string $subject
      * @param string $body
      */
-    protected function notifySenderAboutJobState(string $subject, string $body): void
+    protected function notifySenderAboutJobState(Mail $mail, string $subject, string $body): void
     {
         $fromName = $this->charsetConverter->conv($this->fromName, $this->charset, $this->backendCharset) ?? '';
         $mailMessage = GeneralUtility::makeInstance(MailMessage::class);
         $mailMessage
             ->setSiteIdentifier($this->siteIdentifier)
-            ->setTo($this->mail->getFromEmail(), $fromName)
-            ->setFrom($this->mail->getFromEmail(), $fromName)
+            ->setTo($mail->getFromEmail(), $fromName)
+            ->setFrom($mail->getFromEmail(), $fromName)
             ->setSubject($subject);
 
-        if ($this->mail->getReplyToEmail() !== '') {
-            $mailMessage->setReplyTo($this->mail->getReplyToEmail());
+        if ($mail->getReplyToEmail() !== '') {
+            $mailMessage->setReplyTo($mail->getReplyToEmail());
         }
 
         $mailMessage->text($body);
@@ -558,24 +587,24 @@ class MailerService implements LoggerAwareInterface
         $mail = $this->mailRepository->findMailToSend();
         if ($mail instanceof Mail) {
             $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\' processed...');
-            $this->prepare($mail->getUid());
+            $this->prepare($mail);
 
             if (!$mail->getScheduledBegin()) {
                 // PSR-14 event to manipulate mail before scheduled send begins
                 $this->eventDispatcher->dispatch(
                     new ScheduledSendBegunEvent($mail)
                 );
-                $this->setJobBegin();
+                $this->setJobBegin($mail);
             }
 
-            $finished = $this->massSend();
+            $finished = $this->massSend($mail);
 
             if ($finished) {
                 // PSR-14 event to manipulate mail after scheduled send finished
                 $this->eventDispatcher->dispatch(
                     new ScheduledSendFinishedEvent($mail)
                 );
-                $this->setJobEnd();
+                $this->setJobEnd($mail);
             }
         } else {
             $this->logger->debug('Nothing to do.');
@@ -588,33 +617,34 @@ class MailerService implements LoggerAwareInterface
     /**
      * Send mail to recipient
      *
+     * @param Mail $mail
      * @param string|Address $recipient The recipient to send the mail to
      * @param string $htmlContent
      * @param string $plainContent
      * @return void
      */
-    protected function sendMailToRecipient(Address|string $recipient, string $htmlContent, string $plainContent): void
+    protected function sendMailToRecipient(Mail $mail, Address|string $recipient, string $htmlContent, string $plainContent): void
     {
         /** @var MailMessage $mailMessage */
         $mailMessage = GeneralUtility::makeInstance(MailMessage::class);
         $mailMessage
             ->setSiteIdentifier($this->siteIdentifier)
-            ->from(new Address($this->mail->getFromEmail(), $this->fromName))
+            ->from(new Address($mail->getFromEmail(), $this->fromName))
             ->to($recipient)
             ->subject($this->subjectPrefix . $this->subject)
             ->priority($this->priority);
 
-        if ($this->mail->getReplyToEmail()) {
-            $mailMessage->replyTo(new Address($this->mail->getReplyToEmail(), $this->replyToName));
+        if ($mail->getReplyToEmail()) {
+            $mailMessage->replyTo(new Address($mail->getReplyToEmail(), $this->replyToName));
         } else {
-            $mailMessage->replyTo(new Address($this->mail->getFromEmail(), $this->fromName));
+            $mailMessage->replyTo(new Address($mail->getFromEmail(), $this->fromName));
         }
 
-        if (GeneralUtility::validEmail($this->mail->getReturnPath())) {
-            $mailMessage->sender($this->mail->getReturnPath());
+        if (GeneralUtility::validEmail($mail->getReturnPath())) {
+            $mailMessage->sender($mail->getReturnPath());
         }
 
-        $this->addHtmlPlainTextAndAttachmentsToMailMessage($mailMessage, $htmlContent, $plainContent);
+        $this->addHtmlPlainTextAndAttachmentsToMailMessage($mail, $mailMessage, $htmlContent, $plainContent);
 
         // setting additional header
         // organization and TYPO3MID
@@ -629,7 +659,7 @@ class MailerService implements LoggerAwareInterface
 
         // PSR-14 event to modify mail headers
         $this->eventDispatcher->dispatch(
-            new AdditionalMailHeadersEvent($header, $this->mail, $this->TYPO3MID, $this->organisation, $this->siteIdentifier)
+            new AdditionalMailHeadersEvent($header, $mail, $this->TYPO3MID, $this->organisation, $this->siteIdentifier)
         )->getHeaders();
 
 
@@ -640,16 +670,17 @@ class MailerService implements LoggerAwareInterface
     /**
      * Add html, plaintext and attachments to mail message
      *
+     * @param Mail $mail
      * @param MailMessage $mailMessage
      * @param string $htmlContent
      * @param string $plainContent
      * @return void
      */
-    protected function addHtmlPlainTextAndAttachmentsToMailMessage(MailMessage $mailMessage, string $htmlContent = '', string $plainContent = ''): void
+    protected function addHtmlPlainTextAndAttachmentsToMailMessage(Mail $mail, MailMessage $mailMessage, string $htmlContent = '', string $plainContent = ''): void
     {
         // iterate through the media array and embed them
         if ($htmlContent) {
-            if ($this->mail->isIncludeMedia()) {
+            if ($mail->isIncludeMedia()) {
                 // extract all media path from the mail message
                 $html = new HTML5();
                 $domDocument = $html->loadHTML($htmlContent);
@@ -657,7 +688,7 @@ class MailerService implements LoggerAwareInterface
                 /** @var DOMElement $imageElement */
                 foreach ($imageElements as $imageElement) {
                     if (!$imageElement->hasAttribute('data-do-not-embed')) {
-                        $absoluteImagePath = MailerUtility::absRef($imageElement->getAttribute('src'), $this->mail->getRedirectUrl());
+                        $absoluteImagePath = MailerUtility::absRef($imageElement->getAttribute('src'), $mail->getRedirectUrl());
                         // change image src to absolute path in case fetch and embed fails
                         $imageElement->setAttribute('src', $absoluteImagePath);
                         // fetch image from absolute url
@@ -685,7 +716,7 @@ class MailerService implements LoggerAwareInterface
 
         // handle FAL attachments
         if ($this->attachment > 0) {
-            $files = MailerUtility::getAttachments($this->mailUid);
+            $files = MailerUtility::getAttachments($mail->getUid());
             /** @var FileReference $file */
             foreach ($files as $file) {
                 $mailMessage->attach($file->getContents(), $file->getName(), $file->getMimeType());

@@ -235,9 +235,25 @@ class RecipientService
 
     /**
      * @throws UnknownObjectException
+     * @throws InvalidQueryException
+     * @throws IllegalObjectTypeException
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getNumberOfRecipientsByGroups(ObjectStorage $recipientGroups): int
+    {
+        $numberOfRecipients = 0;
+        foreach ($recipientGroups as $recipientGroup) {
+            $numberOfRecipients += $this->getNumberOfRecipientsByGroup($recipientGroup);
+        }
+
+        return $numberOfRecipients;
+    }
+
+    /**
+     * @throws UnknownObjectException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
-     * @throws DBALException
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
@@ -252,7 +268,6 @@ class RecipientService
      * @param Group $group Recipient group ID
      * @param bool $addGroupUidToRecipientSourceIdentifier
      * @return array List of recipient IDs
-     * @throws DBALException
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException

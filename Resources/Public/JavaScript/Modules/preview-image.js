@@ -32,4 +32,4 @@ class PreviewImage {
     }
 }
 
-new PreviewImage(window.mailUid);
+new PreviewImage(TYPO3.settings.Mail.mailUid);

@@ -7,7 +7,7 @@ define(['html2canvas'], function(html2canvas) {
         window.fetch(TYPO3.settings.ajaxUrls.mail_save_preview_image, {
             method: 'POST',
             body: {
-                mailUid: window.mailUid,
+                mailUid: TYPO3.settings.Mail.mailUid,
                 dataUrl: canvas.toDataURL('image/jpeg', 0.8)
             }
         }).then((response) => {
