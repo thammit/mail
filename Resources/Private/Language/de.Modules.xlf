@@ -1406,6 +1406,10 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
         <source>Maximal visible queue items</source>
         <target state="final">Maximale sichtbare Warteschlangen-Elemente</target>
       </trans-unit>
+      <trans-unit id="configuration.refreshRate" resname="configuration.refreshRate">
+        <source>Automatic refresh of delivery progress bars in seconds</source>
+        <target state="needs-translation">Automatic refresh of delivery progress bars in seconds</target>
+      </trans-unit>
       <trans-unit id="configuration.externalMailHtmlUrl" resname="configuration.externalMailHtmlUrl" approved="yes">
         <source>URL of HTML content</source>
         <target state="final">URL des HTML Inhalts</target>
