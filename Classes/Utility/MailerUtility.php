@@ -527,19 +527,4 @@ class MailerUtility
         return $array;
     }
 
-    public static function calculateDeliveryProgress(Mail $mail): int
-    {
-        $numberOfRecipients = $mail->getNumberOfRecipients();
-        if ($numberOfRecipients === 0 || $mail->isSent()) {
-            return 100;
-        }
-        $percentOfSent = 100 / $numberOfRecipients * $mail->getNumberOfRecipientsHandled();
-        if ($percentOfSent > 100) {
-            $percentOfSent = 100;
-        }
-        if ($percentOfSent < 0) {
-            $percentOfSent = 0;
-        }
-        return (int)$percentOfSent;
-    }
 }

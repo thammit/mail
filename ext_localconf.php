@@ -8,7 +8,7 @@ defined('TYPO3') or die();
     \MEDIAESSENZ\Mail\Configuration::addPageTSConfig();
     \MEDIAESSENZ\Mail\Configuration::addUserTSConfig();
     \MEDIAESSENZ\Mail\Configuration::registerFluidNameSpace();
-    \MEDIAESSENZ\Mail\Configuration::directMailMigration();
+    \MEDIAESSENZ\Mail\Configuration::registerMigrations();
 
     if ((new TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() < 12) {
         \MEDIAESSENZ\Mail\Configuration::registerHooks();

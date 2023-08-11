@@ -13,6 +13,7 @@ use MEDIAESSENZ\Mail\Hooks\AddBackToMailWizardButton;
 use MEDIAESSENZ\Mail\Hooks\PageTreeRefresh;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
+use MEDIAESSENZ\Mail\Updates\ImprovedProcessHandlingUpdater;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -180,9 +181,10 @@ final class Configuration
         ]);
     }
 
-    public static function directMailMigration(): void
+    public static function registerMigrations(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail'] = DirectMailMigration::class;
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailImproveProcessHandling'] = ImprovedProcessHandlingUpdater::class;
     }
 
     public static function registerTypeConverter(): void

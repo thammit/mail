@@ -23,7 +23,7 @@ CREATE TABLE tx_mail_domain_model_mail
 	attachment                   tinyblob,
 	priority                     tinyint(1) unsigned DEFAULT '0'                NOT NULL,
 	encoding                     varchar(80)         DEFAULT 'quoted-printable' NOT NULL,
-	charset                      varchar(20)         DEFAULT 'iso-8859-1'       NOT NULL,
+	charset                      varchar(20)         DEFAULT 'utf-8'       NOT NULL,
 	send_options                 tinyint(1) unsigned DEFAULT '0'                NOT NULL,
 	include_media                tinyint(1) unsigned DEFAULT '0'                NOT NULL,
 	html_params                  varchar(80)         DEFAULT ''                 NOT NULL,

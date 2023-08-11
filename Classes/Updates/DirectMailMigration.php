@@ -24,7 +24,7 @@ class DirectMailMigration implements UpgradeWizardInterface
 
     public function getTitle(): string
     {
-        return 'Migrate EXT:direct_mail database tables to EXT:mail format.';
+        return 'EXT:mail: Migrate EXT:direct_mail database tables to EXT:mail format.';
     }
 
     public function getDescription(): string

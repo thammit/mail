@@ -4,13 +4,10 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DateTimeImmutable;
-use Doctrine\DBAL\Exception;
-use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -79,12 +76,6 @@ class Mail extends AbstractEntity
      * @var string
      */
     protected string $recipientsHandled = '[]';
-    /**
-     * numberOfSent (do not change this annotation block or the property definition!)
-     * see https://forge.typo3.org/issues/98224
-     * @Transient
-     */
-    protected $numberOfSent;
     protected int $numberOfRecipients = 0;
     protected int $numberOfRecipientsHandled = 0;
     protected int $deliveryProgress = 0;
@@ -488,16 +479,6 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @param bool $sent
-     * @return Mail
-     */
-    public function setSent(bool $sent): Mail
-    {
-        $this->sent = $sent;
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getRenderedSize(): int
@@ -598,7 +579,7 @@ class Mail extends AbstractEntity
      */
     public function getHtmlLinks(): array
     {
-        return json_decode($this->htmlLinks, true, 512,  JSON_OBJECT_AS_ARRAY);
+        return json_decode($this->htmlLinks, true, 512, JSON_OBJECT_AS_ARRAY);
     }
 
     /**
@@ -616,7 +597,7 @@ class Mail extends AbstractEntity
      */
     public function getPlainLinks(): array
     {
-        return json_decode($this->plainLinks, true, 512,  JSON_OBJECT_AS_ARRAY);
+        return json_decode($this->plainLinks, true, 512, JSON_OBJECT_AS_ARRAY);
     }
 
     /**
@@ -630,11 +611,16 @@ class Mail extends AbstractEntity
     }
 
     /**
+     * @param string|null $identifier
      * @return array
      */
-    public function getRecipients(): array
+    public function getRecipients(string $identifier = null): array
     {
-        return json_decode($this->recipients, true, 512,  JSON_OBJECT_AS_ARRAY);
+        $recipients = json_decode($this->recipients, true, 512, JSON_OBJECT_AS_ARRAY);
+        if ($identifier) {
+            return $recipients[$identifier] ?? [];
+        }
+        return $recipients;
     }
 
     /**
@@ -651,7 +637,8 @@ class Mail extends AbstractEntity
      * @param int $numberOfRecipients
      * @return Mail
      */
-    public function setNumberOfRecipients(int $numberOfRecipients): Mail{
+    public function setNumberOfRecipients(int $numberOfRecipients): Mail
+    {
         $this->numberOfRecipients = $numberOfRecipients;
         return $this;
     }
@@ -659,24 +646,22 @@ class Mail extends AbstractEntity
     public function getNumberOfRecipients(): int
     {
         return $this->numberOfRecipients;
-//        $numberOfRecipients = 0;
-//        if ($recipients = $this->getRecipients()) {
-//            $numberOfRecipients = array_sum(array_map('count', $recipients));
-//        }
-//        if ($numberOfRecipients === 0) {
-//            return $this->getNumberOfSent();
-//        }
-//        return $numberOfRecipients;
     }
 
-    public function getRecipientsHandled(): array
+    public function getRecipientsHandled(string $identifier = null): array
     {
-        return json_decode($this->recipientsHandled, true, 512,  JSON_OBJECT_AS_ARRAY);
+        $recipientsHandled = json_decode($this->recipientsHandled, true, 512, JSON_OBJECT_AS_ARRAY);
+        if ($identifier) {
+            return $recipientsHandled[$identifier] ?? [];
+        }
+        return $recipientsHandled;
     }
 
     public function setRecipientsHandled(array $recipientsHandled): Mail
     {
         $this->recipientsHandled = json_encode($recipientsHandled);
+        $this->numberOfRecipientsHandled = RecipientUtility::calculateTotalRecipientsOfUidLists($recipientsHandled);
+        $this->calculateDeliveryProgress();
         return $this;
     }
 
@@ -685,45 +670,26 @@ class Mail extends AbstractEntity
         return $this->numberOfRecipientsHandled;
     }
 
-    public function setNumberOfRecipientsHandled(int $numberOfRecipientsHandled): Mail
-    {
-        $this->numberOfRecipientsHandled = $numberOfRecipientsHandled;
-        return $this;
-    }
-
     public function getDeliveryProgress(): int
     {
         return $this->deliveryProgress;
     }
 
-    public function setDeliveryProgress(int $deliveryProgress): Mail
+    public function calculateDeliveryProgress(): void
     {
-        $this->deliveryProgress = $deliveryProgress;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getNumberOfSent(): int
-    {
-        try {
-            $logRepository = GeneralUtility::makeInstance(LogRepository::class);
-            $this->numberOfSent = $logRepository->countByMailUid($this->uid);
-        } catch (Exception) {
-            $this->numberOfSent = 0;
+        if ($this->numberOfRecipients === 0 || $this->sent) {
+            $this->deliveryProgress = 100;
+        } else {
+            $percentOfSent = 100 / $this->numberOfRecipients * $this->numberOfRecipientsHandled;
+            if ($percentOfSent > 100) {
+                $percentOfSent = 100;
+            }
+            if ($percentOfSent < 0) {
+                $percentOfSent = 0;
+            }
+            $this->deliveryProgress = (int)$percentOfSent;
         }
-        return $this->numberOfSent ?? 0;
-    }
-
-    /**
-     * @param int $numberOfSent
-     * @return Mail
-     */
-    public function setNumberOfSent(int $numberOfSent): Mail
-    {
-        $this->numberOfSent = $numberOfSent;
-        return $this;
+        $this->sent = $this->deliveryProgress === 100;
     }
 
     /**

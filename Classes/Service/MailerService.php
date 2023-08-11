@@ -344,105 +344,89 @@ class MailerService implements LoggerAwareInterface
      * returns true if sending is completed
      *
      * @param Mail $mail
-     * @return boolean
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      * @throws \TYPO3\CMS\Core\Exception
      * @throws InvalidQueryException
      */
-    protected function massSend(Mail $mail): bool
+    protected function massSend(Mail $mail): void
     {
-        $finished = true;
+        $recipientSourceIdentifier = '';
+        $recipients = $mail->getRecipients();
+        $recipientsHandled = $mail->getRecipientsHandled();
         $numberOfSentMails = 0;
-        $groupedRecipientIds = $mail->getRecipients();
-        foreach ($groupedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
+        foreach ($recipients as $recipientSourceIdentifier => $recipientIds) {
             if (!$recipientIds) {
                 continue;
             }
+
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             $isSimpleList = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
+
             if (!$recipientSourceConfiguration && !$isSimpleList) {
                 $this->logger->debug('No recipient source configuration found for ' . $recipientSourceIdentifier);
                 continue;
             }
-            $numberOfSentMailsOfGroup = 0;
 
-            // get already handled recipient uids
-            $alreadyHandledRecipientIds = $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($mail->getUid(), $recipientSourceIdentifier);
+            $recipientIds = array_slice($recipientIds, 0, $this->sendPerCycle);
 
-            // reduce $recipientIds to unhandled recipient
-            $recipientIds = array_diff($recipientIds, $alreadyHandledRecipientIds);
-
-            if ($isSimpleList) {
-                [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
-                foreach ($recipientIds as $recipientUid => $recipientData) {
-                    // fake uid for csv
-                    $recipientUid++;
-                    $recipientData['uid'] = $recipientUid;
-                    $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, (int)$groupUid);
-                    $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                    $numberOfSentMailsOfGroup++;
-                    $numberOfSentMails++;
-                    if ($numberOfSentMails >= $this->sendPerCycle) {
-                        $finished = false;
-                        break;
+            switch (true) {
+                case $isSimpleList:
+                    [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
+                    foreach ($recipientIds as $recipientUid => $recipientData) {
+                        // fake uid for csv
+                        $recipientData['uid'] = $recipientUid + 1;
+                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, (int)$groupUid);
+                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier], fn($item) => $item !== $recipientData['uid']);
+                        $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
+                        $numberOfSentMails++;
                     }
-                }
-            } elseif ($recipientSourceConfiguration['model'] ?? false) {
-                $recipientService = GeneralUtility::makeInstance(RecipientService::class);
-                $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
-                    $recipientIds,
-                    $recipientSourceConfiguration['model'],
-                    ['uid', 'name', 'email', 'categories', 'mail_html'],
-                    true,
-                    $this->sendPerCycle
-                );
-                foreach ($recipientsData as $recipientData) {
-                    $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                    $numberOfSentMailsOfGroup++;
-                    $numberOfSentMails++;
-                    if ($numberOfSentMails >= $this->sendPerCycle) {
-                        $finished = false;
-                        break;
+                    break;
+                case $recipientSourceConfiguration['model'] ?? false:
+                    $recipientService = GeneralUtility::makeInstance(RecipientService::class);
+                    $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
+                        $recipientIds,
+                        $recipientSourceConfiguration['model'],
+                        ['uid', 'name', 'email', 'categories', 'mail_html'],
+                        true
+                    );
+                    foreach ($recipientsData as $recipientData) {
+                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier], fn($item) => $item !== $recipientData['uid']);
+                        $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
+                        $numberOfSentMails++;
                     }
-                }
-            } else {
-                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
-                $queryResult = $queryBuilder
-                    ->select('*')
-                    ->from($recipientSourceIdentifier)
-                    ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
-                    ->setMaxResults($this->sendPerCycle)
-                    ->executeQuery();
+                    break;
+                default:
+                    $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
+                    $queryResult = $queryBuilder
+                        ->select('*')
+                        ->from($recipientSourceIdentifier)
+                        ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
+                        ->executeQuery();
 
-                while ($recipientData = $queryResult->fetchAssociative()) {
-                    $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
-                    $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                    $numberOfSentMailsOfGroup++;
-                    $numberOfSentMails++;
-                    if ($numberOfSentMails >= $this->sendPerCycle) {
-                        $finished = false;
-                        break;
+                    while ($recipientData = $queryResult->fetchAssociative()) {
+                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
+                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier], fn($item) => $item !== $recipientData['uid']);
+                        $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
+                        $numberOfSentMails++;
                     }
-                }
-            }
-
-            $mail->setRecipientsHandled(MailerUtility::removeDuplicateValues(array_merge_recursive(
-                $mail->getRecipientsHandled(),
-                [$recipientSourceIdentifier => $this->logRepository->findRecipientsByMailUidAndRecipientSourceIdentifier($mail->getUid(), $recipientSourceIdentifier)]
-            )));
-            $mail->setNumberOfRecipientsHandled($mail->getNumberOfRecipientsHandled() + $numberOfSentMails);
-            $mail->setDeliveryProgress(MailerUtility::calculateDeliveryProgress($mail));
-            $this->mailRepository->update($mail);
-            $this->mailRepository->persist();
-
-            $this->logger->debug('Sending ' . $numberOfSentMailsOfGroup . ' mails from recipient source ' . $recipientSourceIdentifier);
-            if (!$finished) {
-                break;
+                    break;
             }
         }
-        return $finished;
+
+        if ($numberOfSentMails && $recipientSourceIdentifier) {
+            $this->logger->debug('Sent ' . $numberOfSentMails . ' mails to user of recipient source ' . $recipientSourceIdentifier);
+        }
+
+        $mail->setRecipients(MailerUtility::removeDuplicateValues($recipients));
+        $mail->setRecipientsHandled(MailerUtility::removeDuplicateValues($recipientsHandled));
+
+        $this->mailRepository->update($mail);
+        $this->mailRepository->persist();
     }
 
     /**
@@ -524,7 +508,6 @@ class MailerService implements LoggerAwareInterface
     protected function setJobEnd(Mail $mail): void
     {
         $mail->setScheduledEnd(new DateTimeImmutable('now'));
-        $mail->setSent(true);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
@@ -597,9 +580,9 @@ class MailerService implements LoggerAwareInterface
                 $this->setJobBegin($mail);
             }
 
-            $finished = $this->massSend($mail);
+            $this->massSend($mail);
 
-            if ($finished) {
+            if ($mail->isSent()) {
                 // PSR-14 event to manipulate mail after scheduled send finished
                 $this->eventDispatcher->dispatch(
                     new ScheduledSendFinishedEvent($mail)
