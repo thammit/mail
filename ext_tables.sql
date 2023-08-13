@@ -102,11 +102,11 @@ CREATE TABLE tx_mail_domain_model_log
 	return_content   mediumblob                       NULL,
 	return_code      smallint(3) unsigned DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
-	KEY mail_response_types (mail, response_type),
-	KEY mail_return_codes (mail, response_type, return_code),
-	KEY mail_response_type_recipients (mail, response_type, recipient_source, recipient_uid),
-	KEY mail_format_sent (mail, response_type, format_sent),
-	KEY most_popular_url (mail, response_type, url_id)
+	KEY mail_response_type (mail, response_type),
+	KEY return_code (return_code),
+	KEY recipient (recipient_source, recipient_uid),
+	KEY format_sent (format_sent),
+	KEY url_id (url_id)
 );
 
 CREATE TABLE fe_users
