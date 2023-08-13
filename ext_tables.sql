@@ -81,6 +81,7 @@ CREATE TABLE tx_mail_group_mm
 	uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
 	tablenames  varchar(50)      DEFAULT ''  NOT NULL,
 	sorting     int(11) unsigned DEFAULT '0' NOT NULL,
+    KEY tablenames (tablenames),
 	KEY uid_local (uid_local),
 	KEY uid_foreign (uid_foreign)
 );
@@ -101,8 +102,11 @@ CREATE TABLE tx_mail_domain_model_log
 	return_content   mediumblob                       NULL,
 	return_code      smallint(3) unsigned DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid),
-	KEY recipient (recipient_uid, recipient_source, mail, response_type, uid),
-	KEY mail (mail, response_type, recipient_source, recipient_uid)
+	KEY mail_response_types (mail, response_type),
+	KEY mail_return_codes (mail, response_type, return_code),
+	KEY mail_response_type_recipients (mail, response_type, recipient_source, recipient_uid),
+	KEY mail_format_sent (mail, response_type, format_sent),
+	KEY most_popular_url (mail, response_type, url_id)
 );
 
 CREATE TABLE fe_users

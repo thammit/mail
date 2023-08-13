@@ -5,7 +5,7 @@ return [
         'label' => 'mail',
         'label_alt' => 'recipient_source,recipient_uid',
         'label_alt_force' => true,
-        'default_sortby' => 'ORDER BY tstamp DESC',
+        'default_sortby' => 'tstamp DESC',
         'tstamp' => 'tstamp',
         'title' => 'Mail Log',
         'delete' => '',
@@ -43,6 +43,12 @@ return [
         ],
         'url' => [
             'label' => 'Url',
+            'config' => [
+                'type' => 'passthrough'
+            ]
+        ],
+        'email' => [
+            'label' => 'Email',
             'config' => [
                 'type' => 'passthrough'
             ]

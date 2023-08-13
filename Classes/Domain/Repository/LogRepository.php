@@ -90,8 +90,8 @@ class LogRepository extends Repository
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, PDO::PARAM_INT))
             )
-            ->groupBy('recipient_uid')
-            ->addGroupBy('recipient_source')
+            ->groupBy('recipient_source')
+            ->addGroupBy('recipient_uid')
             ->executeQuery()
             ->rowCount();
     }
@@ -100,6 +100,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @return int
      * @throws Exception
+     * @deprecated
      */
     public function countByMailUid(int $mailUid): int
     {
@@ -125,6 +126,7 @@ class LogRepository extends Repository
      *
      * @return array list of recipients
      * @throws Exception
+     * @deprecated
      */
     public function findRecipientsByMailUidAndRecipientSourceIdentifier(int $mailUid, string $recipientSourceIdentifier): array
     {
@@ -135,8 +137,8 @@ class LogRepository extends Repository
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
             )
             ->executeQuery()
             ->fetchAllAssociative(), 'recipient_uid');
@@ -187,9 +189,9 @@ class LogRepository extends Repository
             ->from($this->table)
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
                 $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
                 $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT))
             )
             ->setMaxResults(1)
             ->executeQuery()

@@ -2,7 +2,7 @@
 return [
     'ctrl' => [
         'label' => 'subject',
-        'default_sortby' => 'ORDER BY tstamp DESC',
+        'default_sortby' => 'tstamp DESC',
         'tstamp' => 'tstamp',
         'prependAtCopy' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.prependAtCopy',
         'title' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail',
