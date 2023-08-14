@@ -765,6 +765,7 @@ class MailController extends AbstractController
 
         if ($this->typo3MajorVersion < 12) {
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/ScheduleSending');
         } else {
             $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/schedule-sending.js');
         }
