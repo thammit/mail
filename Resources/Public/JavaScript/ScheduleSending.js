@@ -1,8 +1,8 @@
-define([], function() {
+define([], function () {
     const form = document.getElementById('mail-wizard-schedule-sending-form');
     const submitButton = document.getElementById('mail-wizard-schedule-sending-form-submit-button');
-    const checkboxes = document.getElementsByName('mail[recipientGroups][]');
-    const isChecked = function() {
+    const checkboxes = document.getElementsByName('tx_mail_mailmail_mailmail[mail][recipientGroups][]');
+    const isChecked = function () {
         for (let i = 0; i < checkboxes.length; i++) {
             if (checkboxes[i].checked) {
                 return true;
@@ -17,4 +17,4 @@ define([], function() {
         });
     }
     submitButton.disabled = !isChecked();
-    });
+});
