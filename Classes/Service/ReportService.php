@@ -232,7 +232,7 @@ class ReportService
 
         $mappedPlainUrlsTable = [];
         foreach ($mostPopularPlainLinks as $id => $counter) {
-            $url = $urlArr[intval($id)];
+            $url = $urlArr[(int)$id];
             if (isset($urlMd5Map[md5($url)])) {
                 $mappedPlainUrlsTable[$urlMd5Map[md5($url)]] = $counter;
             } else {
@@ -324,11 +324,13 @@ class ReportService
         foreach ($clickedLinks as $id) {
             // $id is the jumpurl ID
             $origId = $id;
-            $id = abs(intval($id));
+            $id = abs((int)$id);
             $url = $htmlLinks[$id]['ref'] ?: $urlArr[$origId];
             // a link to this host?
             $urlstr = $this->getUrlStr($url);
-            $label = $this->getLinkLabel($url, $urlstr, false, $htmlLinks[$id]['ref']);
+            // do not use the following method, because of its pure performance
+            //$label = $this->getLinkLabel($url, $urlstr, false, $htmlLinks[$id]['ref']);
+            $label = $urlstr;
             if (isset($urlCounter['html'][$id]['plainId'])) {
                 $data[] = [
                     'label' => $label,
@@ -352,19 +354,21 @@ class ReportService
         }
 
         // go through all links that were not clicked yet and that have a label
-        foreach ($urlArr as $id => $link) {
-            if (!in_array($id, $clickedLinks) && (isset($htmlLinks['id']))) {
-                // a link to this host?
-                $urlstr = $this->getUrlStr($link);
-                $label = $htmlLinks[$id]['label'] . ' (' . ($urlstr ?: '/') . ')';
-                $data[] = [
-                    'label' => $label,
-                    'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
-                    'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] : $urlCounter['plain'][$id]['counter']),
-                    'htmlCounter' => $urlCounter['html'][$id]['counter'],
-                    'plainCounter' => $urlCounter['plain'][$id]['counter'],
-                    'url' => $link,
-                ];
+        if (isset($htmlLinks['id'])) {
+            foreach ($urlArr as $id => $link) {
+                if (!in_array($id, $clickedLinks)) {
+                    // a link to this host?
+                    $urlstr = $this->getUrlStr($link);
+                    $label = $htmlLinks[$id]['label'] . ' (' . ($urlstr ?: '/') . ')';
+                    $data[] = [
+                        'label' => $label,
+                        'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
+                        'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] : $urlCounter['plain'][$id]['counter']),
+                        'htmlCounter' => $urlCounter['html'][$id]['counter'],
+                        'plainCounter' => $urlCounter['plain'][$id]['counter'],
+                        'url' => $link,
+                    ];
+                }
             }
         }
 
@@ -399,7 +403,7 @@ class ReportService
             if (preg_match('/(?:^|&)id=([0-9a-z_]+)/', $urlParts['query'], $m)) {
                 $isInt = MathUtility::canBeInterpretedAsInteger($m[1]);
                 if ($isInt) {
-                    $uid = intval($m[1]);
+                    $uid = (int)$m[1];
                     $rootLine = BackendUtility::BEgetRootLine($uid);
                     // array_shift reverses the array (rootline has numeric index in the wrong order!)
                     // $rootLine = array_reverse($rootLine);
@@ -446,6 +450,9 @@ class ReportService
      * @return string The label for the passed $url parameter
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
+     *
+     * @todo This method is an absolute performance killer!!!
+     * It fetches e.g. every pdfs or videos from external/internal urls only to get its filename!
      */
     public function getLinkLabel(string $url, string $urlStr, bool $forceFetch = false, string $linkedWord = ''): string
     {
@@ -457,7 +464,7 @@ class ReportService
         if (!$forceFetch && (str_starts_with($url, $baseURL))) {
             if (($urlParts['fragment'] ?? false) && (str_starts_with($urlParts['fragment'], 'c'))) {
                 // linking directly to a content
-                $elementUid = intval(substr($urlParts['fragment'], 1));
+                $elementUid = (int)substr($urlParts['fragment'], 1);
                 $row = BackendUtility::getRecord('tt_content', $elementUid);
                 if ($row) {
                     $contentTitle = BackendUtility::getRecordTitle('tt_content', $row);
