@@ -10,7 +10,7 @@
 </h2>
 
 <div class="panel panel-default mb-3">
-    <div class="table-fitx">
+    <div class="table-fit">
         <table class="table table-striped table-hover mail-report-responses-table">
             <thead>
             <tr>
@@ -34,14 +34,14 @@
             <f:for each="{data}" as="row">
                 <tr>
                     <td>
-                        <a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget" >
+                        <a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget">
                             {row.label}
                         </a>
                     </td>
-                    <td>{row.totalCounter}</td>
+                    <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.totalCounter}</span></td>
                     <f:if condition="{mail.plainAndHtml}">
-                        <td>{row.htmlCounter}</td>
-                        <td>{row.plainCounter}</td>
+                        <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.htmlCounter}</span></td>
+                        <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.plainCounter}</span></td>
                     </f:if>
                 </tr>
             </f:for>

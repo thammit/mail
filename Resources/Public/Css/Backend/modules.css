@@ -154,15 +154,14 @@
     background-color:rgba(0,0,0,0);
 }
 
-.mail-report-responses-table {
-    table-layout: fixed;
-    width: 100%;
-}
-.mail-report-responses-table  td {
+.mail-report-responses-table td {
     overflow:hidden;
-    text-overflow:ellipsis
+    text-overflow:ellipsis;
+    max-width:406px;
+    white-space: nowrap;
 }
 
 .mail-report-responses-table td+td {
-    width: 50px;
+    width: 5ch;
+    text-align: center;
 }

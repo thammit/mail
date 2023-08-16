@@ -17,7 +17,9 @@
                 <th class="nowrap">
                     <f:translate key="{lll}report.total.returned"/>
                 </th>
-                <td class="col-title col-responsive">{data.total}</td>
+                <td class="col-title col-responsive text-right">
+                    <span class="badge rounded-pill bg-mail-theme pb-1">{data.total}</span>
+                </td>
                 <td class="col-control nowrap">
                     <f:if condition="{data.total}">
                         <div class="btn-group">
@@ -44,7 +46,9 @@
                 <th class="nowrap">
                     <f:translate key="{lll}report.recipientUnknown"/>
                 </th>
-                <td class="col-title col-responsive">{data.unknown}</td>
+                <td class="col-title col-responsive text-right">
+                    <span class="badge rounded-pill bg-mail-theme pb-1">{data.unknown}</span>
+                </td>
                 <td class="col-control nowrap">
                     <f:if condition="{data.unknown}">
                         <div class="btn-group">
@@ -69,7 +73,9 @@
                 <th class="nowrap">
                     <f:translate key="{lll}report.mailboxFull"/>
                 </th>
-                <td class="col-title col-responsive">{data.full}</td>
+                <td class="col-title col-responsive text-right">
+                    <span class="badge rounded-pill bg-mail-theme pb-1">{data.full}</span>
+                </td>
                 <td class="col-control nowrap">
                     <f:if condition="{data.full}">
                         <div class="btn-group">
@@ -93,7 +99,9 @@
                 <th class="nowrap">
                     <f:translate key="{lll}report.badHost"/>
                 </th>
-                <td class="col-title col-responsive">{data.badHost}</td>
+                <td class="col-title col-responsive text-right">
+                    <span class="badge rounded-pill bg-mail-theme pb-1">{data.badHost}</span>
+                </td>
                 <td class="col-control nowrap">
                     <f:if condition="{data.badHost}">
                         <div class="btn-group">
@@ -118,7 +126,9 @@
                 <th class="nowrap">
                     <f:translate key="{lll}report.headerError"/>
                 </th>
-                <td class="col-title col-responsive">{data.headerError}</td>
+                <td class="col-title col-responsive text-right">
+                    <span class="badge rounded-pill bg-mail-theme pb-1">{data.headerError}</span>
+                </td>
                 <td class="col-control nowrap">
                     <f:if condition="{data.headerError}">
                         <div class="btn-group">
@@ -144,7 +154,9 @@
                 <th class="nowrap">
                     <f:translate key="{lll}report.reasonUnknown"/>
                 </th>
-                <td class="col-title col-responsive">{data.reasonUnknown}</td>
+                <td class="col-title col-responsive text-right">
+                    <span class="badge rounded-pill bg-mail-theme pb-1">{data.reasonUnknown}</span>
+                </td>
                 <td class="col-control nowrap">
                     <f:if condition="{data.reasonUnknown}">
                         <div class="btn-group">
