@@ -9,6 +9,7 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
+use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ScssParserUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
@@ -133,16 +134,16 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @param string $recipientSource
-     * @return void
+     * @return ResponseInterface
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    #[NoReturn] public function csvExportTotalReturnedAction(Mail $mail, string $recipientSource): void
+    public function csvExportTotalReturnedAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData()[$recipientSource], 'total_returned');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData()[$recipientSource], 'total_returned');
     }
 
     /**
@@ -186,16 +187,16 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @param string $recipientSource
-     * @return void
+     * @return ResponseInterface
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    #[NoReturn] public function csvExportUnknownAction(Mail $mail, string $recipientSource): void
+    public function csvExportUnknownAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID])[$recipientSource], 'unknown');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID])[$recipientSource], 'unknown');
     }
 
     /**
@@ -239,16 +240,16 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @param string $recipientSource
-     * @return void
+     * @return ResponseInterface
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    #[NoReturn] public function csvExportFullAction(Mail $mail, string $recipientSource): void
+    public function csvExportFullAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL])[$recipientSource], 'mailbox_full');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL])[$recipientSource], 'mailbox_full');
     }
 
     /**
@@ -292,16 +293,16 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @param string $recipientSource
-     * @return void
+     * @return ResponseInterface
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    #[NoReturn] public function csvExportBadHostAction(Mail $mail, string $recipientSource): void
+    public function csvExportBadHostAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL])[$recipientSource], 'bad_host');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL])[$recipientSource], 'bad_host');
     }
 
     /**
@@ -345,16 +346,16 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @param string $recipientSource
-     * @return void
+     * @return ResponseInterface
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    #[NoReturn] public function csvExportBadHeaderAction(Mail $mail, string $recipientSource): void
+    public function csvExportBadHeaderAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED])[$recipientSource], 'bad_header');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED])[$recipientSource], 'bad_header');
     }
 
     /**
@@ -415,16 +416,16 @@ class ReportController extends AbstractController
     /**
      * @param Mail $mail
      * @param string $recipientSource
-     * @return void
+     * @return ResponseInterface
      * @throws Exception
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
      */
-    #[NoReturn] public function csvExportReasonUnknownAction(Mail $mail, string $recipientSource): void
+    public function csvExportReasonUnknownAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->reportService->csvDownloadRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON])[$recipientSource], 'reason_unknown');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON])[$recipientSource], 'reason_unknown');
     }
 
     protected function addDocheaderButtons(string $requestUri): void

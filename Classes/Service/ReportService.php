@@ -16,6 +16,8 @@ use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\ReportUtility;
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -36,6 +38,10 @@ class ReportService
 
     protected array $responseTypesTable = [];
     protected array $recipientSources = [];
+    /**
+     * @var array
+     */
+    private array $pageTSConfiguration = [];
 
     public function __construct(
         protected LogRepository          $logRepository,
@@ -59,6 +65,7 @@ class ReportService
         $this->recipientSources = $this->siteFinder->getSiteByPageId($this->mail->getPid())->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
         $this->recipientService->init($this->recipientSources);
         $this->responseTypesTable = $this->logRepository->findResponseTypesByMail($this->mail->getUid());
+        $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->mail->getPid())['mod.']['web_modules.']['mail.'] ?? [];
     }
 
     /**
@@ -87,14 +94,14 @@ class ReportService
             'htmlSent' => $htmlSent,
             'plainSent' => $plainSent,
             'totalSent' => $totalSent,
-            'returned' => $this->showWithPercent($failedResponses, $totalSent),
+            'returned' => ReportUtility::showWithPercent($failedResponses, $totalSent),
             'htmlResponses' => $htmlResponses,
             'plainResponses' => $plainResponses,
             'totalResponses' => $totalResponses,
-            'htmlViewed' => $this->showWithPercent($uniquePingResponses, $htmlSent),
-            'uniqueResponsesTotal' => $this->showWithPercent($uniqueResponsesTotal, $totalSent),
-            'uniqueResponsesHtml' => $this->showWithPercent($uniqueHtmlResponses, $htmlSent),
-            'uniqueResponsesPlain' => $this->showWithPercent($uniquePlainResponses, $plainSent),
+            'htmlViewed' => ReportUtility::showWithPercent($uniquePingResponses, $htmlSent),
+            'uniqueResponsesTotal' => ReportUtility::showWithPercent($uniqueResponsesTotal, $totalSent),
+            'uniqueResponsesHtml' => ReportUtility::showWithPercent($uniqueHtmlResponses, $htmlSent),
+            'uniqueResponsesPlain' => ReportUtility::showWithPercent($uniquePlainResponses, $plainSent),
             'totalResponsesVsUniqueResponses' => $uniqueResponsesTotal ? number_format($totalResponses / $uniqueResponsesTotal, 2) : '-',
             'htmlResponsesVsUniqueResponses' => $uniqueHtmlResponses ? number_format($htmlResponses / $uniqueHtmlResponses, 2) : '-',
             'plainResponsesVsUniqueResponses' => $uniquePlainResponses ? number_format($plainResponses / $uniquePlainResponses, 2) : '-',
@@ -111,12 +118,12 @@ class ReportService
 
         return [
             'total' => number_format($responsesFailed),
-            'unknown' => $this->showWithPercent(($returnCodesTable['550'] ?? 0) + ($returnCodesTable['553'] ?? 0),
+            'unknown' => ReportUtility::showWithPercent(($returnCodesTable['550'] ?? 0) + ($returnCodesTable['553'] ?? 0),
                 $responsesFailed),
-            'full' => $this->showWithPercent(($returnCodesTable['551'] ?? 0), $responsesFailed),
-            'badHost' => $this->showWithPercent(($returnCodesTable['552'] ?? 0), $responsesFailed),
-            'headerError' => $this->showWithPercent(($returnCodesTable['554'] ?? 0), $responsesFailed),
-            'reasonUnknown' => $this->showWithPercent(($returnCodesTable['-1'] ?? 0), $responsesFailed),
+            'full' => ReportUtility::showWithPercent(($returnCodesTable['551'] ?? 0), $responsesFailed),
+            'badHost' => ReportUtility::showWithPercent(($returnCodesTable['552'] ?? 0), $responsesFailed),
+            'headerError' => ReportUtility::showWithPercent(($returnCodesTable['554'] ?? 0), $responsesFailed),
+            'reasonUnknown' => ReportUtility::showWithPercent(($returnCodesTable['-1'] ?? 0), $responsesFailed),
         ];
     }
 
@@ -165,40 +172,11 @@ class ReportService
     }
 
     /**
-     * @param array $data
-     * @param string $filenamePrefix
-     * @return void
-     */
-    #[NoReturn] public function csvDownloadRecipients(array $data, string $filenamePrefix): void
-    {
-        $emails = [];
-        if ($data['addresses']) {
-            /** @var Address $address */
-            foreach ($data['addresses'] as $address) {
-                $emails[] = ['uid' => $address->getUid(), 'email' => $address->getEmail(), 'name' => $address->getName()];
-            }
-        }
-        if ($data['frontendUsers']) {
-            /** @var FrontendUser $frontendUser */
-            foreach ($data['frontendUsers'] as $frontendUser) {
-                $emails[] = ['uid' => $frontendUser->getUid(), 'email' => $frontendUser->getEmail(), 'name' => $frontendUser->getName()];
-            }
-        }
-        if ($data['plainList']) {
-            foreach ($data['plainList'] as $value) {
-                $emails[] = ['uid' => '-', 'email' => $value, 'name' => ''];
-            }
-        }
-
-        CsvUtility::downloadCSV($emails, $filenamePrefix);
-    }
-
-    /**
      * @return array
+     * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws SiteNotFoundException
-     * @throws Exception
      */
     public function getResponsesData(): array
     {
@@ -326,11 +304,17 @@ class ReportService
             $origId = $id;
             $id = abs((int)$id);
             $url = $htmlLinks[$id]['ref'] ?: $urlArr[$origId];
-            // a link to this host?
-            $urlstr = $this->getUrlStr($url);
-            // do not use the following method, because of its pure performance
-            //$label = $this->getLinkLabel($url, $urlstr, false, $htmlLinks[$id]['ref']);
-            $label = $urlstr;
+            $urlStr = ReportUtility::getUrlStr($url, $this->mail->getPid());
+            $label = $urlStr;
+            if ($this->pageTSConfiguration['showContentTitle'] ?? false) {
+                $label = ReportUtility::getLinkLabel($this->getBaseURL(), $url);
+                if ($this->pageTSConfiguration['prependContentTitle'] ?? false) {
+                    $label .= ' (' . $url . ')';
+                }
+
+            }
+            $label = GeneralUtility::fixed_lgd_cs($label, $this->pageTSConfiguration['maxLabelLength'] ?? 0);
+
             if (isset($urlCounter['html'][$id]['plainId'])) {
                 $data[] = [
                     'label' => $label,
@@ -338,7 +322,7 @@ class ReportService
                     'totalCounter' => $urlCounter['total'][$origId]['counter'],
                     'htmlCounter' => $urlCounter['html'][$id]['counter'],
                     'plainCounter' => $urlCounter['html'][$id]['plainCounter'],
-                    'url' => $urlstr,
+                    'url' => $urlStr,
                 ];
             } else {
                 $html = !empty($urlCounter['html'][$id]['counter']);
@@ -348,7 +332,7 @@ class ReportService
                     'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] ?? 0 : $urlCounter['plain'][$origId]['counter'] ?? 0),
                     'htmlCounter' => $urlCounter['html'][$id]['counter'] ?? 0,
                     'plainCounter' => $urlCounter['plain'][$origId]['counter'] ?? 0,
-                    'url' => $urlstr,
+                    'url' => $urlStr,
                 ];
             }
         }
@@ -358,8 +342,7 @@ class ReportService
             foreach ($urlArr as $id => $link) {
                 if (!in_array($id, $clickedLinks)) {
                     // a link to this host?
-                    $urlstr = $this->getUrlStr($link);
-                    $label = $htmlLinks[$id]['label'] . ' (' . ($urlstr ?: '/') . ')';
+                    $label = $htmlLinks[$id]['label'] . ' (' . (ReportUtility::getUrlStr($link, $this->mail->getPid()) ?: '/') . ')';
                     $data[] = [
                         'label' => $label,
                         'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
@@ -373,48 +356,6 @@ class ReportService
         }
 
         return $data;
-    }
-
-    // todo make static
-    protected function showWithPercent(int $pieces, int $total): string
-    {
-        $str = $pieces ? number_format($pieces) : '0';
-        if ($total) {
-            $str .= ' / ' . number_format(($pieces / $total * 100), 2) . '%';
-        }
-        return $str;
-    }
-
-    /**
-     * @param string $url
-     *
-     * @return string The URL string
-     * @throws SiteNotFoundException
-     */
-    public function getUrlStr(string $url): string
-    {
-        $urlParts = @parse_url($url);
-        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-        $site = $siteFinder->getSiteByPageId($this->mail->getPid());
-
-        if ($url && $site->getBase() === ($urlParts['host'] ?? '')) {
-            $m = [];
-            // do we have an id?
-            if (preg_match('/(?:^|&)id=([0-9a-z_]+)/', $urlParts['query'], $m)) {
-                $isInt = MathUtility::canBeInterpretedAsInteger($m[1]);
-                if ($isInt) {
-                    $uid = (int)$m[1];
-                    $rootLine = BackendUtility::BEgetRootLine($uid);
-                    // array_shift reverses the array (rootline has numeric index in the wrong order!)
-                    // $rootLine = array_reverse($rootLine);
-                    $pages = array_shift($rootLine);
-                    $query = preg_replace('/(?:^|&)id=([0-9a-z_]+)/', '', $urlParts['query']);
-                    $url = $pages['title'] . ($query ? ' / ' . $query : '');
-                }
-            }
-        }
-
-        return $url;
     }
 
     /**
@@ -435,79 +376,6 @@ class ReportService
         }
 
         return $baseUrl;
-    }
-
-    /**
-     * This method returns the label for a specified URL.
-     * If the page is local and contains a fragment it returns the label of the content element linked to.
-     * In any other case it simply fetches the page and extracts the <title> tag content as label
-     *
-     * @param string $url The statistics click-URL for which to return a label
-     * @param string $urlStr A processed variant of the url string. This could get appended to the label???
-     * @param bool $forceFetch When this parameter is set to true the "fetch and extract <title> tag" method will get used
-     * @param string $linkedWord The word to be linked
-     *
-     * @return string The label for the passed $url parameter
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     *
-     * @todo This method is an absolute performance killer!!!
-     * It fetches e.g. every pdfs or videos from external/internal urls only to get its filename!
-     */
-    public function getLinkLabel(string $url, string $urlStr, bool $forceFetch = false, string $linkedWord = ''): string
-    {
-        $baseURL = $this->getBaseURL();
-        $label = $linkedWord;
-        $contentTitle = '';
-
-        $urlParts = parse_url($url);
-        if (!$forceFetch && (str_starts_with($url, $baseURL))) {
-            if (($urlParts['fragment'] ?? false) && (str_starts_with($urlParts['fragment'], 'c'))) {
-                // linking directly to a content
-                $elementUid = (int)substr($urlParts['fragment'], 1);
-                $row = BackendUtility::getRecord('tt_content', $elementUid);
-                if ($row) {
-                    $contentTitle = BackendUtility::getRecordTitle('tt_content', $row);
-                }
-            } else {
-                $contentTitle = $this->getLinkLabel($url, $urlStr, true);
-            }
-        } else {
-            if (empty($urlParts['host']) && (!str_starts_with($url, $baseURL))) {
-                // it's internal
-                $url = $baseURL . $url;
-            }
-
-            $content = GeneralUtility::getURL($url);
-            if (is_string($content) && preg_match('/<\s*title\s*>(.*)<\s*\/\s*title\s*>/i', $content, $matches)) {
-                // get the page title
-                $contentTitle = GeneralUtility::fixed_lgd_cs(trim($matches[1]), 50);
-            } else {
-                // file?
-                $file = GeneralUtility::split_fileref($url);
-                $contentTitle = $file['file'];
-            }
-        }
-
-        $pageTSConfiguration = BackendUtility::getPagesTSconfig($this->mail->getPid())['mod.']['web_modules.']['mail.'] ?? [];
-        if ($pageTSConfiguration['showContentTitle'] ?? false) {
-            $label = $contentTitle;
-        }
-
-        if ($pageTSConfiguration['prependContentTitle'] ?? false) {
-            $label = $contentTitle . ' (' . $linkedWord . ')';
-        }
-
-        // Fallback to url
-        if ($label === '') {
-            $label = $url;
-        }
-
-        if (isset($this->pageTSConfiguration['maxLabelLength']) && ($this->pageTSConfiguration['maxLabelLength'] > 0)) {
-            $label = GeneralUtility::fixed_lgd_cs($label, $this->pageTSConfiguration['maxLabelLength']);
-        }
-
-        return $label;
     }
 
     /**

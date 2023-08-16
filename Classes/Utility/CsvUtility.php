@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use JetBrains\PhpStorm\NoReturn;
+use MEDIAESSENZ\Mail\Domain\Model\Address;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
+use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
@@ -197,4 +199,34 @@ class CsvUtility
             ->withAddedHeader('Content-Disposition', 'attachment; filename=' . $filenamePrefix . '_' . date('dmy-Hi') . '.csv')
             ->withBody($streamFactory->createStream(implode(CR . LF, $lines)));
     }
+
+    /**
+     * @param array $data
+     * @param string $filenamePrefix
+     * @return ResponseInterface
+     */
+    public static function csvDownloadRecipientsCSV(array $data, string $filenamePrefix): ResponseInterface
+    {
+        $emails = [];
+        if ($data['addresses']) {
+            /** @var Address $address */
+            foreach ($data['addresses'] as $address) {
+                $emails[] = ['uid' => $address->getUid(), 'email' => $address->getEmail(), 'name' => $address->getName()];
+            }
+        }
+        if ($data['frontendUsers']) {
+            /** @var FrontendUser $frontendUser */
+            foreach ($data['frontendUsers'] as $frontendUser) {
+                $emails[] = ['uid' => $frontendUser->getUid(), 'email' => $frontendUser->getEmail(), 'name' => $frontendUser->getName()];
+            }
+        }
+        if ($data['plainList']) {
+            foreach ($data['plainList'] as $value) {
+                $emails[] = ['uid' => '-', 'email' => $value, 'name' => ''];
+            }
+        }
+
+        return self::downloadCSV($emails, $filenamePrefix);
+    }
+
 }
