@@ -307,7 +307,7 @@ class ReportService
             $urlStr = ReportUtility::getUrlStr($url, $this->mail->getPid());
             $label = $urlStr;
             if ($this->pageTSConfiguration['showContentTitle'] ?? false) {
-                $label = ReportUtility::getLinkLabel($this->getBaseURL(), $url);
+                $label = ReportUtility::getContentTitle($url, $this->getBaseURL());
                 if (($this->pageTSConfiguration['prependContentTitle'] ?? false) && $label !== $url) {
                     $label .= ' (' . $url . ')';
                 }

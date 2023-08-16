@@ -51,61 +51,53 @@ class ReportUtility
      * If the page is local and contains a fragment it returns the label of the content element linked to.
      * In any other case it simply fetches the page and extracts the <title> tag content as label
      *
-     * @param string $baseURL The base url of the mailing
      * @param string $url The statistics click-URL for which to return a label
-     * @param bool $forceFetch When this parameter is set to true the "fetch and extract <title> tag" method will get used
+     * @param string $baseURL The base url of the mailing
      *
      * @return string The label for the passed $url parameter
-     *
-     * @todo This method is an absolute performance killer!!!
-     * It fetches e.g. every pdfs or videos from external/internal urls only to get its filename!
      */
-    public static function getLinkLabel(string $baseURL, string $url, bool $forceFetch = false): string
+    public static function getContentTitle(string $url, string $baseURL): string
     {
-        $contentTitle = '';
-
-        $urlParts = parse_url($url);
-        if (!$forceFetch && (str_starts_with($url, $baseURL))) {
-            if (($urlParts['fragment'] ?? false) && (str_starts_with($urlParts['fragment'], 'c'))) {
+        if (str_starts_with($url, $baseURL)) {
+            $fragment = parse_url($url, PHP_URL_FRAGMENT);
+            if ($fragment && str_starts_with($fragment, 'c')) {
                 // linking directly to a content
-                $elementUid = (int)substr($urlParts['fragment'], 1);
+                $elementUid = (int)substr($fragment, 1);
                 $row = BackendUtility::getRecord('tt_content', $elementUid);
                 if ($row) {
-                    $contentTitle = BackendUtility::getRecordTitle('tt_content', $row);
+                    return BackendUtility::getRecordTitle('tt_content', $row);
                 }
-            } else {
-                $contentTitle = self::getLinkLabel($baseURL, $url, true);
             }
-        } else {
-            $contentTitle = self::fetchWebpageTitle($url);
+
+            return $url;
         }
 
-        return $contentTitle;
+        return self::determineDocumentTitle($url);
     }
 
-    public static function fetchWebpageTitle(string $url): string
+    public static function determineDocumentTitle(string $url): string
     {
         $client = new Client();
 
         try {
             $response = $client->head($url);
             if ($response->getStatusCode() === 200) {
-                try {
-                    $contentType = $response->getHeaderLine('Content-Type');
-                    if (!str_contains($contentType, 'text/html')) {
-                        return $url;
-                    }
-                    $body = '';
-                    $bodyStream = $client->get($url, ['stream' => true])->getBody();
-                    while (!$bodyStream->eof()) {
-                        $body .= $bodyStream->read(1024);
-                        preg_match('/<title>(.*?)<\/title>/i', $body, $titleMatches);
-                        if (isset($titleMatches[1])) {
-                            return $titleMatches[1];
+                if (str_contains($response->getHeaderLine('Content-Type'), 'text/html')) {
+                    try {
+                        $body = '';
+                        $bodyStream = $client->get($url, ['stream' => true])->getBody();
+                        while (!$bodyStream->eof()) {
+                            $body .= $bodyStream->read(1024);
+                            preg_match('/<title>(.*?)<\/title>/i', $body, $titleMatches);
+                            if (isset($titleMatches[1])) {
+                                return $titleMatches[1];
+                            }
+                            unset($titleMatches);
                         }
-                        unset($titleMatches);
+                    } catch (RequestException|GuzzleException $e) {
                     }
-                } catch (RequestException|GuzzleException $e) {
+                } else {
+                    return basename(parse_url($url, PHP_URL_PATH));
                 }
             }
         } catch (RequestException|GuzzleException $e) {
