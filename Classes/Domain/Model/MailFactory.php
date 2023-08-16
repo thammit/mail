@@ -84,7 +84,7 @@ class MailFactory
             ->setPlainParams($this->pageTSConfiguration['plainParams'] ?? '')
             ->setHtmlParams($this->pageTSConfiguration['htmlParams'] ?? '')
             ->setEncoding($this->pageTSConfiguration['encoding'] ?? 'quoted-printable')
-            ->setCharset($this->pageTSConfiguration['charset'] ?? 'iso-8859-1');
+            ->setCharset($this->pageTSConfiguration['charset'] ?? 'utf-8');
 
         if ($languageUid > 0) {
             $mail->setSysLanguageUid($languageUid);
@@ -119,7 +119,7 @@ class MailFactory
                 $domDocument = $html->loadHTML($htmlContent);
                 foreach (['a', 'form', 'area'] as $tag) {
                     $domElements = $domDocument->getElementsByTagName($tag);
-                    /** @var DOMElement $element */
+                    /** @var DOMElement $domElement */
                     foreach ($domElements as $domElement) {
                         $hyperLinkAttribute = match ($domElement->tagName) {
                             'form' => 'action',
