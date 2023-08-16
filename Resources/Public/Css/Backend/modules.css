@@ -154,13 +154,16 @@
     background-color:rgba(0,0,0,0);
 }
 
-.mail-report-table-crop {
-        width: 75%;
-}
-.mail-report-table-crop a {
-    display: inline-block;
+.mail-report-responses-table {
+    table-layout: fixed;
     width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+.mail-report-responses-table  td {
+    border: solid;
+    overflow:hidden;
+    text-overflow:ellipsis
+}
+
+.mail-report-responses-table td+td {
+    width: 50px;
 }
