@@ -21,7 +21,7 @@
                 <f:render partial="Report/Returned" arguments="{data:returned, mail:mail, lll:lll}"/>
             </f:if>
             <f:if condition="{responses}">
-                <f:render partial="Report/Responses" arguments="{data:responses, mail:mail, lll:lll}"/>
+                <f:render partial="Report/Responses" arguments="{data:responses, mail:mail, lll:lll, maxLabelLength:maxLabelLength}"/>
             </f:if>
         </div>
         <f:if condition="{mail.htmlContent} && {mail.plainContent}">

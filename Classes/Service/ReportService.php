@@ -308,12 +308,11 @@ class ReportService
             $label = $urlStr;
             if ($this->pageTSConfiguration['showContentTitle'] ?? false) {
                 $label = ReportUtility::getLinkLabel($this->getBaseURL(), $url);
-                if ($this->pageTSConfiguration['prependContentTitle'] ?? false) {
+                if (($this->pageTSConfiguration['prependContentTitle'] ?? false) && $label !== $url) {
                     $label .= ' (' . $url . ')';
                 }
 
             }
-            $label = GeneralUtility::fixed_lgd_cs($label, $this->pageTSConfiguration['maxLabelLength'] ?? 0);
 
             if (isset($urlCounter['html'][$id]['plainId'])) {
                 $data[] = [

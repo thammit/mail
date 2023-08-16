@@ -85,6 +85,7 @@ class ReportController extends AbstractController
             'performance' => $this->reportService->getPerformanceData(),
             'returned' => $this->reportService->getReturnedData(),
             'responses' => $this->reportService->getResponsesData(),
+            'maxLabelLength' => (int)($this->pageTSConfiguration['maxLabelLength'] ?? 0),
         ]);
         $this->moduleTemplate->setContent($this->view->render());
         $this->addLeftDocheaderBackButtons();
