@@ -37,7 +37,7 @@
                 <th>
                     <f:translate key="{lll}report.mailsSent"/>
                 </th>
-                <td>{data.totalSent}</td>
+                <td><f:render partial="ProgressBar" arguments="{mail:mail}"/></td>
                 <f:if condition="{mail.plainAndHtml}">
                     <td>{data.htmlSent}</td>
                     <td>{data.plainSent}</td>
@@ -47,7 +47,11 @@
                 <th>
                     <f:translate key="{lll}report.deliveryFailed"/>
                 </th>
-                <td>{data.returned}</td>
+                <td>
+                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="{data.returnedPercent}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width: {data.returnedPercent}%">{data.failedResponses} / {data.returnedPercent}%</div>
+                    </div>
+                </td>
                 <f:if condition="{mail.plainAndHtml}">
                    <td></td>
                    <td></td>
@@ -65,7 +69,11 @@
                     </f:then>
                     <f:else>
                         <f:if condition="{mail.html}">
-                            <td>{data.htmlViewed}</td>
+                            <td>
+                                <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="{data.viewedPercent}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="width: {data.viewedPercent}%">{data.htmlViewed}</div>
+                                </div>
+                            </td>
                         </f:if>
                         <f:if condition="{mail.plain}">
                             <td>{data.plainViewed}</td>
