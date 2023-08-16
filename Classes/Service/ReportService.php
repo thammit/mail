@@ -317,6 +317,7 @@ class ReportService
             if (isset($urlCounter['html'][$id]['plainId'])) {
                 $data[] = [
                     'label' => $label,
+                    'iconIdentifier' => ReportUtility::determineDocumentIconIdentifier($url),
                     'title' => $htmlLinks[$id]['title'],
                     'totalCounter' => $urlCounter['total'][$origId]['counter'],
                     'htmlCounter' => $urlCounter['html'][$id]['counter'],
@@ -327,6 +328,7 @@ class ReportService
                 $html = !empty($urlCounter['html'][$id]['counter']);
                 $data[] = [
                     'label' => $label,
+                    'iconIdentifier' => ReportUtility::determineDocumentIconIdentifier($url),
                     'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
                     'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] ?? 0 : $urlCounter['plain'][$origId]['counter'] ?? 0),
                     'htmlCounter' => $urlCounter['html'][$id]['counter'] ?? 0,
@@ -344,6 +346,7 @@ class ReportService
                     $label = $htmlLinks[$id]['label'] . ' (' . (ReportUtility::getUrlStr($link, $this->mail->getPid()) ?: '/') . ')';
                     $data[] = [
                         'label' => $label,
+                        'iconIdentifier' => ReportUtility::determineDocumentIconIdentifier($link),
                         'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
                         'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] : $urlCounter['plain'][$id]['counter']),
                         'htmlCounter' => $urlCounter['html'][$id]['counter'],

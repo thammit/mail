@@ -68,8 +68,7 @@ class ReportUtility
                     return BackendUtility::getRecordTitle('tt_content', $row);
                 }
             }
-
-            return $url;
+            // return $url;
         }
 
         return self::determineDocumentTitle($url);
@@ -104,6 +103,45 @@ class ReportUtility
         }
 
         return $url;
+    }
+
+    public static function determineDocumentIconIdentifier($url): string
+    {
+        $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+        switch ($extension) {
+            case 'pdf':
+                return 'mimetypes-pdf';
+            case 'xls':
+            case 'xlsx':
+                return 'mimetypes-excel';
+            case 'doc':
+            case 'docx':
+                return 'mimetypes-word';
+            case 'ppt':
+            case 'pptx':
+                return 'mimetypes-powerpoint';
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+                return 'mimetypes-media-image';
+            case 'zip':
+            case 'rar':
+                return 'mimetypes-compressed';
+            case 'mp3':
+            case 'wav':
+            case 'aac':
+                return 'mimetypes-media-audio';
+            case 'mp4':
+            case 'mov':
+            case 'avi':
+                return 'mimetypes-media-video';
+            case 'htm':
+            case 'html':
+                return 'mimetypes-text-html';
+            default:
+                return 'mimetypes-other-other';
+        }
     }
 
     public static function showWithPercent(int $pieces, int $total): string

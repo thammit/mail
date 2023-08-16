@@ -35,7 +35,7 @@
                 <tr>
                     <td>
                         <a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget">
-                            {row.label}
+                            <core:icon identifier="{row.iconIdentifier}" size="small" /> {row.label}
                         </a>
                     </td>
                     <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.totalCounter}</span></td>
