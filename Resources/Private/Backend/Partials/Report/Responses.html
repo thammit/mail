@@ -33,8 +33,8 @@
             <tbody>
             <f:for each="{data}" as="row">
                 <tr>
-                    <td class="w-75">
-                        <a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget"  class="text-truncate d-inline-block">
+                    <td class="mail-report-table-crop">
+                        <a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget"  class="d-inline-block">
                             {row.label}
                         </a>
                     </td>

@@ -155,5 +155,7 @@
 }
 
 .mail-report-table-crop {
+    white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
 }
