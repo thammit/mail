@@ -33,8 +33,11 @@
             <tbody>
             <f:for each="{data}" as="row">
                 <tr>
-                    <td><a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget">{row.label ->
-                        f:format.crop(maxCharacters:maxLabelLength, respectWordBoundaries:0, respectHtml:0)}</a></td>
+                    <td>
+                        <a href="{row.url -> f:format.raw()}" title="{row.title}" target="linktarget"  class="mail-report-table-crop">
+                            {row.label}
+                        </a>
+                    </td>
                     <td>{row.totalCounter}</td>
                     <f:if condition="{mail.plainAndHtml}">
                         <td>{row.htmlCounter}</td>
