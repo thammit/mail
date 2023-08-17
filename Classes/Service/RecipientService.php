@@ -25,6 +25,7 @@ use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
@@ -102,7 +103,9 @@ class RecipientService
             return [];
         }
         $data = [];
+        //$queryBuilder = $this->getQueryBuilder($table);
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
+        $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(HiddenRestriction::class));
         $res = $queryBuilder
             ->select(...$fields)
             ->from($table)
@@ -272,6 +275,7 @@ class RecipientService
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
      */
     public function getRecipientsUidListGroupedByRecipientSource(Group $group, bool $addGroupUidToRecipientSourceIdentifier = false): array
     {
@@ -435,6 +439,7 @@ class RecipientService
     ): array {
         $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
         $queryBuilder = $this->getQueryBuilder($table);
+        $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(HiddenRestriction::class));
 
         $mailActiveExpression = '';
         if (!$ignoreMailActive) {
@@ -459,42 +464,44 @@ class RecipientService
                     ->addOrderBy('fe_users.email')
                     ->executeQuery()
                     ->fetchAllAssociative(), 'uid');
-            } else {
-                return array_column($queryBuilder
-                    ->select($switchTable . '.uid')
-                    ->from($switchTable)
-                    ->where(
-                        $queryBuilder->expr()->and()
-                            ->add($mailActiveExpression)
-                            ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                            ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
-                    )
-                    ->orderBy($switchTable . '.uid')
-                    ->executeQuery()
-                    ->fetchAllAssociative(), 'uid');
             }
-        } else {
-            // get recipients with same categories set in group
-            $recipients = [];
-            $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pages,
-                ['uid']), 'uid') : [];
-            /** @var Category $category */
-            foreach ($categories as $category) {
-                // collect all recipients containing at least one category of the given group
-                $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
-                foreach ($recipientCollection as $recipient) {
-                    if (!in_array($recipient['uid'], $recipients) &&
-                        in_array($recipient['pid'], $pages) &&
-                        $mailActiveExpression &&
-                        ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
-                    ) {
-                        // add it to the list if all constrains fulfilled
-                        $recipients[] = $recipient['uid'];
-                    }
+
+            return array_column($queryBuilder
+                ->select($switchTable . '.uid')
+                ->from($switchTable)
+                ->where(
+                    $queryBuilder->expr()->and()
+                        ->add($mailActiveExpression)
+                        ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
+                        ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
+                )
+                ->orderBy($switchTable . '.uid')
+                ->executeQuery()
+                ->fetchAllAssociative(), 'uid');
+        }
+
+        // get recipients with same categories set in group
+        $recipients = [];
+        $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pages,
+            ['uid']), 'uid') : [];
+        $disabledField = $GLOBALS['TCA'][$table]['ctrl']['enablecolumns']['disabled'] ?? false;
+        /** @var Category $category */
+        foreach ($categories as $category) {
+            // collect all recipients containing at least one category of the given group
+            $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
+            foreach ($recipientCollection as $recipient) {
+                if ((!$disabledField || !$recipient[$disabledField]) &&
+                    ($ignoreMailActive || $recipient['mail_active'] ?? true) &&
+                    !in_array($recipient['uid'], $recipients) &&
+                    in_array($recipient['pid'], $pages) &&
+                    ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
+                ) {
+                    // add it to the list if all constrains fulfilled
+                    $recipients[] = $recipient['uid'];
                 }
             }
-            return $recipients;
         }
+        return $recipients;
     }
 
     /**

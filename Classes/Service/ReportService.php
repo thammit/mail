@@ -79,6 +79,7 @@ class ReportService
 
         $htmlSent = (int)($formatSent[SendFormat::HTML] ?? 0) + (int)($formatSent[SendFormat::BOTH] ?? 0);
         $plainSent = (int)($formatSent[SendFormat::PLAIN] ?? 0);
+        $notSent = (int)($formatSent[SendFormat::NONE] ?? 0);
         $totalSent = $htmlSent + $plainSent;
 
         $uniquePingResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PING);
@@ -96,6 +97,7 @@ class ReportService
             'htmlSent' => $htmlSent,
             'plainSent' => $plainSent,
             'totalSent' => $totalSent,
+            'notSent' => $this->logRepository->findNotSentByMail($this->mail->getUid()),
             'totalSentPercent' => number_format(($totalSent / $this->mail->getNumberOfRecipientsHandled() * 100), 2),
             'failedResponses' => $failedResponses,
             'failedResponsesPercent' => number_format(($failedResponses / $totalSent * 100), 2),
