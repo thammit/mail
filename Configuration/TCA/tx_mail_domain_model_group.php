@@ -1,8 +1,12 @@
 <?php
+
+use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
+use MEDIAESSENZ\Mail\UserFunctions\RecipientSourcesProcFunc;
+
 return [
     'ctrl' => [
         'label' => 'title',
-        'sortby' => 'title',
+        'default_sortby' => 'title',
         'tstamp' => 'tstamp',
         'prependAtCopy' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.prependAtCopy',
         'title' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group',
@@ -14,19 +18,19 @@ return [
         'typeicon_column' => 'type',
         'typeicon_classes' => [
             'default' => 'mail-group',
-            \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::PAGES => 'mail-group',
-            \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::CSV => 'mail-group',
-            \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC => 'mail-group',
-            \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY => 'mail-group',
-            \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER => 'mail-group',
+            RecipientGroupType::PAGES => 'mail-group',
+            RecipientGroupType::CSV => 'mail-group',
+            RecipientGroupType::STATIC => 'mail-group',
+            RecipientGroupType::QUERY => 'mail-group',
+            RecipientGroupType::OTHER => 'mail-group',
         ],
     ],
     'types' => [
-        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::PAGES => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,recipient_sources,pages,recursive,categories'],
-        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::CSV => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,list,csv,mail_html,categories'],
-        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,static_list'],
+        RecipientGroupType::PAGES => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,recipient_sources,pages,recursive,categories'],
+        RecipientGroupType::CSV => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,list,csv,mail_html,categories'],
+        RecipientGroupType::STATIC => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,static_list'],
         //\MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,static_list'],
-        \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,children'],
+        RecipientGroupType::OTHER => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,children'],
     ],
     'columns' => [
         'hidden' => [
@@ -60,11 +64,11 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.0', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::PAGES],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.1', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::CSV],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.2', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::STATIC],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.0', RecipientGroupType::PAGES],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.1', RecipientGroupType::CSV],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.2', RecipientGroupType::STATIC],
                     //['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.3', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.4', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::OTHER],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.4', RecipientGroupType::OTHER],
                 ],
                 'default' => '0',
             ],
@@ -115,7 +119,7 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectCheckBox',
                 'allowNonIdValues' => true,
-                'itemsProcFunc' => \MEDIAESSENZ\Mail\UserFunctions\RecipientSourcesProcFunc::class . '->itemsProcFunc',
+                'itemsProcFunc' => RecipientSourcesProcFunc::class . '->itemsProcFunc',
             ],
         ],
         'list' => [
