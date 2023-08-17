@@ -80,10 +80,13 @@ class ReportController extends AbstractController
     {
         $this->reportService->init($mail);
         $this->assignFieldGroups($mail, true);
+        $performance = $this->reportService->getPerformanceData();
+        if ($performance['failedResponses']) {
+            $this->view->assign('returned', $this->reportService->getReturnedData());
+        }
         $this->view->assignMultiple([
             'mail' => $mail,
-            'performance' => $this->reportService->getPerformanceData(),
-            'returned' => $this->reportService->getReturnedData(),
+            'performance' => $performance,
             'responses' => $this->reportService->getResponsesData(),
             'maxLabelLength' => (int)($this->pageTSConfiguration['maxLabelLength'] ?? 0),
         ]);

@@ -84,9 +84,9 @@ class ReportService
 
         $uniquePingResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PING);
 
-        $htmlResponses = $this->responseTypesTable[ResponseType::HTML] ?? 0;
-        $plainResponses = $this->responseTypesTable[ResponseType::PLAIN] ?? 0;
-        $failedResponses = $this->responseTypesTable[ResponseType::FAILED] ?? 0;
+        $htmlResponses = (int)($this->responseTypesTable[ResponseType::HTML] ?? 0);
+        $plainResponses = (int)($this->responseTypesTable[ResponseType::PLAIN] ?? 0);
+        $failedResponses = (int)($this->responseTypesTable[ResponseType::FAILED] ?? 0);
         $totalResponses = $htmlResponses + $plainResponses;
 
         $uniqueHtmlResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::HTML);
