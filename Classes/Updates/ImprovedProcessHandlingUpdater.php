@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Updates;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
+use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -45,10 +46,12 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
         $connectionMail = $this->getConnectionPool()->getConnectionForTable('tx_mail_domain_model_mail');
         $mails = $this->getMailRecordsToUpdate();
         foreach ($mails as $mail) {
-            $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists(json_decode($mail['recipients'], true, 512, JSON_OBJECT_AS_ARRAY));
+            $recipients = MailerUtility::removeDuplicateValues(json_decode($mail['recipients'],
+                true, 3, JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY));
+            $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($recipients);
             $connectionMail->update('tx_mail_domain_model_mail', [
                 'number_of_recipients' => $numberOfRecipients,
-                'recipients_handled' => $mail['recipients'],
+                'recipients_handled' => json_encode($recipients, JSON_THROW_ON_ERROR, 2),
                 'number_of_recipients_handled' => $numberOfRecipients,
                 'delivery_progress' => 100,
             ],
