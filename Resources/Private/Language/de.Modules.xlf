@@ -763,6 +763,14 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Clicked links</source>
         <target state="final">Geklickte Links</target>
       </trans-unit>
+      <trans-unit id="report.response.target" resname="report.response.target">
+        <source>Target</source>
+        <target state="needs-translation">Target</target>
+      </trans-unit>
+      <trans-unit id="report.response.clicks" resname="report.response.clicks">
+        <source>Clicks</source>
+        <target state="needs-translation">Clicks</target>
+      </trans-unit>
       <trans-unit id="report.html" resname="report.html" approved="yes">
         <source>HTML</source>
         <target state="final">HTML</target>
