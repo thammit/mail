@@ -233,7 +233,7 @@ class MailerService implements LoggerAwareInterface
         // (trailing newline = invalid address)
         $recipientData['email'] = trim($recipientData['email']);
 
-        if ($recipientData['email']) {
+        if ($recipientData['email'] && GeneralUtility::validEmail($recipientData['email'])) {
 
             $additionalMarkers = [
                 '###MAIL_RECIPIENT_SOURCE###' => $recipientSourceIdentifier,
@@ -277,7 +277,7 @@ class MailerService implements LoggerAwareInterface
 
             $mail->setReturnPath(str_replace('###XID###', $mailIdentifierHeaderWithoutHash, $mail->getReturnPath()));
 
-            if (GeneralUtility::validEmail($recipientData['email']) && ($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML))) {
+            if ($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) {
                 $this->sendMailToRecipient(
                     $mail,
                     new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
@@ -417,14 +417,17 @@ class MailerService implements LoggerAwareInterface
                     }
                     break;
             }
+            if (!$recipients[$recipientSourceIdentifier]) {
+                unset($recipients[$recipientSourceIdentifier]);
+            }
         }
 
         if ($numberOfSentMails && $recipientSourceIdentifier) {
             $this->logger->debug('Sent ' . $numberOfSentMails . ' mails to user of recipient source ' . $recipientSourceIdentifier);
         }
 
-        $mail->setRecipients(MailerUtility::removeDuplicateValues($recipients));
-        $mail->setRecipientsHandled(MailerUtility::removeDuplicateValues($recipientsHandled));
+        $mail->setRecipients($recipients, false);
+        $mail->setRecipientsHandled($recipientsHandled);
 
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();

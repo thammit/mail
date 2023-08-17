@@ -807,9 +807,7 @@ class MailController extends AbstractController
             ]);
         }
 
-        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()));
-
-        $mail->setNumberOfRecipients($this->recipientService->getNumberOfRecipientsByGroups($mail->getRecipientGroups()));
+        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()), true);
 
         if ($mail->getNumberOfRecipients() === 0) {
             ViewUtility::addNotificationWarning(

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
 use DateTimeImmutable;
+use JsonException;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
@@ -579,7 +580,7 @@ class Mail extends AbstractEntity
      */
     public function getHtmlLinks(): array
     {
-        return json_decode($this->htmlLinks, true, 512, JSON_OBJECT_AS_ARRAY);
+        return json_decode($this->htmlLinks, true, 3, JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY);
     }
 
     /**
@@ -588,7 +589,7 @@ class Mail extends AbstractEntity
      */
     public function setHtmlLinks(array $htmlLinks): Mail
     {
-        $this->htmlLinks = json_encode($htmlLinks);
+        $this->htmlLinks = json_encode($htmlLinks, JSON_THROW_ON_ERROR, 3);
         return $this;
     }
 
@@ -597,7 +598,7 @@ class Mail extends AbstractEntity
      */
     public function getPlainLinks(): array
     {
-        return json_decode($this->plainLinks, true, 512, JSON_OBJECT_AS_ARRAY);
+        return json_decode($this->plainLinks, true, 3, JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY);
     }
 
     /**
@@ -606,7 +607,7 @@ class Mail extends AbstractEntity
      */
     public function setPlainLinks(array $plainLinks): Mail
     {
-        $this->plainLinks = json_encode($plainLinks);
+        $this->plainLinks = json_encode($plainLinks, JSON_THROW_ON_ERROR, 3);
         return $this;
     }
 
@@ -616,7 +617,7 @@ class Mail extends AbstractEntity
      */
     public function getRecipients(string $identifier = null): array
     {
-        $recipients = json_decode($this->recipients, true, 512, JSON_OBJECT_AS_ARRAY);
+        $recipients = json_decode($this->recipients, true, 3, JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY);
         if ($identifier) {
             return $recipients[$identifier] ?? [];
         }
@@ -625,11 +626,17 @@ class Mail extends AbstractEntity
 
     /**
      * @param array $recipients
+     * @param bool $calculateNumberOfRecipients
      * @return Mail
+     * @throws JsonException
      */
-    public function setRecipients(array $recipients): Mail
+    public function setRecipients(array $recipients, bool $calculateNumberOfRecipients = false): Mail
     {
-        $this->recipients = json_encode($recipients);
+        $recipients = MailerUtility::removeDuplicateValues($recipients);
+        $this->recipients = json_encode($recipients, JSON_THROW_ON_ERROR, 2);
+        if ($calculateNumberOfRecipients) {
+            $this->numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($recipients);
+        }
         return $this;
     }
 
@@ -650,7 +657,8 @@ class Mail extends AbstractEntity
 
     public function getRecipientsHandled(string $identifier = null): array
     {
-        $recipientsHandled = json_decode($this->recipientsHandled, true, 512, JSON_OBJECT_AS_ARRAY);
+        $recipientsHandled = json_decode($this->recipientsHandled, true, 3,
+            JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY);
         if ($identifier) {
             return $recipientsHandled[$identifier] ?? [];
         }
@@ -659,7 +667,8 @@ class Mail extends AbstractEntity
 
     public function setRecipientsHandled(array $recipientsHandled): Mail
     {
-        $this->recipientsHandled = json_encode($recipientsHandled);
+        $recipientsHandled = MailerUtility::removeDuplicateValues($recipientsHandled);
+        $this->recipientsHandled = json_encode($recipientsHandled, JSON_THROW_ON_ERROR, 2);
         $this->numberOfRecipientsHandled = RecipientUtility::calculateTotalRecipientsOfUidLists($recipientsHandled);
         $this->calculateDeliveryProgress();
         return $this;

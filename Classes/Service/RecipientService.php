@@ -241,6 +241,7 @@ class RecipientService
      * @throws IllegalObjectTypeException
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
+     * @deprecated
      */
     public function getNumberOfRecipientsByGroups(ObjectStorage $recipientGroups): int
     {
