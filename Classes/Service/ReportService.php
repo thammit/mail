@@ -97,7 +97,7 @@ class ReportService
             'htmlSent' => $htmlSent,
             'plainSent' => $plainSent,
             'totalSent' => $totalSent,
-            'notSent' => $this->logRepository->findNotSentByMail($this->mail->getUid()),
+//            'notSent' => $this->logRepository->findNotSentByMail($this->mail->getUid()),
             'totalSentPercent' => number_format(($totalSent / $this->mail->getNumberOfRecipientsHandled() * 100), 2),
             'failedResponses' => $failedResponses,
             'failedResponsesPercent' => number_format(($failedResponses / $totalSent * 100), 2),
