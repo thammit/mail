@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Updates;
 
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -34,12 +35,17 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
             'write it to the corresponding database fields.';
     }
 
+    /**
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws DBALException
+     */
     public function executeUpdate(): bool
     {
         $connectionMail = $this->getConnectionPool()->getConnectionForTable('tx_mail_domain_model_mail');
         $mails = $this->getMailRecordsToUpdate();
         foreach ($mails as $mail) {
-            $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists(json_decode($mail['recipients'], true, 512,  JSON_OBJECT_AS_ARRAY));
+            $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists(json_decode($mail['recipients'], true, 512, JSON_OBJECT_AS_ARRAY));
             $connectionMail->update('tx_mail_domain_model_mail', [
                 'number_of_recipients' => $numberOfRecipients,
                 'recipients_handled' => $mail['recipients'],
@@ -52,9 +58,14 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
         return true;
     }
 
+    /**
+     * @throws DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
+     */
     public function updateNecessary(): bool
     {
-        return (bool)$this->getMailRecordsToUpdate();
+        return count($this->getMailRecordsToUpdate()) !== 0;
     }
 
     public function getPrerequisites(): array
@@ -66,6 +77,7 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
 
     /**
      * @throws Exception
+     * @throws \Doctrine\DBAL\Driver\Exception|DBALException
      */
     protected function getMailRecordsToUpdate(): array
     {
@@ -73,8 +85,8 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
         return $queryBuilder
             ->select('*')
             ->where(
-                $queryBuilder->expr()->eq('sent',1),
-                $queryBuilder->expr()->eq('delivery_progress',0)
+                $queryBuilder->expr()->eq('sent', 1),
+                $queryBuilder->expr()->eq('delivery_progress', 0)
             )
             ->executeQuery()
             ->fetchAllAssociative();

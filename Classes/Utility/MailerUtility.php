@@ -266,14 +266,14 @@ class MailerUtility
      *
      * @param string $message Message content
      * @param Mail $mail
-     * @param string $baseUrl
      * @param string $sourceHost
      * @return string Processed message content
      */
-    public static function shortUrlsInPlainText(string $message, Mail $mail, string $baseUrl, string $sourceHost = '*'): string
+    public static function shortUrlsInPlainText(string $message, Mail $mail, string $sourceHost = '*'): string
     {
         $lengthLimit = $mail->isRedirectAll() ? 0 : 76;
         $mailUid = $mail->getUid() ?? 0;
+        $baseUrl = $mail->getRedirectUrl();
         $messageWithReplacedLinks = preg_replace_callback(
             '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
             function (array $matches) use ($mailUid, $lengthLimit, $baseUrl, $sourceHost) {
@@ -333,7 +333,7 @@ class MailerUtility
 
         if ((new Typo3Version())->getMajorVersion() >= 12) {
             // add own creation type and mail uid to filter and delete old mail redirect
-            $record['creation_type'] = (int)(\MEDIAESSENZ\Mail\Utility\ConfigurationUtility::getExtensionConfiguration('mailRedirectCreationTypeNumber') ?? \MEDIAESSENZ\Mail\Constants::DEFAULT_MAIL_REDIRECT_CREATION_TYPE);
+            $record['creation_type'] = (int)(ConfigurationUtility::getExtensionConfiguration('mailRedirectCreationTypeNumber') ?? Constants::DEFAULT_MAIL_REDIRECT_CREATION_TYPE);
             $record['description'] = 'tx_domain_model_mail:' . $mailUid;
         }
 

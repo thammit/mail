@@ -165,3 +165,7 @@
     width: 5ch;
     text-align: center;
 }
+
+.table-fit > .table tr:last-child th {
+    border-bottom: 0;
+}

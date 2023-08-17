@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
@@ -23,6 +24,7 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @return array
      * @throws Exception
+     * @throws DBALException|\Doctrine\DBAL\Driver\Exception
      */
     public function findResponseTypesByMail(int $mailUid): array
     {

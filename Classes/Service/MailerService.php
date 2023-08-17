@@ -265,7 +265,6 @@ class MailerService implements LoggerAwareInterface
                         $plainContent = MailerUtility::shortUrlsInPlainText(
                             $plainContent,
                             $mail,
-                            $mail->getRedirectUrl(),
                             $this->site->getLanguageById($mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
                         );
                     }
@@ -285,6 +284,8 @@ class MailerService implements LoggerAwareInterface
                     $htmlContent,
                     $plainContent
                 );
+            } else {
+                // todo: no mail to user -> log for report
             }
         }
 

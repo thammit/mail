@@ -16,7 +16,7 @@
                 <thead>
                 <tr>
                     <th></th>
-                    <th>
+                    <th class="col-title col-responsive">
                         <f:translate key="{lll}report.total"/>
                     </th>
                     <f:if condition="{mail.html}">
@@ -37,7 +37,11 @@
                 <th>
                     <f:translate key="{lll}report.mailsSent"/>
                 </th>
-                <td><f:render partial="ProgressBar" arguments="{mail:mail}"/></td>
+                <td class="col-title col-responsive">
+                    <div class="progress" role="progressbar" title="{data.totalSent} / {mail.numberOfRecipientsHandled}" aria-label="{f:translate(key:'{lll}report.mailsSent')}" aria-valuenow="{data.totalSentPercent}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width: {data.totalSentPercent}%">{data.totalSentPercent}%</div>
+                    </div>
+                </td>
                 <f:if condition="{mail.plainAndHtml}">
                     <td>{data.htmlSent}</td>
                     <td>{data.plainSent}</td>
@@ -47,9 +51,9 @@
                 <th>
                     <f:translate key="{lll}report.deliveryFailed"/>
                 </th>
-                <td>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="{data.returnedPercent}" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" style="width: {data.returnedPercent}%">{data.failedResponses} / {data.returnedPercent}%</div>
+                <td class="col-title col-responsive">
+                    <div class="progress" role="progressbar" title="{data.failedResponses} / {data.totalSent}" aria-label="{f:translate(key:'{lll}report.deliveryFailed')}" aria-valuenow="{data.failedResponsesPercent}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width: {data.failedResponsesPercent}%">{data.failedResponsesPercent}%</div>
                     </div>
                 </td>
                 <f:if condition="{mail.plainAndHtml}">
@@ -69,9 +73,9 @@
                     </f:then>
                     <f:else>
                         <f:if condition="{mail.html}">
-                            <td>
-                                <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="{data.viewedPercent}" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar" style="width: {data.viewedPercent}%">{data.htmlViewed}</div>
+                            <td class="col-title col-responsive">
+                                <div class="progress" role="progressbar" title="{data.uniquePingResponses} / {data.htmlSent}" aria-label="{f:translate(key:'{lll}report.html.mailsViewed')}" aria-valuenow="{data.viewedPercent}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="width: {data.htmlViewedPercent}%">{data.htmlViewedPercent}%</div>
                                 </div>
                             </td>
                         </f:if>
@@ -85,17 +89,21 @@
                 <th>
                     <f:translate key="{lll}report.total.responses"/>
                 </th>
-                <td>{data.totalResponses}</td>
+                <td class="col-title col-responsive text-end"><span class="badge rounded-pill bg-mail-theme pb-1">{data.totalResponses}</span></td>
                 <f:if condition="{mail.plainAndHtml}">
-                    <td>{data.htmlResponses}</td>
-                    <td>{data.plainResponses}</td>
+                    <td><span class="badge rounded-pill bg-mail-theme pb-1">{data.htmlResponses}</span></td>
+                    <td><span class="badge rounded-pill bg-mail-theme pb-1">{data.plainResponses}</span></td>
                 </f:if>
             </tr>
             <tr>
                 <th>
                     <f:translate key="{lll}report.uniqueResponses"/>
                 </th>
-                <td>{data.uniqueResponsesTotal}</td>
+                <td class="col-title col-responsive">
+                    <div class="progress" role="progressbar" title="{data.uniqueResponsesTotal} / {data.totalSent}" aria-label="{f:translate(key:'{lll}report.uniqueResponses')}" aria-valuenow="{data.uniqueResponsesTotalPercent}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width: {data.uniqueResponsesTotalPercent}%">{data.uniqueResponsesTotalPercent}%</div>
+                    </div>
+                </td>
                 <f:if condition="{mail.plainAndHtml}">
                     <td>{data.uniqueResponsesHtml}</td>
                     <td>{data.uniqueResponsesPlain}</td>
@@ -105,7 +113,7 @@
                 <th>
                     <f:translate key="{lll}report.performance.linksClickedPerRespondent"/>
                 </th>
-                <td>{data.totalResponsesVsUniqueResponses}</td>
+                <td class="col-title col-responsive text-end">{data.totalResponsesVsUniqueResponses}</td>
                 <f:if condition="{mail.plainAndHtml}">
                     <td>{data.htmlResponsesVsUniqueResponses}</td>
                     <td>{data.plainResponsesVsUniqueResponses}</td>

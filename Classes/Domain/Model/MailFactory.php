@@ -281,7 +281,8 @@ class MailFactory
             ->setSubject($subject)
             ->setSendOptions(new SendFormat(SendFormat::PLAIN))
             ->setEncoding($this->pageTSConfiguration['quickMailEncoding'] ?? 'quoted-printable')
-            ->setCharset($this->pageTSConfiguration['quickMailCharset'] ?? 'utf-8');
+            ->setCharset($this->pageTSConfiguration['quickMailCharset'] ?? 'utf-8')
+            ->setRedirectUrl(BackendDataUtility::getBaseUrl($this->storageFolder));
 
         $plainContent = '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_-->' . $plainContent . '<!--' . Constants::CONTENT_SECTION_BOUNDARY . '_END-->';
         // shorten urls is done in mailer service sendPersonalizedMail method as well, but is necessary here as well, to not break links due to following wordwrap
@@ -289,7 +290,6 @@ class MailFactory
             $plainContent = MailerUtility::shortUrlsInPlainText(
                 $plainContent,
                 $mail,
-                BackendDataUtility::getBaseUrl($this->storageFolder),
                 $this->site->getLanguageById($mail->getSysLanguageUid())->getBase()->getHost() ?: '*'
             );
         }

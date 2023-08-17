@@ -670,6 +670,31 @@ class Mail extends AbstractEntity
         return $this->numberOfRecipientsHandled;
     }
 
+    public function getRecipientsNotHandled(): array
+    {
+        $recipientsNotHandled = [];
+
+        $recipients = $this->getRecipients();
+        $recipientsHandled = $this->getRecipientsHandled();
+        foreach ($recipients as $recipientIdentifier => $recipientUids) {
+            if (isset($recipientsHandled[$recipientIdentifier])) {
+                $recipientsNotHandled[$recipientIdentifier] = array_values(array_diff($recipientUids, $recipientsHandled[$recipientIdentifier]));
+            } else {
+                $recipientsNotHandled[$recipientIdentifier] = $recipientUids;
+            }
+            if (!$recipientsNotHandled[$recipientIdentifier]) {
+                unset($recipientsNotHandled[$recipientIdentifier]);
+            }
+        }
+
+        return $recipientsNotHandled;
+    }
+
+    public function getNumberOfRecipientsNotHandled(): int
+    {
+        return RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsNotHandled());
+    }
+
     public function getDeliveryProgress(): int
     {
         return $this->deliveryProgress;

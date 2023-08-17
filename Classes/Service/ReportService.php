@@ -76,13 +76,11 @@ class ReportService
     public function getPerformanceData(): array
     {
         $formatSent = $this->logRepository->findFormatSentByMail($this->mail->getUid());
-        $totalSent = (int)($formatSent[SendFormat::PLAIN] ?? 0) + (int)($formatSent[SendFormat::HTML] ?? 0) + (int)($formatSent[SendFormat::BOTH] ?? 0);
+
         $htmlSent = (int)($formatSent[SendFormat::HTML] ?? 0) + (int)($formatSent[SendFormat::BOTH] ?? 0);
         $plainSent = (int)($formatSent[SendFormat::PLAIN] ?? 0);
+        $totalSent = $htmlSent + $plainSent;
 
-        $uniqueHtmlResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::HTML);
-        $uniquePlainResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PLAIN);
-        $uniqueResponsesTotal = $uniqueHtmlResponses + $uniquePlainResponses;
         $uniquePingResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PING);
 
         $htmlResponses = $this->responseTypesTable[ResponseType::HTML] ?? 0;
@@ -90,23 +88,27 @@ class ReportService
         $failedResponses = $this->responseTypesTable[ResponseType::FAILED] ?? 0;
         $totalResponses = $htmlResponses + $plainResponses;
 
+        $uniqueHtmlResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::HTML);
+        $uniquePlainResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PLAIN);
+        $uniqueResponsesTotal = $uniqueHtmlResponses + $uniquePlainResponses;
+
         return [
             'htmlSent' => $htmlSent,
             'plainSent' => $plainSent,
-            'deliveryProgress' => $this->mail->getDeliveryProgress(),
-            'numberOfRecipients' => $this->mail->getNumberOfRecipients(),
             'totalSent' => $totalSent,
-            'numberOfRecipientsHandled' => $this->mail->getNumberOfRecipientsHandled(),
+            'totalSentPercent' => number_format(($totalSent / $this->mail->getNumberOfRecipientsHandled() * 100), 2),
             'failedResponses' => $failedResponses,
-            'returned' => ReportUtility::showWithPercent($failedResponses, $totalSent),
-            'returnedPercent' => number_format(($failedResponses / $this->mail->getNumberOfRecipientsHandled() * 100), 2),
+            'failedResponsesPercent' => number_format(($failedResponses / $totalSent * 100), 2),
             'htmlResponses' => $htmlResponses,
             'plainResponses' => $plainResponses,
             'totalResponses' => $totalResponses,
             'uniquePingResponses' => $uniquePingResponses,
-            'viewedPercent' => number_format(($uniquePingResponses / $this->mail->getNumberOfRecipientsHandled() * 100), 2),
+            'viewedPercent' => number_format(($uniquePingResponses / $totalSent * 100), 2),
             'htmlViewed' => ReportUtility::showWithPercent($uniquePingResponses, $htmlSent),
-            'uniqueResponsesTotal' => ReportUtility::showWithPercent($uniqueResponsesTotal, $totalSent),
+            'plainViewedPercent' => $plainSent ? number_format(($uniquePingResponses / $plainSent * 100), 2) : 0.0,
+            'htmlViewedPercent' => $htmlSent ? number_format(($uniquePingResponses / $htmlSent * 100), 2) : 0.0,
+            'uniqueResponsesTotal' => $uniqueResponsesTotal,
+            'uniqueResponsesTotalPercent' => number_format(($uniqueResponsesTotal / $totalSent * 100), 2),
             'uniqueResponsesHtml' => ReportUtility::showWithPercent($uniqueHtmlResponses, $htmlSent),
             'uniqueResponsesPlain' => ReportUtility::showWithPercent($uniquePlainResponses, $plainSent),
             'totalResponsesVsUniqueResponses' => $uniqueResponsesTotal ? number_format($totalResponses / $uniqueResponsesTotal, 2) : '-',
