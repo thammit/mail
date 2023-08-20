@@ -569,6 +569,9 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="report.response.clicks" resname="report.response.clicks">
                 <source>Clicks</source>
             </trans-unit>
+            <trans-unit id="report.response.total" resname="report.response.total">
+                <source>Total clicks</source>
+            </trans-unit>
             <trans-unit id="report.html" resname="report.html">
                 <source>HTML</source>
             </trans-unit>
@@ -614,8 +617,20 @@ You may personalize the mails that will be sent to each recipient by inserting t
             <trans-unit id="report.performance" resname="report.performance">
                 <source>Performance</source>
             </trans-unit>
+            <trans-unit id="report.performance.htmlViewed" resname="report.performance.htmlViewed">
+                <source>Opened (HTML)</source>
+            </trans-unit>
+            <trans-unit id="report.performance.uniqueResponses" resname="report.performance.uniqueResponses">
+                <source>Unique clicks</source>
+            </trans-unit>
+            <trans-unit id="report.performance.uniqueResponses" resname="report.performance.uniqueResponses">
+                <source>Unique clicks</source>
+            </trans-unit>
             <trans-unit id="report.performance.linksClickedPerRespondent" resname="report.performance.linksClickedPerRespondent">
-                <source>Total responses/Unique responses</source>
+                <source>Total/Unique clicks</source>
+            </trans-unit>
+            <trans-unit id="report.performance.decimalSeparator" resname="report.performance.decimalSeparator">
+                <source>.</source>
             </trans-unit>
             <trans-unit id="report.returned" resname="report.returned">
                 <source>Returned recipients</source>

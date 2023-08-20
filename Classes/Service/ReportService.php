@@ -79,7 +79,6 @@ class ReportService
 
         $htmlSent = (int)($formatSent[SendFormat::HTML] ?? 0) + (int)($formatSent[SendFormat::BOTH] ?? 0);
         $plainSent = (int)($formatSent[SendFormat::PLAIN] ?? 0);
-        $notSent = (int)($formatSent[SendFormat::NONE] ?? 0);
         $totalSent = $htmlSent + $plainSent;
 
         $uniquePingResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PING);
@@ -95,24 +94,21 @@ class ReportService
 
         return [
             'htmlSent' => $htmlSent,
+            'htmlSentPercent' => number_format(($htmlSent / $this->mail->getNumberOfRecipients() * 100), 2),
             'plainSent' => $plainSent,
+            'plainSentPercent' => number_format(($plainSent / $this->mail->getNumberOfRecipients() * 100), 2),
             'totalSent' => $totalSent,
-//            'notSent' => $this->logRepository->findNotSentByMail($this->mail->getUid()),
-            'totalSentPercent' => number_format(($totalSent / $this->mail->getNumberOfRecipientsHandled() * 100), 2),
+            'totalSentPercent' => number_format(($totalSent / $this->mail->getNumberOfRecipients() * 100), 2),
             'failedResponses' => $failedResponses,
             'failedResponsesPercent' => number_format(($failedResponses / $totalSent * 100), 2),
-            'htmlResponses' => $htmlResponses,
-            'plainResponses' => $plainResponses,
-            'totalResponses' => $totalResponses,
             'uniquePingResponses' => $uniquePingResponses,
-            'viewedPercent' => number_format(($uniquePingResponses / $totalSent * 100), 2),
-            'htmlViewed' => ReportUtility::showWithPercent($uniquePingResponses, $htmlSent),
-            'plainViewedPercent' => $plainSent ? number_format(($uniquePingResponses / $plainSent * 100), 2) : 0.0,
             'htmlViewedPercent' => $htmlSent ? number_format(($uniquePingResponses / $htmlSent * 100), 2) : 0.0,
             'uniqueResponsesTotal' => $uniqueResponsesTotal,
             'uniqueResponsesTotalPercent' => number_format(($uniqueResponsesTotal / $totalSent * 100), 2),
-            'uniqueResponsesHtml' => ReportUtility::showWithPercent($uniqueHtmlResponses, $htmlSent),
-            'uniqueResponsesPlain' => ReportUtility::showWithPercent($uniquePlainResponses, $plainSent),
+            'uniqueResponsesHtml' => $uniqueHtmlResponses,
+            'uniqueResponsesHtmlPercent' => $htmlSent ? number_format(($uniqueHtmlResponses / $htmlSent * 100), 2) : 0.0,
+            'uniqueResponsesPlain' => $uniquePlainResponses,
+            'uniqueResponsesPlainPercent' => $plainSent ? number_format(($uniquePlainResponses / $plainSent * 100), 2) : 0.0,
             'totalResponsesVsUniqueResponses' => $uniqueResponsesTotal ? number_format($totalResponses / $uniqueResponsesTotal, 2) : '-',
             'htmlResponsesVsUniqueResponses' => $uniqueHtmlResponses ? number_format($htmlResponses / $uniqueHtmlResponses, 2) : '-',
             'plainResponsesVsUniqueResponses' => $uniquePlainResponses ? number_format($plainResponses / $uniquePlainResponses, 2) : '-',

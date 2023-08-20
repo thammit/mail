@@ -31,6 +31,9 @@
             </tr>
             </thead>
             <tbody>
+            <f:variable name="totalClicks" value="0"></f:variable>
+            <f:variable name="htmlTotalClicks" value="0"></f:variable>
+            <f:variable name="plainTotalClicks" value="0"></f:variable>
             <f:for each="{data}" as="row">
                 <tr>
                     <td>
@@ -39,12 +42,25 @@
                         </a>
                     </td>
                     <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.totalCounter}</span></td>
+                    <f:variable name="totalClicks" value="{totalClicks + row.totalCounter}"></f:variable>
                     <f:if condition="{mail.plainAndHtml}">
+                        <f:variable name="htmlTotalClicks" value="{htmlTotalClicks + row.htmlCounter}"></f:variable>
+                        <f:variable name="plainTotalClicks" value="{plainTotalClicks + row.plainCounter}"></f:variable>
                         <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.htmlCounter}</span></td>
                         <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.plainCounter}</span></td>
                     </f:if>
                 </tr>
             </f:for>
+            <tr class="table-secondary">
+                <td>
+                    <strong><f:translate key="{lll}report.response.total"/></strong>
+                </td>
+                <td><span style="--bs-badge-font-size:1.1em" class="badge rounded-pill bg-mail-theme pb-1">{totalClicks}</span></td>
+                <f:if condition="{mail.plainAndHtml}">
+                    <th><span class="badge rounded-pill bg-mail-theme pb-1">{htmlTotalClicks}</span></th>
+                    <th><span class="badge rounded-pill bg-mail-theme pb-1">{plainTotalClicks}</span></th>
+                </f:if>
+            </tr>
             </tbody>
         </table>
     </div>
