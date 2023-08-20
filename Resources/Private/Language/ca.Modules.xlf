@@ -771,6 +771,10 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Clicks</source>
         <target state="needs-translation">Clicks</target>
       </trans-unit>
+      <trans-unit id="report.response.total" resname="report.response.total">
+        <source>Total clicks</source>
+        <target state="needs-translation">Total clicks</target>
+      </trans-unit>
       <trans-unit id="report.html" resname="report.html">
         <source>HTML</source>
         <target state="needs-translation">HTML</target>
@@ -831,9 +835,25 @@ You may personalize the mails that will be sent to each recipient by inserting t
         <source>Performance</source>
         <target state="needs-translation">Performance</target>
       </trans-unit>
+      <trans-unit id="report.performance.htmlViewed" resname="report.performance.htmlViewed">
+        <source>Opened (HTML)</source>
+        <target state="needs-translation">Opened (HTML)</target>
+      </trans-unit>
+      <trans-unit id="report.performance.uniqueResponses" resname="report.performance.uniqueResponses">
+        <source>Unique clicks</source>
+        <target state="needs-translation">Unique clicks</target>
+      </trans-unit>
+      <trans-unit id="report.performance.uniqueResponses" resname="report.performance.uniqueResponses">
+        <source>Unique clicks</source>
+        <target state="needs-translation">Unique clicks</target>
+      </trans-unit>
       <trans-unit id="report.performance.linksClickedPerRespondent" resname="report.performance.linksClickedPerRespondent">
-        <source>Total responses/Unique responses</source>
-        <target state="needs-translation">Total responses/Unique responses</target>
+        <source>Total/Unique clicks</source>
+        <target state="needs-translation">Total/Unique clicks</target>
+      </trans-unit>
+      <trans-unit id="report.performance.decimalSeparator" resname="report.performance.decimalSeparator">
+        <source>.</source>
+        <target state="needs-translation">.</target>
       </trans-unit>
       <trans-unit id="report.returned" resname="report.returned">
         <source>Returned recipients</source>
