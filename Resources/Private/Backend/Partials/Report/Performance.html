@@ -20,7 +20,7 @@
                 <td class="col-title col-responsive">
                     <f:if condition="{mail.plainAndHtml}">
                         <f:then>
-                            <div class="progress-stacked">
+                            <div class="progress-stacked position-relative" title="HTML:{data.htmlSent} + PLAIN:{data.plainSent} / {mail.numberOfRecipients}">
                                 <div class="progress" role="progressbar" aria-label="Segment one" aria-valuenow="{data.htmlSentPercent}" aria-valuemin="0" aria-valuemax="100"
                                      style="width: {data.htmlSentPercent}%">
                                     <div class="progress-bar"></div>
@@ -30,8 +30,7 @@
                                     <div class="progress-bar bg-info"></div>
                                 </div>
                                 <div class="progress" style="position:absolute;background-color:transparent;width:{data.totalSentPercent}%" role="progressbar"
-                                     title="HTML:{data.htmlSent} + PLAIN:{data.plainSent} / {mail.numberOfRecipientsHandled}" aria-label="{f:translate(key:'{lll}report.mailsSent')}"
-                                     aria-valuenow="{data.totalSentPercent}" aria-valuemin="0" aria-valuemax="100">
+                                     aria-label="{f:translate(key:'{lll}report.mailsSent')}" aria-valuenow="{data.totalSentPercent}" aria-valuemin="0" aria-valuemax="100">
                                     <div class="progress-bar" style="background-color:transparent;">{data.totalSentPercent}%</div>
                                 </div>
                             </div>
@@ -80,7 +79,7 @@
                 <td class="col-title col-responsive">
                     <f:if condition="{mail.plainAndHtml}">
                         <f:then>
-                            <div class="progress-stacked">
+                            <div class="progress-stacked position-relative" title="HTML:{data.uniqueResponsesHtml} + PLAIN:{data.uniqueResponsesPlain} / {data.totalSent}">
                                 <div class="progress" role="progressbar" aria-label="Segment one" aria-valuenow="{data.uniqueResponsesHtmlPercent}" aria-valuemin="0" aria-valuemax="100"
                                      style="width: {data.uniqueResponsesHtmlPercent}%">
                                     <div class="progress-bar"></div>
@@ -90,8 +89,7 @@
                                     <div class="progress-bar bg-info"></div>
                                 </div>
                                 <div class="progress" style="position:absolute;background-color:transparent;width:{data.uniqueResponsesTotalPercent}%" role="progressbar"
-                                     title="HTML:{data.uniqueResponsesHtml} + PLAIN:{data.uniqueResponsesPlain} / {data.totalSent}" aria-label="{f:translate(key:'{lll}report.uniqueResponses')}"
-                                     aria-valuenow="{data.uniqueResponsesTotalPercent}" aria-valuemin="0" aria-valuemax="100">
+                                     aria-label="{f:translate(key:'{lll}report.uniqueResponses')}" aria-valuenow="{data.uniqueResponsesTotalPercent}" aria-valuemin="0" aria-valuemax="100">
                                     <div class="progress-bar" style="background-color:transparent;">{data.uniqueResponsesTotalPercent}%</div>
                                 </div>
                             </div>
@@ -111,7 +109,7 @@
                 </th>
                 <f:if condition="{mail.plainAndHtml}">
                     <f:then>
-                        <td class="col-title col-responsive text-end d-flex gx-2">
+                        <td class="col-title col-responsive text-end gap-2">
                             <span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">HTML: {data.htmlResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
                             <span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">PLAIN: {data.plainResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
                         </td>

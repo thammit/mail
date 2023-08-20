@@ -17,9 +17,6 @@
                 <th>
                     <f:translate key="{lll}report.response.target"/>
                 </th>
-                <th>
-                    <f:translate key="{lll}report.response.clicks"/>
-                </th>
                 <f:if condition="{mail.plainAndHtml}">
                     <th>
                         <f:translate key="{lll}report.html"/>
@@ -28,6 +25,9 @@
                         <f:translate key="{lll}report.plainText"/>
                     </th>
                 </f:if>
+                <th>
+                    <f:translate key="{lll}report.response.clicks"/>
+                </th>
             </tr>
             </thead>
             <tbody>
@@ -41,7 +41,6 @@
                             <core:icon identifier="{row.iconIdentifier}" size="small" /> {row.label}
                         </a>
                     </td>
-                    <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.totalCounter}</span></td>
                     <f:variable name="totalClicks" value="{totalClicks + row.totalCounter}"></f:variable>
                     <f:if condition="{mail.plainAndHtml}">
                         <f:variable name="htmlTotalClicks" value="{htmlTotalClicks + row.htmlCounter}"></f:variable>
@@ -49,17 +48,18 @@
                         <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.htmlCounter}</span></td>
                         <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.plainCounter}</span></td>
                     </f:if>
+                    <td><span class="badge rounded-pill bg-mail-theme pb-1">{row.totalCounter}</span></td>
                 </tr>
             </f:for>
             <tr class="table-secondary">
                 <td>
                     <strong><f:translate key="{lll}report.response.total"/></strong>
                 </td>
-                <td><span style="--bs-badge-font-size:1.1em" class="badge rounded-pill bg-mail-theme pb-1">{totalClicks}</span></td>
                 <f:if condition="{mail.plainAndHtml}">
-                    <th><span class="badge rounded-pill bg-mail-theme pb-1">{htmlTotalClicks}</span></th>
-                    <th><span class="badge rounded-pill bg-mail-theme pb-1">{plainTotalClicks}</span></th>
+                    <td><span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">{htmlTotalClicks}</span></td>
+                    <td><span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">{plainTotalClicks}</span></td>
                 </f:if>
+                <td><span style="--bs-badge-font-size:1.1em" class="badge rounded-pill bg-mail-theme pb-1">{totalClicks}</span></td>
             </tr>
             </tbody>
         </table>
