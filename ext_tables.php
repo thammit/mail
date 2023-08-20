@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 defined('TYPO3') or die();
 
-(function () {
+(static function () {
     if ((new TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() < 12) {
         \MEDIAESSENZ\Mail\Configuration::registerBackendModules();
     }

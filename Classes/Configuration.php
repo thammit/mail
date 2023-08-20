@@ -17,7 +17,9 @@ use MEDIAESSENZ\Mail\Updates\ImprovedProcessHandlingUpdater;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
 final class Configuration
@@ -202,5 +204,12 @@ final class Configuration
             'type' => 'web',
             'allowedTables' => '*',
         ];
+    }
+
+    public static function excludeMailParamsFromCHashCalculation(): void
+    {
+        if ((int)($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['enforceValidation'] ?? 0) === 1) {
+            ArrayUtility::mergeRecursiveWithOverrule($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['excludedParameters'], ['mail','rid','aC','juHash','jumpurl']);
+        }
     }
 }
