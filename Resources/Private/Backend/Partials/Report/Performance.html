@@ -59,7 +59,7 @@
                     </td>
                 </tr>
             </f:if>
-            <f:if condition="mail.html">
+            <f:if condition="{mail.html} && {data.uniquePingResponses}">
                 <tr>
                     <th>
                         <f:translate key="{lll}report.performance.htmlViewed"/>
@@ -72,54 +72,56 @@
                     </td>
                 </tr>
             </f:if>
-            <tr>
-                <th>
-                    <f:translate key="{lll}report.performance.uniqueResponses"/>
-                </th>
-                <td class="col-title col-responsive">
+            <f:if condition="{data.uniqueResponsesTotal}">
+                <tr>
+                    <th>
+                        <f:translate key="{lll}report.performance.uniqueResponses"/>
+                    </th>
+                    <td class="col-title col-responsive">
+                        <f:if condition="{mail.plainAndHtml}">
+                            <f:then>
+                                <div class="progress-stacked position-relative" title="HTML:{data.uniqueResponsesHtml} + PLAIN:{data.uniqueResponsesPlain} / {data.totalSent}">
+                                    <div class="progress" role="progressbar" aria-label="Segment one" aria-valuenow="{data.uniqueResponsesHtmlPercent}" aria-valuemin="0" aria-valuemax="100"
+                                         style="width: {data.uniqueResponsesHtmlPercent}%">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <div class="progress" role="progressbar" aria-label="Segment two" aria-valuenow="{data.uniqueResponsesPlainPercent}" aria-valuemin="0" aria-valuemax="100"
+                                         style="width: {data.uniqueResponsesPlainPercent}%">
+                                        <div class="progress-bar bg-info"></div>
+                                    </div>
+                                    <div class="progress" style="position:absolute;background-color:transparent;width:{data.uniqueResponsesTotalPercent}%" role="progressbar"
+                                         aria-label="{f:translate(key:'{lll}report.uniqueResponses')}" aria-valuenow="{data.uniqueResponsesTotalPercent}" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar" style="background-color:transparent;">{data.uniqueResponsesTotalPercent}%</div>
+                                    </div>
+                                </div>
+                            </f:then>
+                            <f:else>
+                                <div class="progress" role="progressbar" title="{data.uniqueResponsesTotal} / {data.totalSent}" aria-label="{f:translate(key:'{lll}report.uniqueResponses')}"
+                                     aria-valuenow="{data.uniqueResponsesTotalPercent}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="width: {data.uniqueResponsesTotalPercent}%">{data.uniqueResponsesTotalPercent}%</div>
+                                </div>
+                            </f:else>
+                        </f:if>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <f:translate key="{lll}report.performance.linksClickedPerRespondent"/>
+                    </th>
                     <f:if condition="{mail.plainAndHtml}">
                         <f:then>
-                            <div class="progress-stacked position-relative" title="HTML:{data.uniqueResponsesHtml} + PLAIN:{data.uniqueResponsesPlain} / {data.totalSent}">
-                                <div class="progress" role="progressbar" aria-label="Segment one" aria-valuenow="{data.uniqueResponsesHtmlPercent}" aria-valuemin="0" aria-valuemax="100"
-                                     style="width: {data.uniqueResponsesHtmlPercent}%">
-                                    <div class="progress-bar"></div>
-                                </div>
-                                <div class="progress" role="progressbar" aria-label="Segment two" aria-valuenow="{data.uniqueResponsesPlainPercent}" aria-valuemin="0" aria-valuemax="100"
-                                     style="width: {data.uniqueResponsesPlainPercent}%">
-                                    <div class="progress-bar bg-info"></div>
-                                </div>
-                                <div class="progress" style="position:absolute;background-color:transparent;width:{data.uniqueResponsesTotalPercent}%" role="progressbar"
-                                     aria-label="{f:translate(key:'{lll}report.uniqueResponses')}" aria-valuenow="{data.uniqueResponsesTotalPercent}" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar" style="background-color:transparent;">{data.uniqueResponsesTotalPercent}%</div>
-                                </div>
-                            </div>
+                            <td class="col-title col-responsive text-end gap-2">
+                                <span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">HTML: {data.htmlResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
+                                <span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">PLAIN: {data.plainResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
+                            </td>
                         </f:then>
                         <f:else>
-                            <div class="progress" role="progressbar" title="{data.uniqueResponsesTotal} / {data.totalSent}" aria-label="{f:translate(key:'{lll}report.uniqueResponses')}"
-                                 aria-valuenow="{data.uniqueResponsesTotalPercent}" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar" style="width: {data.uniqueResponsesTotalPercent}%">{data.uniqueResponsesTotalPercent}%</div>
-                            </div>
+                            <td class="col-title col-responsive text-end"><span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">{data.totalResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
+                            </td>
                         </f:else>
                     </f:if>
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <f:translate key="{lll}report.performance.linksClickedPerRespondent"/>
-                </th>
-                <f:if condition="{mail.plainAndHtml}">
-                    <f:then>
-                        <td class="col-title col-responsive text-end gap-2">
-                            <span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">HTML: {data.htmlResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
-                            <span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">PLAIN: {data.plainResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
-                        </td>
-                    </f:then>
-                    <f:else>
-                        <td class="col-title col-responsive text-end"><span class="badge rounded-pill bg-mail-theme pb-1" style="--bs-badge-font-size:1.1em">{data.totalResponsesVsUniqueResponses -> f:format.number(decimalSeparator:'{f:translate(key:\'{lll}report.performance.decimalSeparator\')}')}</span>
-                        </td>
-                    </f:else>
-                </f:if>
-            </tr>
+                </tr>
+            </f:if>
             </tbody>
         </table>
     </div>
