@@ -185,7 +185,7 @@ final class Configuration
 
     public static function registerMigrations(): void
     {
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail'] = DirectMailMigration::class;
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailDirectMailMigration'] = DirectMailMigration::class;
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailImproveProcessHandlingUpdater'] = ImprovedProcessHandlingUpdater::class;
     }
 

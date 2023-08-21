@@ -19,7 +19,7 @@ class DirectMailMigration implements UpgradeWizardInterface
 {
     public function getIdentifier(): string
     {
-        return 'directMail2Mail';
+        return 'mailDirectMailMigration';
     }
 
     public function getTitle(): string
