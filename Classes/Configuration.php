@@ -57,7 +57,7 @@ final class Configuration
      */
     public static function addUserTSConfig(): void
     {
-        \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addUserTSConfig('
+        ExtensionManagementUtility::addUserTSConfig('
         options.pageTree.doktypesToShowInNewPageDragArea := addToList(' . (int)(ConfigurationUtility::getExtensionConfiguration('mailPageTypeNumber') ?? Constants::DEFAULT_MAIL_PAGE_TYPE) . ')
         ');
     }
@@ -186,7 +186,7 @@ final class Configuration
     public static function registerMigrations(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['directMail2Mail'] = DirectMailMigration::class;
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailImproveProcessHandling'] = ImprovedProcessHandlingUpdater::class;
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailImproveProcessHandlingUpdater'] = ImprovedProcessHandlingUpdater::class;
     }
 
     public static function registerTypeConverter(): void
