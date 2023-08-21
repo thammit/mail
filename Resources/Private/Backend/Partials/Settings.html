@@ -13,7 +13,7 @@
 					<tbody>
 					<f:for each="{fieldGroups}" as="fields">
 						<f:for each="{fields}" as="field">
-							<f:render partial="Tabs" section="tableRow" arguments="{field:field, mailUid:mail.uid}"/>
+							<f:render partial="Tabs" section="tableRow" arguments="{field:field, mailUid:mail.uid, lll:lll}"/>
 						</f:for>
 					</f:for>
 					</tbody>
@@ -58,7 +58,7 @@
 								<f:variable name="active">{fieldGroupIterator.isFirst}</f:variable>
 							</f:else>
 						</f:if>
-						<f:render partial="Tabs" section="tabContent" arguments="{tabId:tabId,mailUid:mail.uid,fields:fields,active:active}"/>
+						<f:render partial="Tabs" section="tabContent" arguments="{tabId:tabId,mailUid:mail.uid,fields:fields,active:active,lll:lll}"/>
 					</f:if>
 				</f:for>
 			</div>
