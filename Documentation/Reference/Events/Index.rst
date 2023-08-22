@@ -19,7 +19,7 @@ See `MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers` for example.
         MEDIAESSENZ\Mail\EventListener\AddUpperCaseMarkers:
           tags:
             - name: 'event.listener'
-              identifier: 'addUpperCaseMarkers'
+              identifier: ''mediaessenz/mail/add-upper-case-markers'
 
 
 ManipulateRecipientEvent
@@ -28,6 +28,24 @@ See `MEDIAESSENZ\Mail\EventListener\ManipulateAddressRecipient` and `MEDIAESSENZ
 
 ..  note::
     Need an entry in a `Services.yaml` as well.
+
+DeactivateRecipientsEvent
+=========================
+To deactivate returned mail recipients within the report module (beside tt_address and fe_users), it is necessary to register corresponding event
+listeners.
+
+See `MEDIAESSENZ\Mail\EventListener\DeactivateAddresses` and `DeactivateFeUsers` for example.
+
+..  note::
+    Need an entry in a `Services.yaml` as well. It looks similar to this:
+
+    .. code-block:: yaml
+
+        VENDOR\ExtensionKey\EventListener\DeactivateMyAddresses:
+          tags:
+            - name: 'event.listener'
+              identifier: 'vendor/extensionkey/deactivate-my-addresses'
+
 
 AdditionalMailHeadersEvent
 ==========================

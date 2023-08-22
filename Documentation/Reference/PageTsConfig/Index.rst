@@ -447,7 +447,9 @@ showContentTitle
    :Default: 0
    :Path: mod.web\_modules.mail.showContentTitle
 
-   If set to 1, then only content title, in which the link can be found, will be shown in the click statistics.
+   If set to 1, only the title/name (instead of the path) of a clicked
+   target will be shown in the mail reports. This cost a bit performance,
+   since the title/name has to be fetched and parsed from the target url.
 
 prependContentTitle
 -------------------
@@ -458,7 +460,8 @@ prependContentTitle
    :Default: 0
    :Path: mod.web\_modules.mail.prependContentTitle
 
-   If set to 1, then content title and the linked words will be shown
+   If set to 1, the content title (see above) and the clicked target path
+   will be shown. Only relevant if showContentTitle is set to 1.
 
 maxLabelLength
 --------------

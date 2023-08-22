@@ -130,7 +130,7 @@ class ReportController extends AbstractController
     public function disableTotalReturnedAction(Mail $mail): void
     {
         $this->reportService->init($mail);
-        $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData());
+        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData());
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -183,7 +183,7 @@ class ReportController extends AbstractController
     public function disableUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
+        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -236,7 +236,7 @@ class ReportController extends AbstractController
     public function disableFullAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]));
+        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -289,7 +289,7 @@ class ReportController extends AbstractController
     public function disableBadHostAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]));
+        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -342,7 +342,7 @@ class ReportController extends AbstractController
     public function disableBadHeaderAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]));
+        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -395,7 +395,7 @@ class ReportController extends AbstractController
     public function disableReasonUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $affectedRecipients = $this->reportService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
+        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }

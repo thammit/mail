@@ -89,6 +89,16 @@ services:
       - name: 'event.listener'
         identifier: 'mediaessenz/mail/add-back-to-mail-wizard-button'
 
+  MEDIAESSENZ\Mail\EventListener\DeactivateAddresses:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/deactivate-addresses'
+
+  MEDIAESSENZ\Mail\EventListener\DeactivateFeUsers:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/deactivate-feusers'
+
   MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter:
     tags:
       - name: extbase.type_converter

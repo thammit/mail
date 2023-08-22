@@ -15,6 +15,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
+use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
@@ -193,6 +194,7 @@ class RecipientService
             }
         }
 
+        /** @var RecipientInterface $recipient */
         foreach ($recipients as $recipient) {
             $data[$recipient->getUid()] = $hasFields ? RecipientUtility::getFlatRecipientModelData($recipient, $getters,
                 $withCategoryUidsArray) : $recipient->getEnhancedData();
@@ -712,6 +714,18 @@ class RecipientService
             $this->groupRepository->persist();
         }
     }
+
+    /**
+     * @param array $data
+     * @return int
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
+    public function disableRecipients(array $data): int
+    {
+        return $this->eventDispatcher->dispatch(new DeactivateRecipientsEvent($data, $this->recipientSources))->getNumberOfAffectedRecipients();
+    }
+
 
     /*
      * H E L P E R

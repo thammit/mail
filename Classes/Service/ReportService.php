@@ -11,12 +11,14 @@ use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
+use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\ReportUtility;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -49,6 +51,7 @@ class ReportService
         protected FrontendUserRepository $frontendUserRepository,
         protected SiteFinder             $siteFinder,
         protected RecipientService       $recipientService,
+        protected EventDispatcherInterface $eventDispatcher
     )
     {
     }
@@ -164,21 +167,6 @@ class ReportService
     }
 
     /**
-     * @param array $data
-     * @return int
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
-    public function disableRecipients(array $data): int
-    {
-        $affectedRecipients = 0;
-        $affectedRecipients += $data['addresses'] ? $this->disableAddresses($data['addresses']) : 0;
-        $affectedRecipients += $data['frontendUsers'] ? $this->disableFrontendUsers($data['frontendUsers']) : 0;
-
-        return $affectedRecipients;
-    }
-
-    /**
      * @return array
      * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
@@ -253,52 +241,6 @@ class ReportService
         $htmlLinks = [];
         if ($this->mail->isHtml()) {
             $htmlLinks = $this->mail->getHtmlLinks();
-
-            /*
-            $htmlContent = $mailContent['html']['content'];
-            if (is_array($mailContent['html']['hrefs'])) {
-                foreach ($mailContent['html']['hrefs'] as $jumpurlId => $jumpurlData) {
-                    $htmlLinks[$jumpurlId] = [
-                        'url' => $jumpurlData['ref'],
-                        'label' => '',
-                    ];
-                }
-            }
-
-            // Parse mail body
-            $dom = new DOMDocument;
-            @$dom->loadHTML($htmlContent);
-            $htmlLinks = [];
-            // Get all links
-            foreach ($dom->getElementsByTagName('a') as $node) {
-                $htmlLinks[] = $node;
-            }
-
-            // Process all links found
-            foreach ($htmlLinks as $link) {
-                $url = $link->getAttribute('href');
-
-                if (empty($url) || str_starts_with($url, 'mailto:') || str_starts_with($url, '#') || !str_contains($url, '=')) {
-                    // Drop tags without href / mail links / internal anker
-                    continue;
-                }
-
-                $parsedUrl = GeneralUtility::explodeUrl2Array($url);
-
-                if (!array_key_exists('jumpurl', $parsedUrl)) {
-                    // Ignore non-jumpurl links
-                    continue;
-                }
-
-                $jumpurlId = $parsedUrl['jumpurl'];
-                $targetUrl = $htmlLinks[$jumpurlId]['url'];
-
-                $title = $link->getAttribute('title');
-
-                $htmlLinks[$jumpurlId]['label'] = $targetUrl;
-                $htmlLinks[$jumpurlId]['title'] = !empty($title) ? $title : $targetUrl;
-            }
-            */
         }
 
         $data = [];
@@ -387,39 +329,4 @@ class ReportService
         return $baseUrl;
     }
 
-    /**
-     * @param array $addresses array of addresses
-     *
-     * @return int total of disabled records
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
-    protected function disableAddresses(array $addresses): int
-    {
-        /** @var Address $address */
-        foreach ($addresses as $address) {
-            $address->setActive(false);
-            $this->addressRepository->update($address);
-        }
-
-        return count($addresses);
-    }
-
-    /**
-     * @param array $frontendUsers array of frontend users
-     *
-     * @return int total of disabled records
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
-    protected function disableFrontendUsers(array $frontendUsers): int
-    {
-        /** @var FrontendUser $frontendUser */
-        foreach ($frontendUsers as $frontendUser) {
-            $frontendUser->setActive(false);
-            $this->addressRepository->update($frontendUser);
-        }
-
-        return count($frontendUsers);
-    }
 }

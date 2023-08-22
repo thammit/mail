@@ -151,6 +151,17 @@ trait RepositoryTrait
     }
 
     /**
+     * @param array $data
+     * @param array $identifier
+     * @param array $types
+     * @return int
+     */
+    public function updateRecord(array $data, array $identifier, array $types = []): int
+    {
+        return $this->getConnection($this->table)->update($this->table, $data, $identifier, $types);
+    }
+
+    /**
      * @param int $uid
      * @return int
      * @throws DBALException
