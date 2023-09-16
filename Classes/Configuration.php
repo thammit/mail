@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail;
 
+use Fetch\Server;
 use MEDIAESSENZ\Mail\ContentObject\EmogrifierContentObject;
 use MEDIAESSENZ\Mail\ContentObject\ScssContentObject;
 use MEDIAESSENZ\Mail\Controller\MailController;
@@ -17,6 +18,7 @@ use MEDIAESSENZ\Mail\Updates\ImprovedProcessHandlingUpdater;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -210,6 +212,14 @@ final class Configuration
     {
         if ((int)($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['enforceValidation'] ?? 0) === 1) {
             ArrayUtility::mergeRecursiveWithOverrule($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['excludedParameters'], ['mail','rid','aC','juHash','jumpurl']);
+        }
+    }
+
+    public static function includeRequiredLibrariesForNoneComposerMode(): void
+    {
+        if (!class_exists(Server::class) && !Environment::isComposerMode()) {
+            // @phpstan-ignore-next-line
+            @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
         }
     }
 }

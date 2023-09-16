@@ -12,13 +12,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-
-if (!class_exists(HtmlConverter::class) && !Environment::isComposerMode()) {
-    // @phpstan-ignore-next-line
-    @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
-}
 
 class MarkdownMiddleware implements MiddlewareInterface
 {

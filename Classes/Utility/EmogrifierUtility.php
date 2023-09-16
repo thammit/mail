@@ -5,13 +5,6 @@ namespace MEDIAESSENZ\Mail\Utility;
 
 use Pelago\Emogrifier\CssInliner;
 use Symfony\Component\CssSelector\Exception\ParseException;
-use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-
-if (!class_exists(CssInliner::class) && !Environment::isComposerMode()) {
-    // @phpstan-ignore-next-line
-    @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
-}
 
 class EmogrifierUtility
 {

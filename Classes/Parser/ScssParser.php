@@ -13,11 +13,6 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 
-if (!class_exists(Compiler::class) && !Environment::isComposerMode()) {
-    // @phpstan-ignore-next-line
-    @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
-}
-
 /**
  * ScssParser
  */
