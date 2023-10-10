@@ -633,7 +633,7 @@ class Mail extends AbstractEntity
     public function setRecipients(array $recipients, bool $calculateNumberOfRecipients = false): Mail
     {
         $recipients = MailerUtility::removeDuplicateValues($recipients);
-        $this->recipients = json_encode($recipients, JSON_THROW_ON_ERROR, 2);
+        $this->recipients = json_encode($recipients, JSON_THROW_ON_ERROR, 5);
         if ($calculateNumberOfRecipients) {
             $this->numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($recipients);
         }
