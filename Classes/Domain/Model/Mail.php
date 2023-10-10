@@ -617,7 +617,7 @@ class Mail extends AbstractEntity
      */
     public function getRecipients(string $identifier = null): array
     {
-        $recipients = json_decode($this->recipients, true, 3, JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY);
+        $recipients = json_decode($this->recipients, true, 5, JSON_THROW_ON_ERROR | JSON_OBJECT_AS_ARRAY);
         if ($identifier) {
             return $recipients[$identifier] ?? [];
         }
