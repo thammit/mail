@@ -1,6 +1,6 @@
 .PHONY: build-mail-dependencies
 build-mail-dependencies:
-	composer update --no-dev --prefer-dist --optimize-autoloader --working-dir=Resources/Private/PHP
+	COMPOSER_IGNORE_PLATFORM_REQ=ext-imap composer update --no-dev --prefer-dist --optimize-autoloader --working-dir=Resources/Private/PHP
 	box compile -c Resources/Private/PHP/box.json
 
 .PHONY: zip
