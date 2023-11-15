@@ -4,32 +4,23 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\Exception;
-use JetBrains\PhpStorm\NoReturn;
-use MEDIAESSENZ\Mail\Domain\Model\Address;
-use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
+use JsonException;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
-use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
-use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\ReportUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class ReportService
 {
@@ -61,6 +52,7 @@ class ReportService
      * @return void
      * @throws Exception
      * @throws SiteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function init(Mail $mail): void
     {
@@ -143,7 +135,6 @@ class ReportService
      * @throws Exception
      * @throws Exception
      * @throws InvalidQueryException
-     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function getReturnedDetailsData(array $returnCodes = []): array
     {
@@ -172,6 +163,7 @@ class ReportService
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws SiteNotFoundException
+     * @throws JsonException
      */
     public function getResponsesData(): array
     {

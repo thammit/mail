@@ -318,7 +318,7 @@ class ImportService
 
     /**
      * @return array
-     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function startCsvImport(): array
     {
@@ -400,7 +400,7 @@ class ImportService
      * @param array $csvData The csv raw data
      *
      * @return array Array containing double, updated and invalid-email records
-     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function doImport(array $csvData): array
     {

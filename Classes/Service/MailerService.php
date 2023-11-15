@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Service;
 
 use DateTimeImmutable;
-use Doctrine\DBAL\Driver\Exception;
 use DOMElement;
+use JsonException;
 use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Log;
@@ -346,10 +346,11 @@ class MailerService implements LoggerAwareInterface
      *
      * @param Mail $mail
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws JsonException
      * @throws \TYPO3\CMS\Core\Exception
-     * @throws InvalidQueryException
      */
     protected function massSend(Mail $mail): void
     {
@@ -380,7 +381,7 @@ class MailerService implements LoggerAwareInterface
                         $recipientData['uid'] = $recipientUid + 1;
                         $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, (int)$groupUid);
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier], fn($item) => $item !== $recipientData['uid']);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
                         $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
                         $numberOfSentMails++;
                     }
@@ -395,7 +396,7 @@ class MailerService implements LoggerAwareInterface
                     );
                     foreach ($recipientsData as $recipientData) {
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier], fn($item) => $item !== $recipientData['uid']);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
                         $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
                         $numberOfSentMails++;
                     }
@@ -411,7 +412,7 @@ class MailerService implements LoggerAwareInterface
                     while ($recipientData = $queryResult->fetchAssociative()) {
                         $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier], fn($item) => $item !== $recipientData['uid']);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
                         $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
                         $numberOfSentMails++;
                     }
@@ -549,11 +550,14 @@ class MailerService implements LoggerAwareInterface
 
     /**
      * @return void
-     * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws JsonException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws \TYPO3\CMS\Core\Exception
      */
     public function handleQueue(): void
     {

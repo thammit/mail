@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
@@ -92,7 +91,7 @@ class RecipientService
      * @param bool $categoriesAsList
      *
      * @return array recipients' data
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function getRecipientsDataByUidListAndTable(
         array $uidListOfRecipients,
@@ -278,7 +277,6 @@ class RecipientService
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @throws DBALException
      */
     public function getRecipientsUidListGroupedByRecipientSource(Group $group, bool $addGroupUidToRecipientSourceIdentifier = false): array
     {
@@ -406,7 +404,7 @@ class RecipientService
             $constrains[] = $query->logicalOr(...$orCategoryConstrains);
         }
         $query->matching(
-            $query->logicalAnd($constrains)
+            $query->logicalAnd(...$constrains)
         );
 //        $debugResult = $this->debugQuery($query);
         $recipients = $query->execute();
@@ -429,10 +427,10 @@ class RecipientService
      * @param string $table source table
      * @param array $pages uid list of pages
      * @param ObjectStorage<Category> $categories mail categories
-     *
+     * @param bool $ignoreMailActive
      * @return array The resulting array of uids
      * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function getRecipientUidListByTableAndPageUidListAndCategories(
         string $table,
@@ -539,10 +537,10 @@ class RecipientService
      *
      * @param string $table The table to select from
      * @param int $mailGroupUid The uid of the mail group
-     *
+     * @param bool $ignoreMailActive
      * @return array The resulting array of uids
      * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function getStaticIdListByTableAndGroupUid(string $table, int $mailGroupUid, bool $ignoreMailActive = false): array
     {
@@ -738,7 +736,7 @@ class RecipientService
      *
      * @return array The all id of fe_groups
      * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function getRecursiveFrontendUserGroups(int $groupId): array
     {
@@ -789,8 +787,7 @@ class RecipientService
     }
 
     /**
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function getCategoriesOfRecipient(int $uid, string $table, $categoryFieldName = 'categories'): array
     {
