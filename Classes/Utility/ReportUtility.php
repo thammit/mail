@@ -107,41 +107,19 @@ class ReportUtility
 
     public static function determineDocumentIconIdentifier($url): string
     {
-        $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
-        switch ($extension) {
-            case 'pdf':
-                return 'mimetypes-pdf';
-            case 'xls':
-            case 'xlsx':
-                return 'mimetypes-excel';
-            case 'doc':
-            case 'docx':
-                return 'mimetypes-word';
-            case 'ppt':
-            case 'pptx':
-                return 'mimetypes-powerpoint';
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-                return 'mimetypes-media-image';
-            case 'zip':
-            case 'rar':
-                return 'mimetypes-compressed';
-            case 'mp3':
-            case 'wav':
-            case 'aac':
-                return 'mimetypes-media-audio';
-            case 'mp4':
-            case 'mov':
-            case 'avi':
-                return 'mimetypes-media-video';
-            case 'htm':
-            case 'html':
-                return 'mimetypes-text-html';
-            default:
-                return 'mimetypes-other-other';
-        }
+        $extension = pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION);
+        return match ($extension) {
+            'pdf' => 'mimetypes-pdf',
+            'xls', 'xlsx' => 'mimetypes-excel',
+            'doc', 'docx' => 'mimetypes-word',
+            'ppt', 'pptx' => 'mimetypes-powerpoint',
+            'jpg', 'jpeg', 'png', 'gif' => 'mimetypes-media-image',
+            'zip', 'rar' => 'mimetypes-compressed',
+            'mp3', 'wav', 'aac' => 'mimetypes-media-audio',
+            'mp4', 'mov', 'avi' => 'mimetypes-media-video',
+            'htm', 'html' => 'mimetypes-text-html',
+            default => 'mimetypes-other-other',
+        };
     }
 
     public static function showWithPercent(int $pieces, int $total): string
