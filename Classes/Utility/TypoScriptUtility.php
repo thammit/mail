@@ -57,7 +57,11 @@ class TypoScriptUtility
             $currentPageTSConfig = static::implodeTSParams(BackendUtility::getPagesTSconfig($pageId));
             $set = [];
             foreach ($pageTSConfig as $key => $value) {
-                $value = trim($value);
+                // prevent user to input multiline value
+                $value = strtok(trim($value), "\r\n");
+                if ($value === false) {
+                    $value = '';
+                }
                 $key = $tsConfigPrefix . $key;
                 $tempF = isset($currentPageTSConfig[$key]) ? trim($currentPageTSConfig[$key]) : '';
                 if (strcmp($tempF, $value)) {
