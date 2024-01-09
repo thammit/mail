@@ -485,13 +485,15 @@ class RecipientService
         $recipients = [];
         $frontendUserGroups = $table === 'fe_groups' ? array_column(GeneralUtility::makeInstance(FrontendUserGroupRepository::class)->findRecordByPidList($pages,
             ['uid']), 'uid') : [];
+        $deletedField = $GLOBALS['TCA'][$table]['ctrl']['delete'] ?? false;
         $disabledField = $GLOBALS['TCA'][$table]['ctrl']['enablecolumns']['disabled'] ?? false;
         /** @var Category $category */
         foreach ($categories as $category) {
             // collect all recipients containing at least one category of the given group
             $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
             foreach ($recipientCollection as $recipient) {
-                if ((!$disabledField || !$recipient[$disabledField]) &&
+                if ((!$deletedField || !$recipient[$deletedField]) &&
+                    (!$disabledField || !$recipient[$disabledField]) &&
                     ($ignoreMailActive || $recipient['mail_active'] ?? true) &&
                     !in_array($recipient['uid'], $recipients) &&
                     in_array($recipient['pid'], $pages) &&
@@ -604,7 +606,9 @@ class RecipientService
 
         if ($table === 'fe_groups') {
             // get the uid of the current fe_group
-            $frontendUserGroups = array_column($queryBuilder->resetQueryParts()
+            $queryBuilder = $this->getQueryBuilder('fe_groups');
+
+            $frontendUserGroups = array_column($queryBuilder
                 ->select('fe_groups.uid')
                 ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
                 ->leftJoin(
@@ -638,8 +642,16 @@ class RecipientService
                             $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', (string)$subgroup);
                         }
 
+                        $queryBuilder = $this->getQueryBuilder('fe_groups');
+
+                        $mailActiveExpression = '';
+                        if (!$ignoreMailActive) {
+                            // for fe_users and fe_group, only activated newsletter
+                            $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
+                        }
+
                         // fetch all fe_users from these subgroups
-                        $idList = array_merge($idList, array_column($queryBuilder->resetQueryParts()
+                        $idList = array_merge($idList, array_column($queryBuilder
                             ->select('fe_users.uid')
                             ->from('fe_groups', 'fe_groups')
                             ->innerJoin(
