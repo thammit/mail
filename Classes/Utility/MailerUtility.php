@@ -520,9 +520,10 @@ class MailerUtility
         return (int)round(microtime(true) * 1000);
     }
 
-    public static function removeDuplicateValues($array) {
+    public static function removeDuplicateValues(array $array): array
+    {
         foreach ($array as &$subArray) {
-            $subArray = array_values(array_unique($subArray));
+            $subArray = array_values(array_unique($subArray, SORT_REGULAR));
         }
         return $array;
     }

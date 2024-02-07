@@ -105,7 +105,7 @@ class RecipientController extends AbstractController
         $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group, true);
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
-            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? [];
             $isCsv = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
             if (!$idList || (!$recipientSourceConfiguration && !$isCsv)) {
                 continue;
@@ -137,7 +137,7 @@ class RecipientController extends AbstractController
             }
 
             $recipientSources[$recipientSourceIdentifier] = [
-                'title' => $recipientSourceConfiguration['title'],
+                'title' => $recipientSourceConfiguration['title'] ?? '',
                 'table' => $table,
                 'icon' => $recipientSourceConfiguration['icon'] ?? 'actions-user',
                 'recipients' => $recipients,
