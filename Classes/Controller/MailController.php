@@ -76,7 +76,8 @@ class MailController extends AbstractController
             }
             if ($draftMails->count() > 0) {
                 // there is already a draft mail of this page -> use it
-                return $this->redirect('draftMail', null, null, ['mail' => $draftMails->getFirst()->getUid(), 'id' => $this->pageInfo['pid']]);
+                return $this->redirect('draftMail', null, null,
+                    ['mail' => $draftMails->getFirst()->getUid(), 'id' => $this->pageInfo['pid']]);
             }
             if ($this->pageInfo['hidden']) {
                 $mailModulePageId = BackendDataUtility::getClosestMailModulePageId($this->id);
@@ -91,7 +92,8 @@ class MailController extends AbstractController
                 }
             }
             // create a new mail of the page
-            return $this->redirect('createMailFromInternalPage', null, null, ['page' => $this->id, 'id' => $this->pageInfo['pid']]);
+            return $this->redirect('createMailFromInternalPage', null, null,
+                ['page' => $this->id, 'id' => $this->pageInfo['pid']]);
         }
 
         if (!isset($this->implodedParams['plainParams'])) {
@@ -117,7 +119,12 @@ class MailController extends AbstractController
             ],
         ]);
 
-        $panels = [Constants::PANEL_DRAFT, Constants::PANEL_INTERNAL, Constants::PANEL_EXTERNAL, Constants::PANEL_QUICK_MAIL];
+        $panels = [
+            Constants::PANEL_DRAFT,
+            Constants::PANEL_INTERNAL,
+            Constants::PANEL_EXTERNAL,
+            Constants::PANEL_QUICK_MAIL
+        ];
         if ($this->userTSConfiguration['hideTabs'] ?? false) {
             $hidePanel = GeneralUtility::trimExplode(',', $this->userTSConfiguration['hideTabs']);
             foreach ($hidePanel as $hideTab) {
@@ -204,7 +211,8 @@ class MailController extends AbstractController
      */
     public function updateConfigurationAction(array $pageTS): ResponseInterface
     {
-        if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id), Permission::PAGE_EDIT)) {
+        if (!BackendUserUtility::getBackendUser()->doesUserHaveAccess(BackendUtility::getRecord('pages', $this->id),
+            Permission::PAGE_EDIT)) {
             ViewUtility::addNotificationError(
                 sprintf(LanguageUtility::getLL('configuration.notification.permissionError.message'), $this->id),
                 LanguageUtility::getLL('general.notification.severity.error.title')
@@ -266,8 +274,11 @@ class MailController extends AbstractController
      * @param string $plainTextUrl
      * @return ResponseInterface
      */
-    public function createMailFromExternalUrlsAction(string $subject, string $htmlUrl, string $plainTextUrl): ResponseInterface
-    {
+    public function createMailFromExternalUrlsAction(
+        string $subject,
+        string $htmlUrl,
+        string $plainTextUrl
+    ): ResponseInterface {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         try {
             $newMail = $mailFactory->fromExternalUrls($subject, $htmlUrl, $plainTextUrl);
@@ -288,8 +299,13 @@ class MailController extends AbstractController
      * @param bool $breakLines
      * @return ResponseInterface
      */
-    public function createQuickMailAction(string $subject, string $message, string $fromName, string $fromEmail, bool $breakLines): ResponseInterface
-    {
+    public function createQuickMailAction(
+        string $subject,
+        string $message,
+        string $fromName,
+        string $fromEmail,
+        bool $breakLines
+    ): ResponseInterface {
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = $mailFactory->fromText($subject, $message, $fromName, $fromEmail, $breakLines);
         if ($newMail instanceof Mail) {
@@ -343,7 +359,8 @@ class MailController extends AbstractController
             // it's a quick/external mail
             if (str_starts_with($mail->getHtmlParams(), 'http') || str_starts_with($mail->getPlainParams(), 'http')) {
                 // it's an external mail -> fetch content again
-                $newMail = $mailFactory->fromExternalUrls($mail->getSubject(), $mail->getHtmlParams(), $mail->getPlainParams());
+                $newMail = $mailFactory->fromExternalUrls($mail->getSubject(), $mail->getHtmlParams(),
+                    $mail->getPlainParams());
             } else {
                 return $this->redirect('settings', null, null, ['mail' => $mail->getUid()]);
             }
@@ -359,7 +376,8 @@ class MailController extends AbstractController
             $mail->setCharset($newMail->getCharset());
 
             $this->mailRepository->update($mail);
-            return $this->redirect('settings', null, null, ['mail' => $mail->getUid(), 'updated' => 1, 'tabId' => $tabId]);
+            return $this->redirect('settings', null, null,
+                ['mail' => $mail->getUid(), 'updated' => 1, 'tabId' => $tabId]);
         }
         return $this->redirect('index');
     }
@@ -432,10 +450,12 @@ class MailController extends AbstractController
 
         if ($updatePreview && !$mail->isQuickMail()) {
             if ($mail->isInternal()) {
-                $messageValue = BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'page', $mail->getPage());
+                $messageValue = BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'page',
+                    $mail->getPage());
             } else {
                 $messageValue = trim(BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'plainParams',
-                        $mail->getPlainParams()) . ' / ' . BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'htmlParams', $mail->getHtmlParams()),
+                        $mail->getPlainParams()) . ' / ' . BackendUtility::getProcessedValue('tx_mail_domain_model_mail',
+                        'htmlParams', $mail->getHtmlParams()),
                     ' /');
             }
             $this->addJsNotification(
@@ -494,7 +514,8 @@ class MailController extends AbstractController
         $this->mailRepository->persist();
 
         $data = [];
-        $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid($mail->getPage(), $mail->getSysLanguageUid());
+        $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid($mail->getPage(),
+            $mail->getSysLanguageUid());
 
 
         if ($rows) {
@@ -506,7 +527,8 @@ class MailController extends AbstractController
             $sysCategoryMmRepository = GeneralUtility::makeInstance(SysCategoryMmRepository::class);
             foreach ($rows as $contentElementData) {
                 $categoriesRow = [];
-                $contentElementCategories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName($contentElementData['uid'], 'tt_content');
+                $contentElementCategories = $sysCategoryMmRepository->findByUidForeignTableNameFieldName($contentElementData['uid'],
+                    'tt_content');
 
                 foreach ($contentElementCategories as $contentElementCategory) {
                     $categoriesRow[] = (int)$contentElementCategory['uid_local'];
@@ -514,7 +536,8 @@ class MailController extends AbstractController
 
                 if ($colPos !== (int)$contentElementData['colPos']) {
                     $data['rows'][] = [
-                        'colPos' => BackendUtility::getProcessedValue('tt_content', 'colPos', $contentElementData['colPos']),
+                        'colPos' => BackendUtility::getProcessedValue('tt_content', 'colPos',
+                            $contentElementData['colPos']),
                     ];
                     $colPos = (int)$contentElementData['colPos'];
                 }
@@ -524,7 +547,8 @@ class MailController extends AbstractController
                 if (is_array($ttContentPageTsConfig['categories'] ?? false)) {
                     $configTreeStartingPoints = $ttContentPageTsConfig['categories']['config.']['treeConfig.']['startingPoints'] ?? false;
                     if ($configTreeStartingPoints !== false) {
-                        $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints, true);
+                        $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints,
+                            true);
                         foreach ($configTreeStartingPointsArray as $startingPoint) {
                             $ttContentCategories = $this->categoryRepository->findByParent($startingPoint);
                             foreach ($ttContentCategories as $category) {
@@ -552,7 +576,8 @@ class MailController extends AbstractController
                     'header' => $contentElementData['header'],
                     'CType' => $contentElementData['CType'],
                     'list_type' => $contentElementData['list_type'],
-                    'bodytext' => empty($contentElementData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($contentElementData['bodytext']), 200),
+                    'bodytext' => empty($contentElementData['bodytext']) ? '' : GeneralUtility::fixed_lgd_cs(strip_tags($contentElementData['bodytext']),
+                        200),
                     'hasCategory' => (bool)$contentElementData['categories'],
                     'categories' => $categories,
                 ];
@@ -720,10 +745,16 @@ class MailController extends AbstractController
      */
     public function sendTestMailAction(Mail $mail, string $recipients = ''): ResponseInterface
     {
+        $mailUid = $mail->getUid();
         // normalize addresses:
         $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
 
         if ($addressList) {
+            if (($this->pageTSConfiguration['clickTracking'] || $this->pageTSConfiguration['clickTrackingMailTo']) && $mail->isInternal()) {
+                // no click tracking for internal test mails
+                $mail = MailFactory::forStorageFolder($this->id)->fromInternalPage($mail->getPage(),
+                    $mail->getSysLanguageUid(), true);
+            }
             $this->mailerService->start();
             $this->mailerService->prepare($mail);
             $this->mailerService->setSubjectPrefix($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '');
@@ -734,7 +765,7 @@ class MailController extends AbstractController
             sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), $addressList),
             LanguageUtility::getLL('mail.wizard.notification.testMailSent.title')
         );
-        return $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('testMail', null, null, ['mail' => $mailUid]);
     }
 
     /**
@@ -784,7 +815,8 @@ class MailController extends AbstractController
             $this->arguments->getArgument('mail')
                 ->getPropertyMappingConfiguration()
                 ->forProperty('scheduled')
-                ->setTypeConverterOption(DateTimeImmutableConverter::class, DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, $format);
+                ->setTypeConverterOption(DateTimeImmutableConverter::class,
+                    DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, $format);
         }
     }
 
@@ -807,7 +839,8 @@ class MailController extends AbstractController
             ]);
         }
 
-        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()), true);
+        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()),
+            true);
 
         if ($mail->getNumberOfRecipients() === 0) {
             ViewUtility::addNotificationWarning(

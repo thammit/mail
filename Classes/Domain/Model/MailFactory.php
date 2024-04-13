@@ -64,11 +64,12 @@ class MailFactory
     /**
      * @param int $pageUid
      * @param int $languageUid
+     * @param bool $forceNoClickTracking
      * @return Mail|null
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function fromInternalPage(int $pageUid, int $languageUid = 0): ?Mail
+    public function fromInternalPage(int $pageUid, int $languageUid = 0, bool $forceNoClickTracking = false): ?Mail
     {
         $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
         $pageRecord = $pageRepository->getPage($pageUid, true);
@@ -104,6 +105,12 @@ class MailFactory
         $clickTracking = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
         $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
         $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
+
+        if ($forceNoClickTracking) {
+            $clickTracking = false;
+            $clickTrackingMailTo = false;
+        }
+
         $jumpUrlPrefix = $baseUrl . $glue .
             'mail=###MAIL_ID###' .
             ($trackingPrivacy ? '' : '&rid=###MAIL_RECIPIENT_SOURCE###-###USER_uid###') .
