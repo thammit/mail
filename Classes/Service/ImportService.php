@@ -423,10 +423,10 @@ class ImportService
                     case 'noMap':
                         break;
                     case 'email':
+                        $email = trim($fieldValue);
+                        $tempData[$fieldKey] = $email;
                         if ($this->configuration['validEmail']) {
-                            $email = trim($fieldValue);
                             $invalidEmail = !GeneralUtility::validEmail($email);
-                            $tempData[$fieldKey] = $email;
                         }
                         break;
                     case 'categories':

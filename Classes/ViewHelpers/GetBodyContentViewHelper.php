@@ -23,8 +23,12 @@ class GetBodyContentViewHelper extends AbstractViewHelper
         $content = $this->renderChildren();
         $parser = new HTML5();
         $document = $parser->loadHTML($content);
-        $bodyContent = '';
         $bodyDomNode = $document->getElementsByTagName('body')->item(0);
+        if (!$bodyDomNode instanceof \DOMNode) {
+            return '';
+        }
+
+        $bodyContent = '';
         if ($bodyHasStyle = $bodyDomNode->hasAttribute('style')) {
             $bodyContent .= '<div style="' . $bodyDomNode->getAttribute('style') . '">';
         }
