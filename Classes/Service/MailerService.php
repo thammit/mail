@@ -235,12 +235,6 @@ class MailerService implements LoggerAwareInterface
 
         if ($recipientData['email'] && GeneralUtility::validEmail($recipientData['email'])) {
 
-            $additionalMarkers = [
-                '###MAIL_RECIPIENT_SOURCE###' => $recipientSourceIdentifier,
-                '###MAIL_ID###' => $mail->getUid(),
-                '###MAIL_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
-            ];
-
             $recipientCategories = $recipientData['categories'] ?? [];
 
             $htmlContent = '';
@@ -248,7 +242,7 @@ class MailerService implements LoggerAwareInterface
                 $htmlContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts, $recipientCategories);
 
                 if ($htmlContent) {
-                    $htmlContent = $this->replaceMailMarkers($htmlContent, $recipientData, $recipientSourceIdentifier, $additionalMarkers);
+                    $htmlContent = $this->replaceMailMarkers($mail, $htmlContent, $recipientData, $recipientSourceIdentifier);
                     $formatSent->set(SendFormat::HTML);
                 }
             }
@@ -260,7 +254,7 @@ class MailerService implements LoggerAwareInterface
                 $plainContent = MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts, $recipientCategories);
 
                 if ($plainContent) {
-                    $plainContent = $this->replaceMailMarkers($plainContent, $recipientData, $recipientSourceIdentifier, $additionalMarkers);
+                    $plainContent = $this->replaceMailMarkers($mail, $plainContent, $recipientData, $recipientSourceIdentifier);
                     if ($mail->isRedirect() || $mail->isRedirectAll()) {
                         $plainContent = MailerUtility::shortUrlsInPlainText(
                             $plainContent,
@@ -295,17 +289,23 @@ class MailerService implements LoggerAwareInterface
     /**
      * Replace the marker with recipient data and then send it
      *
+     * @param Mail $mail The mail
      * @param string $content The HTML or plaintext part
      * @param array $recipient Recipient data
      * @param string $recipientSourceIdentifier Recipient source identifier
-     * @param array $markers Existing markers that are mail-specific, not user-specific
      *
      * @return string content with replaced markers
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    protected function replaceMailMarkers(string $content, array $recipient, string $recipientSourceIdentifier, array $markers): string
+    protected function replaceMailMarkers(Mail $mail, string $content, array $recipient, string $recipientSourceIdentifier): string
     {
+        $markers = [
+            '###MAIL_RECIPIENT_SOURCE###' => $recipientSourceIdentifier,
+            '###MAIL_ID###' => $mail->getUid(),
+            '###MAIL_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
+        ];
+
         // replace %23%23%23 with ###, since typolink generated link with urlencode
         $content = str_replace('%23%23%23', '###', $content);
 
