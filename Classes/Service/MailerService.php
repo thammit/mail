@@ -52,15 +52,8 @@ class MailerService implements LoggerAwareInterface
 
     /*
      * special header to identify returned mail
-     *
-     * @var string
      */
     protected string $TYPO3MID = '';
-
-    /*
-     * @var array the mail parts (HTML and Plain, incl. href and link to media)
-     */
-    protected Mail $mail;
     protected int $sendPerCycle = 50;
     protected bool $isHtml = false;
     protected bool $isPlain = false;
@@ -74,10 +67,7 @@ class MailerService implements LoggerAwareInterface
     protected int $priority = 3;
     protected string $authCodeFieldList = '';
     protected string $backendCharset = 'utf-8';
-    protected string $message = '';
     protected bool $notificationJob = false;
-    protected bool $redirect = false;
-    protected string $redirectUrl = '';
     protected int $attachment = 0;
     protected array $htmlContentParts = [];
     protected array $plainContentParts = [];
