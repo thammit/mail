@@ -156,18 +156,24 @@ class CsvUtility
      * Convert charset if necessary
      *
      * @param array $data Contains values to convert
+     * @param string $fromCharset
+     * @param string $toCharset
      *
      * @return array array of charset-converted values
      * @see \TYPO3\CMS\Core\Charset\CharsetConverter::conv[]
      */
-    public static function convertCharset(array $data, $targetCharset, $dbCharset = 'utf-8'): array
+    public static function convertCharsetOfDataArray(array $data, string $fromCharset, string $toCharset = 'utf-8'): array
     {
         // todo check database charset
-        if ($dbCharset !== strtolower($targetCharset)) {
+        if ($toCharset !== strtolower($fromCharset)) {
             $converter = GeneralUtility::makeInstance(CharsetConverter::class);
-            foreach ($data as $k => $v) {
-                $data[$k] = $converter->conv($v, strtolower($targetCharset), $dbCharset);
-            }
+            $data = array_map(
+                fn($row): array => array_map(
+                    fn($column): string => $converter->conv($column, strtolower($fromCharset), strtolower($toCharset)),
+                    $row
+                ),
+                $data
+            );
         }
         return $data;
     }

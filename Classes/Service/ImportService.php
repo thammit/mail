@@ -214,17 +214,32 @@ class ImportService
         $this->configuration['validEmail'] ??= false;
         $this->configuration['removeDublette'] ??= false;
         $this->configuration['updateUnique'] ??= false;
-        $this->configuration['charset'] ??= 'UTF-8';
 
         $data = $this->prepareData();
 
         // show charset selector
-        $charsets = array_unique(array_values(mb_list_encodings()));
-        foreach ($charsets as $charset) {
-            $data['charsets'][] = ['val' => $charset, 'text' => $charset];
+        $encodings = array_unique(array_values(mb_list_encodings()));
+        foreach ($encodings as $encoding) {
+            $data['charsets'][] = ['val' => $encoding, 'text' => $encoding];
         }
 
-        $data['charset'] = $this->configuration['charset'] ?? 'UTF-8';
+        if (isset($this->configuration['charset'])) {
+            $data['charset'] = $this->configuration['charset'];
+        } else {
+            // Try to detect charset
+            $fileAbsolutePath = $this->getFileAbsolutePath((int)$this->configuration['newFileUid']);
+            // Read the content of the file
+            $content = file_get_contents($fileAbsolutePath);
+            // Set the encoding detection order
+            mb_detect_order($encodings);
+            // Detect the character set of the content
+            $data['charset'] = mb_detect_encoding($content, $encodings);
+            // If detection fails, use UTF-8
+            if ($data['charset'] === false) {
+                $data['charset'] = 'UTF-8';
+            }
+            $this->configuration['charset'] = $data['charset'];
+        }
 
         $columnNames = [];
         // show mapping form
@@ -505,8 +520,8 @@ class ImportService
     }
 
     /**
-     * Read in the given CSV file. The function is used during the final file import.
-     * Removes first the first data row if the CSV has fieldnames.
+     * Read in the given CSV file.
+     * Ignores first data row if it contains fieldnames.
      *
      * @return    array        file content in array
      */
@@ -545,8 +560,9 @@ class ImportService
             }
         }
         fclose($handle);
-        $data = CsvUtility::convertCharset($data, $this->configuration['charset']);
+        $data = CsvUtility::convertCharsetOfDataArray($data, $this->configuration['charset']);
         ini_set('auto_detect_line_endings', false);
+
         return $data;
     }
 
