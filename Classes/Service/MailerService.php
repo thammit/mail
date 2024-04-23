@@ -293,7 +293,7 @@ class MailerService implements LoggerAwareInterface
         $markers = [
             '###MAIL_RECIPIENT_SOURCE###' => $recipientSourceIdentifier,
             '###MAIL_ID###' => $mail->getUid(),
-            '###MAIL_AUTHCODE###' => RecipientUtility::stdAuthCode($recipientData, $this->authCodeFieldList),
+            '###MAIL_AUTHCODE###' => RecipientUtility::stdAuthCode($recipient, $this->authCodeFieldList),
         ];
 
         // replace %23%23%23 with ###, since typolink generated link with urlencode
