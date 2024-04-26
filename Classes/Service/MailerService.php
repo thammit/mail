@@ -264,7 +264,7 @@ class MailerService implements LoggerAwareInterface
             if ($formatSent->get(SendFormat::PLAIN) || $formatSent->get(SendFormat::HTML)) {
                 $this->sendMailToRecipient(
                     $mail,
-                    new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'], $this->backendCharset, $this->charset)),
+                    new Address($recipientData['email'], $this->charsetConverter->conv($recipientData['name'] ?? '', $this->backendCharset, $this->charset)),
                     $htmlContent,
                     $plainContent
                 );

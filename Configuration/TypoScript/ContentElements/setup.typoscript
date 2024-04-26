@@ -135,7 +135,7 @@ mail {
 	}
 }
 
-[traverse(request.getQueryParams(), 'plain')  == 1]
+[request && traverse(request.getQueryParams(), 'plain')  == 1]
 	// do no use table markup for plain text since conversation is done by league/html-to-markdown package
 	mail.10.html.templateName = Plain
 	lib.contentElement.layoutRootPaths.200 >
