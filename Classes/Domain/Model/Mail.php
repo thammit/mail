@@ -714,7 +714,7 @@ class Mail extends AbstractEntity
         if ($this->numberOfRecipients === 0 || $this->sent) {
             $this->deliveryProgress = 100;
         } else {
-            $percentOfSent = 100 / $this->numberOfRecipients * $this->numberOfRecipientsHandled;
+            $percentOfSent = $this->numberOfRecipientsHandled / $this->numberOfRecipients * 100;
             if ($percentOfSent > 100) {
                 $percentOfSent = 100;
             }
