@@ -353,6 +353,9 @@ class MailController extends AbstractController
      */
     public function updateContentAction(Mail $mail, string $tabId = ''): ResponseInterface
     {
+        $dataHandler = $this->getDataHandler();
+        $dataHandler->start([], []);
+        $dataHandler->clear_cacheCmd($mail->getPage());
         $mailFactory = MailFactory::forStorageFolder($this->id);
         $newMail = null;
         if ($mail->isExternal()) {
@@ -374,6 +377,7 @@ class MailController extends AbstractController
             $mail->setPlainContent($newMail->getPlainContent());
             $mail->setHtmlContent($newMail->getHtmlContent());
             $mail->setCharset($newMail->getCharset());
+            $mail->setHtmlLinks($newMail->getHtmlLinks());
 
             $this->mailRepository->update($mail);
             return $this->redirect('settings', null, null,
