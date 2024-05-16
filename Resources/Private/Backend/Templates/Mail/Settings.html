@@ -21,6 +21,23 @@
 				<f:render partial="Settings" arguments="{_all}" />
 			</div>
 		</div>
+		<f:if condition="{mail.htmlContent}">
+		<div class="row justify-content-start">
+			<div class="col-12 col-md-10 col-lg-8 col-xl-6 mb-3">
+					<f:if condition="{mail.page}">
+						<f:variable name="mailReturnPath" ><f:uri.action   action="updateContent"  arguments="{mail:mail.uid}"/></f:variable>
+						<a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page, mailReturnPath:mailReturnPath}')}" title="{f:translate(key: '{lll}general.button.editContent')}">
+							<core:icon identifier="app-pagetree-mail" overlay="actions-open"/> {f:translate(key: '{lll}general.button.editContent')}
+						</a>
+					</f:if>
+					<f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}"
+								   action="updateContent"
+								   controller="Mail" arguments="{mail: mail.uid}">
+						<core:icon identifier="actions-refresh"/> {f:translate(key: '{lll}general.button.reloadContent')}
+					</f:link.action>
+			</div>
+		</div>
+		</f:if>
 		<div class="row justify-content-start">
 			<div class="col-12 col-md-10 col-lg-8 col-xl-6">
 				<f:if condition="{mail.htmlContent} && {mail.plainContent}">
@@ -62,19 +79,6 @@
 							</div>
 						</div>
 					</f:else>
-				</f:if>
-				<f:if condition="{mail.htmlContent}">
-					<f:if condition="{mail.page}">
-						<f:variable name="mailReturnPath" ><f:uri.action   action="updateContent"  arguments="{mail:mail.uid}"/></f:variable>
-						<a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page, mailReturnPath:mailReturnPath}')}" title="{f:translate(key: '{lll}general.button.edit')}">
-							<core:icon identifier="app-pagetree-mail" overlay="actions-open"/>
-						</a>
-					</f:if>
-					<f:link.action class="btn btn-default" title="{f:translate(key: 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.reload')}"
-								   action="updateContent"
-								   controller="Mail" arguments="{mail: mail.uid}">
-						<core:icon identifier="actions-refresh"/>
-					</f:link.action>
 				</f:if>
 			</div>
 		</div>
