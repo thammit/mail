@@ -39,9 +39,9 @@
         <source>Update</source>
         <target state="final">Aktualisieren</target>
       </trans-unit>
-      <trans-unit id="general.button.reloadContent" resname="general.button.reloadContent">
+      <trans-unit id="general.button.reloadContent" resname="general.button.reloadContent" approved="yes">
         <source>Reload content</source>
-        <target state="needs-translation">Reload content</target>
+        <target state="final">Inhalt neu laden</target>
       </trans-unit>
       <trans-unit id="general.button.save" resname="general.button.save" approved="yes">
         <source>Save</source>
