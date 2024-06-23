@@ -117,7 +117,7 @@ final class Configuration
             'recipient',
             'after:mail',
             [
-                RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardUploadCsv,csvImportWizardImportCsv,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport',
+                RecipientController::class => 'index,show,csvDownload,csvImportWizard,csvImportWizardUploadCsv,csvImportWizardImportCsv,csvImportWizardStepConfiguration,csvImportWizardStepMapping,csvImportWizardStepStartImport,noPageSelected',
             ],
             [
                 'navigationComponentId' => $navigationComponentId,
@@ -134,7 +134,7 @@ final class Configuration
             'report',
             'after:recipient',
             [
-                ReportController::class => 'index,show,showTotalReturned,disableTotalReturned,csvExportTotalReturned,showUnknown,disableUnknown,csvExportUnknown,showFull,disableFull,csvExportFull,showBadHost,disableBadHost,csvExportBadHost,showBadHeader,disableBadHeader,csvExportBadHeader,showReasonUnknown,disableReasonUnknown,csvExportReasonUnknown,delete',
+                ReportController::class => 'index,show,showTotalReturned,disableTotalReturned,csvExportTotalReturned,showUnknown,disableUnknown,csvExportUnknown,showFull,disableFull,csvExportFull,showBadHost,disableBadHost,csvExportBadHost,showBadHeader,disableBadHeader,csvExportBadHeader,showReasonUnknown,disableReasonUnknown,csvExportReasonUnknown,delete,noPageSelected',
             ],
             [
                 'navigationComponentId' => $navigationComponentId,
@@ -151,7 +151,7 @@ final class Configuration
             'queue',
             'after:report',
             [
-                QueueController::class => 'index,saveConfiguration,trigger,delete',
+                QueueController::class => 'index,saveConfiguration,trigger,delete,noPageSelected',
             ],
             [
                 'navigationComponentId' => $navigationComponentId,

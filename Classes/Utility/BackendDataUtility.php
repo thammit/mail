@@ -4,12 +4,17 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Repository\PagesRepository;
 use TYPO3\CMS\Backend\Tree\View\PageTreeView;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
@@ -115,6 +120,20 @@ class BackendDataUtility
      */
     public static function getClosestMailModulePageId(int $id): int|bool
     {
+        if (!$id) {
+            // it's the root page 0 -> search for the first page with module mail where the current backend user has access to
+            $mailModulePageUids = GeneralUtility::makeInstance(PagesRepository::class)->findMailModulePageUids();
+            if ($mailModulePageUids) {
+                foreach ($mailModulePageUids as $pageUid) {
+                    $hasAccess = BackendUtility::readPageAccess($pageUid, $GLOBALS['BE_USER']->getPagePermsClause(Permission::PAGE_SHOW)) !== false;
+                    if ($hasAccess) {
+                        return (int)$pageUid;
+                    }
+                }
+            }
+            return false;
+        }
+
         $rootLine = BackendUtility::BEgetRootLine($id);
         array_shift($rootLine);
         rsort($rootLine);

@@ -43,16 +43,8 @@ class RecipientController extends AbstractController
      */
     public function indexAction(): ResponseInterface
     {
-        if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
-            // current selected page has no mail module configuration -> redirect to closest mail module page
-            $mailModulePageId = BackendDataUtility::getClosestMailModulePageId($this->id);
-            if ($mailModulePageId) {
-                if ($this->typo3MajorVersion < 12) {
-                    // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
-                    $_GET['id'] = $mailModulePageId;
-                }
-                return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
-            }
+        if ($this->id === 0 || $this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
+            return $this->handleNoMailModulePageRedirect();
         }
 
         $data = [];

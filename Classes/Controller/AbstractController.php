@@ -13,6 +13,7 @@ use MEDIAESSENZ\Mail\Service\MailerService;
 use MEDIAESSENZ\Mail\Service\ReportService;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -243,6 +244,28 @@ abstract class AbstractController extends ActionController
         $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
 
         parent::initializeAction();
+    }
+
+    public function noPageSelectedAction(): ResponseInterface
+    {
+        ViewUtility::addFlashMessageWarning(LanguageUtility::getLL('mail.wizard.notification.noPageSelected.message'),
+            LanguageUtility::getLL('mail.wizard.notification.noPageSelected.title'));
+        $this->moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
+    }
+
+    protected function handleNoMailModulePageRedirect(): ResponseInterface
+    {
+        $mailModulePageId = BackendDataUtility::getClosestMailModulePageId($this->id);
+        if ($mailModulePageId) {
+            if ($this->typo3MajorVersion < 12) {
+                // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
+                $_GET['id'] = $mailModulePageId;
+            }
+            return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
+        }
+        return $this->redirect('noPageSelected');
     }
 
     protected function getDataHandler(): DataHandler

@@ -48,15 +48,6 @@ use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 
 class MailController extends AbstractController
 {
-    public function noPageSelectedAction(): ResponseInterface
-    {
-        ViewUtility::addFlashMessageWarning(LanguageUtility::getLL('mail.wizard.notification.noPageSelected.message'),
-            LanguageUtility::getLL('mail.wizard.notification.noPageSelected.title'));
-        $this->moduleTemplate->setContent($this->view->render());
-
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
-    }
-
     /**
      * @return ResponseInterface
      * @throws ExtensionConfigurationExtensionNotConfiguredException
@@ -65,9 +56,10 @@ class MailController extends AbstractController
     public function indexAction(): ResponseInterface
     {
         if ($this->id === 0 || ($this->pageInfo['doktype'] !== (int)ConfigurationUtility::getExtensionConfiguration('mailPageTypeNumber') && $this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME)) {
-            return $this->redirect('noPageSelected');
+            return $this->handleNoMailModulePageRedirect();
         }
-        if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
+
+        if (!array_key_exists('module', $this->pageInfo) || $this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
             // the currently selected page is not a mail module sys folder
             $draftMails = $this->mailRepository->findOpenByPidAndPage($this->pageInfo['pid'], $this->id);
             if ($this->typo3MajorVersion < 12) {
@@ -80,16 +72,7 @@ class MailController extends AbstractController
                     ['mail' => $draftMails->getFirst()->getUid(), 'id' => $this->pageInfo['pid']]);
             }
             if ($this->pageInfo['hidden']) {
-                $mailModulePageId = BackendDataUtility::getClosestMailModulePageId($this->id);
-                if ($mailModulePageId) {
-                    if ($this->typo3MajorVersion < 12) {
-                        // Hack, because redirect to pid would not work otherwise (see extbase/Classes/Mvc/Web/Routing/UriBuilder.php line 646)
-                        $_GET['id'] = $mailModulePageId;
-                    }
-                    return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
-                } else {
-                    return $this->redirect('noPageSelected');
-                }
+                return $this->handleNoMailModulePageRedirect();
             }
             // create a new mail of the page
             return $this->redirect('createMailFromInternalPage', null, null,

@@ -27,8 +27,7 @@ class QueueController extends AbstractController
      */
     public function indexAction(): ResponseInterface
     {
-        if ($this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
-            // current selected page has no mail module configuration -> redirect to closest mail module page
+        if ($this->id === 0 || $this->pageInfo['module'] !== Constants::MAIL_MODULE_NAME) {
             $mailModulePageId = BackendDataUtility::getClosestMailModulePageId($this->id);
             if ($mailModulePageId) {
                 if ($this->typo3MajorVersion < 12) {
@@ -37,6 +36,7 @@ class QueueController extends AbstractController
                 }
                 return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
             }
+            return $this->redirect('noPageSelected');
         }
 
         $refreshRate = (int)($this->pageTSConfiguration['refreshRate'] ?? 5);
