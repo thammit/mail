@@ -279,7 +279,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                     ->where(
                         $frontendUsersQueryBuilder->expr()->eq('uid', $frontendUsersWithCategory['uid'])
                     )
-                    ->executeQuery();
+                    ->executeStatement();
             }
 
             // update number of categories of tt_address
@@ -302,7 +302,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                     ->where(
                         $ttAddressQueryBuilder->expr()->eq('uid', $ttAddressWithCategory['uid'])
                     )
-                    ->executeQuery();
+                    ->executeStatement();
             }
 
         }
