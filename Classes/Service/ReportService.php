@@ -87,19 +87,21 @@ class ReportService
         $uniquePlainResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PLAIN);
         $uniqueResponsesTotal = $uniqueHtmlResponses + $uniquePlainResponses;
 
+        $numberOfReceipients = $this->mail->getNumberOfRecipients();
+
         return [
             'htmlSent' => $htmlSent,
-            'htmlSentPercent' => number_format(($htmlSent / $this->mail->getNumberOfRecipients() * 100), 2),
+            'htmlSentPercent' => $numberOfReceipients ? number_format(($htmlSent / $numberOfReceipients * 100), 2) : 0.0,
             'plainSent' => $plainSent,
-            'plainSentPercent' => number_format(($plainSent / $this->mail->getNumberOfRecipients() * 100), 2),
+            'plainSentPercent' => $numberOfReceipients ? number_format(($plainSent / $numberOfReceipients * 100), 2) : 0.0,
             'totalSent' => $totalSent,
-            'totalSentPercent' => number_format(($totalSent / $this->mail->getNumberOfRecipients() * 100), 2),
+            'totalSentPercent' => $numberOfReceipients ? number_format(($totalSent / $numberOfReceipients * 100), 2) : 0.0,
             'failedResponses' => $failedResponses,
-            'failedResponsesPercent' => number_format(($failedResponses / $totalSent * 100), 2),
+            'failedResponsesPercent' => $totalSent ? number_format(($failedResponses / $totalSent * 100), 2) : 0.0,
             'uniquePingResponses' => $uniquePingResponses,
             'htmlViewedPercent' => $htmlSent ? number_format(($uniquePingResponses / $htmlSent * 100), 2) : 0.0,
             'uniqueResponsesTotal' => $uniqueResponsesTotal,
-            'uniqueResponsesTotalPercent' => number_format(($uniqueResponsesTotal / $totalSent * 100), 2),
+            'uniqueResponsesTotalPercent' => $totalSent ? number_format(($uniqueResponsesTotal / $totalSent * 100), 2) : 0.0,
             'uniqueResponsesHtml' => $uniqueHtmlResponses,
             'uniqueResponsesHtmlPercent' => $htmlSent ? number_format(($uniqueHtmlResponses / $htmlSent * 100), 2) : 0.0,
             'uniqueResponsesPlain' => $uniquePlainResponses,
