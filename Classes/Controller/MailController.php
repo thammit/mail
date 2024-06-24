@@ -841,10 +841,12 @@ class MailController extends AbstractController
         if ($this->typo3MajorVersion > 11) {
             // scheduled timezone is utc and must be converted to server time zone
             $scheduled = $mail->getScheduled();
-            $serverTimeZone = @date_default_timezone_get();
-            $scheduledWithCorrectTimeZone = $scheduled->setTimezone(new \DateTimeZone($serverTimeZone))->setTime((int)$scheduled->format('H'),
-                (int)$scheduled->format('i'));
-            $mail->setScheduled($scheduledWithCorrectTimeZone);
+            $serverTimeZone = new \DateTimeZone(@date_default_timezone_get());
+            $offset = $serverTimeZone->getOffset($scheduled);
+            if ($offset) {
+                $interval = new \DateInterval('PT' . abs($offset) . 'S');
+                $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
+            }
         }
 
 //        if (false && $this->isTestMail) {
