@@ -8,40 +8,39 @@
 <f:if condition="{news}">
     <f:then>
         <f:for each="{news}" as="newsItem" iteration="iterator">
+            <f:variable name="newsDetailsUrl"><n:link uriOnly="1" newsItem="{newsItem}" settings="{settings}" title="{newsItem.title}" configuration="{forceAbsoluteUrl:1}" /></f:variable>
+            <f:variable name="mediaElement" value="{newsItem.mediaPreviews.0}" />
             <tr>
                 <td valign="top" colspan="2">
-                    <h2>{newsItem.title}</h2>
+                    <h2><a href="{newsDetailsUrl}">{newsItem.title}</a></h2>
                 </td>
             </tr>
             <tr>
                 <td valign="top" width="80%">
                     <p>{newsItem.teaser}</p>
-                    <f:variable name="href"><n:link uriOnly="1" newsItem="{newsItem}" settings="{settings}" title="{newsItem.title}" configuration="{forceAbsoluteUrl:1}" /></f:variable>
-                    <f:render partial="ContentElements/Button" arguments="{href:href, text:'{f:translate(key: \'more-link\')}', rounded:1}"></f:render>
+                    <f:render partial="ContentElements/Button" arguments="{href:newsDetailsUrl, text:'{f:translate(key: \'more-link\')}', rounded:1}"></f:render>
                 </td>
                 <td valign="top" width="20%">
-                    <f:alias map="{mediaElement: newsItem.mediaPreviews.0}">
-                        <n:link newsItem="{newsItem}" settings="{settings}" title="{newsItem.title}" configuration="{forceAbsoluteUrl:1}">
-                            <f:if condition="{mediaElement.originalResource.type} == 2">
-                                <f:then>
-                                    <f:image
-                                        image="{mediaElement}"
-                                        title="{mediaElement.originalResource.title}"
-                                        alt="{mediaElement.originalResource.alternative}"
-                                        maxWidth="300"
-                                        style="width:100%;height:100%;"/>
-                                </f:then>
-                                <f:else>
-                                    <f:image
-                                        src="EXT:news/Resources/Public/Images/dummy-preview-image.png"
-                                        title="Dummy image"
-                                        alt="Dummy image"
-                                        maxWidth="300"
-                                        style="width:100%;height:100%;"/>
-                                </f:else>
-                            </f:if>
-                        </n:link>
-                    </f:alias>
+                    <a href="{newsDetailsUrl}" title="{newsItem.title}">
+                        <f:if condition="{mediaElement.originalResource.type} == 2">
+                            <f:then>
+                                <f:image
+                                    image="{mediaElement}"
+                                    title="{mediaElement.originalResource.title}"
+                                    alt="{mediaElement.originalResource.alternative}"
+                                    maxWidth="300"
+                                    style="width:100%;height:100%;"/>
+                            </f:then>
+                            <f:else>
+                                <f:image
+                                    src="EXT:news/Resources/Public/Images/dummy-preview-image.png"
+                                    title="Dummy image"
+                                    alt="Dummy image"
+                                    maxWidth="300"
+                                    style="width:100%;height:100%;"/>
+                            </f:else>
+                        </f:if>
+                    </a>
                 </td>
             </tr>
             <tr>
