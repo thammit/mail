@@ -6,15 +6,12 @@ namespace MEDIAESSENZ\Mail\Service;
 use Doctrine\DBAL\Exception;
 use JsonException;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
-use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\ReportUtility;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -38,11 +35,8 @@ class ReportService
 
     public function __construct(
         protected LogRepository          $logRepository,
-        protected AddressRepository      $addressRepository,
-        protected FrontendUserRepository $frontendUserRepository,
         protected SiteFinder             $siteFinder,
         protected RecipientService       $recipientService,
-        protected EventDispatcherInterface $eventDispatcher
     )
     {
     }

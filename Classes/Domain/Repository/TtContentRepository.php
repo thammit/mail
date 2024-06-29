@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
-use PDO;
+use TYPO3\CMS\Core\Database\Connection;
 
 class TtContentRepository
 {
@@ -27,11 +27,11 @@ class TtContentRepository
             ->where(
                 $queryBuilder->expr()->eq(
                     'pid',
-                    $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)
                 ),
                 $queryBuilder->expr()->eq(
                     'sys_language_uid',
-                    $queryBuilder->createNamedParameter($sysLanguageUid, PDO::PARAM_INT)
+                    $queryBuilder->createNamedParameter($sysLanguageUid, Connection::PARAM_INT)
                 )
             )
             ->orderBy('colPos')

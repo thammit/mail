@@ -10,7 +10,6 @@ use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
-use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -18,6 +17,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Site\Entity\Site;
@@ -146,14 +146,14 @@ class JumpurlMiddleware implements MiddlewareInterface
             ->count('*')
             ->from($logTable)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailLogParameters['mail'], PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailLogParameters['mail'], Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('url', $queryBuilder->createNamedParameter($mailLogParameters['url'])),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($mailLogParameters['response_type'], PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('url_id', $queryBuilder->createNamedParameter($mailLogParameters['url_id'], PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($mailLogParameters['response_type'], Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('url_id', $queryBuilder->createNamedParameter($mailLogParameters['url_id'], Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($mailLogParameters['recipient_source'])),
-                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($mailLogParameters['recipient_uid'], PDO::PARAM_INT)),
-                $queryBuilder->expr()->lte('tstamp', $queryBuilder->createNamedParameter($mailLogParameters['tstamp'], PDO::PARAM_INT)),
-                $queryBuilder->expr()->gte('tstamp', $queryBuilder->createNamedParameter($mailLogParameters['tstamp'] - 10, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($mailLogParameters['recipient_uid'], Connection::PARAM_INT)),
+                $queryBuilder->expr()->lte('tstamp', $queryBuilder->createNamedParameter($mailLogParameters['tstamp'], Connection::PARAM_INT)),
+                $queryBuilder->expr()->gte('tstamp', $queryBuilder->createNamedParameter($mailLogParameters['tstamp'] - 10, Connection::PARAM_INT))
             );
 
         $existingLog = $query->executeQuery()->fetchOne();
@@ -179,7 +179,7 @@ class JumpurlMiddleware implements MiddlewareInterface
             $res = $queryBuilder->select($fields)
                 ->from($table)
                 ->where(
-                    $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                    $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)),
                     $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0))
                 )
                 ->executeQuery();

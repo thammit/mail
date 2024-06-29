@@ -1,0 +1,16 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Module"/>
+
+<f:section name="Content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+    <h1><f:translate key="{lll}report.show.header"/></h1>
+    <h2><core:iconForRecord row="{uid: mail.uid, type: 0}" table="tx_mail_domain_model_mail" size="default" /> {mail.subject} [{mail.uid}]: <f:translate key="{lll}report.headerError"/></h2>
+    <f:render partial="Backend/Report/ReturnedPanels" arguments="{_all}" />
+</f:section>
+</html>

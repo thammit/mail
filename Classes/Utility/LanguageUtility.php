@@ -66,6 +66,6 @@ class LanguageUtility
      */
     public static function getLL(string $index): string
     {
-        return self::getLanguageService()->getLL($index);
+        return self::getLanguageService()->sL($index);
     }
 }

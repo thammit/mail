@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use DateTimeImmutable;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
-use PDO;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
@@ -131,11 +130,11 @@ class MailRepository extends Repository
                 $queryBuilder->expr()->eq('m.uid', $queryBuilder->quoteIdentifier('l.mail'))
             )
             ->where(
-                $queryBuilder->expr()->eq('m.pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('m.pid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)),
                 $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], Connection::PARAM_INT_ARRAY)),
                 $queryBuilder->expr()->gte('m.scheduled', 0),
-                $queryBuilder->expr()->eq('l.response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
-                $queryBuilder->expr()->neq('l.format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('l.response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
+                $queryBuilder->expr()->neq('l.format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, Connection::PARAM_INT)),
             )
             ->groupBy('l.mail')
             ->orderBy('m.scheduled', 'DESC')

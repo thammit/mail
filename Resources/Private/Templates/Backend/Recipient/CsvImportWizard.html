@@ -1,0 +1,45 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Module"/>
+
+<f:section name="Content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+    <h1><f:translate key="{lll}recipient.import.header"/></h1>
+    <f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation}"/>
+    <h2><f:translate key="{lll}recipient.import.uploadCsv.subheader"/></h2>
+    <f:form action="csvImportWizardUploadCsv" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="recipientListUpload" class="form-label">
+                <f:translate key="{lll}recipient.import.chooseCsvFile"/>
+            </label>
+            <input type="file" class="form-control" id="recipientListUpload" name="upload_1"/>
+            <f:form.hidden name="file[upload][1][data]" value="1"/>
+            <f:form.hidden name="file[upload][1][target]" value="{data.target}"/>
+        </div>
+        <f:form.button type="submit" class="btn btn-mail-theme text-uppercase">
+            <f:translate key="{lll}general.button.next"/>
+        </f:form.button>
+    </f:form>
+    <p class="my-3"><strong>
+        <f:translate key="{lll}recipient.import.or"/>
+    </strong></p>
+    <f:form action="csvImportWizardImportCsv" method="post" enctype="multipart/form-data">
+        <h2><f:translate key="{lll}recipient.import.pasteCsv"/></h2>
+        <div class="mb-3">
+            <label for="receipientListPlain" class="form-label">
+                <f:translate key="{lll}recipient.import.pasteCsv"/>
+            </label>
+            <f:form.textarea name="configuration[csv]" id="receipientListPlain" class="form-control"
+                             rows="10">{data.csv}
+            </f:form.textarea>
+        </div>
+        <f:form.button type="submit" class="btn btn-mail-theme text-uppercase">
+            <f:translate key="{lll}general.button.next"/>
+        </f:form.button>
+    </f:form>
+</f:section>
+</html>

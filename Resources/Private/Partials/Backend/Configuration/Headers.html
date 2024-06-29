@@ -1,0 +1,58 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div class="mb-3">
+    <label for="fromEmail" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.fromEmail"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.fromEmail.description\', 1: \'{lll}configuration.fromEmail.details\'}'}"/>
+    </label>
+    <f:form.textfield type="email" id="fromEmail" name="pageTS[fromEmail]" value="{configuration.fromEmail}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="fromName" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.fromName"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.fromName.description\', 1: \'{lll}configuration.fromName.details\'}'}"/>
+    </label>
+    <f:form.textfield id="fromName" name="pageTS[fromName]" value="{configuration.fromName}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="replyToEmail" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.replyToEmail"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.replyToEmail.description\', 1: \'{lll}configuration.replyToEmail.details\'}'}"/>
+    </label>
+    <f:form.textfield id="replyToEmail" name="pageTS[replyToEmail]" value="{configuration.replyToEmail}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="replyToName" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.replyToName"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.replyToName.description\', 1: \'{lll}configuration.replyToName.details\'}'}"/>
+    </label>
+    <f:form.textfield id="replyToName" name="pageTS[replyToName]" value="{configuration.replyToName}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="returnPath" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.returnPath"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.returnPath.description\', 1: \'{lll}configuration.returnPath.details\'}'}"/>
+    </label>
+    <f:form.textfield id="returnPath" name="pageTS[returnPath]" value="{configuration.returnPath}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="organisation" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.organisation"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.organisation.description\', 1: \'{lll}configuration.organisation.details\'}'}"/>
+    </label>
+    <f:form.textfield id="organisation" name="pageTS[organisation]" value="{configuration.organisation}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="priority" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.priority"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.priority.description\', 1: \'{lll}configuration.priority.details\'}'}"/>
+    </label>
+    <f:form.select id="priority" name="pageTS[priority]" value="{configuration.priority}" class="form-select form-control-adapt">
+        <f:form.select.option value="3">
+            <f:translate key="{lll}configuration.priority.normal"/>
+        </f:form.select.option>
+        <f:form.select.option value="1">
+            <f:translate key="{lll}configuration.priority.high"/>
+        </f:form.select.option>
+        <f:form.select.option value="5">
+            <f:translate key="{lll}configuration.priority.low"/>
+        </f:form.select.option>
+    </f:form.select>
+</div>
+
+</html>

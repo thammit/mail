@@ -92,7 +92,7 @@ class MailController extends AbstractController
             $this->implodedParams['sendPerCycle'] = '50';
         }
 
-        $this->view->assignMultiple([
+        $assignments = [
             'configuration' => $this->implodedParams,
             'charsets' => array_unique(array_values(mb_list_encodings())),
             'backendUser' => [
@@ -100,7 +100,7 @@ class MailController extends AbstractController
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
                 'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
             ],
-        ]);
+        ];
 
         $panels = [
             Constants::PANEL_DRAFT,
@@ -162,7 +162,7 @@ class MailController extends AbstractController
             }
         }
 
-        $this->view->assignMultiple([
+        $assignments += [
             'panel' => $panelData,
             'pageInfo' => $this->pageInfo,
             'hideCategoryStep' => $this->userTSConfiguration['hideCategoryStep'] ?? false,
@@ -173,19 +173,20 @@ class MailController extends AbstractController
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
                 'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
             ],
-        ]);
+        ];
 
-        $this->moduleTemplate->setContent($this->view->render());
         $this->addIndexDocHeaderButtons();
         if ($this->typo3MajorVersion < 12) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Tooltip');
+            $this->view->assignMultiple($assignments);
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewModal');
-        } else {
-            $this->pageRenderer->loadJavaScriptModule('@typo3/backend/tooltip.js');
-            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/preview-modal.js');
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/preview-modal.js');
+        $this->moduleTemplate->assignMultiple($assignments);
+
+        return $this->moduleTemplate->renderResponse('Backend/Mail/Index');
     }
 
     /**
@@ -409,11 +410,11 @@ class MailController extends AbstractController
 
         $this->assignFieldGroups($mail);
 
-        $this->view->assignMultiple([
+        $assignments = [
             'activeTabId' => $tabId,
             'mail' => $mail,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),
-        ]);
+        ];
 
         if ($mail->isInternal() || $mail->isExternal()) {
             if ($updatePreview && ConfigurationUtility::getExtensionConfiguration('createMailThumbnails')) {
@@ -433,8 +434,6 @@ class MailController extends AbstractController
             }
         }
 
-        $this->moduleTemplate->setContent($this->view->render());
-
         if ($updatePreview && !$mail->isQuickMail()) {
             if ($mail->isInternal()) {
                 $messageValue = BackendUtility::getProcessedValue('tx_mail_domain_model_mail', 'page',
@@ -451,7 +450,14 @@ class MailController extends AbstractController
                 LanguageUtility::getLL('general.notification.severity.success.title'));
         }
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Mail/Settings');
     }
 
     /**
@@ -570,21 +576,26 @@ class MailController extends AbstractController
                 ];
             }
         }
-        $this->view->assignMultiple([
+
+        $assignments = [
             'data' => $data,
             'mail' => $mail,
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail)),
-        ]);
-        $this->moduleTemplate->setContent($this->view->render());
+        ];
+
         $this->pageRenderer->addInlineSetting('Mail', 'mailUid', $mail->getUid());
-        if ($this->typo3MajorVersion < 12) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/Categories');
-        } else {
-            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/categories.js');
-        }
         $this->addDocHeaderHelpButton();
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/Categories');
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/categories.js');
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Mail/Categories');
     }
 
     /**
@@ -670,10 +681,12 @@ class MailController extends AbstractController
         $this->mailRepository->persist();
 
         $data = [];
-        $ttAddressRepository = GeneralUtility::makeInstance(AddressRepository::class);
+        if ($this->ttAddressIsLoaded) {
+            $ttAddressRepository = GeneralUtility::makeInstance(AddressRepository::class);
+        }
         $frontendUsersRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
 
-        if ($this->pageTSConfiguration['testTtAddressUids'] ?? false) {
+        if ($this->ttAddressIsLoaded && $this->pageTSConfiguration['testTtAddressUids'] ?? false) {
             $demand = new Demand();
             $demand->setSingleRecords($this->pageTSConfiguration['testTtAddressUids']);
             $data['ttAddress'] = $ttAddressRepository->getAddressesByCustomSorting($demand);
@@ -696,8 +709,10 @@ class MailController extends AbstractController
                                 }
                                 break;
                             case 'tt_address':
-                                foreach ($recipients as $recipient) {
-                                    $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $ttAddressRepository->findByUid($recipient);
+                                if ($this->ttAddressIsLoaded) {
+                                    foreach ($recipients as $recipient) {
+                                        $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $ttAddressRepository->findByUid($recipient);
+                                    }
                                 }
                                 break;
                         }
@@ -708,7 +723,7 @@ class MailController extends AbstractController
 
         $hideCategoryStep = $this->hideCategoryStep($mail);
 
-        $this->view->assignMultiple([
+        $assignments = [
             'data' => $data,
             'navigation' => $this->getNavigation($hideCategoryStep ? 3 : 4, $hideCategoryStep),
             'mailUid' => $mail->getUid(),
@@ -718,11 +733,18 @@ class MailController extends AbstractController
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
                 'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
             ],
-        ]);
-        $this->moduleTemplate->setContent($this->view->render());
+        ];
+
         $this->addDocHeaderHelpButton();
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Mail/TestMail');
     }
 
     /**
@@ -771,25 +793,27 @@ class MailController extends AbstractController
         $this->mailRepository->persist();
 
         $hideCategoryStep = $this->hideCategoryStep($mail);
-        $this->view->assignMultiple([
+        $assignments = [
             'groups' => $this->recipientService->getFinalSendingGroups($this->id),
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
             'v12' => $this->typo3MajorVersion >= 12,
-        ]);
-        $this->moduleTemplate->setContent($this->view->render());
-
-        if ($this->typo3MajorVersion < 12) {
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
-            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/ScheduleSending');
-        } else {
-            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/schedule-sending.js');
-        }
+        ];
         $this->addDocHeaderHelpButton();
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/ScheduleSending');
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/schedule-sending.js');
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Mail/ScheduleSending');
     }
 
     /**

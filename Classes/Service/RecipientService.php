@@ -3,14 +3,11 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Service;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
-use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
-use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
@@ -19,10 +16,12 @@ use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
-use PDO;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\Expression\CompositeExpression;
+use TYPO3\CMS\Core\Database\Query\Expression\ExpressionBuilder;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
@@ -43,8 +42,6 @@ class RecipientService
 
     public function __construct(
         protected GroupRepository $groupRepository,
-        protected AddressRepository $addressRepository,
-        protected FrontendUserRepository $frontendUserRepository,
         protected EventDispatcherInterface $eventDispatcher,
         protected PersistenceManager $persistenceManager
     ) {
@@ -455,11 +452,12 @@ class RecipientService
                     ->from('fe_users', 'fe_users')
                     ->from('fe_groups', 'fe_groups')
                     ->where(
-                        $queryBuilder->expr()->and()
-                            ->add($mailActiveExpression)
-                            ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
-                            ->add($queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
-                            ->add($queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true))
+                        $queryBuilder->expr()->and(
+                            $mailActiveExpression,
+                            $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')),
+                            $queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)),
+                            $queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true)
+                        )
                     )
                     ->orderBy('fe_users.uid')
                     ->addOrderBy('fe_users.email')
@@ -471,10 +469,11 @@ class RecipientService
                 ->select($switchTable . '.uid')
                 ->from($switchTable)
                 ->where(
-                    $queryBuilder->expr()->and()
-                        ->add($mailActiveExpression)
-                        ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)))
+                    $queryBuilder->expr()->and(
+                        $mailActiveExpression,
+                        $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')),
+                        $queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY))
+                    )
                 )
                 ->orderBy($switchTable . '.uid')
                 ->executeQuery()
@@ -573,11 +572,12 @@ class RecipientService
                     $queryBuilder->expr()->inSet('fe_users.usergroup', $queryBuilder->quoteIdentifier('fe_groups.uid'), true)
                 )
                 ->where(
-                    $queryBuilder->expr()->and()
-                        ->add($mailActiveExpression)
-                        ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, PDO::PARAM_INT)))
-                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table)))
+                    $queryBuilder->expr()->and(
+                        $mailActiveExpression,
+                        $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')),
+                        $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                        $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table))
+                    )
                 )
                 ->orderBy('fe_users.uid')
                 ->executeQuery()
@@ -593,11 +593,12 @@ class RecipientService
                     $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($switchTable . '.uid'))
                 )
                 ->where(
-                    $queryBuilder->expr()->and()
-                        ->add($mailActiveExpression)
-                        ->add($queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')))
-                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, PDO::PARAM_INT)))
-                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable)))
+                    $queryBuilder->expr()->and(
+                        $mailActiveExpression,
+                        $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')),
+                        $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                        $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable))
+                    )
                 )
                 ->orderBy($switchTable . '.uid')
                 ->executeQuery()
@@ -624,9 +625,10 @@ class RecipientService
                     $queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign'))
                 )
                 ->where(
-                    $queryBuilder->expr()->and()
-                        ->add($queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($mailGroupUid, PDO::PARAM_INT)))
-                        ->add($queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter('fe_groups')))
+                    $queryBuilder->expr()->and(
+                        $queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                        $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter('fe_groups'))
+                    )
                 )
                 ->executeQuery()
                 ->fetchAllAssociative(), 'uid');
@@ -661,9 +663,10 @@ class RecipientService
                             )
                             ->orWhere(...$subGroupExpressions)
                             ->andWhere(
-                                $queryBuilder->expr()->and()
-                                    ->add($mailActiveExpression)
-                                    ->add($queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')))
+                                $queryBuilder->expr()->and(
+                                    $mailActiveExpression,
+                                    $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter(''))
+                                )
                             )
                             ->orderBy('fe_users.uid')
                             ->executeQuery()
@@ -813,10 +816,11 @@ class RecipientService
                 $queryBuilder->expr()->eq('c.uid', $queryBuilder->quoteIdentifier('mm.uid_local'))
             )
             ->where(
-                $queryBuilder->expr()->and()
-                    ->add($queryBuilder->expr()->eq('mm.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)))
-                    ->add($queryBuilder->expr()->eq('mm.tablenames', $queryBuilder->createNamedParameter($table)))
-                    ->add($queryBuilder->expr()->eq('mm.fieldname', $queryBuilder->createNamedParameter($categoryFieldName)))
+                $queryBuilder->expr()->and(
+                    $queryBuilder->expr()->eq('mm.uid_foreign', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->eq('mm.tablenames', $queryBuilder->createNamedParameter($table)),
+                    $queryBuilder->expr()->eq('mm.fieldname', $queryBuilder->createNamedParameter($categoryFieldName))
+                )
             )
             ->executeQuery()
             ->fetchAllAssociative();

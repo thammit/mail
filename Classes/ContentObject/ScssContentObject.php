@@ -5,8 +5,11 @@ namespace MEDIAESSENZ\Mail\ContentObject;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Parser\ScssParser;
 use ScssPhp\ScssPhp\Exception\SassException;
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\TypoScript\AST\Node\RootNode;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 class ScssContentObject extends AbstractContentObject
 {
@@ -61,11 +64,10 @@ class ScssContentObject extends AbstractContentObject
     protected function getVariablesFromConstants(string $extension = 'scss'): array
     {
         $constants = $this->getConstants();
-        $extension = strtolower($extension);
         $variables = [];
 
         // Fetch settings
-        $prefix = 'plugin.mail.settings.' . $extension . '.';
+        $prefix = 'plugin.mail.settings.' . strtolower($extension) . '.';
         foreach ($constants as $constant => $value) {
             if (str_starts_with($constant, $prefix)) {
                 $variables[substr($constant, strlen($prefix))] = $value;
@@ -80,11 +82,16 @@ class ScssContentObject extends AbstractContentObject
      */
     protected function getConstants(): array
     {
-        if ($GLOBALS['TSFE']->tmpl->flatSetup === null
-            || !is_array($GLOBALS['TSFE']->tmpl->flatSetup)
-            || count($GLOBALS['TSFE']->tmpl->flatSetup) === 0) {
-            $GLOBALS['TSFE']->tmpl->generateConfig();
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            if ($GLOBALS['TSFE']->tmpl->flatSetup === null
+                || !is_array($GLOBALS['TSFE']->tmpl->flatSetup)
+                || count($GLOBALS['TSFE']->tmpl->flatSetup) === 0)
+            {
+                $GLOBALS['TSFE']->tmpl->generateConfig();
+            }
+            return $GLOBALS['TSFE']->tmpl->flatSetup;
+        } else {
+            return $this->request->getAttribute('frontend.typoscript')->getSettingsTree()->flatten();
         }
-        return $GLOBALS['TSFE']->tmpl->flatSetup;
     }
 }

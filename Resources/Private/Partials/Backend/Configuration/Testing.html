@@ -1,0 +1,24 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div class="mb-3">
+    <label for="testTtAddressUids" class="form-label">
+        <f:translate key="{lll}configuration.testAddressUids"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.testAddressUids.description\'}'}"/>
+    </label>
+    <f:form.textfield id="testTtAddressUids" name="pageTS[testTtAddressUids]" value="{configuration.testTtAddressUids}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="testMailGroupUids" class="form-label">
+        <f:translate key="{lll}configuration.testMailGroupUids"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.testMailGroupUids.description\'}'}"/>
+    </label>
+    <f:form.textfield id="testMailGroupUids" name="pageTS[testMailGroupUids]" value="{configuration.testMailGroupUids}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="testMailSubjectPrefix" class="form-label">
+        <f:translate key="{lll}configuration.testMailSubjectPrefix"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.testMailSubjectPrefix.description\'}'}"/>
+    </label>
+    <f:form.textfield id="testMailSubjectPrefix" name="pageTS[testMailSubjectPrefix]" value="{configuration.testMailSubjectPrefix}" class="form-control"/>
+</div>
+
+</html>

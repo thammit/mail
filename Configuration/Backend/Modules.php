@@ -13,7 +13,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
  */
 $modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePosition') ?? 'after:web';
 $modulePositionArray = explode(':', $modulePosition);
-$navigationComponent = '@typo3/backend/page-tree/page-tree-element';
+$navigationComponent = (new \TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() < 13 ? '@typo3/backend/page-tree/page-tree-element' : '@typo3/backend/tree/page-tree-element';
 try {
     if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || (int)ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
         $navigationComponent = '';

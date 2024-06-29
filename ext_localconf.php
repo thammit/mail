@@ -11,6 +11,7 @@ defined('TYPO3') or die();
     \MEDIAESSENZ\Mail\Configuration::registerMigrations();
     \MEDIAESSENZ\Mail\Configuration::excludeMailParamsFromCHashCalculation();
     \MEDIAESSENZ\Mail\Configuration::includeRequiredLibrariesForNoneComposerMode();
+    \MEDIAESSENZ\Mail\Configuration::registerCompilerPasses();
 
     if ((new TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() < 12) {
         \MEDIAESSENZ\Mail\Configuration::registerHooks();

@@ -36,12 +36,11 @@ class ReportController extends AbstractController
             return $this->handleNoMailModulePageRedirect();
         }
 
-        $this->view->assignMultiple([
+        $assignments = [
             'mails' => $this->mailRepository->findSentByPid($this->id),
             'hideDeleteReportButton' => $this->userTSConfiguration['hideDeleteReportButton'] ?? false,
-        ]);
+        ];
 
-        $this->moduleTemplate->setContent($this->view->render());
         $this->addDocheaderButtons($this->request->getRequestTarget());
 
         $refreshRate = (int)($this->pageTSConfiguration['refreshRate'] ?? 5);
@@ -55,7 +54,14 @@ class ReportController extends AbstractController
             }
         }
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Report/Index');
     }
 
     /**
@@ -76,17 +82,24 @@ class ReportController extends AbstractController
         if ($performance['failedResponses']) {
             $this->view->assign('returned', $this->reportService->getReturnedData());
         }
-        $this->view->assignMultiple([
+        $assignments = [
             'mail' => $mail,
             'performance' => $performance,
             'responses' => $this->reportService->getResponsesData(),
             'maxLabelLength' => (int)($this->pageTSConfiguration['maxLabelLength'] ?? 0),
-        ]);
-        $this->moduleTemplate->setContent($this->view->render());
+        ];
+
         $this->addLeftDocheaderBackButtons();
         $this->addDocheaderButtons($this->request->getRequestTarget());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Report/Show');
     }
 
     /**
@@ -104,9 +117,13 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData(),
         ]);
-        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        return $this->moduleTemplate->renderResponse('Backend/Report/ShowTotalReturned');
     }
 
     /**
@@ -157,9 +174,13 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]),
         ]);
-        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        return $this->moduleTemplate->renderResponse('Backend/Report/ShowUnknown');
     }
 
     /**
@@ -210,9 +231,13 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]),
         ]);
-        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        return $this->moduleTemplate->renderResponse('Backend/Report/ShowFull');
     }
 
     /**
@@ -263,9 +288,13 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]),
         ]);
-        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        return $this->moduleTemplate->renderResponse('Backend/Report/ShowBadHost');
     }
 
     /**
@@ -316,9 +345,13 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]),
         ]);
-        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        return $this->moduleTemplate->renderResponse('Backend/Report/ShowBadHeader');
     }
 
     /**
@@ -369,9 +402,13 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]),
         ]);
-        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        return $this->moduleTemplate->renderResponse('Backend/Report/ShowReasonUnknown');
     }
 
     /**

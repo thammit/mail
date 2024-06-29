@@ -1,4 +1,7 @@
 <?php
+
+use TYPO3\CMS\Core\Information\Typo3Version;
+
 return [
     'ctrl' => [
         'label' => 'subject',
@@ -287,7 +290,7 @@ return [
         'attachment' => [
             'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.attachment',
-            'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
+            'config' => (new Typo3Version())->getMajorVersion() < 12 ? \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
                 'attachment',
                 [
                     'maxitems' => 5,
@@ -312,7 +315,12 @@ return [
                     ],
                 ],
                 $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-            ),
+            ) :
+            [
+                'type' => 'file',
+                'maxitems' => 5,
+                'allowed' => 'common-image-types, common-text-types, gz, zip'
+            ],
         ],
         'recipient_groups' => [
             'exclude' => true,

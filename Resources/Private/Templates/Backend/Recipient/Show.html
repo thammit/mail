@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Module"/>
+
+<f:section name="Content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+    <h1>
+        {group.title}
+    </h1>
+    <f:if condition="{recipientSources -> f:count()}">
+        <div class="panel-group" id="mail-recipient-list-panel">
+            <f:variable name="open" value="0"/>
+            <f:if condition="{recipientSources -> f:count()} == 1">
+                <f:variable name="open" value="1"/>
+            </f:if>
+            <f:for each="{recipientSources}" as="recipientSource" key="recipientSourceIdentifier">
+                <f:variable name="title">
+                    <f:translate key="{recipientSource.title}" default="{recipientSource.title}"/> [{recipientSource.table}]
+                </f:variable>
+                <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSourceIdentifier}" class="btn btn-default btn-sm text-uppercase">
+                    <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
+                    <f:translate key="{lll}general.button.downloadCsv"/>
+                </f:link.action></f:variable>
+                <f:variable name="icon">
+                    <f:if condition="{recipientSource.icon}">
+                        <f:then>
+                            <core:icon identifier="{recipientSource.icon}" />
+                        </f:then>
+                        <f:else if="{recipientSource.recipients.0} && {table}">
+                            <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}"/>
+                        </f:else>
+                    </f:if>
+                </f:variable>
+                <f:render partial="Backend/Panel"
+                          arguments="{lll:lll, parentId:'mail-recipient-list-panel-{recipientSourceIdentifier}', title: title, index:recipientSourceIdentifier, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
+                          contentAs="panelBody">
+                    <f:render partial="Backend/Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, editCsvList: recipientSource.editCsvList, lll:lll}"/>
+                </f:render>
+            </f:for>
+        </div>
+    </f:if>
+</f:section>
+</html>

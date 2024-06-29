@@ -1,0 +1,84 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+      xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+      xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:layout name="Module"/>
+
+<f:section name="Content">
+    <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+    <h1><f:translate key="{lll}report.show.header"/>: {mail.subject} [{mail.uid}]</h1>
+    <div class="row">
+        <div class="col-12 col-lg-6">
+            <h2><f:translate key="{lll}report.settings"/></h2>
+            <f:render partial="Backend/Settings" arguments="{_all}" />
+            <f:if condition="{performance}">
+                <f:render partial="Backend/Report/Performance" arguments="{data:performance, mail:mail, lll:lll}"/>
+            </f:if>
+            <f:if condition="{returned}">
+                <f:render partial="Backend/Report/Returned" arguments="{data:returned, mail:mail, lll:lll}"/>
+            </f:if>
+            <f:if condition="{responses}">
+                <f:render partial="Backend/Report/Responses" arguments="{data:responses, mail:mail, lll:lll, maxLabelLength:maxLabelLength}"/>
+            </f:if>
+        </div>
+        <f:if condition="{mail.htmlContent} && {mail.plainContent}">
+            <f:then>
+                <div class="col-12 col-lg-6">
+                    <h2><f:translate key="{lll}report.content"/></h2>
+                    <div role="tabpanel">
+                        <ul class="nav nav-tabs t3js-tabs" role="tablist" id="preview-tabs-tab" data-store-last-tab="1">
+                            <f:render section="tabSelector" arguments="{tabId:'tab-mail-html',title:'HTML',active:1}"/>
+                            <f:render section="tabSelector" arguments="{tabId:'tab-mail-text',title:'Text',active:0}"/>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="tab-mail-html">
+                                <div class="panel panel-tab">
+                                    <div class="panel-body mail-wizard-preview">
+                                        <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
+                                            {mail.htmlContent -> mail:getBodyContent()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="tab-mail-text">
+                                <div class="panel panel-tab">
+                                    <div class="panel-body">
+                                        <pre style="white-space: pre-wrap;">{mail.plainContent -> mail:removeMailBoundaries()}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </f:then>
+            <f:else>
+                <div class="col-12 col-lg-6">
+                    <h2><f:translate key="{lll}report.content"/></h2>
+                    <div class="mail-wizard-preview panel panel-default mb-2">
+                        <div class="mail-wizard-preview-body" id="mail-wizard-preview-body">
+                            <f:if condition="{mail.plainContent}">
+                                <pre class="p-4" style="white-space: pre-wrap;">{mail.plainContent -> mail:removeMailBoundaries()}</pre>
+                            </f:if>
+                            <f:if condition="{mail.htmlContent}">
+                                {mail.htmlContent -> mail:getBodyContent()}
+                            </f:if>
+                        </div>
+                    </div>
+                </div>
+            </f:else>
+        </f:if>
+    </div>
+</f:section>
+
+<f:section name="tabSelector">
+    <li role="presentation" class="t3js-tabmenu-item">
+        <a href="#{tabId}" title="" aria-controls="{tabId}" role="tab" data-bs-toggle="tab"
+           aria-selected="{f:if(condition: '{active}', then: 'true', else:'false')}" class="{f:if(condition: '{active}', then: 'active')}">
+            {title}
+        </a>
+    </li>
+</f:section>
+</html>

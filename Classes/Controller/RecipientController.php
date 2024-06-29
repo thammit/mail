@@ -71,14 +71,22 @@ class RecipientController extends AbstractController
             ];
         }
 
-        $this->view->assign('pid', $this->id);
-        $this->view->assign('data', $data);
-
-        $this->moduleTemplate->setContent($this->view->render());
-        $this->addLeftDocheaderButtons($this->id, $this->request->getRequestTarget());
         $this->addDocheaderButtons();
+        $this->addLeftDocheaderButtons($this->id, $this->request->getRequestTarget());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        $assignments = [
+            'pid' => $this->id,
+            'data' => $data
+        ];
+
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Recipient/Index');
     }
 
     /**
@@ -136,20 +144,26 @@ class RecipientController extends AbstractController
                 'numberOfRecipients' => count($recipients),
                 'show' => $table && BackendUserUtility::getBackendUser()->check('tables_select', $table),
                 'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
-                'editCsvList' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table) ? $editCsvList : 0,
+                'editCsvList' => $table && BackendUserUtility::getBackendUser()->check('tables_modify',
+                    $table) ? $editCsvList : 0,
             ];
         }
 
-        $this->view->assignMultiple([
-            'group' => $group,
-            'recipientSources' => $recipientSources
-        ]);
-
-        $this->moduleTemplate->setContent($this->view->render());
         $this->addLeftDocheaderBackEditButtons($group->getUid(), $this->request->getRequestTarget());
         $this->addDocheaderButtons($group->getTitle());
+        $assignments = [
+            'group' => $group,
+            'recipientSources' => $recipientSources
+        ];
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Recipient/Show');
     }
 
     /**
@@ -166,16 +180,20 @@ class RecipientController extends AbstractController
     {
         $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
         if (!$recipientSourceConfiguration && !($recipientSourceIdentifier === 'tx_mail_domain_model_group')) {
-            ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
+            ViewUtility::addFlashMessageError('',
+                LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
             return $this->redirect('show');
         }
         if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceIdentifier)) {
-            ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
+            ViewUtility::addFlashMessageError('',
+                LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
             return $this->redirect('show');
         }
         $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
-        if (!array_key_exists($recipientSourceIdentifier, $idLists) || count($idLists[$recipientSourceIdentifier]) === 0) {
-            ViewUtility::addFlashMessageError('', LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
+        if (!array_key_exists($recipientSourceIdentifier,
+                $idLists) || count($idLists[$recipientSourceIdentifier]) === 0) {
+            ViewUtility::addFlashMessageError('',
+                LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
             return $this->redirect('show');
         }
 
@@ -185,10 +203,13 @@ class RecipientController extends AbstractController
             $rows = $idList;
         } else {
             if ($recipientSourceConfiguration['model'] ?? false) {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $recipientSourceConfiguration['model'], []);
+                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList,
+                    $recipientSourceConfiguration['model'], []);
             } else {
-                $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceIdentifier, $csvExportFields, true);
+                $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',',
+                    $this->defaultCsvExportFields, true);
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceIdentifier,
+                    $csvExportFields, true);
             }
         }
         return CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);
@@ -203,13 +224,19 @@ class RecipientController extends AbstractController
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
         $importService->init($this->id, $this->request);
+        $assignments = [
+            'data' => $importService->getCsvImportUploadData(),
+            'navigation' => ['steps' => [1, 2, 3, 4], 'currentStep' => 1]
+        ];
 
-        $this->view->assign('data', $importService->getCsvImportUploadData());
-        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 1]);
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
 
-        $this->moduleTemplate->setContent($this->view->render());
-
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Recipient/CsvImportWizard');
     }
 
     /**
@@ -258,13 +285,19 @@ class RecipientController extends AbstractController
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
         $importService->init($this->id, $this->request, $configuration);
+        $assignments = [
+            'data' => $importService->getCsvImportConfigurationData(),
+            'navigation' => ['steps' => [1, 2, 3, 4], 'currentStep' => 2]
+        ];
 
-        $this->view->assign('data', $importService->getCsvImportConfigurationData());
-        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 2]);
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
 
-        $this->moduleTemplate->setContent($this->view->render());
-
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Recipient/CsvImportWizardStepConfiguration');
     }
 
     /**
@@ -277,13 +310,19 @@ class RecipientController extends AbstractController
         /* @var $importService ImportService */
         $importService = GeneralUtility::makeInstance(ImportService::class);
         $importService->init($this->id, $this->request, $configuration);
+        $assignments = [
+            'data' => $importService->getCsvImportMappingData(),
+            'navigation' => ['steps' => [1, 2, 3, 4], 'currentStep' => 3]
+        ];
 
-        $this->view->assign('data', $importService->getCsvImportMappingData());
-        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 3]);
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
 
-        $this->moduleTemplate->setContent($this->view->render());
-
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Recipient/CsvImportWizardStepMapping');
     }
 
     /**
@@ -301,13 +340,19 @@ class RecipientController extends AbstractController
         if (!$importService->validateMapping()) {
             return $this->redirect('csvImportWizardStepMapping', null, null, ['configuration' => $configuration]);
         }
+        $assignments = [
+            'data' => $importService->startCsvImport(),
+            'navigation' => ['steps' => [1, 2, 3, 4], 'currentStep' => 4]
+        ];
 
-        $this->view->assign('data', $importService->startCsvImport());
-        $this->view->assign('navigation', ['steps' => [1,2,3,4], 'currentStep' => 4]);
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
 
-        $this->moduleTemplate->setContent($this->view->render());
-
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Recipient/CsvImportWizardStepStartImport');
     }
 
     /**

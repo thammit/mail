@@ -10,6 +10,7 @@ use MEDIAESSENZ\Mail\Controller\MailController;
 use MEDIAESSENZ\Mail\Controller\QueueController;
 use MEDIAESSENZ\Mail\Controller\RecipientController;
 use MEDIAESSENZ\Mail\Controller\ReportController;
+use MEDIAESSENZ\Mail\DependencyInjection\EventListenerCompilerPass;
 use MEDIAESSENZ\Mail\Hooks\AddBackToMailWizardButton;
 use MEDIAESSENZ\Mail\Hooks\PageTreeRefresh;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
@@ -19,6 +20,8 @@ use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\DependencyInjection\Initialization\ContainerInitialization;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -165,7 +168,11 @@ final class Configuration
 
     public static function addMailStyleSheetDirectory(): void
     {
-        $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            $GLOBALS['TBE_STYLES']['skins']['mail']['stylesheetDirectories'][] = 'EXT:mail/Resources/Public/Css/Backend';
+        } else {
+            $GLOBALS['TYPO3_CONF_VARS']['BE']['stylesheets']['mail'] = 'EXT:mail/Resources/Public/Css/Backend';
+        }
     }
 
     public static function registerHooks(): void
@@ -221,5 +228,16 @@ final class Configuration
             // @phpstan-ignore-next-line
             @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
         }
+    }
+
+    public static function registerCompilerPasses(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['extLocalConfRegistered'][] = function () {
+            if (ExtensionManagementUtility::isLoaded('tt_address')) {
+                GeneralUtility::makeInstance(ContainerInitialization::class)->addCompilerPass(
+                    GeneralUtility::makeInstance(EventListenerCompilerPass::class)
+                );
+            }
+        };
     }
 }

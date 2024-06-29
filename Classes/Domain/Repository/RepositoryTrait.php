@@ -5,7 +5,6 @@ namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use PDO;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -69,7 +68,7 @@ trait RepositoryTrait
             ->select(...$fields)
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT))
             )
             ->executeQuery()
             ->fetchAllAssociative();
@@ -91,7 +90,7 @@ trait RepositoryTrait
             ->select(...$fields)
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidList, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY))
+                $queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidList, Connection::PARAM_INT_ARRAY))
             )
             ->executeQuery()
             ->fetchAllAssociative();
@@ -113,7 +112,7 @@ trait RepositoryTrait
             ->select(...$fields)
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT))
             )
             ->executeQuery()
             ->fetchAllAssociative();
@@ -134,7 +133,7 @@ trait RepositoryTrait
             ->select(...$fields)
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->in('pid', $queryBuilder->createNamedParameter($pidList, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY))
+                $queryBuilder->expr()->in('pid', $queryBuilder->createNamedParameter($pidList, Connection::PARAM_INT_ARRAY))
             )
             ->executeQuery()
             ->fetchAllAssociative();
@@ -173,7 +172,7 @@ trait RepositoryTrait
         return $queryBuilder
             ->delete($this->table)
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT))
             )
             ->executeStatement();
     }
@@ -190,7 +189,7 @@ trait RepositoryTrait
         return $queryBuilder
             ->delete($this->table)
             ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT))
             )
             ->executeStatement();
     }

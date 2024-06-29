@@ -1,0 +1,69 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
+
+<f:layout name="Module"/>
+
+<f:section name="Content">
+	<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
+	<h1>
+		<f:translate key="{lll}report.header"/>
+	</h1>
+	<div class="panel panel-default mb-3">
+		<table class="mail-queue-table table table-striped table-hover mb-0">
+			<thead>
+			<tr>
+				<th class="col-icon nowrap">&nbsp;</th>
+				<th class="col-title col-responsive nowrap">
+					<f:translate key="{lll}report.subject"/>
+				</th>
+				<th class="nowrap">
+					<f:translate key="{lll}report.scheduled"/>
+				</th>
+				<th class="nowrap">
+					<f:translate key="{lll}report.deliveryBegun"/>
+				</th>
+				<th class="nowrap">
+					<f:translate key="{lll}report.deliveryEnded"/>
+				</th>
+				<th class="nowrap text-center" style="min-width:200px">
+					<f:translate key="{lll}report.progress"/>
+				</th>
+				<f:if condition="!{hideDeleteReportButton}">
+					<th class="col-control nowrap">
+					</th>
+				</f:if>
+			</tr>
+			</thead>
+			<tbody>
+			<f:for each="{mails}" as="mail">
+				<tr class="{f:if(condition:'!{mail.sent}',then:'table-info')}">
+					<td class="col-icon nowrap">
+						<core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="small"/>
+					</td>
+					<td class="col-title col-responsive nowrap">
+						<f:link.action action="show" arguments="{mail: mail.uid}">{mail.subject}</f:link.action>
+					</td>
+					<td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y H:i')}</td>
+					<td class="nowrap mail-scheduled-begin">{mail.scheduledBegin -> f:format.date(format: 'd.m.Y H:i')}</td>
+					<td class="nowrap mail-scheduled-end">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y H:i')}</td>
+					<td class="nowrap">
+						<f:render partial="Backend/ProgressBar" arguments="{mail:mail}"/>
+					</td>
+					<f:if condition="!{hideDeleteReportButton}">
+						<td>
+							<f:link.action action="delete" arguments="{mail: mail}"
+										   class="mail-report-delete-button btn btn-default {f:if(condition:'!{mail.sent}',then:'d-none')}">
+								<core:icon identifier="actions-edit-delete"/>
+							</f:link.action>
+						</td>
+					</f:if>
+				</tr>
+			</f:for>
+			</tbody>
+		</table>
+	</div>
+</f:section>
+</html>

@@ -10,9 +10,10 @@ class SimulateFrontendUserGroup
 {
     public function __invoke(ModifyResolvedFrontendGroupsEvent $event): void
     {
-        if (GeneralUtility::_GET('mail_fe_group') && GeneralUtility::_GET('access_token')) {
-            $frontendUserGroup = (int)GeneralUtility::_GET('mail_fe_group');
-            if ($frontendUserGroup > 0 && RegistryUtility::validateAndRemoveAccessToken(GeneralUtility::_GET('access_token'))) {
+        $queryParams = $event->getRequest()->getQueryParams();
+        if ($mailFeGroup = $queryParams['mail_fe_group'] && $accessToken = $queryParams['access_token']) {
+            $frontendUserGroup = (int)$mailFeGroup;
+            if ($frontendUserGroup > 0 && RegistryUtility::validateAndRemoveAccessToken($accessToken)) {
                 $event->setGroups([['uid' => $frontendUserGroup]]);
             }
         }

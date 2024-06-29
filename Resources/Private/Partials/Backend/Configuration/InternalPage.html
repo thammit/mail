@@ -1,0 +1,18 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<div class="mb-3">
+    <label for="htmlParams" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.htmlParams"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.htmlParams.description\', 1: \'{lll}configuration.htmlParams.details\'}'}"/>
+    </label>
+    <f:form.textfield id="htmlParams" name="pageTS[htmlParams]" value="{configuration.htmlParams}" class="form-control"/>
+</div>
+<div class="mb-3">
+    <label for="plainParams" class="form-label">
+        <f:translate key="{lll2}tx_mail_domain_model_mail.plainParams"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.plainParams.description\', 1: \'{lll}configuration.plainParams.details\'}'}"/>
+    </label>
+    <f:form.textfield id="plainParams" name="pageTS[plainParams]" value="{configuration.plainParams}" class="form-control"/>
+</div>
+
+</html>

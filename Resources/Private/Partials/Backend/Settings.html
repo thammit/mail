@@ -1,0 +1,68 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+	  xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
+	  xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+	  xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+	  xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
+	  data-namespace-typo3-fluid="true">
+
+<f:if condition="{settingsWithoutTabs}">
+	<f:then>
+		<div class="panel panel-tab">
+			<div class="panel-body p-0 table-fit">
+				<table class="table table-striped table-hover">
+					<tbody>
+					<f:for each="{fieldGroups}" as="fields">
+						<f:for each="{fields}" as="field">
+							<f:render partial="Backend/Tabs" section="tableRow" arguments="{field:field, mailUid:mail.uid, lll:lll}"/>
+						</f:for>
+					</f:for>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</f:then>
+	<f:else>
+		<div role="tabpanel">
+			<ul class="nav nav-tabs t3js-tabs" role="tablist" id="settings-tabs-tab" data-store-last-tab="1">
+				<f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
+					<f:if condition="{fields}">
+						<f:variable name="tabId" value="tab-{groupName}" />
+						<f:if condition="{activeTabId}">
+							<f:then>
+								<f:if condition="{activeTabId} == {tabId}'">
+									<f:then><f:variable name="active" value="1"/></f:then>
+									<f:else><f:variable name="active" value="0"/></f:else>
+								</f:if>
+							</f:then>
+							<f:else>
+								<f:variable name="active">{fieldGroupIterator.isFirst}</f:variable>
+							</f:else>
+						</f:if>
+						<f:render partial="Backend/Tabs" section="tabSelector"
+								  arguments="{tabId:tabId,title:'{f:translate(key: \'{lll}mail.wizard.settings.{groupName}\')}',active:active}"/>
+					</f:if>
+				</f:for>
+			</ul>
+			<div class="tab-content">
+				<f:for each="{fieldGroups}" as="fields" key="groupName" iteration="fieldGroupIterator">
+					<f:if condition="{fields}">
+						<f:variable name="tabId" value="tab-{groupName}" />
+						<f:if condition="{activeTabId}">
+							<f:then>
+								<f:if condition="{activeTabId} == {tabId}'">
+									<f:then><f:variable name="active" value="1"/></f:then>
+									<f:else><f:variable name="active" value="0"/></f:else>
+								</f:if>
+							</f:then>
+							<f:else>
+								<f:variable name="active">{fieldGroupIterator.isFirst}</f:variable>
+							</f:else>
+						</f:if>
+						<f:render partial="Backend/Tabs" section="tabContent" arguments="{tabId:tabId,mailUid:mail.uid,fields:fields,active:active,lll:lll}"/>
+					</f:if>
+				</f:for>
+			</div>
+		</div>
+	</f:else>
+</f:if>
+</html>

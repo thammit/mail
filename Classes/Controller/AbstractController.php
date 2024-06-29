@@ -36,6 +36,7 @@ use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
@@ -56,7 +57,7 @@ abstract class AbstractController extends ActionController
     protected array $recipientSources = [];
     protected array $implodedParams = [];
     protected array $allowedTables = [];
-    protected ModuleTemplate $moduleTemplate;
+    protected ?ModuleTemplate $moduleTemplate = null;
     protected int $notification = 1;
 
     protected ?ModuleTemplateFactory $moduleTemplateFactory = null;
@@ -74,6 +75,8 @@ abstract class AbstractController extends ActionController
     protected ?UriBuilder $backendUriBuilder = null;
 
     protected int $typo3MajorVersion = 11;
+    protected bool $ttAddressIsLoaded = false;
+    protected bool $jumpurlIsLoaded = false;
 
     /**
      * @param ModuleTemplateFactory $moduleTemplateFactory
@@ -196,6 +199,9 @@ abstract class AbstractController extends ActionController
     {
         $this->typo3MajorVersion = (new Typo3Version())->getMajorVersion();
 
+        $this->ttAddressIsLoaded = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('tt_address');
+        $this->jumpurlIsLoaded = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('jumpurl');
+
         $this->id = (int)($this->request->getParsedBody()['id'] ?? $this->request->getQueryParams()['id'] ?? 0);
 
         $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
@@ -238,7 +244,7 @@ abstract class AbstractController extends ActionController
         $notifications = $this->getFlashMessageQueue(ViewUtility::NOTIFICATIONS)->getAllMessagesAndFlush();
         if ($notifications) {
             foreach ($notifications as $notification) {
-                $this->addJsNotification($notification->getMessage(), $notification->getTitle(), $this->typo3MajorVersion < 12 ? $notification->getSeverity() : $notification->getSeverity()->value);
+                $this->addJsNotification($notification->getMessage(), $notification->getTitle(), $notification->getSeverity());
             }
         }
         $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
@@ -250,9 +256,12 @@ abstract class AbstractController extends ActionController
     {
         ViewUtility::addFlashMessageWarning(LanguageUtility::getLL('mail.wizard.notification.noPageSelected.message'),
             LanguageUtility::getLL('mail.wizard.notification.noPageSelected.title'));
-        $this->moduleTemplate->setContent($this->view->render());
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+        return $this->moduleTemplate->renderResponse();
     }
 
     protected function handleNoMailModulePageRedirect(): ResponseInterface
@@ -279,22 +288,52 @@ abstract class AbstractController extends ActionController
      * @param int $severity
      * @return void
      */
-    protected function addJsNotification(string $message, string $title = '', int $severity = AbstractMessage::OK): void
+    protected function addJsNotification(string $message, string $title = '', int|ContextualFeedbackSeverity $severity = null): void
     {
-        $severities = [
-            AbstractMessage::NOTICE => 'notice',
-            AbstractMessage::INFO => 'info',
-            AbstractMessage::OK => 'success',
-            AbstractMessage::WARNING => 'warning',
-            AbstractMessage::ERROR => 'error',
-        ];
+        if ($this->typo3MajorVersion < 12) {
+            switch ($severity) {
+                case AbstractMessage::NOTICE:
+                    $severityType = 'notice';
+                    break;
+                case AbstractMessage::INFO:
+                    $severityType = 'info';
+                    break;
+                case AbstractMessage::WARNING:
+                    $severityType = 'warning';
+                    break;
+                case AbstractMessage::ERROR:
+                    $severityType = 'error';
+                    break;
+                default:
+                    $severityType = 'success';
+                    break;
+            };
+        } else {
+            switch ($severity) {
+                case ContextualFeedbackSeverity::NOTICE:
+                    $severityType = 'notice';
+                    break;
+                case ContextualFeedbackSeverity::INFO:
+                    $severityType = 'info';
+                    break;
+                case ContextualFeedbackSeverity::WARNING:
+                    $severityType = 'warning';
+                    break;
+                case ContextualFeedbackSeverity::ERROR:
+                    $severityType = 'error';
+                    break;
+                default:
+                    $severityType = 'success';
+                    break;
+            };
+        }
 //        if ($this->typo3MajorVersion < 12) {
 //            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
 //        } else {
 //            $this->pageRenderer->loadJavaScriptModule('@typo3/backend/notification.js');
 //        }
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
-            'top.TYPO3.Notification.' . ($severities[$severity] ?? 'success') . '(\'' . $title . '\', \'' . $message . '\');');
+            'top.TYPO3.Notification.' . $severityType . '(\'' . $title . '\', \'' . $message . '\');');
         $this->notification++;
     }
 
@@ -339,11 +378,21 @@ abstract class AbstractController extends ActionController
         }
 
         if ($this->userTSConfiguration['settingsWithoutTabs'] ?? count($groups) === 1) {
-            $this->view->assign('settingsWithoutTabs', true);
+            if ($this->typo3MajorVersion < 12) {
+                $this->view->assign('settingsWithoutTabs', true);
+            } else {
+                $this->moduleTemplate->assign('settingsWithoutTabs', true);
+            }
         }
 
         if ($forceReadOnly || isset($this->userTSConfiguration['hideEditAllSettingsButton'])) {
-            $this->view->assign('hideEditAllSettingsButton', $forceReadOnly || $this->userTSConfiguration['hideEditAllSettingsButton']);
+            if ($this->typo3MajorVersion < 12) {
+                $this->view->assign('hideEditAllSettingsButton',
+                    $forceReadOnly || $this->userTSConfiguration['hideEditAllSettingsButton']);
+            } else {
+                $this->moduleTemplate->assign('hideEditAllSettingsButton',
+                    $forceReadOnly || $this->userTSConfiguration['hideEditAllSettingsButton']);
+            }
         }
 
         $readOnly = ['type', 'renderedSize'];
@@ -413,7 +462,10 @@ abstract class AbstractController extends ActionController
                 }
             }
         }
-
-        $this->view->assign('fieldGroups', $fieldGroups);
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assign('fieldGroups', $fieldGroups);
+        } else {
+            $this->moduleTemplate->assign('fieldGroups', $fieldGroups);
+        }
     }
 }

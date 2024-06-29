@@ -8,7 +8,7 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
-use PDO;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -38,7 +38,7 @@ class RecipientUtility
             ->from($relationTable, $relationTable)
             ->leftJoin($relationTable, $table, $table, $relationTable . '.uid_foreign = ' . $table . '.uid')
             ->where(
-                $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq($relationTable . '.uid_foreign', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq($relationTable . '.tablenames', $queryBuilder->createNamedParameter($table))
             )
             ->executeQuery();

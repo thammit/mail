@@ -7,7 +7,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
-use PDO;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class LogRepository extends Repository
@@ -35,7 +35,7 @@ class LogRepository extends Repository
             ->count('*')
             ->addSelect('response_type')
             ->from($this->table)
-            ->where($queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)))
+            ->where($queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)))
             ->groupBy('response_type')
             ->executeQuery();
 
@@ -61,8 +61,8 @@ class LogRepository extends Repository
             ->addSelect('return_code')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::FAILED, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::FAILED, Connection::PARAM_INT))
             )
             ->groupBy('return_code')
             ->orderBy('COUNT(*)')
@@ -89,8 +89,8 @@ class LogRepository extends Repository
             ->count('*')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, Connection::PARAM_INT))
             )
             ->groupBy('recipient_source')
             ->addGroupBy('recipient_uid')
@@ -112,9 +112,9 @@ class LogRepository extends Repository
             ->count('*')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
-                $queryBuilder->expr()->gt('format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
+                $queryBuilder->expr()->gt('format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, Connection::PARAM_INT))
             )
             ->executeQuery()
             ->fetchOne();
@@ -138,8 +138,8 @@ class LogRepository extends Repository
             ->select('recipient_uid')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
             )
             ->executeQuery()
@@ -162,7 +162,7 @@ class LogRepository extends Repository
             ->addSelect('format_sent')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', ResponseType::ALL),
             )
             ->groupBy('format_sent')
@@ -190,10 +190,10 @@ class LogRepository extends Repository
             ->select('uid', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
-                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, Connection::PARAM_INT)),
             )
             ->setMaxResults(1)
             ->executeQuery()
@@ -217,8 +217,8 @@ class LogRepository extends Repository
             ->addSelect('url_id')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter($responseType, Connection::PARAM_INT))
             )
             ->groupBy('url_id')
             ->orderBy('COUNT(*)')
@@ -245,14 +245,14 @@ class LogRepository extends Repository
             ->select('recipient_uid', 'recipient_source', 'email')
             ->from($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::FAILED, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::FAILED, Connection::PARAM_INT))
             );
 
         if ($returnCodes) {
             $or = [];
             foreach ($returnCodes as $returnCode) {
-                $or[] = $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter($returnCode, PDO::PARAM_INT));
+                $or[] = $queryBuilder->expr()->eq('return_code', $queryBuilder->createNamedParameter($returnCode, Connection::PARAM_INT));
             }
             if (count($or) > 1) {
                 $statement->andWhere(
@@ -283,7 +283,7 @@ class LogRepository extends Repository
         $queryBuilder
             ->delete($this->table)
             ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT))
             )->executeStatement();
     }
 }

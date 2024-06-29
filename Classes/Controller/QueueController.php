@@ -41,7 +41,7 @@ class QueueController extends AbstractController
 
         $refreshRate = (int)($this->pageTSConfiguration['refreshRate'] ?? 5);
 
-        $this->view->assignMultiple([
+        $assignments = [
             'id' => $this->id,
             'mails' => $this->mailRepository->findScheduledByPid($this->id, (int)($this->pageTSConfiguration['queueLimit'] ?? 10)),
             'sendPerCycle' => (int)($this->pageTSConfiguration['sendPerCycle'] ?? 50),
@@ -49,9 +49,8 @@ class QueueController extends AbstractController
             'refreshRate' => $refreshRate,
             'hideManualSendingButton' => $this->userTSConfiguration['hideManualSendingButton'] ?? false,
             'hideDeleteRunningSendingButton' => $this->userTSConfiguration['hideDeleteRunningSendingButton'] ?? false,
-        ]);
+        ];
 
-        $this->moduleTemplate->setContent($this->view->render());
         $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));
 
         if ($refreshRate) {
@@ -63,7 +62,14 @@ class QueueController extends AbstractController
             }
         }
 
-        return $this->htmlResponse($this->moduleTemplate->renderContent());
+        if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments);
+            $this->moduleTemplate->setContent($this->view->render());
+            return $this->htmlResponse($this->moduleTemplate->renderContent());
+        }
+
+        $this->moduleTemplate->assignMultiple($assignments);
+        return $this->moduleTemplate->renderResponse('Backend/Queue/Index');
     }
 
     public function saveConfigurationAction(int $sendPerCycle, int $queueLimit, int $refreshRate): ResponseInterface

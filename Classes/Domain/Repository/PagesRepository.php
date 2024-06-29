@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
 use Doctrine\DBAL\DBALException;
-use PDO;
+use TYPO3\CMS\Core\Database\Connection;
 
 class PagesRepository
 {
@@ -24,8 +24,8 @@ class PagesRepository
         return $queryBuilder
             ->select('sys_language_uid')
             ->from($this->table)
-            ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, PDO::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, PDO::PARAM_INT)))
+            ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, Connection::PARAM_INT)))
+            ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, Connection::PARAM_INT)))
             ->executeQuery()
             ->fetchAllAssociative();
     }
