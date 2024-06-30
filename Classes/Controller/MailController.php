@@ -510,6 +510,7 @@ class MailController extends AbstractController
         $rows = GeneralUtility::makeInstance(TtContentRepository::class)->findByPidAndSysLanguageUid($mail->getPage(),
             $mail->getSysLanguageUid());
 
+        $configTreeStartingPoints = false;
 
         if ($rows) {
             $data = [
@@ -537,23 +538,12 @@ class MailController extends AbstractController
 
                 $categories = [];
                 $ttContentPageTsConfig = BackendUtility::getTCEFORM_TSconfig('tt_content', $contentElementData);
-                if (is_array($ttContentPageTsConfig['categories'] ?? false)) {
-                    $configTreeStartingPoints = $ttContentPageTsConfig['categories']['config.']['treeConfig.']['startingPoints'] ?? false;
-                    if ($configTreeStartingPoints !== false) {
-                        $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints,
-                            true);
-                        foreach ($configTreeStartingPointsArray as $startingPoint) {
-                            $ttContentCategories = $this->categoryRepository->findByParent($startingPoint);
-                            foreach ($ttContentCategories as $category) {
-                                $categories[] = [
-                                    'uid' => $category->getUid(),
-                                    'title' => $category->getTitle(),
-                                    'checked' => in_array($category->getUid(), $categoriesRow),
-                                ];
-                            }
-                        }
-                    } else {
-                        $ttContentCategories = $this->categoryRepository->findAll();
+                $configTreeStartingPoints = $ttContentPageTsConfig['categories']['config.']['treeConfig.']['startingPoints'] ?? false;
+                if ($configTreeStartingPoints) {
+                    $configTreeStartingPointsArray = GeneralUtility::intExplode(',', $configTreeStartingPoints,
+                        true);
+                    foreach ($configTreeStartingPointsArray as $startingPoint) {
+                        $ttContentCategories = $this->categoryRepository->findByParent($startingPoint);
                         foreach ($ttContentCategories as $category) {
                             $categories[] = [
                                 'uid' => $category->getUid(),
@@ -561,6 +551,15 @@ class MailController extends AbstractController
                                 'checked' => in_array($category->getUid(), $categoriesRow),
                             ];
                         }
+                    }
+                } else {
+                    $ttContentCategories = $this->categoryRepository->findAll();
+                    foreach ($ttContentCategories as $category) {
+                        $categories[] = [
+                            'uid' => $category->getUid(),
+                            'title' => $category->getTitle(),
+                            'checked' => in_array($category->getUid(), $categoriesRow),
+                        ];
                     }
                 }
 
@@ -580,6 +579,7 @@ class MailController extends AbstractController
         $assignments = [
             'data' => $data,
             'mail' => $mail,
+            'configTreeStartingPoints' => $configTreeStartingPoints,
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail)),
         ];
 

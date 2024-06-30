@@ -327,13 +327,8 @@ abstract class AbstractController extends ActionController
                     break;
             };
         }
-//        if ($this->typo3MajorVersion < 12) {
-//            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/Notification');
-//        } else {
-//            $this->pageRenderer->loadJavaScriptModule('@typo3/backend/notification.js');
-//        }
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
-            'top.TYPO3.Notification.' . $severityType . '(\'' . $title . '\', \'' . $message . '\');');
+            'top.TYPO3.Notification.' . $severityType . '(\'' . $title . '\', \'' . $message . '\')', false, false, true);
         $this->notification++;
     }
 
