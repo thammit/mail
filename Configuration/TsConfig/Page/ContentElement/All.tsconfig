@@ -1,23 +1,2 @@
 # remove all not supported elements
-mod.wizards.newContentElement.wizardItems.menu >
-mod.wizards.newContentElement.wizardItems.forms >
-mod.wizards.newContentElement.wizardItems.plugins.elements.domaincheck >
-mod.wizards.newContentElement.wizardItems.interactive >
-mod.wizards.newContentElement.wizardItems.media.elements.audio >
-mod.wizards.newContentElement.wizardItems.media.elements.card_group >
-mod.wizards.newContentElement.wizardItems.media.elements.external_media >
-mod.wizards.newContentElement.wizardItems.media.elements.gallery >
-mod.wizards.newContentElement.wizardItems.media.elements.icon_group >
-mod.wizards.newContentElement.wizardItems.media.elements.media >
-mod.wizards.newContentElement.wizardItems.media.elements.tab >
-mod.wizards.newContentElement.wizardItems.media.elements.uploads >
-mod.wizards.newContentElement.wizardItems.text.elements.card_group >
-mod.wizards.newContentElement.wizardItems.text.elements.listgroup >
-mod.wizards.newContentElement.wizardItems.text.elements.panel >
-mod.wizards.newContentElement.wizardItems.text.elements.quote >
-mod.wizards.newContentElement.wizardItems.text.elements.textcolumn >
-mod.wizards.newContentElement.wizardItems.text.elements.texticon >
-mod.wizards.newContentElement.wizardItems.text.elements.textteaser >
-mod.wizards.newContentElement.wizardItems.social >
-mod.wizards.newContentElement.wizardItems.data.elements.csv >
-mod.wizards.newContentElement.wizardItems.container >
+TCEFORM.tt_content.CType.removeItems := addToList(bullets,table,uploads,menu_abstract,menu_categorized_content,menu_categorized_pages,menu_pages,menu_subpages,menu_recently_updated,menu_related_pages,menu_section,menu_section_pages,menu_sitemap,menu_sitemap_pages,form_formframework,felogin_login,list,audio,card_group,external_media,gallery,icon_group,media,tab,uploads,card_group,listgroup,panel,quote,textcolumn,texticon,textteaser,div,shortcut)
