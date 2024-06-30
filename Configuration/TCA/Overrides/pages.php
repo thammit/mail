@@ -59,7 +59,7 @@ try {
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::registerPageTSConfigFile(
     'mail',
-    'Configuration/TsConfig/Page/ContentElement/All.tsconfig',
+    'Configuration/TsConfig/Page/ContentElement/RemoveNotSupportedContentElements.tsconfig',
     'MAIL: Remove not supported content elements'
 );
 
