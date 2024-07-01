@@ -19,8 +19,6 @@ services:
   MEDIAESSENZ\Mail\Service\RecipientService:
     public: true
 
-  MEDIAESSENZ\Mail\Service\ImportService: ~
-
   MEDIAESSENZ\Mail\Command\SpoolSendCommand:
     tags:
       - name: 'console.command'
@@ -56,8 +54,6 @@ services:
         identifier: 'mediaessenz/mail/manipulate-frontend-user-recipient'
         before: 'mediaessenz/mail/normalize-recipient-data'
 
-  MEDIAESSENZ\Mail\EventListener\ManipulateAddressRecipient: ~
-
   MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData:
     tags:
       - name: 'event.listener'
@@ -83,13 +79,6 @@ services:
     tags:
       - name: 'event.listener'
         identifier: 'mediaessenz/mail/add-back-to-mail-wizard-button'
-
-  MEDIAESSENZ\Mail\EventListener\AddTtAddressExtTablesSql:
-    tags:
-      - name: 'event.listener'
-        identifier: 'mediaessenz/mail/add-tt-address-ext-tables-sql'
-
-  MEDIAESSENZ\Mail\EventListener\DeactivateAddresses: ~
 
   MEDIAESSENZ\Mail\EventListener\DeactivateFeUsers:
     tags:

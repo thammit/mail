@@ -224,6 +224,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      * @param string $combinedRecipient eg. "fe_users-13667".
      * @throws Exception
      * @throws InvalidQueryException
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function initRecipientRecord(string $combinedRecipient): void
     {
