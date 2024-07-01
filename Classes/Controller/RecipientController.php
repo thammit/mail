@@ -10,7 +10,6 @@ use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use MEDIAESSENZ\Mail\Domain\Repository\RecipientRepositoryInterface;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
-use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -76,7 +75,8 @@ class RecipientController extends AbstractController
 
         $assignments = [
             'pid' => $this->id,
-            'data' => $data
+            'data' => $data,
+            'ttAddressIsLoaded' => $this->ttAddressIsLoaded
         ];
 
         if ($this->typo3MajorVersion < 12) {
@@ -260,6 +260,7 @@ class RecipientController extends AbstractController
      * @return ResponseInterface
      * @throws AspectNotFoundException
      * @throws \TYPO3\CMS\Core\Resource\Exception
+     * @throws \Exception
      */
     public function csvImportWizardImportCsvAction(array $configuration = []): ResponseInterface
     {
@@ -277,7 +278,6 @@ class RecipientController extends AbstractController
     /**
      * @param array $configuration
      * @return ResponseInterface
-     * @throws Exception
      * @throws \Exception
      */
     public function csvImportWizardStepConfigurationAction(array $configuration = []): ResponseInterface
@@ -374,13 +374,15 @@ class RecipientController extends AbstractController
                 'returnUrl' => $requestUri
             ]));
         $buttonBar->addButton($addNewButton);
-        $addCsvImportButton = $buttonBar
-            ->makeLinkButton()
-            ->setIcon($this->iconFactory->getIcon('content-csv', Icon::SIZE_SMALL, 'actions-arrow-up-alt'))
-            ->setClasses('btn btn-default text-uppercase')
-            ->setTitle(LanguageUtility::getLL('recipient.button.importCsv'))
-            ->setHref($this->uriBuilder->uriFor('csvImportWizard'));
-        $buttonBar->addButton($addCsvImportButton, ButtonBar::BUTTON_POSITION_LEFT, 2);
+        if ($this->ttAddressIsLoaded) {
+            $addCsvImportButton = $buttonBar
+                ->makeLinkButton()
+                ->setIcon($this->iconFactory->getIcon('content-csv', Icon::SIZE_SMALL, 'actions-arrow-up-alt'))
+                ->setClasses('btn btn-default text-uppercase')
+                ->setTitle(LanguageUtility::getLL('recipient.button.importCsv'))
+                ->setHref($this->uriBuilder->uriFor('csvImportWizard'));
+            $buttonBar->addButton($addCsvImportButton, ButtonBar::BUTTON_POSITION_LEFT, 2);
+        }
     }
 
     /**

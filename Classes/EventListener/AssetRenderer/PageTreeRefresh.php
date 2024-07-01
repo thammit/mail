@@ -16,7 +16,7 @@ class PageTreeRefresh
             $this->getBackendUser()->getSessionData('updatePageTree')
         ) {
             $event->getAssetCollector()->addInlineJavaScript('refreshPageTree',
-                "if (top) { top.document.dispatchEvent(new CustomEvent('typo3:pagetree:refresh')); }");
+                "if (top) { top.document.dispatchEvent(new CustomEvent('typo3:pagetree:refresh')); }", [], ['useNonce' => true]);
             $this->getBackendUser()->setAndSaveSessionData('updatePageTree', null);
         }
     }

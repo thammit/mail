@@ -3,9 +3,12 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
+use DateInterval;
+use DateTimeZone;
 use Doctrine\DBAL\Exception;
 use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use FriendsOfTYPO3\TtAddress\Domain\Repository\AddressRepository;
+use JsonException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
@@ -13,6 +16,7 @@ use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
+use MEDIAESSENZ\Mail\Events\AddTestRecipientsEvent;
 use MEDIAESSENZ\Mail\Exception\HtmlContentFetchFailedException;
 use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
@@ -94,6 +98,8 @@ class MailController extends AbstractController
 
         $assignments = [
             'configuration' => $this->implodedParams,
+            'ttAddressIsLoaded' => $this->ttAddressIsLoaded,
+            'jumpurlIsLoaded' => $this->jumpurlIsLoaded,
             'charsets' => array_unique(array_values(mb_list_encodings())),
             'backendUser' => [
                 'name' => BackendUserUtility::getBackendUser()->user['realName'] ?? '',
@@ -334,6 +340,7 @@ class MailController extends AbstractController
      * @throws ParseException
      * @throws PlainTextContentFetchFailedException
      * @throws UnknownObjectException
+     * @throws JsonException
      */
     public function updateContentAction(Mail $mail, string $tabId = ''): ResponseInterface
     {
@@ -341,7 +348,6 @@ class MailController extends AbstractController
         $dataHandler->start([], []);
         $dataHandler->clear_cacheCmd($mail->getPage());
         $mailFactory = MailFactory::forStorageFolder($this->id);
-        $newMail = null;
         if ($mail->isExternal()) {
             // it's a quick/external mail
             if (str_starts_with($mail->getHtmlParams(), 'http') || str_starts_with($mail->getPlainParams(), 'http')) {
@@ -476,13 +482,15 @@ class MailController extends AbstractController
 
         if ($dataUrl && $mailUid) {
             $mail = $this->mailRepository->findByUid($mailUid);
-            $mail->setPreviewImage($dataUrl);
-            $this->mailRepository->update($mail);
-            $this->mailRepository->persist();
-            return $this->jsonResponse(json_encode([
-                'title' => LanguageUtility::getLL('general.notification.severity.success.title'),
-                'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageSaved.message'),
-            ]));
+            if ($mail instanceof Mail) {
+                $mail->setPreviewImage($dataUrl);
+                $this->mailRepository->update($mail);
+                $this->mailRepository->persist();
+                return $this->jsonResponse(json_encode([
+                    'title' => LanguageUtility::getLL('general.notification.severity.success.title'),
+                    'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageSaved.message'),
+                ]));
+            }
         }
 
         return $this->jsonErrorResponse(json_encode([
@@ -681,12 +689,10 @@ class MailController extends AbstractController
         $this->mailRepository->persist();
 
         $data = [];
-        if ($this->ttAddressIsLoaded) {
-            $ttAddressRepository = GeneralUtility::makeInstance(AddressRepository::class);
-        }
+        $ttAddressRepository = $this->ttAddressIsLoaded ? GeneralUtility::makeInstance(AddressRepository::class) : null;
         $frontendUsersRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
 
-        if ($this->ttAddressIsLoaded && $this->pageTSConfiguration['testTtAddressUids'] ?? false) {
+        if ($ttAddressRepository && $this->pageTSConfiguration['testTtAddressUids'] ?? false) {
             $demand = new Demand();
             $demand->setSingleRecords($this->pageTSConfiguration['testTtAddressUids']);
             $data['ttAddress'] = $ttAddressRepository->getAddressesByCustomSorting($demand);
@@ -709,12 +715,15 @@ class MailController extends AbstractController
                                 }
                                 break;
                             case 'tt_address':
-                                if ($this->ttAddressIsLoaded) {
+                                if ($ttAddressRepository) {
                                     foreach ($recipients as $recipient) {
                                         $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $ttAddressRepository->findByUid($recipient);
                                     }
                                 }
                                 break;
+                            default:
+                                // handle other recipient groups with PSR-14 event
+                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup] = $this->eventDispatcher->dispatch(new AddTestRecipientsEvent($recipientGroup))->getRecipients();
                         }
                     }
                 }
@@ -751,6 +760,8 @@ class MailController extends AbstractController
      * @param Mail $mail
      * @param string $recipients
      * @return ResponseInterface
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function sendTestMailAction(Mail $mail, string $recipients = ''): ResponseInterface
     {
@@ -759,8 +770,8 @@ class MailController extends AbstractController
         $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
 
         if ($addressList) {
-            if (($this->pageTSConfiguration['clickTracking'] || $this->pageTSConfiguration['clickTrackingMailTo']) && $mail->isInternal()) {
-                // no click tracking for internal test mails
+            if (!$this->jumpurlIsLoaded || (($this->pageTSConfiguration['clickTracking'] || $this->pageTSConfiguration['clickTrackingMailTo']) && $mail->isInternal())) {
+                // no click tracking for internal test mails or if jumpurl is not loaded
                 $mail = MailFactory::forStorageFolder($this->id)->fromInternalPage($mail->getPage(),
                     $mail->getSysLanguageUid(), true);
             }
@@ -839,6 +850,8 @@ class MailController extends AbstractController
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
      * @throws Exception
+     * @throws JsonException
+     * @throws \Exception
      */
     public function finishAction(Mail $mail): ResponseInterface
     {
@@ -865,10 +878,10 @@ class MailController extends AbstractController
         if ($this->typo3MajorVersion > 11) {
             // scheduled timezone is utc and must be converted to server time zone
             $scheduled = $mail->getScheduled();
-            $serverTimeZone = new \DateTimeZone(@date_default_timezone_get());
+            $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
             $offset = $serverTimeZone->getOffset($scheduled);
             if ($offset) {
-                $interval = new \DateInterval('PT' . abs($offset) . 'S');
+                $interval = new DateInterval('PT' . abs($offset) . 'S');
                 $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
             }
         }
@@ -1005,7 +1018,7 @@ class MailController extends AbstractController
                 ->setClasses('js-mail-queue-configuration-modal')
                 ->setValue(1)
                 ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
-            $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+            $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT);
         }
 
         if ($this->id) {

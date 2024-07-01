@@ -990,6 +990,9 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 			<trans-unit id="configuration.linksAndTracking.clickTracking" resname="configuration.linksAndTracking.clickTracking">
 				<source>Click tracking</source>
 			</trans-unit>
+			<trans-unit id="configuration.linksAndTracking.clickTracking.jumpurlRequired" resname="configuration.linksAndTracking.clickTracking.jumpurlRequired">
+				<source>This feature requires the installation of EXT:jumpurl</source>
+			</trans-unit>
 			<trans-unit id="configuration.linksAndTracking.clickTracking.description" resname="configuration.linksAndTracking.clickTracking.description">
 				<source>Check this option to enable tracking of clicks.</source>
 			</trans-unit>
@@ -1043,7 +1046,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
 	If you do not specify a usergroup uid and the page has frontend user restrictions, an error will occur and no mail content will be fetched.]]></source>
 			</trans-unit>
 			<trans-unit id="configuration.testMailGroupUids" resname="configuration.testMailGroupUids">
-				<source>Comma separated list of test recipients (group uids)</source>
+				<source>Comma separated list of test recipients (recipient group uids)</source>
 			</trans-unit>
 			<trans-unit id="configuration.testMailGroupUids.description" resname="configuration.testMailGroupUids.description">
 				<source>Alternatively to send test-mails to individuals, you can send it to this groups.</source>

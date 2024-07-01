@@ -15,7 +15,7 @@ class PageTreeRefresh
         $id = (int)($event->getRequest()->getQueryParams()['id'] ?? 0);
         $updatePageTree = $this->getBackendUser()->getSessionData('updatePageTree');
         if ($updatePageTree || $id !== $this->getBackendUser()->getSessionData('lastSelectedPage')) {
-            $this->pageRenderer->addJsInlineCode('refreshPageTree', "if (top) { top.document.dispatchEvent(new CustomEvent('typo3:pagetree:refresh'));}", false, true);
+            $this->pageRenderer->addJsInlineCode('refreshPageTree', "if (top) { top.document.dispatchEvent(new CustomEvent('typo3:pagetree:refresh'));}", false, true, true);
             if ($updatePageTree) {
                 $this->getBackendUser()->setAndSaveSessionData('updatePageTree', null);
             }

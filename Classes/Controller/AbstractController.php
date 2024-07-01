@@ -21,6 +21,7 @@ use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
@@ -261,7 +262,7 @@ abstract class AbstractController extends ActionController
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
-        return $this->moduleTemplate->renderResponse();
+        return $this->moduleTemplate->renderResponse('Backend/NoValidPageSelected');
     }
 
     protected function handleNoMailModulePageRedirect(): ResponseInterface
@@ -285,51 +286,45 @@ abstract class AbstractController extends ActionController
     /**
      * @param string $message
      * @param string $title
-     * @param int $severity
+     * @param int|ContextualFeedbackSeverity|null $severity
      * @return void
      */
     protected function addJsNotification(string $message, string $title = '', int|ContextualFeedbackSeverity $severity = null): void
     {
         if ($this->typo3MajorVersion < 12) {
-            switch ($severity) {
-                case AbstractMessage::NOTICE:
-                    $severityType = 'notice';
-                    break;
-                case AbstractMessage::INFO:
-                    $severityType = 'info';
-                    break;
-                case AbstractMessage::WARNING:
-                    $severityType = 'warning';
-                    break;
-                case AbstractMessage::ERROR:
-                    $severityType = 'error';
-                    break;
-                default:
-                    $severityType = 'success';
-                    break;
-            };
+            $severityType = match ($severity) {
+                AbstractMessage::NOTICE => 'notice',
+                AbstractMessage::INFO => 'info',
+                AbstractMessage::WARNING => 'warning',
+                AbstractMessage::ERROR => 'error',
+                default => 'success',
+            };;
         } else {
-            switch ($severity) {
-                case ContextualFeedbackSeverity::NOTICE:
-                    $severityType = 'notice';
-                    break;
-                case ContextualFeedbackSeverity::INFO:
-                    $severityType = 'info';
-                    break;
-                case ContextualFeedbackSeverity::WARNING:
-                    $severityType = 'warning';
-                    break;
-                case ContextualFeedbackSeverity::ERROR:
-                    $severityType = 'error';
-                    break;
-                default:
-                    $severityType = 'success';
-                    break;
-            };
+            $severityType = match ($severity) {
+                ContextualFeedbackSeverity::NOTICE => 'notice',
+                ContextualFeedbackSeverity::INFO => 'info',
+                ContextualFeedbackSeverity::WARNING => 'warning',
+                ContextualFeedbackSeverity::ERROR => 'error',
+                default => 'success',
+            };;
         }
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
-            'top.TYPO3.Notification.' . $severityType . '(\'' . $title . '\', \'' . $message . '\')', false, false, true);
+            "top.TYPO3.Notification.$severityType('$title', '$message')", false, false, true);
         $this->notification++;
+    }
+
+    /**
+     * @param int $refreshRate
+     * @return void
+     */
+    protected function addQueueRefresher(int $refreshRate): void
+    {
+        $this->pageRenderer->addInlineSetting('Mail', 'refreshRate', $refreshRate);
+        if ($this->typo3MajorVersion < 12) {
+            $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueRefresher');
+        } else {
+            $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/queue-refresher.js');
+        }
     }
 
     /**

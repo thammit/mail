@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Updates;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
+use JsonException;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -37,9 +37,9 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
     }
 
     /**
+     * @return bool
      * @throws Exception
-     * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws DBALException
+     * @throws JsonException
      */
     public function executeUpdate(): bool
     {
@@ -62,8 +62,6 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
     }
 
     /**
-     * @throws DBALException
-     * @throws \Doctrine\DBAL\Driver\Exception
      * @throws Exception
      */
     public function updateNecessary(): bool
@@ -80,7 +78,6 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
 
     /**
      * @throws Exception
-     * @throws \Doctrine\DBAL\Driver\Exception|DBALException
      */
     protected function getMailRecordsToUpdate(): array
     {

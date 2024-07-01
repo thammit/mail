@@ -4,11 +4,10 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use Doctrine\DBAL\Exception;
-use JetBrains\PhpStorm\NoReturn;
+use JsonException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Enumeration\ReturnCodes;
-use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\ScssParserUtility;
@@ -44,14 +43,8 @@ class ReportController extends AbstractController
         $this->addDocheaderButtons($this->request->getRequestTarget());
 
         $refreshRate = (int)($this->pageTSConfiguration['refreshRate'] ?? 5);
-        $this->pageRenderer->addInlineSetting('Mail', 'refreshRate', $refreshRate);
         if ($refreshRate) {
-            $this->pageRenderer->addInlineSetting('Mail', 'refreshRate', $refreshRate);
-            if ($this->typo3MajorVersion < 12) {
-                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueRefresher');
-            } else {
-                $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/queue-refresher.js');
-            }
+            $this->addQueueRefresher($refreshRate);
         }
 
         if ($this->typo3MajorVersion < 12) {
@@ -70,9 +63,11 @@ class ReportController extends AbstractController
      * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws SiteNotFoundException
      * @throws NoSuchPropertyException
+     * @throws SiteNotFoundException
      * @throws UnknownClassException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws JsonException
      */
     public function showAction(Mail $mail): ResponseInterface
     {

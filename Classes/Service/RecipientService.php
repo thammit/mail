@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\Driver\Exception;
-use MEDIAESSENZ\Mail\Database\QueryGenerator;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
@@ -18,13 +17,14 @@ use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
+use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\Expression\CompositeExpression;
-use TYPO3\CMS\Core\Database\Query\Expression\ExpressionBuilder;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
@@ -37,14 +37,15 @@ class RecipientService
 {
     use DebugQueryTrait;
 
-    protected array $allowedTables = ['fe_users', 'tt_address'];
     protected array $recipientSources = [];
+    private bool $ttAddressIsLoaded;
 
     public function __construct(
         protected GroupRepository $groupRepository,
         protected EventDispatcherInterface $eventDispatcher,
         protected PersistenceManager $persistenceManager
     ) {
+        $this->ttAddressIsLoaded = ExtensionManagementUtility::isLoaded('tt_address');
     }
 
     public function init(array $recipientSources): void
@@ -100,7 +101,6 @@ class RecipientService
             return [];
         }
         $data = [];
-        //$queryBuilder = $this->getQueryBuilder($table);
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
         $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(HiddenRestriction::class));
         $res = $queryBuilder
@@ -159,7 +159,14 @@ class RecipientService
         $query = $this->persistenceManager->createQueryForType($modelName);
         $query->getQuerySettings()->setRespectStoragePage(false);
         $query->getQuerySettings()->setRespectSysLanguage(false);
-        $query->getQuerySettings()->setLanguageOverlayMode(false);
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            $query->getQuerySettings()->setLanguageOverlayMode();
+        } else {
+            $languageAspect = $query->getQuerySettings()->getLanguageAspect();
+            if ($languageAspect->getOverlayType() !== LanguageAspect::OVERLAYS_OFF) {
+                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(), LanguageAspect::OVERLAYS_OFF));
+            }
+        }
         $query->matching(
             $query->in('uid', $uidListOfRecipients)
         );
@@ -330,25 +337,6 @@ class RecipientService
                         $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive)));
                 }
                 break;
-//            case RecipientGroupType::QUERY:
-//                // Special query list
-//                // Todo add functionality again
-//                $queryTable = GeneralUtility::_GP('SET')['queryTable'] ?? '';
-//                $queryConfig = GeneralUtility::_GP('mailQueryConfig');
-//                $this->updateGroupQueryConfig($group, $queryTable, $queryConfig);
-//
-//                $table = '';
-//                if ($group->hasAddress()) {
-//                    $table = 'tt_address';
-//                } else {
-//                    if ($group->hasFrontendUser()) {
-//                        $table = 'fe_users';
-//                    }
-//                }
-//                if ($table) {
-//                    $idLists[$table] = $this->getSpecialQueryIdList($table, $group);
-//                }
-//                break;
             case RecipientGroupType::OTHER:
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
@@ -384,7 +372,15 @@ class RecipientService
             $query->getQuerySettings()->setRespectStoragePage(false);
         }
         $query->getQuerySettings()->setRespectSysLanguage(false);
-        $query->getQuerySettings()->setLanguageOverlayMode(false);
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            $query->getQuerySettings()->setLanguageOverlayMode();
+        } else {
+            $languageAspect = $query->getQuerySettings()->getLanguageAspect();
+            if ($languageAspect->getOverlayType() !== LanguageAspect::OVERLAYS_OFF) {
+                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(), LanguageAspect::OVERLAYS_OFF));
+            }
+        }
+
         $constrains = [];
 
         if (!$ignoreMailActive) {
@@ -504,33 +500,6 @@ class RecipientService
             }
         }
         return $recipients;
-    }
-
-    /**
-     * Construct the array of uids from $table selected
-     * by special query of mail group of such type
-     *
-     * @param string $table The table to select from
-     * @param Group $group
-     *
-     * @return array The resulting query.
-     * @throws \Doctrine\DBAL\Exception|Exception
-     */
-    protected function getSpecialQueryIdList(string $table, Group $group): array
-    {
-        $queryGenerator = GeneralUtility::makeInstance(QueryGenerator::class);
-        if ($group->getQuery()) {
-            $queryGenerator->init('mail_queryConfig', $table);
-            $queryGenerator->queryConfig = $queryGenerator->cleanUpQueryConfig(unserialize($group->getQuery()));
-
-            $queryGenerator->extFieldLists['queryFields'] = 'uid';
-            $select = $queryGenerator->getSelectQuery();
-            /** @var Connection $connection */
-            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-
-            return array_column($connection->executeQuery($select)->fetchAllAssociative(), 'uid');
-        }
-        return [];
     }
 
     /**
@@ -691,12 +660,11 @@ class RecipientService
      * @return void
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
-     * todo
      */
     protected function updateGroupQueryConfig(Group $group, mixed $queryTable, mixed $queryConfig): void
     {
         $table = '';
-        if ($group->hasAddress()) {
+        if ($this->ttAddressIsLoaded && $group->hasAddress()) {
             $table = 'tt_address';
         } else {
             if ($group->hasFrontendUser()) {
@@ -713,7 +681,7 @@ class RecipientService
 
         if ($queryTable != $table || $queryConfig != $group->getQuery()) {
             $recordTypes = [];
-            if ($queryTable === 'tt_address') {
+            if ($this->ttAddressIsLoaded && $queryTable === 'tt_address') {
                 $recordTypes = 'tt_address';
             } else {
                 if ($queryTable === 'fe_users') {

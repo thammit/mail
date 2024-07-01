@@ -75,7 +75,7 @@ services:
 
   MEDIAESSENZ\Mail\EventListener\AssetRenderer\PageTreeRefresh:
     tags:
-      - name: event.listener
+      - name: 'event.listener'
         identifier: 'mediaessenz/mail/asset-renderer-pagetree-refresh'
         event: TYPO3\CMS\Core\Page\Event\BeforeJavaScriptsRenderingEvent
 
@@ -83,6 +83,11 @@ services:
     tags:
       - name: 'event.listener'
         identifier: 'mediaessenz/mail/add-back-to-mail-wizard-button'
+
+  MEDIAESSENZ\Mail\EventListener\AddTtAddressExtTablesSql:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/add-tt-address-ext-tables-sql'
 
   MEDIAESSENZ\Mail\EventListener\DeactivateAddresses: ~
 

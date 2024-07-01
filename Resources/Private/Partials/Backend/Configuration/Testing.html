@@ -2,12 +2,14 @@
       xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<div class="mb-3">
-    <label for="testTtAddressUids" class="form-label">
-        <f:translate key="{lll}configuration.testAddressUids"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.testAddressUids.description\'}'}"/>
-    </label>
-    <f:form.textfield id="testTtAddressUids" name="pageTS[testTtAddressUids]" value="{configuration.testTtAddressUids}" class="form-control"/>
-</div>
+<f:if condition="{ttAddressIsLoaded}">
+    <div class="mb-3">
+        <label for="testTtAddressUids" class="form-label">
+            <f:translate key="{lll}configuration.testAddressUids"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.testAddressUids.description\'}'}"/>
+        </label>
+        <f:form.textfield id="testTtAddressUids" name="pageTS[testTtAddressUids]" value="{configuration.testTtAddressUids}" class="form-control"/>
+    </div>
+</f:if>
 <div class="mb-3">
     <label for="testMailGroupUids" class="form-label">
         <f:translate key="{lll}configuration.testMailGroupUids"/><f:render partial="Backend/Help" arguments="{messages: '{0: \'{lll}configuration.testMailGroupUids.description\'}'}"/>

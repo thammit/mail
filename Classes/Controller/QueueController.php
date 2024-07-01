@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Controller;
 
-use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception;
+use JsonException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
@@ -18,6 +19,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class QueueController extends AbstractController
 {
@@ -54,12 +56,7 @@ class QueueController extends AbstractController
         $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));
 
         if ($refreshRate) {
-            $this->pageRenderer->addInlineSetting('Mail', 'refreshRate', $refreshRate);
-            if ($this->typo3MajorVersion < 12) {
-                $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/QueueRefresher');
-            } else {
-                $this->pageRenderer->loadJavaScriptModule('@mediaessenz/mail/queue-refresher.js');
-            }
+            $this->addQueueRefresher($refreshRate);
         }
 
         if ($this->typo3MajorVersion < 12) {
@@ -91,12 +88,14 @@ class QueueController extends AbstractController
 
     /**
      * @return ResponseInterface
-     * @throws Exception
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     * @throws JsonException
      * @throws \TYPO3\CMS\Core\Exception
+     * @throws UnknownObjectException
      */
     public function triggerAction(): ResponseInterface
     {
@@ -170,7 +169,7 @@ class QueueController extends AbstractController
                 ->setClasses('js-mail-queue-configuration-modal')
                 ->setValue(1)
                 ->setIcon($this->iconFactory->getIcon('actions-cog-alt', Icon::SIZE_SMALL));
-            $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT, 1);
+            $buttonBar->addButton($configurationButton, ButtonBar::BUTTON_POSITION_RIGHT);
         }
 
         $reloadButton = $buttonBar->makeLinkButton()
