@@ -103,7 +103,7 @@ class MailerService implements LoggerAwareInterface
     {
         $this->siteIdentifier = $siteIdentifier;
         $this->site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
-        $this->recipientSources = $this->site->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
+        $this->recipientSources = ConfigurationUtility::getRecipientSources($this->site->getConfiguration());
     }
 
     /**

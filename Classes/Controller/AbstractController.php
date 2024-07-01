@@ -228,7 +228,7 @@ abstract class AbstractController extends ActionController
             $this->site = $this->siteFinder->getSiteByPageId($this->id);
             $this->siteIdentifier = $this->site->getIdentifier();
             $this->mailerService->setSiteIdentifier($this->siteIdentifier);
-            $this->recipientSources = $this->site->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
+            $this->recipientSources = ConfigurationUtility::getRecipientSources($this->site->getConfiguration());
             $this->recipientService->init($this->recipientSources);
         } catch (SiteNotFoundException $e) {
             $this->siteIdentifier = '';

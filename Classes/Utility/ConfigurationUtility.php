@@ -7,6 +7,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ConfigurationUtility
@@ -33,8 +34,20 @@ class ConfigurationUtility
     }
 
     /**
+     * @param array $siteConfiguration
      * @return array
      */
+    public static function getRecipientSources(array $siteConfiguration = []): array
+    {
+        $recipientSources = $siteConfiguration['mail']['recipientSources'] ?? self::getDefaultRecipientSources() ?? [];
+
+        if (array_key_exists('tt_address', $recipientSources) && !ExtensionManagementUtility::isLoaded('tt_address')) {
+            unset($recipientSources['tt_address']);
+        }
+
+        return $recipientSources;
+    }
+
     public static function getDefaultRecipientSources(): array
     {
         $loader = GeneralUtility::makeInstance(YamlFileLoader::class);

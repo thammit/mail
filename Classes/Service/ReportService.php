@@ -51,7 +51,7 @@ class ReportService
     public function init(Mail $mail): void
     {
         $this->mail = $mail;
-        $this->recipientSources = $this->siteFinder->getSiteByPageId($this->mail->getPid())->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
+        $this->recipientSources = ConfigurationUtility::getRecipientSources($this->siteFinder->getSiteByPageId($this->mail->getPid())->getConfiguration());
         $this->recipientService->init($this->recipientSources);
         $this->responseTypesTable = $this->logRepository->findResponseTypesByMail($this->mail->getUid());
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($this->mail->getPid())['mod.']['web_modules.']['mail.'] ?? [];

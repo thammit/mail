@@ -67,7 +67,7 @@ class JumpurlMiddleware implements MiddlewareInterface
             /** @var Site $site */
             $site = $request->getAttribute('site');
             if ($site instanceof Site) {
-                $this->recipientSources = $site->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
+                $this->recipientSources = ConfigurationUtility::getRecipientSources($site->getConfiguration());
             }
             $mailUid = (int)$this->request->getQueryParams()['mail'];
             $submittedRecipient = $this->request->getQueryParams()['rid'] ?? '';

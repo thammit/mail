@@ -17,7 +17,7 @@ class RecipientSourcesProcFunc
     {
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
         $site = $siteFinder->getSiteByPageId($params['row']['pid'] ?? 0);
-        $recipientSources = $site->getConfiguration()['mail']['recipientSources'] ?? ConfigurationUtility::getDefaultRecipientSources() ?? [];
+        $recipientSources = ConfigurationUtility::getRecipientSources($site->getConfiguration());
         if ($recipientSources) {
             foreach ($recipientSources as $recipientSourceIdentifier => $recipientSource) {
                 $params['items'][] = [$recipientSource['title'], $recipientSourceIdentifier, $recipientSource['icon']];
