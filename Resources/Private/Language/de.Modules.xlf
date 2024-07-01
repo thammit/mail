@@ -1404,7 +1404,7 @@ Wenn Sie die Markierung ###XID### eingeben, wird sie durch die eindeutige ID des
       </trans-unit>
       <trans-unit id="configuration.testMailGroupUids" resname="configuration.testMailGroupUids" approved="yes">
         <source>Comma separated list of test recipients (group uids)</source>
-        <target state="final">Komma separierte Liste Testempfängern (Benutzergruppen-Uids)</target>
+        <target state="final">Komma separierte Liste Testempfängern (Empfängergruppen-Uids)</target>
       </trans-unit>
       <trans-unit id="configuration.testMailGroupUids.description" resname="configuration.testMailGroupUids.description" approved="yes">
         <source>Alternatively to send test-mails to individuals, you can send it to this groups.</source>
