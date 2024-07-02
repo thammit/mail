@@ -65,7 +65,7 @@ class LanguageUtility
      * @param string $languageLabelPrefix
      * @return string
      */
-    public static function getLL(string $index, $languageLabelPrefix = 'LLL:EXT:mail/Resources/Private/Language/Modules.xlf:'): string
+    public static function getLL(string $index, string $languageLabelPrefix = 'LLL:EXT:mail/Resources/Private/Language/Modules.xlf:'): string
     {
         return self::getLanguageService()->sL($languageLabelPrefix . $index);
     }

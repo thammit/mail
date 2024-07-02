@@ -16,7 +16,7 @@ class AddBackToMailWizardButton
         if ($returnPath = $request->getQueryParams()['mailReturnPath'] ?? false) {
             $icon = GeneralUtility::makeInstance(IconFactory::class)->getIcon('actions-view-go-back', Icon::SIZE_SMALL);
             LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/BackendLayout.xlf');
-            $buttonLabel = LanguageUtility::getLL('backend_layout.back_to_mail_wizard', 'EXT:mail/Resources/Private/Language/BackendLayout.xlf:');
+            $buttonLabel = LanguageUtility::getLL('backend_layout.back_to_mail_wizard', 'LLL:EXT:mail/Resources/Private/Language/BackendLayout.xlf:');
             $event->addHeaderContent('<a href="' . $returnPath . '" class="btn btn-default mb-3">' . $icon . ' ' . $buttonLabel . '</a>');
         }
     }
