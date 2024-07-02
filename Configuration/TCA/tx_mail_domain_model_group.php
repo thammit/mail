@@ -77,7 +77,6 @@ return [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.staticList',
             'config' => [
                 'type' => 'group',
-                'internal_type' => 'db',
                 'allowed' => 'fe_users,fe_groups',
                 'MM' => 'tx_mail_group_mm',
                 'size' => 20,

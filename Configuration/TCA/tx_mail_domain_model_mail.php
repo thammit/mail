@@ -4,6 +4,7 @@ use TYPO3\CMS\Core\Information\Typo3Version;
 
 return [
     'ctrl' => [
+        'hideTable' => true,
         'label' => 'subject',
         'default_sortby' => 'tstamp DESC',
         'tstamp' => 'tstamp',
@@ -13,6 +14,7 @@ return [
         'type' => 'type',
         'typeicon_column' => 'type',
         'typeicon_classes' => [
+            'default' => 'mail-record',
             \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL => 'mail-record',
             \MEDIAESSENZ\Mail\Type\Enumeration\MailType::EXTERNAL => 'mail-record',
             \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_INTERNAL => 'mail-record',

@@ -81,6 +81,7 @@ CREATE TABLE tx_mail_group_mm
 	uid_foreign int(11) unsigned DEFAULT '0' NOT NULL,
 	tablenames  varchar(50)      DEFAULT ''  NOT NULL,
 	sorting     int(11) unsigned DEFAULT '0' NOT NULL,
+    PRIMARY KEY (uid_local, uid_foreign, tablenames),
     KEY tablenames (tablenames),
 	KEY uid_local (uid_local),
 	KEY uid_foreign (uid_foreign)
