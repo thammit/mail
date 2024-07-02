@@ -7,20 +7,19 @@ use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Controller\MailController;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Information\Typo3Version;
 
 /**
  * Definitions for modules provided by EXT:examples
  */
-$modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePosition') ?? 'after:web';
-$modulePositionArray = explode(':', $modulePosition);
-$navigationComponent = (new \TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() < 13 ? '@typo3/backend/page-tree/page-tree-element' : '@typo3/backend/tree/page-tree-element';
-$hideNavigation = false;
 try {
-    if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || (int)ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
-        $hideNavigation = true;
-    }
-} catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
+    $modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePosition') ?? 'after:web';
+} catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
+    $modulePosition = 'after:web';
 }
+$modulePositionArray = explode(':', $modulePosition);
+$navigationComponent = (new Typo3Version())->getMajorVersion() < 13 ? '@typo3/backend/page-tree/page-tree-element' : '@typo3/backend/tree/page-tree-element';
+
 $config = [
     'mail' => [
         'position' => [$modulePositionArray[0] => $modulePositionArray[1]],
@@ -141,11 +140,14 @@ $config = [
     ],
 ];
 
-if ($hideNavigation) {
-    unset($config['mail_mail']['navigationComponent']);
-    unset($config['mail_recipient']['navigationComponent']);
-    unset($config['mail_report']['navigationComponent']);
-    unset($config['mail_queue']['navigationComponent']);
+try {
+    if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || (int)ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
+        unset($config['mail_mail']['navigationComponent']);
+        unset($config['mail_recipient']['navigationComponent']);
+        unset($config['mail_report']['navigationComponent']);
+        unset($config['mail_queue']['navigationComponent']);
+    }
+} catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
 }
 
 return $config;
