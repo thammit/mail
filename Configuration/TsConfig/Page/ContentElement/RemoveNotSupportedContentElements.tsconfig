@@ -1,2 +1,0 @@
-# remove all not supported elements
-TCEFORM.tt_content.CType.removeItems := addToList(bullets,table,uploads,menu_abstract,menu_categorized_content,menu_categorized_pages,menu_pages,menu_subpages,menu_recently_updated,menu_related_pages,menu_section,menu_section_pages,menu_sitemap,menu_sitemap_pages,form_formframework,felogin_login,list,audio,card_group,external_media,gallery,icon_group,media,tab,uploads,card_group,listgroup,panel,quote,textcolumn,texticon,textteaser,div,shortcut)

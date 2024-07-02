@@ -1,0 +1,2 @@
+# allow only supported elements
+TCEFORM.tt_content.CType.keepItems := addToList(header,text,textpic,textmedia,image,html,news_pi1,news_newsselectedlist,news_newsliststicky)

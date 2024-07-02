@@ -692,7 +692,7 @@ class MailController extends AbstractController
         $ttAddressRepository = $this->ttAddressIsLoaded ? GeneralUtility::makeInstance(AddressRepository::class) : null;
         $frontendUsersRepository = GeneralUtility::makeInstance(FrontendUserRepository::class);
 
-        if ($ttAddressRepository && $this->pageTSConfiguration['testTtAddressUids'] ?? false) {
+        if ($ttAddressRepository && ($this->pageTSConfiguration['testTtAddressUids'] ?? false)) {
             $demand = new Demand();
             $demand->setSingleRecords($this->pageTSConfiguration['testTtAddressUids']);
             $data['ttAddress'] = $ttAddressRepository->getAddressesByCustomSorting($demand);
