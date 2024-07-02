@@ -14,13 +14,14 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 $modulePosition = ConfigurationUtility::getExtensionConfiguration('mailModulePosition') ?? 'after:web';
 $modulePositionArray = explode(':', $modulePosition);
 $navigationComponent = (new \TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() < 13 ? '@typo3/backend/page-tree/page-tree-element' : '@typo3/backend/tree/page-tree-element';
+$hideNavigation = false;
 try {
     if (!empty(ConfigurationUtility::getExtensionConfiguration('mailModulePageId')) || (int)ConfigurationUtility::getExtensionConfiguration('hideNavigation')) {
-        $navigationComponent = '';
+        $hideNavigation = true;
     }
 } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException) {
 }
-return [
+$config = [
     'mail' => [
         'position' => [$modulePositionArray[0] => $modulePositionArray[1]],
         'access' => 'user',
@@ -38,7 +39,6 @@ return [
         'extensionName' => 'Mail',
         'iconIdentifier' => 'mail-module-mail',
         'navigationComponent' => $navigationComponent,
-
         'controllerActions' => [
             MailController::class => [
                 'index',
@@ -140,3 +140,12 @@ return [
         ],
     ],
 ];
+
+if ($hideNavigation) {
+    unset($config['mail_mail']['navigationComponent']);
+    unset($config['mail_recipient']['navigationComponent']);
+    unset($config['mail_report']['navigationComponent']);
+    unset($config['mail_queue']['navigationComponent']);
+}
+
+return $config;
