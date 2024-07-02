@@ -10,10 +10,11 @@ use MEDIAESSENZ\Mail\EventListener\ManipulateAddressRecipient;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 return static function (ContainerConfigurator $container, ContainerBuilder $containerBuilder) {
-    if (ExtensionManagementUtility::isLoaded('tt_address')) {
+    // Check if tt_address is present.
+    // It has to be done this way (and not using ExtensionManagementUtility::isLoaded('tt_address')), because of a DI issue
+    if (class_exists('FriendsOfTYPO3\\TtAddress\\Domain\\Repository\\AddressRepository')) {
         $containerBuilder->registerForAutoconfiguration(AddTtAddressExtTablesSql::class)
             ->addTag('event.listener', [
                 'identifier' => 'mediaessenz/mail/add-tt-address-ext-tables-sql',

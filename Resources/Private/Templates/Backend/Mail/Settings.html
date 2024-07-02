@@ -25,7 +25,7 @@
 		<div class="row justify-content-start">
 			<div class="col-12 col-md-10 col-lg-8 col-xl-6 mb-3">
 					<f:if condition="{mail.page}">
-						<f:variable name="mailReturnPath" ><f:uri.action   action="updateContent"  arguments="{mail:mail.uid}"/></f:variable>
+						<f:variable name="mailReturnPath" ><f:uri.action action="updateContent" arguments="{mail:mail.uid}"/></f:variable>
 						<a class="btn btn-default" href="{be:moduleLink(route:'web_layout', arguments:'{id: mail.page, mailReturnPath:mailReturnPath}')}" title="{f:translate(key: '{lll}general.button.editContent')}">
 							<core:icon identifier="app-pagetree-mail" overlay="actions-open"/> {f:translate(key: '{lll}general.button.editContent')}
 						</a>
