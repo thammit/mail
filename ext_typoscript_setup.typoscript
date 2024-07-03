@@ -1,0 +1,5 @@
+# needed for jumpurl middleware - do not delete!
+plugin.tx_mail {
+	settings {
+	}
+}

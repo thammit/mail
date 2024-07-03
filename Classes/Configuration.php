@@ -229,15 +229,4 @@ final class Configuration
             @include 'phar://' . ExtensionManagementUtility::extPath('mail') . 'Resources/Private/PHP/mail-dependencies.phar/vendor/autoload.php';
         }
     }
-
-    public static function registerCompilerPasses(): void
-    {
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['extLocalConfRegistered'][] = function () {
-            if (ExtensionManagementUtility::isLoaded('tt_address')) {
-                GeneralUtility::makeInstance(ContainerInitialization::class)->addCompilerPass(
-                    GeneralUtility::makeInstance(EventListenerCompilerPass::class)
-                );
-            }
-        };
-    }
 }
