@@ -80,7 +80,7 @@ class RecipientController extends AbstractController
         ];
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -157,7 +157,7 @@ class RecipientController extends AbstractController
         ];
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -230,7 +230,7 @@ class RecipientController extends AbstractController
         ];
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -291,7 +291,7 @@ class RecipientController extends AbstractController
         ];
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -316,7 +316,7 @@ class RecipientController extends AbstractController
         ];
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -346,7 +346,7 @@ class RecipientController extends AbstractController
         ];
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }

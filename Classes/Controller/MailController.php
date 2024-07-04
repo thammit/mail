@@ -183,7 +183,7 @@ class MailController extends AbstractController
 
         $this->addIndexDocHeaderButtons();
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/PreviewModal');
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -457,7 +457,7 @@ class MailController extends AbstractController
         }
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -595,7 +595,7 @@ class MailController extends AbstractController
         $this->addDocHeaderHelpButton();
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/Categories');
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
@@ -747,7 +747,7 @@ class MailController extends AbstractController
         $this->addDocHeaderHelpButton();
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -815,7 +815,7 @@ class MailController extends AbstractController
         $this->addDocHeaderHelpButton();
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Backend/DateTimePicker');
             $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Mail/ScheduleSending');
             $this->moduleTemplate->setContent($this->view->render());

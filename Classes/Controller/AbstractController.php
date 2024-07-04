@@ -253,12 +253,13 @@ abstract class AbstractController extends ActionController
         parent::initializeAction();
     }
 
-    public function noPageSelectedAction(): ResponseInterface
+    public function noValidPageSelectedAction(): ResponseInterface
     {
         ViewUtility::addFlashMessageWarning(LanguageUtility::getLL('mail.wizard.notification.noPageSelected.message'),
             LanguageUtility::getLL('mail.wizard.notification.noPageSelected.title'));
 
         if ($this->typo3MajorVersion < 12) {
+            $this->view->assign('layoutSuffix', 'V11');
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
@@ -275,7 +276,7 @@ abstract class AbstractController extends ActionController
             }
             return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
         }
-        return $this->redirect('noPageSelected');
+        return $this->redirect('noValidPageSelected');
     }
 
     protected function getDataHandler(): DataHandler

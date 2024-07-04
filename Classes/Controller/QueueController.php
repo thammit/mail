@@ -38,7 +38,7 @@ class QueueController extends AbstractController
                 }
                 return $this->redirect('index', null, null, ['id' => $mailModulePageId]);
             }
-            return $this->redirect('noPageSelected');
+            return $this->redirect('noValidPageSelected');
         }
 
         $refreshRate = (int)($this->pageTSConfiguration['refreshRate'] ?? 5);
@@ -60,7 +60,7 @@ class QueueController extends AbstractController
         }
 
         if ($this->typo3MajorVersion < 12) {
-            $this->view->assignMultiple($assignments);
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
