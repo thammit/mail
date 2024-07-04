@@ -108,16 +108,18 @@ class ReportController extends AbstractController
     public function showTotalReturnedAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->view->assignMultiple([
+        $assignments = [
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData(),
-        ]);
+        ];
 
         if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
 
+        $this->moduleTemplate->assignMultiple($assignments);
         return $this->moduleTemplate->renderResponse('Backend/Report/ShowTotalReturned');
     }
 
@@ -165,16 +167,18 @@ class ReportController extends AbstractController
     public function showUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->view->assignMultiple([
+        $assignments = [
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]),
-        ]);
+        ];
 
         if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
 
+        $this->moduleTemplate->assignMultiple($assignments);
         return $this->moduleTemplate->renderResponse('Backend/Report/ShowUnknown');
     }
 
@@ -191,7 +195,10 @@ class ReportController extends AbstractController
     public function disableUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]));
+        $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData([
+            ReturnCodes::RECIPIENT_UNKNOWN,
+            ReturnCodes::MAILBOX_INVALID,
+        ]));
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
         return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
@@ -208,7 +215,10 @@ class ReportController extends AbstractController
     public function csvExportUnknownAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID])[$recipientSource], 'unknown');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([
+            ReturnCodes::RECIPIENT_UNKNOWN,
+            ReturnCodes::MAILBOX_INVALID,
+        ])[$recipientSource], 'unknown');
     }
 
     /**
@@ -222,16 +232,18 @@ class ReportController extends AbstractController
     public function showFullAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->view->assignMultiple([
+        $assignments = [
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]),
-        ]);
+        ];
 
         if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
 
+        $this->moduleTemplate->assignMultiple($assignments);
         return $this->moduleTemplate->renderResponse('Backend/Report/ShowFull');
     }
 
@@ -265,7 +277,8 @@ class ReportController extends AbstractController
     public function csvExportFullAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL])[$recipientSource], 'mailbox_full');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL])[$recipientSource],
+            'mailbox_full');
     }
 
     /**
@@ -279,16 +292,18 @@ class ReportController extends AbstractController
     public function showBadHostAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->view->assignMultiple([
+        $assignments = [
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]),
-        ]);
+        ];
 
         if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
 
+        $this->moduleTemplate->assignMultiple($assignments);
         return $this->moduleTemplate->renderResponse('Backend/Report/ShowBadHost');
     }
 
@@ -322,7 +337,8 @@ class ReportController extends AbstractController
     public function csvExportBadHostAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL])[$recipientSource], 'bad_host');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL])[$recipientSource],
+            'bad_host');
     }
 
     /**
@@ -336,16 +352,18 @@ class ReportController extends AbstractController
     public function showBadHeaderAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->view->assignMultiple([
+        $assignments = [
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]),
-        ]);
+        ];
 
         if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
 
+        $this->moduleTemplate->assignMultiple($assignments);
         return $this->moduleTemplate->renderResponse('Backend/Report/ShowBadHeader');
     }
 
@@ -379,7 +397,8 @@ class ReportController extends AbstractController
     public function csvExportBadHeaderAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED])[$recipientSource], 'bad_header');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED])[$recipientSource],
+            'bad_header');
     }
 
     /**
@@ -393,16 +412,18 @@ class ReportController extends AbstractController
     public function showReasonUnknownAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
-        $this->view->assignMultiple([
+        $assignments = [
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]),
-        ]);
+        ];
 
         if ($this->typo3MajorVersion < 12) {
+            $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
             return $this->htmlResponse($this->moduleTemplate->renderContent());
         }
 
+        $this->moduleTemplate->assignMultiple($assignments);
         return $this->moduleTemplate->renderResponse('Backend/Report/ShowReasonUnknown');
     }
 
@@ -429,7 +450,7 @@ class ReportController extends AbstractController
      * @return ResponseInterface
      * @throws IllegalObjectTypeException
      */
-    public function deleteAction(Mail $mail):ResponseInterface
+    public function deleteAction(Mail $mail): ResponseInterface
     {
         $this->logRepository->deleteByMailUid($mail->getUid());
         $this->mailRepository->remove($mail);
@@ -453,7 +474,8 @@ class ReportController extends AbstractController
     public function csvExportReasonUnknownAction(Mail $mail, string $recipientSource): ResponseInterface
     {
         $this->reportService->init($mail);
-        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON])[$recipientSource], 'reason_unknown');
+        return CsvUtility::csvDownloadRecipientsCSV($this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON])[$recipientSource],
+            'reason_unknown');
     }
 
     protected function addDocheaderButtons(string $requestUri): void
