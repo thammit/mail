@@ -24,40 +24,31 @@ All page view settings need to be prefixed with  :typoscript:`plugin.mail.view.p
 
 .. _ts-page-view-templates-root-path:
 
-templatesRootPath
------------------
-
 .. confval:: templatesRootPath
 
    :type: string
    :Default: EXT:mail/Resources/Private/Templates/Mail/
-   :Path: plugin.mail.view.page
+   :Path: plugin.mail.view.page.templatesRootPath
 
    Path to template root for mail pages (FE)
 
 .. _ts-page-view-partials-root-path:
 
-partialsRootPath
-----------------
-
 .. confval:: partialsRootPath
 
    :type: string
    :Default: EXT:mail/Resources/Private/Partials/
-   :Path: plugin.mail.view.page
+   :Path: plugin.mail.view.page.partialsRootPath
 
    Path to partials root for mail pages (FE)
 
 .. _ts-page-view-layouts-root-path:
 
-layoutsRootPath
----------------
-
 .. confval:: layoutsRootPath
 
    :type: string
    :Default: EXT:mail/Resources/Private/Layouts/
-   :Path: plugin.mail.view.page
+   :Path: plugin.mail.view.page.layoutsRootPath
 
    Path to layouts root for mail pages (FE)
 
@@ -75,40 +66,31 @@ All content view settings need to be prefixed with  :typoscript:`plugin.mail.vie
 
 .. _ts-content-view-templates-root-path:
 
-templatesRootPath
------------------
-
 .. confval:: templatesRootPath
 
    :type: string
    :Default: EXT:mail/Resources/Private/Templates/ContentElements/
-   :Path: plugin.mail.view.content
+   :Path: plugin.mail.view.content.templatesRootPath
 
    Path to template root for mail contents (FE)
 
 .. _ts-content-view-partials-root-path:
 
-partialsRootPath
-----------------
-
 .. confval:: partialsRootPath
 
    :type: string
    :Default: EXT:mail/Resources/Private/Partials/
-   :Path: plugin.mail.view.content
+   :Path: plugin.mail.view.content.partialsRootPath
 
    Path to partials root for mail contents (FE)
 
 .. _ts-content-view-layouts-root-path:
 
-layoutsRootPath
----------------
-
 .. confval:: layoutsRootPath
 
    :type: string
    :Default: EXT:mail/Resources/Private/Layouts/
-   :Path: plugin.mail.view.content
+   :Path: plugin.mail.view.content.layoutsRootPath
 
    Path to layouts root for mail contents (FE)
 
@@ -128,66 +110,51 @@ All header settings need to be prefixed with  :typoscript:`plugin.mail.settings.
 
 .. _ts-content-header-title:
 
-title
------
-
 .. confval:: title
 
    :type: string
    :Default: Newsletter
-   :Path: plugin.mail.settings.header
+   :Path: plugin.mail.settings.header.title
 
    Title of the mail header
 
 .. _ts-content-header-image-src:
 
-image.src
----------
-
-.. confval:: src
+.. confval:: image.src
 
    :type: string
    :Default: EXT:mail/Resources/Public/Images/Logo.png
-   :Path: plugin.mail.settings.image
+   :Path: plugin.mail.settings.image.src
 
    Logo source
 
 .. _ts-content-header-image-alt:
 
-image.alt
----------
-
-.. confval:: alt
+.. confval:: image.alt
 
    :type: string
    :Default: Logo
-   :Path: plugin.mail.settings.image
+   :Path: plugin.mail.settings.image.alt
 
    Logo alt text
 
 .. _ts-content-header-image-width:
 
-image.width
------------
-
-.. confval:: width
+.. confval:: image.width
 
    :type: string
    :Default: 300
-   :Path: plugin.mail.settings.image
+   :Path: plugin.mail.settings.image.width
 
    Logo width
 
 .. _ts-content-header-image-height:
 
-image.height
-------------
-
-.. confval:: height
+.. confval:: image.height
 
    :type: string
    :Default:
-   :Path: plugin.mail.settings.image
+   :Path: plugin.mail.settings.image.height
 
    Logo height
 
@@ -207,302 +174,221 @@ All scss settings need to be prefixed with  :typoscript:`plugin.mail.settings.sc
 
 .. _ts-content-scss-modification:
 
-modifications
-------------
-
 .. confval:: modifications
 
    :type: string
    :Default: EXT:mail/Resources/Public/Scss/mail.scss
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.modifications
 
    Scss file to modify the default scss of foundation mail
 
 .. _ts-content-scss-primary-color:
 
-primary-color
--------------
-
 .. confval:: primary-color
 
    :type: color
    :Default: #037eab
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.primary-color
 
    Primary color, used with components that support the `.primary` class
-
-secondary-color
----------------
 
 .. confval:: secondary-color
 
    :type: color
    :Default: #777777
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.secondary-color
 
    Secondary color, used with components that support the `.secondary` class
-
-success-color
--------------
 
 .. confval:: success-color
 
    :type: color
    :Default: #3adb76
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.success-color
 
    Color to indicate a positive status or action, used with the `.success` class
-
-warning-color
--------------
 
 .. confval:: warning-color
 
    :type: color
    :Default: #ffae00
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.warning-color
 
    Color to indicate a caution status or action, used with the `.warning` class
-
-alert-color
------------
 
 .. confval:: alert-color
 
    :type: color
    :Default: #ec5840
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.alert-color
 
    Color to indicate a negative status or action, used with the `.alert` class
-
-light-gray
-----------
 
 .. confval:: light-gray
 
    :type: color
    :Default: #f3f3f3
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.light-gray
 
    Color used for light gray UI items within Foundation
-
-medium-gray
------------
 
 .. confval:: medium-gray
 
    :type: color
    :Default: #cacaca
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.medium-gray
 
    Color used for medium gray UI items within Foundation
-
-dark-gray
----------
 
 .. confval:: dark-gray
 
    :type: color
    :Default: #8a8a8a
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.dark-gray
 
    Color used for dark gray UI items within Foundation
-
-black
------
 
 .. confval:: black
 
    :type: color
    :Default: #0a0a0a
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.black
 
    Color used for black ui items within Foundation
-
-white
------
 
 .. confval:: white
 
    :type: color
    :Default: #fefefe
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.white
 
    Color used for white ui items within Foundation
-
-pre-color
----------
 
 .. confval:: pre-color
 
    :type: color
    :Default: #ff6908
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.pre-color
 
    Code color (<pre>)
-
-header-color
-------------
 
 .. confval:: header-color
 
    :type: color
    :Default: #444444
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.header-color
 
    Headlines color
-
-global-font-color
------------------
 
 .. confval:: global-font-color
 
    :type: color
    :Default: #444444
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-font-color
 
    Text color
-
-header-background-color
------------------------
 
 .. confval:: header-background-color
 
    :type: color
    :Default: #037eab
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.header-background-color
 
    Header background color
-
-body-background
----------------
 
 .. confval:: body-background
 
    :type: string
    :Default: $light-gray
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.body-background
 
    Body background color
-
-container-background-color
---------------------------
 
 .. confval:: container-background-color
 
    :type: string
    :Default: $white
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.container-background-color
 
    Container background color
-
-footer-background-color
------------------------
 
 .. confval:: footer-background-color
 
    :type: string
    :Default: $light-gray
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.footer-background-color
 
    Footer background color
-
-global-width
-------------
 
 .. confval:: global-width
 
    :type: string
    :Default: 600px
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-width
 
    Container width
-
-global-width-small
-------------------
 
 .. confval:: global-width-small
 
    :type: string
    :Default: 95%
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-width-small
 
    Container width (small screens)
-
-global-gutter
--------------
 
 .. confval:: global-gutter
 
    :type: string
    :Default: 20px
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-gutter
 
    Gutter for grid elements
-
-global-gutter-small
--------------------
 
 .. confval:: global-gutter-small
 
    :type: string
    :Default: $global-gutter
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-gutter-small
 
    Gutter for grid elements (small screens)
-
-global-padding
---------------
 
 .. confval:: global-padding
 
    :type: string
    :Default: 20px
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-padding
 
    Global padding
-
-global-margin
--------------
 
 .. confval:: global-margin
 
    :type: string
    :Default: 16px
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-margin
 
    Global margin
-
-global-radius
--------------
 
 .. confval:: global-radius
 
    :type: string
    :Default: 3px
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-radius
 
    Global radius
-
-global-rounded
---------------
 
 .. confval:: global-rounded
 
    :type: string
    :Default: 500px
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-rounded
 
    Global rounded radius of rounded-corners
-
-global-breakpoint
------------------
 
 .. confval:: global-breakpoint
 
    :type: string
    :Default: $global-width + $global-gutter
-   :Path: plugin.mail.settings.scss
+   :Path: plugin.mail.settings.scss.global-breakpoint
 
    Global media query to switch from desktop to mobile styles
 

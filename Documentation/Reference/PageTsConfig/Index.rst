@@ -38,9 +38,6 @@ The following properties set default values for corresponding properties of mail
       :depth: 1
       :local:
 
-fromEmail
----------
-
 .. confval:: fromEmail
 
    :type: string
@@ -51,9 +48,6 @@ fromEmail
 
    Note: This email address appears as the originating address or sender
    address in the mails received by the recipients.
-
-fromName
---------
 
 .. confval:: fromName
 
@@ -66,9 +60,6 @@ fromName
    Note: This name appears as the name of the author or sender in the mails
    received by the recipients.
 
-replyToEmail
-------------
-
 .. confval:: replyToEmail
 
    :type: string
@@ -80,9 +71,6 @@ replyToEmail
    Note: This is the email address to which replies to mails are sent.
    If not specified, the 'fromEmail' is used.
 
-replyToName
-------------
-
 .. confval:: replyToName
 
    :type: string
@@ -93,9 +81,6 @@ replyToName
 
    Note: This is the name of the 'Reply To' email address.
    If not specified, the 'fromName' is used.
-
-returnPath
-----------
 
 .. confval:: returnPath
 
@@ -111,9 +96,6 @@ returnPath
    Note: If you put in the marker ###XID###, it'll be substituted with
    the unique id of the mail recipient.
 
-organisation
-------------
-
 .. confval:: organisation
 
    :type: string
@@ -121,9 +103,6 @@ organisation
    :Path: mod.web\_modules.mail.organisation
 
    Name of the organization sending the mail.
-
-priority
---------
 
 .. confval:: priority
 
@@ -165,9 +144,6 @@ sendOptions
 
 .. _pageTsconfig_includeMedia:
 
-includeMedia
-------------
-
 .. confval:: includeMedia
 
    :type: boolean
@@ -185,9 +161,6 @@ includeMedia
    content by absolute reference (href) to their location on the site
    where they reside.
 
-htmlParams
-----------
-
 .. confval:: htmlParams
 
    :type: string
@@ -198,9 +171,6 @@ htmlParams
 
    Note: The specified parameters will be added to the URL used to fetch the HTML content of the
    mail from a TYPO3 page. If in doubt, leave it blank.
-
-plainParams
------------
 
 .. confval:: plainParams
 
@@ -215,9 +185,6 @@ plainParams
    The default `&plain=1` will be handled by the Markdown Middleware come with this extension. This middleware
    generates a markdown (text) version of a html page and keeps content boundaries needed to separate content
    blocks with specific categories.
-
-encoding
---------
 
 .. confval:: encoding
 
@@ -235,9 +202,6 @@ encoding
 
    8bit
 
-charset
--------
-
 .. confval:: charset
 
    :type: string
@@ -246,9 +210,6 @@ charset
 
    Character set to use when sending mails.
 
-
-quickMailEncoding
------------------
 
 .. confval:: quickMailEncoding
 
@@ -266,9 +227,6 @@ quickMailEncoding
 
    8bit
 
-quickMailCharset
-----------------
-
 .. confval:: quickMailCharset
 
    :type: string
@@ -279,9 +237,6 @@ quickMailCharset
 
    Note: This is the character set used in mails when they are
    built from external pages and character set cannot be auto-detected.
-
-redirect
---------
 
 .. confval:: redirect
 
@@ -296,9 +251,6 @@ redirect
    Note: This configuration determines how Quick Mails are handled and
    further sets the default value for mails from internal pages.
 
-redirectAll
------------
-
 .. confval:: redirectAll
 
    :type: boolean
@@ -307,9 +259,6 @@ redirectAll
 
    If set and redirect is set as well, all links in plain text content will be redirected, not only links longer than 76 characters.
 
-clickTracking
--------------
-
 .. confval:: clickTracking
 
    :type: boolean
@@ -317,9 +266,6 @@ clickTracking
    :Path: mod.web\_modules.mail.clickTracking
 
    Enables click tracking
-
-clickTrackingMailTo
--------------------
 
 .. confval:: clickTrackingMailTo
 
@@ -331,9 +277,6 @@ clickTrackingMailTo
 
 .. _pageTsconfig_trackingPrivacy:
 
-trackingPrivacy
----------------
-
 .. confval:: trackingPrivacy
 
    :type: boolean
@@ -341,9 +284,6 @@ trackingPrivacy
    :Path: mod.web\_modules.mail.trackingPrivacy
 
    Do not add recipient id to click tracking.
-
-authCodeFields
---------------
 
 .. confval:: authCodeFields
 
@@ -353,9 +293,6 @@ authCodeFields
 
    Default list of fields to be used in the computation of the authentication code included in unsubscribe links
    and for click tracking of mails.
-
-httpUsername
-------------
 
 .. confval:: httpUsername
 
@@ -371,9 +308,6 @@ httpUsername
    page happens to be protected, an error will occur and no mail content
    will be fetched.
 
-httpPassword
-------------
-
 .. confval:: httpPassword
 
    :type: string
@@ -388,9 +322,6 @@ httpPassword
    page happens to be protected, an error will occur and no mail content
    will be fetched.
 
-simulateUsergroup
------------------
-
 .. confval:: simulateUsergroup
 
    :type: integer
@@ -403,9 +334,6 @@ simulateUsergroup
    Note: If you do not specify a usergroup uid and the page has frontend
    user restrictions, an error will occur and no mail content will be
    fetched.
-
-testMailGroupUids
------------------
 
 .. confval:: testMailGroupUids
 
@@ -421,9 +349,6 @@ testMailGroupUids
    the UID numbers of the recipient groups you wish to use for testing, then
    enter them here in a comma-separated list.
 
-testTtAddressUids
------------------
-
 .. confval:: testTtAddressUids
 
    :type: string
@@ -438,9 +363,6 @@ testTtAddressUids
    the UID numbers of the recipients you wish to use for testing, then
    enter them here in a comma-separated list.
 
-showContentTitle
-----------------
-
 .. confval:: showContentTitle
 
    :type: boolean
@@ -451,9 +373,6 @@ showContentTitle
    target will be shown in the mail reports. This cost a bit performance,
    since the title/name has to be fetched and parsed from the target url.
 
-prependContentTitle
--------------------
-
 .. confval:: prependContentTitle
 
    :type: boolean
@@ -463,9 +382,6 @@ prependContentTitle
    If set to 1, the content title (see above) and the clicked target path
    will be shown. Only relevant if showContentTitle is set to 1.
 
-maxLabelLength
---------------
-
 .. confval:: maxLabelLength
 
    :type: int
@@ -473,9 +389,6 @@ maxLabelLength
    :Path: mod.web\_modules.mail.maxLabelLength
 
    Maximum length of the clicked statistics label
-
-sendPerCycle
-------------
 
 .. confval:: sendPerCycle
 
@@ -486,9 +399,6 @@ sendPerCycle
    Send per circle for manual sending trigger via Queue module
 
 
-queueLimit
-----------
-
 .. confval:: queueLimit
 
    :type: int
@@ -496,9 +406,6 @@ queueLimit
    :Path: mod.web\_modules.mail.queueLimit
 
    Number of mailings listed in queue module. If zero (0) all current and past mails will be visible.
-
-refreshRate
------------
 
 .. confval:: refreshRate
 
@@ -509,9 +416,6 @@ refreshRate
    Number of seconds between automatic refreshing of delivery progress bars. Set to 0, to stop automatic
    refreshing.
 
-storage
--------
-
 .. confval:: storage
 
    :type: int+
@@ -519,9 +423,6 @@ storage
    :Path: mod.web\_modules.mail.importer.storage
 
    PID of the target SysFolder, in which the recipients will be imported.
-
-removeExisting
---------------
 
 .. confval:: removeExisting
 
@@ -531,9 +432,6 @@ removeExisting
 
    Remove all Addresses in the storage folder before importing.
 
-firstFieldname
--------------
-
 .. confval:: firstFieldname
 
    :type: boolean
@@ -541,9 +439,6 @@ firstFieldname
    :Path: mod.web\_modules.mail.importer.firstFieldname
 
    First row of import file has field names.
-
-delimiter
----------
 
 .. confval:: delimiter
 
@@ -553,9 +448,6 @@ delimiter
 
    Field delimiter (data fields are separated by...) [comma, semicolon, colon, tab]
 
-encapsulation
--------------
-
 .. confval:: encapsulation
 
    :type: string
@@ -563,9 +455,6 @@ encapsulation
    :Path: mod.web\_modules.mail.importer.encapsulation
 
    Field encapsulation character (data fields are encapsulated with...) [doubleQuote, singleQuote]
-
-validEmail
-----------
 
 .. confval:: validEmail
 
@@ -575,9 +464,6 @@ validEmail
 
    Only update/import valid emails from csv data.
 
-removeDublette
---------------
-
 .. confval:: removeDublette
 
    :type: bool
@@ -585,9 +471,6 @@ removeDublette
    :Path: mod.web\_modules.mail.importer.removeDublette
 
    Filter email dublettes from csv data. If a dublette is found, only the first entry is imported.
-
-updateUnique
-------------
 
 .. confval:: updateUnique
 
@@ -597,9 +480,6 @@ updateUnique
 
    Update existing user, instead renaming the new user.
 
-recordUnique
-------------
-
 .. confval:: recordUnique
 
    :type: string
@@ -608,9 +488,6 @@ recordUnique
 
    Specify the field which determines the uniqueness of imported users. [email, name]
 
-inputDisable
-------------
-
 .. confval:: inputDisable
 
    :type: boolean
@@ -618,9 +495,6 @@ inputDisable
    :Path: mod.web\_modules.mail.importer.inputDisable
 
    Disable all of above input field, so that no user can change it.
-
-resultOrder
------------
 
 .. confval:: resultOrder
 

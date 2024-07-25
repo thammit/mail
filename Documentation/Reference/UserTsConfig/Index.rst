@@ -11,9 +11,6 @@ User TSconfig
 The following properties may be used in user TSConfig (BE user or BE usergroups) to configure parts of the different
 MAIL modules.
 
-hideTabs
---------
-
 .. confval:: hideTabs
 
    :type: string
@@ -32,9 +29,6 @@ hideTabs
 
    *  draft: hide the draft mail option
 
-defaultTab
-----------
-
 .. confval:: defaultTab
 
    :type: string
@@ -42,9 +36,6 @@ defaultTab
    :Path: tx_mail.defaultTab
 
    Possible options: internal, external, quickmail, draft
-
-hideConfiguration
------------------
 
 .. confval:: hideConfiguration
 
@@ -56,9 +47,6 @@ hideConfiguration
 
 .. _user-ts-config-hideEditAllSettingsButton:
 
-hideEditAllSettingsButton
--------------------------
-
 .. confval:: hideEditAllSettingsButton
 
    :type: bool
@@ -68,9 +56,6 @@ hideEditAllSettingsButton
    Hide edit all settings button in mail wizard settings step.
 
 .. _user-ts-config-settingsWithoutTabs:
-
-settingsWithoutTabs
--------------------
 
 .. confval:: settingsWithoutTabs
 
@@ -82,9 +67,6 @@ settingsWithoutTabs
 
 .. _user-ts-config-settings-general:
 
-settings.general
-----------------
-
 .. confval:: settings.general
 
    :type: string
@@ -94,9 +76,6 @@ settings.general
    Comma separated list of general fields which should be visible in the mail wizard settings step and report.
 
 .. _user-ts-config-settings-headers:
-
-settings.headers
-----------------
 
 .. confval:: settings.headers
 
@@ -108,9 +87,6 @@ settings.headers
 
 .. _user-ts-config-settings-content:
 
-settings.content
-----------------
-
 .. confval:: settings.content
 
    :type: string
@@ -121,9 +97,6 @@ settings.content
 
 .. _user-ts-config-settings-source:
 
-settings.source
----------------
-
 .. confval:: settings.source
 
    :type: string
@@ -133,9 +106,6 @@ settings.source
    Comma separated list of source fields which should be visible in the mail wizard settings step and report.
 
 .. _user-ts-config-readOnlySettings:
-
-readOnlySettings
-----------------
 
 .. confval:: readOnlySettings
 
@@ -149,9 +119,6 @@ readOnlySettings
    "edit complete record" button! To prevent this, you have to restrict the fields in the usergroup
    settings (exclude fields) as well.
 
-hideCategoryStep
-----------------
-
 .. confval:: hideCategoryStep
 
    :type: bool
@@ -159,9 +126,6 @@ hideCategoryStep
    :Path: tx_mail.hideCategoryStep
 
    Hide the category mail wizard step.
-
-hideManualSendingButton
------------------------
 
 .. confval:: hideManualSendingButton
 
@@ -171,9 +135,6 @@ hideManualSendingButton
 
    Hide manual sending button in queue module.
 
-hideDeleteRunningSendingButton
-------------------------------
-
 .. confval:: hideDeleteRunningSendingButton
 
    :type: bool
@@ -181,9 +142,6 @@ hideDeleteRunningSendingButton
    :Path: tx_mail.hideDeleteRunningSendingButton
 
    Hide delete running sending button in queue module.
-
-hideDeleteReportButton
-----------------------
 
 .. confval:: hideDeleteReportButton
 
@@ -194,9 +152,6 @@ hideDeleteReportButton
    Hide delete report button in report module.
 
 .. _user-ts-config-mail-module-page-id:
-
-mailModulePageId
-----------------
 
 .. confval:: mailModulePageId
 
@@ -210,9 +165,6 @@ mailModulePageId
    show a user individual mail module.
 
 .. _user-ts-config-mail-module-page-ids:
-
-mailModulePageIds
------------------
 
 .. confval:: mailModulePageIds
 
