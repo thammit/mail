@@ -48,7 +48,8 @@ Quick start
    Installation
    Configuration
    RecipientGroups
-   CreateMail
+   CreateMailPage
+   CreateMailContent
    CreateMailing
    SendMail
    MailReport
