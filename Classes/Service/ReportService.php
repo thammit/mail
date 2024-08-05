@@ -145,7 +145,7 @@ class ReportService
                 if ($recipientSourceConfiguration['model'] ?? false) {
                     $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration['model']);
                 } else {
-                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceIdentifier);
+                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier);
                 }
             }
         }

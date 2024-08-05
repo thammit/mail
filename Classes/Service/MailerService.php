@@ -392,15 +392,16 @@ class MailerService implements LoggerAwareInterface
                     }
                     break;
                 default:
-                    $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($recipientSourceIdentifier);
+                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                    $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
                     $queryResult = $queryBuilder
                         ->select('*')
-                        ->from($recipientSourceIdentifier)
+                        ->from($table)
                         ->where($queryBuilder->expr()->in('uid', $queryBuilder->quoteArrayBasedValueListToIntegerList($recipientIds)))
                         ->executeQuery();
 
                     while ($recipientData = $queryResult->fetchAssociative()) {
-                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, $recipientData['uid']);
+                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($table, $recipientData['uid']);
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                         $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
                         $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];

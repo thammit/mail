@@ -248,7 +248,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                 if ($recipientSourceConfiguration['model'] ?? false) {
                     $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration['model'], []);
                 } else {
-                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $this->recipientSourceIdentifier);
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration['table'] ?? $this->recipientSourceIdentifier);
                 }
                 $this->recipientRecord = reset($recipientData);
 

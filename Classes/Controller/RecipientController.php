@@ -120,7 +120,7 @@ class RecipientController extends AbstractController
                 $recipientSourceConfiguration['title'] = 'CSV List';
                 $editCsvList = $groupUid;
             } else {
-                $table = $recipientSourceIdentifier;
+                $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
                 if ($recipientSourceConfiguration['model'] ?? false) {
                     $model = $recipientSourceConfiguration['model'];
                     if (class_exists($model) && is_subclass_of($model, RecipientInterface::class)) {
@@ -208,7 +208,7 @@ class RecipientController extends AbstractController
             } else {
                 $csvExportFields = $recipientSourceConfiguration['csvExportFields'] ?? GeneralUtility::trimExplode(',',
                     $this->defaultCsvExportFields, true);
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceIdentifier,
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier,
                     $csvExportFields, true);
             }
         }

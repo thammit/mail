@@ -23,6 +23,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\QueryRestrictionInterface;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -297,14 +298,15 @@ class RecipientService
                             $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
                             if ($recipientSourceConfiguration['model'] ?? false) {
                                 $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
-                                    $recipientSourceConfiguration['model'],
+                                    $recipientSourceConfiguration,
                                     $pages,
                                     $group->getCategories(),
                                     $ignoreMailActive
                                 );
                             } else {
+                                $recipientSourceConfiguration['table'] ??= $recipientSourceIdentifier;
                                 $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByTableAndPageUidListAndCategories(
-                                    $recipientSourceIdentifier,
+                                    $recipientSourceConfiguration,
                                     $pages,
                                     $group->getCategories(),
                                     $ignoreMailActive
@@ -333,8 +335,9 @@ class RecipientService
                 foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
                     $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
                     $idListKey = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
+                    $recipientSourceConfiguration['table'] ??= $recipientSourceIdentifier;
                     $idLists[$idListKey] = array_unique(array_merge($idLists[$idListKey] ?? [],
-                        $this->getStaticIdListByTableAndGroupUid($recipientSourceIdentifier, $group->getUid(), $ignoreMailActive)));
+                        $this->getStaticIdListByTableAndGroupUid($recipientSourceConfiguration, $group->getUid(), $ignoreMailActive)));
                 }
                 break;
             case RecipientGroupType::OTHER:
@@ -359,12 +362,13 @@ class RecipientService
      * @throws InvalidQueryException
      */
     protected function getRecipientUidListByModelNameAndPageUidListAndCategories(
-        string $modelName,
+        array $recipientSourceConfiguration,
         array $storagePageIds,
         ObjectStorage $categories,
         bool $ignoreMailActive = false
     ): array {
         $recipientUids = [];
+        $modelName = $recipientSourceConfiguration['model'];
         $query = $this->persistenceManager->createQueryForType($modelName);
         if ($storagePageIds) {
             $query->getQuerySettings()->setStoragePageIds($storagePageIds);
@@ -417,7 +421,7 @@ class RecipientService
      * If no group categories set, all entries (within the given pages) will be returned,
      * otherwise only entries with matching categories will be returned.
      *
-     * @param string $table source table
+     * @param array $recipientSourceConfiguration recipient source configuration
      * @param array $pages uid list of pages
      * @param ObjectStorage<Category> $categories mail categories
      * @param bool $ignoreMailActive
@@ -426,14 +430,26 @@ class RecipientService
      * @throws \Doctrine\DBAL\Exception
      */
     protected function getRecipientUidListByTableAndPageUidListAndCategories(
-        string $table,
+        array $recipientSourceConfiguration,
         array $pages,
         ObjectStorage $categories,
         bool $ignoreMailActive = false
     ): array {
-        $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
+        $table = $recipientSourceConfiguration['table'];
+        $switchTable = $recipientSourceConfiguration['contains'] ?? $table;
+
         $queryBuilder = $this->getQueryBuilder($table);
         $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(HiddenRestriction::class));
+
+        // Add custom query restrictions
+        if ($recipientSourceConfiguration['queryRestrictions'] ?? false) {
+            foreach ((array)$recipientSourceConfiguration['queryRestrictions'] as $queryRestrictionFQN) {
+                $queryRestriction = GeneralUtility::makeInstance($queryRestrictionFQN);
+                if ($queryRestriction instanceof QueryRestrictionInterface) {
+                    $queryBuilder->getRestrictions()->add($queryRestriction);
+                }
+            }
+        }
 
         $mailActiveExpression = '';
         if (!$ignoreMailActive) {
@@ -505,16 +521,17 @@ class RecipientService
     /**
      * Return all uids from $table for a static mail group.
      *
-     * @param string $table The table to select from
+     * @param array $recipientSourceConfiguration
      * @param int $mailGroupUid The uid of the mail group
      * @param bool $ignoreMailActive
      * @return array The resulting array of uids
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    protected function getStaticIdListByTableAndGroupUid(string $table, int $mailGroupUid, bool $ignoreMailActive = false): array
+    protected function getStaticIdListByTableAndGroupUid(array $recipientSourceConfiguration, int $mailGroupUid, bool $ignoreMailActive = false): array
     {
-        $switchTable = $table === 'fe_groups' ? 'fe_users' : $table;
+        $table = $recipientSourceConfiguration['table'];
+        $switchTable = $recipientSourceConfiguration['contains'] ?? $table;
 
         $queryBuilder = $this->getQueryBuilder($table);
 
@@ -522,6 +539,16 @@ class RecipientService
         if (!$ignoreMailActive) {
             // for fe_users and fe_group, only activated newsletter
             $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
+        }
+
+        // Add custom query restrictions
+        if ($recipientSourceConfiguration['queryRestrictions'] ?? false) {
+            foreach ((array)$recipientSourceConfiguration['queryRestrictions'] as $queryRestrictionFQN) {
+                $queryRestriction = GeneralUtility::makeInstance($queryRestrictionFQN);
+                if ($queryRestriction instanceof QueryRestrictionInterface) {
+                    $queryBuilder->getRestrictions()->add($queryRestriction);
+                }
+            }
         }
 
         if ($table === 'fe_groups') {
