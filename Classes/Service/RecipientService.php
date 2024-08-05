@@ -13,6 +13,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
+use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -319,7 +320,9 @@ class RecipientService
             case RecipientGroupType::CSV:
                 // List of mails
                 if ($group->isCsv()) {
-                    $recipients = CsvUtility::rearrangeCsvValues($group->getList());
+                    $defaultRecipientFields = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipientFields'), true);
+                    $allRecipientFields = array_merge($defaultRecipientFields, GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields'), true));
+                    $recipients = CsvUtility::rearrangeCsvValues($group->getList(), ',', $allRecipientFields);
                 } else {
                     $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
                 }

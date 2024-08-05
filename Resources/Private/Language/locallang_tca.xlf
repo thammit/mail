@@ -154,10 +154,13 @@
                 <source>Separate emails by space/comma/linebreak</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.csv.I.1" resname="tx_mail_domain_model_group.csv.I.1">
-                <source>CSV [name],[email]</source>
+                <source>CSV [name],[email][,[salutation]]</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.list" resname="tx_mail_domain_model_group.list">
                 <source>Recipients</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.list.description" resname="tx_mail_domain_model_group.list.description">
+                <source>If CSV format is selected, the first line can (optionally) contain field names defined in the extension settings (defaultRecipientFields + additionalRecipientFields). Please use commas to separate the fields and (optionally) double quotation marks to enclose the values.</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.mailGroups" resname="tx_mail_domain_model_group.mailGroups">
                 <source>Other recipient lists</source>

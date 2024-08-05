@@ -52,10 +52,6 @@ class CsvUtility
             // in that case '+[value]' adds that number to the field value (accumulation) and '=[value]' overrides any existing value in the field
 
             $firstRow = $lines[0];
-            try {
-                $fieldList = array_merge($fieldList, explode(',', ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields')));
-            } catch (ExtensionConfigurationPathDoesNotExistException|ExtensionConfigurationExtensionNotConfiguredException) {
-            }
             $hasFieldNames = true;
             $fieldOrder = [];
 
@@ -74,12 +70,13 @@ class CsvUtility
             }
 
             if ($hasFieldNames) {
-                // if the first line contain field names move lines pointer to next element
-                next($lines);
+                // if the first line contain field names remove first line for next steps
+                array_shift($lines);
             } else {
                 $fieldOrder = [
                     ['name'],
                     ['email'],
+                    ['salutation'],
                 ];
             }
 
@@ -92,8 +89,8 @@ class CsvUtility
                     foreach ($fieldOrder as $column => $fieldConfiguration) {
                         if ($fieldConfiguration[0]) {
                             if ($fieldConfiguration[1] ?? false) {
-                                // If is true
-                                if (trim($line[$column])) {
+                                // If column exist and is not empty
+                                if (array_key_exists($column, $line) && trim($line[$column])) {
                                     if (str_starts_with($fieldConfiguration[1], '=')) {
                                         $data[$rowNumber][$fieldConfiguration[0]] = trim(substr($fieldConfiguration[1], 1));
                                     } else if (str_starts_with($fieldConfiguration[1], '+')) {

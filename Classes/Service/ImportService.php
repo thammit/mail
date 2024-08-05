@@ -686,11 +686,12 @@ class ImportService
     private function getFileAbsolutePath(int $fileUid): string
     {
         $file = $this->getFileById($fileUid);
-        if (!is_object($file)) {
+        if (!$file instanceof File || !$file->exists()) {
             return '';
         }
-        return Environment::getPublicPath() . '/' . str_replace('//', '/',
-                $file->getStorage()->getConfiguration()['basePath'] . $file->getProperty('identifier'));
+        return $file->getForLocalProcessing();
+//        return Environment::getPublicPath() . '/' . str_replace('//', '/',
+//                $file->getStorage()->getConfiguration()['basePath'] . $file->getProperty('identifier'));
     }
 
     /**
