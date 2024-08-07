@@ -132,7 +132,6 @@ class RecipientController extends AbstractController
             } else {
                 $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
                 $title = $recipientSourceConfiguration['title'] ?? '';
-//                $title .= ' [' . $table . ']';
                 if ($recipientSourceConfiguration['model'] ?? false) {
                     $model = $recipientSourceConfiguration['model'];
                     if (class_exists($model) && is_subclass_of($model, RecipientInterface::class)) {
