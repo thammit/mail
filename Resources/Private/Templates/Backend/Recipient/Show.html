@@ -17,7 +17,7 @@
             <f:if condition="{recipientSources -> f:count()} == 1">
                 <f:variable name="open" value="1"/>
             </f:if>
-            <f:for each="{recipientSources}" as="recipientSource" key="recipientSourceIdentifier">
+            <f:for each="{recipientSources}" as="recipientSource" key="recipientSourceIdentifier" iteration="panel">
                 <f:variable name="title">
                     <f:translate key="{recipientSource.title}" default="{recipientSource.title}"/><f:if condition="{recipientSource.table} != 'tx_mail_domain_model_group'"> [{recipientSource.table}]</f:if>
                 </f:variable>
@@ -36,7 +36,7 @@
                     </f:if>
                 </f:variable>
                 <f:render partial="Backend/Panel"
-                          arguments="{lll:lll, parentId:'mail-recipient-list-panel-{recipientSourceIdentifier}', title: title, index:recipientSourceIdentifier, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
+                          arguments="{lll:lll, parentId:'mail-recipient-list-panel-{panel.index}', title: title, index:panel.index, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
                           contentAs="panelBody">
                     <f:render partial="Backend/Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, editCsvList: recipientSource.editCsvList, lll:lll}"/>
                 </f:render>
