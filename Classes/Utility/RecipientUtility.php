@@ -8,6 +8,8 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
@@ -51,6 +53,15 @@ class RecipientUtility
         return $recipientCategories;
     }
 
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
+    public static function getAllRecipientFields(): array
+    {
+        $defaultRecipientFields = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipientFields'), true);
+        return array_merge($defaultRecipientFields, GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields'), true));
+    }
 
     /**
      * @param array $uidLists

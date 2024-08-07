@@ -151,16 +151,52 @@
                 <source>List format</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.csv.I.0" resname="tx_mail_domain_model_group.csv.I.0">
-                <source>Separate emails by space/comma/linebreak</source>
+                <source>List of emails</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.csv.I.1" resname="tx_mail_domain_model_group.csv.I.1">
-                <source>CSV [name],[email][,[salutation]]</source>
+                <source>Plain CSV</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csv.I.2" resname="tx_mail_domain_model_group.csv.I.2">
+                <source>CSV from file</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvType" resname="tx_mail_domain_model_group.csvType">
+                <source>CSV type</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvType.I.0" resname="tx_mail_domain_model_group.csvType.I.0">
+                <source>Plain CSV</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvType.I.1" resname="tx_mail_domain_model_group.csvType.I.1">
+                <source>CSV from file</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.list" resname="tx_mail_domain_model_group.list">
                 <source>Recipients</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.list.description" resname="tx_mail_domain_model_group.list.description">
-                <source>If CSV format is selected, the first line can (optionally) contain field names defined in the extension settings (defaultRecipientFields + additionalRecipientFields). Please use commas to separate the fields and (optionally) double quotation marks to enclose the values.</source>
+                <source>Separate emails by space, comma or linebreak</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvSeparator" resname="tx_mail_domain_model_group.csvSeparator">
+                <source>Separator</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvSeparator.I.0" resname="tx_mail_domain_model_group.csvSeparator.I.0">
+                <source>, (comma)</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvSeparator.I.1" resname="tx_mail_domain_model_group.csvSeparator.I.1">
+                <source>; (semicolon)</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvSeparator.I.2" resname="tx_mail_domain_model_group.csvSeparator.I.2">
+                <source>[TAB] (tabulator)</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvData" resname="tx_mail_domain_model_group.csvData">
+                <source>CSV Data</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvData.description" resname="tx_mail_domain_model_group.csvData.description">
+                <source>The first line of the CSV can (optionally) contain field names (defaultRecipientFields + additionalRecipientFields, both defined in the extension settings).
+                    If first line doesn't contain field names, the order must be "name"[separator]"email" (optional appended: [separator]"salutation").
+                    Double quotation marks to enclose values are optional but recommended. [separator] is a placeholder and should be ",", ";" or a tab.
+                </source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvFile" resname="tx_mail_domain_model_group.csvFile">
+                <source>CSV File</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.mailGroups" resname="tx_mail_domain_model_group.mailGroups">
                 <source>Other recipient lists</source>
@@ -171,26 +207,26 @@
             <trans-unit id="tx_mail_domain_model_group.selectCategories" resname="tx_mail_domain_model_group.selectCategories">
                 <source>Recipients must subscribe to one of the following categories</source>
             </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.selectCategoriesForPlainCsv" resname="tx_mail_domain_model_group.selectCategoriesForPlainCsv">
+                <source>Recipients will have the following categories</source>
+            </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.staticList" resname="tx_mail_domain_model_group.staticList">
                 <source>Recipients</source>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.type.I.0" resname="tx_mail_domain_model_group.type.I.0">
+            <trans-unit id="tx_mail_domain_model_group.type.pages" resname="tx_mail_domain_model_group.type.pages">
                 <source>From pages</source>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.type.I.1" resname="tx_mail_domain_model_group.type.I.1">
+            <trans-unit id="tx_mail_domain_model_group.type.list" resname="tx_mail_domain_model_group.type.list">
                 <source>Plain list</source>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.type.I.2" resname="tx_mail_domain_model_group.type.I.2">
+            <trans-unit id="tx_mail_domain_model_group.type.csv" resname="tx_mail_domain_model_group.type.csv">
+                <source>CSV</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.type.static" resname="tx_mail_domain_model_group.type.static">
                 <source>Static list</source>
             </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.type.I.3" resname="tx_mail_domain_model_group.type.I.3">
-                <source>Special query</source>
-            </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.type.I.4" resname="tx_mail_domain_model_group.type.I.4">
+            <trans-unit id="tx_mail_domain_model_group.type.other" resname="tx_mail_domain_model_group.type.other">
                 <source>From other recipient lists</source>
-            </trans-unit>
-            <trans-unit id="tx_mail_domain_model_group.type.I.5" resname="tx_mail_domain_model_group.type.I.5">
-                <source>From Extbase Domain Model</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.recipientSources" resname="tx_mail_domain_model_group.recipientSources">
                 <source>Recipient sources</source>

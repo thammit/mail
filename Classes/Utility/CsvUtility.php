@@ -57,11 +57,11 @@ class CsvUtility
 
             foreach ($firstRow as $value) {
                 $fieldName = '';
-                $probe = preg_split('|[\[\]]|', $value);
+                $probe = preg_split('|[\[\]]|', strtolower($value));
                 if (is_array($probe)) {
                     [$fieldName, $fieldConfiguration] = count($probe) === 2 ? $probe : [$probe[0], ''];
                 }
-                $fieldName = trim($fieldName ?? '');
+                $fieldName = strtolower(trim($fieldName ?? ''));
                 $fieldOrder[] = [$fieldName, trim($fieldConfiguration ?? '')];
                 if ($fieldName && !str_starts_with($fieldName, 'user_') && !in_array($fieldName, $fieldList)) {
                     $hasFieldNames = false;

@@ -18,6 +18,8 @@ use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -283,6 +285,8 @@ class RecipientService
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function getRecipientsUidListGroupedByRecipientSource(Group $group, bool $addGroupUidToRecipientSourceIdentifier = false): array
     {
@@ -317,14 +321,12 @@ class RecipientService
                     }
                 }
                 break;
+            case RecipientGroupType::LIST:
             case RecipientGroupType::CSV:
-                // List of mails
-                if ($group->isCsv()) {
-                    $defaultRecipientFields = GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('defaultRecipientFields'), true);
-                    $allRecipientFields = array_merge($defaultRecipientFields, GeneralUtility::trimExplode(',', ConfigurationUtility::getExtensionConfiguration('additionalRecipientFields'), true));
-                    $recipients = CsvUtility::rearrangeCsvValues($group->getList(), ',', $allRecipientFields);
+                if ($group->getType() === RecipientGroupType::LIST) {
+                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($group->getList()))));
                 } else {
-                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', $group->getList())));
+                    $recipients = CsvUtility::rearrangeCsvValues($group->getCsvData(), $group->getCsvSeparatorString(), RecipientUtility::getAllRecipientFields());
                 }
                 foreach ($recipients as $key => $recipient) {
                     $recipients[$key]['categories'] = $group->getCategories();

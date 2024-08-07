@@ -19,12 +19,12 @@
             </f:if>
             <f:for each="{recipientSources}" as="recipientSource" key="recipientSourceIdentifier">
                 <f:variable name="title">
-                    <f:translate key="{recipientSource.title}" default="{recipientSource.title}"/> [{recipientSource.table}]
+                    <f:translate key="{recipientSource.title}" default="{recipientSource.title}"/><f:if condition="{recipientSource.table} != 'tx_mail_domain_model_group'"> [{recipientSource.table}]</f:if>
                 </f:variable>
-                <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSourceIdentifier}" class="btn btn-default btn-sm text-uppercase">
+                <f:variable name="additionalHeading"><f:if condition="{recipientSource.csvExport} || 1==1"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSourceIdentifier}" class="btn btn-default btn-sm text-uppercase">
                     <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
                     <f:translate key="{lll}general.button.downloadCsv"/>
-                </f:link.action></f:variable>
+                </f:link.action></f:if></f:variable>
                 <f:variable name="icon">
                     <f:if condition="{recipientSource.icon}">
                         <f:then>

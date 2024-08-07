@@ -13,11 +13,14 @@ use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Utility\ClassNamingUtility;
@@ -112,15 +115,24 @@ class RecipientController extends AbstractController
             }
             $recipients = [];
             $editCsvList = 0;
+            $csvExport = true;
             if ($isCsv) {
-                [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
+                [$recipientSourceIdentifierWithoutGroupId, $groupUid] = explode(':', $recipientSourceIdentifier);
                 $recipients = $idList;
-                $table = $recipientSourceIdentifier;
+                $table = $recipientSourceIdentifierWithoutGroupId;
                 $recipientSourceConfiguration['icon'] = 'actions-user';
-                $recipientSourceConfiguration['title'] = 'CSV List';
-                $editCsvList = $groupUid;
+                $groupOfRecipientSource = $this->groupRepository->findByUid((int)$groupUid);
+                $title = '';
+                if ($groupOfRecipientSource instanceof Group) {
+                    $title = $groupOfRecipientSource->getTitle();
+                    $title .= $groupOfRecipientSource->getType() === RecipientGroupType::CSV ? ' [CSV]' : ' [Plain list]';
+                }
+                $editCsvList = (int)$groupUid;
+                $csvExport = false;
             } else {
                 $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                $title = $recipientSourceConfiguration['title'] ?? '';
+//                $title .= ' [' . $table . ']';
                 if ($recipientSourceConfiguration['model'] ?? false) {
                     $model = $recipientSourceConfiguration['model'];
                     if (class_exists($model) && is_subclass_of($model, RecipientInterface::class)) {
@@ -137,7 +149,7 @@ class RecipientController extends AbstractController
             }
 
             $recipientSources[$recipientSourceIdentifier] = [
-                'title' => $recipientSourceConfiguration['title'] ?? '',
+                'title' => $title,
                 'table' => $table,
                 'icon' => $recipientSourceConfiguration['icon'] ?? 'actions-user',
                 'recipients' => $recipients,
@@ -146,6 +158,7 @@ class RecipientController extends AbstractController
                 'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
                 'editCsvList' => $table && BackendUserUtility::getBackendUser()->check('tables_modify',
                     $table) ? $editCsvList : 0,
+                'csvExport' => $csvExport,
             ];
         }
 
@@ -175,9 +188,27 @@ class RecipientController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function csvDownloadAction(Group $group, string $recipientSourceIdentifier): ResponseInterface
     {
+        if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
+            [$recipientSourceIdentifierWithoutGroupId, $groupUid] = explode(':', $recipientSourceIdentifier);
+            $table = $recipientSourceIdentifierWithoutGroupId;
+            $groupOfRecipientSource = $this->groupRepository->findByUid((int)$groupUid);
+            $rows = [];
+            if ($groupOfRecipientSource instanceof Group) {
+                if ($groupOfRecipientSource->getType() === RecipientGroupType::CSV) {
+                    $rows = CsvUtility::rearrangeCsvValues($groupOfRecipientSource->getCsvData(), $groupOfRecipientSource->getCsvSeparatorString(), RecipientUtility::getAllRecipientFields());
+                } else {
+                    $rows = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($groupOfRecipientSource->getList()))));
+                    $rows = array_map(fn($element) => array_merge(array_slice($element, 0, 1), array_slice($element, 2)), $rows);
+                }
+            }
+            return CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);
+        }
+
         $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
         if (!$recipientSourceConfiguration && !($recipientSourceIdentifier === 'tx_mail_domain_model_group')) {
             ViewUtility::addFlashMessageError('',

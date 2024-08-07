@@ -30,11 +30,11 @@
                         <f:if condition="{recipient.uid} && {allowEdit}">
                             <f:then>
                                 <be:link.editRecord uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}general.button.edit')}">
-                                    {recipient.name}
+                                    <f:if condition="{recipient.name}"><f:then>{recipient.name}</f:then><f:else>({recipient.email})</f:else></f:if>
                                 </be:link.editRecord>
                             </f:then>
                             <f:else>
-                                {recipient.name}
+                                <f:if condition="{recipient.name}"><f:then>{recipient.name}</f:then><f:else>({recipient.email})</f:else></f:if>
                             </f:else>
                         </f:if>
                     </td>
@@ -67,7 +67,7 @@
                             </be:link.editRecord>
                         </f:if>
                         <f:if condition="{editCsvList}">
-                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
+                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
                         </f:if>

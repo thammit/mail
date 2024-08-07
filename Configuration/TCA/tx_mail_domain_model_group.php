@@ -1,5 +1,7 @@
 <?php
 
+use MEDIAESSENZ\Mail\Type\Enumeration\CsvSeparator;
+use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\UserFunctions\RecipientSourcesProcFunc;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -22,16 +24,23 @@ return [
             'default' => 'mail-group',
             RecipientGroupType::PAGES => 'mail-group',
             RecipientGroupType::CSV => 'mail-group',
+            RecipientGroupType::LIST => 'mail-group',
             RecipientGroupType::STATIC => 'mail-group',
-            RecipientGroupType::QUERY => 'mail-group',
             RecipientGroupType::OTHER => 'mail-group',
         ],
     ],
     'types' => [
         RecipientGroupType::PAGES => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,recipient_sources,pages,recursive,categories'],
-        RecipientGroupType::CSV => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv,list,mail_html,categories'],
+        RecipientGroupType::LIST => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,list,mail_html,categories'],
+        RecipientGroupType::CSV => [
+            'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv_type,csv_separator,csv_data,csv_file,mail_html,categories',
+            'columnsOverrides' => [
+                'categories' => [
+                    'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.selectCategoriesForPlainCsv',
+                ]
+            ]
+        ],
         RecipientGroupType::STATIC => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,static_list'],
-        //\MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,static_list'],
         RecipientGroupType::OTHER => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,children'],
     ],
     'columns' => [
@@ -66,13 +75,13 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.0', RecipientGroupType::PAGES],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.1', RecipientGroupType::CSV],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.2', RecipientGroupType::STATIC],
-                    //['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.3', \MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType::QUERY],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.I.4', RecipientGroupType::OTHER],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.pages', RecipientGroupType::PAGES],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.list', RecipientGroupType::LIST],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.csv', RecipientGroupType::CSV],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.static', RecipientGroupType::STATIC],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.other', RecipientGroupType::OTHER],
                 ],
-                'default' => '0',
+                'default' => RecipientGroupType::PAGES,
             ],
         ],
         'static_list' => [
@@ -128,20 +137,58 @@ return [
             'description' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.list.description',
             'config' => [
                 'type' => 'text',
-                'cols' => 48,
+                'cols' => 50,
                 'rows' => 10,
+                'fixedFont' => true,
             ],
         ],
-        'csv' => [
-            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csv',
+        'csv_type' => [
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvType',
+            'onChange' => 'reload',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csv.I.0', '0'],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csv.I.1', '1'],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvType.I.0', CsvType::PLAIN],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvType.I.1', CsvType::FILE],
                 ],
-                'default' => '0',
+                'default' => CsvType::PLAIN,
+            ],
+        ],
+        'csv_separator' => [
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'items' => [
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.0', CsvSeparator::COMMA],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.1', CsvSeparator::SEMICOLON],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.2', CsvSeparator::TAB],
+                ],
+                'default' => CsvSeparator::COMMA,
+            ],
+        ],
+        'csv_data' => [
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvData',
+            'description' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvData.description',
+            'displayCond' => 'FIELD:csv_type:=:' . CsvType::PLAIN,
+            'config' => [
+                'type' => 'text',
+                'cols' => 50,
+                'rows' => 10,
+                'enableTabulator' => true,
+                'fixedFont' => true,
+            ],
+        ],
+        'csv_file' => [
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvFile',
+            'description' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvData.description',
+            'displayCond' => 'FIELD:csv_type:=:' . CsvType::FILE,
+            'config' => [
+                'type' => 'file',
+                'allowed' => 'csv,txt',
+                'maxitems' => 1,
+                'minitems' => 1,
             ],
         ],
         'mail_html' => [

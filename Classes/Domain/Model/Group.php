@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
+use MEDIAESSENZ\Mail\Type\Enumeration\CsvSeparator;
+use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
@@ -41,9 +43,20 @@ class Group extends AbstractEntity
     protected string $list = '';
 
     /**
-     * @var bool
+     * @var int
      */
-    protected bool $csv = false;
+    protected int $csvSeparator = CsvSeparator::COMMA;
+
+    /**
+     * @var string
+     */
+    protected string $csvData = '';
+
+    /**
+     * @var int
+     */
+    protected int $csvType = CsvType::PLAIN;
+
 
     /**
      * @var bool
@@ -195,21 +208,45 @@ class Group extends AbstractEntity
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isCsv(): bool
+    public function getCsvSeparator(): int
     {
-        return $this->csv;
+        return $this->csvSeparator;
     }
 
-    /**
-     * @param bool $csv
-     * @return Group
-     */
-    public function setCsv(bool $csv): Group
+    public function getCsvSeparatorString(): string
     {
-        $this->csv = $csv;
+        return match ($this->csvSeparator) {
+            CsvSeparator::TAB => "\t",
+            CsvSeparator::SEMICOLON => ';',
+            default => ',',
+        };
+    }
+
+    public function setCsvSeparator(int $csvSeparator): Group
+    {
+        $this->csvSeparator = $csvSeparator;
+        return $this;
+    }
+
+    public function getCsvData(): string
+    {
+        return $this->csvData;
+    }
+
+    public function setCsvData(string $csvData): Group
+    {
+        $this->csvData = $csvData;
+        return $this;
+    }
+
+    public function getCsvType(): int
+    {
+        return $this->csvType;
+    }
+
+    public function setCsvType(int $csvType): Group
+    {
+        $this->csvType = $csvType;
         return $this;
     }
 
