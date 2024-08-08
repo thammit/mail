@@ -38,11 +38,13 @@ class RecipientController extends AbstractController
     /**
      * @return ResponseInterface
      * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
+     * @throws RouteNotFoundException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @throws RouteNotFoundException
      */
     public function indexAction(): ResponseInterface
     {
@@ -118,7 +120,6 @@ class RecipientController extends AbstractController
             }
             $recipients = [];
             $editCsvList = 0;
-            $csvExport = true;
             if ($isCsv) {
                 $title = '';
                 [$recipientSourceIdentifierWithoutGroupId, $groupUid] = explode(':', $recipientSourceIdentifier);
@@ -131,7 +132,6 @@ class RecipientController extends AbstractController
                 $recipients = $idList;
                 $icon = 'actions-user';
                 $editCsvList = (int)$groupUid;
-                $csvExport = false;
             } else {
                 $recipientSourceConfiguration = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $this->recipientSources[$recipientSourceIdentifier]);
                 $title = $recipientSourceConfiguration->title;
@@ -161,7 +161,6 @@ class RecipientController extends AbstractController
                 'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
                 'editCsvList' => $table && BackendUserUtility::getBackendUser()->check('tables_modify',
                     $table) ? $editCsvList : 0,
-                'csvExport' => $csvExport,
             ];
         }
 
@@ -197,8 +196,7 @@ class RecipientController extends AbstractController
     public function csvDownloadAction(Group $group, string $recipientSourceIdentifier): ResponseInterface
     {
         if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
-            [$recipientSourceIdentifierWithoutGroupId, $groupUid] = explode(':', $recipientSourceIdentifier);
-            $table = $recipientSourceIdentifierWithoutGroupId;
+            [, $groupUid] = explode(':', $recipientSourceIdentifier);
             $groupOfRecipientSource = $this->groupRepository->findByUid((int)$groupUid);
             $rows = [];
             if ($groupOfRecipientSource instanceof Group) {
