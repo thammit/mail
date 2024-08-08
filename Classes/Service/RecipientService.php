@@ -5,15 +5,16 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
+use MEDIAESSENZ\Mail\Events\RecipientsRestrictionEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
-use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -168,7 +169,8 @@ class RecipientService
         } else {
             $languageAspect = $query->getQuerySettings()->getLanguageAspect();
             if ($languageAspect->getOverlayType() !== LanguageAspect::OVERLAYS_OFF) {
-                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(), LanguageAspect::OVERLAYS_OFF));
+                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(),
+                    LanguageAspect::OVERLAYS_OFF));
             }
         }
         $query->matching(
@@ -214,6 +216,8 @@ class RecipientService
      * @param ObjectStorage<Group> $groups
      * @return array
      * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
@@ -263,10 +267,14 @@ class RecipientService
     }
 
     /**
-     * @throws UnknownObjectException
+     * @param Group $group
+     * @return int
+     * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
-     * @throws Exception
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      */
     public function getNumberOfRecipientsByGroup(Group $group): int
@@ -277,9 +285,6 @@ class RecipientService
     /**
      * collects all recipient uids from a given group respecting there categories
      *
-     * @param Group $group Recipient group ID
-     * @param bool $addGroupUidToRecipientSourceIdentifier
-     * @return array List of recipient IDs
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
@@ -297,26 +302,20 @@ class RecipientService
                 $pages = BackendDataUtility::getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
-                        $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
-                        if ($recipientSourceConfiguration) {
-                            $recipientSourceIdentifier = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
-                            $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
-                            if ($recipientSourceConfiguration['model'] ?? false) {
-                                $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
-                                    $recipientSourceConfiguration,
-                                    $pages,
-                                    $group->getCategories(),
-                                    $ignoreMailActive
-                                );
-                            } else {
-                                $recipientSourceConfiguration['table'] ??= $recipientSourceIdentifier;
-                                $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByTableAndPageUidListAndCategories(
-                                    $recipientSourceConfiguration,
-                                    $pages,
-                                    $group->getCategories(),
-                                    $ignoreMailActive
-                                );
-                            }
+                        $recipientSourceConfiguration = new RecipientSourceConfigurationDTO($recipientSourceIdentifier,
+                            $this->recipientSources[$recipientSourceIdentifier]);
+                        if ($recipientSourceConfiguration->model) {
+                            $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
+                                $recipientSourceConfiguration,
+                                $pages,
+                                $group->getCategories()
+                            );
+                        } else {
+                            $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByTableAndPageUidListAndCategories(
+                                $recipientSourceConfiguration,
+                                $pages,
+                                $group->getCategories()
+                            );
                         }
                     }
                 }
@@ -326,23 +325,23 @@ class RecipientService
                 if ($group->getType() === RecipientGroupType::LIST) {
                     $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($group->getList()))));
                 } else {
-                    $recipients = CsvUtility::rearrangeCsvValues($group->getCsvData(), $group->getCsvSeparatorString(), RecipientUtility::getAllRecipientFields());
+                    $recipients = CsvUtility::rearrangeCsvValues($group->getCsvData(), $group->getCsvSeparatorString(),
+                        RecipientUtility::getAllRecipientFields());
                 }
                 foreach ($recipients as $key => $recipient) {
                     $recipients[$key]['categories'] = $group->getCategories();
                     $recipients[$key]['mail_html'] = $group->isMailHtml() ? 1 : 0;
                 }
-                $csvRecipientSourceIdentifier = $addGroupUidToRecipientSourceIdentifier ? 'tx_mail_domain_model_group:' . $group->getUid() : 'tx_mail_domain_model_group';
-                $idLists[$csvRecipientSourceIdentifier] = RecipientUtility::removeDuplicates($recipients);
+                $recipientSourceIdentifier = $addGroupUidToRecipientSourceIdentifier ? 'tx_mail_domain_model_group:' . $group->getUid() : 'tx_mail_domain_model_group';
+                $idLists[$recipientSourceIdentifier] = RecipientUtility::removeDuplicates($recipients);
                 break;
             case RecipientGroupType::STATIC:
                 // Static MM list
                 foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
-                    $ignoreMailActive = $recipientSourceConfiguration['ignoreMailActive'] ?? false;
-                    $idListKey = $recipientSourceConfiguration['contains'] ?? $recipientSourceIdentifier;
-                    $recipientSourceConfiguration['table'] ??= $recipientSourceIdentifier;
-                    $idLists[$idListKey] = array_unique(array_merge($idLists[$idListKey] ?? [],
-                        $this->getStaticIdListByTableAndGroupUid($recipientSourceConfiguration, $group->getUid(), $ignoreMailActive)));
+                    $recipientSourceConfiguration = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $recipientSourceConfiguration);
+                    $recipientSourceIdentifier = $recipientSourceConfiguration->contains ?? $recipientSourceIdentifier;
+                    $idLists[$recipientSourceIdentifier] = array_unique(array_merge($idLists[$recipientSourceIdentifier] ?? [],
+                        $this->getStaticIdListByTableAndGroupUid($recipientSourceConfiguration, $group->getUid())));
                 }
                 break;
             case RecipientGroupType::OTHER:
@@ -354,8 +353,8 @@ class RecipientService
                 break;
         }
 
-        foreach ($idLists as $recipientSource => $idList) {
-            $idLists[$recipientSource] = str_starts_with($recipientSource, 'tx_mail_domain_model_group') ? $idList : array_unique($idList);
+        foreach ($idLists as $recipientSourceIdentifier => $idList) {
+            $idLists[$recipientSourceIdentifier] = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group') ? $idList : array_unique($idList);
         }
 
         // todo add event dispatcher to manipulate the returned idLists
@@ -367,14 +366,12 @@ class RecipientService
      * @throws InvalidQueryException
      */
     protected function getRecipientUidListByModelNameAndPageUidListAndCategories(
-        array $recipientSourceConfiguration,
+        RecipientSourceConfigurationDTO $recipientSourceConfiguration,
         array $storagePageIds,
         ObjectStorage $categories,
-        bool $ignoreMailActive = false
     ): array {
         $recipientUids = [];
-        $modelName = $recipientSourceConfiguration['model'];
-        $query = $this->persistenceManager->createQueryForType($modelName);
+        $query = $this->persistenceManager->createQueryForType($recipientSourceConfiguration->model);
         if ($storagePageIds) {
             $query->getQuerySettings()->setStoragePageIds($storagePageIds);
         } else {
@@ -386,29 +383,35 @@ class RecipientService
         } else {
             $languageAspect = $query->getQuerySettings()->getLanguageAspect();
             if ($languageAspect->getOverlayType() !== LanguageAspect::OVERLAYS_OFF) {
-                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(), LanguageAspect::OVERLAYS_OFF));
+                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(),
+                    LanguageAspect::OVERLAYS_OFF));
             }
         }
 
-        $constrains = [];
+        $constraints = [];
 
-        if (!$ignoreMailActive) {
-            $constrains[] = $query->equals('active', true);
+        if (!$recipientSourceConfiguration->ignoreMailActive) {
+            $constraints[] = $query->equals('active', true);
         }
 
-        $constrains[] = $query->logicalNot($query->equals('email', ''));
+        $constraints[] = $query->logicalNot($query->equals('email', ''));
 
         if ($categories->count() > 0) {
             $orCategoryConstrains = [];
             foreach ($categories as $category) {
                 $orCategoryConstrains[] = $query->contains('categories', $category);
             }
-            $constrains[] = $query->logicalOr(...$orCategoryConstrains);
+            $constraints[] = $query->logicalOr(...$orCategoryConstrains);
         }
+
+        // PSR-14 event dispatcher to add custom query restrictions
+        $constraints = $this->eventDispatcher->dispatch(new RecipientsRestrictionEvent($recipientSourceConfiguration, $query, $constraints))->getConstraints();
+
         $query->matching(
-            $query->logicalAnd(...$constrains)
+            $query->logicalAnd(...$constraints)
         );
-//        $debugResult = $this->debugQuery($query);
+
+        //        $debugResult = $this->debugQuery($query);
         $recipients = $query->execute();
 //        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
 
@@ -426,29 +429,23 @@ class RecipientService
      * If no group categories set, all entries (within the given pages) will be returned,
      * otherwise only entries with matching categories will be returned.
      *
-     * @param array $recipientSourceConfiguration recipient source configuration
-     * @param array $pages uid list of pages
-     * @param ObjectStorage<Category> $categories mail categories
-     * @param bool $ignoreMailActive
-     * @return array The resulting array of uids
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
     protected function getRecipientUidListByTableAndPageUidListAndCategories(
-        array $recipientSourceConfiguration,
+        RecipientSourceConfigurationDTO $recipientSourceConfiguration,
         array $pages,
         ObjectStorage $categories,
-        bool $ignoreMailActive = false
     ): array {
-        $table = $recipientSourceConfiguration['table'];
-        $switchTable = $recipientSourceConfiguration['contains'] ?? $table;
+        $table = $recipientSourceConfiguration->table;
+        $switchTable = $recipientSourceConfiguration->contains ?? $table;
 
         $queryBuilder = $this->getQueryBuilder($table);
         $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(HiddenRestriction::class));
 
         // Add custom query restrictions
-        if ($recipientSourceConfiguration['queryRestrictions'] ?? false) {
-            foreach ((array)$recipientSourceConfiguration['queryRestrictions'] as $queryRestrictionFQN) {
+        if ($recipientSourceConfiguration->queryRestrictions) {
+            foreach ($recipientSourceConfiguration->queryRestrictions as $queryRestrictionFQN) {
                 $queryRestriction = GeneralUtility::makeInstance($queryRestrictionFQN);
                 if ($queryRestriction instanceof QueryRestrictionInterface) {
                     $queryBuilder->getRestrictions()->add($queryRestriction);
@@ -457,7 +454,7 @@ class RecipientService
         }
 
         $mailActiveExpression = '';
-        if (!$ignoreMailActive) {
+        if (!$recipientSourceConfiguration->ignoreMailActive) {
             $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
@@ -510,7 +507,7 @@ class RecipientService
             foreach ($recipientCollection as $recipient) {
                 if ((!$deletedField || !$recipient[$deletedField]) &&
                     (!$disabledField || !$recipient[$disabledField]) &&
-                    ($ignoreMailActive || $recipient['mail_active'] ?? true) &&
+                    ($recipientSourceConfiguration->ignoreMailActive || $recipient['mail_active'] ?? true) &&
                     !in_array($recipient['uid'], $recipients) &&
                     in_array($recipient['pid'], $pages) &&
                     ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
@@ -526,29 +523,27 @@ class RecipientService
     /**
      * Return all uids from $table for a static mail group.
      *
-     * @param array $recipientSourceConfiguration
-     * @param int $mailGroupUid The uid of the mail group
-     * @param bool $ignoreMailActive
-     * @return array The resulting array of uids
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    protected function getStaticIdListByTableAndGroupUid(array $recipientSourceConfiguration, int $mailGroupUid, bool $ignoreMailActive = false): array
-    {
-        $table = $recipientSourceConfiguration['table'];
-        $switchTable = $recipientSourceConfiguration['contains'] ?? $table;
+    protected function getStaticIdListByTableAndGroupUid(
+        RecipientSourceConfigurationDTO $recipientSourceConfiguration,
+        int $mailGroupUid,
+    ): array {
+        $table = $recipientSourceConfiguration->table;
+        $switchTable = $recipientSourceConfiguration->contains ?? $table;
 
         $queryBuilder = $this->getQueryBuilder($table);
 
         $mailActiveExpression = '';
-        if (!$ignoreMailActive) {
+        if (!$recipientSourceConfiguration->ignoreMailActive) {
             // for fe_users and fe_group, only activated newsletter
             $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
         // Add custom query restrictions
-        if ($recipientSourceConfiguration['queryRestrictions'] ?? false) {
-            foreach ((array)$recipientSourceConfiguration['queryRestrictions'] as $queryRestrictionFQN) {
+        if ($recipientSourceConfiguration->queryRestrictions) {
+            foreach ($recipientSourceConfiguration->queryRestrictions as $queryRestrictionFQN) {
                 $queryRestriction = GeneralUtility::makeInstance($queryRestrictionFQN);
                 if ($queryRestriction instanceof QueryRestrictionInterface) {
                     $queryBuilder->getRestrictions()->add($queryRestriction);
@@ -648,7 +643,7 @@ class RecipientService
                         $queryBuilder = $this->getQueryBuilder('fe_groups');
 
                         $mailActiveExpression = '';
-                        if (!$ignoreMailActive) {
+                        if (!$recipientSourceConfiguration->ignoreMailActive) {
                             // for fe_users and fe_group, only activated newsletter
                             $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
                         }
@@ -684,49 +679,6 @@ class RecipientService
     /*
      * U P D A T E S
      */
-
-    /**
-     * @param Group $group
-     * @param mixed $queryTable
-     * @param mixed $queryConfig
-     * @return void
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
-    protected function updateGroupQueryConfig(Group $group, mixed $queryTable, mixed $queryConfig): void
-    {
-        $table = '';
-        if ($this->ttAddressIsLoaded && $group->hasAddress()) {
-            $table = 'tt_address';
-        } else {
-            if ($group->hasFrontendUser()) {
-                $table = 'fe_users';
-            }
-        }
-
-        $queryTable = $queryTable ?: $table;
-        $queryConfig = $queryConfig ? serialize($queryConfig) : $group->getQuery();
-
-        if ($queryTable != $table) {
-            $queryConfig = '';
-        }
-
-        if ($queryTable != $table || $queryConfig != $group->getQuery()) {
-            $recordTypes = [];
-            if ($this->ttAddressIsLoaded && $queryTable === 'tt_address') {
-                $recordTypes = 'tt_address';
-            } else {
-                if ($queryTable === 'fe_users') {
-                    $recordTypes = 'fe_users';
-                }
-            }
-
-            $group->setrecipientSources($recordTypes);
-            $group->setQuery($queryConfig);
-            $this->groupRepository->update($group);
-            $this->groupRepository->persist();
-        }
-    }
 
     /**
      * @param array $data

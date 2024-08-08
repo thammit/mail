@@ -90,14 +90,13 @@ class Group extends AbstractEntity
 
     public function __construct()
     {
-        $this->children = new ObjectStorage();
-        $this->categories = new ObjectStorage();
+        $this->initializeObject();
     }
 
     public function initializeObject(): void
     {
-        $this->children = $this->children ?? new ObjectStorage();
-        $this->categories = $this->categories ?? new ObjectStorage();
+        $this->children ??= new ObjectStorage();
+        $this->categories ??= new ObjectStorage();
     }
 
     /**
@@ -292,36 +291,6 @@ class Group extends AbstractEntity
     public function getRecipientSources(): array
     {
         return GeneralUtility::trimExplode(',', $this->recipientSources, true);
-    }
-
-    /**
-     * @param array $recipientSources
-     * @return Group
-     */
-    public function setRecipientSources(array $recipientSources): Group
-    {
-        $this->recipientSources = implode(',', $recipientSources);
-        return $this;
-    }
-
-    public function hasRecipientSource(string $recipientSourceIdentifier): bool
-    {
-        return in_array($recipientSourceIdentifier, $this->getRecipientSources());
-    }
-
-    public function hasAddress(): bool
-    {
-        return $this->hasRecipientSource('tt_address');
-    }
-
-    public function hasFrontendUser(): bool
-    {
-        return $this->hasRecipientSource('fe_users');
-    }
-
-    public function hasFrontendUserGroup(): bool
-    {
-        return $this->hasRecipientSource('fe_groups');
     }
 
     /**
