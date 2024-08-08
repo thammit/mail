@@ -208,7 +208,7 @@
                 <source>Recipients must subscribe to one of the following categories</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.selectCategoriesForPlainCsv" resname="tx_mail_domain_model_group.selectCategoriesForPlainCsv">
-                <source>Recipients will have the following categories</source>
+                <source>Recipients are assigned to the following categories</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.staticList" resname="tx_mail_domain_model_group.staticList">
                 <source>Recipients</source>
