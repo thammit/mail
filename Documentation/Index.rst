@@ -82,6 +82,7 @@ uses the latest technologies provided by TYPO3 CMS.
    Introduction/Index
    QuickStart/Index
    Reference/Index
+   ChangeLog/Index
 
 .. Meta Menu
 

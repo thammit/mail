@@ -27,9 +27,8 @@ class DeactivateFeUsers
         $affectedRecipients = $disableRecipientsEvent->getNumberOfAffectedRecipients();
         $recipients = $disableRecipientsEvent->getData()[$this->recipientSourceIdentifier] ?? [];
         $recipientSourceConfiguration = $disableRecipientsEvent->getRecipientSources()[$this->recipientSourceIdentifier];
-        $isModel = $recipientSourceConfiguration['model'] ?? false;
         foreach ($recipients as $recipient) {
-            if ($isModel) {
+            if ($recipientSourceConfiguration->model) {
                 $address = $this->frontendUserRepository->findByUid((int)$recipient['uid']);
                 if ($address instanceof Address && $address->isActive()) {
                     $address->setActive(false);

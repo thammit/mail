@@ -62,6 +62,8 @@ class RecipientService
      * @param int $pageId
      * @return array
      * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
@@ -249,10 +251,14 @@ class RecipientService
     }
 
     /**
-     * @throws UnknownObjectException
-     * @throws InvalidQueryException
-     * @throws IllegalObjectTypeException
+     * @param ObjectStorage $recipientGroups
+     * @return int
      * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      * @deprecated
      */
@@ -302,8 +308,8 @@ class RecipientService
                 $pages = BackendDataUtility::getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
-                        $recipientSourceConfiguration = new RecipientSourceConfigurationDTO($recipientSourceIdentifier,
-                            $this->recipientSources[$recipientSourceIdentifier]);
+                        /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+                        $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
                         if ($recipientSourceConfiguration->model) {
                             $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
                                 $recipientSourceConfiguration,
@@ -338,7 +344,7 @@ class RecipientService
             case RecipientGroupType::STATIC:
                 // Static MM list
                 foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
-                    $recipientSourceConfiguration = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $recipientSourceConfiguration);
+                    /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
                     $recipientSourceIdentifier = $recipientSourceConfiguration->contains ?? $recipientSourceIdentifier;
                     $idLists[$recipientSourceIdentifier] = array_unique(array_merge($idLists[$recipientSourceIdentifier] ?? [],
                         $this->getStaticIdListByTableAndGroupUid($recipientSourceConfiguration, $group->getUid())));

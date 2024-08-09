@@ -2,7 +2,6 @@
 
 namespace MEDIAESSENZ\Mail\EventListener;
 
-use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -18,10 +17,10 @@ class ManipulateFrontendUserRecipient
         if ($event->getRecipientSourceIdentifier() === 'fe_users') {
             $recipientSourceConfiguration = $event->getRecipientSourceConfiguration();
             $recipientData = $event->getRecipientData();
-            if (($recipientSourceConfiguration['model'] ?? false) && ($recipientData['uid'] ?? false)) {
+            if (($recipientSourceConfiguration->model ?? false) && ($recipientData['uid'] ?? false)) {
                 // add all csv export field/values to existing data, but do not override already existing field/values!
                 // this is important, because categories need to stay an array of uids
-                $enhancedRecipientData = GeneralUtility::makeInstance(RecipientService::class)->getRecipientsDataByUidListAndModelName([$recipientData['uid']], $recipientSourceConfiguration['model'], []);
+                $enhancedRecipientData = GeneralUtility::makeInstance(RecipientService::class)->getRecipientsDataByUidListAndModelName([$recipientData['uid']], $recipientSourceConfiguration->model, []);
                 $recipientData += reset($enhancedRecipientData);
                 // fe_users use field 'telephone' for 'phone'
                 if ($recipientData['telephone'] ?? false) {

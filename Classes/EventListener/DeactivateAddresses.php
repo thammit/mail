@@ -3,6 +3,7 @@
 namespace MEDIAESSENZ\Mail\EventListener;
 
 use MEDIAESSENZ\Mail\Domain\Model\Address;
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
@@ -27,9 +28,8 @@ class DeactivateAddresses
         $affectedRecipients = $disableRecipientsEvent->getNumberOfAffectedRecipients();
         $recipients = $disableRecipientsEvent->getData()[$this->recipientSourceIdentifier] ?? [];
         $recipientSourceConfiguration = $disableRecipientsEvent->getRecipientSources()[$this->recipientSourceIdentifier];
-        $isModel = $recipientSourceConfiguration['model'] ?? false;
         foreach ($recipients as $recipient) {
-            if ($isModel) {
+            if ($recipientSourceConfiguration->model) {
                 $address = $this->addressRepository->findByUid((int)$recipient['uid']);
                 if ($address instanceof Address && $address->isActive()) {
                     $address->setActive(false);

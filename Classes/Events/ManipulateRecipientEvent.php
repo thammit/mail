@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Events;
 
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
+
 final class ManipulateRecipientEvent
 {
-    public function __construct(private array $recipientData, private string $recipientSourceIdentifier, private array $recipientSourceConfiguration) {
+    public function __construct(private array $recipientData, private RecipientSourceConfigurationDTO $recipientSourceConfiguration) {
     }
 
     public function getRecipientData(): array
@@ -22,18 +24,12 @@ final class ManipulateRecipientEvent
         $this->recipientData = $recipientData;
     }
 
-    /**
-     * @return string
-     */
     public function getRecipientSourceIdentifier(): string
     {
-        return $this->recipientSourceIdentifier;
+        return $this->recipientSourceConfiguration->identifier;
     }
 
-    /**
-     * @return array
-     */
-    public function getRecipientSourceConfiguration(): array
+    public function getRecipientSourceConfiguration(): RecipientSourceConfigurationDTO
     {
         return $this->recipientSourceConfiguration;
     }

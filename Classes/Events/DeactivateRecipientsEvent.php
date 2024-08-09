@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Events;
 
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
+
 final class DeactivateRecipientsEvent
 {
     private int $numberOfAffectedRecipients = 0;
@@ -18,6 +20,9 @@ final class DeactivateRecipientsEvent
         return $this->data;
     }
 
+    /**
+     * @return RecipientSourceConfigurationDTO[]
+     */
     public function getRecipientSources(): array
     {
         return $this->recipientSources;

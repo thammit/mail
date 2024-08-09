@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -35,7 +36,7 @@ class ConfigurationUtility
 
     /**
      * @param array $siteConfiguration
-     * @return array
+     * @return RecipientSourceConfigurationDTO[]
      */
     public static function getRecipientSources(array $siteConfiguration = []): array
     {
@@ -45,7 +46,12 @@ class ConfigurationUtility
             unset($recipientSources['tt_address']);
         }
 
-        return $recipientSources;
+        $recipientSourcesWithDTOs = [];
+        foreach ($recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
+            $recipientSourcesWithDTOs[$recipientSourceIdentifier] = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $recipientSourceConfiguration);
+        }
+
+        return $recipientSourcesWithDTOs;
     }
 
     public static function getDefaultRecipientSources(): array

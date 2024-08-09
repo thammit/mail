@@ -3,6 +3,7 @@
 namespace MEDIAESSENZ\Mail\Middleware;
 
 use Doctrine\DBAL\Driver\Exception;
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
@@ -236,25 +237,25 @@ class JumpurlMiddleware implements MiddlewareInterface
         // is the DB table name and the second part the UID of the record in the DB table
         [$this->recipientSourceIdentifier, $recipientUid] = explode('-', $combinedRecipient);
 
-        $recipientSourceConfiguration = $this->recipientSources[$this->recipientSourceIdentifier] ?? false;
-
-        if ($recipientSourceConfiguration) {
+        if ($this->recipientSources[$this->recipientSourceIdentifier] ?? false) {
+            /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+            $recipientSourceConfiguration = $this->recipientSources[$this->recipientSourceIdentifier];
             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
             $recipientService->init($this->recipientSources);
             $isSimpleList = $this->recipientSourceIdentifier === 'tx_mail_domain_model_group';
             if ($isSimpleList) {
                 $this->recipientRecord['uid'] = $recipientUid;
             } else {
-                if ($recipientSourceConfiguration['model'] ?? false) {
-                    $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration['model'], []);
+                if ($recipientSourceConfiguration->model) {
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration->model, []);
                 } else {
-                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration['table'] ?? $this->recipientSourceIdentifier);
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration->table);
                 }
                 $this->recipientRecord = reset($recipientData);
 
                 // PSR-14 event dispatcher to manipulate recipient data the same way done in mailerService::sendSingleMailAndAddLogEntry method
                 $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-                $this->recipientRecord = $eventDispatcher->dispatch(new ManipulateRecipientEvent($this->recipientRecord, $this->recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
+                $this->recipientRecord = $eventDispatcher->dispatch(new ManipulateRecipientEvent($this->recipientRecord, $recipientSourceConfiguration))->getRecipientData();
             }
         }
     }

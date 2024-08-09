@@ -8,6 +8,7 @@ use DOMElement;
 use JsonException;
 use Masterminds\HTML5;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
@@ -316,8 +317,7 @@ class MailerService implements LoggerAwareInterface
             new ManipulateMarkersEvent(
                 $markers,
                 $recipient,
-                $recipientSourceIdentifier,
-                $this->recipientSources[$recipientSourceIdentifier] ?? []
+                $this->recipientSources[$recipientSourceIdentifier] ?? new RecipientSourceConfigurationDTO($recipientSourceIdentifier, ['noTable' => true])
             )
         )->getMarkers();
 

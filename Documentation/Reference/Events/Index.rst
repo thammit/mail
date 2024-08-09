@@ -46,6 +46,9 @@ See `MEDIAESSENZ\Mail\EventListener\DeactivateAddresses` and `DeactivateFeUsers`
             - name: 'event.listener'
               identifier: 'vendor/extensionkey/deactivate-my-addresses'
 
+RecipientsRestrictionEvent
+==========================
+Adds possibility to restrict recipients from extbase model sources
 
 AdditionalMailHeadersEvent
 ==========================

@@ -129,11 +129,12 @@ class RecipientController extends AbstractController
                     $title .= $groupOfRecipientSource->getType() === RecipientGroupType::CSV ? ' [CSV]' : ' [Plain list]';
                 }
                 $table = $recipientSourceIdentifierWithoutGroupId;
-                $recipients = $idList;
                 $icon = 'actions-user';
+                $recipients = $idList;
                 $editCsvList = (int)$groupUid;
             } else {
-                $recipientSourceConfiguration = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $this->recipientSources[$recipientSourceIdentifier]);
+                /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+                $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
                 $title = $recipientSourceConfiguration->title;
                 $table = $recipientSourceConfiguration->table;
                 $icon = $recipientSourceConfiguration->icon;
@@ -215,8 +216,8 @@ class RecipientController extends AbstractController
                 LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
             return $this->redirect('show');
         }
-
-        $recipientSourceConfiguration = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $this->recipientSources[$recipientSourceIdentifier]);
+        /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+        $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
         if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceConfiguration->table)) {
             ViewUtility::addFlashMessageError('',
                 LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
