@@ -285,7 +285,8 @@ class RecipientService
      */
     public function getNumberOfRecipientsByGroup(Group $group): int
     {
-        return RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsUidListGroupedByRecipientSource($group));
+        $list = $this->getRecipientsUidListGroupedByRecipientSource($group);
+        return RecipientUtility::calculateTotalRecipientsOfUidLists($list);
     }
 
     /**

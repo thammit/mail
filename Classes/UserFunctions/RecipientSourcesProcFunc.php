@@ -19,8 +19,8 @@ class RecipientSourcesProcFunc
         $site = $siteFinder->getSiteByPageId($params['row']['pid'] ?? 0);
         $recipientSources = ConfigurationUtility::getRecipientSources($site->getConfiguration());
         if ($recipientSources) {
-            foreach ($recipientSources as $recipientSourceIdentifier => $recipientSource) {
-                $params['items'][] = [$recipientSource['title'], $recipientSourceIdentifier, $recipientSource['icon']];
+            foreach ($recipientSources as $recipientSource) {
+                $params['items'][] = [$recipientSource->title, $recipientSource->identifier, $recipientSource->icon];
             }
         }
     }
