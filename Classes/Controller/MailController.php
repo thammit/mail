@@ -863,7 +863,14 @@ class MailController extends AbstractController
             ]);
         }
 
-        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups()),
+        $recipientGroups = $mail->getRecipientGroups();
+
+        if ($mail->getExcludeRecipientGroups()->count() > 0) {
+            // todo add filter by exclude recipient groups
+            $excludeRecipientGroups = $mail->getExcludeRecipientGroups();
+        }
+
+        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($recipientGroups),
             true);
 
         if ($mail->getNumberOfRecipients() === 0) {
