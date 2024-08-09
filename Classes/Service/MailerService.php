@@ -366,14 +366,14 @@ class MailerService implements LoggerAwareInterface
 
             switch (true) {
                 case $isSimpleList:
-                    [$recipientSourceIdentifier, $groupUid] = explode(':', $recipientSourceIdentifier);
+                    [$table, $groupUid] = explode(':', $recipientSourceIdentifier);
                     foreach ($recipientIds as $recipientUid => $recipientData) {
                         // fake uid for csv
                         $recipientData['uid'] = $recipientUid + 1;
-                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($recipientSourceIdentifier, (int)$groupUid);
+                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($table, (int)$groupUid);
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                         $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
-                        $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
+                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
                         $numberOfSentMails++;
                     }
                     break;
@@ -388,7 +388,7 @@ class MailerService implements LoggerAwareInterface
                     foreach ($recipientsData as $recipientData) {
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                         $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
-                        $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
+                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
                         $numberOfSentMails++;
                     }
                     break;
@@ -405,7 +405,7 @@ class MailerService implements LoggerAwareInterface
                         $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($table, $recipientData['uid']);
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                         $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
-                        $recipientsHandled[$recipientSourceIdentifier][] = $recipientData['uid'];
+                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
                         $numberOfSentMails++;
                     }
                     break;

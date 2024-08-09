@@ -577,6 +577,7 @@ class Mail extends AbstractEntity
 
     /**
      * @return array
+     * @throws JsonException
      */
     public function getHtmlLinks(): array
     {
@@ -586,6 +587,7 @@ class Mail extends AbstractEntity
     /**
      * @param array $htmlLinks
      * @return Mail
+     * @throws JsonException
      */
     public function setHtmlLinks(array $htmlLinks): Mail
     {
@@ -595,6 +597,7 @@ class Mail extends AbstractEntity
 
     /**
      * @return array
+     * @throws JsonException
      */
     public function getPlainLinks(): array
     {
@@ -604,6 +607,7 @@ class Mail extends AbstractEntity
     /**
      * @param array $plainLinks
      * @return Mail
+     * @throws JsonException
      */
     public function setPlainLinks(array $plainLinks): Mail
     {
@@ -614,6 +618,7 @@ class Mail extends AbstractEntity
     /**
      * @param string|null $identifier
      * @return array
+     * @throws JsonException
      */
     public function getRecipients(string $identifier = null): array
     {
@@ -655,6 +660,9 @@ class Mail extends AbstractEntity
         return $this->numberOfRecipients;
     }
 
+    /**
+     * @throws JsonException
+     */
     public function getRecipientsHandled(string $identifier = null): array
     {
         $recipientsHandled = json_decode($this->recipientsHandled, true, 5,
@@ -665,6 +673,9 @@ class Mail extends AbstractEntity
         return $recipientsHandled;
     }
 
+    /**
+     * @throws JsonException
+     */
     public function setRecipientsHandled(array $recipientsHandled): Mail
     {
         $recipientsHandled = MailerUtility::removeDuplicateValues($recipientsHandled);
@@ -679,6 +690,9 @@ class Mail extends AbstractEntity
         return $this->numberOfRecipientsHandled;
     }
 
+    /**
+     * @throws JsonException
+     */
     public function getRecipientsNotHandled(): array
     {
         $recipientsNotHandled = [];
@@ -699,6 +713,9 @@ class Mail extends AbstractEntity
         return $recipientsNotHandled;
     }
 
+    /**
+     * @throws JsonException
+     */
     public function getNumberOfRecipientsNotHandled(): int
     {
         return RecipientUtility::calculateTotalRecipientsOfUidLists($this->getRecipientsNotHandled());
