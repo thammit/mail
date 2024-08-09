@@ -345,10 +345,13 @@ class RecipientService
             case RecipientGroupType::STATIC:
                 // Static MM list
                 foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
-                    /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
-                    $recipientSourceIdentifier = $recipientSourceConfiguration->contains ?? $recipientSourceIdentifier;
-                    $idLists[$recipientSourceIdentifier] = array_unique(array_merge($idLists[$recipientSourceIdentifier] ?? [],
-                        $this->getStaticIdListByTableAndGroupUid($recipientSourceConfiguration, $group->getUid())));
+                    if ($recipientSourceConfiguration->table === $recipientSourceConfiguration->identifier) {
+                        // only add recipients sources where table name is identical to identifier
+                        /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+                        $recipientSourceIdentifier = $recipientSourceConfiguration->contains ?? $recipientSourceIdentifier;
+                        $idLists[$recipientSourceIdentifier] = array_unique(array_merge($idLists[$recipientSourceIdentifier] ?? [],
+                            $this->getStaticIdListByTableAndGroupUid($recipientSourceConfiguration, $group->getUid())));
+                    }
                 }
                 break;
             case RecipientGroupType::OTHER:
@@ -538,13 +541,10 @@ class RecipientService
         int $mailGroupUid,
     ): array {
         $table = $recipientSourceConfiguration->table;
-        $switchTable = $recipientSourceConfiguration->contains ?? $table;
-
         $queryBuilder = $this->getQueryBuilder($table);
-
         $mailActiveExpression = '';
         if (!$recipientSourceConfiguration->ignoreMailActive) {
-            // for fe_users and fe_group, only activated newsletter
+            $switchTable = $recipientSourceConfiguration->contains ?? $table;
             $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
         }
 
@@ -558,123 +558,122 @@ class RecipientService
             }
         }
 
-        if ($table === 'fe_groups') {
-            $idList = array_column($queryBuilder
-                ->select('fe_users.uid')
+        if ($table !== 'fe_groups') {
+            return array_unique(array_column($queryBuilder
+                ->select($table . '.uid')
                 ->from('tx_mail_group_mm', 'tx_mail_group_mm')
                 ->innerJoin(
                     'tx_mail_group_mm',
-                    'fe_groups',
-                    'fe_groups',
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier('fe_groups.uid'))
-                )
-                ->innerJoin(
-                    'fe_groups',
-                    'fe_users',
-                    'fe_users',
-                    $queryBuilder->expr()->inSet('fe_users.usergroup', $queryBuilder->quoteIdentifier('fe_groups.uid'), true)
+                    $table,
+                    $table,
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($table . '.uid'))
                 )
                 ->where(
                     $queryBuilder->expr()->and(
                         $mailActiveExpression,
-                        $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')),
+                        $queryBuilder->expr()->neq($table . '.email', $queryBuilder->createNamedParameter('')),
                         $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
                         $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table))
                     )
                 )
-                ->orderBy('fe_users.uid')
+                ->orderBy($table . '.uid')
                 ->executeQuery()
-                ->fetchAllAssociative(), 'uid');
-        } else {
-            $idList = array_column($queryBuilder
-                ->select($switchTable . '.uid')
-                ->from('tx_mail_group_mm', 'tx_mail_group_mm')
-                ->innerJoin(
-                    'tx_mail_group_mm',
-                    $switchTable,
-                    $switchTable,
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($switchTable . '.uid'))
-                )
-                ->where(
-                    $queryBuilder->expr()->and(
-                        $mailActiveExpression,
-                        $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')),
-                        $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
-                        $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($switchTable))
-                    )
-                )
-                ->orderBy($switchTable . '.uid')
-                ->executeQuery()
-                ->fetchAllAssociative(), 'uid');
+                ->fetchAllAssociative(), 'uid'));
         }
 
-        if ($table === 'fe_groups') {
-            // get the uid of the current fe_group
-            $queryBuilder = $this->getQueryBuilder('fe_groups');
+        // handle special case fe_groups
 
-            $frontendUserGroups = array_column($queryBuilder
-                ->select('fe_groups.uid')
-                ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
-                ->leftJoin(
-                    'tx_mail_domain_model_group',
-                    'tx_mail_group_mm',
-                    'tx_mail_group_mm',
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
+        $idList = array_column($queryBuilder
+            ->select('fe_users.uid')
+            ->from('tx_mail_group_mm', 'tx_mail_group_mm')
+            ->innerJoin(
+                'tx_mail_group_mm',
+                'fe_groups',
+                'fe_groups',
+                $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier('fe_groups.uid'))
+            )
+            ->innerJoin(
+                'fe_groups',
+                'fe_users',
+                'fe_users',
+                $queryBuilder->expr()->inSet('fe_users.usergroup', $queryBuilder->quoteIdentifier('fe_groups.uid'), true)
+            )
+            ->where(
+                $queryBuilder->expr()->and(
+                    $mailActiveExpression,
+                    $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')),
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table))
                 )
-                ->leftJoin(
-                    'tx_mail_group_mm',
-                    'fe_groups',
-                    'fe_groups',
-                    $queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign'))
+            )
+            ->orderBy('fe_users.uid')
+            ->executeQuery()
+            ->fetchAllAssociative(), 'uid');
+
+        $queryBuilder = $this->getQueryBuilder('fe_groups');
+
+        $frontendUserGroups = array_column($queryBuilder
+            ->select('fe_groups.uid')
+            ->from('tx_mail_domain_model_group', 'tx_mail_domain_model_group')
+            ->leftJoin(
+                'tx_mail_domain_model_group',
+                'tx_mail_group_mm',
+                'tx_mail_group_mm',
+                $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
+            )
+            ->leftJoin(
+                'tx_mail_group_mm',
+                'fe_groups',
+                'fe_groups',
+                $queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign'))
+            )
+            ->where(
+                $queryBuilder->expr()->and(
+                    $queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter('fe_groups'))
                 )
-                ->where(
-                    $queryBuilder->expr()->and(
-                        $queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
-                        $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter('fe_groups'))
-                    )
-                )
-                ->executeQuery()
-                ->fetchAllAssociative(), 'uid');
+            )
+            ->executeQuery()
+            ->fetchAllAssociative(), 'uid');
 
-            if ($frontendUserGroups) {
-                foreach ($frontendUserGroups as $frontendUserGroup) {
-                    // recursively get all subgroups of this fe_groups
-                    $subgroups = $this->getRecursiveFrontendUserGroups($frontendUserGroup);
+        if ($frontendUserGroups) {
+            foreach ($frontendUserGroups as $frontendUserGroup) {
+                // recursively get all subgroups of this fe_groups
+                $subgroups = $this->getRecursiveFrontendUserGroups($frontendUserGroup);
 
-                    if ($subgroups) {
-                        $subGroupExpressions = [];
-                        foreach ($subgroups as $subgroup) {
-                            $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', (string)$subgroup);
-                        }
-
-                        $queryBuilder = $this->getQueryBuilder('fe_groups');
-
-                        $mailActiveExpression = '';
-                        if (!$recipientSourceConfiguration->ignoreMailActive) {
-                            // for fe_users and fe_group, only activated newsletter
-                            $mailActiveExpression = $queryBuilder->expr()->eq($switchTable . '.mail_active', 1);
-                        }
-
-                        // fetch all fe_users from these subgroups
-                        $idList = array_merge($idList, array_column($queryBuilder
-                            ->select('fe_users.uid')
-                            ->from('fe_groups', 'fe_groups')
-                            ->innerJoin(
-                                'fe_groups',
-                                'fe_users',
-                                'fe_users'
-                            )
-                            ->orWhere(...$subGroupExpressions)
-                            ->andWhere(
-                                $queryBuilder->expr()->and(
-                                    $mailActiveExpression,
-                                    $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter(''))
-                                )
-                            )
-                            ->orderBy('fe_users.uid')
-                            ->executeQuery()
-                            ->fetchAllAssociative(), 'uid'));
+                if ($subgroups) {
+                    $subGroupExpressions = [];
+                    foreach ($subgroups as $subgroup) {
+                        $subGroupExpressions[] = $queryBuilder->expr()->inSet('fe_users.usergroup', (string)$subgroup);
                     }
+
+                    $queryBuilder = $this->getQueryBuilder('fe_groups');
+
+                    $mailActiveExpression = '';
+                    if (!$recipientSourceConfiguration->ignoreMailActive) {
+                        // for fe_users and fe_group, only activated newsletter
+                        $mailActiveExpression = $queryBuilder->expr()->eq('fe_users.mail_active', 1);
+                    }
+
+                    // fetch all fe_users from these subgroups
+                    $idList = array_merge($idList, array_column($queryBuilder
+                        ->select('fe_users.uid')
+                        ->from('fe_groups', 'fe_groups')
+                        ->innerJoin(
+                            'fe_groups',
+                            'fe_users',
+                            'fe_users'
+                        )
+                        ->orWhere(...$subGroupExpressions)
+                        ->andWhere(
+                            $queryBuilder->expr()->and(
+                                $mailActiveExpression,
+                                $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter(''))
+                            )
+                        )
+                        ->orderBy('fe_users.uid')
+                        ->executeQuery()
+                        ->fetchAllAssociative(), 'uid'));
                 }
             }
         }

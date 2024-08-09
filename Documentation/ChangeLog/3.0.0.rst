@@ -31,7 +31,7 @@ New features
     - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Configuration/Site/RecipientSources.yaml (recipientSources:female_tt_address)
     - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Classes/Database/Query/Restriction/FemaleRestriction.php
 
- - To make it possible to use a table more than ones, a new recipient source confiiguration property `table` was added.
+ - To make it possible to use a table more than once, a new recipient source confiiguration property `table` was added.
    If not set, the identifier is used as table name instead.
 
 Breaking changes

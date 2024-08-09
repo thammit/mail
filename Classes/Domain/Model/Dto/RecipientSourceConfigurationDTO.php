@@ -21,7 +21,7 @@ class RecipientSourceConfigurationDTO
         $this->identifier = $identifier;
         $this->title = $data['title'] ?? $identifier;
         $this->icon = $data['icon'] ?? 'empty-empty';
-        $this->table = $data['contains'] ?? $data['table'] ?? $identifier;
+        $this->table = $data['table'] ?? $identifier;
         if ($data['noTable'] ?? false) {
             $this->table = null;
         }
