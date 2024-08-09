@@ -863,15 +863,16 @@ class MailController extends AbstractController
             ]);
         }
 
-        $recipientGroups = $mail->getRecipientGroups();
+        $recipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups());
 
         if ($mail->getExcludeRecipientGroups()->count() > 0) {
-            // todo add filter by exclude recipient groups
+            // todo add filter by exclude recipient groups emails
             $excludeRecipientGroups = $mail->getExcludeRecipientGroups();
+            $excludeRecipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($excludeRecipientGroups);
+//            $finalRecipients = array_diff_assoc(array_intersect_assoc($recipients, $excludeRecipients), $recipients);
         }
 
-        $mail->setRecipients($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($recipientGroups),
-            true);
+        $mail->setRecipients($recipients,true);
 
         if ($mail->getNumberOfRecipients() === 0) {
             ViewUtility::addNotificationWarning(
