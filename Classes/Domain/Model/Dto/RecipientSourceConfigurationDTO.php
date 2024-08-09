@@ -7,7 +7,7 @@ class RecipientSourceConfigurationDTO
     public string $identifier;
     public string $title;
     public string $icon;
-    public string $table;
+    public ?string $table;
     public ?string $contains = null;
     public ?string $model = null;
     public bool $ignoreMailActive = false;

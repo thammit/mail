@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Log;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Events\AdditionalMailHeadersEvent;
@@ -34,6 +35,7 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -334,13 +336,12 @@ class MailerService implements LoggerAwareInterface
      * Mass send to recipient in the list
      * returns true if sending is completed
      *
-     * @param Mail $mail
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
      * @throws JsonException
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws Exception
      */
     protected function massSend(Mail $mail): void
     {
@@ -353,10 +354,10 @@ class MailerService implements LoggerAwareInterface
                 continue;
             }
 
-            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             $isSimpleList = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
 
-            if (!$recipientSourceConfiguration && !$isSimpleList) {
+            if (!($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) && !$isSimpleList) {
                 $this->logger->debug('No recipient source configuration found for ' . $recipientSourceIdentifier);
                 continue;
             }
@@ -376,11 +377,11 @@ class MailerService implements LoggerAwareInterface
                         $numberOfSentMails++;
                     }
                     break;
-                case $recipientSourceConfiguration['model'] ?? false:
+                case $recipientSourceConfiguration->model:
                     $recipientService = GeneralUtility::makeInstance(RecipientService::class);
                     $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
                         $recipientIds,
-                        $recipientSourceConfiguration['model'],
+                        $recipientSourceConfiguration->model,
                         ['uid', 'name', 'email', 'categories', 'mail_html'],
                         true
                     );
@@ -392,7 +393,7 @@ class MailerService implements LoggerAwareInterface
                     }
                     break;
                 default:
-                    $table = $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier;
+                    $table = $recipientSourceConfiguration->table;
                     $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
                     $queryResult = $queryBuilder
                         ->select('*')
@@ -436,7 +437,7 @@ class MailerService implements LoggerAwareInterface
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws Exception
      */
     protected function sendSingleMailAndAddLogEntry(Mail $mail, array $recipientData, string $recipientSourceIdentifier): void
     {
@@ -447,7 +448,7 @@ class MailerService implements LoggerAwareInterface
             // see MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData for example
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             if ($recipientSourceConfiguration) {
-                $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceIdentifier, $recipientSourceConfiguration))->getRecipientData();
+                $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceConfiguration))->getRecipientData();
             }
 
             // Add mail log entry
@@ -548,7 +549,7 @@ class MailerService implements LoggerAwareInterface
      * @throws JsonException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @throws \TYPO3\CMS\Core\Exception
+     * @throws Exception
      */
     public function handleQueue(): void
     {
