@@ -35,6 +35,7 @@ CREATE TABLE tx_mail_domain_model_mail
     html_links                   text,
     plain_links                  text,
     recipient_groups             varchar(80)         DEFAULT ''                 NOT NULL,
+    exclude_recipient_groups     varchar(80)         DEFAULT ''                 NOT NULL,
     recipients                   text,
     number_of_recipients         int(11) unsigned    DEFAULT '0'                NOT NULL,
     recipients_handled           text,

@@ -282,6 +282,12 @@
             <trans-unit id="mail.wizard.scheduleSending.mailGroups" resname="mail.wizard.scheduleSending.mailGroups">
                 <source>Recipient groups</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.excludeRecipientGroups" resname="mail.wizard.scheduleSending.excludeRecipientGroups">
+                <source>Exclude recipient groups</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.excludeRecipientGroups.description" resname="mail.wizard.scheduleSending.excludeRecipientGroups.description">
+                <source>Do not send mail to email addresses found in one of the following recipient groups</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.scheduleSending.info.mailGroup.title" resname="mail.wizard.scheduleSending.info.mailGroup.title">
                 <source>Select recipients and time of sending</source>
             </trans-unit>

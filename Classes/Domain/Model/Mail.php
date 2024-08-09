@@ -68,6 +68,10 @@ class Mail extends AbstractEntity
      */
     protected ObjectStorage $recipientGroups;
     /**
+     * @var ObjectStorage<Group>
+     */
+    protected ObjectStorage $excludeRecipientGroups;
+    /**
      * query info (do not delete this annotation block!)
      * @var string
      */
@@ -902,6 +906,17 @@ class Mail extends AbstractEntity
     public function setRecipientGroups(ObjectStorage $recipientGroups): Mail
     {
         $this->recipientGroups = $recipientGroups;
+        return $this;
+    }
+
+    public function getExcludeRecipientGroups(): ObjectStorage
+    {
+        return $this->excludeRecipientGroups;
+    }
+
+    public function setExcludeRecipientGroups(ObjectStorage $excludeRecipientGroups): Mail
+    {
+        $this->excludeRecipientGroups = $excludeRecipientGroups;
         return $this;
     }
 

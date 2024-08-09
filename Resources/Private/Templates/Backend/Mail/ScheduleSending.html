@@ -46,6 +46,28 @@
 									</li>
 								</f:for>
 							</ul>
+                            <f:if condition="!{checked}">
+                                <div class="mt-4">
+                                    <h4>
+                                        <f:translate key="{lll}mail.wizard.scheduleSending.excludeRecipientGroups"/>
+                                    </h4>
+                                    <p>
+                                        <f:translate key="{lll}mail.wizard.scheduleSending.excludeRecipientGroups.description"/>
+                                    </p>
+                                    <ul class="list-group">
+                                        <f:for each="{groups}" as="group">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <label class="form-check-label" for="exclude-mailgroups-{group.uid}">
+                                                    <f:form.checkbox class="form-check-input me-1" property="excludeRecipientGroups" multiple="1" value="{group.uid}"
+                                                                     id="exclude-mailgroups-{group.uid}"/>
+                                                    {group.title}
+                                                </label>
+                                                <span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
+                                            </li>
+                                        </f:for>
+                                    </ul>
+                                </div>
+                            </f:if>
 						</div>
 					</f:then>
 					<f:else>

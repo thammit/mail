@@ -338,6 +338,20 @@ return [
                 'maxitems' => 60,
             ]
         ],
+        'exclude_recipient_groups' => [
+            'exclude' => true,
+            'label' => 'Recipient Groups',
+            'config' => [
+                'type' => 'select',
+                'readOnly' => true,
+                'renderType' => 'selectCheckBox',
+                'renderMode' => 'checkbox',
+                'foreign_table' => 'tx_mail_domain_model_group',
+                'size' => 5,
+                'minitems' => 0,
+                'maxitems' => 60,
+            ]
+        ],
         'mail_content' => [
             'label' => 'Mail content',
             'config' => [
