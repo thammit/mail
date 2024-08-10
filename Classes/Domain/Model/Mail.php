@@ -89,16 +89,14 @@ class Mail extends AbstractEntity
 
     public function __construct()
     {
-        $this->attachment = new ObjectStorage();
-        $this->recipientGroups = new ObjectStorage();
-        $this->sendOptions = new SendFormat(SendFormat::NONE);
+        $this->initializeObject();
     }
 
     public function initializeObject(): void
     {
-        $this->attachment = $this->attachment ?? new ObjectStorage();
-        $this->recipientGroups = $this->recipientGroups ?? new ObjectStorage();
-        $this->sendOptions = $this->sendOptions ?? new SendFormat(SendFormat::NONE);
+        $this->attachment ??= new ObjectStorage();
+        $this->recipientGroups ??= new ObjectStorage();
+        $this->sendOptions ??= new SendFormat(SendFormat::NONE);
     }
 
     /**
@@ -756,10 +754,10 @@ class Mail extends AbstractEntity
     }
 
     /**
-     * @param DateTimeImmutable $scheduled
+     * @param ?DateTimeImmutable $scheduled
      * @return Mail
      */
-    public function setScheduled(DateTimeImmutable $scheduled): Mail
+    public function setScheduled(?DateTimeImmutable $scheduled): Mail
     {
         $this->scheduled = $scheduled;
         return $this;

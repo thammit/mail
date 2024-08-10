@@ -26,10 +26,6 @@
 			<div class="row mb-3 gy-3">
 				<f:if condition="{groups}">
 					<f:then>
-						<f:variable name="numberOfRecipientGroups" value="{groups -> f:count()}"/>
-						<f:if condition="{numberOfRecipientGroups} == 1">
-							<f:variable name="checked" value="1"/>
-						</f:if>
 						<div class="col-12 col-md-6">
 							<h4>
 								<f:translate key="{lll}mail.wizard.scheduleSending.mailGroups"/>
@@ -38,7 +34,7 @@
 								<f:for each="{groups}" as="group">
 									<li class="list-group-item d-flex justify-content-between align-items-center">
 										<label class="form-check-label" for="mailgroups-{group.uid}">
-											<f:form.checkbox class="form-check-input me-1" checked="{checked}" property="recipientGroups" multiple="1" value="{group.uid}"
+											<f:form.checkbox class="form-check-input me-1" property="recipientGroups" multiple="1" value="{group.uid}"
 															 id="mailgroups-{group.uid}"/>
 											{group.title}
 										</label>
@@ -46,7 +42,7 @@
 									</li>
 								</f:for>
 							</ul>
-                            <f:if condition="!{checked}">
+                            <f:if condition="{groups -> f:count()} > 1">
                                 <div class="mt-4">
                                     <h4>
                                         <f:translate key="{lll}mail.wizard.scheduleSending.excludeRecipientGroups"/>

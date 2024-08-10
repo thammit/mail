@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Controller;
 
 use DateInterval;
+use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\DBAL\Exception;
 use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
@@ -47,6 +48,7 @@ use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Reflection\ClassSchema\Exception\NoSuchPropertyException;
 use TYPO3\CMS\Extbase\Reflection\Exception\UnknownClassException;
 
@@ -470,13 +472,14 @@ class MailController extends AbstractController
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      * @throws IllegalObjectTypeException
+     * @throws JsonException
      * @throws UnknownObjectException
      */
     public function savePreviewImageAction(ServerRequestInterface $request): ResponseInterface
     {
         // language service has to be set here, because method is called by ajax route, which doesn't call initializeAction
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
-        $bodyContents = json_decode($request->getBody()->getContents() ?? null, true);
+        $bodyContents = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $mailUid = $bodyContents['mailUid'] ?? 0;
         $dataUrl = $bodyContents['dataUrl'] ?? 0;
 
@@ -489,14 +492,14 @@ class MailController extends AbstractController
                 return $this->jsonResponse(json_encode([
                     'title' => LanguageUtility::getLL('general.notification.severity.success.title'),
                     'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageSaved.message'),
-                ]));
+                ], JSON_THROW_ON_ERROR));
             }
         }
 
         return $this->jsonErrorResponse(json_encode([
             'title' => LanguageUtility::getLL('general.notification.severity.error.title'),
             'message' => LanguageUtility::getLL('mail.wizard.notification.previewImageCreationFailed.message'),
-        ]));
+        ], JSON_THROW_ON_ERROR));
     }
 
     /**
@@ -609,13 +612,14 @@ class MailController extends AbstractController
     /**
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws JsonException
      */
     public function updateCategoryRestrictionsAction(ServerRequestInterface $request): ResponseInterface
     {
         // language service has to be set here, because method is called by ajax route, which doesn't call initializeAction
         LanguageUtility::getLanguageService()->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
 
-        $contentCategories = json_decode($request->getBody()->getContents() ?? null, true);
+        $contentCategories = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $mailUid = $contentCategories['mailUid'] ?? 0;
         $mail = $this->mailRepository->findByUid((int)$mailUid);
         $contentElementUid = $contentCategories['content'] ?? 0;
@@ -658,29 +662,31 @@ class MailController extends AbstractController
                 return $this->jsonErrorResponse(json_encode([
                     'title' => LanguageUtility::getLL('general.notification.severity.error.title'),
                     'message' => LanguageUtility::getLL('mail.wizard.notification.updateContentFailed.message'),
-                ]));
+                ], JSON_THROW_ON_ERROR));
             }
 
             return $this->jsonResponse(json_encode([
                 'title' => LanguageUtility::getLL('mail.wizard.notification.categoriesUpdated.title'),
                 'message' => LanguageUtility::getLL('mail.wizard.notification.categoriesUpdated.message'),
-            ]));
+            ], JSON_THROW_ON_ERROR));
         }
 
         return $this->jsonErrorResponse(json_encode([
             'title' => LanguageUtility::getLL('general.notification.severity.error.title'),
             'message' => LanguageUtility::getLL('mail.wizard.notification.categoryRestrictionSaveFailed.message'),
-        ]));
+        ], JSON_THROW_ON_ERROR));
     }
 
     /**
      * @param Mail $mail
      * @return ResponseInterface
+     * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws Exception
      */
     public function testMailAction(Mail $mail): ResponseInterface
     {
@@ -791,21 +797,31 @@ class MailController extends AbstractController
     /**
      * @param Mail $mail
      * @return ResponseInterface
+     * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws Exception
      */
     public function scheduleSendingAction(Mail $mail): ResponseInterface
     {
         $mail->setStep($this->hideCategoryStep($mail) ? 4 : 5);
+
+        $groups = $this->recipientService->getFinalSendingGroups($this->id);
+        if (count($groups) === 1) {
+            $presetGroup = new ObjectStorage();
+            $presetGroup->attach($this->groupRepository->findOneByPid($this->id));
+            $mail->setRecipientGroups($presetGroup);
+        }
+
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
         $hideCategoryStep = $this->hideCategoryStep($mail);
         $assignments = [
-            'groups' => $this->recipientService->getFinalSendingGroups($this->id),
+            'groups' => $groups,
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
@@ -870,28 +886,50 @@ class MailController extends AbstractController
             $excludeRecipientGroups = $mail->getExcludeRecipientGroups();
             $excludeRecipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($excludeRecipientGroups);
             $emailsToExclude = $this->recipientService->getEmailAddressesByRecipientsUidListGroupedByRecipientSource($excludeRecipients);
-            $recipients = $this->recipientService->removeFromRecipientListIfInExcludeEmailsList($recipients, $emailsToExclude);
+            $filteredRecipients = $this->recipientService->removeFromRecipientListIfInExcludeEmailsList($recipients, $emailsToExclude);
+            $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($filteredRecipients);
+            if ($numberOfRecipients === 0) {
+                $mail->setRecipients([], true);
+                $mail->setScheduled(null);
+                $this->mailRepository->update($mail);
+                $this->mailRepository->persist();
+                ViewUtility::addNotificationWarning(
+                    LanguageUtility::getLL('mail.wizard.notification.noRecipientsDueToExcludes.message'),
+                    LanguageUtility::getLL('general.notification.severity.warning.title')
+                );
+
+                return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
+            }
+            $recipients = $filteredRecipients;
+        } else {
+            $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($recipients);
         }
 
-        $mail->setRecipients($recipients,true);
-
-        if ($mail->getNumberOfRecipients() === 0) {
-            ViewUtility::addNotificationError(
+        if ($numberOfRecipients === 0) {
+            $mail->setRecipients([], true);
+            $mail->setScheduled(null);
+            $this->mailRepository->update($mail);
+            $this->mailRepository->persist();
+            ViewUtility::addNotificationWarning(
                 LanguageUtility::getLL('mail.wizard.notification.noRecipients.message'),
-                LanguageUtility::getLL('general.notification.severity.error.title')
+                LanguageUtility::getLL('general.notification.severity.warning.title')
             );
 
             return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
         }
 
+        $mail->setRecipients($recipients,true);
+
         if ($this->typo3MajorVersion > 11) {
             // scheduled timezone is utc and must be converted to server time zone
             $scheduled = $mail->getScheduled();
-            $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
-            $offset = $serverTimeZone->getOffset($scheduled);
-            if ($offset) {
-                $interval = new DateInterval('PT' . abs($offset) . 'S');
-                $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
+            if ($scheduled instanceof DateTimeImmutable) {
+                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
+                $offset = $serverTimeZone->getOffset($scheduled);
+                if ($offset) {
+                    $interval = new DateInterval('PT' . abs($offset) . 'S');
+                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
+                }
             }
         }
 
