@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\Exception;
 use JsonException;
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
@@ -46,7 +47,6 @@ class ReportService
      * @return void
      * @throws Exception
      * @throws SiteNotFoundException
-     * @throws \Doctrine\DBAL\Driver\Exception
      */
     public function init(Mail $mail): void
     {
@@ -81,15 +81,15 @@ class ReportService
         $uniquePlainResponses = $this->logRepository->countByMailAndResponseType($this->mail->getUid(), ResponseType::PLAIN);
         $uniqueResponsesTotal = $uniqueHtmlResponses + $uniquePlainResponses;
 
-        $numberOfReceipients = $this->mail->getNumberOfRecipients();
+        $numberOfRecipients = $this->mail->getNumberOfRecipients();
 
         return [
             'htmlSent' => $htmlSent,
-            'htmlSentPercent' => $numberOfReceipients ? number_format(($htmlSent / $numberOfReceipients * 100), 2) : 0.0,
+            'htmlSentPercent' => $numberOfRecipients ? number_format(($htmlSent / $numberOfRecipients * 100), 2) : 0.0,
             'plainSent' => $plainSent,
-            'plainSentPercent' => $numberOfReceipients ? number_format(($plainSent / $numberOfReceipients * 100), 2) : 0.0,
+            'plainSentPercent' => $numberOfRecipients ? number_format(($plainSent / $numberOfRecipients * 100), 2) : 0.0,
             'totalSent' => $totalSent,
-            'totalSentPercent' => $numberOfReceipients ? number_format(($totalSent / $numberOfReceipients * 100), 2) : 0.0,
+            'totalSentPercent' => $numberOfRecipients ? number_format(($totalSent / $numberOfRecipients * 100), 2) : 0.0,
             'failedResponses' => $failedResponses,
             'failedResponsesPercent' => $totalSent ? number_format(($failedResponses / $totalSent * 100), 2) : 0.0,
             'uniquePingResponses' => $uniquePingResponses,
@@ -137,15 +137,15 @@ class ReportService
         $data = [];
         $failedRecipientIds = $this->logRepository->findFailedRecipientIdsByMailAndReturnCodeGroupedByRecipientSource($this->mail->getUid(), $returnCodes);
         foreach ($failedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
-            if ($recipientSourceIdentifier === 'tx_mail_domain_model_group') {
+            if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
                 $data[$recipientSourceIdentifier] = $recipientIds;
             } else {
-                // get site configuration
+                /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
                 $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
-                if ($recipientSourceConfiguration['model'] ?? false) {
-                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration['model']);
+                if ($recipientSourceConfiguration->model) {
+                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration->model);
                 } else {
-                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration['table'] ?? $recipientSourceIdentifier);
+                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration->table);
                 }
             }
         }
@@ -207,7 +207,7 @@ class ReportService
             // Look up plain url in html urls
             $htmlLinkFound = false;
             foreach ($urlCounter['html'] as $htmlId => $_) {
-                if ($urlArr[$id] == $urlArr[$htmlId]) {
+                if ($urlArr[$id] === $urlArr[$htmlId]) {
                     $urlCounter['html'][$htmlId]['plainId'] = $id;
                     $urlCounter['html'][$htmlId]['plainCounter'] = $counter;
                     $urlCounter['total'][$htmlId]['counter'] += $counter;
@@ -237,7 +237,7 @@ class ReportService
         $clickedLinks = array_keys($urlCounter['total']);
 
         foreach ($clickedLinks as $id) {
-            // $id is the jumpurl ID
+            // $id is the jump url ID
             $origId = $id;
             $id = abs((int)$id);
             $url = $htmlLinks[$id]['ref'] ?: $urlArr[$origId];

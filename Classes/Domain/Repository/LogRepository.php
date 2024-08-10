@@ -3,10 +3,8 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
-use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Extbase\Persistence\Repository;
 
@@ -24,7 +22,6 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @return array
      * @throws Exception
-     * @throws DBALException|\Doctrine\DBAL\Driver\Exception
      */
     public function findResponseTypesByMail(int $mailUid): array
     {
@@ -100,54 +97,6 @@ class LogRepository extends Repository
 
     /**
      * @param int $mailUid
-     * @return int
-     * @throws Exception
-     * @deprecated
-     */
-    public function countByMailUid(int $mailUid): int
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        return $queryBuilder
-            ->count('*')
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
-                $queryBuilder->expr()->gt('format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, Connection::PARAM_INT))
-            )
-            ->executeQuery()
-            ->fetchOne();
-    }
-
-    /**
-     * Get array of already sent recipient ids
-     *
-     * @param int $mailUid uid of the mail record
-     * @param string $recipientSourceIdentifier Recipient source identifier
-     *
-     * @return array list of recipients
-     * @throws Exception
-     * @deprecated
-     */
-    public function findRecipientsByMailUidAndRecipientSourceIdentifier(int $mailUid, string $recipientSourceIdentifier): array
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        return array_column($queryBuilder
-            ->select('recipient_uid')
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
-            )
-            ->executeQuery()
-            ->fetchAllAssociative(), 'recipient_uid');
-    }
-
-    /**
-     * @param int $mailUid
      * @return array
      * @throws Exception
      */
@@ -192,7 +141,7 @@ class LogRepository extends Repository
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
+                $queryBuilder->expr()->like('recipient_source', $queryBuilder->createNamedParameter($queryBuilder->escapeLikeWildcards($recipientSourceIdentifier) . '%')),
                 $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, Connection::PARAM_INT)),
             )
             ->setMaxResults(1)
@@ -267,7 +216,7 @@ class LogRepository extends Repository
         $idLists = [];
 
         while ($row = $result->fetchAssociative()) {
-            $idLists[$row['recipient_source']][] = $row['recipient_source'] === 'tx_mail_domain_model_group' ? $row['email'] : $row['recipient_uid'];
+            $idLists[$row['recipient_source']][] = str_starts_with($row['recipient_source'], 'tx_mail_domain_model_group') ? $row['email'] : $row['recipient_uid'];
         }
 
         return $idLists;
@@ -277,7 +226,8 @@ class LogRepository extends Repository
      * @param int $mailUid
      * @return void
      */
-    public function deleteByMailUid(int $mailUid) {
+    public function deleteByMailUid(int $mailUid): void
+    {
         $queryBuilder = $this->getQueryBuilder();
 
         $queryBuilder

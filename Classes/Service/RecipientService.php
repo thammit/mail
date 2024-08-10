@@ -113,7 +113,8 @@ class RecipientService
         $res = $queryBuilder
             ->select(...$fields)
             ->from($table)
-            ->where($queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uidListOfRecipients, Connection::PARAM_INT_ARRAY)))
+            ->where($queryBuilder->expr()->in('uid',
+                $queryBuilder->createNamedParameter($uidListOfRecipients, Connection::PARAM_INT_ARRAY)))
             ->executeQuery();
 
         $replaceCategories = in_array('categories', $fields);
@@ -171,7 +172,8 @@ class RecipientService
         } else {
             $languageAspect = $query->getQuerySettings()->getLanguageAspect();
             if ($languageAspect->getOverlayType() !== LanguageAspect::OVERLAYS_OFF) {
-                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(),
+                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(),
+                    $languageAspect->getContentId(),
                     LanguageAspect::OVERLAYS_OFF));
             }
         }
@@ -194,7 +196,8 @@ class RecipientService
         $hasFields = !empty($fields);
         if ($hasFields) {
             foreach ($fields as $field) {
-                $propertyName = ucfirst(str_contains($field, '_') ? str_replace(' ', '', ucwords(str_replace('_', ' ', $field))) : $field);
+                $propertyName = ucfirst(str_contains($field, '_') ? str_replace(' ', '',
+                    ucwords(str_replace('_', ' ', $field))) : $field);
                 if (method_exists($firstRecipient, 'get' . $propertyName)) {
                     $getters[$field] = 'get' . $propertyName;
                 } else {
@@ -251,25 +254,88 @@ class RecipientService
     }
 
     /**
-     * @param ObjectStorage $recipientGroups
-     * @return int
-     * @throws Exception
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
-     * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Exception
-     * @deprecated
      */
-    public function getNumberOfRecipientsByGroups(ObjectStorage $recipientGroups): int
+    public function getEmailAddressesByRecipientsUidListGroupedByRecipientSource(array $recipientsUidListGroupedByRecipientSource): array
     {
-        $numberOfRecipients = 0;
-        foreach ($recipientGroups as $recipientGroup) {
-            $numberOfRecipients += $this->getNumberOfRecipientsByGroup($recipientGroup);
+        $emailAddresses = [];
+
+        foreach ($recipientsUidListGroupedByRecipientSource as $recipientSourceIdentifier => $recipients) {
+            $emailAddresses += $this->getEmailAddressesByRecipientSourceAndRecipientsList($recipientSourceIdentifier, $recipients);
         }
 
-        return $numberOfRecipients;
+        return array_unique($emailAddresses);
+    }
+
+    /**
+     * @throws InvalidQueryException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getEmailAddressesByRecipientSourceAndRecipientsList(string $recipientSourceIdentifier, array $recipients): array
+    {
+        if (!$recipients) {
+            return [];
+        }
+
+        $emails = [];
+        if (!str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
+            /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
+            if ($recipientSourceConfiguration->model) {
+                $recipients = $this->getRecipientsDataByUidListAndModelName($recipients,
+                    $recipientSourceConfiguration->model, ['email']);
+            } else {
+                $recipients = $this->getRecipientsDataByUidListAndTable($recipients,
+                    $recipientSourceConfiguration->table, ['email']);
+            }
+        }
+        foreach ($recipients as $recipient) {
+            if ($recipient['email'] ?? false) {
+                $emails[] = $recipient['email'];
+            }
+        }
+
+        return $emails;
+    }
+
+    /**
+     * @throws InvalidQueryException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function removeFromRecipientListIfInExcludeEmailsList(array $recipientsUidListGroupedByRecipientSource, array $excludeEmails): array
+    {
+        foreach ($recipientsUidListGroupedByRecipientSource as $recipientSourceIdentifier => $recipients) {
+            if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
+                // handle csv and plain lists
+                $recipientsToKeep = [];
+                foreach ($recipients as $recipient) {
+                    $email = $recipient['email'] ?? false;
+                    if (!in_array($email, $excludeEmails, true)) {
+                        $recipientsToKeep[] = $recipient;
+                    }
+                }
+                $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = $recipientsToKeep;
+            } else {
+                /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+                $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
+                if ($recipientSourceConfiguration->model) {
+                    $recipientsData = $this->getRecipientsDataByUidListAndModelName($recipients,
+                        $recipientSourceConfiguration->model, ['uid', 'email']);
+                } else {
+                    $recipientsData = $this->getRecipientsDataByUidListAndTable($recipients,
+                        $recipientSourceConfiguration->table, ['uid', 'email']);
+                }
+                foreach ($recipientsData as $recipientData) {
+                    $email = $recipientData['email'] ?? false;
+                    if (in_array($email, $excludeEmails, true)) {
+                        $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = array_values(array_filter($recipients, static fn($uid) => $uid !== (int)$recipientData['uid']));
+                    }
+                }
+            }
+        }
+
+        return $recipientsUidListGroupedByRecipientSource;
     }
 
     /**
@@ -300,8 +366,10 @@ class RecipientService
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function getRecipientsUidListGroupedByRecipientSource(Group $group, bool $addGroupUidToRecipientSourceIdentifier = false): array
-    {
+    public function getRecipientsUidListGroupedByRecipientSource(
+        Group $group,
+        bool $addGroupUidToRecipientSourceIdentifier = false
+    ): array {
         $idLists = [];
         switch ($group->getType()) {
             case RecipientGroupType::PAGES:
@@ -330,7 +398,8 @@ class RecipientService
             case RecipientGroupType::LIST:
             case RecipientGroupType::CSV:
                 if ($group->getType() === RecipientGroupType::LIST) {
-                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($group->getList()))));
+                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|',
+                        trim($group->getList()))));
                 } else {
                     $recipients = CsvUtility::rearrangeCsvValues($group->getCsvData(), $group->getCsvSeparatorString(),
                         RecipientUtility::getAllRecipientFields());
@@ -357,14 +426,16 @@ class RecipientService
             case RecipientGroupType::OTHER:
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
-                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup, $addGroupUidToRecipientSourceIdentifier);
+                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup,
+                        $addGroupUidToRecipientSourceIdentifier);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
         }
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
-            $idLists[$recipientSourceIdentifier] = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group') ? $idList : array_unique($idList);
+            $idLists[$recipientSourceIdentifier] = str_starts_with($recipientSourceIdentifier,
+                'tx_mail_domain_model_group') ? $idList : array_unique($idList);
         }
 
         // todo add event dispatcher to manipulate the returned idLists
@@ -393,7 +464,8 @@ class RecipientService
         } else {
             $languageAspect = $query->getQuerySettings()->getLanguageAspect();
             if ($languageAspect->getOverlayType() !== LanguageAspect::OVERLAYS_OFF) {
-                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(), $languageAspect->getContentId(),
+                $query->getQuerySettings()->setLanguageAspect(new LanguageAspect($languageAspect->getId(),
+                    $languageAspect->getContentId(),
                     LanguageAspect::OVERLAYS_OFF));
             }
         }
@@ -415,7 +487,8 @@ class RecipientService
         }
 
         // PSR-14 event dispatcher to add custom query restrictions
-        $constraints = $this->eventDispatcher->dispatch(new RecipientsRestrictionEvent($recipientSourceConfiguration, $query, $constraints))->getConstraints();
+        $constraints = $this->eventDispatcher->dispatch(new RecipientsRestrictionEvent($recipientSourceConfiguration,
+            $query, $constraints))->getConstraints();
 
         $query->matching(
             $query->logicalAnd(...$constraints)
@@ -479,7 +552,8 @@ class RecipientService
                         $queryBuilder->expr()->and(
                             $mailActiveExpression,
                             $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')),
-                            $queryBuilder->expr()->in('fe_groups.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)),
+                            $queryBuilder->expr()->in('fe_groups.pid',
+                                $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY)),
                             $queryBuilder->expr()->inSet('fe_users.usergroup', 'fe_groups.uid', true)
                         )
                     )
@@ -496,7 +570,8 @@ class RecipientService
                     $queryBuilder->expr()->and(
                         $mailActiveExpression,
                         $queryBuilder->expr()->neq($switchTable . '.email', $queryBuilder->createNamedParameter('')),
-                        $queryBuilder->expr()->in($switchTable . '.pid', $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY))
+                        $queryBuilder->expr()->in($switchTable . '.pid',
+                            $queryBuilder->createNamedParameter($pages, Connection::PARAM_INT_ARRAY))
                     )
                 )
                 ->orderBy($switchTable . '.uid')
@@ -520,7 +595,8 @@ class RecipientService
                     ($recipientSourceConfiguration->ignoreMailActive || $recipient['mail_active'] ?? true) &&
                     !in_array($recipient['uid'], $recipients) &&
                     in_array($recipient['pid'], $pages) &&
-                    ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups, GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
+                    ($table !== 'fe_groups' || count(array_intersect($frontendUserGroups,
+                            GeneralUtility::intExplode(',', $recipient['usergroup']))) > 0)
                 ) {
                     // add it to the list if all constrains fulfilled
                     $recipients[] = $recipient['uid'];
@@ -566,14 +642,17 @@ class RecipientService
                     'tx_mail_group_mm',
                     $table,
                     $table,
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier($table . '.uid'))
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign',
+                        $queryBuilder->quoteIdentifier($table . '.uid'))
                 )
                 ->where(
                     $queryBuilder->expr()->and(
                         $mailActiveExpression,
                         $queryBuilder->expr()->neq($table . '.email', $queryBuilder->createNamedParameter('')),
-                        $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
-                        $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table))
+                        $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local',
+                            $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                        $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames',
+                            $queryBuilder->createNamedParameter($table))
                     )
                 )
                 ->orderBy($table . '.uid')
@@ -590,20 +669,24 @@ class RecipientService
                 'tx_mail_group_mm',
                 'fe_groups',
                 'fe_groups',
-                $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign', $queryBuilder->quoteIdentifier('fe_groups.uid'))
+                $queryBuilder->expr()->eq('tx_mail_group_mm.uid_foreign',
+                    $queryBuilder->quoteIdentifier('fe_groups.uid'))
             )
             ->innerJoin(
                 'fe_groups',
                 'fe_users',
                 'fe_users',
-                $queryBuilder->expr()->inSet('fe_users.usergroup', $queryBuilder->quoteIdentifier('fe_groups.uid'), true)
+                $queryBuilder->expr()->inSet('fe_users.usergroup', $queryBuilder->quoteIdentifier('fe_groups.uid'),
+                    true)
             )
             ->where(
                 $queryBuilder->expr()->and(
                     $mailActiveExpression,
                     $queryBuilder->expr()->neq('fe_users.email', $queryBuilder->createNamedParameter('')),
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter($table))
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local',
+                        $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames',
+                        $queryBuilder->createNamedParameter($table))
                 )
             )
             ->orderBy('fe_users.uid')
@@ -619,18 +702,22 @@ class RecipientService
                 'tx_mail_domain_model_group',
                 'tx_mail_group_mm',
                 'tx_mail_group_mm',
-                $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local', $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
+                $queryBuilder->expr()->eq('tx_mail_group_mm.uid_local',
+                    $queryBuilder->quoteIdentifier('tx_mail_domain_model_group.uid'))
             )
             ->leftJoin(
                 'tx_mail_group_mm',
                 'fe_groups',
                 'fe_groups',
-                $queryBuilder->expr()->eq('fe_groups.uid', $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign'))
+                $queryBuilder->expr()->eq('fe_groups.uid',
+                    $queryBuilder->quoteIdentifier('tx_mail_group_mm.uid_foreign'))
             )
             ->where(
                 $queryBuilder->expr()->and(
-                    $queryBuilder->expr()->eq('tx_mail_domain_model_group.uid', $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
-                    $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames', $queryBuilder->createNamedParameter('fe_groups'))
+                    $queryBuilder->expr()->eq('tx_mail_domain_model_group.uid',
+                        $queryBuilder->createNamedParameter($mailGroupUid, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->eq('tx_mail_group_mm.tablenames',
+                        $queryBuilder->createNamedParameter('fe_groups'))
                 )
             )
             ->executeQuery()
@@ -694,7 +781,8 @@ class RecipientService
      */
     public function disableRecipients(array $data): int
     {
-        return $this->eventDispatcher->dispatch(new DeactivateRecipientsEvent($data, $this->recipientSources))->getNumberOfAffectedRecipients();
+        return $this->eventDispatcher->dispatch(new DeactivateRecipientsEvent($data,
+            $this->recipientSources))->getNumberOfAffectedRecipients();
     }
 
 
@@ -775,7 +863,8 @@ class RecipientService
             )
             ->where(
                 $queryBuilder->expr()->and(
-                    $queryBuilder->expr()->eq('mm.uid_foreign', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->eq('mm.uid_foreign',
+                        $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)),
                     $queryBuilder->expr()->eq('mm.tablenames', $queryBuilder->createNamedParameter($table)),
                     $queryBuilder->expr()->eq('mm.fieldname', $queryBuilder->createNamedParameter($categoryFieldName))
                 )

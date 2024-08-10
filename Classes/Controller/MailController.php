@@ -866,18 +866,19 @@ class MailController extends AbstractController
         $recipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups());
 
         if ($mail->getExcludeRecipientGroups()->count() > 0) {
-            // todo add filter by exclude recipient groups emails
+            // filter recipients by exclude recipient groups emails
             $excludeRecipientGroups = $mail->getExcludeRecipientGroups();
             $excludeRecipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($excludeRecipientGroups);
-//            $finalRecipients = array_diff_assoc(array_intersect_assoc($recipients, $excludeRecipients), $recipients);
+            $emailsToExclude = $this->recipientService->getEmailAddressesByRecipientsUidListGroupedByRecipientSource($excludeRecipients);
+            $recipients = $this->recipientService->removeFromRecipientListIfInExcludeEmailsList($recipients, $emailsToExclude);
         }
 
         $mail->setRecipients($recipients,true);
 
         if ($mail->getNumberOfRecipients() === 0) {
-            ViewUtility::addNotificationWarning(
+            ViewUtility::addNotificationError(
                 LanguageUtility::getLL('mail.wizard.notification.noRecipients.message'),
-                LanguageUtility::getLL('general.notification.severity.warning.title')
+                LanguageUtility::getLL('general.notification.severity.error.title')
             );
 
             return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
