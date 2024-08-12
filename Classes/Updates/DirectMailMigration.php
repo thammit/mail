@@ -5,6 +5,7 @@ namespace MEDIAESSENZ\Mail\Updates;
 
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -79,7 +80,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                             'include_media' => $record['includeMedia'],
                             'html_params' => $record['HTMLParams'],
                             'plain_params' => $record['plainParams'],
-                            'sent' => $record['issent'],
+                            'status' => $record['issent'] ? MailStatus::SENT : MailStatus::DRAFT,
                             'rendered_size' => strlen($mailContent['html']['content'] ?? '') + strlen($mailContent['plain']['content'] ?? ''),
                             'message_id' => $mailContent['messageid'],
                             'html_content' => $mailContent['html']['content'] ?? '',

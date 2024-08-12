@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Domain\Model;
 use DateTimeImmutable;
 use JsonException;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
@@ -17,6 +18,7 @@ use TYPO3\CMS\Extbase\Domain\Model\File;
 class Mail extends AbstractEntity
 {
     protected int $type = MailType::INTERNAL;
+    protected int $status = MailStatus::DRAFT;
     protected int $page = 0;
     protected int $step = 1;
     protected bool $sent = false;
@@ -135,6 +137,17 @@ class Mail extends AbstractEntity
     public function setType(int $type): Mail
     {
         $this->type = $type;
+        return $this;
+    }
+
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(int $status): Mail
+    {
+        $this->status = $status;
         return $this;
     }
 

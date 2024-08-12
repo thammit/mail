@@ -1,3 +1,8 @@
+.. _changelog:
+
+Change Log
+==========
+
 .. toctree::
    :maxdepth: 5
    :titlesonly:

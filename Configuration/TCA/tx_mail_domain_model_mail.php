@@ -43,6 +43,21 @@ return [
                 'type' => 'language',
             ],
         ],
+        'status' => [
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.status',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'items' => [
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.status.I.0', \MEDIAESSENZ\Mail\Type\Enumeration\MailStatus::DRAFT],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.status.I.1', \MEDIAESSENZ\Mail\Type\Enumeration\MailStatus::SCHEDULED],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.status.I.2', \MEDIAESSENZ\Mail\Type\Enumeration\MailStatus::SENDING],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.status.I.3', \MEDIAESSENZ\Mail\Type\Enumeration\MailStatus::SENT],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.status.I.4', \MEDIAESSENZ\Mail\Type\Enumeration\MailStatus::ABORTED],
+                ],
+                'default' => \MEDIAESSENZ\Mail\Type\Enumeration\MailStatus::DRAFT,
+            ],
+        ],
         'subject' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.subject',
             'config' => [

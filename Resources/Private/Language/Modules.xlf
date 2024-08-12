@@ -169,7 +169,7 @@
                 <source>There are no recipients in the selected group(s).</source>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.noRecipientsDueToExcludes.message" resname="mail.wizard.notification.noRecipientsDueToExcludes.message">
-                <source>There are no recipients in the selected combination of group(s)/exclude group(s).</source>
+                <source>There are no recipients in the selected combination of recipient group(s)/exclude group(s).</source>
             </trans-unit>
             <trans-unit id="mail.wizard.notification.finished.message" resname="mail.wizard.notification.finished.message">
                 <source>The mail "%s" was successfully scheduled for distribution at %s.</source>

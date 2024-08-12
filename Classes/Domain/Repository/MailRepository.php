@@ -7,6 +7,7 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use TYPO3\CMS\Core\Database\Connection;
@@ -44,7 +45,7 @@ class MailRepository extends Repository
         $query = $this->createQuery();
         $query->matching(
             $query->logicalAnd(
-                $query->equals('scheduled', 0),
+                $query->equals('status', MailStatus::DRAFT),
                 $query->equals('pid', $pid),
             )
         );
@@ -61,7 +62,7 @@ class MailRepository extends Repository
         $query = $this->createQuery();
         $query->matching(
             $query->logicalAnd(
-                $query->equals('scheduled', 0),
+                $query->equals('status', MailStatus::DRAFT),
                 $query->equals('page', $page),
                 $query->equals('pid', $pid),
             )
@@ -69,16 +70,13 @@ class MailRepository extends Repository
         return $query->execute();
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     public function findScheduledByPid(int $pid, int $limit = 10): QueryResultInterface|array
     {
         $query = $this->createQuery();
         $query->matching(
             $query->logicalAnd(
                 $query->equals('pid', $pid),
-                $query->greaterThan('scheduled', 0),
+                $query->equals('status', MailStatus::SCHEDULED),
             )
         );
         $query->setOrderings(['scheduled' => QueryInterface::ORDER_DESCENDING]);
@@ -98,6 +96,7 @@ class MailRepository extends Repository
         $query->getQuerySettings()->setIgnoreEnableFields(true);
         $query->matching(
             $query->logicalAnd(
+                $query->equals('status', MailStatus::SCHEDULED),
                 $query->logicalNot($query->equals('scheduled', 0)),
                 $query->lessThan('scheduled', new DateTimeImmutable('now')),
                 $query->equals('scheduledEnd', 0),
@@ -132,7 +131,7 @@ class MailRepository extends Repository
             ->where(
                 $queryBuilder->expr()->eq('m.pid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)),
                 $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], Connection::PARAM_INT_ARRAY)),
-                $queryBuilder->expr()->gte('m.scheduled', 0),
+                $queryBuilder->expr()->gte('m.status', MailStatus::SENT),
                 $queryBuilder->expr()->eq('l.response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
                 $queryBuilder->expr()->neq('l.format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, Connection::PARAM_INT)),
             )

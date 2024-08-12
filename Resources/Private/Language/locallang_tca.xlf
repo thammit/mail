@@ -57,6 +57,27 @@
             <trans-unit id="tx_mail_domain_model_mail.organisation" resname="tx_mail_domain_model_mail.organisation">
                 <source>Organization</source>
             </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.status" resname="tx_mail_domain_model_mail.status">
+                <source>Status</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.status.I.0" resname="tx_mail_domain_model_mail.status.I.0">
+                <source>Draft</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.status.I.1" resname="tx_mail_domain_model_mail.status.I.1">
+                <source>Scheduled</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.status.I.2" resname="tx_mail_domain_model_mail.status.I.2">
+                <source>Sending</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.status.I.3" resname="tx_mail_domain_model_mail.status.I.3">
+                <source>Paused</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.status.I.4" resname="tx_mail_domain_model_mail.status.I.4">
+                <source>Aborted</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.status.I.5" resname="tx_mail_domain_model_mail.status.I.5">
+                <source>Sent</source>
+            </trans-unit>
             <trans-unit id="tx_mail_domain_model_mail.page" resname="tx_mail_domain_model_mail.page">
                 <source>Page</source>
             </trans-unit>

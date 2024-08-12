@@ -22,6 +22,7 @@ use MEDIAESSENZ\Mail\Exception\HtmlContentFetchFailedException;
 use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -871,6 +872,19 @@ class MailController extends AbstractController
      */
     public function finishAction(Mail $mail): ResponseInterface
     {
+        if ($this->typo3MajorVersion > 11) {
+            // scheduled timezone is utc and must be converted to server time zone
+            $scheduled = $mail->getScheduled();
+            if ($scheduled instanceof DateTimeImmutable) {
+                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
+                $offset = $serverTimeZone->getOffset($scheduled);
+                if ($offset) {
+                    $interval = new DateInterval('PT' . abs($offset) . 'S');
+                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
+                }
+            }
+        }
+
         if ($mail->getRecipientGroups()->count() === 0) {
             ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'),
                 LanguageUtility::getLL('general.notification.severity.warning.title'));
@@ -890,7 +904,7 @@ class MailController extends AbstractController
             $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($filteredRecipients);
             if ($numberOfRecipients === 0) {
                 $mail->setRecipients([], true);
-                $mail->setScheduled(null);
+//                $mail->setScheduled(null);
                 $this->mailRepository->update($mail);
                 $this->mailRepository->persist();
                 ViewUtility::addNotificationWarning(
@@ -907,7 +921,7 @@ class MailController extends AbstractController
 
         if ($numberOfRecipients === 0) {
             $mail->setRecipients([], true);
-            $mail->setScheduled(null);
+//            $mail->setScheduled(null);
             $this->mailRepository->update($mail);
             $this->mailRepository->persist();
             ViewUtility::addNotificationWarning(
@@ -920,18 +934,7 @@ class MailController extends AbstractController
 
         $mail->setRecipients($recipients,true);
 
-        if ($this->typo3MajorVersion > 11) {
-            // scheduled timezone is utc and must be converted to server time zone
-            $scheduled = $mail->getScheduled();
-            if ($scheduled instanceof DateTimeImmutable) {
-                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
-                $offset = $serverTimeZone->getOffset($scheduled);
-                if ($offset) {
-                    $interval = new DateInterval('PT' . abs($offset) . 'S');
-                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
-                }
-            }
-        }
+        $mail->setStatus(MailStatus::SCHEDULED);
 
 //        if (false && $this->isTestMail) {
 //            $updateFields['subject'] = ($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '') . ' ' . $row['subject'];

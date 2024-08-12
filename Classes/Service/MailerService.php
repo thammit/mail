@@ -19,6 +19,7 @@ use MEDIAESSENZ\Mail\Events\ManipulateMarkersEvent;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Events\ScheduledSendBegunEvent;
 use MEDIAESSENZ\Mail\Events\ScheduledSendFinishedEvent;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Mail\MailMessage;
@@ -482,6 +483,7 @@ class MailerService implements LoggerAwareInterface
     protected function setJobBegin(Mail $mail): void
     {
         $mail->setScheduledBegin(new DateTimeImmutable('now'));
+        $mail->setStatus(MailStatus::SENDING);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 
@@ -505,6 +507,7 @@ class MailerService implements LoggerAwareInterface
     protected function setJobEnd(Mail $mail): void
     {
         $mail->setScheduledEnd(new DateTimeImmutable('now'));
+        $mail->setStatus(MailStatus::SENT);
         $this->mailRepository->update($mail);
         $this->mailRepository->persist();
 

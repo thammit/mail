@@ -78,14 +78,25 @@
 					<label for="distributionTime" class="form-label h4 mb-2">
 						<f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
 					</label>
-					<f:variable name="now">{f:format.date(format:'H:i d-m-Y',date:'now')}</f:variable>
-					<f:variable name="nowISO">{f:format.date(format:'Y-m-d\TH:i:s\Z',date:'now')}</f:variable>
+                    <f:if condition="{mail.scheduled}">
+                    	<f:then>
+                            <f:variable name="now">{f:format.date(format:'H:i d-m-Y',date:'now')}</f:variable>
+                            <f:variable name="scheduled">{f:format.date(format:'H:i d-m-Y',date:mail.scheduled)}</f:variable>
+                            <f:variable name="scheduledISO">{f:format.date(format:'Y-m-d\TH:i:s\Z',date:mail.scheduled)}</f:variable>
+                        </f:then>
+                        <f:else>
+                            <f:variable name="now">{f:format.date(format:'H:i d-m-Y',date:'now')}</f:variable>
+                            <f:variable name="scheduled">{f:format.date(format:'H:i d-m-Y',date:'now')}</f:variable>
+                            <f:variable name="scheduledISO">{f:format.date(format:'Y-m-d\TH:i:s\Z',date:'now')}</f:variable>
+                        </f:else>
+                    </f:if>
+
 					<f:if condition="{v12}">
 						<f:then>
 							<div class="input-group">
 								<input id="mail-distribution-time" data-date-type="datetime" data-date-mindate="{now}"
-									   class="form-control" value="{now}" autocomplete="off"/>
-								<f:form.hidden property="scheduled" value="{nowISO}"/>
+									   class="form-control" value="{scheduled}" autocomplete="off"/>
+								<f:form.hidden property="scheduled" value="{scheduledISO}"/>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</button>
@@ -98,7 +109,7 @@
 												  class="form-control t3js-datetimepicker"
 												  data="{date-type:'datetime', date-mindate:now}"
 												  property="scheduled"
-												  value="{now}"/>
+												  value="{scheduled}"/>
 								<label class="mb-0 btn btn-default" for="mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</label>

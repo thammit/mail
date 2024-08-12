@@ -14,6 +14,7 @@ use MEDIAESSENZ\Mail\DependencyInjection\EventListenerCompilerPass;
 use MEDIAESSENZ\Mail\Hooks\AddBackToMailWizardButton;
 use MEDIAESSENZ\Mail\Hooks\PageTreeRefresh;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
+use MEDIAESSENZ\Mail\Updates\AddStatus;
 use MEDIAESSENZ\Mail\Updates\CsvGroupConverter;
 use MEDIAESSENZ\Mail\Updates\DirectMailMigration;
 use MEDIAESSENZ\Mail\Updates\ImprovedProcessHandlingUpdater;
@@ -198,6 +199,7 @@ final class Configuration
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailDirectMailMigration'] = DirectMailMigration::class;
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailImproveProcessHandlingUpdater'] = ImprovedProcessHandlingUpdater::class;
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailCsvGroupConverter'] = CsvGroupConverter::class;
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['mailAddStatus'] = AddStatus::class;
     }
 
     public static function registerTypeConverter(): void

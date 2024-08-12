@@ -13,14 +13,14 @@ define([], function () {
                 }
                 return response.json();
             }).then((result) => {
-                const sent = Boolean(result.sent);
+                const status = Number(result.status);
                 const recipientsHandled = parseInt(result.recipientsHandled);
                 const deliveryProgress = parseInt(result.deliveryProgress);
                 const numberOfRecipients = parseInt(runningProgressBar.getAttribute('aria-valuemax'));
                 runningProgressBar.style.width = `${deliveryProgress}%`;
                 runningProgressBar.innerText = `${deliveryProgress}%`;
                 runningProgressBar.setAttribute('title', `${recipientsHandled}/${numberOfRecipients}`);
-                runningProgressBar.setAttribute('aria-valuenow', String(result.sent));
+                runningProgressBar.setAttribute('aria-valuenow', `${deliveryProgress}%`);
                 const tableRow = runningProgressBar.closest('tr');
                 const scheduledBegin = tableRow.querySelector('.mail-scheduled-begin');
                 if (scheduledBegin) {
@@ -30,7 +30,7 @@ define([], function () {
                 if (scheduledEnd) {
                     scheduledEnd.innerText = result.scheduledEnd;
                 }
-                if (sent) {
+                if (status === 5) {
                     clearInterval(interval);
                     tableRow.classList.remove('table-info');
                     runningProgressBar.className = 'progress-bar bg-success';

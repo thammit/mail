@@ -25,7 +25,6 @@ class QueueController extends AbstractController
 {
     /**
      * @return ResponseInterface
-     * @throws InvalidQueryException
      */
     public function indexAction(): ResponseInterface
     {
@@ -136,7 +135,7 @@ class QueueController extends AbstractController
         /** @var Mail $mail */
         $mail = $this->mailRepository->findByUid((int)($request->getQueryParams()['mail']));
         return $this->jsonResponse(json_encode([
-            'sent' => $mail->isSent(),
+            'status' => $mail->getStatus(),
             'recipientsHandled' => $mail->getNumberOfRecipientsHandled(),
             'deliveryProgress' => $mail->getDeliveryProgress(),
             'scheduledBegin' => $mail->getScheduledBegin() ? $mail->getScheduledBegin()->format('d.m.Y H:i') : '',

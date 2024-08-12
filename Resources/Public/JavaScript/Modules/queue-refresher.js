@@ -17,14 +17,14 @@ class QueueRefresher {
         request.then(async (response) => {
             return response.resolve('json');
         }).then((result) => {
-            const sent = Boolean(result.sent);
+            const status = Number(result.status);
             const recipientsHandled = parseInt(result.recipientsHandled);
             const deliveryProgress = parseInt(result.deliveryProgress);
             const numberOfRecipients = parseInt(runningProgressBar.getAttribute('aria-valuemax'));
             runningProgressBar.style.width = `${deliveryProgress}%`;
             runningProgressBar.innerText = `${deliveryProgress}%`;
             runningProgressBar.setAttribute('title', `${recipientsHandled}/${numberOfRecipients}`);
-            runningProgressBar.setAttribute('aria-valuenow', String(result.sent));
+            runningProgressBar.setAttribute('aria-valuenow', `${deliveryProgress}%`);
             const tableRow = runningProgressBar.closest('tr');
             const scheduledBegin = tableRow.querySelector('.mail-scheduled-begin');
             if (scheduledBegin) {
@@ -34,7 +34,7 @@ class QueueRefresher {
             if (scheduledEnd) {
                 scheduledEnd.innerText = result.scheduledEnd;
             }
-            if (sent) {
+            if (status === 5) {
                 if (interval) {
                     clearInterval(interval);
                 }
