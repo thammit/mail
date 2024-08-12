@@ -13,7 +13,9 @@ tx_mail {
     }
     readOnlySettings = type,renderedSize
     hideCategoryStep = 0
+    hideExcludeRecipientGroups = 0
     hideDeleteReportButton = 0
     hideManualSendingButton = 0
     hideDeleteRunningSendingButton = 0
+    hidePauseButton = 0
 }

@@ -42,7 +42,7 @@
 									</li>
 								</f:for>
 							</ul>
-                            <f:if condition="{groups -> f:count()} > 1">
+                            <f:if condition="!{hideExcludeRecipientGroups} && {groups -> f:count()} > 1">
                                 <div class="mt-4">
                                     <h4>
                                         <f:translate key="{lll}mail.wizard.scheduleSending.excludeRecipientGroups"/>

@@ -37,6 +37,8 @@ New features
 - To make it possible to use a table more than once, a new recipient source confiiguration property `table` was added.
   If not set, the identifier is used as table name instead.
 
+- Mail queue pause and continue enables the possibility to pause and resume the sending of a mailing.
+
 Breaking changes
 ----------------
 

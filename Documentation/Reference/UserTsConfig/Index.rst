@@ -125,7 +125,13 @@ MAIL modules.
    :Default: 0
    :Path: tx_mail.hideCategoryStep
 
-   Hide the category mail wizard step.
+.. confval:: hideExcludeRecipientGroups
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.hideExcludeRecipientGroups
+
+   Hide the exclude recipient groups in the last mail wizard step.
 
 .. confval:: hideManualSendingButton
 
@@ -134,6 +140,14 @@ MAIL modules.
    :Path: tx_mail.hideManualSendingButton
 
    Hide manual sending button in queue module.
+
+.. confval:: hidePauseButton
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.hidePauseButton
+
+   Hide pause and continue button in queue module.
 
 .. confval:: hideDeleteRunningSendingButton
 

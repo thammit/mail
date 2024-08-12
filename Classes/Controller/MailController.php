@@ -824,6 +824,7 @@ class MailController extends AbstractController
         $assignments = [
             'groups' => $groups,
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
+            'hideExcludeRecipientGroups' => $this->userTSConfiguration['hideExcludeRecipientGroups'] ?? false,
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),

@@ -51,6 +51,7 @@ class QueueController extends AbstractController
             'refreshRate' => $refreshRate,
             'hideManualSendingButton' => $this->userTSConfiguration['hideManualSendingButton'] ?? false,
             'hideDeleteRunningSendingButton' => $this->userTSConfiguration['hideDeleteRunningSendingButton'] ?? false,
+            'hidePauseButton' => $this->userTSConfiguration['hidePauseButton'] ?? false,
         ];
 
         $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));
