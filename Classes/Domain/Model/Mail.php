@@ -491,7 +491,7 @@ class Mail extends AbstractEntity
      */
     public function isSent(): bool
     {
-        return $this->sent;
+        return $this->status === MailStatus::SENT;
     }
 
     /**
