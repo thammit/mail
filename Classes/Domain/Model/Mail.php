@@ -743,7 +743,7 @@ class Mail extends AbstractEntity
 
     public function calculateDeliveryProgress(): void
     {
-        if ($this->numberOfRecipients === 0 || $this->sent) {
+        if ($this->numberOfRecipients === 0 || $this->isSent()) {
             $this->deliveryProgress = 100;
         } else {
             $percentOfSent = $this->numberOfRecipientsHandled / $this->numberOfRecipients * 100;
@@ -755,7 +755,9 @@ class Mail extends AbstractEntity
             }
             $this->deliveryProgress = (int)$percentOfSent;
         }
-        $this->sent = $this->deliveryProgress === 100;
+        if ($this->deliveryProgress === 100) {
+            $this->status = MailStatus::SENT;
+        }
     }
 
     /**
