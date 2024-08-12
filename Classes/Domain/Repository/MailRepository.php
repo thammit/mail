@@ -76,7 +76,10 @@ class MailRepository extends Repository
         $query->matching(
             $query->logicalAnd(
                 $query->equals('pid', $pid),
-                $query->equals('status', MailStatus::SCHEDULED),
+                $query->logicalOr(
+                    $query->equals('status', MailStatus::SCHEDULED),
+                    $query->equals('status', MailStatus::PAUSED)
+                )
             )
         );
         $query->setOrderings(['scheduled' => QueryInterface::ORDER_DESCENDING]);

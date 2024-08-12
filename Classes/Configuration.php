@@ -156,7 +156,7 @@ final class Configuration
             'queue',
             'after:report',
             [
-                QueueController::class => 'index,saveConfiguration,trigger,delete,noValidPageSelected',
+                QueueController::class => 'index,saveConfiguration,trigger,delete,pause,continue,noValidPageSelected',
             ],
             [
                 'navigationComponentId' => $navigationComponentId,

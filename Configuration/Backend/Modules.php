@@ -134,6 +134,8 @@ $config = [
                 'saveConfiguration',
                 'trigger',
                 'delete',
+                'pause',
+                'continue',
                 'noValidPageSelected',
             ],
         ],

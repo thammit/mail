@@ -151,6 +151,31 @@ class Mail extends AbstractEntity
         return $this;
     }
 
+    public function isDraft(): bool
+    {
+        return $this->status === MailStatus::DRAFT;
+    }
+
+    public function isScheduledState(): bool
+    {
+        return $this->status === MailStatus::SCHEDULED;
+    }
+
+    public function isPaused(): bool
+    {
+        return $this->status === MailStatus::PAUSED;
+    }
+
+    public function isAborted(): bool
+    {
+        return $this->status === MailStatus::ABORTED;
+    }
+
+    public function isSent(): bool
+    {
+        return $this->status === MailStatus::SENT;
+    }
+
     /**
      * @return int
      */
@@ -484,14 +509,6 @@ class Mail extends AbstractEntity
     {
         $this->plainParams = $plainParams;
         return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSent(): bool
-    {
-        return $this->status === MailStatus::SENT;
     }
 
     /**

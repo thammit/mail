@@ -17,7 +17,9 @@
             <p>
                 <f:translate key="{lll}queue.manualSending.description" arguments="{0: sendPerCycle}"/>
             </p>
-            <f:link.action action="trigger" class="btn btn-mail-theme"><f:translate key="{lll}queue.button.triggerManualSending"/></f:link.action>
+            <f:link.action action="trigger" class="btn btn-mail-theme">
+                <f:translate key="{lll}queue.button.triggerManualSending"/>
+            </f:link.action>
         </f:be.infobox>
     </f:if>
     <div class="panel panel-default">
@@ -40,7 +42,7 @@
                 <th class="nowrap text-center" style="min-width: 200px;">
                     <f:translate key="{lll}queue.progress"/>
                 </th>
-                <f:if condition="!{hideDeleteRunningSendingButton}">
+                <f:if condition="!{hideDeleteRunningSendingButton} || !{hidePauseButton}">
                     <th class="col-control nowrap">
                     </th>
                 </f:if>
@@ -48,56 +50,109 @@
             </thead>
             <tbody>
             <f:for each="{mails}" as="mail">
-                <tr class="table-success {f:if(condition:'!{mail.sent}', then:'table-info')}">
+                <f:variable name="trClass" value="table-info"/>
+                <f:if condition="{mail.paused}">
+                    <f:variable name="trClass" value="table-warning"/>
+                </f:if>
+                <f:if condition="{mail.sent}">
+                    <f:variable name="trClass" value="table-success"/>
+                </f:if>
+                <tr class="{trClass}">
                     <td class="col-icon nowrap">
                         <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail"/>
                     </td>
-                    <td class="col-title col-responsive nowrap">{mail.subject}</td>
+                    <td class="col-title col-responsive nowrap">{mail.subject} <f:if condition="{mail.paused}">[<f:format.case><f:translate key="{lll}queue.paused"/></f:format.case>]
+                    </f:if>
+                    </td>
                     <td class="nowrap">{mail.scheduled -> f:format.date(format: 'd.m.Y H:i')}</td>
                     <td class="nowrap mail-scheduled-begin">{mail.scheduledBegin -> f:format.date(format: 'd.m.Y H:i')}</td>
                     <td class="nowrap mail-scheduled-end">{mail.scheduledEnd -> f:format.date(format: 'd.m.Y H:i')}</td>
-                    <td class="nowrap"><f:render partial="Backend/ProgressBar" arguments="{mail:mail}" /></td>
-                    <f:if condition="!{hideDeleteRunningSendingButton}">
-                        <td class="col-control nowrap">
-                            <f:if condition="!{mail.sent}">
-                                <f:link.action action="delete" arguments="{mail: mail}" class="mail-delete-button btn btn-default"><core:icon identifier="actions-edit-delete"/></f:link.action>
+                    <td class="nowrap">
+                        <f:render partial="Backend/ProgressBar" arguments="{mail:mail}"/>
+                    </td>
+                    <td class="col-control nowrap">
+                        <f:if condition="!{mail.sent} || !{hideDeleteRunningSendingButton} || !{hidePauseButton}">
+                            <f:if condition="!{hidePauseButton}">
+                                <f:if condition="!{mail.paused}">
+                                    <f:then>
+                                        <f:link.action action="pause" arguments="{mail: mail}" class="mail-pause-button btn btn-warning">
+                                            <core:icon identifier="actions-pause"/>
+                                        </f:link.action>
+                                    </f:then>
+                                    <f:else>
+                                        <f:link.action action="continue" arguments="{mail: mail}" class="mail-confinue-button btn btn-warning">
+                                            <core:icon identifier="actions-play"/>
+                                        </f:link.action>
+                                    </f:else>
+                                </f:if>
                             </f:if>
-                        </td>
-                    </f:if>
+                            <f:if condition="!{hideDeleteRunningSendingButton} && !{mail.sent}">
+                                <f:link.action action="delete" arguments="{mail: mail}" class="mail-delete-button btn btn-danger">
+                                    <core:icon identifier="actions-edit-delete"/>
+                                </f:link.action>
+                            </f:if>
+                        </f:if>
+                    </td>
                 </tr>
             </f:for>
+            <f:variable name="emptyTableRowClass" value="d-table-row"/>
+            <f:if condition="{mails}">
+                <f:variable name="emptyTableRowClass" value="d-none"/>
+            </f:if>
+            <tr id="mailQueueEmpty" class="{emptyTableRowClass}">
+                <td colspan="6"><f:translate key="{lll}queue.empty"/></td>
+                <f:if condition="!{hideDeleteRunningSendingButton} || !{hidePauseButton}">
+                    <td class="col-control nowrap"> </td>
+                </f:if>
+            </tr>
             </tbody>
         </table>
     </div>
-    <div style="--bs-modal-zindex:1051;" class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-queue-configuration-modal" tabindex="-1" aria-labelledby="mail-queue-configuration-modal-label" aria-hidden="true">
+    <div style="--bs-modal-zindex:1051;" class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-queue-configuration-modal"
+         tabindex="-1" aria-labelledby="mail-queue-configuration-modal-label" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="mail-queue-configuration-modal-label"><f:translate key="{lll}configuration.panel.module.header" /></h5>
+                    <h5 class="modal-title" id="mail-queue-configuration-modal-label">
+                        <f:translate key="{lll}configuration.panel.module.header"/>
+                    </h5>
                     <button class="t3js-modal-close close" data-bs-dismiss="modal" aria-label="Close">
-                        <core:icon identifier="actions-close" />
-                        <span class="visually-hidden"><f:translate key="{lll}general.button.cancel" /></span>
+                        <core:icon identifier="actions-close"/>
+                        <span class="visually-hidden"><f:translate key="{lll}general.button.cancel"/></span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <f:form action="saveConfiguration" id="mail-queue-configuration-form" class="mail-queue-configuration-formx" target="list_frame">
                         <div class="form-group">
-                            <label for="queueModalConfigure-sendPerCycle-title"><f:translate key="{lll}configuration.sendPerCycle" /></label>
-                            <f:form.textfield name="sendPerCycle" type="number" additionalAttributes="{min: 1, max: 500}" id="queueModalConfigure-sendPerCycle-title" class="form-control" value="{sendPerCycle}" required="required" />
+                            <label for="queueModalConfigure-sendPerCycle-title">
+                                <f:translate key="{lll}configuration.sendPerCycle"/>
+                            </label>
+                            <f:form.textfield name="sendPerCycle" type="number" additionalAttributes="{min: 1, max: 500}" id="queueModalConfigure-sendPerCycle-title"
+                                              class="form-control" value="{sendPerCycle}" required="required"/>
                         </div>
                         <div class="form-group">
-                            <label for="queueModalConfigure-queueLimit-title"><f:translate key="{lll}configuration.queueLimit" /></label>
-                            <f:form.textfield name="queueLimit" type="number" additionalAttributes="{min: 0, max: 100}" id="queueModalConfigure-queueLimit-title" class="form-control" value="{queueLimit}" required="required" />
+                            <label for="queueModalConfigure-queueLimit-title">
+                                <f:translate key="{lll}configuration.queueLimit"/>
+                            </label>
+                            <f:form.textfield name="queueLimit" type="number" additionalAttributes="{min: 0, max: 100}" id="queueModalConfigure-queueLimit-title"
+                                              class="form-control" value="{queueLimit}" required="required"/>
                         </div>
                         <div class="form-group">
-                            <label for="queueModalConfigure-refreshRate-title"><f:translate key="{lll}configuration.refreshRate" /></label>
-                            <f:form.textfield name="refreshRate" type="number" additionalAttributes="{min: 0, max: 600}" id="queueModalConfigure-refreshRate-title" class="form-control" value="{refreshRate}" required="required" />
+                            <label for="queueModalConfigure-refreshRate-title">
+                                <f:translate key="{lll}configuration.refreshRate"/>
+                            </label>
+                            <f:form.textfield name="refreshRate" type="number" additionalAttributes="{min: 0, max: 600}" id="queueModalConfigure-refreshRate-title"
+                                              class="form-control" value="{refreshRate}" required="required"/>
                         </div>
                     </f:form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-bs-dismiss="modal"><f:translate key="{lll}general.button.cancel" /></button>
-                    <button type="submit" form="mail-queue-configuration-form" class="btn btn-primary"><f:translate key="{lll}general.button.save" /></button>
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">
+                        <f:translate key="{lll}general.button.cancel"/>
+                    </button>
+                    <button type="submit" form="mail-queue-configuration-form" class="btn btn-primary">
+                        <f:translate key="{lll}general.button.save"/>
+                    </button>
                 </div>
             </div>
         </div>

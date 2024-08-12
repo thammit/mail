@@ -7,6 +7,7 @@ use Doctrine\DBAL\Exception;
 use JsonException;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
+use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
@@ -125,6 +126,36 @@ class QueueController extends AbstractController
         $this->mailRepository->remove($mail);
         ViewUtility::addNotificationSuccess(
             sprintf(LanguageUtility::getLL('mail.wizard.notification.deleted.message'), $mail->getSubject()),
+            LanguageUtility::getLL('general.notification.severity.success.title')
+        );
+        return $this->redirect('index');
+    }
+
+    /**
+     * @throws UnknownObjectException
+     * @throws IllegalObjectTypeException
+     */
+    public function pauseAction(Mail $mail): ResponseInterface
+    {
+        $mail->setStatus(MailStatus::PAUSED);
+        $this->mailRepository->update($mail);
+        ViewUtility::addNotificationSuccess(
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.paused.message'), $mail->getSubject()),
+            LanguageUtility::getLL('general.notification.severity.success.title')
+        );
+        return $this->redirect('index');
+    }
+
+    /**
+     * @throws UnknownObjectException
+     * @throws IllegalObjectTypeException
+     */
+    public function continueAction(Mail $mail): ResponseInterface
+    {
+        $mail->setStatus(MailStatus::SCHEDULED);
+        $this->mailRepository->update($mail);
+        ViewUtility::addNotificationSuccess(
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.continued.message'), $mail->getSubject()),
             LanguageUtility::getLL('general.notification.severity.success.title')
         );
         return $this->redirect('index');
