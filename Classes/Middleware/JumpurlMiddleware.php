@@ -252,8 +252,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                     $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration->model, []);
                     $this->recipientRecord = reset($recipientData);
                     break;
-                case $recipientSourceConfiguration->isCsv():
-                case $recipientSourceConfiguration->isPlain():
+                case $recipientSourceConfiguration->isCsvOrPlain():
                     $this->recipientRecord['uid'] = $recipientUid;
                     break;
                 case $recipientSourceConfiguration->isCsvFile():

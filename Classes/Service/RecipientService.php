@@ -297,8 +297,7 @@ class RecipientService
             case $recipientSourceConfiguration->isModelSource():
                 $recipients = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['email']);
                 break;
-            case $recipientSourceConfiguration->isCsv():
-            case $recipientSourceConfiguration->isPlain():
+            case $recipientSourceConfiguration->isCsvOrPlain():
                 // nothing to do, since email is already in recipient array
                 break;
             case $recipientSourceConfiguration->isCsvFile():
@@ -344,8 +343,7 @@ class RecipientService
                         }
                     }
                     break;
-                case $recipientSourceConfiguration->isCsv():
-                case $recipientSourceConfiguration->isPlain():
+                case $recipientSourceConfiguration->isCsvOrPlain():
                     // handle csv and plain lists
                     $recipientsToKeep = [];
                     foreach ($recipients as $recipient) {

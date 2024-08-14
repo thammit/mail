@@ -147,8 +147,7 @@ class ReportService
                     case $recipientSourceConfiguration->isModelSource():
                         $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration->model);
                         break;
-                    case $recipientSourceConfiguration->isPlain():
-                    case $recipientSourceConfiguration->isCsv():
+                    case $recipientSourceConfiguration->isCsvOrPlain():
                         $data[$recipientSourceIdentifier] = $recipientIds;
                         break;
                     case $recipientSourceConfiguration->isCsvFile():
