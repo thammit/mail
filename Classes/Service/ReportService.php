@@ -140,15 +140,16 @@ class ReportService
         foreach ($failedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
+                $data[$recipientSourceIdentifier]['configuration'] = $recipientSourceConfiguration;
                 switch (true) {
                     case $recipientSourceConfiguration->isTableSource():
-                        $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration->table);
+                        $data[$recipientSourceIdentifier]['recipients'] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration->table);
                         break;
                     case $recipientSourceConfiguration->isModelSource():
-                        $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration->model);
+                        $data[$recipientSourceIdentifier]['recipients'] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration->model);
                         break;
                     case $recipientSourceConfiguration->isCsvOrPlain():
-                        $data[$recipientSourceIdentifier] = $recipientIds;
+                        $data[$recipientSourceIdentifier]['recipients'] = $recipientIds;
                         break;
                     case $recipientSourceConfiguration->isCsvFile():
                     case $recipientSourceConfiguration->isService():

@@ -26,7 +26,7 @@ class DeactivateAddresses
     public function __invoke(DeactivateRecipientsEvent $disableRecipientsEvent): void
     {
         $affectedRecipients = $disableRecipientsEvent->getNumberOfAffectedRecipients();
-        $recipients = $disableRecipientsEvent->getData()[$this->recipientSourceIdentifier] ?? [];
+        $recipients = $disableRecipientsEvent->getData()[$this->recipientSourceIdentifier]['recipients'] ?? [];
         $recipientSourceConfiguration = $disableRecipientsEvent->getRecipientSources()[$this->recipientSourceIdentifier];
         foreach ($recipients as $recipient) {
             if ($recipientSourceConfiguration->model) {

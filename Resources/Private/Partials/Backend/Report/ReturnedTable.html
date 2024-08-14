@@ -5,6 +5,17 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
+<f:variable name="icon">
+    <f:if condition="{recipientSource.configuration.icon}">
+        <f:then>
+            <core:icon identifier="{recipientSource.configuration.icon}" size="small" />
+        </f:then>
+        <f:else if="{recipientSource.recipients.0} && {recipientSource.configuration.table}">
+            <core:iconForRecord row="{recipientSource.recipients.0}" table="{recipientSource.configuration.table}" size="small"/>
+        </f:else>
+    </f:if>
+</f:variable>
+
 <div class="panel panel-default">
     <div class="table-fit">
         <table class="table table-striped table-hover">
@@ -17,13 +28,19 @@
             </tr>
             </thead>
             <tbody>
-            <f:for each="{recipients}" as="recipient">
+            <f:for each="{recipientSource.recipients}" as="recipient">
+                <f:variable name="editUid" value="{recipient.uid}" />
+                <f:if condition="{recipientSource.configuration.csvOrPlain}">
+                    <f:variable name="editUid" value="{recipientSource.configuration.groupUid}" />
+                </f:if>
                 <tr>
                     <td class="col-icon nowrap" style="width: 1%">
-                        <core:iconForRecord row="{uid: recipient.uid}" table="{recipientSource}" size="small"/>
+                        <f:if condition="{icon}">
+                            {icon -> f:format.raw()}
+                        </f:if>
                     </td>
                     <td class="nowrap">
-                        <be:link.editRecord uid="{recipient.uid}" table="{recipientSource}"
+                        <be:link.editRecord uid="{editUid}" table="{recipientSource.configuration.table}"
                                             title="{f:translate(key: '{lll}general.button.edit')}">
                             {recipient.name}
                         </be:link.editRecord>
@@ -32,7 +49,7 @@
                         {recipient.email}
                     </td>
                     <td class="col-control nowrap">
-                        <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{recipientSource}"
+                        <be:link.editRecord class="btn btn-default" uid="{editUid}" table="{recipientSource.configuration.table}"
                                             title="{f:translate(key: '{lll}general.button.edit')}">
                             <core:icon identifier="actions-open"/>
                         </be:link.editRecord>
