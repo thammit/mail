@@ -13,6 +13,10 @@ use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
 
 class AddStatus implements UpgradeWizardInterface
 {
+    public function getIdentifier(): string
+    {
+        return 'mailAddStatus';
+    }
 
     public function getTitle(): string
     {

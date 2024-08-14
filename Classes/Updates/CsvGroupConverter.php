@@ -12,6 +12,10 @@ use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
 
 class CsvGroupConverter implements UpgradeWizardInterface
 {
+    public function getIdentifier(): string
+    {
+        return 'mailCsvGroupConverter';
+    }
 
     public function getTitle(): string
     {
@@ -37,7 +41,7 @@ class CsvGroupConverter implements UpgradeWizardInterface
                 ->set('csv_data', 'list', false)
                 ->set('list', '')
                 ->where(
-                    $queryBuilder->expr()->eq('type', RecipientGroupType::LIST),
+                    $queryBuilder->expr()->eq('type', RecipientGroupType::PLAIN),
                     $queryBuilder->expr()->eq('csv', 1)
                 )
                 ->executeStatement();
@@ -73,7 +77,7 @@ class CsvGroupConverter implements UpgradeWizardInterface
         return (bool)$queryBuilder
             ->count('uid')
             ->where(
-                $queryBuilder->expr()->eq('type', RecipientGroupType::LIST),
+                $queryBuilder->expr()->eq('type', RecipientGroupType::PLAIN),
                 $queryBuilder->expr()->eq('csv', 1)
             )
             ->executeQuery()
