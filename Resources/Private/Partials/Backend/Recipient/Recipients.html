@@ -76,7 +76,6 @@
                             </be:link.editRecord>
                         </f:if>
                         <f:if condition="{recipientSource.editCsvList}">
-                            {recipientSource.configuration.table}
                             <be:link.editRecord class="btn btn-default" uid="{recipientSource.editCsvList}" table="tx_mail_domain_model_group" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
