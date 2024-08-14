@@ -8,6 +8,8 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
+use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
+use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Database\Connection;
@@ -15,10 +17,26 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
+use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 class RecipientUtility
 {
+    /**
+     * @throws InvalidQueryException
+     * @throws Exception
+     */
+    public function getRecipientCategories(string $table, int $uid, int $categoryFormat): array|string
+    {
+        return match ($categoryFormat) {
+            CategoryFormat::OBJECTS => RecipientUtility::getObjectsOfRecipientCategories($table, $uid),
+            CategoryFormat::UIDS => RecipientUtility::getListOfRecipientCategories($table, $uid),
+            CategoryFormat::CSV => RecipientUtility::getCsvOfRecipientCategories($table, $uid),
+            default => '',
+        };
+    }
+
     /**
      * Get the list of categories ids subscribed to by recipient $uid from table $table
      *
@@ -51,6 +69,37 @@ class RecipientUtility
         }
 
         return $recipientCategories;
+    }
+
+    /**
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public static function getObjectsOfRecipientCategories(string $table, int $uid): array
+    {
+        $categoryUidList = self::getListOfRecipientCategories($table, $uid);
+        $categoryRepository = GeneralUtility::makeInstance(CategoryRepository::class);
+        return $categoryRepository->findByUids($categoryUidList)->toArray();
+    }
+
+    /**
+     * @throws Exception
+     * @throws InvalidQueryException
+     */
+    public static function getCsvOfRecipientCategories(string $table, int $uid, $orderings = ['title' => 'ASC']): string
+    {
+        $categoryUidList = self::getListOfRecipientCategories($table, $uid);
+        $categoryRepository = GeneralUtility::makeInstance(CategoryRepository::class);
+        $categories = $categoryRepository->findByUids($categoryUidList, $orderings);
+        if ($categories->count() === 0) {
+            return '';
+        }
+        $categoryTitles = [];
+        foreach ($categories as $category) {
+            $categoryTitles[] = $category->getTitle();
+        }
+
+        return implode(', ', $categoryTitles);
     }
 
     /**
@@ -172,55 +221,65 @@ class RecipientUtility
     /**
      * @param RecipientInterface|DomainObjectInterface $recipient
      * @param array $getters
-     * @param bool $withCategoryUidsArray
+     * @param int $categoryFormat
      * @return array
      */
-    public static function getFlatRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $getters, bool $withCategoryUidsArray = false): array
+    public static function getFlatRecipientModelData(RecipientInterface|DomainObjectInterface $recipient, array $getters, int $categoryFormat = CategoryFormat::CSV): array
     {
         $values = [];
         foreach ($getters as $field => $getter) {
-            $categoryUids = $withCategoryUidsArray && $field === 'categories';
-            if ($field === 'categories' && !$recipient instanceof CategoryInterface && !method_exists($recipient, $getter)) {
-                $values[$field] = $categoryUids ? [] : '';
-                continue;
-            }
-            $value = $recipient->$getter();
-            if ($value instanceof ObjectStorage) {
-                if ($value->count() > 0) {
-                    $titles = [];
-                    foreach ($value as $item) {
-                        if ($categoryUids) {
-                            $titles[] = $item->getUid();
-                        } else {
-                            if (method_exists($item, 'getTitle')) {
-                                $titles[] = $item->getTitle();
-                            } else {
-                                if (method_exists($item, 'getName')) {
-                                    $titles[] = $item->getName();
-                                } else {
-                                    $titles[] = $item->getUid();
+            switch ($field) {
+                case 'categories':
+                    $data = [];
+                    if ($recipient instanceof CategoryInterface) {
+                        $categories = $recipient->getCategories();
+                        if ($categories->count() > 0) {
+                            foreach ($categories as $category) {
+                                switch ($categoryFormat) {
+                                    case CategoryFormat::UIDS:
+                                        $data[] = $category->getUid();
+                                        break;
+                                    case CategoryFormat::CSV:
+                                        $data[] = $category->getTitle();
+                                        break;
+                                    case CategoryFormat::OBJECTS:
+                                        $data[] = $category;
+                                        break;
                                 }
                             }
                         }
                     }
-                    if ($categoryUids) {
-                        $values[$field] = $titles;
+                    $values['categories'] = $categoryFormat === CategoryFormat::CSV ? implode(', ', $data) : $data;
+                    break;
+                default:
+                    $value = $recipient->$getter();
+                    if ($value instanceof ObjectStorage) {
+                        $data = [];
+                        if ($value->count() > 0) {
+                            foreach ($value as $item) {
+                                if (method_exists($item, 'getTitle')) {
+                                    $data[] = $item->getTitle();
+                                } else {
+                                    if (method_exists($item, 'getName')) {
+                                        $data[] = $item->getName();
+                                    } else {
+                                        $data[] = $item->getUid();
+                                    }
+                                }
+                            }
+                        }
+                        $values[$field] = implode(', ', $data);
                     } else {
-                        $values[$field] = implode(', ', $titles);
+                        if (is_bool($value)) {
+                            $values[$field] = $value ? '1' : '0';
+                        } else {
+                            if ($value instanceof DateTime || $value instanceof DateTimeImmutable) {
+                                $values[$field] = $value->format('c');
+                            } else {
+                                $values[$field] = (string)$value;
+                            }
+                        }
                     }
-                } else {
-                    $values[$field] = $categoryUids ? [] : '';
-                }
-            } else {
-                if (is_bool($value)) {
-                    $values[$field] = $value ? '1' : '0';
-                } else {
-                    if ($value instanceof DateTime || $value instanceof DateTimeImmutable) {
-                        $values[$field] = $value->format('c');
-                    } else {
-                        $values[$field] = (string)$value;
-                    }
-                }
             }
         }
 

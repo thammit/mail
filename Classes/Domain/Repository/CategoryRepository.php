@@ -30,4 +30,22 @@ class CategoryRepository extends Repository
 
         return $query->execute();
     }
+
+    /**
+     * @throws InvalidQueryException
+     */
+    public function findByUids(array $categoryUids, array $orderings = []): array|QueryResultInterface
+    {
+        $query = $this->createQuery();
+        $query->getQuerySettings()->setRespectStoragePage(false);
+        $query->getQuerySettings()->setRespectSysLanguage(false);
+
+        $query->matching($query->in('uid', $categoryUids));
+
+        if (!empty($orderings)) {
+            $query->setOrderings($orderings);
+        }
+
+        return $query->execute();
+    }
 }

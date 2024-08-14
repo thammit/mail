@@ -19,6 +19,7 @@ use MEDIAESSENZ\Mail\Events\ManipulateMarkersEvent;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Events\ScheduledSendBegunEvent;
 use MEDIAESSENZ\Mail\Events\ScheduledSendFinishedEvent;
+use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
@@ -320,7 +321,7 @@ class MailerService implements LoggerAwareInterface
             new ManipulateMarkersEvent(
                 $markers,
                 $recipient,
-                $this->recipientSources[$recipientSourceIdentifier] ?? new RecipientSourceConfigurationDTO($recipientSourceIdentifier, ['noTable' => true])
+                $this->recipientSources[$recipientSourceIdentifier]
             )
         )->getMarkers();
 
@@ -355,10 +356,9 @@ class MailerService implements LoggerAwareInterface
                 continue;
             }
 
-            $isSimpleList = str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group');
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
 
-            if (!($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) && !$isSimpleList) {
+            if (!$recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
                 $this->logger->debug('No recipient source configuration found for ' . $recipientSourceIdentifier);
                 continue;
             }
@@ -366,34 +366,7 @@ class MailerService implements LoggerAwareInterface
             $recipientIds = array_slice($recipientIds, 0, $this->sendPerCycle);
 
             switch (true) {
-                case $isSimpleList:
-                    [$table, $groupUid] = explode(':', $recipientSourceIdentifier);
-                    foreach ($recipientIds as $recipientUid => $recipientData) {
-                        // fake uid for csv
-                        $recipientData['uid'] = $recipientUid + 1;
-                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($table, (int)$groupUid);
-                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
-                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
-                        $numberOfSentMails++;
-                    }
-                    break;
-                case $recipientSourceConfiguration->model:
-                    $recipientService = GeneralUtility::makeInstance(RecipientService::class);
-                    $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
-                        $recipientIds,
-                        $recipientSourceConfiguration->model,
-                        ['uid', 'name', 'email', 'categories', 'mail_html'],
-                        true
-                    );
-                    foreach ($recipientsData as $recipientData) {
-                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
-                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
-                        $numberOfSentMails++;
-                    }
-                    break;
-                default:
+                case $recipientSourceConfiguration->isTableSource():
                     $table = $recipientSourceConfiguration->table;
                     $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
                     $queryResult = $queryBuilder
@@ -409,6 +382,37 @@ class MailerService implements LoggerAwareInterface
                         $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
                         $numberOfSentMails++;
                     }
+                    break;
+                case $recipientSourceConfiguration->isModelSource():
+                    $recipientService = GeneralUtility::makeInstance(RecipientService::class);
+                    $recipientsData = $recipientService->getRecipientsDataByUidListAndModelName(
+                        $recipientIds,
+                        $recipientSourceConfiguration->model,
+                        ['uid', 'name', 'email', 'categories', 'mail_html'],
+                        CategoryFormat::UIDS
+                    );
+                    foreach ($recipientsData as $recipientData) {
+                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
+                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
+                        $numberOfSentMails++;
+                    }
+                    break;
+                case $recipientSourceConfiguration->isCsvOrPlain():
+                    [$table, $groupUid] = explode(':', $recipientSourceIdentifier);
+                    foreach ($recipientIds as $recipientUid => $recipientData) {
+                        // fake uid for csv
+                        $recipientData['uid'] = $recipientUid + 1;
+                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($table, (int)$groupUid);
+                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
+                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
+                        $numberOfSentMails++;
+                    }
+                    break;
+                case $recipientSourceConfiguration->isCsvFile():
+                case $recipientSourceConfiguration->isService():
+                    // todo
                     break;
             }
             if (!$recipients[$recipientSourceIdentifier]) {
@@ -448,7 +452,7 @@ class MailerService implements LoggerAwareInterface
             // PSR-14 event dispatcher to manipulate recipient data
             // see MEDIAESSENZ\Mail\EventListener\NormalizeRecipientData for example
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
-            if ($recipientSourceConfiguration) {
+            if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
                 $recipientData = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipientData, $recipientSourceConfiguration))->getRecipientData();
             }
 

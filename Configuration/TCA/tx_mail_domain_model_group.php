@@ -24,14 +24,14 @@ return [
             'default' => 'mail-group',
             RecipientGroupType::PAGES => 'mail-group',
             RecipientGroupType::CSV => 'mail-group',
-            RecipientGroupType::LIST => 'mail-group',
+            RecipientGroupType::PLAIN => 'mail-group',
             RecipientGroupType::STATIC => 'mail-group',
             RecipientGroupType::OTHER => 'mail-group',
         ],
     ],
     'types' => [
         RecipientGroupType::PAGES => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,recipient_sources,pages,recursive,categories'],
-        RecipientGroupType::LIST => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,list,mail_html,categories'],
+        RecipientGroupType::PLAIN => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,list,mail_html,categories'],
         RecipientGroupType::CSV => [
             'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv_type,csv_separator,csv_data,csv_file,mail_html,categories',
             'columnsOverrides' => [
@@ -76,7 +76,7 @@ return [
                 'renderType' => 'selectSingle',
                 'items' => [
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.pages', RecipientGroupType::PAGES],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.list', RecipientGroupType::LIST],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.list', RecipientGroupType::PLAIN],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.csv', RecipientGroupType::CSV],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.static', RecipientGroupType::STATIC],
                     ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.other', RecipientGroupType::OTHER],

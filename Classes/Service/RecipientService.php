@@ -13,6 +13,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Events\RecipientsRestrictionEvent;
+use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
@@ -93,16 +94,17 @@ class RecipientService
      * @param array $uidListOfRecipients List of recipient IDs
      * @param string $table Table name
      * @param array $fields Field to be selected
-     * @param bool $categoriesAsList
+     * @param int $categoryFormat
      *
      * @return array recipients' data
      * @throws \Doctrine\DBAL\Exception
+     * @throws InvalidQueryException
      */
     public function getRecipientsDataByUidListAndTable(
         array $uidListOfRecipients,
         string $table,
         array $fields = ['uid', 'name', 'email', 'categories', 'mail_html'],
-        bool $categoriesAsList = false
+        int $categoryFormat = CategoryFormat::OBJECTS
     ): array {
         if (!$uidListOfRecipients) {
             return [];
@@ -120,20 +122,22 @@ class RecipientService
         $replaceCategories = in_array('categories', $fields);
         while ($row = $res->fetchAssociative()) {
             if ($replaceCategories) {
+                $categories = $categoryFormat === CategoryFormat::CSV ? '' : [];
                 if ($row['categories'] ?? false) {
-                    $items = $this->getCategoriesOfRecipient($row['uid'], $table);
-                    if ($items) {
-                        if ($categoriesAsList) {
-                            $row['categories'] = implode(', ', array_column($items, 'title'));
-                        } else {
-                            $row['categories'] = $items;
-                        }
-                    } else {
-                        $row['categories'] = $categoriesAsList ? '' : [];
+                    switch (true) {
+                        case $categoryFormat === CategoryFormat::OBJECTS:
+                            $categories = RecipientUtility::getObjectsOfRecipientCategories($table, $row['uid']);
+                            break;
+                        case $categoryFormat === CategoryFormat::UIDS:
+                            $categories = RecipientUtility::getListOfRecipientCategories($table, $row['uid']);
+                            break;
+                        case $categoryFormat === CategoryFormat::CSV:
+                            $categories = RecipientUtility::getCsvOfRecipientCategories($table, $row['uid']);
+                            break;
                     }
-                } else {
-                    $row['categories'] = $categoriesAsList ? '' : [];
                 }
+                $row['categories'] = $categories;
+
             }
             $data[$row['uid']] = $row;
         }
@@ -147,7 +151,7 @@ class RecipientService
      * @param array $uidListOfRecipients List of recipient IDs
      * @param string $modelName model name
      * @param array $fields Field to be selected. If empty enhanced model data will be returned
-     * @param bool $withCategoryUidsArray
+     * @param int $categoryFormat
      * @param int $limit limit of results
      *
      * @return array recipients' data
@@ -157,10 +161,10 @@ class RecipientService
         array $uidListOfRecipients,
         string $modelName,
         array $fields = ['uid', 'name', 'email', 'categories', 'mail_html'],
-        bool $withCategoryUidsArray = false,
+        int $categoryFormat = CategoryFormat::OBJECTS,
         int $limit = 0
     ): array {
-        if (!$uidListOfRecipients || !$modelName) {
+        if (!$uidListOfRecipients || !$modelName || !class_exists($modelName) || !is_subclass_of($modelName, RecipientInterface::class)) {
             return [];
         }
         $data = [];
@@ -211,7 +215,7 @@ class RecipientService
         /** @var RecipientInterface $recipient */
         foreach ($recipients as $recipient) {
             $data[$recipient->getUid()] = $hasFields ? RecipientUtility::getFlatRecipientModelData($recipient, $getters,
-                $withCategoryUidsArray) : $recipient->getEnhancedData();
+                $categoryFormat) : $recipient->getEnhancedData();
         }
 
         return $data;
@@ -243,10 +247,13 @@ class RecipientService
         }
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
-            if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
-                $idLists[$recipientSourceIdentifier] = RecipientUtility::removeDuplicates($idList);
-            } else {
-                $idLists[$recipientSourceIdentifier] = array_unique($idList);
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+            if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
+                if ($recipientSourceConfiguration->isCsvOrPlain()) {
+                    $idLists[$recipientSourceIdentifier] = RecipientUtility::removeDuplicates($idList);
+                } else {
+                    $idLists[$recipientSourceIdentifier] = array_unique($idList);
+                }
             }
         }
 
@@ -274,22 +281,32 @@ class RecipientService
      */
     public function getEmailAddressesByRecipientSourceAndRecipientsList(string $recipientSourceIdentifier, array $recipients): array
     {
-        if (!$recipients) {
+        /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+        $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+
+        if (!$recipients || !$recipientSourceConfiguration) {
             return [];
         }
 
         $emails = [];
-        if (!str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
-            /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
-            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
-            if ($recipientSourceConfiguration->model) {
-                $recipients = $this->getRecipientsDataByUidListAndModelName($recipients,
-                    $recipientSourceConfiguration->model, ['email']);
-            } else {
-                $recipients = $this->getRecipientsDataByUidListAndTable($recipients,
-                    $recipientSourceConfiguration->table, ['email']);
-            }
+
+        switch (true) {
+            case $recipientSourceConfiguration->isTableSource():
+                $recipients = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->table, ['email']);
+                break;
+            case $recipientSourceConfiguration->isModelSource():
+                $recipients = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['email']);
+                break;
+            case $recipientSourceConfiguration->isCsv():
+            case $recipientSourceConfiguration->isPlain():
+                // nothing to do, since email is already in recipient array
+                break;
+            case $recipientSourceConfiguration->isCsvFile():
+            case $recipientSourceConfiguration->isService():
+                // todo
+                break;
         }
+
         foreach ($recipients as $recipient) {
             if ($recipient['email'] ?? false) {
                 $emails[] = $recipient['email'];
@@ -306,32 +323,43 @@ class RecipientService
     public function removeFromRecipientListIfInExcludeEmailsList(array $recipientsUidListGroupedByRecipientSource, array $excludeEmails): array
     {
         foreach ($recipientsUidListGroupedByRecipientSource as $recipientSourceIdentifier => $recipients) {
-            if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
-                // handle csv and plain lists
-                $recipientsToKeep = [];
-                foreach ($recipients as $recipient) {
-                    $email = $recipient['email'] ?? false;
-                    if (!in_array($email, $excludeEmails, true)) {
-                        $recipientsToKeep[] = $recipient;
+            /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+            if (!$recipientSourceConfiguration) {
+                continue;
+            }
+
+            switch (true) {
+                case $recipientSourceConfiguration->isTableSource():
+                case $recipientSourceConfiguration->isModelSource():
+                    if ($recipientSourceConfiguration->isTableSource()) {
+                        $recipientsData = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->table, ['uid', 'email']);
+                    } else {
+                        $recipientsData = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['uid', 'email']);
                     }
-                }
-                $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = $recipientsToKeep;
-            } else {
-                /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
-                $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
-                if ($recipientSourceConfiguration->model) {
-                    $recipientsData = $this->getRecipientsDataByUidListAndModelName($recipients,
-                        $recipientSourceConfiguration->model, ['uid', 'email']);
-                } else {
-                    $recipientsData = $this->getRecipientsDataByUidListAndTable($recipients,
-                        $recipientSourceConfiguration->table, ['uid', 'email']);
-                }
-                foreach ($recipientsData as $recipientData) {
-                    $email = $recipientData['email'] ?? false;
-                    if (in_array($email, $excludeEmails, true)) {
-                        $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = array_values(array_filter($recipients, static fn($uid) => $uid !== (int)$recipientData['uid']));
+                    foreach ($recipientsData as $recipientData) {
+                        $email = $recipientData['email'] ?? false;
+                        if (in_array($email, $excludeEmails, true)) {
+                            $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = array_values(array_filter($recipients, static fn($uid) => $uid !== (int)$recipientData['uid']));
+                        }
                     }
-                }
+                    break;
+                case $recipientSourceConfiguration->isCsv():
+                case $recipientSourceConfiguration->isPlain():
+                    // handle csv and plain lists
+                    $recipientsToKeep = [];
+                    foreach ($recipients as $recipient) {
+                        $email = $recipient['email'] ?? false;
+                        if (!in_array($email, $excludeEmails, true)) {
+                            $recipientsToKeep[] = $recipient;
+                        }
+                    }
+                    $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = $recipientsToKeep;
+                    break;
+                case $recipientSourceConfiguration->isCsvFile():
+                case $recipientSourceConfiguration->isService():
+                    // todo
+                    break;
             }
         }
 
@@ -351,7 +379,7 @@ class RecipientService
      */
     public function getNumberOfRecipientsByGroup(Group $group): int
     {
-        $list = $this->getRecipientsUidListGroupedByRecipientSource($group);
+        $list = $this->getRecipientsUidListGroupedByRecipientSource($group, true);
         return RecipientUtility::calculateTotalRecipientsOfUidLists($list);
     }
 
@@ -371,15 +399,15 @@ class RecipientService
         bool $addGroupUidToRecipientSourceIdentifier = false
     ): array {
         $idLists = [];
-        switch ($group->getType()) {
-            case RecipientGroupType::PAGES:
+        switch (true) {
+            case $group->isPages():
                 // From pages
                 $pages = BackendDataUtility::getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
                         /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
                         $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
-                        if ($recipientSourceConfiguration->model) {
+                        if ($recipientSourceConfiguration->isModelSource()) {
                             $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
                                 $recipientSourceConfiguration,
                                 $pages,
@@ -395,14 +423,12 @@ class RecipientService
                     }
                 }
                 break;
-            case RecipientGroupType::LIST:
-            case RecipientGroupType::CSV:
-                if ($group->getType() === RecipientGroupType::LIST) {
-                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|',
-                        trim($group->getList()))));
+            case $group->isPlain():
+            case $group->isCsv():
+                if ($group->isPlain()) {
+                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($group->getList()))));
                 } else {
-                    $recipients = CsvUtility::rearrangeCsvValues($group->getCsvData(), $group->getCsvSeparatorString(),
-                        RecipientUtility::getAllRecipientFields());
+                    $recipients = CsvUtility::rearrangeCsvValues($group->getCsvData(), $group->getCsvSeparatorString(), RecipientUtility::getAllRecipientFields());
                 }
                 foreach ($recipients as $key => $recipient) {
                     $recipients[$key]['categories'] = $group->getCategories();
@@ -411,7 +437,7 @@ class RecipientService
                 $recipientSourceIdentifier = $addGroupUidToRecipientSourceIdentifier ? 'tx_mail_domain_model_group:' . $group->getUid() : 'tx_mail_domain_model_group';
                 $idLists[$recipientSourceIdentifier] = RecipientUtility::removeDuplicates($recipients);
                 break;
-            case RecipientGroupType::STATIC:
+            case $group->isStatic():
                 // Static MM list
                 foreach ($this->recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
                     if ($recipientSourceConfiguration->table === $recipientSourceConfiguration->identifier) {
@@ -423,7 +449,7 @@ class RecipientService
                     }
                 }
                 break;
-            case RecipientGroupType::OTHER:
+            case $group->isOther():
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
                     $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup,
@@ -433,14 +459,19 @@ class RecipientService
                 break;
         }
 
+        $uniqueIdLists = [];
+
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
-            $idLists[$recipientSourceIdentifier] = str_starts_with($recipientSourceIdentifier,
-                'tx_mail_domain_model_group') ? $idList : array_unique($idList);
+            /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+            if ($recipientSourceConfiguration) {
+                $uniqueIdLists[$recipientSourceIdentifier] = $recipientSourceConfiguration->isCsvOrPlain() ? $idList : array_unique($idList);
+            }
         }
 
         // todo add event dispatcher to manipulate the returned idLists
 
-        return $idLists;
+        return $uniqueIdLists;
     }
 
     /**

@@ -5,7 +5,17 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<f:if condition="{recipients}">
+<f:if condition="{recipientSource.recipients}">
+    <f:variable name="icon">
+        <f:if condition="{recipientSource.configuration.icon}">
+            <f:then>
+                <core:icon identifier="{recipientSource.configuration.icon}" />
+            </f:then>
+            <f:else if="{recipientSource.recipients.0} && {recipientSource.configuration.table}">
+                <core:iconForRecord row="{recipientSource.recipients.0}" table="{recipientSource.configuration.table}"/>
+            </f:else>
+        </f:if>
+    </f:variable>
     <div class="panel panel-default">
         <table class="table table-striped table-hover mb-0">
             <thead>
@@ -19,7 +29,7 @@
             </tr>
             </thead>
             <tbody>
-            <f:for each="{recipients}" as="recipient">
+            <f:for each="{recipientSource.recipients}" as="recipient">
                 <tr>
                     <td class="col-icon nowrap" style="width: 1%">
                         <f:if condition="{icon}">
@@ -27,9 +37,9 @@
                         </f:if>
                     </td>
                     <td class="col-title col-responsive nowrap">
-                        <f:if condition="{recipient.uid} && {allowEdit}">
+                        <f:if condition="{recipient.uid} && {recipientSource.edit}">
                             <f:then>
-                                <be:link.editRecord uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}general.button.edit')}">
+                                <be:link.editRecord uid="{recipient.uid}" table="{recipientSource.configuration.table}" title="{f:translate(key: '{lll}general.button.edit')}">
                                     <f:if condition="{recipient.name}"><f:then>{recipient.name}</f:then><f:else>({recipient.email})</f:else></f:if>
                                 </be:link.editRecord>
                             </f:then>
@@ -45,8 +55,7 @@
                         <f:if condition="{recipient.categories -> f:count() > 0}">
                         <f:then>
                             <f:for each="{recipient.categories}" as="category" iteration="categoryIterator">
-                                {category.title}
-                                <f:if condition="!{categoryIterator.isLast}">, </f:if>
+                                {category.title}<f:if condition="!{categoryIterator.isLast}">, </f:if>
                             </f:for>
                         </f:then>
                         <f:else>
@@ -61,13 +70,14 @@
                         </f:if>
                     </td>
                     <td class="col-control nowrap">
-                        <f:if condition="{recipient.uid} && {allowEdit}">
-                            <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}general.button.edit')}">
+                        <f:if condition="{recipient.uid} && {recipientSource.edit}">
+                            <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{recipientSource.configuration.table}" title="{f:translate(key: '{lll}general.button.edit')}">
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
                         </f:if>
-                        <f:if condition="{editCsvList}">
-                            <be:link.editRecord class="btn btn-default" uid="{editCsvList}" table="{table}" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
+                        <f:if condition="{recipientSource.editCsvList}">
+                            {recipientSource.configuration.table}
+                            <be:link.editRecord class="btn btn-default" uid="{recipientSource.editCsvList}" table="tx_mail_domain_model_group" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
                                 <core:icon identifier="actions-open"/>
                             </be:link.editRecord>
                         </f:if>

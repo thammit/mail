@@ -136,16 +136,25 @@ class ReportService
     {
         $data = [];
         $failedRecipientIds = $this->logRepository->findFailedRecipientIdsByMailAndReturnCodeGroupedByRecipientSource($this->mail->getUid(), $returnCodes);
+
         foreach ($failedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
-            if (str_starts_with($recipientSourceIdentifier, 'tx_mail_domain_model_group')) {
-                $data[$recipientSourceIdentifier] = $recipientIds;
-            } else {
-                /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
-                $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
-                if ($recipientSourceConfiguration->model) {
-                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration->model);
-                } else {
-                    $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration->table);
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+            if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
+                switch (true) {
+                    case $recipientSourceConfiguration->isTableSource():
+                        $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration->table);
+                        break;
+                    case $recipientSourceConfiguration->isModelSource():
+                        $data[$recipientSourceIdentifier] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration->model);
+                        break;
+                    case $recipientSourceConfiguration->isPlain():
+                    case $recipientSourceConfiguration->isCsv():
+                        $data[$recipientSourceIdentifier] = $recipientIds;
+                        break;
+                    case $recipientSourceConfiguration->isCsvFile():
+                    case $recipientSourceConfiguration->isService():
+                        // todo
+                        break;
                 }
             }
         }

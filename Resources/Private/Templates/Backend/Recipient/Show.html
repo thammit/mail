@@ -17,28 +17,18 @@
             <f:if condition="{recipientSources -> f:count()} == 1">
                 <f:variable name="open" value="1"/>
             </f:if>
-            <f:for each="{recipientSources}" as="recipientSource" key="recipientSourceIdentifier" iteration="panel">
+            <f:for each="{recipientSources}" as="recipientSource" iteration="panel">
                 <f:variable name="title">
-                    <f:translate key="{recipientSource.title}" default="{recipientSource.title}"/><f:if condition="{recipientSource.table} != 'tx_mail_domain_model_group'"> [{recipientSource.table}]</f:if>
+                    <f:translate key="{recipientSource.configuration.title}" default="{recipientSource.configuration.title}"/> [{recipientSource.configuration.identifier}]
                 </f:variable>
-                <f:variable name="additionalHeading"><f:if condition="{recipientSource.csvExport} || 1==1"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSourceIdentifier}" class="btn btn-default btn-sm text-uppercase">
+                <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSource.configuration.identifier}" class="btn btn-default btn-sm text-uppercase">
                     <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
                     <f:translate key="{lll}general.button.downloadCsv"/>
-                </f:link.action></f:if></f:variable>
-                <f:variable name="icon">
-                    <f:if condition="{recipientSource.icon}">
-                        <f:then>
-                            <core:icon identifier="{recipientSource.icon}" />
-                        </f:then>
-                        <f:else if="{recipientSource.recipients.0} && {table}">
-                            <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}"/>
-                        </f:else>
-                    </f:if>
-                </f:variable>
+                </f:link.action></f:variable>
                 <f:render partial="Backend/Panel"
                           arguments="{lll:lll, parentId:'mail-recipient-list-panel-{panel.index}', title: title, index:panel.index, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
                           contentAs="panelBody">
-                    <f:render partial="Backend/Recipient/Recipients" arguments="{recipients: recipientSource.recipients, htmlColumn: recipientSource.htmlColumn, table: recipientSource.table, icon: icon, allowEdit: recipientSource.edit, editCsvList: recipientSource.editCsvList, lll:lll}"/>
+                    <f:render partial="Backend/Recipient/Recipients" arguments="{recipientSource:recipientSource, lll:lll}"/>
                 </f:render>
             </f:for>
         </div>

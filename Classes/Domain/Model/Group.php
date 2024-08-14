@@ -117,6 +117,31 @@ class Group extends AbstractEntity
         return $this;
     }
 
+    public function isPages(): bool
+    {
+        return $this->type === RecipientGroupType::PAGES;
+    }
+
+    public function isStatic(): bool
+    {
+        return $this->type === RecipientGroupType::STATIC;
+    }
+
+    public function isCsv(): bool
+    {
+        return $this->type === RecipientGroupType::CSV;
+    }
+
+    public function isPlain(): bool
+    {
+        return $this->type === RecipientGroupType::PLAIN;
+    }
+
+    public function isOther(): bool
+    {
+        return $this->type === RecipientGroupType::OTHER;
+    }
+
     /**
      * @return string
      */

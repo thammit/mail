@@ -3,11 +3,16 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
+use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
+use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
+use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
+use MEDIAESSENZ\Mail\Type\Enumeration\RecipientSourceType;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -37,6 +42,7 @@ class ConfigurationUtility
     /**
      * @param array $siteConfiguration
      * @return RecipientSourceConfigurationDTO[]
+     * @throws Exception
      */
     public static function getRecipientSources(array $siteConfiguration = []): array
     {
@@ -48,6 +54,34 @@ class ConfigurationUtility
 
         $recipientSourcesWithDTOs = [];
         foreach ($recipientSources as $recipientSourceIdentifier => $recipientSourceConfiguration) {
+            $recipientSourcesWithDTOs[$recipientSourceIdentifier] = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $recipientSourceConfiguration);
+        }
+
+        // get recipient sources from group records if type is plain and csv
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_mail_domain_model_group');
+        $csvRecipientSources = $queryBuilder
+            ->select('uid', 'pid', 'title', 'type', 'csv_type')
+            ->from('tx_mail_domain_model_group')
+            ->where($queryBuilder->expr()->eq('type', RecipientGroupType::CSV))
+            ->orWhere($queryBuilder->expr()->eq('type', RecipientGroupType::PLAIN))
+            ->executeQuery()
+            ->fetchAllAssociative();
+        foreach ($csvRecipientSources as $csvRecipientSource) {
+            $recipientSourceIdentifier = 'tx_mail_domain_model_group:' . $csvRecipientSource['uid'];
+            $type = match ($csvRecipientSource['type']) {
+                RecipientGroupType::CSV => match ($csvRecipientSource['csv_type']) {
+                    CsvType::FILE => RecipientSourceType::CSVFILE,
+                    default => RecipientSourceType::CSV,
+                },
+                default => RecipientSourceType::PLAIN,
+            };
+            $recipientSourceConfiguration = [
+                'type' => $type,
+                'title' => $csvRecipientSource['title'],
+                'pid' => $csvRecipientSource['pid'],
+                'groupUid' => $csvRecipientSource['uid'],
+                'icon' => 'mail-group',
+            ];
             $recipientSourcesWithDTOs[$recipientSourceIdentifier] = new RecipientSourceConfigurationDTO($recipientSourceIdentifier, $recipientSourceConfiguration);
         }
 

@@ -237,26 +237,34 @@ class JumpurlMiddleware implements MiddlewareInterface
         // is the DB table name and the second part the UID of the record in the DB table
         [$this->recipientSourceIdentifier, $recipientUid] = explode('-', $combinedRecipient);
 
-        if ($this->recipientSources[$this->recipientSourceIdentifier] ?? false) {
-            /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
-            $recipientSourceConfiguration = $this->recipientSources[$this->recipientSourceIdentifier];
+        $recipientSourceConfiguration = $this->recipientSources[$this->recipientSourceIdentifier] ?? false;
+
+        if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
             $recipientService = GeneralUtility::makeInstance(RecipientService::class);
             $recipientService->init($this->recipientSources);
-            $isSimpleList = $this->recipientSourceIdentifier === 'tx_mail_domain_model_group';
-            if ($isSimpleList) {
-                $this->recipientRecord['uid'] = $recipientUid;
-            } else {
-                if ($recipientSourceConfiguration->model) {
-                    $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration->model, []);
-                } else {
-                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration->table);
-                }
-                $this->recipientRecord = reset($recipientData);
 
-                // PSR-14 event dispatcher to manipulate recipient data the same way done in mailerService::sendSingleMailAndAddLogEntry method
-                $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-                $this->recipientRecord = $eventDispatcher->dispatch(new ManipulateRecipientEvent($this->recipientRecord, $recipientSourceConfiguration))->getRecipientData();
+            switch (true) {
+                case $recipientSourceConfiguration->isTableSource():
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration->table);
+                    $this->recipientRecord = reset($recipientData);
+                    break;
+                case $recipientSourceConfiguration->isModelSource():
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration->model, []);
+                    $this->recipientRecord = reset($recipientData);
+                    break;
+                case $recipientSourceConfiguration->isCsv():
+                case $recipientSourceConfiguration->isPlain():
+                    $this->recipientRecord['uid'] = $recipientUid;
+                    break;
+                case $recipientSourceConfiguration->isCsvFile():
+                case $recipientSourceConfiguration->isService():
+                    // todo:
+                    break;
             }
+
+            // PSR-14 event dispatcher to manipulate recipient data the same way done in mailerService::sendSingleMailAndAddLogEntry method
+            $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
+            $this->recipientRecord = $eventDispatcher->dispatch(new ManipulateRecipientEvent($this->recipientRecord, $recipientSourceConfiguration))->getRecipientData();
         }
     }
 
