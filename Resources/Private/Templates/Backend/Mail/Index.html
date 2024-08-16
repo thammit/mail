@@ -200,7 +200,7 @@
                                 </div>
                             </div>
                         </f:if>
-                        <f:if condition="!{data.scheduledBegin}">
+                        <f:if condition="{data.draft}">
                             <f:link.action action="delete" arguments="{mail:data.uid}" class="btn btn-default" data="{bs-toggle:'tooltip', bs-placement:'top'}" title="Delete mail"><core:icon identifier="actions-edit-delete" size="small"/></f:link.action>
                         </f:if>
                     </td>
