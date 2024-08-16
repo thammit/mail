@@ -111,27 +111,31 @@ class RecipientController extends AbstractController
     public function showAction(Group $group): ResponseInterface
     {
         $recipientSources = [];
-        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group, true);
-        foreach ($idLists as $recipientSourceIdentifier => $idList) {
+        $recipientsUidListGroupedByRecipientSource = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group, true);
+
+        foreach ($recipientsUidListGroupedByRecipientSource as $recipientSourceIdentifier => $idList) {
 
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+
             if (!$idList || !$recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
                 // skip empty id lists and lists without recipient source configuration
                 continue;
             }
 
             $recipients = [];
-            $editCsvList = 0;
+
             switch (true) {
                 case $recipientSourceConfiguration->isTableSource():
-                    $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration->table);
+                    $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table);
+                    if ($recipientSourceConfiguration->contains) {
+                        $recipientSourceConfiguration->title = $recipientSourceConfiguration->containsTitle ?? $recipientSourceConfiguration->contains;
+                    }
                     break;
                 case $recipientSourceConfiguration->isModelSource():
                     $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($idList, $recipientSourceConfiguration->model);
                     break;
                 case $recipientSourceConfiguration->isCsvOrPlain():
                     $recipients = $idList;
-                    $editCsvList = $recipientSourceConfiguration->groupUid;
                     break;
                 case $recipientSourceConfiguration->isCsvFile():
                 case $recipientSourceConfiguration->isService():
@@ -139,24 +143,24 @@ class RecipientController extends AbstractController
                     break;
             }
 
-            $table = $recipientSourceConfiguration->table;
+            $table = $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table;
 
-            $recipientSources[] = [
+            $recipientSources[$recipientSourceConfiguration->identifier] = [
                 'configuration' => $recipientSourceConfiguration,
                 'recipients' => $recipients,
                 'numberOfRecipients' => count($recipients),
                 'show' => $table && BackendUserUtility::getBackendUser()->check('tables_select', $table),
                 'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
-                'editCsvList' => BackendUserUtility::getBackendUser()->check('tables_modify', 'tx_mail_domain_model_group') ? $editCsvList : 0,
             ];
         }
 
-        $this->addLeftDocheaderBackEditButtons($group->getUid(), $this->request->getRequestTarget());
-        $this->addDocheaderButtons($group->getTitle());
         $assignments = [
             'group' => $group,
             'recipientSources' => $recipientSources
         ];
+
+        $this->addLeftDocheaderBackEditButtons($group->getUid(), $this->request->getRequestTarget());
+        $this->addDocheaderButtons($group->getTitle());
 
         if ($this->typo3MajorVersion < 12) {
             $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
@@ -165,6 +169,7 @@ class RecipientController extends AbstractController
         }
 
         $this->moduleTemplate->assignMultiple($assignments);
+
         return $this->moduleTemplate->renderResponse('Backend/Recipient/Show');
     }
 
@@ -209,25 +214,25 @@ class RecipientController extends AbstractController
             return $this->redirect('show');
         }
 
-        $idLists = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
-        if (!array_key_exists($recipientSourceIdentifier, $idLists) || count($idLists[$recipientSourceIdentifier]) === 0) {
+        $recipientsUidListGroupedByRecipientSource = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
+        if (!array_key_exists($recipientSourceIdentifier, $recipientsUidListGroupedByRecipientSource) || count($recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier]) === 0) {
             ViewUtility::addFlashMessageError('',
                 LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
             return $this->redirect('show');
         }
 
-        $idList = $idLists[$recipientSourceIdentifier];
-        if (is_array(current($idList))) {
+        $recipientsUidList = $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier];
+        if (is_array(current($recipientsUidList))) {
             // the list already contain recipient data and not only an array of uids
-            $rows = $idList;
+            $rows = $recipientsUidList;
         } else {
             if ($recipientSourceConfiguration->isModelSource()) {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($idList,
+                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientsUidList,
                     $recipientSourceConfiguration->model, []);
             } else {
                 $csvExportFields = $recipientSourceConfiguration->csvExportFields ?? GeneralUtility::trimExplode(',',
                     $this->defaultCsvExportFields, true);
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($idList, $recipientSourceConfiguration->table, $csvExportFields, CategoryFormat::CSV);
+                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($recipientsUidList, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, $csvExportFields, CategoryFormat::CSV);
             }
         }
         return CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);

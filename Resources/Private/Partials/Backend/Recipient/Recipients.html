@@ -6,13 +6,19 @@
       data-namespace-typo3-fluid="true">
 
 <f:if condition="{recipientSource.recipients}">
+    <f:variable name="table" value="{recipientSource.configuration.table}" />
+    <f:variable name="iconIdenfiier" value="{recipientSource.configuration.icon}" />
+    <f:if condition="{recipientSource.configuration.contains}">
+        <f:variable name="table" value="{recipientSource.configuration.contains}" />
+        <f:variable name="iconIdenfiier" value="{recipientSource.configuration.containsIcon}" />
+    </f:if>
     <f:variable name="icon">
-        <f:if condition="{recipientSource.configuration.icon}">
+        <f:if condition="{iconIdenfiier}">
             <f:then>
-                <core:icon identifier="{recipientSource.configuration.icon}" />
+                <core:icon identifier="{iconIdenfiier}" />
             </f:then>
-            <f:else if="{recipientSource.recipients.0} && {recipientSource.configuration.table}">
-                <core:iconForRecord row="{recipientSource.recipients.0}" table="{recipientSource.configuration.table}"/>
+            <f:else if="{recipientSource.recipients.0} && {table}">
+                <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}"/>
             </f:else>
         </f:if>
     </f:variable>
@@ -37,11 +43,24 @@
                         </f:if>
                     </td>
                     <td class="col-title col-responsive nowrap">
-                        <f:if condition="{recipient.uid} && {recipientSource.edit}">
+                        <f:if condition="{recipientSource.edit}">
                             <f:then>
-                                <be:link.editRecord uid="{recipient.uid}" table="{recipientSource.configuration.table}" title="{f:translate(key: '{lll}general.button.edit')}">
-                                    <f:if condition="{recipient.name}"><f:then>{recipient.name}</f:then><f:else>({recipient.email})</f:else></f:if>
-                                </be:link.editRecord>
+                                <f:if condition="{recipientSource.configuration.csvOrPlain}">
+                                    <f:then>
+                                        <f:if condition="{recipientSource.configuration.groupUid}">
+                                            <be:link.editRecord uid="{recipientSource.configuration.groupUid}" table="{table}" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
+                                                <f:if condition="{recipient.name}"><f:then>{recipient.name}</f:then><f:else>({recipient.email})</f:else></f:if>
+                                            </be:link.editRecord>
+                                        </f:if>
+                                    </f:then>
+                                    <f:else>
+                                        <f:if condition="{recipient.uid} && {recipientSource.edit}">
+                                            <be:link.editRecord uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}general.button.edit')}">
+                                                <f:if condition="{recipient.name}"><f:then>{recipient.name}</f:then><f:else>({recipient.email})</f:else></f:if>
+                                            </be:link.editRecord>
+                                        </f:if>
+                                    </f:else>
+                                </f:if>
                             </f:then>
                             <f:else>
                                 <f:if condition="{recipient.name}"><f:then>{recipient.name}</f:then><f:else>({recipient.email})</f:else></f:if>
@@ -70,15 +89,23 @@
                         </f:if>
                     </td>
                     <td class="col-control nowrap">
-                        <f:if condition="{recipient.uid} && {recipientSource.edit}">
-                            <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{recipientSource.configuration.table}" title="{f:translate(key: '{lll}general.button.edit')}">
-                                <core:icon identifier="actions-open"/>
-                            </be:link.editRecord>
-                        </f:if>
-                        <f:if condition="{recipientSource.editCsvList}">
-                            <be:link.editRecord class="btn btn-default" uid="{recipientSource.editCsvList}" table="tx_mail_domain_model_group" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
-                                <core:icon identifier="actions-open"/>
-                            </be:link.editRecord>
+                        <f:if condition="{recipientSource.edit}">
+                            <f:if condition="{recipientSource.configuration.csvOrPlain}">
+                                <f:then>
+                                    <f:if condition="{recipientSource.configuration.groupUid}">
+                                        <be:link.editRecord class="btn btn-default" uid="{recipientSource.configuration.groupUid}" table="{table}" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
+                                            <core:icon identifier="actions-open"/>
+                                        </be:link.editRecord>
+                                    </f:if>
+                                </f:then>
+                                <f:else>
+                                    <f:if condition="{recipient.uid} && {recipientSource.edit}">
+                                        <be:link.editRecord class="btn btn-default" uid="{recipient.uid}" table="{table}" title="{f:translate(key: '{lll}general.button.edit')}">
+                                            <core:icon identifier="actions-open"/>
+                                        </be:link.editRecord>
+                                    </f:if>
+                                </f:else>
+                            </f:if>
                         </f:if>
                     </td>
                 </tr>

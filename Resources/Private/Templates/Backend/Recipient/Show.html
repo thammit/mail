@@ -18,18 +18,20 @@
                 <f:variable name="open" value="1"/>
             </f:if>
             <f:for each="{recipientSources}" as="recipientSource" iteration="panel">
-                <f:variable name="title">
-                    <f:translate key="{recipientSource.configuration.title}" default="{recipientSource.configuration.title}"/> [{recipientSource.configuration.identifier}]
-                </f:variable>
-                <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSource.configuration.identifier}" class="btn btn-default btn-sm text-uppercase">
-                    <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
-                    <f:translate key="{lll}general.button.downloadCsv"/>
-                </f:link.action></f:variable>
-                <f:render partial="Backend/Panel"
-                          arguments="{lll:lll, parentId:'mail-recipient-list-panel-{panel.index}', title: title, index:panel.index, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
-                          contentAs="panelBody">
-                    <f:render partial="Backend/Recipient/Recipients" arguments="{recipientSource:recipientSource, lll:lll}"/>
-                </f:render>
+                <f:if condition="{recipientSource.show}">
+                    <f:variable name="title">
+                        <f:translate key="{recipientSource.configuration.title}" default="{recipientSource.configuration.title}"/> [{recipientSource.configuration.identifier}{f:if(condition: recipientSource.configuration.contains, then: ' -> {recipientSource.configuration.contains}')}]
+                    </f:variable>
+                    <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSource.configuration.identifier}" class="btn btn-default btn-sm text-uppercase">
+                        <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
+                        <f:translate key="{lll}general.button.downloadCsv"/>
+                    </f:link.action></f:variable>
+                    <f:render partial="Backend/Panel"
+                              arguments="{lll:lll, parentId:'mail-recipient-list-panel-{panel.index}', title: title, index:panel.index, open:1, counter: recipientSource.numberOfRecipients, additionalHeading:additionalHeading}"
+                              contentAs="panelBody">
+                        <f:render partial="Backend/Recipient/Recipients" arguments="{recipientSource:recipientSource, lll:lll}"/>
+                    </f:render>
+                </f:if>
             </f:for>
         </div>
     </f:if>

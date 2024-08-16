@@ -15,6 +15,8 @@ class RecipientSourceConfigurationDTO
     public string $icon;
     public ?string $table;
     public ?string $contains = null;
+    public ?string $containsTitle = null;
+    public ?string $containsIcon = null;
     public ?string $model = null;
     public bool $ignoreMailActive = false;
     public bool $forceHtmlMail = false;
@@ -51,6 +53,8 @@ class RecipientSourceConfigurationDTO
             $this->table = 'tx_mail_domain_model_group';
         }
         $this->contains = $data['contains'] ?? null;
+        $this->containsTitle = $data['containsTitle'] ?? null;
+        $this->containsIcon = $data['containsIcon'] ?? null;
         $this->model = $data['model'] ?? null;
         $this->ignoreMailActive = (bool)($data['ignoreMailActive'] ?? false);
         $this->forceHtmlMail = (bool)($data['forceHtmlMail'] ?? false);

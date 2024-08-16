@@ -4,6 +4,9 @@ mail:
       title: 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recipientSources.I.2'
       icon: 'status-user-group-frontend'
       contains: fe_users
+      containsTitle: 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recipientSources.I.1'
+      containsIcon: 'status-user-frontend'
+      csvExportFields: [uid,name,first_name,middle_name,last_name,title,email,telephone,www,address,company,city,zip,country,fax,categories,mail_salutation,mail_html,tstamp]
     fe_users:
       title: 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.recipientSources.I.1'
       icon: 'status-user-frontend'

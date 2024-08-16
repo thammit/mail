@@ -14,7 +14,6 @@ use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Events\RecipientsRestrictionEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
-use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
@@ -620,7 +619,7 @@ class RecipientService
             $recipientCollection = CategoryCollection::load($category->getUid(), true, $switchTable, 'categories');
             foreach ($recipientCollection as $recipient) {
                 if ((!$deletedField || !$recipient[$deletedField]) &&
-                    (!$disabledField || !$recipient[$disabledField]) &&
+                    (!$disabledField || !($recipient[$disabledField] ?? false)) &&
                     ($recipientSourceConfiguration->ignoreMailActive || $recipient['mail_active'] ?? true) &&
                     !in_array($recipient['uid'], $recipients) &&
                     in_array($recipient['pid'], $pages) &&
