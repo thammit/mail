@@ -805,6 +805,7 @@ class MailController extends AbstractController
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Exception
      */
     public function scheduleSendingAction(Mail $mail): ResponseInterface
     {
@@ -815,6 +816,20 @@ class MailController extends AbstractController
             $presetGroup = new ObjectStorage();
             $presetGroup->attach($this->groupRepository->findOneByPid($this->id));
             $mail->setRecipientGroups($presetGroup);
+        }
+
+        if (!$mail->getScheduled()) {
+            $now = new DateTimeImmutable('now');
+            if ($this->typo3MajorVersion > 11) {
+                // timezone is utc and must be converted to server time zone
+                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
+                $offset = $serverTimeZone->getOffset($now);
+                if ($offset) {
+                    $interval = new DateInterval('PT' . abs($offset) . 'S');
+                    $now = $offset >= 0 ? $now->add($interval) : $now->sub($interval);
+                }
+            }
+            $mail->setScheduled($now);
         }
 
         $this->mailRepository->update($mail);
@@ -873,19 +888,6 @@ class MailController extends AbstractController
      */
     public function finishAction(Mail $mail): ResponseInterface
     {
-        if ($this->typo3MajorVersion > 11) {
-            // scheduled timezone is utc and must be converted to server time zone
-            $scheduled = $mail->getScheduled();
-            if ($scheduled instanceof DateTimeImmutable) {
-                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
-                $offset = $serverTimeZone->getOffset($scheduled);
-                if ($offset) {
-                    $interval = new DateInterval('PT' . abs($offset) . 'S');
-                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
-                }
-            }
-        }
-
         if ($mail->getRecipientGroups()->count() === 0) {
             ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'),
                 LanguageUtility::getLL('general.notification.severity.warning.title'));
@@ -934,6 +936,19 @@ class MailController extends AbstractController
         }
 
         $mail->setRecipients($recipients,true);
+
+        if ($this->typo3MajorVersion > 11) {
+            // scheduled timezone is utc and must be converted to server time zone
+            $scheduled = $mail->getScheduled();
+            if ($scheduled instanceof DateTimeImmutable) {
+                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
+                $offset = $serverTimeZone->getOffset($scheduled);
+                if ($offset) {
+                    $interval = new DateInterval('PT' . abs($offset) . 'S');
+                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
+                }
+            }
+        }
 
         $mail->setStatus(MailStatus::SCHEDULED);
 

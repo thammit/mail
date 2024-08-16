@@ -78,23 +78,10 @@
 					<label for="distributionTime" class="form-label h4 mb-2">
 						<f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
 					</label>
-                    <f:variable name="now" value="{f:format.date(format:'H:i d-m-Y',date:'now')}"/>
-                    <f:variable name="nowISO" value="{f:format.date(format:'Y-m-d\TH:i:s\Z',date:'now')}"/>
-                    <f:if condition="{mail.scheduled}">
-                    	<f:then>
-                            <f:variable name="scheduled" value="{f:format.date(format:'H:i d-m-Y',date:mail.scheduled)}"/>
-                            <f:variable name="scheduledISO" value="{f:format.date(format:'Y-m-d\TH:i:s\Z',date:mail.scheduled)}"/>
-                        </f:then>
-                        <f:else>
-                            <f:variable name="scheduled" value="{now}"/>
-                            <f:variable name="scheduledISO" value="{nowISO}"/>
-                        </f:else>
-                    </f:if>
-
 					<f:if condition="{v12}">
 						<f:then>
 							<div class="input-group">
-								<f:form.textfield id="mail-distribution-time" class="form-control" property="scheduled" value="{scheduledISO}" data="{date-type:'datetime',date-mindate:nowISO}" additionalAttributes="{autocomplete:'off'}"/>
+								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{f:format.date(format:'c',date:mail.scheduled)}" data="{date-type:'datetime'}" additionalAttributes="{autocomplete:'off'}" class="form-control"/>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</button>
@@ -102,12 +89,7 @@
 						</f:then>
 						<f:else>
 							<div class="input-group">
-								<f:form.textfield additionalAttributes="{autocomplete:'off'}"
-												  id="mail-distribution-time"
-												  class="form-control t3js-datetimepicker"
-												  data="{date-type:'datetime', date-mindate:now}"
-												  property="scheduled"
-												  value="{scheduled}"/>
+								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{f:format.date(format:'H:i d-m-Y',date:mail.scheduled)}" data="{date-type:'datetime'}" additionalAttributes="{autocomplete:'off'}" class="form-control t3js-datetimepicker"/>
 								<label class="mb-0 btn btn-default" for="mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</label>
