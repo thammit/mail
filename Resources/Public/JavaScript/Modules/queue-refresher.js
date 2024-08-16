@@ -53,7 +53,13 @@ class QueueRefresher {
             clearInterval(interval);
           }
           tableRow.remove();
-          document.getElementById("mailQueueEmpty").className = "d-table-row";
+          if (
+            document.querySelectorAll(
+              ".mail-queue-table tbody tr:not(#mailQueueEmpty)",
+            ).length === 0
+          ) {
+            document.getElementById("mailQueueEmpty").className = "d-table-row";
+          }
           // tableRow.classList.remove("table-info");
           // runningProgressBar.className = "progress-bar bg-success";
           // const mailDeleteButton = tableRow.querySelector(
