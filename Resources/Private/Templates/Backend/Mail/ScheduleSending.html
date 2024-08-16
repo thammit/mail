@@ -94,9 +94,7 @@
 					<f:if condition="{v12}">
 						<f:then>
 							<div class="input-group">
-								<input id="mail-distribution-time" data-date-type="datetime" data-date-mindate="{nowISO}"
-									   class="form-control" autocomplete="off"/>
-								<f:form.hidden property="scheduled" value="{scheduledISO}"/>
+								<f:form.textfield id="mail-distribution-time" class="form-control" property="scheduled" value="{scheduledISO}" data="{date-type:'datetime',date-mindate:nowISO}" additionalAttributes="{autocomplete:'off'}"/>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</button>
