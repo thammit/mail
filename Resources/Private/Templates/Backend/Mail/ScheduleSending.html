@@ -85,16 +85,9 @@
 					<f:if condition="{mail.scheduled}">
 						<f:variable name="date" value="{mail.scheduled -> f:format.date(format:'H:i d-m-Y')}"/>
 						<f:variable name="dateISO" value="{mail.scheduled -> f:format.date(format:'Y-m-d\TH:i:s\Z')}"/>
-						<f:variable name="dateISO8601" value="{mail.scheduled -> f:format.date(format:'c')}"/>
 					</f:if>
-					<p>minDate: {minDate}</p>
-					<p>minDateISO: {minDateISO}</p>
-					<p>date: {date}</p>
-					<p>dateISO: {dateISO}</p>
-					<p>dateISO8601: {dateISO8601}</p>
 					<f:switch expression="{typo3Version}">
 						<f:case value="11">
-							<p>V11</p>
 							<div class="input-group">
 								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{date}" data="{date-type:'datetime', date-mindate:minDate}" additionalAttributes="{autocomplete:'off'}" class="form-control t3js-datetimepicker"/>
 								<label class="mb-0 btn btn-default" for="mail-distribution-time">
@@ -103,7 +96,6 @@
 							</div>
 						</f:case>
 						<f:case value="12">
-							<p>V12</p>
 							<div class="input-group">
 								<input id="mail-distribution-time" value="{date}" data-date-type="datetime" data-date-mindate="{minDateISO}" autocomplete="off" class="form-control"/>
 								<f:form.hidden property="scheduled" value="{dateISO}"/>
@@ -113,13 +105,8 @@
 							</div>
 						</f:case>
 						<f:defaultCase>
-							<p>Default</p>
 							<div class="input-group">
 								<input id="mail-distribution-time" name="mail[scheduled]" value="{date}" data-date-type="datetime" data-date-mindate="{minDate}" autocomplete="off" class="form-control"/>
-								<f:comment>
-									<f:form.hidden property="scheduled" value="{nowISO}"/>
-									<f:form.textfield id="mail-distribution-time" property="scheduled" value="{date}" data="{date-type:'datetime', date-mindate:minDate}" additionalAttributes="{autocomplete:'off'}" class="form-control"/>
-								</f:comment>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</button>
@@ -127,20 +114,6 @@
 						</f:defaultCase>
 					</f:switch>
 				</div>
-				<f:comment>
-					<div class="form-check mb-3">
-						<input class="form-check-input" type="checkbox" name="isTestMail" id="tx-directmail-sendtestmail-check" value="1"/>
-						<label class="form-check-label" for="tx-directmail-sendtestmail-check">
-							<f:translate key="{lll}mail.wizard.scheduleSending.testMail"/>
-						</label>
-					</div>
-					<div class="form-check mb-3">
-						<input class="form-check-input" type="checkbox" name="saveDraft" id="tx-directmail-savedraft-check" value="1"/>
-						<label class="form-check-label" for="tx-directmail-savedraft-check">
-							<f:translate key="{lll}mail.wizard.scheduleDraft"/>
-						</label>
-					</div>
-				</f:comment>
 			</div>
 			<f:if condition="{groups}">
 				<f:form.button disabled="disabled" id="mail-wizard-schedule-sending-form-submit-button" class="btn btn-lg btn-mail-theme text-uppercase" type="Submit">

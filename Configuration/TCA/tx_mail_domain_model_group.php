@@ -7,7 +7,7 @@ use MEDIAESSENZ\Mail\UserFunctions\RecipientSourcesProcFunc;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-return [
+$return = [
     'ctrl' => [
         'label' => 'title',
         'default_sortby' => 'title',
@@ -207,3 +207,16 @@ return [
         ],
     ],
 ];
+
+if ((int)\TYPO3\CMS\Core\Utility\VersionNumberUtility::getCurrentTypo3Version() < 12) {
+    $return['columns']['csv_file']['config'] = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
+        'csv_file',
+        [
+            'maxitems' => 1,
+            'minitems' => 1,
+        ],
+        'csv,txt'
+    );
+}
+
+return $return;

@@ -821,16 +821,9 @@ class MailController extends AbstractController
         if (!$mail->getScheduled()) {
             $now = new DateTimeImmutable('now');
             if ($this->typo3MajorVersion > 11) {
-                //$now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
-                //$now = new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin'));
                 // converted timezone from server time zone to utc
                 $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
                 $now = new DateTimeImmutable('now', $serverTimeZone);
-//                $offset = $serverTimeZone->getOffset($now);
-//                if ($offset) {
-//                    $interval = new DateInterval('PT' . abs($offset) . 'S');
-//                    $now = $offset >= 0 ? $now->add($interval) : $now->sub($interval);
-//                }
             }
             $mail->setScheduled($now);
         }
@@ -868,21 +861,14 @@ class MailController extends AbstractController
      */
     public function initializeFinishAction(): void
     {
-        switch ($this->typo3MajorVersion) {
-            case 11:
-                $format = 'H:i d-m-Y';
-                break;
-            case 12:
-                // under typo3 12 the scheduled property has W3C format ("YYYY-MM-DDT##:##:##+##:##")
-                // with UTC timezone e.g. 2024-08-17T20:21:42Z
-                // because of this the created datetime immutable object has to be corrected
-                // in the finishAction later to fit to the timezone of the server
-                $format = \DateTimeInterface::W3C;
-                break;
-            default:
-                $format = 'H:i d-m-Y';
-                break;
-        }
+        // under typo3 12 the scheduled property has W3C format
+        // with UTC timezone e.g. 2024-08-17T20:21:42Z
+        // because of this the created datetime immutable object has to be corrected
+        // in the finishAction later to fit to the timezone of the server
+        $format = match ($this->typo3MajorVersion) {
+            12 => \DateTimeInterface::W3C,
+            default => 'H:i d-m-Y',
+        };
 
         if ($this->arguments->hasArgument('mail')) {
             $this->arguments->getArgument('mail')
@@ -956,7 +942,6 @@ class MailController extends AbstractController
 
         if ($numberOfRecipients === 0) {
             $mail->setRecipients([], true);
-//            $mail->setScheduled(null);
             $this->mailRepository->update($mail);
             $this->mailRepository->persist();
             ViewUtility::addNotificationWarning(
