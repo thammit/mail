@@ -1,4 +1,5 @@
 import DateTimePicker from "@typo3/backend/date-time-picker.js";
+// source https://github.com/TYPO3/typo3/blob/main/Build/Sources/TypeScript/backend/date-time-picker.ts
 
 class ScheduleSending {
     constructor() {

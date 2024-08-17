@@ -21,7 +21,6 @@ class Mail extends AbstractEntity
     protected int $status = MailStatus::DRAFT;
     protected int $page = 0;
     protected int $step = 1;
-    protected bool $sent = false;
     protected string $subject = '';
     protected string $fromEmail = '';
     protected string $fromName = '';

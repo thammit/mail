@@ -843,7 +843,7 @@ class MailController extends AbstractController
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
-            'v12' => $this->typo3MajorVersion >= 12,
+            'typo3Version' => $this->typo3MajorVersion,
         ];
         $this->addDocHeaderHelpButton();
 
@@ -866,9 +866,19 @@ class MailController extends AbstractController
     public function initializeFinishAction(): void
     {
         $format = $this->typo3MajorVersion < 12 ? 'H:i d-m-Y' : null;
+
+        switch ($this->typo3MajorVersion) {
+            case 12:
+                $format = null;
+                break;
+            default:
+                $format = 'H:i d-m-Y';
+                break;
+        }
+
         if ($this->arguments->hasArgument('mail')) {
             $this->arguments->getArgument('mail')
-                ->getPropertyMappingConfiguration()
+                ->getPropertyMappingConfiguration()->allowProperties('scheduled')
                 ->forProperty('scheduled')
                 ->setTypeConverterOption(DateTimeImmutableConverter::class,
                     DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, $format);

@@ -221,13 +221,6 @@ return [
                 'default' => '&plain=1',
             ],
         ],
-        'sent' => [
-            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sent',
-            'config' => [
-                'type' => 'check',
-                'readOnly' => true,
-            ],
-        ],
         'step' => [
             'label' => 'Step',
             'config' => [
@@ -482,9 +475,9 @@ return [
 		'],
     ],
     'palettes' => [
-        '1' => ['showitem' => 'scheduled_begin, scheduled_end, sent'],
+        '1' => ['showitem' => 'scheduled_begin, scheduled_end'],
         'from' => ['showitem' => 'from_email, from_name'],
         'reply' => ['showitem' => 'reply_to_email, reply_to_name'],
-        'progress' => ['showitem' => 'number_of_recipients, number_of_recipients_handled, delivery_progress, sent'],
+        'progress' => ['showitem' => 'number_of_recipients, number_of_recipients_handled, delivery_progress'],
     ],
 ];

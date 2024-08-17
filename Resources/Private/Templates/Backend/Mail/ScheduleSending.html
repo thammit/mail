@@ -78,24 +78,45 @@
 					<label for="distributionTime" class="form-label h4 mb-2">
 						<f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
 					</label>
-					<f:if condition="{v12}">
-						<f:then>
+					<f:variable name="minDate" value="{f:format.date(format:'H:i d-m-Y')}"/>
+					<f:variable name="minDateISO" value="{f:format.date(format:'Y-m-d\TH:i:s\Z')}"/>
+					<f:variable name="date" value="{minDate}"/>
+					<f:variable name="dateISO" value="{minDateISO}"/>
+					<f:if condition="{mail.scheduled}">
+						<f:variable name="date" value="{mail.scheduled -> f:format.date(format:'H:i d-m-Y')}"/>
+						<f:variable name="dateISO" value="{mail.scheduled -> f:format.date(format:'Y-m-d\TH:i:s\Z')}"/>
+					</f:if>
+					<f:switch expression="{typo3Version}">
+						<f:case value="11">
 							<div class="input-group">
-								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{f:format.date(format:'c',date:mail.scheduled)}" data="{date-type:'datetime'}" additionalAttributes="{autocomplete:'off'}" class="form-control"/>
-								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
-									<core:icon identifier="actions-edit-pick-date"/>
-								</button>
-							</div>
-						</f:then>
-						<f:else>
-							<div class="input-group">
-								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{f:format.date(format:'H:i d-m-Y',date:mail.scheduled)}" data="{date-type:'datetime'}" additionalAttributes="{autocomplete:'off'}" class="form-control t3js-datetimepicker"/>
+								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{date}" data="{date-type:'datetime', date-mindate:minDate}" additionalAttributes="{autocomplete:'off'}" class="form-control t3js-datetimepicker"/>
 								<label class="mb-0 btn btn-default" for="mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</label>
 							</div>
-						</f:else>
-					</f:if>
+						</f:case>
+						<f:case value="12">
+							<div class="input-group">
+								<input id="mail-distribution-time" value="{date}" data-date-type="datetime" data-date-mindate="{minDate}" autocomplete="off" class="form-control"/>
+								<f:form.hidden property="scheduled" value="{dateISO}"/>
+								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
+									<core:icon identifier="actions-edit-pick-date"/>
+								</button>
+							</div>
+						</f:case>
+						<f:defaultCase>
+							<div class="input-group">
+								<input id="mail-distribution-time" name="mail[scheduled]" value="{date}" data-date-type="datetime" data-date-mindate="{minDate}" autocomplete="off" class="form-control"/>
+								<f:comment>
+									<f:form.hidden property="scheduled" value="{nowISO}"/>
+									<f:form.textfield id="mail-distribution-time" property="scheduled" value="{date}" data="{date-type:'datetime', date-mindate:minDate}" additionalAttributes="{autocomplete:'off'}" class="form-control"/>
+								</f:comment>
+								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
+									<core:icon identifier="actions-edit-pick-date"/>
+								</button>
+							</div>
+						</f:defaultCase>
+					</f:switch>
 				</div>
 				<f:comment>
 					<div class="form-check mb-3">
