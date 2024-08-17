@@ -78,14 +78,20 @@
 					<label for="distributionTime" class="form-label h4 mb-2">
 						<f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
 					</label>
-					<f:variable name="minDate" value="{f:format.date(format:'H:i d-m-Y')}"/>
-					<f:variable name="minDateISO" value="{f:format.date(format:'Y-m-d\TH:i:s\Z')}"/>
+					<f:variable name="minDate" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
+					<f:variable name="minDateISO" value="{f:format.date(format:'Y-m-d\TH:i:s\Z', date:'now')}"/>
 					<f:variable name="date" value="{minDate}"/>
 					<f:variable name="dateISO" value="{minDateISO}"/>
 					<f:if condition="{mail.scheduled}">
 						<f:variable name="date" value="{mail.scheduled -> f:format.date(format:'H:i d-m-Y')}"/>
 						<f:variable name="dateISO" value="{mail.scheduled -> f:format.date(format:'Y-m-d\TH:i:s\Z')}"/>
+						<f:variable name="dateISO8601" value="{mail.scheduled -> f:format.date(format:'c')}"/>
 					</f:if>
+					<p>minDate: {minDate}</p>
+					<p>minDateISO: {minDateISO}</p>
+					<p>date: {date}</p>
+					<p>dateISO: {dateISO}</p>
+					<p>dateISO8601: {dateISO8601}</p>
 					<f:switch expression="{typo3Version}">
 						<f:case value="11">
 							<div class="input-group">
