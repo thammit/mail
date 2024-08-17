@@ -245,7 +245,7 @@ class JumpurlMiddleware implements MiddlewareInterface
 
             switch (true) {
                 case $recipientSourceConfiguration->isTableSource():
-                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration->table);
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table);
                     $this->recipientRecord = reset($recipientData);
                     break;
                 case $recipientSourceConfiguration->isModelSource():

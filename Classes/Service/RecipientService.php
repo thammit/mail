@@ -291,7 +291,7 @@ class RecipientService
 
         switch (true) {
             case $recipientSourceConfiguration->isTableSource():
-                $recipients = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->table, ['email']);
+                $recipients = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, ['email']);
                 break;
             case $recipientSourceConfiguration->isModelSource():
                 $recipients = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['email']);
@@ -331,7 +331,7 @@ class RecipientService
                 case $recipientSourceConfiguration->isTableSource():
                 case $recipientSourceConfiguration->isModelSource():
                     if ($recipientSourceConfiguration->isTableSource()) {
-                        $recipientsData = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->table, ['uid', 'email']);
+                        $recipientsData = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, ['uid', 'email']);
                     } else {
                         $recipientsData = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['uid', 'email']);
                     }

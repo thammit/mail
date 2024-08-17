@@ -367,7 +367,7 @@ class MailerService implements LoggerAwareInterface
 
             switch (true) {
                 case $recipientSourceConfiguration->isTableSource():
-                    $table = $recipientSourceConfiguration->table;
+                    $table = $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table;
                     $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
                     $queryResult = $queryBuilder
                         ->select('*')

@@ -143,7 +143,7 @@ class ReportService
                 $data[$recipientSourceIdentifier]['configuration'] = $recipientSourceConfiguration;
                 switch (true) {
                     case $recipientSourceConfiguration->isTableSource():
-                        $data[$recipientSourceIdentifier]['recipients'] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration->table);
+                        $data[$recipientSourceIdentifier]['recipients'] = $this->recipientService->getRecipientsDataByUidListAndTable($recipientIds, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table);
                         break;
                     case $recipientSourceConfiguration->isModelSource():
                         $data[$recipientSourceIdentifier]['recipients'] = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientIds, $recipientSourceConfiguration->model);
