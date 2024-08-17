@@ -94,6 +94,7 @@
 					<p>dateISO8601: {dateISO8601}</p>
 					<f:switch expression="{typo3Version}">
 						<f:case value="11">
+							<p>V11</p>
 							<div class="input-group">
 								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{date}" data="{date-type:'datetime', date-mindate:minDate}" additionalAttributes="{autocomplete:'off'}" class="form-control t3js-datetimepicker"/>
 								<label class="mb-0 btn btn-default" for="mail-distribution-time">
@@ -102,8 +103,9 @@
 							</div>
 						</f:case>
 						<f:case value="12">
+							<p>V12</p>
 							<div class="input-group">
-								<input id="mail-distribution-time" value="{date}" data-date-type="datetime" data-date-mindate="{minDate}" autocomplete="off" class="form-control"/>
+								<input id="mail-distribution-time" value="{date}" data-date-type="datetime" data-date-mindate="{minDateISO}" autocomplete="off" class="form-control"/>
 								<f:form.hidden property="scheduled" value="{dateISO}"/>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
@@ -111,6 +113,7 @@
 							</div>
 						</f:case>
 						<f:defaultCase>
+							<p>Default</p>
 							<div class="input-group">
 								<input id="mail-distribution-time" name="mail[scheduled]" value="{date}" data-date-type="datetime" data-date-mindate="{minDate}" autocomplete="off" class="form-control"/>
 								<f:comment>

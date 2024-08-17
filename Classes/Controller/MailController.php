@@ -868,11 +868,16 @@ class MailController extends AbstractController
      */
     public function initializeFinishAction(): void
     {
-        $format = $this->typo3MajorVersion < 12 ? 'H:i d-m-Y' : null;
-
         switch ($this->typo3MajorVersion) {
+            case 11:
+                $format = 'H:i d-m-Y';
+                break;
             case 12:
-                $format = null;
+                // under typo3 12 the scheduled property has W3C format ("YYYY-MM-DDT##:##:##+##:##")
+                // with UTC timezone e.g. 2024-08-17T20:21:42Z
+                // because of this the created datetime immutable object has to be corrected
+                // in the finishAction later to fit to the timezone of the server
+                $format = \DateTimeInterface::W3C;
                 break;
             default:
                 $format = 'H:i d-m-Y';
@@ -909,18 +914,19 @@ class MailController extends AbstractController
             ]);
         }
 
-//        if ($this->typo3MajorVersion > 11) {
-//            // scheduled timezone is utc and must be converted to server time zone
-//            $scheduled = $mail->getScheduled();
-//            if ($scheduled instanceof DateTimeImmutable) {
-//                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
-//                $offset = $serverTimeZone->getOffset($scheduled);
-//                if ($offset) {
-//                    $interval = new DateInterval('PT' . abs($offset) . 'S');
-//                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
-//                }
-//            }
-//        }
+
+        if ($this->typo3MajorVersion === 12) {
+            // scheduled timezone is utc and must be converted to server time zone
+            $scheduled = $mail->getScheduled();
+            if ($scheduled instanceof DateTimeImmutable) {
+                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
+                $offset = $serverTimeZone->getOffset($scheduled);
+                if ($offset) {
+                    $interval = new DateInterval('PT' . abs($offset) . 'S');
+                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
+                }
+            }
+        }
 
         $recipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups());
 
