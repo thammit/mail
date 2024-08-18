@@ -85,6 +85,11 @@ services:
       - name: 'event.listener'
         identifier: 'mediaessenz/mail/deactivate-feusers'
 
+  MEDIAESSENZ\Mail\EventListener\AvoidCaching:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/avoid-caching'
+
   MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter:
     tags:
       - name: extbase.type_converter

@@ -36,9 +36,6 @@ use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 class JumpurlMiddleware implements MiddlewareInterface
 {
 
-    public const RECIPIENT_TABLE_TTADDRESS = 'tt_address';
-    public const RECIPIENT_TABLE_FEUSER = 'fe_users';
-
     protected int $responseType = 0;
 
     protected string $recipientSourceIdentifier = '';
@@ -74,6 +71,7 @@ class JumpurlMiddleware implements MiddlewareInterface
             $submittedRecipient = $this->request->getQueryParams()['rid'] ?? '';
             $submittedAuthCode = $this->request->getQueryParams()['aC'];
             $jumpUrl = $this->request->getQueryParams()['jumpurl'];
+            $frontendTypoScript = $request->getAttribute('frontend.typoscript');
             $this->mail = GeneralUtility::makeInstance(MailRepository::class)->findByUid($mailUid);
 
             $this->initRecipientRecord($submittedRecipient);

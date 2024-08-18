@@ -33,8 +33,7 @@ class FilterPageTreeMiddleware  implements MiddlewareInterface
     {
         /** @var BackendUserAuthentication $backendUser */
         $backendUser = $GLOBALS['BE_USER'];
-        if (array_key_exists('id', $request->getQueryParams())) {
-            $pageId = $request->getQueryParams()['id'];
+        if ($pageId = $request->getQueryParams()['id'] ?? false) {
             if (MathUtility::canBeInterpretedAsInteger($pageId)) {
                 $backendUser->setAndSaveSessionData('lastSelectedPage', (int)$pageId);
             }
