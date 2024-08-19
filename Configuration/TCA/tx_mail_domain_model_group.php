@@ -31,7 +31,14 @@ $return = [
     ],
     'types' => [
         RecipientGroupType::PAGES => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,recipient_sources,pages,recursive,categories'],
-        RecipientGroupType::PLAIN => ['showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,list,mail_html,categories'],
+        RecipientGroupType::PLAIN => [
+            'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,list,mail_html,categories',
+            'columnsOverrides' => [
+                'categories' => [
+                    'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.selectCategoriesForPlainCsv',
+                ]
+            ]
+        ],
         RecipientGroupType::CSV => [
             'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv_type,csv_separator,csv_data,csv_file,mail_html,categories',
             'columnsOverrides' => [
@@ -75,11 +82,26 @@ $return = [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.pages', RecipientGroupType::PAGES],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.list', RecipientGroupType::PLAIN],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.csv', RecipientGroupType::CSV],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.static', RecipientGroupType::STATIC],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.other', RecipientGroupType::OTHER],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.pages',
+                        RecipientGroupType::PAGES
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.list',
+                        RecipientGroupType::PLAIN
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.csv',
+                        RecipientGroupType::CSV
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.static',
+                        RecipientGroupType::STATIC
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.type.other',
+                        RecipientGroupType::OTHER
+                    ],
                 ],
                 'default' => RecipientGroupType::PAGES,
             ],
@@ -149,8 +171,14 @@ $return = [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvType.I.0', CsvType::PLAIN],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvType.I.1', CsvType::FILE],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvType.I.0',
+                        CsvType::PLAIN
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvType.I.1',
+                        CsvType::FILE
+                    ],
                 ],
                 'default' => CsvType::PLAIN,
             ],
@@ -161,9 +189,18 @@ $return = [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.0', CsvSeparator::COMMA],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.1', CsvSeparator::SEMICOLON],
-                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.2', CsvSeparator::TAB],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.0',
+                        CsvSeparator::COMMA
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.1',
+                        CsvSeparator::SEMICOLON
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvSeparator.I.2',
+                        CsvSeparator::TAB
+                    ],
                 ],
                 'default' => CsvSeparator::COMMA,
             ],
