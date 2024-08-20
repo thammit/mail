@@ -425,7 +425,7 @@ class RecipientService
                 if ($group->isPlain()) {
                     $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($group->getList()))));
                 } else {
-                    $recipients = CsvUtility::rearrangeCsvValues($group->getCsvData(), $group->getCsvSeparatorString(), RecipientUtility::getAllRecipientFields());
+                    $recipients = CsvUtility::getRecipientDataFromCSVGroup($group);
                 }
                 foreach ($recipients as $key => $recipient) {
                     $recipients[$key]['categories'] = $group->getCategories();

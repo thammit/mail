@@ -207,12 +207,23 @@
             <trans-unit id="tx_mail_domain_model_group.csvSeparator.I.2" resname="tx_mail_domain_model_group.csvSeparator.I.2">
                 <source>[TAB] (tabulator)</source>
             </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvSeparator" resname="tx_mail_domain_model_group.csvSeparator">
+                <source>Field separator</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvFieldNames" resname="tx_mail_domain_model_group.csvFieldNames">
+                <source>First line of CSV Data contain fieldnames</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvFieldNames.description" resname="tx_mail_domain_model_group.csvFieldNames.description">
+                <source>If checked the first line of the CSV must contain field names. "name" and "email" are mandatory.
+                    All other fields defined in defaultRecipientFields and additionalRecipientFields of the the extension settings are optional.
+                    Fields are not defined in defaultRecipientFields or additionalRecipientFields will be ignored.
+                </source>
+            </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.csvData" resname="tx_mail_domain_model_group.csvData">
                 <source>CSV Data</source>
             </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.csvData.description" resname="tx_mail_domain_model_group.csvData.description">
-                <source>The first line of the CSV can (optionally) contain field names (defaultRecipientFields + additionalRecipientFields, both defined in the extension settings).
-                    If first line doesn't contain field names, the order must be "name"[separator]"email" (optional appended: [separator]"salutation").
+                <source>If first line doesn't contain field names, the order must be "name"[separator]"email" (optional appended: [separator]"salutation").
                     Double quotation marks to enclose values are optional but recommended. [separator] is a placeholder and should be ",", ";" or a tab.
                 </source>
             </trans-unit>

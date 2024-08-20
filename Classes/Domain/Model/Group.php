@@ -48,6 +48,11 @@ class Group extends AbstractEntity
     protected int $csvSeparator = CsvSeparator::COMMA;
 
     /**
+     * @var bool
+     */
+    protected bool  $csvFieldNames = false;
+
+    /**
      * @var string
      */
     protected string $csvData = '';
@@ -249,6 +254,17 @@ class Group extends AbstractEntity
     public function setCsvSeparator(int $csvSeparator): Group
     {
         $this->csvSeparator = $csvSeparator;
+        return $this;
+    }
+
+    public function isCsvFieldNames(): bool
+    {
+        return $this->csvFieldNames;
+    }
+
+    public function setCsvFieldNames(bool $csvFieldNames): Group
+    {
+        $this->csvFieldNames = $csvFieldNames;
         return $this;
     }
 

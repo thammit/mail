@@ -61,6 +61,7 @@ CREATE TABLE tx_mail_domain_model_group
     list              mediumblob,
     csv_type          tinyint(1) unsigned DEFAULT '0' NOT NULL,
     csv_separator     tinyint(1) unsigned DEFAULT '0' NOT NULL,
+	csv_field_names    tinyint(1) unsigned DEFAULT '0' NOT NULL,
     csv_data          mediumblob,
     csv_file          int(11) unsigned    DEFAULT '0' NOT NULL,
     mail_html         tinyint(1) unsigned DEFAULT '0' NOT NULL,

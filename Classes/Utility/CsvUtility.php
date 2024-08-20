@@ -8,6 +8,7 @@ use MEDIAESSENZ\Mail\Domain\Model\Address;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\FrontendUser;
+use MEDIAESSENZ\Mail\Domain\Model\Group;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
@@ -21,93 +22,106 @@ class CsvUtility
 {
     /**
      * Parse CSV lines into array form
-     *
-     * @param string $str String in csv-format
-     * @param string $separator Separator
-     * @param array $fieldList
-     * @return array parsed CSV values
+     * @param Group $group
+     * @return array
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public static function rearrangeCsvValues(string $str, string $separator = ',', array $fieldList = []): array
+    public static function getRecipientDataFromCSVGroup(Group $group): array
     {
-        $data = [];
+        $separator = $group->getCsvSeparatorString();
+        $csvRawData = $group->getCsvData();
+        $allRecipientFields = RecipientUtility::getAllRecipientFields();
+        $firstLineOfCsvContainFieldNames = $group->isCsvFieldNames();
 
         $fh = tmpfile();
-        fwrite($fh, trim($str));
+        fwrite($fh, trim($csvRawData));
         fseek($fh, 0);
-        $separator = $separator === 'tab' ? "\t" : $separator;
-        $lines = [];
+        $csvDataArray = [];
         while ($line = fgetcsv($fh, 1000, $separator)) {
-            $lines[] = $line;
+            $csvDataArray[] = $line;
         }
         fclose($fh);
 
-        if (count($lines) > 0) {
+        if (!$csvDataArray || ($firstLineOfCsvContainFieldNames && count($csvDataArray) === 1)) {
+            return [];
+        }
 
-            // Analyse if first line contain field names.
-            // It is necessary that a value is either
-            // 1) found in the fields list
-            // 2) is empty (value omitted then)
-            // 3) starts with "user_".
-            // In addition, fields may be prepended with "[code]".
-            // This is used if the incoming value is true
-            // in that case '+[value]' adds that number to the field value (accumulation) and '=[value]' overrides any existing value in the field
+        if ($firstLineOfCsvContainFieldNames) {
+            // It is necessary that either
+            //   - contains field "name" and "email"
+            //   - found in the fields list
+            //   - is empty (value omitted then)
+            //   - fields may be prepended with "[code]".
+            //     This is used if the incoming value is true
+            //     in that case '+[value]' adds that number to the field value (accumulation) and '=[value]' overrides any existing value in the field
+            $fieldNames = $csvDataArray[0];
 
-            $firstRow = $lines[0];
-            $hasFieldNames = true;
+            if (!in_array('name', $fieldNames, true) || !in_array('email', $fieldNames, true)) {
+                return [];
+            }
+
             $fieldOrder = [];
 
-            foreach ($firstRow as $value) {
-                $fieldName = '';
-                $probe = preg_split('|[\[\]]|', strtolower($value));
+            foreach ($fieldNames as $column => $fieldName) {
+                $fieldName = trim($fieldName ?? '');
+                $probe = preg_split('|[\[\]]|', $fieldName);
                 if (is_array($probe)) {
                     [$fieldName, $fieldConfiguration] = count($probe) === 2 ? $probe : [$probe[0], ''];
                 }
                 $fieldName = strtolower(trim($fieldName ?? ''));
-                $fieldOrder[] = [$fieldName, trim($fieldConfiguration ?? '')];
-                if ($fieldName && !str_starts_with($fieldName, 'user_') && !in_array($fieldName, $fieldList)) {
-                    $hasFieldNames = false;
-                    break;
+                if (!$fieldName || !in_array($fieldName, $allRecipientFields, true)) {
+                    continue;
                 }
+                $fieldOrder[$column] = [$fieldName, trim($fieldConfiguration ?? '')];
             }
 
-            if ($hasFieldNames) {
-                // if the first line contain field names remove first line for next steps
-                array_shift($lines);
-            } else {
-                $fieldOrder = [
-                    ['name'],
-                    ['email'],
-                    ['salutation'],
-                ];
-            }
+            // remove first line of csv data
+            array_shift($csvDataArray);
 
-            $rowNumber = 0;
-            foreach ($lines as $line) {
-                // Must be a line with content.
-                // This sorts out entries with one key which is empty. Those are empty lines.
-                if (count($line) > 1 || $line[0]) {
-                    // Traverse fieldOrder and map values over
-                    foreach ($fieldOrder as $column => $fieldConfiguration) {
-                        if ($fieldConfiguration[0]) {
-                            if ($fieldConfiguration[1] ?? false) {
-                                // If column exist and is not empty
-                                if (array_key_exists($column, $line) && trim($line[$column])) {
-                                    if (str_starts_with($fieldConfiguration[1], '=')) {
-                                        $data[$rowNumber][$fieldConfiguration[0]] = trim(substr($fieldConfiguration[1], 1));
-                                    } else if (str_starts_with($fieldConfiguration[1], '+')) {
-                                        $data[$rowNumber][$fieldConfiguration[0]] .= substr($fieldConfiguration[1], 1);
+        } else {
+            $fieldOrder = [
+                ['name'],
+                ['email'],
+                ['salutation'],
+            ];
+        }
+
+        $data = [];
+
+        foreach ($csvDataArray as $row => $csvRow) {
+            // Must be a line with content.
+            // This sorts out entries with one key which is empty. Those are empty lines.
+            if (count($csvRow) > 1 || $csvRow[0]) {
+                // Traverse fieldOrder and map values over
+                foreach ($fieldOrder as $column => $fieldConfiguration) {
+                    if ($fieldConfiguration[0]) {
+                        if ($fieldConfiguration[1] ?? false) {
+                            // If column exist and is not empty
+                            if (array_key_exists($column, $csvRow) && trim($csvRow[$column])) {
+                                if (str_starts_with($fieldConfiguration[1], '=')) {
+                                    $data[$row][$fieldConfiguration[0]] = trim(substr($fieldConfiguration[1], 1));
+                                } else {
+                                    if (str_starts_with($fieldConfiguration[1], '+')) {
+                                        $data[$row][$fieldConfiguration[0]] .= substr($fieldConfiguration[1], 1);
                                     }
                                 }
-                            } else {
-                                $data[$rowNumber][$fieldConfiguration[0]] = trim($line[$column] ?? '');
                             }
+                        } else {
+                            $data[$row][$fieldConfiguration[0]] = trim($csvRow[$column] ?? '');
                         }
                     }
-                    $rowNumber++;
+                }
+
+                $email = $data[$row]['email'] ?? '';
+                if (!$email || !GeneralUtility::validEmail($email)) {
+                    // remove entries with invalid email
+                    unset($data[$row]);
                 }
             }
         }
-        return $data;
+
+        return array_values($data);
     }
 
     /**
@@ -127,7 +141,7 @@ class CsvUtility
         foreach ($mappedCsv as $k => $csvData) {
             if (!in_array($k, $remove)) {
                 $found = 0;
-                foreach ($cmpCsv as $kk =>$cmpData) {
+                foreach ($cmpCsv as $kk => $cmpData) {
                     if ($k != $kk) {
                         if ($csvData[$uniqueKey] == $cmpData[$uniqueKey]) {
                             $double[] = $mappedCsv[$kk];
@@ -214,7 +228,7 @@ class CsvUtility
         $emails = [];
         $recipientSourceConfiguration = $data['configuration'] ?? null;
         if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO &&
-            $data['recipients'] ?? false) {
+        $data['recipients'] ?? false) {
             foreach ($data['recipients'] as $recipient) {
                 $emails[] = ['uid' => $recipient['uid'] ?? '-', 'email' => $recipient['email'], 'name' => $recipient['name'] ?? ''];
             }

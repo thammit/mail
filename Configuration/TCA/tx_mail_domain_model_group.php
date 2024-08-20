@@ -40,7 +40,7 @@ $return = [
             ]
         ],
         RecipientGroupType::CSV => [
-            'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv_type,csv_separator,csv_data,csv_file,mail_html,categories',
+            'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv_type,csv_separator,csv_field_names,csv_data,csv_file,mail_html,categories',
             'columnsOverrides' => [
                 'categories' => [
                     'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.selectCategoriesForPlainCsv',
@@ -204,6 +204,15 @@ $return = [
                 ],
                 'default' => CsvSeparator::COMMA,
             ],
+        ],
+        'csv_field_names' => [
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvFieldNames',
+            'description' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvFieldNames.description',
+            'exclude' => '1',
+            'config' => [
+                'type' => 'check',
+                'default' => 0
+            ]
         ],
         'csv_data' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvData',

@@ -7,11 +7,8 @@ use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
-use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
-use MEDIAESSENZ\Mail\Domain\Repository\RecipientRepositoryInterface;
 use MEDIAESSENZ\Mail\Service\ImportService;
 use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
-use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
@@ -25,12 +22,10 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Utility\ClassNamingUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
-use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class RecipientController extends AbstractController
 {
@@ -196,16 +191,16 @@ class RecipientController extends AbstractController
 
         if ($recipientSourceConfiguration->isCsvOrPlain()) {
             $groupOfRecipientSource = $this->groupRepository->findByUid($recipientSourceConfiguration->groupUid);
-            $rows = [];
+            $recipientData = [];
             if ($groupOfRecipientSource instanceof Group) {
                 if ($recipientSourceConfiguration->isCsv()) {
-                    $rows = CsvUtility::rearrangeCsvValues($groupOfRecipientSource->getCsvData(), $groupOfRecipientSource->getCsvSeparatorString(), RecipientUtility::getAllRecipientFields());
+                    $recipientData = CsvUtility::getRecipientDataFromCSVGroup($groupOfRecipientSource);
                 } else {
-                    $rows = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($groupOfRecipientSource->getList()))));
-                    $rows = array_map(fn($element) => array_merge(array_slice($element, 0, 1), array_slice($element, 2)), $rows);
+                    $recipientData = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($groupOfRecipientSource->getList()))));
+                    $recipientData = array_map(fn($element) => array_merge(array_slice($element, 0, 1), array_slice($element, 2)), $recipientData);
                 }
             }
-            return CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);
+            return CsvUtility::downloadCSV($recipientData, $recipientSourceIdentifier);
         }
 
         if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceConfiguration->table)) {
@@ -215,6 +210,7 @@ class RecipientController extends AbstractController
         }
 
         $recipientsUidListGroupedByRecipientSource = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
+
         if (!array_key_exists($recipientSourceIdentifier, $recipientsUidListGroupedByRecipientSource) || count($recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier]) === 0) {
             ViewUtility::addFlashMessageError('',
                 LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
@@ -222,20 +218,21 @@ class RecipientController extends AbstractController
         }
 
         $recipientsUidList = $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier];
+
         if (is_array(current($recipientsUidList))) {
             // the list already contain recipient data and not only an array of uids
-            $rows = $recipientsUidList;
+            $recipientData = $recipientsUidList;
         } else {
             if ($recipientSourceConfiguration->isModelSource()) {
-                $rows = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientsUidList,
+                $recipientData = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientsUidList,
                     $recipientSourceConfiguration->model, []);
             } else {
                 $csvExportFields = $recipientSourceConfiguration->csvExportFields ?? GeneralUtility::trimExplode(',',
                     $this->defaultCsvExportFields, true);
-                $rows = $this->recipientService->getRecipientsDataByUidListAndTable($recipientsUidList, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, $csvExportFields, CategoryFormat::CSV);
+                $recipientData = $this->recipientService->getRecipientsDataByUidListAndTable($recipientsUidList, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, $csvExportFields, CategoryFormat::CSV);
             }
         }
-        return CsvUtility::downloadCSV($rows, $recipientSourceIdentifier);
+        return CsvUtility::downloadCSV($recipientData, $recipientSourceIdentifier);
     }
 
     /**
@@ -302,6 +299,7 @@ class RecipientController extends AbstractController
      * @param array $configuration
      * @return ResponseInterface
      * @throws \Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function csvImportWizardStepConfigurationAction(array $configuration = []): ResponseInterface
     {
