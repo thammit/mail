@@ -210,6 +210,18 @@
             <trans-unit id="tx_mail_domain_model_group.csvSeparator" resname="tx_mail_domain_model_group.csvSeparator">
                 <source>Field separator</source>
             </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvEnclosure" resname="tx_mail_domain_model_group.csvEnclosure">
+                <source>Field enclosure</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvEnclosure.I.0" resname="tx_mail_domain_model_group.csvEnclosure.I.0">
+                <source>" (double quotes)</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvEnclosure.I.1" resname="tx_mail_domain_model_group.csvEnclosure.I.1">
+                <source>' (single quotes)</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_group.csvEnclosure.I.2" resname="tx_mail_domain_model_group.csvEnclosure.I.2">
+                <source>` (back tick)</source>
+            </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.csvFieldNames" resname="tx_mail_domain_model_group.csvFieldNames">
                 <source>First line of CSV Data contain fieldnames</source>
             </trans-unit>

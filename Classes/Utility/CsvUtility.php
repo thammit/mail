@@ -29,16 +29,14 @@ class CsvUtility
      */
     public static function getRecipientDataFromCSVGroup(Group $group): array
     {
-        $separator = $group->getCsvSeparatorString();
         $csvRawData = $group->getCsvData();
-        $allRecipientFields = RecipientUtility::getAllRecipientFields();
         $firstLineOfCsvContainFieldNames = $group->isCsvFieldNames();
 
         $fh = tmpfile();
         fwrite($fh, trim($csvRawData));
         fseek($fh, 0);
         $csvDataArray = [];
-        while ($line = fgetcsv($fh, 1000, $separator)) {
+        while ($line = fgetcsv($fh, 1000, $group->getCsvSeparatorString(), $group->getCsvEnclosureString())) {
             $csvDataArray[] = $line;
         }
         fclose($fh);
@@ -61,6 +59,7 @@ class CsvUtility
                 return [];
             }
 
+            $allRecipientFields = RecipientUtility::getAllRecipientFields();
             $fieldOrder = [];
 
             foreach ($fieldNames as $column => $fieldName) {

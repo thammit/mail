@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
+use MEDIAESSENZ\Mail\Type\Enumeration\CsvEnclosure;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvSeparator;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
@@ -46,6 +47,11 @@ class Group extends AbstractEntity
      * @var int
      */
     protected int $csvSeparator = CsvSeparator::COMMA;
+
+    /**
+     * @var int
+     */
+    protected int $csvEnclosure = CsvEnclosure::DOUBLE_QUOTE;
 
     /**
      * @var bool
@@ -254,6 +260,26 @@ class Group extends AbstractEntity
     public function setCsvSeparator(int $csvSeparator): Group
     {
         $this->csvSeparator = $csvSeparator;
+        return $this;
+    }
+
+    public function getCsvEnclosure(): int
+    {
+        return $this->csvEnclosure;
+    }
+
+    public function getCsvEnclosureString(): string
+    {
+        return match ($this->csvEnclosure) {
+            CsvEnclosure::SINGLE_QUOTE => "'",
+            CsvEnclosure::BACK_TICK => '`',
+            default => '"',
+        };
+    }
+
+    public function setCsvEnclosure(int $csvEnclosure): Group
+    {
+        $this->csvEnclosure = $csvEnclosure;
         return $this;
     }
 

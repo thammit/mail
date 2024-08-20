@@ -1,5 +1,6 @@
 <?php
 
+use MEDIAESSENZ\Mail\Type\Enumeration\CsvEnclosure;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvSeparator;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
@@ -40,7 +41,7 @@ $return = [
             ]
         ],
         RecipientGroupType::CSV => [
-            'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv_type,csv_separator,csv_field_names,csv_data,csv_file,mail_html,categories',
+            'showitem' => 'type, hidden, sys_language_uid, title, description, --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.advanced,csv_type,csv_separator,csv_enclosure,csv_field_names,csv_data,csv_file,mail_html,categories',
             'columnsOverrides' => [
                 'categories' => [
                     'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.selectCategoriesForPlainCsv',
@@ -203,6 +204,28 @@ $return = [
                     ],
                 ],
                 'default' => CsvSeparator::COMMA,
+            ],
+        ],
+        'csv_enclosure' => [
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvEnclosure',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'items' => [
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvEnclosure.I.0',
+                        CsvEnclosure::DOUBLE_QUOTE
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvEnclosure.I.1',
+                        CsvEnclosure::SINGLE_QUOTE
+                    ],
+                    [
+                        'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvEnclosure.I.2',
+                        CsvEnclosure::BACK_TICK
+                    ],
+                ],
+                'default' => CsvEnclosure::DOUBLE_QUOTE,
             ],
         ],
         'csv_field_names' => [
