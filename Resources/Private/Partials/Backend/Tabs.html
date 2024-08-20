@@ -31,10 +31,11 @@
 </f:section>
 
 <f:section name="tableRow">
-	<tr>
-		<th style="width:20%; min-width:200px">{field.title}</th>
-		<td>{field.value}</td>
-		<td class="text-right text-end">
+	<f:variable name="background" value="{f:if(condition:field.error,then:'bg-danger-subtle')}" />
+	<tr class="{background}">
+		<th style="width:20%; min-width:200px" class="{background}">{field.title}</th>
+		<td class="{background}">{field.value}</td>
+		<td class="text-right text-end {background}">
 			<f:if condition="{field.edit}">
 				<f:if condition="{tabId}">
 					<f:variable name="returnUrl"><f:uri.action action="settings" arguments="{mail:mailUid,tabId:tabId}"/></f:variable>

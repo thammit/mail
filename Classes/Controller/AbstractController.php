@@ -288,9 +288,10 @@ abstract class AbstractController extends ActionController
      * @param string $message
      * @param string $title
      * @param int|ContextualFeedbackSeverity|null $severity
+     * @param int|null $duration
      * @return void
      */
-    protected function addJsNotification(string $message, string $title = '', int|ContextualFeedbackSeverity $severity = null): void
+    protected function addJsNotification(string $message, string $title = '', int|ContextualFeedbackSeverity $severity = null, int|null $duration = null): void
     {
         if ($this->typo3MajorVersion < 12) {
             $severityType = match ($severity) {
@@ -309,8 +310,13 @@ abstract class AbstractController extends ActionController
                 default => 'success',
             };;
         }
+
+        if ($duration === null) {
+            $duration = $severityType === 'error' ? 0 : 5;
+        }
+
         $this->pageRenderer->addJsInlineCode(ViewUtility::NOTIFICATIONS . $this->notification,
-            "top.TYPO3.Notification.$severityType('$title', '$message')", false, false, true);
+            "top.TYPO3.Notification.$severityType('$title', '$message', $duration)", false, false, true);
         $this->notification++;
     }
 
@@ -449,6 +455,10 @@ abstract class AbstractController extends ActionController
                         'title' => TcaUtility::getTranslatedLabelOfTcaField($columnName, $tableName),
                         'value' => $value,
                         'edit' => !$backendUserIsAllowedToEditMailSettingsRecord || in_array($property, $readOnly) ? false : GeneralUtility::camelCaseToLowerCaseUnderscored($property),
+                        'error' => match ($property) {
+                            'fromEmail' => !$mail->isValidFromEmail(),
+                            default => false
+                        }
                     ];
                 }
             }

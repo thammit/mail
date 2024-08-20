@@ -10,6 +10,7 @@ use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailType;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -266,6 +267,11 @@ class Mail extends AbstractEntity
     public function getFromEmail(): string
     {
         return $this->fromEmail;
+    }
+
+    public function isValidFromEmail(): bool
+    {
+        return GeneralUtility::validEmail($this->fromEmail);
     }
 
     /**

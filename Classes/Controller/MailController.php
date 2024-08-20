@@ -39,8 +39,10 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\Exception\InvalidFileException;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
@@ -115,7 +117,7 @@ class MailController extends AbstractController
             Constants::PANEL_DRAFT,
             Constants::PANEL_INTERNAL,
             Constants::PANEL_EXTERNAL,
-            Constants::PANEL_QUICK_MAIL
+            Constants::PANEL_QUICK_MAIL,
         ];
         if ($this->userTSConfiguration['hideTabs'] ?? false) {
             $hidePanel = GeneralUtility::trimExplode(',', $this->userTSConfiguration['hideTabs']);
@@ -457,6 +459,15 @@ class MailController extends AbstractController
                 sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchSuccessfully.message'),
                     $messageValue),
                 LanguageUtility::getLL('general.notification.severity.success.title'));
+        }
+
+        if (!$mail->isValidFromEmail()) {
+            $this->addJsNotification(
+                LanguageUtility::getLL('mail.wizard.notification.noValidFromEmail.message'),
+                LanguageUtility::getLL('general.notification.severity.error.title'),
+                $this->typo3MajorVersion < 12 ? AbstractMessage::ERROR : ContextualFeedbackSeverity::ERROR,
+                10
+            );
         }
 
         if ($this->typo3MajorVersion < 12) {
@@ -952,7 +963,7 @@ class MailController extends AbstractController
             return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
         }
 
-        $mail->setRecipients($recipients,true);
+        $mail->setRecipients($recipients, true);
 
         $mail->setStatus(MailStatus::SCHEDULED);
 

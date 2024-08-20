@@ -82,8 +82,12 @@
 				</f:if>
 			</div>
 		</div>
+		<f:variable name="nextDisabled" value="0" />
+		<f:if condition="!{mail.validFromEmail}">
+			<f:variable name="nextDisabled" value="1" />
+		</f:if>
 		<f:render partial="Backend/Wizard/Navigation"
-				  arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, lll:lll}"/>
+				  arguments="{mail:mail.uid, previousAction: navigation.previousAction, nextAction: navigation.nextAction, nextDisabled: nextDisabled, lll:lll}"/>
 	</div>
 </f:section>
 </html>

@@ -126,6 +126,9 @@
             <trans-unit id="mail.wizard.notification.noPageSelected.message" resname="mail.wizard.notification.noPageSelected.message">
                 <source>Please select a mail folder or page in the page tree.</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.noValidFromEmail.message" resname="mail.wizard.notification.noValidFromEmail.message">
+                <source>No valid sender email found!</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.fetchSuccessfully.message" resname="mail.wizard.notification.fetchSuccessfully.message">
                 <source>The page "%s" was fetched successfully.</source>
             </trans-unit>
