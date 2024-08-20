@@ -257,7 +257,7 @@ $return = [
                 'type' => 'file',
                 'allowed' => 'csv,txt',
                 'maxitems' => 1,
-                'minitems' => 1,
+                'minitems' => 0,
             ],
         ],
         'mail_html' => [
