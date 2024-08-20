@@ -927,7 +927,7 @@ If the option is not set, images are included in HTML content by absolute refere
             <trans-unit id="configuration.returnPath.details" xml:space="preserve">
 			<source><![CDATA[This is the address to which non-deliverable mails will be returned to.
 If you put in the marker ###XID### it'll be substituted with the unique id of the mail recipient.
-Note that if PHP is executing in safe mode, the Direct mail module may not be able to set the return path to a value different than the value defined at the server level.]]></source>
+Note that if PHP is executing in safe mode, the mail module may not be able to set the return path to a value different than the value defined at the server level.]]></source>
 		    </trans-unit>
             <trans-unit id="configuration.sendOptions.description" resname="configuration.sendOptions.description">
                 <source>Select the format of mail content.</source>
@@ -936,7 +936,7 @@ Note that if PHP is executing in safe mode, the Direct mail module may not be ab
                 <source>If in doubt, set it to 'Plain text and HTML'. The messages will then be sent with both formats included, and the recipients are normally able to select their preferred format.</source>
             </trans-unit>
             <trans-unit id="configuration.type.description" resname="configuration.type.description">
-                <source>Type of source of the Direct mail</source>
+                <source>Type of source of the mail</source>
             </trans-unit>
             <trans-unit id="configuration.type.details" resname="configuration.type.details">
                 <source>The mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External URL'.</source>
