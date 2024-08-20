@@ -242,6 +242,9 @@
             <trans-unit id="tx_mail_domain_model_group.csvFile" resname="tx_mail_domain_model_group.csvFile">
                 <source>CSV File</source>
             </trans-unit>
+            <trans-unit id="notImplementedYet" resname="notImplementedYet">
+                <source>This feature is not implemented yet. If you like to sponsor the development, please contact me.</source>
+            </trans-unit>
             <trans-unit id="tx_mail_domain_model_group.mailGroups" resname="tx_mail_domain_model_group.mailGroups">
                 <source>Other recipient lists</source>
             </trans-unit>
