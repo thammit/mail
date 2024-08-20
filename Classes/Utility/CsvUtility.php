@@ -99,7 +99,7 @@ class CsvUtility
                                     }
                                 }
                             } else {
-                                $data[$rowNumber][$fieldConfiguration[0]] = trim($line[$column]);
+                                $data[$rowNumber][$fieldConfiguration[0]] = trim($line[$column] ?? '');
                             }
                         }
                     }
