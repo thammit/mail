@@ -24,16 +24,20 @@ class RecipientSourcesProcFunc
         $recipientSources = ConfigurationUtility::getRecipientSources($site->getConfiguration());
         if ($recipientSources) {
             foreach ($recipientSources as $recipientSource) {
-                if ($recipientSource->isCsvOrPlain()) {
-                    /** @var BackendUserAuthentication $backendUser */
-                    $backendUser = $GLOBALS['BE_USER'];
-                    $page = BackendUtility::getRecord('pages', $recipientSource->pid);
-                    if ($page && $backendUser->doesUserHaveAccess($page, 1)) {
-                        $params['items'][] = [$recipientSource->title, $recipientSource->identifier, $recipientSource->icon];
-                    }
-                } else {
+                if (!$recipientSource->isCsvOrPlain() && !$recipientSource->isCsvFile()) {
                     $params['items'][] = [$recipientSource->title, $recipientSource->identifier, $recipientSource->icon];
                 }
+//              To add csv and plain recipient groups as well uncomment:
+//              if ($recipientSource->isCsvOrPlain() || $recipientSource->isCsvFile()) {
+//                  /** @var BackendUserAuthentication $backendUser */
+//                  $backendUser = $GLOBALS['BE_USER'];
+//                  $page = BackendUtility::getRecord('pages', $recipientSource->pid);
+//                  if ($page && $backendUser->doesUserHaveAccess($page, 1)) {
+//                      $params['items'][] = [$recipientSource->title, $recipientSource->identifier, $recipientSource->icon];
+//                  }
+//              } else {
+//                  $params['items'][] = [$recipientSource->title, $recipientSource->identifier, $recipientSource->icon];
+//              }
             }
         }
     }
