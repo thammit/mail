@@ -85,7 +85,7 @@ class RecipientSourceConfigurationDTO
 
     public function isCsv(): bool
     {
-        return $this->type === RecipientSourceType::CSV;
+        return $this->type === RecipientSourceType::CSV || $this->type === RecipientSourceType::CSVFILE;
     }
 
     public function isCsvFile(): bool

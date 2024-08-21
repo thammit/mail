@@ -462,7 +462,7 @@ class RecipientService
             /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             if ($recipientSourceConfiguration) {
-                $uniqueIdLists[$recipientSourceIdentifier] = $recipientSourceConfiguration->isCsvOrPlain() ? $idList : array_unique($idList);
+                $uniqueIdLists[$recipientSourceIdentifier] = $recipientSourceConfiguration->isCsvOrPlain()  ? $idList : array_unique($idList);
             }
         }
 

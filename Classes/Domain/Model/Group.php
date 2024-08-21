@@ -8,6 +8,7 @@ use MEDIAESSENZ\Mail\Type\Enumeration\CsvSeparator;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -68,6 +69,10 @@ class Group extends AbstractEntity
      */
     protected int $csvType = CsvType::PLAIN;
 
+    /**
+     * @var FileReference|null
+     */
+    protected ?FileReference $csvFile = null;
 
     /**
      * @var bool
@@ -313,6 +318,17 @@ class Group extends AbstractEntity
     public function setCsvType(int $csvType): Group
     {
         $this->csvType = $csvType;
+        return $this;
+    }
+
+    public function getCsvFile(): ?FileReference
+    {
+        return $this->csvFile;
+    }
+
+    public function setCsvFile(?FileReference $csvFile): Group
+    {
+        $this->csvFile = $csvFile;
         return $this;
     }
 

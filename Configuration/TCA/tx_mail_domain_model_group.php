@@ -251,7 +251,7 @@ $return = [
         ],
         'csv_file' => [
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvFile',
-            'description' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:notImplementedYet',
+            'description' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_group.csvFile.description',
             'displayCond' => 'FIELD:csv_type:=:' . CsvType::FILE,
             'config' => [
                 'type' => 'file',
