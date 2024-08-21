@@ -8,10 +8,12 @@
 
 
 
-Recipient list refactoring
---------------------------
+TYPO3 13 compatibility + Recipient group refactoring
+----------------------------------------------------
 
-Add more possibilities to manipulate recipient groups using query restrictions on table or extbase model based recipient sources.
+- Add more possibilities to manipulate recipient groups using query restrictions on tables or extbase model based recipient sources
+- Enhanced csv based recipient groups
+- Exclude recipient groups
 
 New features
 ------------
@@ -22,9 +24,6 @@ New features
 
   - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Configuration/Site/RecipientSources.yaml (recipientSources:male_tt_address)
   - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Classes/EventListener/AddressModelRestriction.php
-  - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Classes/Domain/Model/Address.php
-  - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Classes/Domain/Repository/AddressRepository.php
-  - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Configuration/Extbase/Persistence/Classes.php
   - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Configuration/Services.yaml
 
 - Add possibility to define one or more query restrictions to manipulate table recipient sources. This way it is now possible to e.g. filter recipient lists coming from tables.
@@ -37,7 +36,19 @@ New features
 - To make it possible to use a table more than once, a new recipient source confiiguration property `table` was added.
   If not set, the identifier is used as table name instead.
 
-- Mail queue pause and continue enables the possibility to pause and resume the sending of a mailing.
+- The mail queue is now pausable. This opens the possibility to pause a running delivery to e.g. give another delivery priority.
+
+- A new recipient group type "CSV" was added with additional configuration settings:
+
+  - Type "Plain CSV" and "CSV from file"
+  - Field separator
+  - Field enclosure
+  - First line contains field names, which makes it possible to use every field defined in the extension settings "defaultRecipientFields" or "additionalRecipientFields" as marker
+  - CSV file as source (file must be UTF-8 encoded!)
+
+- The last step of the Mail Wizard has been expanded to include a new “Exclude recipient groups” selection, which allows you to define one or more recipient groups
+  that are to be to be excluded from a mailing. This makes it possible, for example, to exclude a few people from a larger list in order to prevent them from receiving a specific
+  mailing. This list could be a plain list with just email addresses.
 
 Breaking changes
 ----------------
@@ -62,10 +73,10 @@ Breaking changes
 
   This will be available as `$recipientsSourceConfiguration->custom['foo']` in an event listener.
 
-- Plain Lists and CSV recipient groups are now different recipient group type. A migration wizard to convert from old to new format comes with this version.
+- Plain Lists and CSV recipient groups are now different recipient group types. A migration wizard to convert from the old to new format comes with this version.
   Attention: Before using the migration wizard please do a database compare, but do **not** rename or remove the field "csv" in the first step!
-  After the new fields "csv_type", "csv_data", "csv_separator" and "csv_file" (not used yet) have been generated with help of the database compare,
-  got to admin tools > upgrade and click on upgrade wizard. Here start the wizard with the title: "EXT:mail: Migrate mail group type plain to plain or new group csv, depending on csv type.".
+  After the new fields "csv_type", "csv_data", "csv_separator" and "csv_file" have been generated, goto admin tools > upgrade and click on upgrade wizard.
+  Here start the wizard with the title: "EXT:mail: Migrate mail group type plain to plain or new group csv, depending on csv type.".
   After this, you can safely delete the field "csv" from the mail database table.
 
 - Mail records now have a status field, which can hold (currently) 5 different states:
