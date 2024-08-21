@@ -15,20 +15,28 @@ MAIL comes with a lot of possibilities:
 
 *  From pages
 
-   *  compare to EXT:direct_mail, MAIL is not limited to fe_groups, fe_users, tt_address and one custom table
+   *  Compare to EXT:direct_mail, MAIL is not limited to fe_groups, fe_users, tt_address and one custom table
    *  It is possible to add as many tables you like, as long they have the needed fields or an extbase model which implements at least the RecipientInterface, defined in :guilabel:`Classes/Domain/Model/RecipientInterface.php`
    *  Beside the recipient source (table) it is also possible to set a starting point where the records should be taken from
    *  Categories can also be set to filter the list of recipients to only those how have the at least one of them assigned as well
 
-*  Static list
-
-   *  Single records of all defined sources can be added – also fe_groups which will add all fe_users who have this groups assigned.
-
 *  Plain list
 
    *  A comma separated list of recipients (just mails or names and mails separated by a comma or semicolon)
-   *  compare to EXT:direct_mail, within MAIL you also can choose whether the group of users should receive html or just plain mails.
-   *  categories are also definable
+   *  Compare to EXT:direct_mail, within MAIL you also can choose whether the recipients should get html or plain mails.
+   *  Categories are also assignable
+
+*  CSV (Plain/File)
+
+   *  Configurable CSV input format (different separators, enclosures and check if first line contain field names)
+   *  If the first line doesn't contain the fieldnames, the order of the data must be "name", "email" and (optionally) "salutation"
+   *  Data can be plain pasted into the data field or from a selected csv file (must be utf-8 encoded!)
+   *  Compare to EXT:direct_mail, within MAIL you also can choose whether the recipients should get html or plain mails.
+   *  Categories are also assignable
+
+*  Static list
+
+   *  Single records of all defined sources can be added – also fe_groups which will add all fe_users who have this groups assigned.
 
 *  From other recipient lists
 
@@ -37,11 +45,11 @@ MAIL comes with a lot of possibilities:
 Some EXT:direct_mail power users may miss the possibility to define queries as sending groups.
 This feature is currently not available, and will maybe come with a future release. Sponsoring is highly welcome.
 
-Importing a csv list of addresses
-=================================
+Importing CSV data (plain/file) as tt_address records
+====================================================
 
-This module also gives you the option to import a csv (comma-separates list) of addresses
-and create a recipient group containing the imported records afterwards.
+This module, which needs tt_address to be installed, gives you the option to import a csv (comma-separates list) of addresses
+as tt_address records, which could be added as "From pages" or "Static list" recipient group afterwards.
 
 To make it easier to import csv records, there is a wizard, which
 guide you through the process.
@@ -96,3 +104,7 @@ After mapping the fields you are ready to start the import process by pressing t
 If finished a list of new imported, invalid email, updated and doublet records will be shown.
 
 .. include:: /Images/AddressImportStep5.rst.txt
+
+This process generates tt_address records in the choosen folder. To create a recipient group from this records,
+you must add a new recipient group of the type “From pages” and select “Addresses” as Recipient source.
+Then choose the folder where you imported the records under "Startingpoint" and finally press Save.

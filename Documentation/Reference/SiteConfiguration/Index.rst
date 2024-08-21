@@ -53,6 +53,52 @@ Here is an example of how to add a table which has all necessary fields (at leas
 To simplify things a bit, it is also possible to ignore the mail_html and mail_active fields (they not need to exist at all).
 To do this, just add `forceHtmlMail: true` or/and `ignoreMailActive: true` to your recipientSource configuration.
 
+It is also possible to use a table more than once to create recipient sources with a subset of e.g. tt_address records.
+
+.. code-block:: yaml
+
+   mail:
+      recipientSources:
+         female_tt_address:
+            table: 'tt_address'
+            title: 'Female filtered tt_address records using table'
+            icon: 'tcarecords-tt_address-default'
+            queryRestrictions:
+              - 'MEDIAESSENZ\AdditionalMailRecipients\Database\Query\Restriction\FemaleRestriction'
+            csvExportFields: [uid,gender,name,first_name,middle_name,last_name,title,email,phone,www,address,company,city,zip,country,fax,categories,mail_salutation,mail_html,tstamp]
+
+In this case the table name has to be defined as `table` property. To create a subset of tt_address records, one or more QueryRestrictions can be defined.
+
+Such a QueryRestrictions could look like this:
+
+.. code-block:: php
+
+   <?php
+   namespace MEDIAESSENZ\AdditionalMailRecipients\Database\Query\Restriction;
+
+   use TYPO3\CMS\Core\Database\Query\Expression\CompositeExpression;
+   use TYPO3\CMS\Core\Database\Query\Expression\ExpressionBuilder;
+   use TYPO3\CMS\Core\Database\Query\Restriction\QueryRestrictionInterface;
+
+   class FemaleRestriction implements QueryRestrictionInterface
+   {
+       public function buildExpression(array $queriedTables, ExpressionBuilder $expressionBuilder): CompositeExpression
+       {
+           $constraints = [];
+           foreach ($queriedTables as $tableAlias => $tableName) {
+               if ($tableName === 'tt_address') {
+                   // attention: since gender is a string in tt_address the value has to be set in double quotes!
+                   // normally this should be done with help of the $queryBuilder->createNamedParameter('f', Connection::PARAM_STR)), but here we do not have the query builder :-(
+                   $constraints[] = $expressionBuilder->eq(
+                       $tableAlias . '.' . 'gender',
+                       '"f"'
+                   );
+               }
+           }
+           return $expressionBuilder->and(...$constraints);
+       }
+   }
+
 If a table doesn't contain the upper mentioned fields, or the fields have different names, it is also possible to use an extbase model to map fields to the need.
 A site configuration doing this could look like this:
 
@@ -78,3 +124,14 @@ Btw.: The same method will be used by the csv-export inside the recipient group 
 
 ..  note::
    Since using a domain model for a recipient source brings extbase into the game, working with large recipient groups can become a game of patience.
+
+It is also possible to create a subset of record from a domain model source.
+
+Since MAIL doesn't use the "normal" repository classes of a model, this restriction has to be added as an event listener (RecipientsRestrictionEvent).
+
+An example how this could look like, can be found here: https://gitlab.com/mediaessenz/additional-mail-recipients
+
+The responsible files in the example extension are
+ - `Configuration/Services.yaml` (line 16-19)
+ - `Configuration/Site/RecipientSources.yaml` (line 12-19)
+ - `Classes/EventListener/AddressModelRestriction.php`.
