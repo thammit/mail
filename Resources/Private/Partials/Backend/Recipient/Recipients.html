@@ -93,7 +93,7 @@
                             <f:if condition="{recipientSource.configuration.csvOrPlain}">
                                 <f:then>
                                     <f:if condition="{recipientSource.configuration.groupUid}">
-                                        <be:link.editRecord class="btn btn-default" uid="{recipientSource.configuration.groupUid}" table="{table}" fields="list,csv_separator,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
+                                        <be:link.editRecord class="btn btn-default" uid="{recipientSource.configuration.groupUid}" table="{table}" fields="list,csv_separator,csv_enclosure,csv_field_names,csv_data,csv_file,mail_html,categories" title="{f:translate(key: '{lll}general.button.edit')}">
                                             <core:icon identifier="actions-open"/>
                                         </be:link.editRecord>
                                     </f:if>
