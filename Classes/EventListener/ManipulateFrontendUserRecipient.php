@@ -17,7 +17,7 @@ class ManipulateFrontendUserRecipient
         if ($event->getRecipientSourceIdentifier() === 'fe_users') {
             $recipientSourceConfiguration = $event->getRecipientSourceConfiguration();
             $recipientData = $event->getRecipientData();
-            if (($recipientSourceConfiguration->model ?? false) && ($recipientData['uid'] ?? false)) {
+            if ($recipientSourceConfiguration->isModelSource() && ($recipientData['uid'] ?? false)) {
                 // add all csv export field/values to existing data, but do not override already existing field/values!
                 // this is important, because categories need to stay an array of uids
                 $enhancedRecipientData = GeneralUtility::makeInstance(RecipientService::class)->getRecipientsDataByUidListAndModelName([$recipientData['uid']], $recipientSourceConfiguration->model, []);
