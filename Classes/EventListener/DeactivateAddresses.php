@@ -3,9 +3,12 @@
 namespace MEDIAESSENZ\Mail\EventListener;
 
 use MEDIAESSENZ\Mail\Domain\Model\Address;
-use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
@@ -29,20 +32,64 @@ class DeactivateAddresses
         $recipients = $disableRecipientsEvent->getData()[$this->recipientSourceIdentifier]['recipients'] ?? [];
         $recipientSourceConfiguration = $disableRecipientsEvent->getRecipientSources()[$this->recipientSourceIdentifier];
         foreach ($recipients as $recipient) {
-            if ($recipientSourceConfiguration->model) {
-                $address = $this->addressRepository->findByUid((int)$recipient['uid']);
-                if ($address instanceof Address && $address->isActive()) {
-                    $address->setActive(false);
-                    $this->persistenceManager->update($address);
-                    $affectedRecipients ++;
-                }
-            } else {
-                if ($recipient['mail_active']) {
-                    $affectedRecipients += $this->addressRepository->updateRecord(['mail_active' => 0], ['uid' => (int)$recipient['uid']]);
-                }
+            switch (true) {
+                case $recipientSourceConfiguration->isModelSource():
+                    $address = $this->addressRepository->findByUid((int)$recipient['uid']);
+                    if ($address instanceof Address && $address->isActive()) {
+                        $address->setActive(false);
+                        $this->persistenceManager->update($address);
+                        $this->persistenceManager->persistAll();
+                        $affectedRecipients++;
+                    }
+                    break;
+                case $recipientSourceConfiguration->isTableSource():
+                    if ($recipient['mail_active']) {
+                        $queryBuilder = $this->getQueryBuilder($recipientSourceConfiguration->table);
+                        $affectedRecipients += $queryBuilder->update($recipientSourceConfiguration->table)
+                            ->set('mail_active',0)
+                            ->where($queryBuilder->expr()->eq('uid', $recipient['uid']))
+                            ->executeStatement();
+                    }
+                    break;
             }
         }
 
         $disableRecipientsEvent->setNumberOfAffectedRecipients($affectedRecipients);
     }
+
+    /*
+     * D A T A B A S E
+     */
+
+    protected function getConnectionPool(): ConnectionPool
+    {
+        return GeneralUtility::makeInstance(ConnectionPool::class);
+    }
+
+    /**
+     * @param string|null $table
+     * @return QueryBuilder
+     */
+    protected function getQueryBuilder(string $table = null): QueryBuilder
+    {
+        return $this->getConnectionPool()->getQueryBuilderForTable($table);
+    }
+
+    /**
+     * @param string|null $table
+     * @param bool $withDeleted
+     * @return QueryBuilder
+     */
+    protected function getQueryBuilderWithoutRestrictions(string $table = null, bool $withDeleted = false): QueryBuilder
+    {
+        $queryBuilder = $this->getQueryBuilder($table);
+        $queryBuilder
+            ->getRestrictions()
+            ->removeAll();
+        if (!$withDeleted) {
+            $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        }
+        return $queryBuilder;
+    }
+
 }
