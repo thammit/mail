@@ -9,7 +9,7 @@ class AvoidCaching
     {
         // because of unknown reasons TYPO3 13.2 doesn't load the ext_typoscript_setup.typoscript
         // in some cases. To be sure this happens this hack is nessessary.
-        if (($event->getRequest()->getQueryParams()['mail'] ?? false) && ($event->getRequest()->getQueryParams()['jumpurl'] ?? false)) {
+        if (($event->getRequest()->getQueryParams()['mail'] ?? false) && array_key_exists('jumpurl', $event->getRequest()->getQueryParams())) {
             $event->setShouldUseCachedPageData(false);
         }
     }

@@ -3,6 +3,7 @@
 namespace MEDIAESSENZ\Mail\Middleware;
 
 use Doctrine\DBAL\Driver\Exception;
+use JsonException;
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
@@ -54,7 +55,12 @@ class JumpurlMiddleware implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws \Exception|Exception
+     * @throws Exception
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws InvalidQueryException
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -209,6 +215,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      *
      * @param int $targetIndex
      * @return string|null
+     * @throws JsonException
      */
     protected function getTargetUrl(int $targetIndex): ?string
     {
