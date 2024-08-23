@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Command;
 
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use Fetch\Message;
 use Fetch\Server;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BounceMailUtility;
+use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,7 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AnalyzeBounceMailCommand extends Command
@@ -25,14 +25,11 @@ class AnalyzeBounceMailCommand extends Command
     private LanguageService $languageService;
 
     public function __construct(
-        private LanguageServiceFactory $languageServiceFactory,
         private Context $context,
         private LogRepository $logRepository,
         string $name = null
     )
     {
-        $this->languageService = $this->languageServiceFactory->create('default');
-        $this->languageService->includeLLFile('EXT:mail/Resources/Private/Language/Modules.xlf');
         parent::__construct($name);
     }
 
@@ -77,7 +74,7 @@ class AnalyzeBounceMailCommand extends Command
                 'c',
                 InputOption::VALUE_REQUIRED,
                 'Number of bounce mail to be processed'
-            )//->setHelp('')
+            )
         ;
     }
 
@@ -99,7 +96,7 @@ class AnalyzeBounceMailCommand extends Command
         $count = 0;
         // check if PHP IMAP is installed
         if (!extension_loaded('imap')) {
-            $io->error($this->languageService->getLL('scheduler.bounceMail.phpImapError'));
+            $io->error(LanguageUtility::getLL('scheduler.bounceMail.phpImapError'));
             return Command::FAILURE;
         }
 
@@ -163,11 +160,15 @@ class AnalyzeBounceMailCommand extends Command
                 }
                 // expunge to delete permanently
                 $mailServer->expunge();
-                imap_close($mailServer->getImapStream());
+                try {
+                    imap_close($mailServer->getImapStream());
+                } catch (\Exception $exception) {
+                    $io->error('imap_close failed with error: ' . $exception->getMessage());
+                }
                 return Command::SUCCESS;
             }
         } catch (\Exception $e) {
-            $io->error($this->languageService->getLL('scheduler.bounceMail.dataVerification') . $e->getMessage());
+            $io->error(LanguageUtility::getLL('scheduler.bounceMail.dataVerification') . $e->getMessage());
         }
 
         return Command::FAILURE;
@@ -177,7 +178,7 @@ class AnalyzeBounceMailCommand extends Command
      * Process the bounce mail
      * @param Message $message the message object
      * @return bool true if bounce mail can be parsed, else false
-     * @throws DBALException
+     * @throws Exception
      */
     private function processBounceMail(Message $message): bool
     {

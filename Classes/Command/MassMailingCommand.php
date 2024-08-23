@@ -14,6 +14,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class MassMailingCommand extends Command
@@ -22,7 +23,7 @@ class MassMailingCommand extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    public function configure()
+    public function configure(): void
     {
         $this->setDescription('Sends planed mass mails from EXT:mail');
         $this->addOption('site-identifier', null, InputOption::VALUE_REQUIRED, 'The site identifier for mail settings.', '');
@@ -34,6 +35,7 @@ class MassMailingCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
+     * @throws SiteNotFoundException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -68,7 +70,7 @@ class MassMailingCommand extends Command
         $mailerService->start((int)$input->getOption('send-per-cycle'));
         try {
             $mailerService->handleQueue();
-        } catch (DBALException $e) {
+        } catch (\Doctrine\DBAL\Exception $e) {
             $io->warning('DBALException: ' . $e->getMessage());
             return Command::FAILURE;
         } catch (Exception $e) {
@@ -86,6 +88,8 @@ class MassMailingCommand extends Command
         } catch (\TYPO3\CMS\Core\Exception $e) {
             $io->warning('TYPO3\CMS\Core\Exception: ' . $e->getMessage());
             return Command::FAILURE;
+        } catch (\JsonException $e) {
+            $io->warning('JsonException: ' . $e->getMessage());
         }
 
         // unlink($lockfile);

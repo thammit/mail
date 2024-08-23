@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Repository;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -57,7 +56,6 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws DBALException
      * @throws Exception
      */
     public function findRecordByUid(int $uid, array $fields = ['*'], bool $withoutRestrictions = false): array
@@ -79,7 +77,6 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws DBALException
      * @throws Exception
      */
     public function findRecordByUidList(array $uidList, array $fields = ['*'], bool $withoutRestrictions = false): array
@@ -101,7 +98,6 @@ trait RepositoryTrait
      * @param array $fields
      * @param bool $withoutRestrictions
      * @return array
-     * @throws DBALException
      * @throws Exception
      */
     public function findRecordByPid(int $pid, array $fields = ['*'], bool $withoutRestrictions = false): array
@@ -119,11 +115,6 @@ trait RepositoryTrait
     }
 
     /**
-     * @param array $pidList
-     * @param array $fields
-     * @param bool $withoutRestrictions
-     * @return array
-     * @throws DBALException
      * @throws Exception
      */
     public function findRecordByPidList(array $pidList, array $fields = ['*'], bool $withoutRestrictions = false): array
@@ -163,7 +154,6 @@ trait RepositoryTrait
     /**
      * @param int $uid
      * @return int
-     * @throws DBALException
      */
     public function deleteRecordByUid(int $uid): int
     {
@@ -180,7 +170,6 @@ trait RepositoryTrait
     /**
      * @param int $pid
      * @return int
-     * @throws DBALException
      */
     public function deleteRecordByPid(int $pid): int
     {

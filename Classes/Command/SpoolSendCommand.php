@@ -18,7 +18,7 @@ class SpoolSendCommand extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    public function configure()
+    public function configure(): void
     {
         $this->setDescription('This command invokes EXT:mail mailer in order to process queued messages.');
         $this
