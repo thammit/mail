@@ -369,9 +369,12 @@ class MailerUtility
     public static function decodeMailIdentifierHeader($rawHeaders, $header): array|bool
     {
         if (str_contains($rawHeaders, $header)) {
-            $p = explode($header . ':', $rawHeaders, 2);
-            $l = explode(LF, $p[1], 2);
-            [$mailUid, $recipientSourceIdentifier, $recipientUid, $hash] = GeneralUtility::trimExplode('-', $l[0]);
+            // tt_address example X-TYPO3MID: MID28-tt_address-1-ac70286ddd3ce390624791a5eeda870d
+            // fe_users example X-TYPO3MID: MID28-fe_users-1-ac70286ddd3ce390624791a5eeda870d
+            // plain/csv example X-TYPO3MID: MID28-tx_mail_domain_model_group:1-1-ac70286ddd3ce390624791a5eeda870d
+            [, $preSelection] = explode($header . ':', $rawHeaders, 2);
+            [$finalSelection] = explode(LF, $preSelection, 2);
+            [$mailUid, $recipientSourceIdentifier, $recipientUid, $hash] = GeneralUtility::trimExplode('-', $finalSelection, true);
             $mailUid = (int)ltrim($mailUid, 'MID');
             if (md5(self::buildMailIdentifierHeaderWithoutHash($mailUid, $recipientSourceIdentifier, (int)$recipientUid)) === $hash) {
                 return [

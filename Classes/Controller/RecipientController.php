@@ -132,7 +132,6 @@ class RecipientController extends AbstractController
                 case $recipientSourceConfiguration->isCsvOrPlain():
                     $recipients = $idList;
                     break;
-                case $recipientSourceConfiguration->isCsvFile():
                 case $recipientSourceConfiguration->isService():
                     // todo
                     break;

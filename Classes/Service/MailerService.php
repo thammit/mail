@@ -410,7 +410,6 @@ class MailerService implements LoggerAwareInterface
                         $numberOfSentMails++;
                     }
                     break;
-                case $recipientSourceConfiguration->isCsvFile():
                 case $recipientSourceConfiguration->isService():
                     // todo
                     break;

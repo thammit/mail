@@ -123,19 +123,19 @@ class ReportController extends AbstractController
 
     /**
      * @param Mail $mail
-     * @return void
+     * @return ResponseInterface
      * @throws Exception
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws SiteNotFoundException
      * @throws UnknownObjectException
      */
-    public function disableTotalReturnedAction(Mail $mail): void
+    public function disableTotalReturnedAction(Mail $mail): ResponseInterface
     {
         $this->reportService->init($mail);
         $affectedRecipients = $this->recipientService->disableRecipients($this->reportService->getReturnedDetailsData());
         ViewUtility::addNotificationSuccess(sprintf(LanguageUtility::getLL('report.notification.recipientsDisabled.message'), $affectedRecipients));
-        $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
+        return $this->redirect('show', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**

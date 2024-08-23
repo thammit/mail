@@ -32,11 +32,6 @@
                                            title="{f:translate(key: '{lll}report.disable.returned')}">
                                 <core:icon identifier="actions-lock" size="small"/>
                             </f:link.action>
-                            <f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid}"
-                                           class="btn btn-default"
-                                           title="{f:translate(key: '{lll}report.csvReturned')}">
-                                <core:icon identifier="actions-document-export-csv" size="small"/>
-                            </f:link.action>
                         </div>
                     </f:if>
                 </td>
@@ -58,11 +53,6 @@
                             <f:link.action action="disableUnknown" arguments="{mail: mail.uid}" class="btn btn-default"
                                            title="{f:translate(key: '{lll}report.disable.returned.unknownRecipient')}">
                                 <core:icon identifier="actions-lock" size="small"/>
-                            </f:link.action>
-                            <f:link.action action="csvExportUnknown" arguments="{mail: mail.uid}"
-                                           class="btn btn-default"
-                                           title="{f:translate(key: '{lll}report.csvReturned.unknownRecipient')}">
-                                <core:icon identifier="actions-document-export-csv" size="small"/>
                             </f:link.action>
                         </div>
                     </f:if>
@@ -86,10 +76,6 @@
                                            title="{f:translate(key: '{lll}report.disable.returned.mailboxFull')}">
                                 <core:icon identifier="actions-lock" size="small"/>
                             </f:link.action>
-                            <f:link.action action="csvExportFull" arguments="{mail: mail.uid}" class="btn btn-default"
-                                           title="{f:translate(key: '{lll}report.csvReturned.mailboxFull')}">
-                                <core:icon identifier="actions-document-export-csv" size="small"/>
-                            </f:link.action>
                         </div>
                     </f:if>
                 </td>
@@ -111,11 +97,6 @@
                             <f:link.action action="disableBadHost" arguments="{mail: mail.uid}" class="btn btn-default"
                                            title="{f:translate(key: '{lll}report.disable.returned.badHost')}">
                                 <core:icon identifier="actions-lock" size="small"/>
-                            </f:link.action>
-                            <f:link.action action="csvExportBadHost" arguments="{mail: mail.uid}"
-                                           class="btn btn-default"
-                                           title="{f:translate(key: '{lll}report.csvReturned.badHost')}">
-                                <core:icon identifier="actions-document-export-csv" size="small"/>
                             </f:link.action>
                         </div>
                     </f:if>
@@ -140,11 +121,6 @@
                                            title="{f:translate(key: '{lll}report.disable.returned.badHeader')}">
                                 <core:icon identifier="actions-lock" size="small"/>
                             </f:link.action>
-                            <f:link.action action="csvExportBadHeader" arguments="{mail: mail.uid}"
-                                           class="btn btn-default"
-                                           title="{f:translate(key: '{lll}report.csvReturned.badHeader')}">
-                                <core:icon identifier="actions-document-export-csv" size="small"/>
-                            </f:link.action>
                         </div>
                     </f:if>
                 </td>
@@ -168,11 +144,6 @@
                                            class="btn btn-default"
                                            title="{f:translate(key: '{lll}report.disable.returned.reasonUnknown')}">
                                 <core:icon identifier="actions-lock" size="small"/>
-                            </f:link.action>
-                            <f:link.action action="csvExportReasonUnknown" arguments="{mail: mail.uid}"
-                                           class="btn btn-default"
-                                           title="{f:translate(key: '{lll}report.report.csvReturned.reasonUnknown')}">
-                                <core:icon identifier="actions-document-export-csv" size="small"/>
                             </f:link.action>
                         </div>
                     </f:if>

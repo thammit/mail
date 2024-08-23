@@ -151,7 +151,6 @@ class ReportService
                     case $recipientSourceConfiguration->isCsvOrPlain():
                         $data[$recipientSourceIdentifier]['recipients'] = $recipientIds;
                         break;
-                    case $recipientSourceConfiguration->isCsvFile():
                     case $recipientSourceConfiguration->isService():
                         // todo
                         break;

@@ -299,7 +299,6 @@ class RecipientService
             case $recipientSourceConfiguration->isCsvOrPlain():
                 // nothing to do, since email is already in recipient array
                 break;
-            case $recipientSourceConfiguration->isCsvFile():
             case $recipientSourceConfiguration->isService():
                 // todo
                 break;
@@ -353,7 +352,6 @@ class RecipientService
                     }
                     $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = $recipientsToKeep;
                     break;
-                case $recipientSourceConfiguration->isCsvFile():
                 case $recipientSourceConfiguration->isService():
                     // todo
                     break;
