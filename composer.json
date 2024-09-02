@@ -39,7 +39,7 @@
         "typo3/cms-redirects": "^11.5 || ^12.4 || ^13",
         "typo3/cms-scheduler": "^11.5 || ^12.4 || ^13",
         "typo3/cms-fluid-styled-content": "^11.5 || ^12.4 || ^13",
-        "tddeboer/imap": "^1",
+        "ddeboer/imap": "^1",
         "league/html-to-markdown": "^5",
         "masterminds/html5": "^2.7.6",
         "pelago/emogrifier": "^7",

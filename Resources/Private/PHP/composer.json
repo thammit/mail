@@ -9,7 +9,7 @@
     },
     "require": {
         "php": "^8.0",
-        "tddeboer/imap": "^1",
+        "ddeboer/imap": "^1",
         "league/html-to-markdown": "^5",
         "pelago/emogrifier": "^7",
         "scssphp/scssphp": "^1.8.1"
