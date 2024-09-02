@@ -21,11 +21,12 @@ class CsvUtility
     /**
      * Parse CSV lines into array form
      * @param Group $group
+     * @param bool $allFields
      * @return array
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public static function getRecipientDataFromCSVGroup(Group $group): array
+    public static function getRecipientDataFromCSVGroup(Group $group, bool $allFields = false): array
     {
         if ($group->getCsvType() === CsvType::FILE) {
             $file = $group->getCsvFile();
@@ -65,7 +66,7 @@ class CsvUtility
                 return [];
             }
 
-            $allRecipientFields = RecipientUtility::getAllRecipientFields();
+            $allRecipientFields = $allFields ? [] : RecipientUtility::getAllRecipientFields();
 
             // build up field order array
 
@@ -87,7 +88,7 @@ class CsvUtility
                     [$fieldName, $fieldModification] = count($probe) === 2 ? $probe : [$probe[0], ''];
                 }
                 $fieldName = strtolower(trim($fieldName ?? ''));
-                if (!$fieldName || !in_array($fieldName, $allRecipientFields, true)) {
+                if (!$fieldName || ($allRecipientFields && !in_array($fieldName, $allRecipientFields, true))) {
                     continue;
                 }
                 $fieldOrder[$column] = [$fieldName, trim($fieldModification ?? '')];
@@ -149,14 +150,19 @@ class CsvUtility
 
     public static function arrayToCsv(array $data, $separator = ',', $enclosure = '"', $escapeChar = "\\"): string
     {
+        $csvString = '';
+
         $f = fopen('php://temp', 'r+');
 
         foreach ($data as $row) {
-            fputcsv($f, $row, $separator, $enclosure, $escapeChar);
+            $quotedRow = array_map(function($field) use ($enclosure, $escapeChar) {
+                $escapedField = str_replace($enclosure, $escapeChar . $enclosure, $field);
+                return $enclosure . $escapedField . $enclosure;
+            }, $row);
+
+            $csvString .= implode($separator, $quotedRow) . "\n";
         }
 
-        rewind($f);
-        $csvString = stream_get_contents($f);
         fclose($f);
 
         return $csvString;

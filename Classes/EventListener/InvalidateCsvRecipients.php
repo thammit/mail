@@ -44,11 +44,11 @@ class InvalidateCsvRecipients
                 if ($recipientSourceConfiguration->isCsv()) {
                     $group = $this->groupRepository->findByUid($recipientSourceConfiguration->groupUid);
                     if ($group instanceof Group) {
-                        $recipients = CsvUtility::getRecipientDataFromCSVGroup($group);
+                        $recipients = CsvUtility::getRecipientDataFromCSVGroup($group, true);
                         foreach ($recipients as &$recipient) {
                             // walk through all invalid recipients and make them (really) invalid in the recipient source
                             if (in_array($recipient['email'], $invalidRecipientEmails)) {
-                                $recipients['email'] = '!invalid!-' . implode('-', $data[$recipientSourceIdentifier]['returnCodes'] ?? []) . '-' . $recipient['email'];
+                                $recipient['email'] = '!invalid!-' . implode('-', $data[$recipientSourceIdentifier]['returnCodes'] ?? []) . '-' . str_replace('@', '[at]', $recipient['email']);
                                 $affectedRecipientsOfSource ++;
                             }
                         }
@@ -56,7 +56,7 @@ class InvalidateCsvRecipients
                             // write back changed emails
                             if ($group->isCsvFieldNames()) {
                                 // add field names to recipients array
-                                $recipients = array_merge(array_keys($recipients[0]), $recipients);
+                                $recipients = array_merge([array_keys($recipients[0])], $recipients);
                             }
 
                             // build csv string
