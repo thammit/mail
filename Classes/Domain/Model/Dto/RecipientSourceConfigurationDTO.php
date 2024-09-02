@@ -38,7 +38,7 @@ class RecipientSourceConfigurationDTO
         }
         $this->identifier = $identifier;
 
-        if (!($data['groupUid'] ?? false) && str_starts_with($identifier, 'tx_mail_domain_model_mail')) {
+        if (!($data['groupUid'] ?? false) && str_starts_with($identifier, 'tx_mail_domain_model_group')) {
             [, $groupUid] = GeneralUtility::trimExplode(':', $identifier, true);
             $this->groupUid = (int)$groupUid;
         } else {

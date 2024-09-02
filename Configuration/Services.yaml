@@ -85,6 +85,16 @@ services:
       - name: 'event.listener'
         identifier: 'mediaessenz/mail/deactivate-feusers'
 
+  MEDIAESSENZ\Mail\EventListener\InvalidateCsvRecipients:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/invalidate-csv-recipients'
+
+  MEDIAESSENZ\Mail\EventListener\InvalidatePlainRecipients:
+    tags:
+      - name: 'event.listener'
+        identifier: 'mediaessenz/mail/invalidate-plain-recipients'
+
   MEDIAESSENZ\Mail\EventListener\AvoidCaching:
     tags:
       - name: 'event.listener'

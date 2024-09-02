@@ -147,6 +147,21 @@ class CsvUtility
         return array_values($data);
     }
 
+    public static function arrayToCsv(array $data, $separator = ',', $enclosure = '"', $escapeChar = "\\"): string
+    {
+        $f = fopen('php://temp', 'r+');
+
+        foreach ($data as $row) {
+            fputcsv($f, $row, $separator, $enclosure, $escapeChar);
+        }
+
+        rewind($f);
+        $csvString = stream_get_contents($f);
+        fclose($f);
+
+        return $csvString;
+    }
+
     /**
      * Filter duplicates from input csv data
      *

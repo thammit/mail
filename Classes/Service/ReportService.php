@@ -140,6 +140,7 @@ class ReportService
         foreach ($failedRecipientIds as $recipientSourceIdentifier => $recipientIds) {
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
+                $data[$recipientSourceIdentifier]['returnCodes'] = $returnCodes;
                 $data[$recipientSourceIdentifier]['configuration'] = $recipientSourceConfiguration;
                 switch (true) {
                     case $recipientSourceConfiguration->isTableSource():
