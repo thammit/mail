@@ -73,15 +73,15 @@ class ReportController extends AbstractController
         $this->reportService->init($mail);
         $this->assignFieldGroups($mail, true);
         $performance = $this->reportService->getPerformanceData();
-        if ($performance['failedResponses']) {
-            $this->view->assign('returned', $this->reportService->getReturnedData());
-        }
         $assignments = [
             'mail' => $mail,
             'performance' => $performance,
             'responses' => $this->reportService->getResponsesData(),
             'maxLabelLength' => (int)($this->pageTSConfiguration['maxLabelLength'] ?? 0),
         ];
+        if ($performance['failedResponses']) {
+            $assignments['returned'] = $this->reportService->getReturnedData();
+        }
 
         $this->addLeftDocheaderBackButtons();
         $this->addDocheaderButtons($this->request->getRequestTarget());
@@ -110,6 +110,8 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData(),
         ];
+
+        $this->addLeftDocheaderBackToReportButton($mail);
 
         if ($this->typo3MajorVersion < 12) {
             $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
@@ -166,6 +168,8 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_UNKNOWN, ReturnCodes::MAILBOX_INVALID]),
         ];
+
+        $this->addLeftDocheaderBackToReportButton($mail);
 
         if ($this->typo3MajorVersion < 12) {
             $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
@@ -229,6 +233,8 @@ class ReportController extends AbstractController
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::MAILBOX_FULL]),
         ];
 
+        $this->addLeftDocheaderBackToReportButton($mail);
+
         if ($this->typo3MajorVersion < 12) {
             $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
@@ -285,6 +291,8 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::RECIPIENT_NOT_LOCAL]),
         ];
+
+        $this->addLeftDocheaderBackToReportButton($mail);
 
         if ($this->typo3MajorVersion < 12) {
             $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
@@ -343,6 +351,8 @@ class ReportController extends AbstractController
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::TRANSACTION_FAILED]),
         ];
 
+        $this->addLeftDocheaderBackToReportButton($mail);
+
         if ($this->typo3MajorVersion < 12) {
             $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
             $this->moduleTemplate->setContent($this->view->render());
@@ -399,6 +409,8 @@ class ReportController extends AbstractController
             'mail' => $mail,
             'recipientSources' => $this->reportService->getReturnedDetailsData([ReturnCodes::UNKNOWN_REASON]),
         ];
+
+        $this->addLeftDocheaderBackToReportButton($mail);
 
         if ($this->typo3MajorVersion < 12) {
             $this->view->assignMultiple($assignments + ['layoutSuffix' => 'V11']);
@@ -507,6 +519,21 @@ class ReportController extends AbstractController
             ->setClasses('btn btn-default text-uppercase')
             ->setTitle(LanguageUtility::getLL('general.button.back'))
             ->setHref($this->uriBuilder->uriFor('index'));
+        $buttonBar->addButton($addBackButton);
+    }
+
+    /**
+     * Create document header back buttons of "show" action
+     */
+    protected function addLeftDocheaderBackToReportButton(Mail $mail): void
+    {
+        $buttonBar = $this->moduleTemplate->getDocHeaderComponent()->getButtonBar();
+        $addBackButton = $buttonBar
+            ->makeLinkButton()
+            ->setIcon($this->iconFactory->getIcon('actions-view-go-back', Icon::SIZE_SMALL))
+            ->setClasses('btn btn-default text-uppercase')
+            ->setTitle(LanguageUtility::getLL('general.button.back'))
+            ->setHref($this->uriBuilder->uriFor('show', ['mail' => $mail->getUid()]));
         $buttonBar->addButton($addBackButton);
     }
 

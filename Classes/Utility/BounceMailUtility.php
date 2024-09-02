@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Utility;
 
-use Fetch\Message;
+use Ddeboer\Imap\Message;
 use MEDIAESSENZ\Mail\Constants;
 
 class BounceMailUtility
@@ -19,11 +19,11 @@ class BounceMailUtility
     {
         // get attachment
         $attachments = $message->getAttachments();
-        if (is_array($attachments)) {
+        if ($attachments) {
             // search in attachment
             foreach ($attachments as $attachment) {
                 // Find mail id
-                $midArray = MailerUtility::decodeMailIdentifierHeader($attachment->getData(), $header);
+                $midArray = MailerUtility::decodeMailIdentifierHeader($attachment->getContent(), $header);
                 if ($midArray) {
                     // mail id, table and recipient found in attachment
                     return $midArray;
@@ -39,6 +39,11 @@ class BounceMailUtility
 //            'recipient_source' => 'tt_address',
 //            'recipient_uid' => 32,
 //        ];
+
+        if (!$midArray) {
+            // search in raw message
+            $midArray = MailerUtility::decodeMailIdentifierHeader($message->getRawMessage(), $header);
+        }
 
         return $midArray;
     }
@@ -109,7 +114,7 @@ class BounceMailUtility
             $result['content'] = trim($content);
             $result['reason_text'] = trim(substr($content, 0, 1000));
             $result['mailserver'] = 'unknown';
-            $result['reason'] = self::extractReason($result['reason_text']);
+            $result['reason'] = self::extractReason($content);
         }
 
         return $result;

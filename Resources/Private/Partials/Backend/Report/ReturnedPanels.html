@@ -6,10 +6,10 @@
       data-namespace-typo3-fluid="true">
 
 <div class="panel-group" id="mail-recipient-list-panel">
-    <f:for each="recipientSources" as="recipientSource" iteration="recipientSourceIterator">
+    <f:for each="{recipientSources}" as="recipientSource" iteration="recipientSourceIterator">
         <f:if condition="{recipientSource}">
             <f:variable name="title">
-                <f:translate key="{lll}report.returned.recipientSource.{recipientSource.configuration.title}" default="{recipientSource.configuration.title}"/> [{recipientSource.configuration.identifier}]
+                <f:translate key="{recipientSource.configuration.title}" default="{recipientSource.configuration.title}"/> [{recipientSource.configuration.identifier}]
             </f:variable>
             <f:variable name="additionalHeading">
                 <f:link.action action="csvExportTotalReturned" arguments="{mail: mail.uid, recipientSource: recipientSource.configuration.identifier}"
@@ -31,7 +31,7 @@
                         </ul>
                     </f:then>
                     <f:else>
-                        <f:render partial="Report/ReturnedTable" arguments="{recipientSource:recipientSource, lll:lll}"/>
+                        <f:render partial="Backend/Report/ReturnedTable" arguments="{recipientSource:recipientSource, lll:lll}"/>
                     </f:else>
                 </f:if>
             </f:render>

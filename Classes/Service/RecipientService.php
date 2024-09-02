@@ -102,7 +102,7 @@ class RecipientService
     public function getRecipientsDataByUidListAndTable(
         array $uidListOfRecipients,
         string $table,
-        array $fields = ['uid', 'name', 'email', 'categories', 'mail_html'],
+        array $fields = ['uid', 'name', 'email', 'categories', 'mail_html', 'mail_active'],
         int $categoryFormat = CategoryFormat::OBJECTS
     ): array {
         if (!$uidListOfRecipients) {
@@ -159,7 +159,7 @@ class RecipientService
     public function getRecipientsDataByUidListAndModelName(
         array $uidListOfRecipients,
         string $modelName,
-        array $fields = ['uid', 'name', 'email', 'categories', 'mail_html'],
+        array $fields = ['uid', 'name', 'email', 'categories', 'mail_html', 'mail_active'],
         int $categoryFormat = CategoryFormat::OBJECTS,
         int $limit = 0
     ): array {

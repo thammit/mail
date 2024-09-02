@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Command;
 
 use Doctrine\DBAL\Exception;
-use Fetch\Message;
-use Fetch\Server;
+use Ddeboer\Imap\Message;
+use Ddeboer\Imap\Server;
 use MEDIAESSENZ\Mail\Domain\Repository\LogRepository;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\BounceMailUtility;
@@ -131,42 +131,38 @@ class AnalyzeBounceMailCommand extends Command
 
         // try to connect to mail server
         try {
-            /** @var Server $mailServer */
-            $mailServer = GeneralUtility::makeInstance(
-                Server::class,
+            $mailServer = new Server(
                 $server,
-                $port,
-                $type
+                (string)$port
             );
 
-            $mailServer->setAuthentication($user, $password);
-            $mailServer->getImapStream();
-            if ($mailServer instanceof Server) {
-                // we are connected to mail server
-                // get unread mails
-                $messages = $mailServer->search('UNSEEN', $count);
-                if (count($messages)) {
-                    /** @var Message $message The message object */
-                    foreach ($messages as $message) {
-                        // process the mail
-                        if ($this->processBounceMail($message)) {
-                            //$io->writeln($message->getSubject());
-                            // set delete
-                            $message->delete();
-                        } else {
-                            $message->setFlag('SEEN');
-                        }
+            $connection = $mailServer->authenticate($user, $password);
+            $mailbox = $connection->getMailbox('INBOX');
+            $messages = $mailbox->getMessages();
+            // we are connected to mail server
+            // get unread mails
+//            $messages = $mailServer->search('UNSEEN', $count);
+            if (count($messages)) {
+                /** @var Message $message The message object */
+                foreach ($messages as $message) {
+                    // process the mail
+                    if ($this->processBounceMail($message)) {
+                        //$io->writeln($message->getSubject());
+                        // set delete
+                        $message->delete();
+                    } else {
+                        $message->setFlag('SEEN');
                     }
                 }
-                // expunge to delete permanently
-                $mailServer->expunge();
-                try {
-                    imap_close($mailServer->getImapStream());
-                } catch (\Exception $exception) {
-                    $io->error('imap_close failed with error: ' . $exception->getMessage());
-                }
-                return Command::SUCCESS;
             }
+            // expunge to delete permanently
+            $connection->expunge();
+//            try {
+//                imap_close($connection);
+//            } catch (\Exception $exception) {
+//                $io->error('imap_close failed with error: ' . $exception->getMessage());
+//            }
+            return Command::SUCCESS;
         } catch (\Exception $e) {
             $io->error(LanguageUtility::getLL('scheduler.bounceMail.dataVerification') . $e->getMessage());
         }
@@ -193,7 +189,7 @@ class AnalyzeBounceMailCommand extends Command
 
         if ($row) {
             try {
-                $analyzeResult = BounceMailUtility::analyseReturnError($message->getMessageBody());
+                $analyzeResult = BounceMailUtility::analyseReturnError($message->getRawMessage());
                 $insertFields = [
                     'tstamp' => $this->context->getPropertyFromAspect('date', 'timestamp'),
                     'response_type' => ResponseType::FAILED,
