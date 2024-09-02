@@ -137,6 +137,12 @@
     }
 }
 
+@media (min-width: 992px) {
+    [data-module-name="mail_report"] .mail-wizard-preview {
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+    }
+}
 
 .mail-wizard-preview-body > div {
     position:relative;
