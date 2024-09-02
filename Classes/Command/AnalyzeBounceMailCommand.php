@@ -17,7 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AnalyzeBounceMailCommand extends Command
 {
@@ -49,7 +48,8 @@ class AnalyzeBounceMailCommand extends Command
                 'port',
                 'p',
                 InputOption::VALUE_REQUIRED,
-                'Port number'
+                'Port number',
+                '993'
             )
             ->addOption(
                 'user',
@@ -62,18 +62,6 @@ class AnalyzeBounceMailCommand extends Command
                 'pw',
                 InputOption::VALUE_REQUIRED,
                 'Password'
-            )
-            ->addOption(
-                'type',
-                't',
-                InputOption::VALUE_REQUIRED,
-                'Type of mailserver (imap or pop3)'
-            )
-            ->addOption(
-                'count',
-                'c',
-                InputOption::VALUE_REQUIRED,
-                'Number of bounce mail to be processed'
             )
         ;
     }
@@ -89,11 +77,10 @@ class AnalyzeBounceMailCommand extends Command
         $io->title($this->getDescription());
 
         $server = '';
-        $port = 0;
+        $port = '993';
         $user = '';
         $password = '';
-        $type = '';
-        $count = 0;
+
         // check if PHP IMAP is installed
         if (!extension_loaded('imap')) {
             $io->error(LanguageUtility::getLL('scheduler.bounceMail.phpImapError'));
@@ -102,52 +89,30 @@ class AnalyzeBounceMailCommand extends Command
 
         if ($input->getOption('server')) {
             $server = $input->getOption('server');
-            //$io->writeln($server);
         }
+
         if ($input->getOption('port')) {
-            $port = (int)$input->getOption('port');
-            //$io->writeln($port);
+            $port = (string)$input->getOption('port');
         }
+
         if ($input->getOption('user')) {
             $user = $input->getOption('user');
-            //$io->writeln($user);
         }
+
         if ($input->getOption('password')) {
             $password = $input->getOption('password');
-            //$io->writeln($password);
-        }
-        if ($input->getOption('type')) {
-            $type = $input->getOption('type');
-            //$io->writeln($type);
-            if (!in_array($type, ['imap', 'pop3'])) {
-                $io->warning('Type: only imap or pop3');
-                return Command::FAILURE;
-            }
-        }
-        if ($input->getOption('count')) {
-            $count = (int)$input->getOption('count');
-            //$io->writeln($count);
         }
 
-        // try to connect to mail server
         try {
-            $mailServer = new Server(
-                $server,
-                (string)$port
-            );
+            // try to connect to mail server
+            $connection = (new Server($server, $port))->authenticate($user, $password);
+            $messages = $connection->getMailbox('INBOX')->getMessages();
 
-            $connection = $mailServer->authenticate($user, $password);
-            $mailbox = $connection->getMailbox('INBOX');
-            $messages = $mailbox->getMessages();
-            // we are connected to mail server
-            // get unread mails
-//            $messages = $mailServer->search('UNSEEN', $count);
             if (count($messages)) {
                 /** @var Message $message The message object */
                 foreach ($messages as $message) {
                     // process the mail
                     if ($this->processBounceMail($message)) {
-                        //$io->writeln($message->getSubject());
                         // set delete
                         $message->delete();
                     } else {
@@ -155,13 +120,10 @@ class AnalyzeBounceMailCommand extends Command
                     }
                 }
             }
+
             // expunge to delete permanently
             $connection->expunge();
-//            try {
-//                imap_close($connection);
-//            } catch (\Exception $exception) {
-//                $io->error('imap_close failed with error: ' . $exception->getMessage());
-//            }
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $io->error(LanguageUtility::getLL('scheduler.bounceMail.dataVerification') . $e->getMessage());
