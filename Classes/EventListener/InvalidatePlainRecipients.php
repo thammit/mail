@@ -42,7 +42,7 @@ class InvalidatePlainRecipients
                         foreach ($recipients as &$recipient) {
                             // walk through all invalid recipients and make them (really) invalid in the recipient source
                             if (in_array($recipient['email'], $invalidRecipientEmails)) {
-                                $recipients['email'] = '!invalid!-' . implode('-', $data[$recipientSourceIdentifier]['returnCodes'] ?? []) . '-' . $recipient['email'];
+                                $recipient['email'] = '!invalid!-' . implode('-', $data[$recipientSourceIdentifier]['returnCodes'] ?? []) . '-' . str_replace('@', '[at]', $recipient['email']);
                                 $affectedRecipientsOfSource ++;
                             }
                         }
