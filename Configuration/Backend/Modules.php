@@ -52,6 +52,7 @@ $config = [
                 'updateCategories',
                 'testMail',
                 'sendTestMail',
+                'sendTestMailToGroup',
                 'scheduleSending',
                 'finish',
                 'delete',

@@ -38,11 +38,11 @@ class InvalidatePlainRecipients
                 if ($recipientSourceConfiguration->isPlain()) {
                     $group = $this->groupRepository->findByUid($recipientSourceConfiguration->groupUid);
                     if ($group instanceof Group) {
-                        $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($group->getList()))));
+                        $recipients = $group->getListRecipients();
                         foreach ($recipients as &$recipient) {
                             // walk through all invalid recipients and make them (really) invalid in the recipient source
                             if (in_array($recipient['email'], $invalidRecipientEmails)) {
-                                $recipient['email'] = '!invalid!-' . implode('-', $data[$recipientSourceIdentifier]['returnCodes'] ?? []) . '-' . str_replace('@', '[at]', $recipient['email']);
+                                $recipient['email'] = RecipientUtility::invalidateEmail($recipient['email'], $data[$recipientSourceIdentifier]['returnCodes']);
                                 $affectedRecipientsOfSource ++;
                             }
                         }

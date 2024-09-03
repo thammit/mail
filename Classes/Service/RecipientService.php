@@ -15,7 +15,7 @@ use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Events\RecipientsRestrictionEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
-use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
@@ -88,6 +88,63 @@ class RecipientService
     }
 
     /**
+     * @throws InvalidQueryException
+     * @throws IllegalObjectTypeException
+     * @throws Exception
+     * @throws UnknownObjectException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getRecipientsByGroup(Group $group): array
+    {
+        $recipientSources = [];
+        $recipientsUidListGroupedByRecipientSource = $this->getRecipientsUidListGroupedByRecipientSource($group, true);
+
+        foreach ($recipientsUidListGroupedByRecipientSource as $recipientSourceIdentifier => $recipientUidList) {
+
+            $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
+
+            if (!$recipientUidList || !$recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
+                // skip empty id lists and lists without recipient source configuration
+                continue;
+            }
+
+            $recipients = [];
+
+            switch (true) {
+                case $recipientSourceConfiguration->isTableSource():
+                    $recipients = $this->getRecipientsDataByUidListAndTable($recipientUidList, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table);
+                    if ($recipientSourceConfiguration->contains) {
+                        $recipientSourceConfiguration->title = $recipientSourceConfiguration->containsTitle ?? $recipientSourceConfiguration->contains;
+                    }
+                    break;
+                case $recipientSourceConfiguration->isModelSource():
+                    $recipients = $this->getRecipientsDataByUidListAndModelName($recipientUidList, $recipientSourceConfiguration->model);
+                    break;
+                case $recipientSourceConfiguration->isCsvOrPlain():
+                    $recipients = $recipientUidList;
+                    break;
+                case $recipientSourceConfiguration->isService():
+                    // todo
+                    break;
+            }
+
+            $table = $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table;
+
+            $recipientSources[$recipientSourceConfiguration->identifier] = [
+                'configuration' => $recipientSourceConfiguration,
+                'recipients' => $recipients,
+                'numberOfRecipients' => count($recipients),
+                'show' => $table && BackendUserUtility::getBackendUser()->check('tables_select', $table),
+                'edit' => $table && BackendUserUtility::getBackendUser()->check('tables_modify', $table),
+            ];
+        }
+
+        return $recipientSources;
+    }
+
+    /**
      * Get recipient DB record given on the ID
      *
      * @param array $uidListOfRecipients List of recipient IDs
@@ -107,6 +164,10 @@ class RecipientService
     ): array {
         if (!$uidListOfRecipients) {
             return [];
+        }
+        if (!in_array('uid', $fields)) {
+            // we need the uid
+            $fields[] = 'uid';
         }
         $data = [];
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
@@ -165,6 +226,10 @@ class RecipientService
     ): array {
         if (!$uidListOfRecipients || !$modelName || !class_exists($modelName) || !is_subclass_of($modelName, RecipientInterface::class)) {
             return [];
+        }
+        if (!in_array('uid', $fields)) {
+            // we need the uid
+            $fields[] = 'uid';
         }
         $data = [];
         $query = $this->persistenceManager->createQueryForType($modelName);
@@ -291,10 +356,10 @@ class RecipientService
 
         switch (true) {
             case $recipientSourceConfiguration->isTableSource():
-                $recipients = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, ['email']);
+                $recipients = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, ['uid', 'email']);
                 break;
             case $recipientSourceConfiguration->isModelSource():
-                $recipients = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['email']);
+                $recipients = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['uid', 'email']);
                 break;
             case $recipientSourceConfiguration->isCsvOrPlain():
                 // nothing to do, since email is already in recipient array
@@ -420,11 +485,7 @@ class RecipientService
                 break;
             case $group->isPlain():
             case $group->isCsv():
-                if ($group->isPlain()) {
-                    $recipients = RecipientUtility::reArrangePlainMails(array_unique(preg_split('|[[:space:],;]+|', trim($group->getList()))));
-                } else {
-                    $recipients = CsvUtility::getRecipientDataFromCSVGroup($group);
-                }
+                $recipients = $group->isPlain() ? $group->getListRecipientsWithName() : $group->getCsvRecipients();
                 foreach ($recipients as $key => $recipient) {
                     $recipients[$key]['categories'] = $group->getCategories();
                     $recipients[$key]['mail_html'] = $group->isMailHtml() ? 1 : 0;
@@ -447,8 +508,7 @@ class RecipientService
             case $group->isOther():
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
-                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup,
-                        $addGroupUidToRecipientSourceIdentifier);
+                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup, $addGroupUidToRecipientSourceIdentifier);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
@@ -460,7 +520,7 @@ class RecipientService
             /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
             if ($recipientSourceConfiguration) {
-                $uniqueIdLists[$recipientSourceIdentifier] = $recipientSourceConfiguration->isCsvOrPlain()  ? $idList : array_unique($idList);
+                $uniqueIdLists[$recipientSourceIdentifier] = $recipientSourceConfiguration->isCsvOrPlain() ? $idList : array_unique($idList);
             }
         }
 
@@ -538,7 +598,6 @@ class RecipientService
      * If no group categories set, all entries (within the given pages) will be returned,
      * otherwise only entries with matching categories will be returned.
      *
-     * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
     protected function getRecipientUidListByTableAndPageUidListAndCategories(

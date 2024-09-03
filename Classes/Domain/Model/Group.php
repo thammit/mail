@@ -7,6 +7,10 @@ use MEDIAESSENZ\Mail\Type\Enumeration\CsvEnclosure;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvSeparator;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
+use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
@@ -248,6 +252,16 @@ class Group extends AbstractEntity
         return $this;
     }
 
+    public function getListRecipients(): array
+    {
+        return RecipientUtility::normalizePlainEmailList(array_unique(preg_split('|[[:space:],;]+|', trim($this->list))));
+    }
+
+    public function getListRecipientsWithName(): array
+    {
+        return RecipientUtility::normalizePlainEmailList(array_unique(preg_split('|[[:space:],;]+|', trim($this->list))), true);
+    }
+
     public function getCsvSeparator(): int
     {
         return $this->csvSeparator;
@@ -330,6 +344,15 @@ class Group extends AbstractEntity
     {
         $this->csvFile = $csvFile;
         return $this;
+    }
+
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     */
+    public function getCsvRecipients(): array
+    {
+        return CsvUtility::getRecipientDataFromCSVGroup($this, true);
     }
 
     /**

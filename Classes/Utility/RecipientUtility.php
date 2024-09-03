@@ -136,7 +136,7 @@ class RecipientUtility
      */
     public static function normalizeListOfEmailAddresses(string $emailAddresses): string
     {
-        $rawAddressList = preg_split('|[' . chr(10) . ',;]|', $emailAddresses);
+        $rawAddressList = preg_split('|[' . LF . ',;]|', $emailAddresses);
         $cleanAddressList = [];
 
         foreach ($rawAddressList as $email) {
@@ -148,6 +148,25 @@ class RecipientUtility
 
         // remove duplicates and return clean list
         return implode(',', array_keys(array_flip($cleanAddressList)));
+    }
+
+    /**
+     * Normalize an array of email addresses into a 2-dimensional array with an optional empty name element
+     */
+    public static function normalizePlainEmailList(array $emails, $addEmptyNameColumn = false): array
+    {
+        $data = array_map(fn($email) => ['email' => trim($email)], $emails);
+
+        if ($addEmptyNameColumn) {
+            $data = array_map(fn($subArray) => $subArray + ['name' => ''], $data);
+        }
+
+        return $data;
+    }
+
+    public static function invalidateEmail($email, $errorCodes = []): string
+    {
+        return '!invalid!-' . implode('-', $errorCodes) . '-' . str_replace('@', '[at]', $email);
     }
 
     /**
@@ -174,24 +193,6 @@ class RecipientUtility
 
         return substr(md5($authCode), 0, $codeLength);
     }
-
-    /**
-     * Rearrange emails array into a 2-dimensional array
-     *
-     * @param array $plainMails Recipient emails
-     *
-     * @return array a 2-dimensional array consisting email and name
-     */
-    public static function reArrangePlainMails(array $plainMails): array
-    {
-        $out = [];
-        foreach ($plainMails as $email) {
-            $out[] = ['email' => trim($email), 'name' => ''];
-        }
-
-        return $out;
-    }
-
     /**
      * Remove double record in an array
      *

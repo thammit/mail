@@ -7,6 +7,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
+use MEDIAESSENZ\Mail\Utility\RecipientUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
@@ -44,11 +45,11 @@ class InvalidateCsvRecipients
                 if ($recipientSourceConfiguration->isCsv()) {
                     $group = $this->groupRepository->findByUid($recipientSourceConfiguration->groupUid);
                     if ($group instanceof Group) {
-                        $recipients = CsvUtility::getRecipientDataFromCSVGroup($group, true);
+                        $recipients = $group->getCsvRecipients();
                         foreach ($recipients as &$recipient) {
                             // walk through all invalid recipients and make them (really) invalid in the recipient source
                             if (in_array($recipient['email'], $invalidRecipientEmails)) {
-                                $recipient['email'] = '!invalid!-' . implode('-', $data[$recipientSourceIdentifier]['returnCodes'] ?? []) . '-' . str_replace('@', '[at]', $recipient['email']);
+                                $recipient['email'] = RecipientUtility::invalidateEmail($recipient['email'], $data[$recipientSourceIdentifier]['returnCodes']);
                                 $affectedRecipientsOfSource ++;
                             }
                         }

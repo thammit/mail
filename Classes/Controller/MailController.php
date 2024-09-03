@@ -11,6 +11,7 @@ use FriendsOfTYPO3\TtAddress\Domain\Model\Dto\Demand;
 use FriendsOfTYPO3\TtAddress\Domain\Repository\AddressRepository;
 use JsonException;
 use MEDIAESSENZ\Mail\Constants;
+use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Model\MailFactory;
@@ -720,29 +721,13 @@ class MailController extends AbstractController
             $mailGroupUids = GeneralUtility::intExplode(',', $this->pageTSConfiguration['testMailGroupUids']);
             $data['mailGroups'] = [];
             foreach ($mailGroupUids as $mailGroupUid) {
-                /** @var Group $testMailGroup */
-                $testMailGroup = $this->groupRepository->findByUid($mailGroupUid);
-                if ($testMailGroup instanceof Group) {
-                    $data['mailGroups'][$testMailGroup->getUid()]['title'] = $testMailGroup->getTitle();
-                    $recipientGroups = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($testMailGroup);
-                    foreach ($recipientGroups as $recipientGroup => $recipients) {
-                        switch ($recipientGroup) {
-                            case 'fe_users':
-                                foreach ($recipients as $recipient) {
-                                    $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $frontendUsersRepository->findByUid($recipient);
-                                }
-                                break;
-                            case 'tt_address':
-                                if ($ttAddressRepository) {
-                                    foreach ($recipients as $recipient) {
-                                        $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup][] = $ttAddressRepository->findByUid($recipient);
-                                    }
-                                }
-                                break;
-                            default:
-                                // handle other recipient groups with PSR-14 event
-                                $data['mailGroups'][$testMailGroup->getUid()]['groups'][$recipientGroup] = $this->eventDispatcher->dispatch(new AddTestRecipientsEvent($recipientGroup))->getRecipients();
-                        }
+                /** @var Group $group */
+                $group = $this->groupRepository->findByUid($mailGroupUid);
+                if ($group instanceof Group) {
+                    $recipientSources = $this->recipientService->getRecipientsByGroup($group);
+                    foreach ($recipientSources as $recipientSourceIdentifier => $recipientSource) {
+                        $data['mailGroups'][$mailGroupUid]['title'] = $group->getTitle();
+                        $data['mailGroups'][$mailGroupUid]['recipientSources'][$recipientSourceIdentifier] = $recipientSource;
                     }
                 }
             }
@@ -783,27 +768,36 @@ class MailController extends AbstractController
      */
     public function sendTestMailAction(Mail $mail, string $recipients = ''): ResponseInterface
     {
-        $mailUid = $mail->getUid();
         // normalize addresses:
         $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
 
         if ($addressList) {
             if (!$this->jumpurlIsLoaded || (($this->pageTSConfiguration['clickTracking'] || $this->pageTSConfiguration['clickTrackingMailTo']) && $mail->isInternal())) {
                 // no click tracking for internal test mails or if jumpurl is not loaded
-                $mail = MailFactory::forStorageFolder($this->id)->fromInternalPage($mail->getPage(),
+                $testMail = MailFactory::forStorageFolder($this->id)->fromInternalPage($mail->getPage(),
                     $mail->getSysLanguageUid(), true);
             }
             $this->mailerService->start();
-            $this->mailerService->prepare($mail);
+            $this->mailerService->prepare($testMail ?? $mail);
             $this->mailerService->setSubjectPrefix($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '');
-            $this->mailerService->sendSimpleMail($mail, $addressList);
+            $this->mailerService->sendSimpleMail($testMail ?? $mail, $addressList);
         }
 
         ViewUtility::addNotificationSuccess(
             sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), $addressList),
             LanguageUtility::getLL('mail.wizard.notification.testMailSent.title')
         );
-        return $this->redirect('testMail', null, null, ['mail' => $mailUid]);
+        return $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
+    }
+
+    public function sendTestMailToGroupAction(Mail $mail, Group $group): ResponseInterface
+    {
+        $recipientSources = $this->recipientService->getRecipientsByGroup($group);
+        $addressList = [];
+        $groups = new ObjectStorage();
+        $groups->attach($group);
+        $recipients = $this->recipientService->getEmailAddressesByRecipientsUidListGroupedByRecipientSource($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($groups));
+        return $this->redirect('sendTestMail', null, null, ['mail' => $mail->getUid(), 'recipients' => implode(',', $recipients)]);
     }
 
     /**
