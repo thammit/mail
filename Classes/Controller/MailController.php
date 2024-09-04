@@ -768,6 +768,21 @@ class MailController extends AbstractController
      */
     public function sendTestMailAction(Mail $mail, string $recipients = ''): ResponseInterface
     {
+        return $this->sendTestMailToRecipients($mail, $recipients);
+    }
+
+    public function sendTestMailToGroupAction(Mail $mail, Group $group): ResponseInterface
+    {
+        $recipientSources = $this->recipientService->getRecipientsByGroup($group);
+        $addressList = [];
+        $groups = new ObjectStorage();
+        $groups->attach($group);
+        $recipients = $this->recipientService->getEmailAddressesByRecipientsUidListGroupedByRecipientSource($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($groups));
+        return $this->sendTestMailToRecipients($mail, implode(',', $recipients));
+    }
+
+    protected function sendTestMailToRecipients(Mail $mail, string $recipients): ResponseInterface
+    {
         // normalize addresses:
         $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
 
@@ -787,17 +802,8 @@ class MailController extends AbstractController
             sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), $addressList),
             LanguageUtility::getLL('mail.wizard.notification.testMailSent.title')
         );
-        return $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
-    }
 
-    public function sendTestMailToGroupAction(Mail $mail, Group $group): ResponseInterface
-    {
-        $recipientSources = $this->recipientService->getRecipientsByGroup($group);
-        $addressList = [];
-        $groups = new ObjectStorage();
-        $groups->attach($group);
-        $recipients = $this->recipientService->getEmailAddressesByRecipientsUidListGroupedByRecipientSource($this->recipientService->getRecipientsUidListsGroupedByRecipientSource($groups));
-        return $this->redirect('sendTestMail', null, null, ['mail' => $mail->getUid(), 'recipients' => implode(',', $recipients)]);
+        return $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
     }
 
     /**
