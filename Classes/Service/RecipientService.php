@@ -876,8 +876,7 @@ class RecipientService
      */
     public function disableRecipients(array $data): int
     {
-        return $this->eventDispatcher->dispatch(new DeactivateRecipientsEvent($data,
-            $this->recipientSources))->getNumberOfAffectedRecipients();
+        return $this->eventDispatcher->dispatch(new DeactivateRecipientsEvent($data, $this->recipientSources))->getNumberOfAffectedRecipients();
     }
 
 
@@ -940,32 +939,6 @@ class RecipientService
         }
 
         return array_unique($groupArr);
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    protected function getCategoriesOfRecipient(int $uid, string $table, $categoryFieldName = 'categories'): array
-    {
-        $queryBuilder = $this->getQueryBuilderWithoutRestrictions('sys_category_record_mm');
-        return $queryBuilder->select('c.title')
-            ->from('sys_category_record_mm', 'mm')
-            ->leftJoin(
-                'mm',
-                'sys_category',
-                'c',
-                $queryBuilder->expr()->eq('c.uid', $queryBuilder->quoteIdentifier('mm.uid_local'))
-            )
-            ->where(
-                $queryBuilder->expr()->and(
-                    $queryBuilder->expr()->eq('mm.uid_foreign',
-                        $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)),
-                    $queryBuilder->expr()->eq('mm.tablenames', $queryBuilder->createNamedParameter($table)),
-                    $queryBuilder->expr()->eq('mm.fieldname', $queryBuilder->createNamedParameter($categoryFieldName))
-                )
-            )
-            ->executeQuery()
-            ->fetchAllAssociative();
     }
 
 
