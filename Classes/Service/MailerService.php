@@ -399,14 +399,16 @@ class MailerService implements LoggerAwareInterface
                     }
                     break;
                 case $recipientSourceConfiguration->isCsvOrPlain():
-                    [$table, $groupUid] = explode(':', $recipientSourceIdentifier);
+//                    $categories = RecipientUtility::getListOfRecipientCategories($recipientSourceConfiguration->table, $recipientSourceConfiguration->groupUid);
                     foreach ($recipientIds as $recipientUid => $recipientData) {
                         // fake uid for csv
-                        $recipientData['uid'] = $recipientUid + 1;
-                        $recipientData['categories'] = RecipientUtility::getListOfRecipientCategories($table, (int)$groupUid);
-                        $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
-                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
-                        $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
+                        $enhancedRecipientData = array_merge($recipientData, [
+                            'uid' => $recipientUid + 1,
+//                            'categories' => $categories
+                        ]);
+                        $this->sendSingleMailAndAddLogEntry($mail, $enhancedRecipientData, $recipientSourceIdentifier);
+                        $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item['email'] !== $recipientData['email']);
+                        $recipientsHandled[$recipientSourceIdentifier][] = $recipientData;
                         $numberOfSentMails++;
                     }
                     break;

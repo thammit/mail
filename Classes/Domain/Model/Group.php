@@ -454,4 +454,13 @@ class Group extends AbstractEntity
         return $this;
     }
 
+    public function getCategoriesUidList(): array
+    {
+        $categoryUidList = [];
+        foreach ($this->categories as $category) {
+            $categoryUidList[] = $category->getUid();
+        }
+
+        return $categoryUidList;
+    }
 }

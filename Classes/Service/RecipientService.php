@@ -318,8 +318,8 @@ class RecipientService
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
         foreach ($groups as $group) {
-            $recipientList = $this->getRecipientsUidListGroupedByRecipientSource($group);
-            $idLists = array_merge_recursive($idLists, $recipientList);
+            $recipients = $this->getRecipientsUidListGroupedByRecipientSource($group, true);
+            $idLists = array_merge_recursive($idLists, $recipients);
         }
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
@@ -466,7 +466,7 @@ class RecipientService
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function getRecipientsUidListGroupedByRecipientSource(Group $group): array
+    public function getRecipientsUidListGroupedByRecipientSource(Group $group, bool $categoriesAsUidList = false): array
     {
         $idLists = [];
         switch (true) {
@@ -497,7 +497,7 @@ class RecipientService
             case $group->isCsv():
                 $recipients = $group->isPlain() ? $group->getListRecipientsWithName() : $group->getCsvRecipients();
                 foreach ($recipients as $key => $recipient) {
-                    $recipients[$key]['categories'] = $group->getCategories();
+                    $recipients[$key]['categories'] = $categoriesAsUidList ? $group->getCategoriesUidList() : $group->getCategories();
                     $recipients[$key]['mail_html'] = $group->isMailHtml() ? 1 : 0;
                 }
                 $recipientSourceIdentifier = 'tx_mail_domain_model_group:' . $group->getUid();

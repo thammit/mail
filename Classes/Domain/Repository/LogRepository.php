@@ -141,7 +141,7 @@ class LogRepository extends Repository
             ->where(
                 $queryBuilder->expr()->eq('mail', $queryBuilder->createNamedParameter($mailUid, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
-                $queryBuilder->expr()->like('recipient_source', $queryBuilder->createNamedParameter($queryBuilder->escapeLikeWildcards($recipientSourceIdentifier) . '%')),
+                $queryBuilder->expr()->eq('recipient_source', $queryBuilder->createNamedParameter($recipientSourceIdentifier)),
                 $queryBuilder->expr()->eq('recipient_uid', $queryBuilder->createNamedParameter($recipientUid, Connection::PARAM_INT)),
             )
             ->setMaxResults(1)
