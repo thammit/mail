@@ -76,6 +76,7 @@ class ConfigurationUtility
                 default => RecipientSourceType::PLAIN,
             };
             $recipientSourceConfiguration = [
+                'table' => 'tx_mail_domain_model_group',
                 'type' => $type,
                 'title' => $csvRecipientSource['title'],
                 'pid' => $csvRecipientSource['pid'],

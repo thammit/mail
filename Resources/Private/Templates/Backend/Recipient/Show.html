@@ -22,7 +22,11 @@
                     <f:variable name="title">
                         <f:translate key="{recipientSource.configuration.title}" default="{recipientSource.configuration.title}"/> [{recipientSource.configuration.identifier}{f:if(condition: recipientSource.configuration.contains, then: ' -> {recipientSource.configuration.contains}')}]
                     </f:variable>
-                    <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: group.uid, recipientSourceIdentifier: recipientSource.configuration.identifier}" class="btn btn-default btn-sm text-uppercase">
+                    <f:variable name="groupUid" value="{group.uid}"/>
+                    <f:if condition="{recipientSource.configuration.groupUid}">
+                        <f:variable name="groupUid" value="{recipientSource.configuration.groupUid}"/>
+                    </f:if>
+                    <f:variable name="additionalHeading"><f:link.action action="csvDownload" arguments="{group: groupUid, recipientSourceIdentifier: recipientSource.configuration.identifier}" class="btn btn-default btn-sm text-uppercase">
                         <core:icon identifier="content-csv" overlay="actions-arrow-down-alt"/>
                         <f:translate key="{lll}general.button.downloadCsv"/>
                     </f:link.action></f:variable>

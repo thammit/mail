@@ -142,49 +142,43 @@ class RecipientController extends AbstractController
     {
         /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
         if (!($recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false)) {
-            ViewUtility::addFlashMessageError('',
-                LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'), true);
-            return $this->redirect('show');
-        }
+            ViewUtility::addNotificationError(LanguageUtility::getLL('recipient.notification.noRecipientSourceConfigurationFound.message'));
 
-        if ($recipientSourceConfiguration->isCsvOrPlain()) {
-            $groupOfRecipientSource = $this->groupRepository->findByUid($recipientSourceConfiguration->groupUid);
-            $recipients = [];
-            if ($groupOfRecipientSource instanceof Group) {
-                $recipients = $group->isPlain() ? $group->getListRecipients() : $group->getCsvRecipients();
-            }
-            return CsvUtility::downloadCSV($recipients, $recipientSourceIdentifier);
+            return $this->redirect('show', null, null, ['group' => $group]);
         }
 
         if (!BackendUserUtility::getBackendUser()->check('tables_select', $recipientSourceConfiguration->table)) {
-            ViewUtility::addFlashMessageError('',
-                LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'), true);
-            return $this->redirect('show');
+            ViewUtility::addNotificationError(LanguageUtility::getLL('recipient.notification.disallowedCsvExport.message'));
+
+            return $this->redirect('show', null, null, ['group' => $group]);
         }
 
+        $recipients = [];
         $recipientsUidListGroupedByRecipientSource = $this->recipientService->getRecipientsUidListGroupedByRecipientSource($group);
-
-        if (!array_key_exists($recipientSourceIdentifier, $recipientsUidListGroupedByRecipientSource) || count($recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier]) === 0) {
-            ViewUtility::addFlashMessageError('',
-                LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'), true);
-            return $this->redirect('show');
-        }
-
         $recipientsUidList = $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier];
+        $csvExportFields = $recipientSourceConfiguration->csvExportFields ?? GeneralUtility::trimExplode(',', $this->defaultCsvExportFields, true);
 
-        if (is_array(current($recipientsUidList))) {
-            // the list already contain recipient data and not only an array of uids
-            $recipients = $recipientsUidList;
-        } else {
-            if ($recipientSourceConfiguration->isModelSource()) {
-                $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientsUidList,
-                    $recipientSourceConfiguration->model, []);
-            } else {
-                $csvExportFields = $recipientSourceConfiguration->csvExportFields ?? GeneralUtility::trimExplode(',',
-                    $this->defaultCsvExportFields, true);
+        switch (true) {
+            case $group->isPlain():
+                $recipients = $group->getListRecipients();
+                break;
+            case $group->isCsv():
+                $recipients = $group->getCsvRecipients();
+                break;
+            case $recipientSourceConfiguration->isTableSource():
                 $recipients = $this->recipientService->getRecipientsDataByUidListAndTable($recipientsUidList, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, $csvExportFields, CategoryFormat::CSV);
-            }
+                break;
+            case $recipientSourceConfiguration->isModelSource():
+                $recipients = $this->recipientService->getRecipientsDataByUidListAndModelName($recipientsUidList, $recipientSourceConfiguration->model, $csvExportFields, CategoryFormat::CSV);
+                break;
         }
+
+        if (!$recipients) {
+            ViewUtility::addNotificationInfo(LanguageUtility::getLL('recipient.notification.noRecipientsFound.message'));
+
+            return $this->redirect('show', null, null, ['group' => $group]);
+        }
+
         return CsvUtility::downloadCSV($recipients, $recipientSourceIdentifier);
     }
 

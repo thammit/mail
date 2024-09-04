@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Domain\Model;
 
+use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvEnclosure;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvSeparator;
 use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;

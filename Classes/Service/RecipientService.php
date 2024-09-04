@@ -99,7 +99,7 @@ class RecipientService
     public function getRecipientsByGroup(Group $group): array
     {
         $recipientSources = [];
-        $recipientsUidListGroupedByRecipientSource = $this->getRecipientsUidListGroupedByRecipientSource($group, true);
+        $recipientsUidListGroupedByRecipientSource = $this->getRecipientsUidListGroupedByRecipientSource($group);
 
         foreach ($recipientsUidListGroupedByRecipientSource as $recipientSourceIdentifier => $recipientUidList) {
 
@@ -165,10 +165,17 @@ class RecipientService
         if (!$uidListOfRecipients) {
             return [];
         }
+
         if (!in_array('uid', $fields)) {
             // we need the uid
             $fields[] = 'uid';
         }
+
+        if (!in_array('email', $fields)) {
+            // we need the email
+            $fields[] = 'email';
+        }
+
         $data = [];
         $queryBuilder = $this->getQueryBuilderWithoutRestrictions($table);
         $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(HiddenRestriction::class));
@@ -227,14 +234,22 @@ class RecipientService
         if (!$uidListOfRecipients || !$modelName || !class_exists($modelName) || !is_subclass_of($modelName, RecipientInterface::class)) {
             return [];
         }
+
         if (!in_array('uid', $fields)) {
             // we need the uid
             $fields[] = 'uid';
         }
+
+        if (!in_array('email', $fields)) {
+            // we need the email
+            $fields[] = 'email';
+        }
+
         $data = [];
         $query = $this->persistenceManager->createQueryForType($modelName);
         $query->getQuerySettings()->setRespectStoragePage(false);
         $query->getQuerySettings()->setRespectSysLanguage(false);
+
         if ((new Typo3Version())->getMajorVersion() < 12) {
             $query->getQuerySettings()->setLanguageOverlayMode();
         } else {
@@ -245,41 +260,38 @@ class RecipientService
                     LanguageAspect::OVERLAYS_OFF));
             }
         }
+
         $query->matching(
             $query->in('uid', $uidListOfRecipients)
         );
+
         if ($limit > 0) {
             $query->setLimit($limit);
         }
-//        $debugResult = $this->debugQuery($query);
-        $recipients = $query->execute();
-//        ViewUtility::addFlashMessageInfo($debugResult, 'Count ' . $recipients->count(), true);
 
+        $recipients = $query->execute();
         $firstRecipient = $recipients->getFirst();
+
         if (!$firstRecipient instanceof RecipientInterface && !$firstRecipient instanceof DomainObjectInterface) {
             return [];
         }
 
         $getters = [];
-        $hasFields = !empty($fields);
-        if ($hasFields) {
-            foreach ($fields as $field) {
-                $propertyName = ucfirst(str_contains($field, '_') ? str_replace(' ', '',
-                    ucwords(str_replace('_', ' ', $field))) : $field);
-                if (method_exists($firstRecipient, 'get' . $propertyName)) {
-                    $getters[$field] = 'get' . $propertyName;
-                } else {
-                    if (method_exists($firstRecipient, 'is' . $propertyName)) {
-                        $getters[$field] = 'is' . $propertyName;
-                    }
+        foreach ($fields as $field) {
+            $propertyName = ucfirst(str_contains($field, '_') ? str_replace(' ', '',
+                ucwords(str_replace('_', ' ', $field))) : $field);
+            if (method_exists($firstRecipient, 'get' . $propertyName)) {
+                $getters[$field] = 'get' . $propertyName;
+            } else {
+                if (method_exists($firstRecipient, 'is' . $propertyName)) {
+                    $getters[$field] = 'is' . $propertyName;
                 }
             }
         }
 
         /** @var RecipientInterface $recipient */
         foreach ($recipients as $recipient) {
-            $data[$recipient->getUid()] = $hasFields ? RecipientUtility::getFlatRecipientModelData($recipient, $getters,
-                $categoryFormat) : $recipient->getEnhancedData();
+            $data[$recipient->getUid()] = RecipientUtility::getFlatRecipientModelData($recipient, $getters, $categoryFormat);
         }
 
         return $data;
@@ -306,7 +318,7 @@ class RecipientService
         // Looping through the selected array, in order to fetch recipient details
         $idLists = [];
         foreach ($groups as $group) {
-            $recipientList = $this->getRecipientsUidListGroupedByRecipientSource($group, true);
+            $recipientList = $this->getRecipientsUidListGroupedByRecipientSource($group);
             $idLists = array_merge_recursive($idLists, $recipientList);
         }
 
@@ -439,7 +451,7 @@ class RecipientService
      */
     public function getNumberOfRecipientsByGroup(Group $group): int
     {
-        $list = $this->getRecipientsUidListGroupedByRecipientSource($group, true);
+        $list = $this->getRecipientsUidListGroupedByRecipientSource($group);
         return RecipientUtility::calculateTotalRecipientsOfUidLists($list);
     }
 
@@ -454,10 +466,8 @@ class RecipientService
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function getRecipientsUidListGroupedByRecipientSource(
-        Group $group,
-        bool $addGroupUidToRecipientSourceIdentifier = false
-    ): array {
+    public function getRecipientsUidListGroupedByRecipientSource(Group $group): array
+    {
         $idLists = [];
         switch (true) {
             case $group->isPages():
@@ -490,7 +500,7 @@ class RecipientService
                     $recipients[$key]['categories'] = $group->getCategories();
                     $recipients[$key]['mail_html'] = $group->isMailHtml() ? 1 : 0;
                 }
-                $recipientSourceIdentifier = $addGroupUidToRecipientSourceIdentifier ? 'tx_mail_domain_model_group:' . $group->getUid() : 'tx_mail_domain_model_group';
+                $recipientSourceIdentifier = 'tx_mail_domain_model_group:' . $group->getUid();
                 $idLists[$recipientSourceIdentifier] = RecipientUtility::removeDuplicates($recipients);
                 break;
             case $group->isStatic():
@@ -508,7 +518,7 @@ class RecipientService
             case $group->isOther():
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
-                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup, $addGroupUidToRecipientSourceIdentifier);
+                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
