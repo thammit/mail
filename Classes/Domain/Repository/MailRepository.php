@@ -78,6 +78,7 @@ class MailRepository extends Repository
                 $query->equals('pid', $pid),
                 $query->logicalOr(
                     $query->equals('status', MailStatus::SCHEDULED),
+                    $query->equals('status', MailStatus::SENDING),
                     $query->equals('status', MailStatus::PAUSED)
                 )
             )
@@ -99,7 +100,10 @@ class MailRepository extends Repository
         $query->getQuerySettings()->setIgnoreEnableFields(true);
         $query->matching(
             $query->logicalAnd(
-                $query->equals('status', MailStatus::SCHEDULED),
+                $query->logicalOr(
+                    $query->equals('status', MailStatus::SCHEDULED),
+                    $query->equals('status', MailStatus::SENDING)
+                ),
                 $query->logicalNot($query->equals('scheduled', 0)),
                 $query->lessThan('scheduled', new DateTimeImmutable('now')),
                 $query->equals('scheduledEnd', 0),
@@ -134,7 +138,10 @@ class MailRepository extends Repository
             ->where(
                 $queryBuilder->expr()->eq('m.pid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)),
                 $queryBuilder->expr()->in('m.type', $queryBuilder->createNamedParameter([MailType::INTERNAL, MailType::EXTERNAL], Connection::PARAM_INT_ARRAY)),
-                $queryBuilder->expr()->gte('m.status', MailStatus::SENT),
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->eq('m.status', MailStatus::SENDING),
+                    $queryBuilder->expr()->eq('m.status', MailStatus::SENT),
+                ),
                 $queryBuilder->expr()->eq('l.response_type', $queryBuilder->createNamedParameter(ResponseType::ALL, Connection::PARAM_INT)),
                 $queryBuilder->expr()->neq('l.format_sent', $queryBuilder->createNamedParameter(SendFormat::NONE, Connection::PARAM_INT)),
             )

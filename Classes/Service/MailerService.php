@@ -485,7 +485,7 @@ class MailerService implements LoggerAwareInterface
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      */
-    protected function setJobBegin(Mail $mail): void
+    protected function setJobBegin(Mail &$mail): void
     {
         $mail->setScheduledBegin(new DateTimeImmutable('now'));
         $mail->setStatus(MailStatus::SENDING);
@@ -509,7 +509,7 @@ class MailerService implements LoggerAwareInterface
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
      */
-    protected function setJobEnd(Mail $mail): void
+    protected function setJobEnd(Mail &$mail): void
     {
         $mail->setScheduledEnd(new DateTimeImmutable('now'));
         $mail->setStatus(MailStatus::SENT);
