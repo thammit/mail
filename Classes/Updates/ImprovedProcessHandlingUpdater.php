@@ -82,14 +82,18 @@ class ImprovedProcessHandlingUpdater implements UpgradeWizardInterface
     protected function getMailRecordsToUpdate(): array
     {
         $queryBuilder = $this->getPreparedQueryBuilder('tx_mail_domain_model_mail');
-        return $queryBuilder
-            ->select('*')
-            ->where(
-                $queryBuilder->expr()->eq('sent', 1),
-                $queryBuilder->expr()->eq('delivery_progress', 0)
-            )
-            ->executeQuery()
-            ->fetchAllAssociative();
+        try {
+            return $queryBuilder
+                ->select('*')
+                ->where(
+                    $queryBuilder->expr()->eq('sent', 1),
+                    $queryBuilder->expr()->eq('delivery_progress', 0)
+                )
+                ->executeQuery()
+                ->fetchAllAssociative();
+        } catch (\Exception $exception) {
+            return [];
+        }
     }
 
     protected function getPreparedQueryBuilder(string $table): QueryBuilder
