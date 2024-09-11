@@ -475,8 +475,10 @@ class RecipientService
                 $pages = BackendDataUtility::getRecursivePagesList($group->getPages(), $group->isRecursive());
                 if ($pages) {
                     foreach ($group->getRecipientSources() as $recipientSourceIdentifier) {
-                        /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
                         $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier];
+                        if (!$recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
+                            continue;
+                        }
                         if ($recipientSourceConfiguration->isModelSource()) {
                             $idLists[$recipientSourceIdentifier] = $this->getRecipientUidListByModelNameAndPageUidListAndCategories(
                                 $recipientSourceConfiguration,
@@ -527,9 +529,8 @@ class RecipientService
         $uniqueIdLists = [];
 
         foreach ($idLists as $recipientSourceIdentifier => $idList) {
-            /** @var RecipientSourceConfigurationDTO $recipientSourceConfiguration */
             $recipientSourceConfiguration = $this->recipientSources[$recipientSourceIdentifier] ?? false;
-            if ($recipientSourceConfiguration) {
+            if ($recipientSourceConfiguration instanceof RecipientSourceConfigurationDTO) {
                 $uniqueIdLists[$recipientSourceIdentifier] = $recipientSourceConfiguration->isCsvOrPlain() ? $idList : array_unique($idList);
             }
         }
