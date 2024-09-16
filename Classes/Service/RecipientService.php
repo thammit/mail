@@ -520,7 +520,7 @@ class RecipientService
             case $group->isOther():
                 $childGroups = $group->getChildren();
                 foreach ($childGroups as $childGroup) {
-                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup);
+                    $collect = $this->getRecipientsUidListGroupedByRecipientSource($childGroup, $categoriesAsUidList);
                     $idLists = array_merge_recursive($idLists, $collect);
                 }
                 break;
