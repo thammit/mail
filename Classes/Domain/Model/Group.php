@@ -353,7 +353,17 @@ class Group extends AbstractEntity
      */
     public function getCsvRecipients(): array
     {
-        return CsvUtility::getRecipientDataFromCSVGroup($this, true);
+        if ($this->csvType === CsvType::FILE) {
+            $file = $this->csvFile;
+            if (!$file instanceof FileReference) {
+                return [];
+            }
+            $csvRawData = $file->getOriginalResource()->getContents();
+        } else {
+            $csvRawData = $this->csvData;
+        }
+
+        return CsvUtility::getRecipientsFromCsvData(CsvUtility::parseCsvRawData($csvRawData, $this->getCsvSeparatorString(), $this->getCsvEnclosureString()), $this->csvFieldNames);
     }
 
     /**

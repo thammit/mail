@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace MEDIAESSENZ\Mail\Utility;
 
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
-use MEDIAESSENZ\Mail\Domain\Model\Group;
-use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Charset\CharsetConverter;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -14,41 +12,30 @@ use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Http\StreamFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 
 class CsvUtility
 {
-    /**
-     * Parse CSV lines into array form
-     * @param Group $group
-     * @param bool $allFields
-     * @return array
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     */
-    public static function getRecipientDataFromCSVGroup(Group $group, bool $allFields = false): array
+    public static function parseCsvRawData(string $csvRawData, string $csvSeparator = ',', string $csvEnclosure = '"'): array
     {
-        if ($group->getCsvType() === CsvType::FILE) {
-            $file = $group->getCsvFile();
-            if (!$file instanceof FileReference) {
-                return [];
-            }
-            $csvRawData = $file->getOriginalResource()->getContents();
-        } else {
-            $csvRawData = $group->getCsvData();
-        }
-
         $fh = tmpfile();
         fwrite($fh, trim($csvRawData));
         fseek($fh, 0);
         $csvDataArray = [];
-        while ($line = fgetcsv($fh, 1000, $group->getCsvSeparatorString(), $group->getCsvEnclosureString())) {
+        while ($line = fgetcsv($fh, 1000, $csvSeparator, $csvEnclosure)) {
             $csvDataArray[] = $line;
         }
         fclose($fh);
 
-        $firstLineOfCsvContainFieldNames = $group->isCsvFieldNames();
+        return $csvDataArray;
+    }
 
+    /**
+     * Parse CSV lines into array form
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     */
+    public static function getRecipientsFromCsvData(array $csvDataArray, bool $firstLineOfCsvContainFieldNames, bool $allFields = true): array
+    {
         if (!$csvDataArray || ($firstLineOfCsvContainFieldNames && count($csvDataArray) === 1)) {
             return [];
         }
@@ -61,8 +48,8 @@ class CsvUtility
             //   - fields may be prepended with "[code]".
             $fieldNames = $csvDataArray[0];
 
-            if (!in_array('name', $fieldNames, true) || !in_array('email', $fieldNames, true)) {
-                // first line of csv doesn't contain name and email field
+            if (!in_array('email', $fieldNames, true)) {
+                // first line of csv doesn't contain email field
                 return [];
             }
 

@@ -2,6 +2,8 @@
 
 namespace MEDIAESSENZ\Mail\EventListener;
 
+use Doctrine\DBAL\Exception;
+use MEDIAESSENZ\Mail\Domain\Repository\AddressRepository;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -11,6 +13,7 @@ class ManipulateAddressRecipient
 {
     /**
      * @throws InvalidQueryException
+     * @throws Exception
      */
     public function __invoke(ManipulateRecipientEvent $event): void
     {
@@ -24,7 +27,22 @@ class ManipulateAddressRecipient
                 $recipientData += reset($enhancedRecipientData);
                 $event->setRecipientData($recipientData);
             }
+            if ($recipientSourceConfiguration->isTableSource() && ($recipientData['uid'] ?? false) && !$recipientData['name']) {
+                $addressRepository = GeneralUtility::makeInstance(AddressRepository::class);
+                $address = $addressRepository->findRecordByUid((int)$recipientData['uid'])[0];
+                if (($address['first_name'] ?? false) || ($address['middle_name'] ?? false) || ($address['last_name'] ?? false)) {
+                    $recipientData['name'] = str_replace('  ', ' ', trim($address['first_name'] . ' ' . trim($address['middle_name']) . ' ' . $address['last_name']));
+                    $event->setRecipientData($recipientData);
+                }
+            }
         }
-
+        if ($event->getRecipientSourceConfiguration()->isCsv()) {
+            // csv data
+            $recipientData = $event->getRecipientData();
+            if (!array_key_exists('name', $recipientData) && ($recipientData['last_name'] ?? false)) {
+                $recipientData['name'] = $recipientData['last_name'];
+                $event->setRecipientData($recipientData);
+            }
+        }
     }
 }

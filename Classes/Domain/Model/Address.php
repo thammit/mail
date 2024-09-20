@@ -25,9 +25,9 @@ class Address extends AbstractRecipient implements RecipientInterface, CategoryI
         $repositoryName = ClassNamingUtility::translateModelNameToRepositoryName(self::ENHANCED_MODEL);
         $repository = GeneralUtility::makeInstance($repositoryName);
         $address = $repository->findByUid($this->uid);
-        $additionalFields = [];
+        $enhancedData = parent::getEnhancedData();
         if ($address instanceof \FriendsOfTYPO3\TtAddress\Domain\Model\Address) {
-            $additionalFields = [
+            $enhancedData += [
                 'gender' => $address->getGender(),
                 'title' => $address->getTitle(),
                 'first_name' => $address->getFirstName(),
@@ -46,6 +46,6 @@ class Address extends AbstractRecipient implements RecipientInterface, CategoryI
             ];
         }
 
-        return parent::getEnhancedData() + $additionalFields;
+        return $enhancedData;
     }
 }

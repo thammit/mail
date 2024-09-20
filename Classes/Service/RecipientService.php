@@ -12,6 +12,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
 use MEDIAESSENZ\Mail\Events\DeactivateRecipientsEvent;
+use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
 use MEDIAESSENZ\Mail\Events\RecipientsRestrictionEvent;
 use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
@@ -128,6 +129,10 @@ class RecipientService
                 case $recipientSourceConfiguration->isService():
                     // todo
                     break;
+            }
+
+            foreach ($recipients as $key => $recipient) {
+                $recipients[$key] = $this->eventDispatcher->dispatch(new ManipulateRecipientEvent($recipient, $recipientSourceConfiguration))->getRecipientData();
             }
 
             $table = $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table;
