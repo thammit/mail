@@ -787,7 +787,7 @@ class MailController extends AbstractController
         $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
 
         if ($addressList) {
-            if (!$this->jumpurlIsLoaded || (($this->pageTSConfiguration['clickTracking'] || $this->pageTSConfiguration['clickTrackingMailTo']) && $mail->isInternal())) {
+            if (!$this->jumpurlIsLoaded || ((($this->pageTSConfiguration['clickTracking'] ?? false) || ($this->pageTSConfiguration['clickTrackingMailTo'] ?? false)) && $mail->isInternal())) {
                 // no click tracking for internal test mails or if jumpurl is not loaded
                 $testMail = MailFactory::forStorageFolder($this->id)->fromInternalPage($mail->getPage(),
                     $mail->getSysLanguageUid(), true);
