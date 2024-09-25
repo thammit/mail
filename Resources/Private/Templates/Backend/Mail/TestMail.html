@@ -33,7 +33,7 @@
                         </f:if>
                         <f:form.textfield class="form-control" placeholder="Mail address" name="recipients" value="{recipients}"
                                additionalAttributes="{aria-label:'Test mail recipient', aria-describedby: 'send-test-mail-tt-address-{address.uid}-button'}"/>
-                        <f:form.button class="btn btn-outline-primary text-uppercase" id="send-test-mail-tt-address-{address.uid}-button" type="submit">
+                        <f:form.button class="btn btn-default text-uppercase" id="send-test-mail-tt-address-{address.uid}-button" type="submit">
                             <f:translate key="{lll}general.button.send"/>
                         </f:form.button>
                     </div>
@@ -91,7 +91,7 @@
                             </table>
                         </div>
                         <f:form action="sendTestMailToGroup" arguments="{mail: mailUid, group: groupId}" method="post" enctype="multipart/form-data">
-                            <f:form.button class="btn btn-outline-primary text-uppercase" id="send-test-mail-group-{groupId}-button" type="submit">
+                            <f:form.button class="btn btn-default text-uppercase" id="send-test-mail-group-{groupId}-button" type="submit">
                                 <f:translate key="{lll}general.button.sendTestMail" arguments="{0: mailGroup.title}"/>
                             </f:form.button>
                         </f:form>
