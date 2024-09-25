@@ -48,7 +48,7 @@ class InvalidatePlainRecipients
                         }
                         if ($affectedRecipientsOfSource) {
                             // write back changed emails
-                            $group->setList(implode(LF, $recipients));
+                            $group->setList(implode(LF, array_column($recipients, 'email')));
                             $this->groupRepository->update($group);
                             $this->persistenceManager->persistAll();
                         }
