@@ -83,7 +83,7 @@ class MailRepository extends Repository
                 )
             )
         );
-        $query->setOrderings(['scheduled' => QueryInterface::ORDER_DESCENDING]);
+        $query->setOrderings(['scheduled' => QueryInterface::ORDER_ASCENDING]);
 
         if ($limit) {
             $query->setLimit($limit);
