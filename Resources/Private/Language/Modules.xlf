@@ -319,6 +319,9 @@
             <trans-unit id="mail.wizard.scheduleSending.distributionTime" resname="mail.wizard.scheduleSending.distributionTime">
                 <source>Distribution time (hh:mm dd-mm-yyyy)</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.distributionStart" resname="mail.wizard.scheduleSending.distributionStart">
+                <source>Distribution start (hh:mm dd-mm-yyyy)</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.draftSaved.title" resname="mail.wizard.notification.draftSaved.title">
                 <source>Mail saved as draft</source>
             </trans-unit>
