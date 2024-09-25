@@ -17,8 +17,10 @@ MAIL comes with a lot of possibilities:
 
    *  Compare to EXT:direct_mail, MAIL is not limited to fe_groups, fe_users, tt_address and one custom table
    *  It is possible to add as many tables you like, as long they have the needed fields or an extbase model which implements at least the RecipientInterface, defined in :guilabel:`Classes/Domain/Model/RecipientInterface.php`
+   *  To make it even more flexible it is possible to define query restrictions (for tables) or use the RecipientsRestrictionEvent (for extbase) to filter recipients list.
+      Checkout https://gitlab.com/mediaessenz/additional-mail-recipients how to do it.
    *  Beside the recipient source (table) it is also possible to set a starting point where the records should be taken from
-   *  Categories can also be set to filter the list of recipients to only those how have the at least one of them assigned as well
+   *  Categories can also be set to filter the list of recipients to only those who have at least one of them assigned as well
 
 *  Plain list
 

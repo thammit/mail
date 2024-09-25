@@ -29,4 +29,5 @@ The extension is highly inspired from direct_mail, and was the base of a massive
 Kudos to all people who put there lifeblood and love in this project.
 
 For all EXT:direct_mail users who wants to try out this extension:
-A direct_mail -> mail migration script can be found in the upgrade wizard of the TYPO3 install tool.
+A direct_mail -> mail migration script can be found in the upgrade wizard of the TYPO3 install tool
+after installing MAIL.

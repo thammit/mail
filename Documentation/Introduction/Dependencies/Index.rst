@@ -15,7 +15,7 @@ MAIL make use of several packages all found at packagist.org:
 *  pelago/emogrifier (https://github.com/MyIntervals/emogrifier)
 *  league/html-to-markdown (https://github.com/thephpleague/html-to-markdown)
 *  masterminds/html5 (https://github.com/Masterminds/html5-php)
-*  tedivm/fetch (https://github.com/tedious/Fetch)
+*  ddeboer/imap (https://github.com/ddeboer/imap)
 
 Kudos to all involved coders who put her love and energy in it. Without her, this extension would not exist.
 
@@ -59,7 +59,7 @@ masterminds/html5
 
 This package is used on several places to extract specific parts of a mail (e.g. links, images, special data attributes).
 
-tedivm/fetch
+ddeboer/imap
 ============
 
 This package is used by the AnalyzeBounceMailCommand to read the mail account of returned mails.
