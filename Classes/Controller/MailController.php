@@ -836,18 +836,13 @@ class MailController extends AbstractController
             $mail->setRecipientGroups($presetGroup);
         }
 
-        $now = new DateTimeImmutable('now');
-        if ($this->typo3MajorVersion == 12) {
-            // converted timezone from server time zone to utc
-            $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
-            $now = new DateTimeImmutable('now', $serverTimeZone);
-        }
-//        if ($this->typo3MajorVersion == 13) {
-//            // converted timezone from server time zone to utc
-//            $serverTimeZone = new DateTimeZone('UTC');
-//            $now = new DateTimeImmutable('now', $serverTimeZone);
-//        }
         if (!$mail->getScheduled()) {
+            $now = new DateTimeImmutable('now');
+            if ($this->typo3MajorVersion == 12) {
+                // converted timezone from server time zone to utc
+                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
+                $now = new DateTimeImmutable('now', $serverTimeZone);
+            }
             $mail->setScheduled($now);
         }
 
@@ -884,23 +879,15 @@ class MailController extends AbstractController
      */
     public function initializeFinishAction(): void
     {
-        // under typo3 12 the scheduled property has W3C format
-        // with UTC timezone e.g. 2024-08-17T20:21:42Z
-        // because of this the created datetime immutable object has to be corrected
-        // in the finishAction later to fit to the timezone of the server
-//        $format = match ($this->typo3MajorVersion) {
-//            12 => \DateTimeInterface::W3C,
-//            13 => \DateTimeInterface::W3C,
-//            default => 'H:i d-m-Y',
-//        };
-//
-//        if ($this->arguments->hasArgument('mail')) {
-//            $this->arguments->getArgument('mail')
-//                ->getPropertyMappingConfiguration()->allowProperties('scheduled')
-//                ->forProperty('scheduled')
-//                ->setTypeConverterOption(DateTimeImmutableConverter::class,
-//                    DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, $format);
-//        }
+        if ($this->typo3MajorVersion === 11) {
+            // the datetime picker of v11 delivers date in H:i d-m-Y format which has to be converted
+            if ($this->arguments->hasArgument('distributionTime')) {
+                $this->arguments->getArgument('distributionTime')
+                    ->getPropertyMappingConfiguration()
+                    ->setTypeConverterOption(DateTimeImmutableConverter::class,
+                        DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, 'H:i d-m-Y');
+            }
+        }
     }
 
     /**
@@ -924,7 +911,6 @@ class MailController extends AbstractController
             ]);
         }
 
-
         if ($this->typo3MajorVersion >= 12) {
             // $distributionTime timezone is utc and must be converted to server time zone
             if ($distributionTime instanceof DateTimeImmutable) {
@@ -937,7 +923,7 @@ class MailController extends AbstractController
             }
         } else {
             // TYPO3 11
-
+            $mail->setScheduled($distributionTime);
         }
 
         $recipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups());
