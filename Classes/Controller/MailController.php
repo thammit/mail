@@ -836,13 +836,18 @@ class MailController extends AbstractController
             $mail->setRecipientGroups($presetGroup);
         }
 
+        $now = new DateTimeImmutable('now');
+        if ($this->typo3MajorVersion == 12) {
+            // converted timezone from server time zone to utc
+            $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
+            $now = new DateTimeImmutable('now', $serverTimeZone);
+        }
+//        if ($this->typo3MajorVersion == 13) {
+//            // converted timezone from server time zone to utc
+//            $serverTimeZone = new DateTimeZone('UTC');
+//            $now = new DateTimeImmutable('now', $serverTimeZone);
+//        }
         if (!$mail->getScheduled()) {
-            $now = new DateTimeImmutable('now');
-            if ($this->typo3MajorVersion > 11) {
-                // converted timezone from server time zone to utc
-                $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
-                $now = new DateTimeImmutable('now', $serverTimeZone);
-            }
             $mail->setScheduled($now);
         }
 
@@ -883,18 +888,19 @@ class MailController extends AbstractController
         // with UTC timezone e.g. 2024-08-17T20:21:42Z
         // because of this the created datetime immutable object has to be corrected
         // in the finishAction later to fit to the timezone of the server
-        $format = match ($this->typo3MajorVersion) {
-            12 => \DateTimeInterface::W3C,
-            default => 'H:i d-m-Y',
-        };
-
-        if ($this->arguments->hasArgument('mail')) {
-            $this->arguments->getArgument('mail')
-                ->getPropertyMappingConfiguration()->allowProperties('scheduled')
-                ->forProperty('scheduled')
-                ->setTypeConverterOption(DateTimeImmutableConverter::class,
-                    DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, $format);
-        }
+//        $format = match ($this->typo3MajorVersion) {
+//            12 => \DateTimeInterface::W3C,
+//            13 => \DateTimeInterface::W3C,
+//            default => 'H:i d-m-Y',
+//        };
+//
+//        if ($this->arguments->hasArgument('mail')) {
+//            $this->arguments->getArgument('mail')
+//                ->getPropertyMappingConfiguration()->allowProperties('scheduled')
+//                ->forProperty('scheduled')
+//                ->setTypeConverterOption(DateTimeImmutableConverter::class,
+//                    DateTimeImmutableConverter::CONFIGURATION_DATE_FORMAT, $format);
+//        }
     }
 
     /**
@@ -908,28 +914,30 @@ class MailController extends AbstractController
      * @throws JsonException
      * @throws \Exception
      */
-    public function finishAction(Mail $mail): ResponseInterface
+    public function finishAction(Mail $mail, ?DateTimeImmutable $distributionTime = null): ResponseInterface
     {
         if ($mail->getRecipientGroups()->count() === 0) {
             ViewUtility::addNotificationWarning(LanguageUtility::getLL('mail.wizard.notification.missingRecipientGroup.message'),
                 LanguageUtility::getLL('general.notification.severity.warning.title'));
             return $this->redirect('scheduleSending', null, null, [
-                'mail' => $mail,
+                'mail' => $mail->getUid(),
             ]);
         }
 
 
-        if ($this->typo3MajorVersion === 12) {
-            // scheduled timezone is utc and must be converted to server time zone
-            $scheduled = $mail->getScheduled();
-            if ($scheduled instanceof DateTimeImmutable) {
+        if ($this->typo3MajorVersion >= 12) {
+            // $distributionTime timezone is utc and must be converted to server time zone
+            if ($distributionTime instanceof DateTimeImmutable) {
                 $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
-                $offset = $serverTimeZone->getOffset($scheduled);
+                $offset = $serverTimeZone->getOffset($distributionTime);
                 if ($offset) {
                     $interval = new DateInterval('PT' . abs($offset) . 'S');
-                    $mail->setScheduled($offset >= 0 ? $scheduled->sub($interval) : $scheduled->add($interval));
+                    $mail->setScheduled($offset >= 0 ? $distributionTime->sub($interval) : $distributionTime->add($interval));
                 }
             }
+        } else {
+            // TYPO3 11
+
         }
 
         $recipients = $this->recipientService->getRecipientsUidListsGroupedByRecipientSource($mail->getRecipientGroups());
@@ -950,7 +958,7 @@ class MailController extends AbstractController
                     LanguageUtility::getLL('general.notification.severity.warning.title')
                 );
 
-                return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
+                return $this->redirect('scheduleSending', null, null, ['mail' => $mail->getUid()]);
             }
             $recipients = $filteredRecipients;
         } else {
@@ -966,7 +974,7 @@ class MailController extends AbstractController
                 LanguageUtility::getLL('general.notification.severity.warning.title')
             );
 
-            return $this->redirect('scheduleSending', null, null, ['mail' => $mail]);
+            return $this->redirect('scheduleSending', null, null, ['mail' => $mail->getUid()]);
         }
 
         $mail->setRecipients($recipients, true);

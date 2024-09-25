@@ -33,11 +33,13 @@
 							<ul class="list-group">
 								<f:for each="{groups}" as="group">
 									<li class="list-group-item d-flex justify-content-between align-items-center">
-										<label class="form-check-label" for="mailgroups-{group.uid}">
-											<f:form.checkbox class="form-check-input me-1" property="recipientGroups" multiple="1" value="{group.uid}"
-															 id="mailgroups-{group.uid}"/>
-											{group.title}
-										</label>
+										<span class="form-check mb-0">
+											<label class="form-check-label" for="mailgroups-{group.uid}">
+												<f:form.checkbox class="form-check-input me-1" property="recipientGroups" multiple="1" value="{group.uid}"
+																 id="mailgroups-{group.uid}"/>
+												{group.title}
+											</label>
+										</span>
 										<span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
 									</li>
 								</f:for>
@@ -53,11 +55,13 @@
                                     <ul class="list-group">
                                         <f:for each="{groups}" as="group">
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <label class="form-check-label" for="exclude-mailgroups-{group.uid}">
-                                                    <f:form.checkbox class="form-check-input me-1" property="excludeRecipientGroups" multiple="1" value="{group.uid}"
-                                                                     id="exclude-mailgroups-{group.uid}"/>
-                                                    {group.title}
-                                                </label>
+												<span class="form-check mb-0">
+													<label class="form-check-label" for="exclude-mailgroups-{group.uid}">
+														<f:form.checkbox class="form-check-input me-1" property="excludeRecipientGroups" multiple="1" value="{group.uid}"
+																		 id="exclude-mailgroups-{group.uid}"/>
+														{group.title}
+													</label>
+												</span>
                                                 <span class="badge rounded-pill bg-mail-theme ms-1 pb-1">{group.receiver}</span>
                                             </li>
                                         </f:for>
@@ -76,10 +80,11 @@
 				</f:if>
 				<div class="col-12 col-md-6">
 					<label for="distributionTime" class="form-label h4 mb-2">
-						<f:translate key="{lll}mail.wizard.scheduleSending.distributionTime"/>
+						<f:translate key="{lll}mail.wizard.scheduleSending.distributionStart"/>
 					</label>
 					<f:variable name="minDate" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
 					<f:variable name="minDateISO" value="{f:format.date(format:'Y-m-d\TH:i:s\Z', date:'now')}"/>
+					<f:variable name="minDateISO2" value="{f:format.date(format:'c', date:'now')}"/>
 					<f:variable name="date" value="{minDate}"/>
 					<f:variable name="dateISO" value="{minDateISO}"/>
 					<f:if condition="{mail.scheduled}">
@@ -89,7 +94,7 @@
 					<f:switch expression="{typo3Version}">
 						<f:case value="11">
 							<div class="input-group">
-								<f:form.textfield id="mail-distribution-time" property="scheduled" value="{date}" data="{date-type:'datetime', date-mindate:minDate}" additionalAttributes="{autocomplete:'off'}" class="form-control t3js-datetimepicker"/>
+								<f:form.textfield id="mail-distribution-time" name="distributionTime" value="{date}" data="{date-type:'datetime', date-mindate:minDate}" additionalAttributes="{autocomplete:'off'}" class="form-control t3js-datetimepicker"/>
 								<label class="mb-0 btn btn-default" for="mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</label>
@@ -98,7 +103,7 @@
 						<f:case value="12">
 							<div class="input-group">
 								<input id="mail-distribution-time" value="{date}" data-date-type="datetime" data-date-mindate="{minDateISO}" autocomplete="off" class="form-control"/>
-								<f:form.hidden property="scheduled" value="{dateISO}"/>
+								<f:form.hidden property="distributionTime" value="{dateISO}"/>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</button>
@@ -106,7 +111,7 @@
 						</f:case>
 						<f:defaultCase>
 							<div class="input-group">
-								<input id="mail-distribution-time" name="mail[scheduled]" value="{date}" data-date-type="datetime" data-date-mindate="{minDate}" autocomplete="off" class="form-control"/>
+								<input id="mail-distribution-time" name="distributionTime" value="{dateISO}" data-date-mindate="{minDateISO}" data-date-type="datetime" autocomplete="off" class="form-control"/>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</button>
