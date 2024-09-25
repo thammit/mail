@@ -408,36 +408,20 @@ class RecipientService
                 continue;
             }
 
-            switch (true) {
-                case $recipientSourceConfiguration->isTableSource():
-                case $recipientSourceConfiguration->isModelSource():
-                    if ($recipientSourceConfiguration->isTableSource()) {
-                        $recipientsData = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, ['uid', 'email']);
-                    } else {
-                        $recipientsData = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['uid', 'email']);
-                    }
-                    foreach ($recipientsData as $recipientData) {
-                        $email = $recipientData['email'] ?? false;
-                        if (in_array($email, $excludeEmails, true)) {
-                            $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = array_values(array_filter($recipients, static fn($uid) => $uid !== (int)$recipientData['uid']));
-                        }
-                    }
-                    break;
-                case $recipientSourceConfiguration->isCsvOrPlain():
-                    // handle csv and plain lists
-                    $recipientsToKeep = [];
-                    foreach ($recipients as $recipient) {
-                        $email = $recipient['email'] ?? false;
-                        if (!in_array($email, $excludeEmails, true)) {
-                            $recipientsToKeep[] = $recipient;
-                        }
-                    }
-                    $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = $recipientsToKeep;
-                    break;
-                case $recipientSourceConfiguration->isService():
-                    // todo
-                    break;
+            if ($recipientSourceConfiguration->isTableSource()) {
+                $recipients = $this->getRecipientsDataByUidListAndTable($recipients, $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table, ['uid', 'email']);
+            } else if ($recipientSourceConfiguration->isModelSource()) {
+                $recipients = $this->getRecipientsDataByUidListAndModelName($recipients, $recipientSourceConfiguration->model, ['uid', 'email']);
             }
+
+            $recipientsToKeep = [];
+            foreach ($recipients as $recipient) {
+                $email = $recipient['email'] ?? false;
+                if (!in_array($email, $excludeEmails, true)) {
+                    $recipientsToKeep[] = $recipient;
+                }
+            }
+            $recipientsUidListGroupedByRecipientSource[$recipientSourceIdentifier] = $recipientsToKeep;
         }
 
         return $recipientsUidListGroupedByRecipientSource;
