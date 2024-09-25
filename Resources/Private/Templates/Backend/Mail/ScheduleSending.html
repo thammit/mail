@@ -84,7 +84,6 @@
 					</label>
 					<f:variable name="minDate" value="{f:format.date(format:'H:i d-m-Y', date:'now')}"/>
 					<f:variable name="minDateISO" value="{f:format.date(format:'Y-m-d\TH:i:s\Z', date:'now')}"/>
-					<f:variable name="minDateISO2" value="{f:format.date(format:'c', date:'now')}"/>
 					<f:variable name="date" value="{minDate}"/>
 					<f:variable name="dateISO" value="{minDateISO}"/>
 					<f:if condition="{mail.scheduled}">
@@ -103,7 +102,7 @@
 						<f:case value="12">
 							<div class="input-group">
 								<input id="mail-distribution-time" value="{date}" data-date-type="datetime" data-date-mindate="{minDateISO}" autocomplete="off" class="form-control"/>
-								<f:form.hidden property="distributionTime" value="{dateISO}"/>
+								<f:form.hidden name="distributionTime" value="{dateISO}"/>
 								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
 									<core:icon identifier="actions-edit-pick-date"/>
 								</button>
