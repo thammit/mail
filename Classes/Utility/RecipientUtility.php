@@ -118,14 +118,15 @@ class RecipientUtility
      */
     public static function calculateTotalRecipientsOfUidLists(array $uidLists): int
     {
-        $totalRecipients = 0;
-        foreach ($uidLists as $uidList) {
-            if (is_array($uidList)) {
-                $totalRecipients += count($uidList);
-            }
-        }
-
-        return $totalRecipients;
+        return array_reduce($uidLists, fn($total, $uidList) => $total + (is_array($uidList) ? count($uidList) : 0), 0);
+//        $totalRecipients = 0;
+//        foreach ($uidLists as $uidList) {
+//            if (is_array($uidList)) {
+//                $totalRecipients += count($uidList);
+//            }
+//        }
+//
+//        return $totalRecipients;
     }
 
     /**
@@ -136,18 +137,8 @@ class RecipientUtility
      */
     public static function normalizeListOfEmailAddresses(string $emailAddresses): string
     {
-        $rawAddressList = preg_split('|[' . LF . ',;]|', $emailAddresses);
-        $cleanAddressList = [];
-
-        foreach ($rawAddressList as $email) {
-            $email = trim($email);
-            if (GeneralUtility::validEmail($email)) {
-                $cleanAddressList[] = $email;
-            }
-        }
-
         // remove duplicates and return clean list
-        return implode(',', array_keys(array_flip($cleanAddressList)));
+        return implode(',', array_keys(array_flip(array_map('trim', preg_split('|[' . LF . ',;]|', $emailAddresses)))));
     }
 
     /**
@@ -167,6 +158,11 @@ class RecipientUtility
     public static function invalidateEmail($email, $errorCodes = []): string
     {
         return '!invalid!-' . implode('-', $errorCodes) . '-' . str_replace('@', '[at]', $email);
+    }
+
+    public static function removeInvalidateEmailsFromRecipientsList(array $recipientsList): array
+    {
+        return array_filter($recipientsList, fn($entry) => GeneralUtility::validEmail($entry['email']));
     }
 
     /**

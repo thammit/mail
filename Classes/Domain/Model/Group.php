@@ -255,12 +255,12 @@ class Group extends AbstractEntity
 
     public function getListRecipients(): array
     {
-        return RecipientUtility::normalizePlainEmailList(array_unique(preg_split('|[[:space:],;]+|', trim($this->list))));
+        return RecipientUtility::removeInvalidateEmailsFromRecipientsList(RecipientUtility::normalizePlainEmailList(array_unique(preg_split('|[[:space:],;]+|', trim($this->list)))));
     }
 
     public function getListRecipientsWithName(): array
     {
-        return RecipientUtility::normalizePlainEmailList(array_unique(preg_split('|[[:space:],;]+|', trim($this->list))), true);
+        return RecipientUtility::removeInvalidateEmailsFromRecipientsList(RecipientUtility::normalizePlainEmailList(array_unique(preg_split('|[[:space:],;]+|', trim($this->list))), true));
     }
 
     public function getCsvSeparator(): int

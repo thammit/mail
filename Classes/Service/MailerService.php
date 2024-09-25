@@ -184,21 +184,13 @@ class MailerService implements LoggerAwareInterface
 
     /**
      * Send a simple email (without personalizing)
-     *
-     * @param Mail $mail
-     * @param string $addressList comma separated list of emails
-     *
-     * @return void
      */
-    public function sendSimpleMail(Mail $mail, string $addressList): void
+    public function sendSimpleMail(Mail $mail, array $testEmailRecipients): void
     {
-        $addressList = str_replace(';', ',', $addressList);
-        $recipients = explode(',', $addressList);
-
-        foreach ($recipients as $recipient) {
+        foreach ($testEmailRecipients as $recipient) {
             $this->sendMailToRecipient(
                 $mail,
-                $recipient,
+                $recipient['email'],
                 MailerUtility::getContentFromContentPartsMatchingUserCategories($this->htmlContentParts),
                 MailerUtility::getContentFromContentPartsMatchingUserCategories($this->plainContentParts)
             );

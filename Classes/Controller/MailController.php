@@ -784,9 +784,10 @@ class MailController extends AbstractController
     protected function sendTestMailToRecipients(Mail $mail, string $recipients): ResponseInterface
     {
         // normalize addresses:
-        $addressList = RecipientUtility::normalizeListOfEmailAddresses($recipients);
+        $allTestEmailRecipients = explode(',', str_replace(';', ',', RecipientUtility::normalizeListOfEmailAddresses($recipients)));
+        $validTestEmailRecipients = RecipientUtility::removeInvalidateEmailsFromRecipientsList(RecipientUtility::normalizePlainEmailList($allTestEmailRecipients));
 
-        if ($addressList) {
+        if ($validTestEmailRecipients) {
             if (!$this->jumpurlIsLoaded || ((($this->pageTSConfiguration['clickTracking'] ?? false) || ($this->pageTSConfiguration['clickTrackingMailTo'] ?? false)) && $mail->isInternal())) {
                 // no click tracking for internal test mails or if jumpurl is not loaded
                 $testMail = MailFactory::forStorageFolder($this->id)->fromInternalPage($mail->getPage(),
@@ -795,12 +796,18 @@ class MailController extends AbstractController
             $this->mailerService->start();
             $this->mailerService->prepare($testMail ?? $mail);
             $this->mailerService->setSubjectPrefix($this->pageTSConfiguration['testMailSubjectPrefix'] ?? '');
-            $this->mailerService->sendSimpleMail($testMail ?? $mail, $addressList);
+            $this->mailerService->sendSimpleMail($testMail ?? $mail, $validTestEmailRecipients);
+            ViewUtility::addNotificationSuccess(
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), implode(',', array_column($validTestEmailRecipients, 'email'))),
+                LanguageUtility::getLL('mail.wizard.notification.testMailSent.title')
+            );
+
+            return $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
         }
 
-        ViewUtility::addNotificationSuccess(
-            sprintf(LanguageUtility::getLL('mail.wizard.notification.testMailSent.message'), $addressList),
-            LanguageUtility::getLL('mail.wizard.notification.testMailSent.title')
+        ViewUtility::addNotificationWarning(
+            sprintf(LanguageUtility::getLL('mail.wizard.notification.noValidEmailAddress.message'), implode(', ', $allTestEmailRecipients)),
+            LanguageUtility::getLL('mail.wizard.notification.noValidEmailAddress.title')
         );
 
         return $this->redirect('testMail', null, null, ['mail' => $mail->getUid()]);
@@ -936,7 +943,6 @@ class MailController extends AbstractController
             $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($filteredRecipients);
             if ($numberOfRecipients === 0) {
                 $mail->setRecipients([], true);
-//                $mail->setScheduled(null);
                 $this->mailRepository->update($mail);
                 $this->mailRepository->persist();
                 ViewUtility::addNotificationWarning(

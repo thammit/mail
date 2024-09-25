@@ -162,6 +162,12 @@
             <trans-unit id="mail.wizard.notification.testMailSent.message" resname="mail.wizard.notification.testMailSent.message">
                 <source>Recipient(s): %s</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.notification.noValidEmailAddress.title" resname="mail.wizard.notification.noValidEmailAddress.title">
+                <source>No valid email address(s) found</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.notification.noValidEmailAddress.message" resname="mail.wizard.notification.noValidEmailAddress.message">
+                <source>Recipient(s): %s</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.finished.title" resname="mail.wizard.notification.finished.title">
                 <source>Mail scheduled for distribution</source>
             </trans-unit>
