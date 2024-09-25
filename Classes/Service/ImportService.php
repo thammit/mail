@@ -18,9 +18,9 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Resource\DefaultUploadFolderResolver;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
@@ -48,6 +48,7 @@ class ImportService
     protected RequestInterface $request;
     protected string $refererHost;
     protected string $requestHost;
+    protected int $typo3MajorVersion;
 
     protected ?BackendUserAuthentication $backendUserAuthentication = null;
 
@@ -59,6 +60,7 @@ class ImportService
         protected EventDispatcherInterface $eventDispatcher
     ) {
         $this->backendUserAuthentication = $GLOBALS['BE_USER'];
+        $this->typo3MajorVersion = (new Typo3Version())->getMajorVersion();
     }
 
     /**
@@ -115,8 +117,6 @@ class ImportService
     /**
      * @return bool return true if import/upload was successfully
      * @throws AspectNotFoundException
-     * @throws \TYPO3\CMS\Core\Resource\Exception
-     * @throws Exception
      */
     public function importCsv(): bool
     {
@@ -333,7 +333,7 @@ class ImportService
 
     /**
      * @return array
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function startCsvImport(): array
     {
@@ -415,7 +415,7 @@ class ImportService
      * @param array $csvData The csv raw data
      *
      * @return array Array containing double, updated and invalid-email records
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function doImport(array $csvData): array
     {
@@ -500,7 +500,7 @@ class ImportService
         $data = $this->eventDispatcher->dispatch(new ManipulateCsvImportDataEvent($data, $this->configuration))->getData();
 
         // start importing
-        $this->dataHandler->enableLogging = 0;
+        $this->dataHandler->enableLogging = false;
         $this->dataHandler->start($data, []);
         $this->dataHandler->process_datamap();
 
@@ -572,7 +572,6 @@ class ImportService
      * @param string $csv
      * @return void
      * @throws AspectNotFoundException
-     * @throws \TYPO3\CMS\Core\Resource\Exception
      */
     public function createCsvFile(string $csv): void
     {
@@ -581,8 +580,11 @@ class ImportService
         /* @var $extendedFileUtility ExtendedFileUtility */
         $extendedFileUtility = GeneralUtility::makeInstance(ExtendedFileUtility::class);
         $extendedFileUtility->setActionPermissions($userPermissions);
-        $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
-
+        if ($this->typo3MajorVersion >= 13) {
+            $extendedFileUtility->setExistingFilesConflictMode(\TYPO3\CMS\Core\Resource\Enum\DuplicationBehavior::REPLACE);
+        } else {
+            $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
+        }
         // Checking referer / executing:
         if ($this->requestHost !== $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
             $this->backendUserAuthentication->writelog(
@@ -635,7 +637,11 @@ class ImportService
             /* @var $extendedFileUtility ExtendedFileUtility */
             $extendedFileUtility = GeneralUtility::makeInstance(ExtendedFileUtility::class);
             $extendedFileUtility->setActionPermissions();
-            $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
+            if ($this->typo3MajorVersion >= 13) {
+                $extendedFileUtility->setExistingFilesConflictMode(\TYPO3\CMS\Core\Resource\Enum\DuplicationBehavior::REPLACE);
+            } else {
+                $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
+            }
 
             if ($this->requestHost !== $this->refererHost && !$GLOBALS['TYPO3_CONF_VARS']['SYS']['doNotCheckReferer']) {
                 $this->backendUserAuthentication->writelog(
@@ -643,13 +649,18 @@ class ImportService
                     'Referer host "%s" and server host "%s" did not match!',
                     [$this->refererHost, $this->requestHost]);
             } else {
-                if ((new Typo3Version())->getMajorVersion() < 12) {
+
+                if ($this->typo3MajorVersion < 12) {
                     $file = GeneralUtility::_GP('tx_mail_mailmail_mailrecipient')['file'];
                 } else {
                     $file = $this->request->getParsedBody()['file'] ?? $this->request->getQueryParams()['file'] ?? null;
                 }
                 $extendedFileUtility->start($file);
-                $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::cast(DuplicationBehavior::REPLACE));
+                if ($this->typo3MajorVersion >= 13) {
+                    $extendedFileUtility->setExistingFilesConflictMode(\TYPO3\CMS\Core\Resource\Enum\DuplicationBehavior::REPLACE);
+                } else {
+                    $extendedFileUtility->setExistingFilesConflictMode(DuplicationBehavior::REPLACE);
+                }
                 $tempFile = $extendedFileUtility->func_upload($file['upload']['1']);
 
                 if ($tempFile[0] instanceof File) {
@@ -701,9 +712,24 @@ class ImportService
      */
     public function importFolder(): string
     {
-        /** @var Folder $folder */
-        $folder = BackendUserUtility::getBackendUser()->getDefaultUploadTemporaryFolder();
-        return $folder->getPublicUrl() . 'importexport';
+        if ($this->typo3MajorVersion >= 12) {
+            $defaultFolder = GeneralUtility::makeInstance(DefaultUploadFolderResolver::class)->resolve(BackendUserUtility::getBackendUser());
+        } else {
+            $defaultFolder = BackendUserUtility::getBackendUser()->getDefaultUploadTemporaryFolder();
+        }
+        if ($defaultFolder instanceof Folder) {
+            $tempImportFolderName = 'importexport';
+            $createFolder = !$defaultFolder->hasFolder($tempImportFolderName);
+            if ($createFolder === true) {
+                try {
+                    return $defaultFolder->createFolder($tempImportFolderName)->getPublicUrl();
+                } catch (Exception $folderAccessException) {
+                }
+            } else {
+                return $defaultFolder->getSubfolder($tempImportFolderName)->getPublicUrl();
+            }
+        }
+        return '';
     }
 
     /**
