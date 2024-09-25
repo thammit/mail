@@ -13,7 +13,8 @@ TYPO3 13 compatibility + Recipient group refactoring
 
 - Add more possibilities to manipulate recipient groups using query restrictions on tables or extbase model based recipient sources
 - Enhanced csv based recipient groups
-- Exclude recipient groups
+- Add feature to reduce the list of recipients of a mailing by choosing one or more other recipient groups
+- Improved bounce mails handing (needs IMAP account now!)
 
 New features
 ------------
@@ -46,9 +47,13 @@ New features
   - First line contains field names, which makes it possible to use every field defined in the extension settings "defaultRecipientFields" or "additionalRecipientFields" as marker
   - CSV file as source (file must be UTF-8 encoded!)
 
-- The last step of the Mail Wizard has been expanded to include a new “Exclude recipient groups” selection, which allows you to define one or more recipient groups
-  that are to be to be excluded from a mailing. This makes it possible, for example, to exclude a few people from a larger list in order to prevent them from receiving a specific
-  mailing. This list could be a plain list with just email addresses.
+- The bounce mail handling was enhanced to handle recipients from csv and plain lists as well. After deactivate bounced recipients inside the report module, the affected emails
+  will be changed inside there source (recipient group record or csv file) like so: invalid-email@domain.com -> !invalid!--invalid-email[at]domain.com.
+  In this way, any other data for this user is retained. However, it will no longer be used as a recipient due to the invalid email.
+
+- The last step of the Mail Wizard has been expanded to include a new “Exclude recipient groups” selection, which allows to define one or more recipient groups that are to be
+  excluded from a mailing. This makes it possible, for example, to exclude a few people from a larger list in order to prevent them from receiving a specific mailing.
+  This list could be a plain list with just email addresses.
 
 Breaking changes
 ----------------
@@ -61,7 +66,7 @@ Breaking changes
   - ManipulateRecipientEvent
   - DeactivateRecipientEvent
 
-  Please adjust your event listeners to use e.g. `$recipientsSourceConfiguration->table` instead of `$recipientsSourceConfiguration->['table']`.
+  Please adjust your event listeners to use e.g. `$recipientsSourceConfiguration->table` instead of `$recipientsSourceConfiguration['table']`.
   There is also a `custom` property available to transfer custom yaml config into event listeners.
 
   .. code-block:: yaml
@@ -77,7 +82,7 @@ Breaking changes
   Attention: Before using the migration wizard please do a database compare, but do **not** rename or remove the field "csv" in the first step!
   After the new fields "csv_type", "csv_data", "csv_separator" and "csv_file" have been generated, goto admin tools > upgrade and click on upgrade wizard.
   Here start the wizard with the title: "EXT:mail: Migrate mail group type plain to plain or new group csv, depending on csv type.".
-  After this, you can safely delete the field "csv" from the mail database table.
+  After this, you can safely delete the field "csv" from the tx_mail_domain_model_group database table.
 
 - Mail records now have a status field, which can hold (currently) 5 different states:
 
@@ -88,6 +93,11 @@ Breaking changes
   - 4 = ABORTED
   - 5 = SENT
 
-  There is an update wizard to convert existing mail records. Please do not delete the mail database field "sent" or rename it to "zzz_deleted_sent" before running it once.
+  There is an update wizard to convert existing mail records. Please do not delete the mail database field "sent" or rename it to "zzz_deleted_sent" before running it once!
 
   As a side effect, the backend module of the queue now only shows scheduled mails that have not yet been sent.
+
+- For a better bounce mail handling MAIL now uses ddeboer/imap instead of tedivm/fetch. Since ddeboer/imap only can handle IMAP accounts, the possibility to use a POP3
+  account for collecting bounce mails is dropped. As the mail server type parameter in the bounce mail command is therefore obsolete, it is also deleted. The parameter "count",
+  to set the number of bounce mail to be processed per run, was dropped as well, since it should not be a critical thing, to handle all found bounce mail in one run.
+  Due to this changes, all scheduler task using this command may be corrupt after updating to MAIL 3.0. In dought just recreate them.
