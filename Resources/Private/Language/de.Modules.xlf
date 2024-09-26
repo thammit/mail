@@ -167,9 +167,9 @@
         <source>Please select a mail folder or page in the page tree.</source>
         <target state="final">Bitte wählen Sie einen Mail-Ordner oder eine Mail-Seite im Seitenbaum aus.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.noValidFromEmail.message" resname="mail.wizard.notification.noValidFromEmail.message">
+      <trans-unit id="mail.wizard.notification.noValidFromEmail.message" resname="mail.wizard.notification.noValidFromEmail.message" approved="yes">
         <source>No valid sender email found!</source>
-        <target state="needs-translation">No valid sender email found!</target>
+        <target state="final">Keine gültige Absender-E-Mail gefunden!</target>
       </trans-unit>
       <trans-unit id="mail.wizard.notification.fetchSuccessfully.message" resname="mail.wizard.notification.fetchSuccessfully.message" approved="yes">
         <source>The page "%s" was fetched successfully.</source>
@@ -215,13 +215,13 @@
         <source>Recipient(s): %s</source>
         <target state="final">Empfänger: %s</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.noValidEmailAddress.title" resname="mail.wizard.notification.noValidEmailAddress.title">
+      <trans-unit id="mail.wizard.notification.noValidEmailAddress.title" resname="mail.wizard.notification.noValidEmailAddress.title" approved="yes">
         <source>No valid email address(s) found</source>
-        <target state="needs-translation">No valid email address(s) found</target>
+        <target state="final">Keine gültige E-Mail-Adresse(n) gefunden</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.noValidEmailAddress.message" resname="mail.wizard.notification.noValidEmailAddress.message">
+      <trans-unit id="mail.wizard.notification.noValidEmailAddress.message" resname="mail.wizard.notification.noValidEmailAddress.message" approved="yes">
         <source>Recipient(s): %s</source>
-        <target state="needs-translation">Recipient(s): %s</target>
+        <target state="final">Empfänger: %s</target>
       </trans-unit>
       <trans-unit id="mail.wizard.notification.finished.title" resname="mail.wizard.notification.finished.title" approved="yes">
         <source>Mail scheduled for distribution</source>
@@ -235,9 +235,9 @@
         <source>There are no recipients in the selected group(s).</source>
         <target state="final">Es gibt keine Empfänger in der/den ausgewählten Gruppen.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.noRecipientsDueToExcludes.message" resname="mail.wizard.notification.noRecipientsDueToExcludes.message">
+      <trans-unit id="mail.wizard.notification.noRecipientsDueToExcludes.message" resname="mail.wizard.notification.noRecipientsDueToExcludes.message" approved="yes">
         <source>There are no recipients in the selected combination of recipient group(s)/exclude group(s).</source>
-        <target state="needs-translation">There are no recipients in the selected combination of recipient group(s)/exclude group(s).</target>
+        <target state="final">Es gibt keine Empfänger in der ausgewählten Kombination von Empfängergruppe(n)/ausgeschlossen Gruppe(n).</target>
       </trans-unit>
       <trans-unit id="mail.wizard.notification.finished.message" resname="mail.wizard.notification.finished.message" approved="yes">
         <source>The mail "%s" was successfully scheduled for distribution at %s.</source>
@@ -251,13 +251,13 @@
         <source>The mail "%s" was successfully deleted.</source>
         <target state="final">Die Mail "%s" wurde erfolgreich gelöscht.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.paused.message" resname="mail.wizard.notification.paused.message">
+      <trans-unit id="mail.wizard.notification.paused.message" resname="mail.wizard.notification.paused.message" approved="yes">
         <source>The mail "%s" was successfully paused.</source>
-        <target state="needs-translation">The mail "%s" was successfully paused.</target>
+        <target state="final">Der Versand der Mail "%s" wurde erfolgreich pausiert.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.notification.continued.message" resname="mail.wizard.notification.continued.message">
+      <trans-unit id="mail.wizard.notification.continued.message" resname="mail.wizard.notification.continued.message" approved="yes">
         <source>The mail "%s" was successfully continued.</source>
-        <target state="needs-translation">The mail "%s" was successfully continued.</target>
+        <target state="final">Der Versand der Mail "%s" wurde erfolgreich fortgesetzt.</target>
       </trans-unit>
       <trans-unit id="mail.wizard.title" resname="mail.wizard.title" approved="yes">
         <source>Mail Wizard</source>
@@ -399,13 +399,13 @@
         <source>Recipient groups</source>
         <target state="final">Empfängergruppen</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.scheduleSending.excludeRecipientGroups" resname="mail.wizard.scheduleSending.excludeRecipientGroups">
+      <trans-unit id="mail.wizard.scheduleSending.excludeRecipientGroups" resname="mail.wizard.scheduleSending.excludeRecipientGroups" approved="yes">
         <source>Exclude recipient groups</source>
-        <target state="needs-translation">Exclude recipient groups</target>
+        <target state="final">Empfängergruppen ausschließen</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.scheduleSending.excludeRecipientGroups.description" resname="mail.wizard.scheduleSending.excludeRecipientGroups.description">
+      <trans-unit id="mail.wizard.scheduleSending.excludeRecipientGroups.description" resname="mail.wizard.scheduleSending.excludeRecipientGroups.description" approved="yes">
         <source>Do not send mail to email addresses found in one of the following recipient groups</source>
-        <target state="needs-translation">Do not send mail to email addresses found in one of the following recipient groups</target>
+        <target state="final">Sende keine Mails an E-Mail-Adressen, die in einer der folgenden Empfängergruppen enthalten sind</target>
       </trans-unit>
       <trans-unit id="mail.wizard.scheduleSending.info.mailGroup.title" resname="mail.wizard.scheduleSending.info.mailGroup.title" approved="yes">
         <source>Select recipients and time of sending</source>
@@ -425,9 +425,9 @@
         <source>Distribution time (hh:mm dd-mm-yyyy)</source>
         <target state="final">Versandbeginn (hh:mm dd-mm-yyyy)</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.scheduleSending.distributionStart" resname="mail.wizard.scheduleSending.distributionStart">
+      <trans-unit id="mail.wizard.scheduleSending.distributionStart" resname="mail.wizard.scheduleSending.distributionStart" approved="yes">
         <source>Distribution start (hh:mm dd-mm-yyyy)</source>
-        <target state="needs-translation">Distribution start (hh:mm dd-mm-yyyy)</target>
+        <target state="final">Versandbeginn (hh:mm dd-mm-yyyy)</target>
       </trans-unit>
       <trans-unit id="mail.wizard.notification.draftSaved.title" resname="mail.wizard.notification.draftSaved.title" approved="yes">
         <source>Mail saved as draft</source>
@@ -1091,13 +1091,13 @@ Sie können die Mails, die an jeden Empfänger gesendet werden, personalisieren,
         <source>Mail Queue</source>
         <target state="final">Mail Warteschlange</target>
       </trans-unit>
-      <trans-unit id="queue.paused" resname="queue.paused">
+      <trans-unit id="queue.paused" resname="queue.paused" approved="yes">
         <source>paused</source>
-        <target state="needs-translation">paused</target>
+        <target state="final">pausiert</target>
       </trans-unit>
-      <trans-unit id="queue.empty" resname="queue.empty">
+      <trans-unit id="queue.empty" resname="queue.empty" approved="yes">
         <source>The mail queue is empty</source>
-        <target state="needs-translation">The mail queue is empty</target>
+        <target state="final">Die E-Mail-Warteschlange ist leer</target>
       </trans-unit>
       <trans-unit id="configuration.header" resname="configuration.header" approved="yes">
         <source>Mail Settings</source>
@@ -1260,13 +1260,13 @@ Wenn die Option NICHT gesetzt ist, werden Bilder in den HTML-Inhalt über einen 
         <source>Enter the return path email address here.</source>
         <target state="final">Geben Sie hier die E-Mail-Adresse ein, an die unzustellbare E-Mails zurückgesendet werden sollen.</target>
       </trans-unit>
-      <trans-unit id="configuration.returnPath.details" xml:space="preserve">
+      <trans-unit id="configuration.returnPath.details" xml:space="preserve" approved="yes">
 			<source><![CDATA[This is the address to which non-deliverable mails will be returned to.
 If you put in the marker ###XID### it'll be substituted with the unique id of the mail recipient.
 Note that if PHP is executing in safe mode, the mail module may not be able to set the return path to a value different than the value defined at the server level.]]></source>
-		    <target state="needs-translation"><![CDATA[This is the address to which non-deliverable mails will be returned to.
-If you put in the marker ###XID### it'll be substituted with the unique id of the mail recipient.
-Note that if PHP is executing in safe mode, the mail module may not be able to set the return path to a value different than the value defined at the server level.]]></target></trans-unit>
+		    <target state="final"><![CDATA[An diese Adresse werden nicht zustellbare Mails zurückgeschickt.
+Wenn Sie den Marker ###XID### einfügen, wird dieser durch eine eindeutige ID des Mail-Empfängers ersetzt.
+Hinweis: Wenn PHP im sicheren Modus ausgeführt wird, ist MAIL möglicherweise nicht in der Lage, den Rückgabepfad auf einen anderen Wert zu setzen, als auf der Serverebene definiert.]]></target></trans-unit>
       <trans-unit id="configuration.sendOptions.description" resname="configuration.sendOptions.description" approved="yes">
         <source>Select the format of mail content.</source>
         <target state="final">Wähle das Format des E-Mail-Inhalts aus.</target>
@@ -1275,9 +1275,9 @@ Note that if PHP is executing in safe mode, the mail module may not be able to s
         <source>If in doubt, set it to 'Plain text and HTML'. The messages will then be sent with both formats included, and the recipients are normally able to select their preferred format.</source>
         <target state="final">Im Zweifelsfall sollten Sie die Einstellung 'Reiner Text und HTML' setzen. Die Nachrichten werden dann in beiden Formaten verschickt, und die Empfänger können normalerweise ihr bevorzugtes Format auswählen.</target>
       </trans-unit>
-      <trans-unit id="configuration.type.description" resname="configuration.type.description">
+      <trans-unit id="configuration.type.description" resname="configuration.type.description" approved="yes">
         <source>Type of source of the mail</source>
-        <target state="needs-translation">Type of source of the mail</target>
+        <target state="final">Quelltyp der Mail</target>
       </trans-unit>
       <trans-unit id="configuration.type.details" resname="configuration.type.details" approved="yes">
         <source>The mail may be compiled from a page extracted from the page tree of the TYPO3 site: 'TYPO3 Page', or from a page from another site: 'External URL'.</source>
@@ -1377,9 +1377,9 @@ Note that if PHP is executing in safe mode, the mail module may not be able to s
         <source>Click tracking</source>
         <target state="final">Klickverfolgung</target>
       </trans-unit>
-      <trans-unit id="configuration.linksAndTracking.clickTracking.jumpurlRequired" resname="configuration.linksAndTracking.clickTracking.jumpurlRequired">
+      <trans-unit id="configuration.linksAndTracking.clickTracking.jumpurlRequired" resname="configuration.linksAndTracking.clickTracking.jumpurlRequired" approved="yes">
         <source>This feature requires the installation of EXT:jumpurl</source>
-        <target state="needs-translation">This feature requires the installation of EXT:jumpurl</target>
+        <target state="final">Diese Funktion erfordert die Installation von EXT:jumpurl</target>
       </trans-unit>
       <trans-unit id="configuration.linksAndTracking.clickTracking.description" resname="configuration.linksAndTracking.clickTracking.description" approved="yes">
         <source>Check this option to enable tracking of clicks.</source>
@@ -1451,9 +1451,9 @@ Note that if PHP is executing in safe mode, the mail module may not be able to s
         <target state="final"><![CDATA[Die Benutzergruppe mit der angegebenen UID wird zum Abrufen des E-Mail-Inhalts verwendet.
                     Wenn Sie keine Benutzergruppen-UID angeben und die Seite Einschränkungen für Frontend-Benutzer aufweist, tritt ein Fehler auf und es wird kein E-Mail-Inhalt abgerufen.]]></target>
       </trans-unit>
-      <trans-unit id="configuration.testMailGroupUids" resname="configuration.testMailGroupUids">
+      <trans-unit id="configuration.testMailGroupUids" resname="configuration.testMailGroupUids" approved="yes">
         <source>Comma separated list of test recipients (recipient group uids)</source>
-        <target state="needs-translation">Comma separated list of test recipients (recipient group uids)</target>
+        <target state="final">Komma separierte Liste Testempfängern (Empfängergruppen-Uids)</target>
       </trans-unit>
       <trans-unit id="configuration.testMailGroupUids.description" resname="configuration.testMailGroupUids.description" approved="yes">
         <source>Alternatively to send test-mails to individuals, you can send it to this groups.</source>
