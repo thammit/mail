@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\Command;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Service\MailerService;
 use Symfony\Component\Console\Command\Command;
@@ -14,7 +13,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class MassMailingCommand extends Command
@@ -42,32 +44,22 @@ class MassMailingCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title($this->getDescription());
 
-        /*
-        $lockfile = Environment::getPublicPath() . '/typo3temp/tx_mail_cron.lock';
-
-        // Check if cronjob is already running:
-        if (@file_exists($lockfile)) {
-            // If the lock is not older than 1 day, skip:
-            if (filemtime($lockfile) > (time() - (60 * 60 * 24))) {
-                $io->warning('TYPO3 Mail Cron: Aborting, another process is already running!');
-                return Command::FAILURE;
-            } else {
-                $io->writeln('TYPO3 Mail Cron: A .lock file was found but it is older than 1 day! Processing mails ...');
-            }
-        }
-
-        touch($lockfile);
-        // Fix file permissions
-        GeneralUtility::fixPermissions($lockfile);
-        */
-
-        /**
-         * The direct_mail engine
-         * @var $mailerService MailerService
-         */
+        /** @var MailerService $mailerService */
         $mailerService = GeneralUtility::makeInstance(MailerService::class);
         $mailerService->setSiteIdentifier($input->getOption('site-identifier'));
         $mailerService->start((int)$input->getOption('send-per-cycle'));
+
+        if (!$GLOBALS['TYPO3_REQUEST'] ?? false) {
+            // If this command is called in cli context there is no request object which is needed by extbase
+            // As a workaround we create a request object here
+            $io->note('No request object found. Create a fake request object to make extbase happy ...');
+            $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByIdentifier($input->getOption('site-identifier'));
+            $request = (new ServerRequest())
+                ->withAttribute('applicationType', SystemEnvironmentBuilder::REQUESTTYPE_BE)
+                ->withAttribute('site', $site);
+            $GLOBALS['TYPO3_REQUEST'] = $request;
+        }
+
         try {
             $mailerService->handleQueue();
         } catch (\Doctrine\DBAL\Exception $e) {

@@ -125,7 +125,7 @@ class AnalyzeBounceMailCommand extends Command
             $connection->expunge();
 
             return Command::SUCCESS;
-        } catch (\Exception $e) {
+        } catch (\Exception | Exception $e) {
             $io->error(LanguageUtility::getLL('scheduler.bounceMail.dataVerification') . $e->getMessage());
         }
 
