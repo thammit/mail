@@ -43,7 +43,8 @@
 
 .bg-mail-theme {
     --bs-bg-opacity: 1;
-    --badge-default-color: #fff;
+    --badge-default-color: var(--mail-color);
+    --typo3-badge-color: var(--mail-color);
     background-color: rgba(var(--mail-primary-rgb),var(--bs-bg-opacity)) !important;
 }
 
