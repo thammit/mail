@@ -49,7 +49,7 @@ class MassMailingCommand extends Command
         $mailerService->setSiteIdentifier($input->getOption('site-identifier'));
         $mailerService->start((int)$input->getOption('send-per-cycle'));
 
-        if (!$GLOBALS['TYPO3_REQUEST'] ?? false) {
+        if (!($GLOBALS['TYPO3_REQUEST'] ?? false)) {
             // If this command is called in cli context there is no request object which is needed by extbase
             // As a workaround we create a request object here
             $io->note('No request object found. Create a fake request object to make extbase happy ...');
