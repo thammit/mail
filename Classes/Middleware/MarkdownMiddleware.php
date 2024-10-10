@@ -39,6 +39,7 @@ class MarkdownMiddleware implements MiddlewareInterface
         $markDownContent = preg_replace("/( \n)/","\n", $markDownContent);
         $markDownContent = preg_replace("/(\n){2,}/","\n\n", $markDownContent);
         $markDownContent = preg_replace("/(\\\_)/","_", $markDownContent);
+        $markDownContent = preg_replace("/(\\\###)/","###", $markDownContent);
         $markDownResponse->getBody()->write($markDownContent);
         return $markDownResponse;
     }

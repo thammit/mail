@@ -6,6 +6,7 @@ namespace MEDIAESSENZ\Mail\Updates;
 use Doctrine\DBAL\Exception;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Type\Enumeration\MailStatus;
+use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -127,18 +128,18 @@ class DirectMailMigration implements UpgradeWizardInterface
             foreach ($sysDmailGroupRecordsToMigrate as $record) {
                 $alreadyMigrated = $connectionGroup->count('*', 'tx_mail_domain_model_group', ['uid' => $record['uid']]);
                 if ($alreadyMigrated === 0) {
+                    $isCsv = (int)$record['type'] === RecipientGroupType::PLAIN && (int)$record['csv'] === 1;
                     $connectionGroup->insert('tx_mail_domain_model_group',
                         [
                             'uid' => $record['uid'],
                             'pid' => $record['pid'],
                             'tstamp' => $record['tstamp'],
                             'deleted' => $record['deleted'],
-                            'type' => $record['type'],
+                            'type' => $isCsv ? RecipientGroupType::CSV : $record['type'],
                             'title' => $record['title'],
                             'description' => $record['description'],
                             'static_list' => $record['static_list'],
-                            'list' => $record['list'],
-                            'csv' => $record['csv'],
+                            'csv_data' => $record['list'],
                             'pages' => $record['pages'],
                             'recipient_sources' => $whichtablesToRecipientSources[$record['whichtables']],
                             'recursive' => $record['recursive'],
