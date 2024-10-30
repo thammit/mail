@@ -31,7 +31,7 @@ class ManipulateAddressRecipient
                 $addressRepository = GeneralUtility::makeInstance(AddressRepository::class);
                 $address = $addressRepository->findRecordByUid((int)$recipientData['uid'])[0];
                 if (($address['first_name'] ?? false) || ($address['middle_name'] ?? false) || ($address['last_name'] ?? false)) {
-                    $recipientData['name'] = str_replace('  ', ' ', trim($address['first_name'] . ' ' . trim($address['middle_name']) . ' ' . $address['last_name']));
+                    $recipientData['name'] = str_replace('  ', ' ', trim(($address['first_name'] ?? '') . ' ' . trim($address['middle_name'] ?? '') . ' ' . ($address['last_name'] ?? '')));
                     $event->setRecipientData($recipientData);
                 }
             }

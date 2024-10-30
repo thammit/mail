@@ -99,15 +99,6 @@
 								</label>
 							</div>
 						</f:case>
-						<f:case value="12">
-							<div class="input-group">
-								<input id="mail-distribution-time" value="{date}" data-date-type="datetime" data-date-mindate="{minDateISO}" autocomplete="off" class="form-control"/>
-								<f:form.hidden name="distributionTime" value="{dateISO}"/>
-								<button class="btn btn-default" type="button" data-global-event="click" data-action-focus="#mail-distribution-time">
-									<core:icon identifier="actions-edit-pick-date"/>
-								</button>
-							</div>
-						</f:case>
 						<f:defaultCase>
 							<div class="input-group">
 								<input id="mail-distribution-time" name="distributionTime" value="{dateISO}" data-date-mindate="{minDateISO}" data-date-type="datetime" autocomplete="off" class="form-control"/>

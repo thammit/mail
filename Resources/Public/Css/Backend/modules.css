@@ -191,6 +191,11 @@
     border-bottom: 0;
 }
 
+.mail-queue-table {
+    display: block;
+    overflow-x: auto;
+}
+
 .progress-stacked {
     --bs-progress-height: 1.25rem;
     --bs-progress-font-size: 0.675rem;

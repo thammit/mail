@@ -8,6 +8,7 @@ use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Mail;
 use MEDIAESSENZ\Mail\Domain\Repository\MailRepository;
 use MEDIAESSENZ\Mail\Events\ManipulateRecipientEvent;
+use MEDIAESSENZ\Mail\Exception\RecipientNotFoundException;
 use MEDIAESSENZ\Mail\Service\RecipientService;
 use MEDIAESSENZ\Mail\Type\Enumeration\ResponseType;
 use MEDIAESSENZ\Mail\Utility\ConfigurationUtility;
@@ -77,10 +78,13 @@ class JumpurlMiddleware implements MiddlewareInterface
             $submittedRecipient = $this->request->getQueryParams()['rid'] ?? '';
             $submittedAuthCode = $this->request->getQueryParams()['aC'];
             $jumpUrl = $this->request->getQueryParams()['jumpurl'];
-            $frontendTypoScript = $request->getAttribute('frontend.typoscript');
             $this->mail = GeneralUtility::makeInstance(MailRepository::class)->findByUid($mailUid);
 
-            $this->initRecipientRecord($submittedRecipient);
+            try {
+                $this->initRecipientRecord($submittedRecipient);
+            } catch (RecipientNotFoundException $e) {
+
+            }
             $urlId = 0;
             if ((MathUtility::canBeInterpretedAsInteger($jumpUrl) || $jumpUrl === '-0') && $this->mail instanceof Mail) {
                 $this->responseType = $jumpUrl === '-0' || (int)$jumpUrl < 0 ? ResponseType::PLAIN : ResponseType::HTML;
@@ -96,7 +100,6 @@ class JumpurlMiddleware implements MiddlewareInterface
                 if (empty($jumpUrlTargetUrl)) {
                     die('Error: No further link. Please report error to the mail sender.');
                 }
-
             } else {
                 // jumpUrl is not an integer -- then this is a URL, that means that the "mail ping"
                 // functionality was used to count the number of "opened mails" received (url, mail ping)
@@ -107,7 +110,6 @@ class JumpurlMiddleware implements MiddlewareInterface
                     $this->responseType = ResponseType::PING;
                 }
             }
-
             if ($this->responseType !== ResponseType::ALL) {
                 $mailLogParams = [
                     'mail' => $mailUid,
@@ -116,7 +118,7 @@ class JumpurlMiddleware implements MiddlewareInterface
                     'response_type' => $this->responseType,
                     'url_id' => $urlId,
                     'recipient_source' => $this->recipientSourceIdentifier,
-                    'recipient_uid' => $this->recipientRecord['uid'] ?? hexdec($submittedAuthCode)
+                    'recipient_uid' => $this->recipientRecord['uid'] ?? hexdec($submittedAuthCode),
                 ];
                 if ($this->hasRecentLog($mailLogParams) === false) {
                     GeneralUtility::makeInstance(ConnectionPool::class)
@@ -231,6 +233,7 @@ class JumpurlMiddleware implements MiddlewareInterface
      * @throws Exception
      * @throws InvalidQueryException
      * @throws \Doctrine\DBAL\Exception
+     * @throws RecipientNotFoundException
      */
     protected function initRecipientRecord(string $combinedRecipient): void
     {
@@ -250,11 +253,18 @@ class JumpurlMiddleware implements MiddlewareInterface
 
             switch (true) {
                 case $recipientSourceConfiguration->isTableSource():
-                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid], $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table);
+                    $recipientData = $recipientService->getRecipientsDataByUidListAndTable([$recipientUid],
+                        $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table);
+                    if (!$recipientData) {
+                        throw new RecipientNotFoundException();
+                    }
                     $this->recipientRecord = reset($recipientData);
                     break;
                 case $recipientSourceConfiguration->isModelSource():
                     $recipientData = $recipientService->getRecipientsDataByUidListAndModelName([$recipientUid], $recipientSourceConfiguration->model, []);
+                    if (!$recipientData) {
+                        throw new RecipientNotFoundException();
+                    }
                     $this->recipientRecord = reset($recipientData);
                     break;
                 case $recipientSourceConfiguration->isCsvOrPlain():
@@ -267,7 +277,8 @@ class JumpurlMiddleware implements MiddlewareInterface
 
             // PSR-14 event dispatcher to manipulate recipient data the same way done in mailerService::sendSingleMailAndAddLogEntry method
             $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-            $this->recipientRecord = $eventDispatcher->dispatch(new ManipulateRecipientEvent($this->recipientRecord, $recipientSourceConfiguration))->getRecipientData();
+            $this->recipientRecord = $eventDispatcher->dispatch(new ManipulateRecipientEvent($this->recipientRecord,
+                $recipientSourceConfiguration))->getRecipientData();
         }
     }
 

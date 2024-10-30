@@ -792,6 +792,7 @@ class MailController extends AbstractController
                 // no click tracking for internal test mails or if jumpurl is not loaded
                 $testMail = MailFactory::forStorageFolder($this->id)->fromInternalPage($mail->getPage(),
                     $mail->getSysLanguageUid(), true);
+                $testMail->setSubject($mail->getSubject());
             }
             $this->mailerService->start();
             $this->mailerService->prepare($testMail ?? $mail);

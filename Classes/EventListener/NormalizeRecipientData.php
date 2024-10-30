@@ -18,7 +18,7 @@ class NormalizeRecipientData
             $recipientData['firstname'] = $recipientData['name'];
         }
 
-        if (!trim($recipientData['firstname'])) {
+        if (!trim($recipientData['firstname'] ?? '')) {
             $recipientData['firstname'] = $recipientData['email'];
         }
 

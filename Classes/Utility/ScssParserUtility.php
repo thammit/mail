@@ -13,12 +13,14 @@ class ScssParserUtility
      */
     static public function deleteCacheFiles(): array
     {
-        $deletedFilePaths = [];
-
         $path = Environment::getPublicPath() . '/' . trim(Constants::SCSS_PARSER_TEMP_DIR, '/');
 
-        $files = scandir($path);
+        if (!is_dir($path)) {
+            return [];
+        }
 
+        $files = scandir($path);
+        $deletedFilePaths = [];
         foreach ($files as $file) {
             if ($file === '.' || $file === '..') {
                 continue;
