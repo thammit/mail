@@ -1,0 +1,19 @@
+3.1.0 - 31th Oct. 2024
+=======================
+
+
+.. contents::
+        :local:
+        :depth: 3
+
+
+
+New features
+------------
+
+- Add ManipulateMailRecipientsEvent to manipulate the array of recipients of a mail after pressing the finish button in the mail wizard.
+
+  This event can be helpful to remove duplicate email recipients comming from multiple selected recipient lists.
+
+  Please note that recipients with the same email may have subscribed to different email categories. If this is the case and a mailing
+  also uses the category function, caution is advised!

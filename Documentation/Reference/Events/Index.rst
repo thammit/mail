@@ -31,6 +31,10 @@ ManipulateCsvImportDataEvent
 ============================
 Adds possibility to modify csv data during import them to tt_address records. This needs tt_address to be installed.
 
+ManipulateMailRecipientsEvent
+=============================
+Adds possibility to manipulate the recipients list of a mailing right after finishing the mail wizard.
+
 ManipulateMarkersEvent
 ======================
 
@@ -60,11 +64,11 @@ Adds possibility to restrict recipients from extbase model sources
 
 ScheduledSendBegunEvent
 =======================
-Adds possibility do something after scheduled sending begun
+Adds possibility to do something after scheduled sending begun
 
 ScheduledSendFinishedEvent
 ==========================
-Adds possibility do something after scheduled sending finished
+Adds possibility to do something after scheduled sending finished
 
 
 Need more?

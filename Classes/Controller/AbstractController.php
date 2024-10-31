@@ -21,7 +21,6 @@ use MEDIAESSENZ\Mail\Utility\TcaUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;

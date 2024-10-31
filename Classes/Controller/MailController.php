@@ -19,6 +19,7 @@ use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\SysCategoryMmRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\TtContentRepository;
 use MEDIAESSENZ\Mail\Events\AddTestRecipientsEvent;
+use MEDIAESSENZ\Mail\Events\ManipulateMailRecipientsEvent;
 use MEDIAESSENZ\Mail\Exception\HtmlContentFetchFailedException;
 use MEDIAESSENZ\Mail\Exception\PlainTextContentFetchFailedException;
 use MEDIAESSENZ\Mail\Property\TypeConverter\DateTimeImmutableConverter;
@@ -948,9 +949,11 @@ class MailController extends AbstractController
                 return $this->redirect('scheduleSending', null, null, ['mail' => $mail->getUid()]);
             }
             $recipients = $filteredRecipients;
-        } else {
-            $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($recipients);
         }
+
+        // PSR-14 Event to manipulate mail recipients
+        $recipients = $this->eventDispatcher->dispatch(new ManipulateMailRecipientsEvent($mail, $recipients))->getRecipients();
+        $numberOfRecipients = RecipientUtility::calculateTotalRecipientsOfUidLists($recipients);
 
         if ($numberOfRecipients === 0) {
             $mail->setRecipients([], true);
