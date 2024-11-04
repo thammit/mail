@@ -9,11 +9,7 @@
 
 <f:section name="Content">
 	<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-	<h1>
-		<f:translate key="{lll}mail.wizard.title"/>
-		:
-		<f:translate key="{lll}mail.wizard.settings"/>
-	</h1>
+	<h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.settings"/></h1>
 	<f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation}"/>
 	<div class="mail-wizard-settings">
 		<div class="row justify-content-start">

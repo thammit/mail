@@ -11,7 +11,7 @@
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.testMail"/></h1>
     <f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation}"/>
-    <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/> {title}</h2>
+    <h2><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="medium" alternativeMarkupIdentifier="inline"/> {title}</h2>
     <f:render partial="Backend/HelpModal" arguments="{titleLanguageKey: '{lll}mail.wizard.testMail.info.title', bodyLanguageKey: '{lll}mail.wizard.testMail.info.message'}"/>
     <div class="mb-4">
         <h4><f:translate key="{lll}mail.wizard.testMail.individual"/></h4>
@@ -66,10 +66,10 @@
                                     <f:variable name="icon">
                                         <f:if condition="{iconIdenfiier}">
                                             <f:then>
-                                                <core:icon identifier="{iconIdenfiier}" />
+                                                <core:icon identifier="{iconIdenfiier}" alternativeMarkupIdentifier="inline" />
                                             </f:then>
                                             <f:else if="{recipientSource.recipients.0} && {table}">
-                                                <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}"/>
+                                                <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}" alternativeMarkupIdentifier="inline"/>
                                             </f:else>
                                         </f:if>
                                     </f:variable>
@@ -81,7 +81,7 @@
                                                 </f:if>
                                             </td>
                                             <td>
-                                                {recipient.name}, {recipient.email}
+                                                <f:if condition="{recipient.name}">{recipient.name}, </f:if>{recipient.email}
                                                 <f:variable name="recipients" value="{recipient.email};{recipients}"/>
                                             </td>
                                         </tr>

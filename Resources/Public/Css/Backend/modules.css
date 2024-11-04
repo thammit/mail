@@ -64,9 +64,13 @@
     -ms-transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);
     -webkit-transform: translate(-50%, -50%);
-    color: var(--mail-color);
+    color: #171717;
     font-size: 1rem;
     font-weight: 600;
+}
+
+.mail-wizard-navigation li.current .title {
+    color: var(--mail-color);
 }
 
 .mail-wizard-navigation li,
@@ -77,6 +81,8 @@
     -moz-outline: none;
     -webkit-outline: none;
 }
+
+
 
 .mail-wizard-navigation li {
     display: inline-block;

@@ -15,10 +15,10 @@
     <f:variable name="icon">
         <f:if condition="{iconIdenfiier}">
             <f:then>
-                <core:icon identifier="{iconIdenfiier}" />
+                <core:icon identifier="{iconIdenfiier}" alternativeMarkupIdentifier="inline" />
             </f:then>
             <f:else if="{recipientSource.recipients.0} && {table}">
-                <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}"/>
+                <core:iconForRecord row="{recipientSource.recipients.0}" table="{table}" alternativeMarkupIdentifier="inline"/>
             </f:else>
         </f:if>
     </f:variable>

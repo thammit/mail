@@ -9,16 +9,12 @@
 
 <f:section name="Content">
 	<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-	<h1>
-		<f:translate key="{lll}mail.wizard.title"/>
-		:
-		<f:translate key="{lll}mail.wizard.scheduleSending"/>
-	</h1>
+	<h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.scheduleSending"/></h1>
 	<f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation}"/>
 	<f:render partial="Backend/HelpModal"
 			  arguments="{titleLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.title', bodyLanguageKey: '{lll}mail.wizard.scheduleSending.info.mailGroup.message'}"/>
 	<h2>
-		<core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="default"/>
+		<core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="medium" alternativeMarkupIdentifier="inline"/>
 		{title}
 	</h2>
 	<f:form id="mail-wizard-schedule-sending-form" action="finish" object="{mail}" objectName="mail" method="post" enctype="multipart/form-data">

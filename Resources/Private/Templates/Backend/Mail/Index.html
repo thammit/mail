@@ -96,7 +96,7 @@
                 </f:if>
                 <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}">
                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="{htmlPreviewLink.title}">
-                        <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/>
+                        <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small" alternativeMarkupIdentifier="inline"/>
                     </span>
                 </a>
             </f:for>
@@ -113,7 +113,7 @@
                 </f:if>
                 <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}">
                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="{textPreviewLink.title}">
-                        <core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/>
+                        <core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small" alternativeMarkupIdentifier="inline"/>
                     </span>
                 </a>
             </f:for>
@@ -142,7 +142,7 @@
             <f:for each="{data.data}" as="data">
                 <tr>
                     <td class="col-icon nowrap" style="width: 1%">
-                        <core:iconForRecord row="{uid: data.uid, type:0}" table="tx_mail_domain_model_mail"/>
+                        <core:iconForRecord row="{uid: data.uid, type:0}" table="tx_mail_domain_model_mail" alternativeMarkupIdentifier="inline" size="medium"/>
                     </td>
                     <td class="col-title col-responsive nowrap">
                         {data.subject}
@@ -151,13 +151,13 @@
                     <td class="nowrap">{data.lastModified -> f:format.date(format:'H:i d-m-Y')}</td>
                     <td class="nowrap">{data.renderedSize -> f:format.bytes()}</td>
                     <td class="nowrap"><f:if condition="{data.attachment}">
-                        <core:icon identifier="mail-attachment" size="small"/>
+                        <core:icon identifier="mail-attachment" size="small" alternativeMarkupIdentifier="inline" />
                     </f:if></td>
                     <td class="nowrap">
                         <f:if condition="{data.htmlContent}">
                             <button class="btn btn-default" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-html-body-{data.uid}">
                                 <span data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key:'{lll}mail.wizard.htmlMailBody.title')}">
-                                    <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small"/>
+                                    <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small" alternativeMarkupIdentifier="inline"/>
                                 </span>
                             </button>
                             <div class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-wizard-open-mail-preview-html-body-{data.uid}" tabindex="-1" aria-labelledby="mail-wizard-open-mail-preview-html-body-{data.uid}-label" aria-hidden="true">
@@ -180,7 +180,7 @@
                         <f:if condition="{data.plainContent}">
                             <button class="btn btn-default" data-bs-toggle="modal" data-bs-target="#mail-wizard-open-mail-preview-plain-body-{data.uid}">
                                 <span data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key:'{lll}mail.wizard.plainMailBody.title')}">
-                                    <core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small"/>
+                                    <core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small" alternativeMarkupIdentifier="inline"/>
                                 </span>
                             </button>
                             <div class="modal fade modal-type-default modal-severity-notice modal-style-default modal-size-medium" id="mail-wizard-open-mail-preview-plain-body-{data.uid}" tabindex="-1" aria-labelledby="mail-wizard-open-mail-preview-plain-body-{data.uid}-label" aria-hidden="true">
@@ -240,7 +240,7 @@
                         <tr class="db_list_normal">
                             <td class="col-icon nowrap" style="width: 1%">
                                 <span data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="tooltip" data-bs-placement="right" title="{data.toolTip}">
-                                    <core:icon identifier="app-pagetree-mail" overlay="{f:if(condition: data.fe_group, then: 'overlay-frontenduser')}" size="small"/>
+                                    <core:icon identifier="app-pagetree-mail" overlay="{f:if(condition: data.fe_group, then: 'overlay-frontenduser')}" size="medium" alternativeMarkupIdentifier="inline"/>
                                 </span>
                             </td>
                             <td class="col-title col-responsive nowrap">{data.title}</td>

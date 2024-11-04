@@ -98,7 +98,7 @@ CREATE TABLE tx_mail_domain_model_log
 	pid              int(11) unsigned     DEFAULT '0' NOT NULL,
 	mail             int(5) unsigned      DEFAULT '0' NOT NULL,
 	recipient_uid    int(10) unsigned     DEFAULT '0' NOT NULL,
-	recipient_source varchar(255)         DEFAULT ''  NOT NULL,
+	recipient_source varchar(100)         DEFAULT ''  NOT NULL,
 	email            varchar(255)         DEFAULT ''  NOT NULL,
 	tstamp           int(11) unsigned     DEFAULT '0' NOT NULL,
 	url              blob                             NULL,

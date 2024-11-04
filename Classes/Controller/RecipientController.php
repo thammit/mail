@@ -8,6 +8,7 @@ use MEDIAESSENZ\Mail\Constants;
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Service\ImportService;
+use MEDIAESSENZ\Mail\Template\Components\Buttons\LinkButtonWithInlineIcon;
 use MEDIAESSENZ\Mail\Type\Enumeration\CategoryFormat;
 use MEDIAESSENZ\Mail\Utility\BackendUserUtility;
 use MEDIAESSENZ\Mail\Utility\CsvUtility;
@@ -369,9 +370,12 @@ class RecipientController extends AbstractController
             ->setTitle(LanguageUtility::getLL('general.button.back'))
             ->setHref($this->uriBuilder->uriFor('index'));
         $buttonBar->addButton($addBackButton);
-        $addEditGroupButton = $buttonBar
-            ->makeLinkButton()
-            ->setIcon($this->iconFactory->getIcon('mail-group-edit', Icon::SIZE_SMALL))
+        if ($this->typo3MajorVersion < 13) {
+            $addEditGroupButton = $buttonBar->makeLinkButton();
+        } else {
+            $addEditGroupButton = $buttonBar->makeButton(LinkButtonWithInlineIcon::class);
+        }
+        $addEditGroupButton->setIcon($this->iconFactory->getIcon('mail-group-edit', Icon::SIZE_SMALL))
             ->setClasses('btn btn-default text-uppercase')
             ->setTitle(LanguageUtility::getLL('general.button.edit'))
             ->setHref((string)$this->backendUriBuilder->buildUriFromRoute('record_edit', [
