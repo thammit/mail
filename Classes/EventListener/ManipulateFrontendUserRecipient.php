@@ -9,24 +9,36 @@ use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class ManipulateFrontendUserRecipient
 {
+    public function __construct(private readonly RecipientService $recipientService)
+    {
+    }
     /**
      * @throws InvalidQueryException
      */
     public function __invoke(ManipulateRecipientEvent $event): void
     {
         if ($event->getRecipientSourceIdentifier() === 'fe_users') {
-            $recipientSourceConfiguration = $event->getRecipientSourceConfiguration();
             $recipientData = $event->getRecipientData();
-            if ($recipientSourceConfiguration->isModelSource() && ($recipientData['uid'] ?? false)) {
-                // add all csv export field/values to existing data, but do not override already existing field/values!
-                // this is important, because categories need to stay an array of uids
-                $enhancedRecipientData = GeneralUtility::makeInstance(RecipientService::class)->getRecipientsDataByUidListAndModelName([$recipientData['uid']], $recipientSourceConfiguration->model, []);
-                $recipientData += reset($enhancedRecipientData);
-                // fe_users use field 'telephone' for 'phone'
-                if ($recipientData['telephone'] ?? false) {
-                    $recipientData['phone'] = $recipientData['telephone'];
+            if (($recipientData['uid'] ?? false) && empty($recipientData['phone'] ?? '')) {
+                try {
+                    $recipientUid = (int)$recipientData['uid'];
+                    $additionalFields = ['telephone'];
+                    $recipientSourceConfiguration = $event->getRecipientSourceConfiguration();
+                    if ($recipientSourceConfiguration->isModelSource()) {
+                        $enhancedRecipientData = $this->recipientService->getRecipientsDataByUidListAndModelName([$recipientUid],
+                            $recipientSourceConfiguration->model, $additionalFields)[$recipientUid];
+                    } else {
+                        if ($recipientSourceConfiguration->isTableSource()) {
+                            $enhancedRecipientData = $this->recipientService->getRecipientsDataByUidListAndTable([$recipientUid],
+                                $recipientSourceConfiguration->table, $additionalFields)[$recipientUid];
+                        }
+                    }
+                    if ($enhancedRecipientData['telephone'] ?? false) {
+                        $recipientData['phone'] = trim($enhancedRecipientData['telephone']);
+                    }
+                    $event->setRecipientData($recipientData);
+                } catch (\Exception $e) {
                 }
-                $event->setRecipientData($recipientData);
             }
         }
     }

@@ -5,9 +5,11 @@ namespace MEDIAESSENZ\Mail\Service;
 
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Domain\Model\Category;
+use MEDIAESSENZ\Mail\Domain\Model\CategoryInterface;
 use MEDIAESSENZ\Mail\Domain\Model\Dto\RecipientSourceConfigurationDTO;
 use MEDIAESSENZ\Mail\Domain\Model\Group;
 use MEDIAESSENZ\Mail\Domain\Model\RecipientInterface;
+use MEDIAESSENZ\Mail\Domain\Repository\CategoryRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\FrontendUserGroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\GroupRepository;
 use MEDIAESSENZ\Mail\Domain\Repository\DebugQueryTrait;
@@ -281,8 +283,11 @@ class RecipientService
             return [];
         }
 
+        $enhancedDataKeys = array_keys($firstRecipient->getEnhancedData());
+        $additionalFields = array_diff($enhancedDataKeys, $fields);
+
         $getters = [];
-        foreach ($fields as $field) {
+        foreach ($additionalFields as $field) {
             $propertyName = ucfirst(str_contains($field, '_') ? str_replace(' ', '',
                 ucwords(str_replace('_', ' ', $field))) : $field);
             if (method_exists($firstRecipient, 'get' . $propertyName)) {
@@ -296,7 +301,33 @@ class RecipientService
 
         /** @var RecipientInterface $recipient */
         foreach ($recipients as $recipient) {
-            $data[$recipient->getUid()] = RecipientUtility::getFlatRecipientModelData($recipient, $getters, $categoryFormat);
+            $data[$recipient->getUid()] = $recipient->getEnhancedData();
+            if (in_array('categories', $enhancedDataKeys)) {
+                switch ($categoryFormat) {
+                    case CategoryFormat::OBJECTS:
+                        if ($recipient instanceof CategoryInterface) {
+                            $data[$recipient->getUid()]['categories'] = $recipient->getCategories();
+                        } else {
+                            $categoryUids = GeneralUtility::intExplode(',', $data[$recipient->getUid()]['categories'], true);
+                            $categoryRepository = GeneralUtility::makeInstance(CategoryRepository::class);
+                            $categories = new ObjectStorage();
+                            foreach ($categoryUids as $categoryUid) {
+                                $category = $categoryRepository->getByUid($categoryUid);
+                                if ($category instanceof Category) {
+                                    $categories->attach($category);
+                                }
+                            }
+                            $data[$recipient->getUid()]['categories'] = $categories;
+                        }
+                        break;
+                    case CategoryFormat::UIDS:
+                        $data[$recipient->getUid()]['categories'] = GeneralUtility::intExplode(',', $data[$recipient->getUid()]['categories'], true);
+                        break;
+                }
+            }
+            if ($getters) {
+                $data[$recipient->getUid()] += RecipientUtility::getFlatRecipientModelData($recipient, $getters, $categoryFormat);
+            }
         }
 
         return $data;
