@@ -1,0 +1,35 @@
+3.2.0 - 6th Nov. 2024
+=======================
+
+
+.. contents::
+        :local:
+        :depth: 3
+
+
+
+New features
+------------
+
+- The included NormalizeRecipientData Event Listener now normalizes the name of recipients.
+  If the name field is empty, it now searches for the fields first_name, middle_name and last_name and uses them (combined) as replacements in case they are not empty as well.
+
+- Add an example of how to prevent duplicate sendings using the new ManipulateMailRecipientsEvent introduced with version 3.1.0
+
+  - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Classes/EventListener/FilterDuplicateRecipients.php
+  - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Configuration/Services.yaml
+
+..  attention::
+  This example does not take into account that a duplicate recipient may have other categories.
+
+- Enhance the ManipulateFrontendUserRecipients to also normalize the phone field (from telephone) if the source is table
+
+Bug Fixes
+---------
+
+- CSV sendings now do not stop after the first sending period anymore
+
+- Recipient data containing null or 0 are now also have this value in there corresponding markers
+
+- The getRecipientsDataByUidListAndModelName, responsible for getting the data of recipients from a model source, now make use of the getEnhancedData method
+

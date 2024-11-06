@@ -35,6 +35,14 @@ ManipulateMailRecipientsEvent
 =============================
 Adds possibility to manipulate the recipients list of a mailing right after finishing the mail wizard.
 
+..  tip::
+    Usage example (filtering out recipient duplicates):
+
+   - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Classes/EventListener/FilterDuplicateRecipients.php
+   - https://gitlab.com/mediaessenz/additional-mail-recipients/-/blob/main/Configuration/Services.yaml
+
+   Attention: This example does not take into account that a duplicate recipient may have other categories.
+
 ManipulateMarkersEvent
 ======================
 
