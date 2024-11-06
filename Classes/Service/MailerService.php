@@ -392,10 +392,11 @@ class MailerService implements LoggerAwareInterface
                     break;
                 case $recipientSourceConfiguration->isCsvOrPlain():
 //                    $categories = RecipientUtility::getListOfRecipientCategories($recipientSourceConfiguration->table, $recipientSourceConfiguration->groupUid);
+                    $numberOfRecipientsHandled = count($recipientsHandled[$recipientSourceIdentifier] ?? []);
                     foreach ($recipientIds as $recipientUid => $recipientData) {
                         // fake uid for csv
                         $enhancedRecipientData = array_merge($recipientData, [
-                            'uid' => $recipientUid + 1,
+                            'uid' => $numberOfRecipientsHandled + $recipientUid + 1,
 //                            'categories' => $categories
                         ]);
                         $this->sendSingleMailAndAddLogEntry($mail, $enhancedRecipientData, $recipientSourceIdentifier);
