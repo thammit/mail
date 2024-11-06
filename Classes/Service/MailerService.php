@@ -302,8 +302,14 @@ class MailerService implements LoggerAwareInterface
         }
 
         foreach ($rowFieldsArray as $substField) {
-            if ($recipient[$substField] ?? false) {
-                $markers['###USER_' . $substField . '###'] = $this->charsetConverter->conv((string)$recipient[$substField], $this->backendCharset, $this->charset);
+            if (array_key_exists($substField, $recipient)) {
+                if (MathUtility::canBeInterpretedAsInteger($recipient[$substField])) {
+                    $markers['###USER_' . $substField . '###'] = (int)$recipient[$substField];
+                } else if ($recipient[$substField] === null) {
+                    $markers['###USER_' . $substField . '###'] = null;
+                } else {
+                    $markers['###USER_' . $substField . '###'] = $this->charsetConverter->conv((string)$recipient[$substField], $this->backendCharset, $this->charset);
+                }
             }
         }
 
