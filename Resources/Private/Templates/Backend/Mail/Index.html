@@ -10,14 +10,14 @@
 <f:section name="Content">
     <f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
     <f:variable name="lll2" value="LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:"/>
-    <h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.selectSource"/></h1>
-    <f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation}"/>
+    <f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation, lll:lll}"/>
+    <h2 class="mt-0 mb-3"><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="{iconSize}" alternativeMarkupIdentifier="inline"/> <f:translate key="{lll}mail.wizard.selectSource"/></h2>
     <div class="panel-group" id="mail-wizard-source-select-panel">
         <f:if condition="{panel.draft.data}">
             <f:variable name="counter" value="{panel.draft.data -> f:count()}"/>
             <f:variable name="title"><f:translate key="{lll}mail.wizard.draftMails"/></f:variable>
             <f:render partial="Backend/Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:7, open:panel.draft.open, counter: counter}" contentAs="panelBody">
-                <f:render section="DraftMailsPanel" arguments="{lll:lll, data:panel.draft, hideCategoryStep:hideCategoryStep, mailSysFolderUid:mailSysFolderUid}" />
+                <f:render section="DraftMailsPanel" arguments="{lll:lll, data:panel.draft, hideCategoryStep:hideCategoryStep, mailSysFolderUid:mailSysFolderUid, iconSize:iconSize}" />
             </f:render>
         </f:if>
         <f:if condition="{panel.internal}">
@@ -25,7 +25,7 @@
             <f:variable name="title"><f:translate key="{lll}mail.wizard.internalPage"/></f:variable>
             <f:variable name="additionalHeading"><core:icon identifier="app-pagetree-folder-contains-mail" /> {pageInfo.title} [{pageInfo.uid}]</f:variable>
             <f:render partial="Backend/Panel" arguments="{lll:lll, parentId:'mail-wizard-source-select-panel', title: title, index:4, open:panel.internal.open, counter: counter, additionalHeading: additionalHeading}" contentAs="panelBody">
-                <f:render section="InternalPanel" arguments="{lll:lll, data: panel.internal, mailSysFolderUid:mailSysFolderUid}" />
+                <f:render section="InternalPanel" arguments="{lll:lll, data: panel.internal, mailSysFolderUid:mailSysFolderUid, iconSize:iconSize}" />
             </f:render>
         </f:if>
         <f:if condition="{panel.external}">
@@ -142,7 +142,7 @@
             <f:for each="{data.data}" as="data">
                 <tr>
                     <td class="col-icon nowrap" style="width: 1%">
-                        <core:iconForRecord row="{uid: data.uid, type:0}" table="tx_mail_domain_model_mail" alternativeMarkupIdentifier="inline" size="medium"/>
+                        <core:iconForRecord row="{uid: data.uid, type:0}" table="tx_mail_domain_model_mail" alternativeMarkupIdentifier="inline" size="{iconSize}"/>
                     </td>
                     <td class="col-title col-responsive nowrap">
                         {data.subject}
@@ -240,7 +240,7 @@
                         <tr class="db_list_normal">
                             <td class="col-icon nowrap" style="width: 1%">
                                 <span data-bs-trigger="hover focus" data-bs-container="body" data-bs-toggle="tooltip" data-bs-placement="right" title="{data.toolTip}">
-                                    <core:icon identifier="app-pagetree-mail" overlay="{f:if(condition: data.fe_group, then: 'overlay-frontenduser')}" size="medium" alternativeMarkupIdentifier="inline"/>
+                                    <core:icon identifier="app-pagetree-mail" overlay="{f:if(condition: data.fe_group, then: 'overlay-frontenduser')}" size="{iconSize}" alternativeMarkupIdentifier="inline"/>
                                 </span>
                             </td>
                             <td class="col-title col-responsive nowrap">{data.title}</td>

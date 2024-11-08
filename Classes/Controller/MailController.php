@@ -186,6 +186,7 @@ class MailController extends AbstractController
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
                 'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
             ],
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
 
         $this->addIndexDocHeaderButtons();
@@ -427,6 +428,7 @@ class MailController extends AbstractController
             'activeTabId' => $tabId,
             'mail' => $mail,
             'navigation' => $this->getNavigation(2, $this->hideCategoryStep($mail)),
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
 
         if ($mail->isInternal() || $mail->isExternal()) {
@@ -606,6 +608,7 @@ class MailController extends AbstractController
             'mail' => $mail,
             'configTreeStartingPoints' => $configTreeStartingPoints,
             'navigation' => $this->getNavigation(3, $this->hideCategoryStep($mail)),
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
 
         $this->pageRenderer->addInlineSetting('Mail', 'mailUid', $mail->getUid());
@@ -746,6 +749,7 @@ class MailController extends AbstractController
                 'email' => BackendUserUtility::getBackendUser()->user['email'] ?? '',
                 'uid' => BackendUserUtility::getBackendUser()->user['uid'] ?? '',
             ],
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
 
         $this->addDocHeaderHelpButton();
@@ -860,6 +864,7 @@ class MailController extends AbstractController
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),
             'typo3Version' => $this->typo3MajorVersion,
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
         $this->addDocHeaderHelpButton();
 

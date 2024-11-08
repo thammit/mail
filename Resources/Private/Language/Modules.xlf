@@ -196,7 +196,7 @@
                 <source>The mail "%s" was successfully continued.</source>
             </trans-unit>
             <trans-unit id="mail.wizard.title" resname="mail.wizard.title">
-                <source>Mail Wizard</source>
+                <source>MAIL Wizard</source>
             </trans-unit>
             <trans-unit id="mail.wizard.externalMailPlainTextUrl" resname="mail.wizard.externalMailPlainTextUrl">
                 <source>URL of plain text content</source>

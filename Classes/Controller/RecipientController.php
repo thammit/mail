@@ -79,7 +79,8 @@ class RecipientController extends AbstractController
         $assignments = [
             'pid' => $this->id,
             'data' => $data,
-            'ttAddressIsLoaded' => $this->ttAddressIsLoaded
+            'ttAddressIsLoaded' => $this->ttAddressIsLoaded,
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
 
         if ($this->typo3MajorVersion < 12) {

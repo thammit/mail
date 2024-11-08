@@ -38,6 +38,7 @@ class ReportController extends AbstractController
         $assignments = [
             'mails' => $this->mailRepository->findSentByPid($this->id),
             'hideDeleteReportButton' => $this->userTSConfiguration['hideDeleteReportButton'] ?? false,
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
 
         $this->addDocheaderButtons($this->request->getRequestTarget());
@@ -78,6 +79,7 @@ class ReportController extends AbstractController
             'performance' => $performance,
             'responses' => $this->reportService->getResponsesData(),
             'maxLabelLength' => (int)($this->pageTSConfiguration['maxLabelLength'] ?? 0),
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
         if ($performance['failedResponses']) {
             $assignments['returned'] = $this->reportService->getReturnedData();

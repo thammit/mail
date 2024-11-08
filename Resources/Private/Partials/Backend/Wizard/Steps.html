@@ -5,7 +5,8 @@
       xmlns:mail="http://typo3.org/ns/MEDIAESSENZ/Mail/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<div class="mail-wizard-navigation mb-4">
+<div class="mail-wizard-navigation d-flex align-items-center">
+    <h1 class="mb-0 lh-1 me-3"><f:translate key="{lll}mail.wizard.title"/></h1>
     <ul>
         <f:for each="{navigation.steps}" as="step" iteration="stepIterator">
             <li class="{f:if(condition: '{navigation.currentStep} == {step}', then: 'current', else: '')} {f:if(condition: '{stepIterator.isLast}', then:'last')}"><span class="title">{step}</span></li>

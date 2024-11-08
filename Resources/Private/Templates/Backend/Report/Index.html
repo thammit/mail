@@ -41,7 +41,7 @@
 			<f:for each="{mails}" as="mail">
 				<tr class="{f:if(condition:'!{mail.sent}',then:'table-info')}">
 					<td class="col-icon nowrap">
-						<f:link.action action="show" arguments="{mail: mail.uid}"><core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="medium" alternativeMarkupIdentifier="inline"/></f:link.action>
+						<f:link.action action="show" arguments="{mail: mail.uid}"><core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" size="{iconSize}" alternativeMarkupIdentifier="inline"/></f:link.action>
 					</td>
 					<td class="col-title col-responsive nowrap">
 						<f:link.action action="show" arguments="{mail: mail.uid}">{mail.subject}</f:link.action>

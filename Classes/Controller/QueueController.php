@@ -52,6 +52,7 @@ class QueueController extends AbstractController
             'hideManualSendingButton' => $this->userTSConfiguration['hideManualSendingButton'] ?? false,
             'hideDeleteRunningSendingButton' => $this->userTSConfiguration['hideDeleteRunningSendingButton'] ?? false,
             'hidePauseButton' => $this->userTSConfiguration['hidePauseButton'] ?? false,
+            'iconSize' => $this->typo3MajorVersion < 12 ? 'default' : 'medium',
         ];
 
         $this->configureOverViewDocHeader($this->request->getRequestTarget(), !($this->userTSConfiguration['hideManualSending'] ?? false) && !($this->userTSConfiguration['hideConfiguration'] ?? false));

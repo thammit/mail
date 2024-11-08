@@ -9,8 +9,8 @@
 
 <f:section name="Content">
 	<f:variable name="lll" value="LLL:EXT:mail/Resources/Private/Language/Modules.xlf:"/>
-	<h1><f:translate key="{lll}mail.wizard.title"/>: <f:translate key="{lll}mail.wizard.settings"/></h1>
-	<f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation}"/>
+	<f:render partial="Backend/Wizard/Steps" arguments="{navigation: navigation, lll:lll}"/>
+	<h2 class="mt-0 mb-3"><core:iconForRecord row="{uid: mailUid, type:0}" table="tx_mail_domain_model_mail" size="{iconSize}" alternativeMarkupIdentifier="inline"/> {mail.subject}: <f:translate key="{lll}mail.wizard.settings"/></h2>
 	<div class="mail-wizard-settings">
 		<div class="row justify-content-start">
 			<div class="col-12 col-md-10 col-lg-8 col-xl-6">

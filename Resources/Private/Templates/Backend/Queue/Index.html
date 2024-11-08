@@ -59,7 +59,7 @@
                 </f:if>
                 <tr class="{trClass}">
                     <td class="col-icon nowrap">
-                        <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" alternativeMarkupIdentifier="inline" size="medium"/>
+                        <core:iconForRecord row="{uid: mail.uid, type:0}" table="tx_mail_domain_model_mail" alternativeMarkupIdentifier="inline" size="{iconSize}"/>
                     </td>
                     <td class="col-title col-responsive nowrap">{mail.subject} <f:if condition="{mail.paused}">[<f:format.case><f:translate key="{lll}queue.paused"/></f:format.case>]
                     </f:if>
