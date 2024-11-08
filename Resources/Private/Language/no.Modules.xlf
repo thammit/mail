@@ -260,8 +260,8 @@
         <target state="needs-translation">The mail "%s" was successfully continued.</target>
       </trans-unit>
       <trans-unit id="mail.wizard.title" resname="mail.wizard.title">
-        <source>Mail Wizard</source>
-        <target state="needs-translation">Mail Wizard</target>
+        <source>MAIL Wizard</source>
+        <target state="needs-translation">MAIL Wizard</target>
       </trans-unit>
       <trans-unit id="mail.wizard.externalMailPlainTextUrl" resname="mail.wizard.externalMailPlainTextUrl">
         <source>URL of plain text content</source>
