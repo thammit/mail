@@ -17,6 +17,13 @@
     --module-docheader-bg: var(--mail-primary);
 }
 
+[data-module-name="MailMail_MailMail"] .module-docheader,
+[data-module-name="MailMail_MailRecipient"] .module-docheader,
+[data-module-name="MailMail_MailReport"] .module-docheader,
+[data-module-name="MailMail_MailQueue"] .module-docheader {
+    background-color: var(--mail-primary);
+}
+
 .btn.btn-mail-theme {
     --bs-btn-color: var(--mail-color);
     --bs-btn-bg: var(--mail-background-color);
@@ -55,7 +62,8 @@
     background-color: rgba(var(--mail-primary-rgb),var(--bs-bg-opacity)) !important;
 }
 
-.mail-wizard-navigation {
+[data-module-name="MailMail_MailMail"] .mail-wizard-navigation,
+[data-module-name="mail_mail"] .mail-wizard-navigation {
     position: fixed;
     top: 25px;
     transition: top 200ms ease-in-out;
@@ -63,10 +71,24 @@
     --bs-heading-color: var(--mail-color);
 }
 
-.module-docheader-folded + .module-body .mail-wizard-navigation {
-    position: fixed;
+
+[data-module-name="MailMail_MailMail"] .mail-wizard-navigation {
+    top: 16px;
+    color: var(--mail-color);
+}
+
+[data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
     top: 8px;
-    z-index: 300;
+}
+
+[data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1,
+[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1 {
+    transition: font-size 200ms ease-in-out;
+    font-size: 1.2rem;
+}
+
+[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
+    top: 4px;
 }
 
 .mail-wizard-navigation ul {
