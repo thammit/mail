@@ -8,7 +8,7 @@ return [
         'default_sortby' => 'tstamp DESC',
         'tstamp' => 'tstamp',
         'title' => 'Mail Log',
-        'delete' => '',
+        'delete' => 'deleted',
         'typeicon_column' => 'recipient_source',
         'typeicon_classes' => [
             'fe_users' => 'mail-log',
