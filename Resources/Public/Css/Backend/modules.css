@@ -64,31 +64,32 @@
 
 [data-module-name="MailMail_MailMail"] .mail-wizard-navigation,
 [data-module-name="mail_mail"] .mail-wizard-navigation {
+    min-height: var(--module-docheader-height);
     position: fixed;
-    top: 25px;
-    transition: top 200ms ease-in-out;
+    top: 0;
+    transition: min-height 300ms ease-in-out;
     z-index: 300;
     --bs-heading-color: var(--mail-color);
 }
 
 
 [data-module-name="MailMail_MailMail"] .mail-wizard-navigation {
-    top: 16px;
+    min-height: 65px;
     color: var(--mail-color);
 }
 
 [data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
-    top: 8px;
+    min-height: calc(var(--module-docheader-bar-height) + var(--module-docheader-padding-y) + 2px);
+}
+
+[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
+    min-height: 32px;
 }
 
 [data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1,
 [data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1 {
     transition: font-size 200ms ease-in-out;
     font-size: 1.2rem;
-}
-
-[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
-    top: 4px;
 }
 
 .mail-wizard-navigation ul {
