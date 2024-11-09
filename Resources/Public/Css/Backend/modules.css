@@ -17,9 +17,13 @@
     --module-docheader-bg: var(--mail-primary);
 }
 [data-module-name="mail_mail"] .module-docheader,
+[data-module-name="MailMail_MailMail"] .module-docheader,
 [data-module-name="mail_recipient"] .module-docheader,
+[data-module-name="MailMail_MailRecipient"] .module-docheader,
 [data-module-name="mail_report"] .module-docheader,
-[data-module-name="mail_queue"] .module-docheader{
+[data-module-name="MailMail_MailReport"] .module-docheader,
+[data-module-name="mail_queue"] .module-docheader,
+[data-module-name="MailMail_MailQueue"] .module-docheader {
     background-image: url("../../Images/header-bg.png");
     background-repeat: no-repeat;
     background-position-x: 100%;
