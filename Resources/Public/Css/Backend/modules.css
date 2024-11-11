@@ -56,7 +56,7 @@
     min-height: var(--module-docheader-height);
     transition: min-height 300ms ease-in-out;
     --bs-heading-color: var(--mail-color);
-    padding: .44rem 0;
+    padding: .33rem 0;
 }
 .mail-wizard-navigation > div {
     display: flex;
