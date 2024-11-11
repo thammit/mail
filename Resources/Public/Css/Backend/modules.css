@@ -16,25 +16,218 @@
 [data-module-name="mail_queue"] {
     --module-docheader-bg: var(--mail-primary);
 }
-[data-module-name="mail_mail"] .module-docheader,
-[data-module-name="MailMail_MailMail"] .module-docheader,
-[data-module-name="mail_recipient"] .module-docheader,
-[data-module-name="MailMail_MailRecipient"] .module-docheader,
-[data-module-name="mail_report"] .module-docheader,
-[data-module-name="MailMail_MailReport"] .module-docheader,
-[data-module-name="mail_queue"] .module-docheader,
-[data-module-name="MailMail_MailQueue"] .module-docheader {
-    background-image: url("../../Images/header-bg.png");
-    background-repeat: no-repeat;
-    background-position-x: 100%;
-    background-size: 50%;
-}
 
 [data-module-name="MailMail_MailMail"] .module-docheader,
 [data-module-name="MailMail_MailRecipient"] .module-docheader,
 [data-module-name="MailMail_MailReport"] .module-docheader,
 [data-module-name="MailMail_MailQueue"] .module-docheader {
     background-color: var(--mail-primary);
+}
+
+@media (min-width: 992px) {
+    [data-module-name="mail_mail"] .module-docheader,
+    [data-module-name="mail_recipient"] .module-docheader,
+    [data-module-name="mail_report"] .module-docheader,
+    [data-module-name="mail_queue"] .module-docheader,
+    [data-module-name="MailMail_MailMail"] .module-docheader,
+    [data-module-name="MailMail_MailRecipient"] .module-docheader,
+    [data-module-name="MailMail_MailReport"] .module-docheader,
+    [data-module-name="MailMail_MailQueue"] .module-docheader {
+        background-image: url("../../Images/header-bg.png");
+        background-repeat: no-repeat;
+        background-position-x: 100%;
+    }
+}
+
+
+.bg-mail-theme {
+    --bs-bg-opacity: 1;
+    --badge-default-color: var(--mail-color);
+    --typo3-badge-color: var(--mail-color);
+    background-color: rgba(var(--mail-primary-rgb),var(--bs-bg-opacity)) !important;
+}
+
+.mail-wizard-navigation {
+    display: flex;
+    align-items: flex-end;
+    position: fixed;
+    z-index: 300;
+    top: 0;
+    min-height: var(--module-docheader-height);
+    transition: min-height 300ms ease-in-out;
+    --bs-heading-color: var(--mail-color);
+    padding: .44rem 0;
+}
+.mail-wizard-navigation > div {
+    display: flex;
+    align-items: center;
+}
+
+[data-module-name="MailMail_MailMail"] .mail-wizard-navigation {
+    min-height: 65px;
+    color: var(--mail-color);
+}
+
+[data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
+    min-height: calc(var(--module-docheader-bar-height) + var(--module-docheader-padding-y) + 2px);
+}
+
+[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
+    min-height: 32px;
+}
+
+.mail-wizard-navigation h1 {
+    margin: 0 1.5rem 0 0;
+    line-height: 1;
+    /*font-size: 1.2rem;*/
+    transition: font-size 200ms ease-in-out;
+}
+
+[data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1,
+[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1 {
+    line-height: 1;
+    font-size: 1.2rem;
+}
+
+.mail-wizard-navigation ul {
+    display: flex;
+    display: -webkit-flex;
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.mail-wizard-navigation li .title {
+    display: none;
+}
+
+.mail-wizard-navigation li,
+.mail-wizard-navigation li.current {
+    outline: none;
+    -o-outline: none;
+    -ms-outline: none;
+    -moz-outline: none;
+    -webkit-outline: none;
+}
+
+.mail-wizard-navigation li {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    transition: width 200ms ease-in-out, height 200ms ease-in-out, margin-right 200ms ease-in-out;
+    border-radius: 50%;
+    opacity: .5;
+    -o-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    background-color: var(--mail-color);
+    margin-right: 8px;
+    position: relative;
+}
+
+.module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li,
+.module-docheader.module-docheader-folded ~ .module-body .mail-wizard-navigation li {
+    width: 25px;
+    height: 25px;
+    margin-right: 25px;
+}
+
+
+.mail-wizard-navigation li::before {
+    position: absolute;
+    content: "";
+    background-color: var(--bs-gray-400);
+    opacity: .5;
+    width: 8px;
+    height: 2px;
+    transition: width 200ms ease-in-out, height 200ms ease-in-out;
+    top: 50%;
+    transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    left: 100%;
+}
+
+.module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li::before {
+    width: 16px;
+    height: 2px;
+}
+
+@media (min-width: 576px) {
+
+    .mail-wizard-navigation li {
+        width: 25px;
+        height: 25px;
+        margin-right: 16px;
+    }
+
+    .module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li,
+    .module-docheader.module-docheader-folded ~ .module-body .mail-wizard-navigation li {
+        width: 25px;
+        height: 25px;
+        margin-right: 16px;
+    }
+
+    .mail-wizard-navigation li::before {
+        width: 16px;
+        height: 2px;
+    }
+
+    .mail-wizard-navigation li .title {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -webkit-transform: translate(-50%, -50%);
+        color: #171717;
+        font-size: .8rem;
+        font-weight: 400;
+    }
+
+    .mail-wizard-navigation li.current .title {
+        color: var(--mail-primary);
+    }
+
+}
+
+@media (min-width: 768px) {
+    .mail-wizard-navigation li {
+        margin-right: 32px;
+    }
+    .mail-wizard-navigation li::before {
+        width: 32px;
+    }
+    .module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li::before {
+        width: 16px;
+    }
+}
+
+
+.mail-wizard-navigation li.last::before {
+    content: none;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.mail-wizard-navigation li.current,
+.mail-wizard-navigation li.current:active,
+.mail-wizard-navigation li.done::before,
+.mail-wizard-navigation li.done,
+.mail-wizard-navigation li.done:active {
+    background-color: var(--mail-color);
+    outline-color: var(--mail-color);
+    animation: fadeIn 500ms ease-in-out forwards;
 }
 
 .btn.btn-mail-theme {
@@ -67,146 +260,6 @@
     --typo3-btn-disabled-bg: var(--mail-background-color);
     --typo3-btn-disabled-border-color: var(--mail-border-color);
 }
-
-.bg-mail-theme {
-    --bs-bg-opacity: 1;
-    --badge-default-color: var(--mail-color);
-    --typo3-badge-color: var(--mail-color);
-    background-color: rgba(var(--mail-primary-rgb),var(--bs-bg-opacity)) !important;
-}
-
-[data-module-name="MailMail_MailMail"] .mail-wizard-navigation,
-[data-module-name="mail_mail"] .mail-wizard-navigation {
-    min-height: var(--module-docheader-height);
-    position: fixed;
-    top: 0;
-    transition: min-height 300ms ease-in-out;
-    z-index: 300;
-    --bs-heading-color: var(--mail-color);
-}
-
-
-[data-module-name="MailMail_MailMail"] .mail-wizard-navigation {
-    min-height: 65px;
-    color: var(--mail-color);
-}
-
-[data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
-    min-height: calc(var(--module-docheader-bar-height) + var(--module-docheader-padding-y) + 2px);
-}
-
-[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation {
-    min-height: 32px;
-}
-
-[data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1,
-[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1 {
-    transition: font-size 200ms ease-in-out;
-    font-size: 1.2rem;
-}
-
-.mail-wizard-navigation ul {
-    display: flex;
-    display: -webkit-flex;
-    list-style: none;
-    padding-left: 0;
-    margin-bottom: 0;
-}
-
-.mail-wizard-navigation li .title {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    -o-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
-    -moz-transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
-    color: #171717;
-    font-size: 1rem;
-    font-weight: 400;
-}
-
-.mail-wizard-navigation li.current .title {
-    color: var(--mail-primary);
-}
-
-.mail-wizard-navigation li,
-.mail-wizard-navigation li.current {
-    outline: none;
-    -o-outline: none;
-    -ms-outline: none;
-    -moz-outline: none;
-    -webkit-outline: none;
-}
-
-.mail-wizard-navigation li {
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-    transition: width 200ms ease-in-out, height 200ms ease-in-out, margin-right 200ms ease-in-out;
-    border-radius: 50%;
-    opacity: .5;
-    -o-border-radius: 50%;
-    -ms-border-radius: 50%;
-    -moz-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    background-color: var(--mail-color);
-    margin-right: 32px;
-    position: relative;
-    outline: 4px solid transparent;
-}
-
-.module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li,
-.module-docheader.module-docheader-folded ~ .module-body .mail-wizard-navigation li {
-    width: 25px;
-    height: 25px;
-    margin-right: 25px;
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
-}
-
-.mail-wizard-navigation li::before {
-    position: absolute;
-    content: "";
-    background-color: var(--bs-gray-400);
-    opacity: .5;
-    width: 32px;
-    height: 4px;
-    transition: width 200ms ease-in-out, height 200ms ease-in-out;
-    top: 50%;
-    transform: translateY(-50%);
-    -o-transform: translateY(-50%);
-    -ms-transform: translateY(-50%);
-    -moz-transform: translateY(-50%);
-    -webkit-transform: translateY(-50%);
-    left: 100%;
-}
-
-.module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li::before {
-    width: 25px;
-    height: 2px;
-}
-
-.mail-wizard-navigation li.last::before {
-    content: none;
-}
-
-.mail-wizard-navigation li.current,
-.mail-wizard-navigation li.current:active,
-.mail-wizard-navigation li.done::before,
-.mail-wizard-navigation li.done,
-.mail-wizard-navigation li.done:active {
-    background-color: var(--mail-color);
-    outline-color: var(--mail-color);
-    animation: fadeIn 500ms ease-in-out forwards;
-}
-
-
 
 .mail-wizard-settings .mail-wizard-preview {
     max-height: 50vh;
@@ -241,7 +294,8 @@
 }
 
 @media (min-width: 992px) {
-    [data-module-name="mail_report"] .mail-wizard-preview {
+    [data-module-name="mail_report"] .mail-wizard-preview,
+    [data-module-name="MailMail_MailReport"] .mail-wizard-preview {
         max-height: calc(100vh - 200px);
         overflow-y: auto;
     }
@@ -306,8 +360,4 @@
 
 .progress-stacked > .progress > .progress-bar {
     width: 100%;
-}
-
-[data-color-scheme="light"] {
-
 }
