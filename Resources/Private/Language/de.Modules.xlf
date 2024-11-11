@@ -259,9 +259,9 @@
         <source>The mail "%s" was successfully continued.</source>
         <target state="final">Der Versand der Mail "%s" wurde erfolgreich fortgesetzt.</target>
       </trans-unit>
-      <trans-unit id="mail.wizard.title" resname="mail.wizard.title">
+      <trans-unit id="mail.wizard.title" resname="mail.wizard.title" approved="yes">
         <source>MAIL Wizard</source>
-        <target state="needs-translation">MAIL Wizard</target>
+        <target state="final">MAIL Assistent</target>
       </trans-unit>
       <trans-unit id="mail.wizard.externalMailPlainTextUrl" resname="mail.wizard.externalMailPlainTextUrl" approved="yes">
         <source>URL of plain text content</source>
