@@ -83,12 +83,6 @@
     transition: font-size 200ms ease-in-out;
 }
 
-[data-module-name="mail_mail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1,
-[data-module-name="MailMail_MailMail"] .module-docheader-folded + .module-body .mail-wizard-navigation h1 {
-    line-height: 1;
-    font-size: 1.2rem;
-}
-
 .mail-wizard-navigation ul {
     display: flex;
     display: -webkit-flex;
@@ -112,8 +106,10 @@
 
 .mail-wizard-navigation li {
     display: inline-block;
+    position: relative;
     width: 8px;
     height: 8px;
+    margin-right: 8px;
     transition: width 200ms ease-in-out, height 200ms ease-in-out, margin-right 200ms ease-in-out;
     border-radius: 50%;
     opacity: .5;
@@ -122,15 +118,13 @@
     -moz-border-radius: 50%;
     -webkit-border-radius: 50%;
     background-color: var(--mail-color);
-    margin-right: 8px;
-    position: relative;
 }
 
 .module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li,
 .module-docheader.module-docheader-folded ~ .module-body .mail-wizard-navigation li {
-    width: 25px;
-    height: 25px;
-    margin-right: 25px;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
 }
 
 
@@ -151,9 +145,8 @@
     left: 100%;
 }
 
-.module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li::before {
-    width: 16px;
-    height: 2px;
+.mail-wizard-navigation li.last::before {
+    content: none;
 }
 
 @media (min-width: 576px) {
@@ -161,18 +154,18 @@
     .mail-wizard-navigation li {
         width: 25px;
         height: 25px;
-        margin-right: 16px;
+        margin-right: 25px;
     }
 
     .module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li,
     .module-docheader.module-docheader-folded ~ .module-body .mail-wizard-navigation li {
         width: 25px;
         height: 25px;
-        margin-right: 16px;
+        margin-right: 25px;
     }
 
     .mail-wizard-navigation li::before {
-        width: 16px;
+        width: 25px;
         height: 2px;
     }
 
@@ -199,20 +192,14 @@
 
 @media (min-width: 768px) {
     .mail-wizard-navigation li {
-        margin-right: 32px;
+        margin-right: 25px;
     }
     .mail-wizard-navigation li::before {
-        width: 32px;
-    }
-    .module-docheader.module-docheader-folded + .module-body .mail-wizard-navigation li::before {
-        width: 16px;
+        width: 25px;
     }
 }
 
 
-.mail-wizard-navigation li.last::before {
-    content: none;
-}
 
 @keyframes fadeIn {
     to {
