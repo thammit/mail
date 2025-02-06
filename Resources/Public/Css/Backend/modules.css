@@ -1,6 +1,6 @@
 :root {
     --mail-primary: #037eab;
-    --mail-primary-rgb: 3,126,171;
+    --mail-primary-rgb: 3, 126, 171;
     --mail-background-color: #037eab;
     --mail-background-color2: #01729b;
     --mail-active-bg: #0394c8;
@@ -44,7 +44,7 @@
     --bs-bg-opacity: 1;
     --badge-default-color: var(--mail-color);
     --typo3-badge-color: var(--mail-color);
-    background-color: rgba(var(--mail-primary-rgb),var(--bs-bg-opacity)) !important;
+    background-color: rgba(var(--mail-primary-rgb), var(--bs-bg-opacity)) !important;
 }
 
 .mail-wizard-navigation {
@@ -58,6 +58,7 @@
     --bs-heading-color: var(--mail-color);
     padding: .33rem 0;
 }
+
 .mail-wizard-navigation > div {
     display: flex;
     align-items: center;
@@ -194,11 +195,11 @@
     .mail-wizard-navigation li {
         margin-right: 25px;
     }
+
     .mail-wizard-navigation li::before {
         width: 25px;
     }
 }
-
 
 
 @keyframes fadeIn {
@@ -224,7 +225,7 @@
     --bs-btn-hover-color: var(--mail-color);
     --bs-btn-hover-bg: var(--mail-border-color);
     --bs-btn-hover-border-color: var(--mail-hover-border-color);
-    --bs-btn-focus-shadow-rgb: 38,118,190;
+    --bs-btn-focus-shadow-rgb: 38, 118, 190;
     --bs-btn-active-color: var(--mail-color);
     --bs-btn-active-bg: var(--mail-active-bg);
     --bs-btn-active-border-color: var(--mail-active-border-color);
@@ -238,7 +239,7 @@
     --typo3-btn-hover-color: var(--mail-color);
     --typo3-btn-hover-bg: var(--mail-border-color);
     --typo3-btn-hover-border-color: var(--mail-hover-border-color);
-    --typo3-btn-focus-shadow-rgb: 38,118,190;
+    --typo3-btn-focus-shadow-rgb: 38, 118, 190;
     --typo3-btn-active-color: var(--mail-color);
     --typo3-btn-active-bg: var(--mail-active-bg);
     --typo3-btn-active-border-color: var(--mail-active-border-color);
@@ -250,7 +251,7 @@
 
 .mail-wizard-settings .mail-wizard-preview {
     max-height: 50vh;
-    overflow-y:scroll;
+    overflow-y: scroll;
 }
 
 .mail-wizard-settings pre {
@@ -258,24 +259,25 @@
 }
 
 .mail-wizard-categories .mail-wizard-preview {
-    height:450px;
-    overflow-y:scroll;
+    height: 450px;
+    overflow-y: scroll;
     scroll-behavior: smooth;
 }
 
 @media (min-width: 768px) {
 
     .mail-wizard-categories .mail-wizard-preview {
-        width:320px;
-        height:450px;
+        width: 320px;
+        height: 450px;
         overflow-x: hidden;
-        overflow-y:scroll;
+        overflow-y: scroll;
         scroll-behavior: smooth;
     }
+
     .mail-wizard-categories .mail-wizard-preview-body {
-        width:600px;
-        height:100%;
-        overflow:visible;
+        width: 600px;
+        height: 100%;
+        overflow: visible;
         transform: scale(0.5) translate(-50%, -50%);
     }
 }
@@ -289,29 +291,29 @@
 }
 
 .mail-wizard-preview-body > div {
-    position:relative;
+    position: relative;
 }
 
 .mail-wizard-preview-body > div::before {
-    position:absolute;
-    z-index:1040;
-    content:"";
-    display:block;
-    top:0;
-    right:0;
-    bottom:0;
-    left:0;
-    background-color:rgba(0,0,0,0);
+    position: absolute;
+    z-index: 1040;
+    content: "";
+    display: block;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .mail-report-responses-table td {
-    overflow:hidden;
-    text-overflow:ellipsis;
-    max-width:406px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 406px;
     white-space: nowrap;
 }
 
-.mail-report-responses-table td+td {
+.mail-report-responses-table td + td {
     width: 5ch;
     text-align: center;
 }
@@ -341,10 +343,46 @@
     background-color: var(--bs-progress-bg);
     border-radius: var(--bs-progress-border-radius);
 }
+
 .progress-stacked > .progress {
     overflow: visible;
 }
 
 .progress-stacked > .progress > .progress-bar {
     width: 100%;
+}
+
+.mail-theme-background {
+    fill: #0078e6;
+    fill: var(--mail-background-color, #0078e6);
+}
+
+.mail-theme-color {
+    fill: var(--mail-color, #ffffff);
+}
+
+.mail-module-main {
+    fill: none;
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-miterlimit: 5.3333;
+}
+
+.mail-theme-folder-background {
+    fill: #016c92;
+    fill: var(--mail-background-color, #016c92);
+}
+
+.mail-theme-folder-foreground {
+    fill: #0394c8;
+    fill: var(--mail-background-color2, #0394c8);
+}
+
+.mail-theme-mail {
+    fill: #FFFFFF;
+    stroke: #000000;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-miterlimit: 5.3333;
 }
