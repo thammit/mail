@@ -86,7 +86,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                             'message_id' => $mailContent['messageid'],
                             'html_content' => $mailContent['html']['content'] ?? '',
                             'plain_content' => $mailContent['plain']['content'] ?? '',
-                            'html_links' => json_encode($mailContent['html']['href'] ?? []),
+                            'html_links' => json_encode($mailContent['html']['hrefs'] ?? []),
                             'plain_links' => json_encode($mailContent['plain']['link_ids'] ?? []),
                             'recipients' => json_encode(unserialize($record['query_info']['id_lists'] ?? 'a:0:{}')),
                             'scheduled' => $record['scheduled'],
@@ -329,7 +329,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                     'uid_foreign' => $record['uid_foreign'],
                     'tablenames' => $record['tablenames'],
                     'sorting' => $record['sorting'],
-                    'sorting_foreign' => $record['sorting_foreign'],
+                    'sorting_foreign' => $record['sorting_foreign'] ?? 0,
                 ]);
             }
         }
