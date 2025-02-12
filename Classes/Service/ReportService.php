@@ -264,7 +264,7 @@ class ReportService
                 $data[] = [
                     'label' => $label,
                     'iconIdentifier' => ReportUtility::determineDocumentIconIdentifier($url),
-                    'title' => $htmlLinks[$id]['title'],
+                    'title' => $htmlLinks[$id]['title'] ?? $urlStr,
                     'totalCounter' => $urlCounter['total'][$origId]['counter'],
                     'htmlCounter' => $urlCounter['html'][$id]['counter'],
                     'plainCounter' => $urlCounter['html'][$id]['plainCounter'],
