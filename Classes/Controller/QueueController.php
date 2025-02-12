@@ -167,6 +167,17 @@ class QueueController extends AbstractController
     {
         /** @var Mail $mail */
         $mail = $this->mailRepository->findByUid((int)($request->getQueryParams()['mail']));
+
+        if (!$mail instanceof Mail) {
+            return $this->jsonResponse(json_encode([
+                'status' => MailStatus::SENT,
+                'recipientsHandled' => 0,
+                'deliveryProgress' => 100,
+                'scheduledBegin' => '',
+                'scheduledEnd' => ''
+            ]));
+        }
+
         return $this->jsonResponse(json_encode([
             'status' => $mail->getStatus(),
             'recipientsHandled' => $mail->getNumberOfRecipientsHandled(),

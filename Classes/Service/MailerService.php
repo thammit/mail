@@ -363,6 +363,9 @@ class MailerService implements LoggerAwareInterface
 
             $recipientIds = array_slice($recipientIds, 0, $this->sendPerCycle);
 
+            $numberOfRecipients = count($recipientIds);
+            $recipientIdsOfRecipientSourceHandled = [];
+
             switch (true) {
                 case $recipientSourceConfiguration->isTableSource():
                     $table = $recipientSourceConfiguration->contains ?? $recipientSourceConfiguration->table;
@@ -378,6 +381,7 @@ class MailerService implements LoggerAwareInterface
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                         $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
                         $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
+                        $recipientIdsOfRecipientSourceHandled[] = (int)$recipientData['uid'];
                         $numberOfSentMails++;
                     }
                     break;
@@ -393,6 +397,7 @@ class MailerService implements LoggerAwareInterface
                         $this->sendSingleMailAndAddLogEntry($mail, $recipientData, $recipientSourceIdentifier);
                         $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item !== $recipientData['uid']);
                         $recipientsHandled[$recipientSourceIdentifier][] = (int)$recipientData['uid'];
+                        $recipientIdsOfRecipientSourceHandled[] = (int)$recipientData['uid'];
                         $numberOfSentMails++;
                     }
                     break;
@@ -408,6 +413,7 @@ class MailerService implements LoggerAwareInterface
                         $this->sendSingleMailAndAddLogEntry($mail, $enhancedRecipientData, $recipientSourceIdentifier);
                         $recipients[$recipientSourceIdentifier] = array_filter($recipients[$recipientSourceIdentifier] ?? [], fn($item) => $item['email'] !== $recipientData['email']);
                         $recipientsHandled[$recipientSourceIdentifier][] = $recipientData;
+                        $recipientIdsOfRecipientSourceHandled[] = $recipientData;
                         $numberOfSentMails++;
                     }
                     break;
@@ -415,6 +421,14 @@ class MailerService implements LoggerAwareInterface
                     // todo
                     break;
             }
+
+            if ($numberOfRecipients > count($recipientIdsOfRecipientSourceHandled)) {
+                // not all recipients handled, because of meanwhile deleted or hidden records -> mark them as handled anyway
+                $notHandledRecipientIds = array_diff($recipientIds, $recipientIdsOfRecipientSourceHandled);
+                $this->logger->notice('Did not send ' . count($notHandledRecipientUids) . ' mails to user of recipient group ' . $recipientSourceIdentifier . ' because of deleted or hidden: ' . join(',', $notHandledRecipientIds));
+                $recipientsHandled[$recipientSourceIdentifier] = array_unique(array_merge($recipientsHandled[$recipientSourceIdentifier], $notHandledRecipientIds));
+            }
+
             if (!$recipients[$recipientSourceIdentifier]) {
                 unset($recipients[$recipientSourceIdentifier]);
             }
