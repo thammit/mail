@@ -329,7 +329,7 @@ class DirectMailMigration implements UpgradeWizardInterface
                     'uid_foreign' => $record['uid_foreign'],
                     'tablenames' => $record['tablenames'],
                     'sorting' => $record['sorting'],
-                    'sorting_foreign' => $record['sorting_foreign'],
+                    'sorting_foreign' => $record['sorting_foreign'] ?? 0,
                 ]);
             }
         }
