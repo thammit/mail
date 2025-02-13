@@ -1,0 +1,71 @@
+{
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": false,
+  "files.trimTrailingWhitespace": true,
+  "files.associations": {
+    "*.tmpl": "html"
+  },
+
+  "git.autofetch": true,
+
+  "gitPrefix.pattern": "(.*)/(.*)(-\\d+)/.*",
+  "gitPrefix.replacement": "'[' + p1.toUpperCase() + '][' + p2.toUpperCase() + p3 + '] '",
+  "gitPrefix.replacementIsFunction": true,
+
+  "html.format.wrapLineLength": 160,
+
+  "intelephense.environment.includePaths": [
+    "../__typo3-src/typo3_src-12.4",
+    "../__typo3-src/typo3_src-12.4.27"
+  ],
+  "intelephense.environment.phpVersion": "8.2",
+
+  "prettier.tabWidth": 4,
+  "prettier.printWidth": 160,
+
+  "xml.fileAssociations": [
+    {
+      "pattern": "**/*.xlf",
+      "systemId": "http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd"
+    }
+  ],
+
+  "liveSassCompile.settings.formats": [
+		{
+			"format": "expanded",
+			"extensionName": ".css",
+			"savePath": "~/../../Public/Css"
+		},
+		{
+			"format": "compressed",
+			"extensionName": ".min.css",
+			"savePath": "~/../../Public/Css"
+		}
+	],
+  "liveSassCompile.settings.excludeList": [
+    "/**/node_modules/**",
+    "/.vscode/**",
+    "/**/Contrib/**",
+    "/**/Vendor/**"
+  ],
+  "liveSassCompile.settings.autoprefix": [
+    "> 1%",
+    "last 2 versions"
+  ],
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
