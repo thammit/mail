@@ -48,7 +48,7 @@ class EditMailPageContentViewHelper extends AbstractTagBasedViewHelper
      * @return string
      * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
-    public function render(): string
+    public function render()
     {
         if ($this->arguments['uid'] < 1) {
             throw new \InvalidArgumentException('Uid must be a positive integer, ' . $this->arguments['uid'] . ' given.', 1526127158);

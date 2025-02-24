@@ -12,25 +12,6 @@ class PagesRepository
     protected string $table = 'pages';
 
     /**
-     * @param int $pageUid
-     * @param int $langUid
-     * @return array
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function selectPageByL10nAndSysLanguageUid(int $pageUid, int $langUid): array
-    {
-        $queryBuilder = $this->getQueryBuilder();
-
-        return $queryBuilder
-            ->select('sys_language_uid')
-            ->from($this->table)
-            ->where($queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageUid, Connection::PARAM_INT)))
-            ->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($langUid, Connection::PARAM_INT)))
-            ->executeQuery()
-            ->fetchAllAssociative();
-    }
-
-    /**
      * @param string $permsClause
      * @return array
      * @throws \Doctrine\DBAL\Exception

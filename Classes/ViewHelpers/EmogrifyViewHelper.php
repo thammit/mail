@@ -28,11 +28,7 @@ class EmogrifyViewHelper extends AbstractViewHelper
         $this->registerArgument('options', 'array', 'CSS inliner options.', false, []);
     }
 
-    /**
-     * @return string
-     * @throws ParseException
-     */
-    public function render(): string
+    public function render()
     {
         $content = $this->renderChildren();
         $css = $this->arguments['css'];
@@ -40,13 +36,5 @@ class EmogrifyViewHelper extends AbstractViewHelper
         $options = $this->arguments['options'];
 
         return EmogrifierUtility::emogrify($content, $css, $extractContent, $options);
-    }
-
-    /**
-     * @return ContentObjectRenderer
-     */
-    protected static function getContentObject(): ContentObjectRenderer
-    {
-        return $GLOBALS['TSFE']->cObj;
     }
 }

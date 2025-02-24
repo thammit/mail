@@ -2,16 +2,11 @@
 
 namespace MEDIAESSENZ\Mail\ViewHelpers;
 
-use Closure;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
 class InlineCssViewHelper extends AbstractViewHelper
 {
-    use CompileWithRenderStatic;
-
     /**
      * @var bool
      */
@@ -32,20 +27,10 @@ class InlineCssViewHelper extends AbstractViewHelper
         $this->registerArgument('addStyleTag', 'bool', 'Wrap css with style tags.', false, false);
     }
 
-    /**
-     * @param array $arguments
-     * @param Closure $renderChildrenClosure
-     * @param RenderingContextInterface $renderingContext
-     * @return string
-     */
-    public static function renderStatic(
-        array $arguments,
-        Closure $renderChildrenClosure,
-        RenderingContextInterface $renderingContext
-    ): string
+    public function render()
     {
-        $path = GeneralUtility::getFileAbsFileName($arguments['path']);
+        $path = GeneralUtility::getFileAbsFileName($this->arguments['path']);
         $css = GeneralUtility::getUrl($path);
-        return ($arguments['addStyleTag'] ? '<style>' . $css . '</style>' : $css);
+        return ($this->arguments['addStyleTag'] ? '<style>' . $css . '</style>' : $css);
     }
 }

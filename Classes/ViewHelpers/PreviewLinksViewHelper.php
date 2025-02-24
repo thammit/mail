@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\ViewHelpers;
 
-use Closure;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
@@ -11,14 +10,12 @@ use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
+use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 class PreviewLinksViewHelper extends AbstractViewHelper
 {
-    use CompileWithRenderStatic;
-
     protected $escapeOutput = false;
 
     /**
@@ -30,52 +27,59 @@ class PreviewLinksViewHelper extends AbstractViewHelper
         $this->registerArgument('pageId', 'int', 'Page id of the PageTs configuration', true);
     }
 
-    /**
-     * get country infos from a given ISO3
-     *
-     * @param array $arguments
-     * @param Closure $renderChildrenClosure
-     * @param RenderingContextInterface $renderingContext
-     *
-     * @return array
-     */
-    public static function renderStatic(
-        array                     $arguments,
-        Closure                   $renderChildrenClosure,
-        RenderingContextInterface $renderingContext
-    ): array
+    public function render()
     {
-        $pageTSConfiguration = BackendUtility::getPagesTSconfig($arguments['pageId'])['mod.']['web_modules.']['mail.'] ?? [];
-        $implodedParams = TypoScriptUtility::implodeTSParams($pageTSConfiguration);
-        $uid = $arguments['uid'];
+        $uid = $this->arguments['uid'];
         try {
             $languages = LanguageUtility::getAvailablePageLanguages($uid);
         } catch (DBALException|Exception $e) {
             return [];
         }
+
+        $pageTSConfiguration = BackendUtility::getPagesTSconfig($this->arguments['pageId'])['mod.']['web_modules.']['mail.'] ?? [];
+        $implodedParams = TypoScriptUtility::implodeTSParams($pageTSConfiguration);
         $previewHTMLLinkAttributes = [];
         $previewTextLinkAttributes = [];
         $multilingual = count($languages) > 1;
-        foreach ($languages as $languageUid => $lang) {
-            $langParam = static::getLanguageParam($languageUid, $pageTSConfiguration);
-            $langTitle = $multilingual ? ' - ' . $lang['title'] : '';
-            $plainParams = $implodedParams['plainParams'] ?? $langParam;
-            $htmlParams = $implodedParams['htmlParams'] ?? $langParam;
-            $flagIcon = $lang['flagIcon'];
+        /** @var PageRepository $pageRepository */
+        $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
 
-            $previewUriBuilder = PreviewUriBuilder::create($uid, '')
-                ->withRootLine(BackendUtility::BEgetRootLine($uid));
+        foreach ($languages as $languageUid => $language) {
+
+            if ($languageUid === 0) {
+                $page = $pageRepository->getPage($uid, true);
+            } else {
+                $page = $pageRepository->getPageOverlay($uid, $languageUid);
+            }
+
+            $title = htmlentities($page['title']);
+            $flagIcon = $language['flagIcon'];
+            $languageTitle = $multilingual ? ': ' . htmlentities($language['title']) : '';
+
+            $htmlPreviewUriBuilder = PreviewUriBuilder::create($uid)->withLanguage($languageUid);
+
+            if ($implodedParams['htmlParams'] ?? false) {
+                $htmlPreviewUriBuilder = $htmlPreviewUriBuilder->withAdditionalQueryParameters(trim($implodedParams['htmlParams'], '&?'));
+            }
 
             $previewHTMLLinkAttributes[$languageUid] = [
-                'title' => htmlentities(LanguageUtility::getLL('mail.wizard.htmlPreviewLink.title') . $langTitle),
-                'uri' => $previewUriBuilder->withAdditionalQueryParameters($htmlParams)->buildUri(),
+                'title' => $title,
+                'languageTitle' => $languageTitle,
+                'uri' => $htmlPreviewUriBuilder->buildUri(),
                 'languageUid' => $languageUid,
                 'flagIcon' => $flagIcon,
             ];
 
+            $plainPreviewUriBuilder = PreviewUriBuilder::create($uid)->withLanguage($languageUid);
+
+            if ($implodedParams['plainParams'] ?? false) {
+                $plainPreviewUriBuilder = $plainPreviewUriBuilder->withAdditionalQueryParameters(trim($implodedParams['plainParams'], '&?'));
+            }
+
             $previewTextLinkAttributes[$languageUid] = [
-                'title' => htmlentities(LanguageUtility::getLL('mail.wizard.plainTextPreviewLink.title') . $langTitle),
-                'uri' => $previewUriBuilder->withAdditionalQueryParameters($plainParams)->buildUri(),
+                'title' => $title,
+                'languageTitle' => $languageTitle,
+                'uri' => $plainPreviewUriBuilder->buildUri(),
                 'languageUid' => $languageUid,
                 'flagIcon' => $flagIcon,
             ];
@@ -86,10 +90,5 @@ class PreviewLinksViewHelper extends AbstractViewHelper
             SendFormat::HTML => ['htmlPreview' => $previewHTMLLinkAttributes],
             default => ['htmlPreview' => $previewHTMLLinkAttributes, 'textPreview' => $previewTextLinkAttributes],
         };
-    }
-
-    public static function getLanguageParam(int $sysLanguageUid, array $params): string
-    {
-        return $params['langParams.'][$sysLanguageUid] ?? '&L=' . $sysLanguageUid;
     }
 }

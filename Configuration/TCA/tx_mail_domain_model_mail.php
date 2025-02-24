@@ -21,7 +21,6 @@ return [
             \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_EXTERNAL => 'mail-record',
         ],
         'useColumnsForDefaultValues' => 'from_email,from_name,reply_to_email,reply_to_name,organisation,priority,encoding,charset,send_options,type',
-        'languageField' => 'sys_language_uid',
     ],
     'columns' => [
         'type' => [
