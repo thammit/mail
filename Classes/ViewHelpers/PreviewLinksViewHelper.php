@@ -11,6 +11,7 @@ use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use TYPO3\CMS\Backend\Routing\PreviewUriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
@@ -23,29 +24,33 @@ class PreviewLinksViewHelper extends AbstractViewHelper
      */
     public function initializeArguments(): void
     {
-        $this->registerArgument('uid', 'int', 'Mail uid', true);
+        $this->registerArgument('uid', 'int', 'Page id of the Mail', true);
         $this->registerArgument('pageId', 'int', 'Page id of the PageTs configuration', true);
     }
 
     public function render()
     {
-        $uid = $this->arguments['uid'];
+        $uid = (int)($this->arguments['uid'] ?? 0);
         try {
             $languages = LanguageUtility::getAvailablePageLanguages($uid);
         } catch (DBALException|Exception $e) {
             return [];
         }
 
-        $pageTSConfiguration = BackendUtility::getPagesTSconfig($this->arguments['pageId'])['mod.']['web_modules.']['mail.'] ?? [];
-        $implodedParams = TypoScriptUtility::implodeTSParams($pageTSConfiguration);
+        $pageTSConfiguration = TypoScriptUtility::implodeTSParams(BackendUtility::getPagesTSconfig($this->arguments['pageId'])['mod.']['web_modules.']['mail.'] ?? []);
+
         $previewHTMLLinkAttributes = [];
         $previewTextLinkAttributes = [];
-        $multilingual = count($languages) > 1;
+        $htmlParams = trim(($pageTSConfiguration['htmlParams'] ?? ''), '&?');
+        $plainParams = trim(($pageTSConfiguration['plainParams'] ?? ''), '&?');
+        $isMultilingual = count($languages) > 1;
+
         /** @var PageRepository $pageRepository */
         $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
 
         foreach ($languages as $languageUid => $language) {
 
+            $languageUid = (int)$languageUid;
             if ($languageUid === 0) {
                 $page = $pageRepository->getPage($uid, true);
             } else {
@@ -54,35 +59,10 @@ class PreviewLinksViewHelper extends AbstractViewHelper
 
             $title = htmlentities($page['title']);
             $flagIcon = $language['flagIcon'];
-            $languageTitle = $multilingual ? ': ' . htmlentities($language['title']) : '';
+            $languageTitle = $isMultilingual ? ': ' . htmlentities($language['title']) : '';
 
-            $htmlPreviewUriBuilder = PreviewUriBuilder::create($uid)->withLanguage($languageUid);
-
-            if ($implodedParams['htmlParams'] ?? false) {
-                $htmlPreviewUriBuilder = $htmlPreviewUriBuilder->withAdditionalQueryParameters(trim($implodedParams['htmlParams'], '&?'));
-            }
-
-            $previewHTMLLinkAttributes[$languageUid] = [
-                'title' => $title,
-                'languageTitle' => $languageTitle,
-                'uri' => $htmlPreviewUriBuilder->buildUri(),
-                'languageUid' => $languageUid,
-                'flagIcon' => $flagIcon,
-            ];
-
-            $plainPreviewUriBuilder = PreviewUriBuilder::create($uid)->withLanguage($languageUid);
-
-            if ($implodedParams['plainParams'] ?? false) {
-                $plainPreviewUriBuilder = $plainPreviewUriBuilder->withAdditionalQueryParameters(trim($implodedParams['plainParams'], '&?'));
-            }
-
-            $previewTextLinkAttributes[$languageUid] = [
-                'title' => $title,
-                'languageTitle' => $languageTitle,
-                'uri' => $plainPreviewUriBuilder->buildUri(),
-                'languageUid' => $languageUid,
-                'flagIcon' => $flagIcon,
-            ];
+            $previewHTMLLinkAttributes[$languageUid] = $this->getLinkAttributes($uid, $languageUid, $htmlParams, $title, $languageTitle, $flagIcon);
+            $previewTextLinkAttributes[$languageUid] = $this->getLinkAttributes($uid, $languageUid, $plainParams, $title, $languageTitle, $flagIcon);
         }
 
         return match ($pageTSConfiguration['sendOptions'] ?? 0) {
@@ -90,5 +70,36 @@ class PreviewLinksViewHelper extends AbstractViewHelper
             SendFormat::HTML => ['htmlPreview' => $previewHTMLLinkAttributes],
             default => ['htmlPreview' => $previewHTMLLinkAttributes, 'textPreview' => $previewTextLinkAttributes],
         };
+    }
+
+    protected function getLinkAttributes(
+        int $pageUid,
+        int $languageUid,
+        string $additionalQueryParameters,
+        string $title,
+        string $languageTitle,
+        mixed $flagIcon,
+    ): array {
+        $previewUriBuilder = PreviewUriBuilder::create($pageUid);
+
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            if ($languageUid > 0) {
+                $additionalQueryParameters = rtrim('L=' . $languageUid . '&' . $additionalQueryParameters, '&');
+            }
+        } else {
+            $previewUriBuilder = $previewUriBuilder->withLanguage($languageUid);
+        }
+
+        if ($additionalQueryParameters) {
+            $previewUriBuilder = $previewUriBuilder->withAdditionalQueryParameters($additionalQueryParameters);
+        }
+
+        return [
+            'title' => $title,
+            'languageTitle' => $languageTitle,
+            'uri' => $previewUriBuilder->buildUri(),
+            'languageUid' => $languageUid,
+            'flagIcon' => $flagIcon,
+        ];
     }
 }
