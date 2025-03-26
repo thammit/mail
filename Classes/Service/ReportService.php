@@ -226,7 +226,11 @@ class ReportService
             }
             if (!$htmlLinkFound) {
                 $urlCounter['plain'][$id]['counter'] = $counter;
-                $urlCounter['total'][$id]['counter'] += $counter;
+                if (isset($urlCounter['total'][$id]['counter'])) {
+                    $urlCounter['total'][$id]['counter'] += $counter;
+                } else {
+                    $urlCounter['total'][$id]['counter'] = $counter;
+                }
             }
         }
         arsort($urlCounter['total']);
