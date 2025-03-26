@@ -18,7 +18,7 @@ class GetBodyContentViewHelper extends AbstractViewHelper
      */
     protected $escapeOutput = false;
 
-    public function render(): string
+    public function render()
     {
         $content = $this->renderChildren();
         $parser = new HTML5();

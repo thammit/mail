@@ -94,8 +94,8 @@
                 <f:if condition="{addIconOverlay}">
                     <f:variable name="iconOverlay" value="{htmlPreviewLink.flagIcon}" />
                 </f:if>
-                <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}">
-                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{htmlPreviewLink.title}">
+                <a href="{htmlPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{htmlPreviewLink.title}">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key: '{lll}mail.wizard.htmlPreviewLink.title')}{htmlPreviewLink.languageTitle}">
                         <core:icon identifier="mail-preview-html" overlay="{iconOverlay}" size="small" alternativeMarkupIdentifier="inline"/>
                     </span>
                 </a>
@@ -111,8 +111,8 @@
                 <f:if condition="{addIconOverlay}">
                     <f:variable name="iconOverlay" value="{textPreviewLink.flagIcon}" />
                 </f:if>
-                <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{title}">
-                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{textPreviewLink.title}">
+                <a href="{textPreviewLink.uri}" class="js-mail-preview-modal btn btn-default" data-bs-toggle="modal" data-bs-target="#previewModal" data-modal-title="{textPreviewLink.title}">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{f:translate(key: '{lll}mail.wizard.plainTextPreviewLink.title')}{textPreviewLink.languageTitle}">
                         <core:icon identifier="mail-preview-text" overlay="{iconOverlay}" size="small" alternativeMarkupIdentifier="inline"/>
                     </span>
                 </a>
@@ -251,7 +251,7 @@
                                 <mail:editMailPageContent uid="{data.uid}" class="btn btn-default" title="{f:translate(key: '{lll}general.button.editContent')}" data="{bs-trigger:'hover focus', bs-container:'body', bs-toggle:'tooltip', bs-placement:'top'}">
                                     <core:icon identifier="actions-document-edit" size="small"/>
                                 </mail:editMailPageContent>
-                                <f:render section="previewButtons" arguments="{uid:data.uid,title:data.title,pageId:data.pid}" />
+                                <f:render section="previewButtons" arguments="{uid:data.uid,title:data.title,pageId:data.pid, lll:lll}" />
                             </td>
                             <td class="col-control nowrap">
                                 <f:link.action action="createMailFromInternalPage" arguments="{page: data.uid}" class="btn btn-mail-theme text-uppercase"><f:translate key="{lll}general.button.next" default="Next" /></f:link.action>

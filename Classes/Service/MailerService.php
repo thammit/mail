@@ -425,7 +425,7 @@ class MailerService implements LoggerAwareInterface
             if ($numberOfRecipients > count($recipientIdsOfRecipientSourceHandled)) {
                 // not all recipients handled, because of meanwhile deleted or hidden records -> mark them as handled anyway
                 $notHandledRecipientIds = array_diff($recipientIds, $recipientIdsOfRecipientSourceHandled);
-                $this->logger->notice('Did not send ' . count($notHandledRecipientUids) . ' mails to user of recipient group ' . $recipientSourceIdentifier . ' because of deleted or hidden: ' . join(',', $notHandledRecipientIds));
+                $this->logger->notice('Did not send ' . count($notHandledRecipientIds) . ' mails to user of recipient group ' . $recipientSourceIdentifier . ' because of deleted or hidden: ' . join(',', $notHandledRecipientIds));
                 $recipientsHandled[$recipientSourceIdentifier] = array_unique(array_merge($recipientsHandled[$recipientSourceIdentifier], $notHandledRecipientIds));
             }
 

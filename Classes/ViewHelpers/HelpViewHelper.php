@@ -3,19 +3,14 @@ declare(strict_types=1);
 
 namespace MEDIAESSENZ\Mail\ViewHelpers;
 
-use Closure;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 class HelpViewHelper extends AbstractViewHelper
 {
-    use CompileWithRenderStatic;
-
     protected $escapeOutput = false;
 
     /**
@@ -27,22 +22,10 @@ class HelpViewHelper extends AbstractViewHelper
         $this->registerArgument('field', 'string', 'Field', true);
     }
 
-    /**
-     * get country infos from a given ISO3
-     *
-     * @param array $arguments
-     * @param Closure $renderChildrenClosure
-     * @param RenderingContextInterface $renderingContext
-     *
-     * @return mixed
-     */
-    public static function renderStatic(
-        array $arguments,
-        Closure $renderChildrenClosure,
-        RenderingContextInterface $renderingContext
-    ) {
-        $table = $arguments['table'];
-        $field = $arguments['field'];
+    public function render()
+    {
+        $table = $this->arguments['table'];
+        $field = $this->arguments['field'];
 
         $helpTextArray = BackendUtility::helpTextArray($table, $field);
         $output = '';

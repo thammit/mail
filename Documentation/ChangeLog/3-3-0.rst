@@ -1,0 +1,23 @@
+3.3.0 - 24th Feb. 2025
+=======================
+
+
+.. contents::
+        :local:
+        :depth: 3
+
+
+
+Bug Fixes & Changes
+-------------------
+
+
+- Creating and sending mails in other languages then default (0) had some issues which needs to change several files:
+
+  - Templates/Backend/Mail/Index.html (preview modals link changed)
+  - ViewHelpers/PreviewLinksViewHelper.php (change way how to get links to translated pages and add page title to return array)
+  - Configuration/TCA/tx_mail_domain_model_mail.php (remove 'languageField' => 'sys_language_uid', from the ctrl section, since this field is only used to fetch
+    the right language from a given internal page, not from the mail record it self)
+
+- Make all included viewhelpers future proof by changing them from renderStatic to render
+

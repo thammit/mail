@@ -17,10 +17,7 @@ class RemoveMailBoundariesViewHelper extends AbstractViewHelper
      */
     protected $escapeOutput = true;
 
-    /**
-     * @return string
-     */
-    public function render(): string
+    public function render()
     {
         return preg_replace('/<!--' . Constants::CONTENT_SECTION_BOUNDARY .'_([\d,]*|END)-->/', '', $this->renderChildren());
     }
