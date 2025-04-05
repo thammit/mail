@@ -259,11 +259,11 @@ class ReportService
                 }
 
             }
-
+            $iconIdentifier = ReportUtility::determineDocumentIconIdentifier($url);
             if (isset($urlCounter['html'][$id]['plainId'])) {
                 $data[] = [
                     'label' => $label,
-                    'iconIdentifier' => ReportUtility::determineDocumentIconIdentifier($url),
+                    'iconIdentifier' => $iconIdentifier,
                     'title' => $htmlLinks[$id]['title'],
                     'totalCounter' => $urlCounter['total'][$origId]['counter'],
                     'htmlCounter' => $urlCounter['html'][$id]['counter'],
@@ -274,7 +274,7 @@ class ReportService
                 $html = !empty($urlCounter['html'][$id]['counter']);
                 $data[] = [
                     'label' => $label,
-                    'iconIdentifier' => ReportUtility::determineDocumentIconIdentifier($url),
+                    'iconIdentifier' => $iconIdentifier,
                     'title' => $htmlLinks[$id]['title'] ?? $htmlLinks[$id]['ref'],
                     'totalCounter' => ($html ? $urlCounter['html'][$id]['counter'] ?? 0 : $urlCounter['plain'][$origId]['counter'] ?? 0),
                     'htmlCounter' => $urlCounter['html'][$id]['counter'] ?? 0,
@@ -284,7 +284,7 @@ class ReportService
             }
         }
 
-        // go through all links that were not clicked yet and that have a label
+        // go through all links that were not clicked yet
         if (isset($htmlLinks['id'])) {
             foreach ($urlArr as $id => $link) {
                 if (!in_array($id, $clickedLinks)) {
