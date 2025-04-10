@@ -219,6 +219,7 @@ class ReportService
                 if ($urlArr[$id] === $urlArr[$htmlId]) {
                     $urlCounter['html'][$htmlId]['plainId'] = $id;
                     $urlCounter['html'][$htmlId]['plainCounter'] = $counter;
+                    $urlCounter['total'][$htmlId]['counter'] ??= 0;
                     $urlCounter['total'][$htmlId]['counter'] += $counter;
                     $htmlLinkFound = true;
                     break;
@@ -226,6 +227,7 @@ class ReportService
             }
             if (!$htmlLinkFound) {
                 $urlCounter['plain'][$id]['counter'] = $counter;
+                $urlCounter['total'][$id]['counter'] ??= 0;
                 $urlCounter['total'][$id]['counter'] += $counter;
             }
         }
