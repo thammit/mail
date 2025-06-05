@@ -12,7 +12,7 @@ class AddUpperCaseMarkers
         foreach ($markers as $marker => $value) {
             $uppercaseMarker = strtoupper($marker);
             if (str_starts_with($marker, '###USER_') && !array_key_exists($uppercaseMarker, $markers)) {
-                $markers[$uppercaseMarker] = strtoupper($value);
+                $markers[$uppercaseMarker] = strtoupper((string)($value ?? ''));
             }
         }
         $event->setMarkers($markers);

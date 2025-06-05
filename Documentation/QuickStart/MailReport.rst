@@ -36,3 +36,6 @@ If returned mails found, a forth box will appear, to view, delete or disable the
 
 ..  note::
     This only works, if :guilabel:`Privacy click tracking` inside :guilabel:`Mail > Configuration > Links and click tracking` is deactivated.
+
+..  note::
+    It it possible to exclude links from tracking, by adding `data-do-not-track` as attribute.

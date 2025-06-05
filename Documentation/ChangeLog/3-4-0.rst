@@ -1,0 +1,20 @@
+3.4.0 - 5th June. 2025
+=======================
+
+
+.. contents::
+        :local:
+        :depth: 3
+
+
+
+Bug Fixes & Changes
+-------------------
+
+- Improved migration logic by adding checks for record validity and content structure within DirectMailMigration.
+- Enhanced documentation with notes on excluding links from tracking.
+- Performed bug fixes in UpperCaseMarkers handling.
+- Updated dependencies in `composer.lock` of phar package for TER releases to newer versions for PHP-CSS-Parser and Symfony Polyfills.
+- Fix permalinks in documentation guides.xml.
+- Refactor ViewHelpers and improve multilingual support.
+- Update URL counter logic in ReportService.php
