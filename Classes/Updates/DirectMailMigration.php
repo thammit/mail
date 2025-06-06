@@ -13,11 +13,14 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Install\Attribute\UpgradeWizard;
 use TYPO3\CMS\Install\Updates\DatabaseUpdatedPrerequisite;
 use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
 
+#[UpgradeWizard('mailDirectMailMigration')]
 class DirectMailMigration implements UpgradeWizardInterface
 {
     private bool $ttAddressIsLoaded;
@@ -502,9 +505,16 @@ class DirectMailMigration implements UpgradeWizardInterface
      */
     protected function tableExists(string $table): bool
     {
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            return $this->getConnectionPool()
+                ->getConnectionForTable($table)
+                ->getSchemaManager()
+                ->tablesExist([$table]);
+        }
+
         return $this->getConnectionPool()
             ->getConnectionForTable($table)
-            ->getSchemaManager()
+            ->createSchemaManager()
             ->tablesExist([$table]);
     }
 
