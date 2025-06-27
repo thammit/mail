@@ -101,7 +101,16 @@
 							</div>
 						</f:defaultCase>
 					</f:switch>
-				</div>
+                    <f:if condition="{showSendingPriority}">
+                        <label for="sendingPriority" class="form-label h4 mt-3 mb-2">
+                            <f:translate key="{lll}mail.wizard.scheduleSending.sendingPriority"/>
+                        </label>
+                        <f:form.select id="sendingPriority" property="sendingPriority" class="form-select">
+                            <f:form.select.option value="0"><f:translate key="{lll}mail.wizard.scheduleSending.sendingPriority.I.0" /></f:form.select.option>
+                            <f:form.select.option value="1"><f:translate key="{lll}mail.wizard.scheduleSending.sendingPriority.I.1" /></f:form.select.option>
+                        </f:form.select>
+                    </f:if>
+                </div>
 			</div>
 			<f:if condition="{groups}">
 				<f:form.button disabled="disabled" id="mail-wizard-schedule-sending-form-submit-button" class="btn btn-lg btn-mail-theme text-uppercase" type="Submit">

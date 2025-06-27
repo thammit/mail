@@ -322,6 +322,15 @@
             <trans-unit id="mail.wizard.scheduleSending.distributionStart" resname="mail.wizard.scheduleSending.distributionStart">
                 <source>Distribution start (hh:mm dd-mm-yyyy)</source>
             </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.sendingPriority" resname="mail.wizard.scheduleSending.sendingPriority">
+                <source>Sending priority</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.sendingPriority.I.0" resname="mail.wizard.scheduleSending.sendingPriority.I.0">
+                <source>Normal</source>
+            </trans-unit>
+            <trans-unit id="mail.wizard.scheduleSending.sendingPriority.I.1" resname="mail.wizard.scheduleSending.sendingPriority.I.1">
+                <source>High</source>
+            </trans-unit>
             <trans-unit id="mail.wizard.notification.draftSaved.title" resname="mail.wizard.notification.draftSaved.title">
                 <source>Mail saved as draft</source>
             </trans-unit>

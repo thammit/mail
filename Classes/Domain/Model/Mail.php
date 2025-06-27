@@ -29,6 +29,7 @@ class Mail extends AbstractEntity
     protected string $replyToName = '';
     protected string $organisation = '';
     protected int $priority = 3;
+    protected int $sendingPriority = 0;
     protected string $encoding = 'quoted-printable';
     protected string $charset = 'iso-8859-1';
     /**
@@ -371,6 +372,17 @@ class Mail extends AbstractEntity
     public function setPriority(int $priority): Mail
     {
         $this->priority = $priority;
+        return $this;
+    }
+
+    public function getSendingPriority(): int
+    {
+        return $this->sendingPriority;
+    }
+
+    public function setSendingPriority(int $sendingPriority): Mail
+    {
+        $this->sendingPriority = $sendingPriority;
         return $this;
     }
 

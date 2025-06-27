@@ -14,6 +14,7 @@ use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -29,11 +30,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class MailFactory
 {
     private SiteInterface $site;
-
-    /**
-     * @var array|mixed
-     */
-    private array $pageTSConfiguration = [];
+    private array $pageTSConfiguration;
+    private array $userTSConfiguration;
 
     /**
      * @param $uid
@@ -58,6 +56,7 @@ class MailFactory
     public function __construct(private int $storageFolder, private Context $context, private SiteFinder $siteFinder)
     {
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($storageFolder)['mod.']['web_modules.']['mail.'] ?? [];
+        $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
         $this->site = $this->siteFinder->getSiteByPageId($storageFolder);
     }
 
@@ -330,6 +329,7 @@ class MailFactory
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
             ->setAuthCodeFields($this->pageTSConfiguration['authCodeFields'] ?? '')
             ->setSendOptions(new SendFormat($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))
+            ->setSendingPriority((int)($this->userTSConfiguration['defaultSendingPriority'] ?? $this->pageTSConfiguration['defaultSendingPriority'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['sending_priority']['config']['default']))
             ->setIncludeMedia((bool)($this->pageTSConfiguration['includeMedia'] ?? false))
             ->setPid($this->storageFolder);
 

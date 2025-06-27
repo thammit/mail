@@ -110,7 +110,10 @@ class MailRepository extends Repository
                 $query->logicalNot($query->in('type', [MailType::DRAFT_INTERNAL, MailType::DRAFT_EXTERNAL]))
             )
         );
-        $query->setOrderings(['scheduled' => QueryInterface::ORDER_ASCENDING]);
+        $query->setOrderings([
+            'sending_priority' => QueryInterface::ORDER_DESCENDING,
+            'scheduled' => QueryInterface::ORDER_ASCENDING
+        ]);
 
         return $query->execute()->getFirst();
     }

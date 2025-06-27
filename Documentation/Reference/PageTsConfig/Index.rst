@@ -120,6 +120,20 @@ The following properties set default values for corresponding properties of mail
 
    5 – Low
 
+.. confval:: defaultSendingPriority
+
+   :type: int+
+   :Default: 0
+   :Path: tx_mail.defaultSendingPriority
+
+   Set the default sending priority for the last mail wizard step.
+
+   Possible values are:
+
+      0 - Normal
+
+      1 - High
+
 sendOptions
 -----------
 

@@ -177,6 +177,19 @@ return [
                 'default' => '3',
             ],
         ],
+        'sending_priority' => [
+            'exclude' => true,
+            'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sending_priority',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'items' => [
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sending_priority.I.0', 0],
+                    ['LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sending_priority.I.1', 1],
+                ],
+                'default' => 0,
+            ],
+        ],
         'send_options' => [
             'exclude' => true,
             'label' => 'LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.sendOptions',
@@ -449,25 +462,25 @@ return [
     ],
     'types' => [
         \MEDIAESSENZ\Mail\Type\Enumeration\MailType::INTERNAL => ['showitem' => '
-			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type,sys_language_uid, page, plain_params, html_params, attachment,
+			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type,sys_language_uid, page, plain_params, html_params, attachment, sending_priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
 		'],
         \MEDIAESSENZ\Mail\Type\Enumeration\MailType::EXTERNAL => ['showitem' => '
-            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.htmlParams.ALT.1, attachment,
+            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.htmlParams.ALT.1, attachment, sending_priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
 		'],
         \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_INTERNAL => ['showitem' => '
-			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type,sys_language_uid, page, plain_params, html_params, attachment,
+			--div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type,sys_language_uid, page, plain_params, html_params, attachment, sending_priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
 		'],
         \MEDIAESSENZ\Mail\Type\Enumeration\MailType::DRAFT_EXTERNAL => ['showitem' => '
-            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.htmlParams.ALT.1, attachment,
+            --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.general, type, page, plain_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.plainParams.ALT.1, html_params;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.htmlParams.ALT.1, attachment, sending_priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.headers, subject, --palette--;;from, --palette--;Reply-to;reply, return_path, organisation, priority,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.content, send_options, include_media, redirect, redirect_all, auth_code_fields,
             --div--;LLL:EXT:mail/Resources/Private/Language/locallang_tca.xlf:tx_mail_domain_model_mail.tab.distribution, scheduled, --palette--;;progress
