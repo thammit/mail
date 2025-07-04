@@ -133,6 +133,15 @@ MAIL modules.
 
    Hide the exclude recipient groups in the last mail wizard step.
 
+.. confval:: showSendingPriority
+
+   :type: bool
+   :Default: 0
+   :Path: tx_mail.showSendingPriority
+
+   Show the sending priority in the last mail wizard step.
+   Mails marked as "high" will be send before other mails.
+
 .. confval:: defaultSendingPriority
 
    :type: int+
@@ -143,18 +152,9 @@ MAIL modules.
 
    Possible values are:
 
-      0 - Normal
+   0 - Normal
 
-      1 - High
-
-.. confval:: showSendingPriority
-
-   :type: bool
-   :Default: 0
-   :Path: tx_mail.showSendingPriority
-
-   Show the sending priority in the last mail wizard step.
-   Mails marked as "high" will be send before other mails.
+   1 - High
 
 .. confval:: hideManualSendingButton
 
