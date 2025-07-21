@@ -99,6 +99,15 @@
             <trans-unit id="tx_mail_domain_model_mail.priority.I.2" resname="tx_mail_domain_model_mail.priority.I.2">
                 <source>High</source>
             </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.sending_priority" resname="tx_mail_domain_model_mail.sending_priority">
+                <source>Sending priority</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.sending_priority.I.0" resname="tx_mail_domain_model_mail.sending_priority.I.0">
+                <source>Normal</source>
+            </trans-unit>
+            <trans-unit id="tx_mail_domain_model_mail.sending_priority.I.1" resname="tx_mail_domain_model_mail.sending_priority.I.1">
+                <source>High</source>
+            </trans-unit>
             <trans-unit id="tx_mail_domain_model_mail.renderedSize" resname="tx_mail_domain_model_mail.renderedSize">
                 <source>Compiled size</source>
             </trans-unit>

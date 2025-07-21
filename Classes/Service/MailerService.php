@@ -704,7 +704,7 @@ class MailerService implements LoggerAwareInterface
                 /** @var DOMElement $imageElement */
                 foreach ($imageElements as $imageElement) {
                     if (!$imageElement->hasAttribute('data-do-not-embed')) {
-                        $absoluteImagePath = MailerUtility::absRef($imageElement->getAttribute('src'), $mail->getRedirectUrl());
+                        $absoluteImagePath = MailerUtility::getAbsoluteUrl($imageElement->getAttribute('src'), $mail->getRedirectUrl());
                         // change image src to absolute path in case fetch and embed fails
                         $imageElement->setAttribute('src', $absoluteImagePath);
                         // fetch image from absolute url

@@ -120,6 +120,37 @@ The following properties set default values for corresponding properties of mail
 
    5 – Low
 
+.. confval:: hideExcludeRecipientGroups
+
+   :type: bool
+   :Default: 0
+   :Path: mod.web\_modules.mail.hideExcludeRecipientGroups
+
+   Hide the exclude recipient groups in the last mail wizard step.
+
+.. confval:: showSendingPriority
+
+   :type: bool
+   :Default: 0
+   :Path: mod.web\_modules.mail.showSendingPriority
+
+   Show the sending priority in the last mail wizard step.
+   Mails marked as "high" will be send before other mails.
+
+.. confval:: defaultSendingPriority
+
+   :type: int+
+   :Default: 0
+   :Path: mod.web\_modules.mail.defaultSendingPriority
+
+   Set the default sending priority for the last mail wizard step.
+
+   Possible values are:
+
+   0 - Normal
+
+   1 - High
+
 sendOptions
 -----------
 

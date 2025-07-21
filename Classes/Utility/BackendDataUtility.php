@@ -22,26 +22,39 @@ class BackendDataUtility
 {
     public static function getBaseUrl(int $pageId, int $languageUid = 0): string
     {
-        if ($pageId > 0) {
-            /** @var SiteFinder $siteFinder */
-            $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-            try {
-                $site = $siteFinder->getSiteByPageId($pageId);
-                $base = $site->getBase();
-                if ($languageUid > 0) {
-                    $siteLanguage = $site->getLanguageById($languageUid);
-                    $languagePath = rtrim($siteLanguage->getBase()->getPath(), '/');
-                    if ($languagePath) {
-                        return sprintf('%s://%s/%s', $base->getScheme(), $base->getHost(), $languagePath);
+        if (!$pageId) {
+            return '';
+        }
+        /** @var SiteFinder $siteFinder */
+        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+        try {
+            $site = $siteFinder->getSiteByPageId($pageId);
+            $base = $site->getBase();
+            $scheme = sprintf('%s://', $base->getScheme());
+            $host = $base->getHost();
+            $port = $base->getPort() ? (':' . $base->getPort()) : '';
+            $languagePath = '';
+            if ($languageUid > 0) {
+                $siteLanguage = $site->getLanguageById($languageUid);
+                $languageBase = $siteLanguage->getBase();
+                $languagePath = trim($languageBase->getPath(), '/');
+                if ($languagePath) {
+                    // language has a path prefix
+                    $languagePath = '/' . $languagePath;
+                } else {
+                    $languageBaseHost = $languageBase->getHost();
+                    if ($languageBaseHost !== $base->getHost()) {
+                        // language has an own domain
+                        $host = $languageBaseHost;
                     }
                 }
 
-                return sprintf('%s://%s', $base->getScheme(), $base->getHost());
-            } catch (SiteNotFoundException) {
             }
-        }
 
-        return '';
+            return $scheme . $host . $port . $languagePath;
+        } catch (SiteNotFoundException) {
+            return '';
+        }
     }
 
     /**
@@ -125,7 +138,8 @@ class BackendDataUtility
             $mailModulePageUids = GeneralUtility::makeInstance(PagesRepository::class)->findMailModulePageUids();
             if ($mailModulePageUids) {
                 foreach ($mailModulePageUids as $pageUid) {
-                    $hasAccess = BackendUtility::readPageAccess($pageUid, $GLOBALS['BE_USER']->getPagePermsClause(Permission::PAGE_SHOW)) !== false;
+                    $hasAccess = BackendUtility::readPageAccess($pageUid,
+                            $GLOBALS['BE_USER']->getPagePermsClause(Permission::PAGE_SHOW)) !== false;
                     if ($hasAccess) {
                         return (int)$pageUid;
                     }

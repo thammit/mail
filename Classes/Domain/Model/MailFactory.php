@@ -14,6 +14,7 @@ use MEDIAESSENZ\Mail\Type\Bitmask\SendFormat;
 use MEDIAESSENZ\Mail\Utility\BackendDataUtility;
 use MEDIAESSENZ\Mail\Utility\LanguageUtility;
 use MEDIAESSENZ\Mail\Utility\MailerUtility;
+use MEDIAESSENZ\Mail\Utility\TypoScriptUtility;
 use MEDIAESSENZ\Mail\Utility\ViewUtility;
 use Symfony\Component\CssSelector\Exception\ParseException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -29,11 +30,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class MailFactory
 {
     private SiteInterface $site;
-
-    /**
-     * @var array|mixed
-     */
-    private array $pageTSConfiguration = [];
+    private array $pageTSConfiguration;
+    private array $userTSConfiguration;
 
     /**
      * @param $uid
@@ -58,6 +56,7 @@ class MailFactory
     public function __construct(private int $storageFolder, private Context $context, private SiteFinder $siteFinder)
     {
         $this->pageTSConfiguration = BackendUtility::getPagesTSconfig($storageFolder)['mod.']['web_modules.']['mail.'] ?? [];
+        $this->userTSConfiguration = TypoScriptUtility::getUserTSConfig()['tx_mail.'] ?? [];
         $this->site = $this->siteFinder->getSiteByPageId($storageFolder);
     }
 
@@ -71,17 +70,19 @@ class MailFactory
      */
     public function fromInternalPage(int $pageUid, int $languageUid = 0, bool $forceNoClickTracking = false): ?Mail
     {
+        /** @var PageRepository $pageRepository */
         $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
         $pageRecord = $pageRepository->getPage($pageUid, true);
         if (!$pageRecord) {
             return null;
         }
+        $baseUrl = BackendDataUtility::getBaseUrl($pageUid, $languageUid);
         $mail = $this->newMailFromPageTSConfiguration();
         $mail->setType(MailType::INTERNAL)
             ->setStep(1)
-            ->setPage($pageRecord['uid'])
+            ->setPage($pageUid)
             ->setSubject($pageRecord['title'] ?? '')
-            ->setRedirectUrl(BackendDataUtility::getBaseUrl($pageUid))
+            ->setRedirectUrl($baseUrl)
             ->setPlainParams($this->pageTSConfiguration['plainParams'] ?? '')
             ->setHtmlParams($this->pageTSConfiguration['htmlParams'] ?? '')
             ->setEncoding($this->pageTSConfiguration['encoding'] ?? 'quoted-printable')
@@ -100,8 +101,6 @@ class MailFactory
             }
         }
 
-        $baseUrl = BackendDataUtility::getBaseUrl($mail->getPage(), $languageUid);
-        $glue = str_contains($baseUrl, '?') ? '&' : '?';
         $clickTracking = (bool)($this->pageTSConfiguration['clickTracking'] ?? false);
         $clickTrackingMailTo = (bool)($this->pageTSConfiguration['clickTrackingMailTo'] ?? false);
         $trackingPrivacy = (bool)($this->pageTSConfiguration['trackingPrivacy'] ?? false);
@@ -111,16 +110,17 @@ class MailFactory
             $clickTrackingMailTo = false;
         }
 
+        $glue = str_contains($baseUrl, '?') ? '&' : '?';
         $jumpUrlPrefix = $baseUrl . $glue .
             'mail=###MAIL_ID###' .
             ($trackingPrivacy ? '' : '&rid=###MAIL_RECIPIENT_SOURCE###-###USER_uid###') .
             '&aC=###MAIL_AUTHCODE###' .
             '&jumpurl=';
 
-        $htmlLinks = [];
+        $jumpUrls = [];
         if ($mail->isHtml()) {
-            $htmlUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
-            $htmlContent = $this->fetchHtmlContent($htmlUrl);
+            $htmlContentUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getHtmlParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
+            $htmlContent = $this->fetchHtmlContent($htmlContentUrl);
             if ($htmlContent !== false) {
                 $html = new HTML5();
                 $domDocument = $html->loadHTML($htmlContent);
@@ -128,28 +128,28 @@ class MailFactory
                     $domElements = $domDocument->getElementsByTagName($tag);
                     /** @var DOMElement $domElement */
                     foreach ($domElements as $domElement) {
-                        $hyperLinkAttribute = match ($domElement->tagName) {
+                        $urlAttribute = match ($domElement->tagName) {
                             'form' => 'action',
                             default => 'href',
                         };
-                        $originalHyperLink = $domElement->getAttribute($hyperLinkAttribute);
-                        if (!str_starts_with(trim($originalHyperLink), '#')) {
-                            $absoluteHyperlink = MailerUtility::absRef($originalHyperLink, $baseUrl);
-                            if ($clickTracking && !$domElement->getAttribute('data-do-not-track') && (!str_starts_with($originalHyperLink, 'mailto:') || $clickTrackingMailTo)) {
-                                $hyperLink = array_search($originalHyperLink, array_column($htmlLinks, 'ref'));
-                                if ($hyperLink === false) {
-                                    $htmlLinks[] = [
-                                        'tag' => $hyperLinkAttribute,
-                                        'ref' => $originalHyperLink,
-                                        'absRef' => $absoluteHyperlink,
-                                        'title' => $domElement->getAttribute('title') ?: $originalHyperLink,
+                        $url = trim($domElement->getAttribute($urlAttribute));
+                        if (!str_starts_with($url, '#')) {
+                            $absoluteUrl = MailerUtility::getAbsoluteUrl($url, $baseUrl);
+                            if ($clickTracking && !$domElement->getAttribute('data-do-not-track') && (!str_starts_with($url, 'mailto:') || $clickTrackingMailTo)) {
+                                $jumpUrlId = array_search($url, array_column($jumpUrls, 'ref'), true);
+                                if ($jumpUrlId === false) {
+                                    $jumpUrls[] = [
+                                        'tag' => $urlAttribute,
+                                        'ref' => $url,
+                                        'absRef' => $absoluteUrl,
+                                        'title' => $domElement->getAttribute('title') ?: $url,
                                     ];
-                                    end($htmlLinks);
-                                    $hyperLink = key($htmlLinks);
+                                    end($jumpUrls);
+                                    $jumpUrlId = key($jumpUrls);
                                 }
-                                $absoluteHyperlink = $jumpUrlPrefix . $hyperLink;
+                                $absoluteUrl = $jumpUrlPrefix . $jumpUrlId;
                             }
-                            $domElement->setAttribute($hyperLinkAttribute, $absoluteHyperlink);
+                            $domElement->setAttribute($urlAttribute, $absoluteUrl);
                         }
                     }
                 }
@@ -158,30 +158,31 @@ class MailFactory
                     $images = $domDocument->getElementsByTagName('img');
                     /** @var DOMElement $image */
                     foreach ($images as $image) {
+                        $imgSrc = $image->getAttribute('src');
                         if ($clickTracking && $image->hasAttribute('data-mailer-ping')) {
                             // Tracking pixel
-                            $image->setAttribute('src', $jumpUrlPrefix . $image->getAttribute('src'));
+                            $image->setAttribute('src', $jumpUrlPrefix . $imgSrc);
                             // Replace only first image src with jumpurl
                             $clickTracking = false;
-                        } else if (!$mail->isIncludeMedia() && $image->hasAttribute('src') && !str_starts_with($image->getAttribute('src'), 'http')) {
-                            // convert all relative image urls to absolute urls
-                            $image->setAttribute('src', MailerUtility::absRef($image->getAttribute('src'), $mail->getRedirectUrl()));
+                        } else if (!$mail->isIncludeMedia() && !str_starts_with($imgSrc, 'http')) {
+                            // convert relative image url to absolute url
+                            $image->setAttribute('src', MailerUtility::getAbsoluteUrl($imgSrc, $baseUrl));
                         }
                     }
                 }
 
                 $mail->setHtmlContent($html->saveHTML($domDocument));
-                $mail->setHtmlLinks($htmlLinks);
+                $mail->setHtmlLinks($jumpUrls);
             }
         }
 
         if ($mail->isPlain()) {
-            $plainTextUrl = BackendDataUtility::getUrlForInternalPage($mail->getPage(), $mail->getPlainParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
-            $plainContent = $this->fetchPlainTextContent($plainTextUrl);
+            $plainContentUrl = BackendDataUtility::getUrlForInternalPage($pageUid, $mail->getPlainParams(), (int)($this->pageTSConfiguration['simulateUsergroup'] ?? 0));
+            $plainContent = $this->fetchPlainContent($plainContentUrl);
             if ($plainContent !== false) {
-                foreach ($htmlLinks as $key => $htmlLink) {
+                foreach ($jumpUrls as $jumpUrlId => $jumpUrl) {
                     // replace links found in html content in plain content as well, but with negative jumpUrl id
-                    $plainContent = str_replace($htmlLink['absRef'], $jumpUrlPrefix . '-' . $key, $plainContent);
+                    $plainContent = str_replace($jumpUrl['absRef'], $jumpUrlPrefix . '-' . $jumpUrlId, $plainContent);
                 }
                 $mail->setPlainContent($plainContent);
             }
@@ -249,7 +250,7 @@ class MailFactory
             $mail->removePlainSendOption();
         } else {
             $plainTextUrl = MailerUtility::getUrlForExternalPage($mail->getPlainParams());
-            $plainContent = $this->fetchPlainTextContent($plainTextUrl);
+            $plainContent = $this->fetchPlainContent($plainTextUrl);
             if ($plainContent === false) {
                 throw new PlainTextContentFetchFailedException();
             }
@@ -328,6 +329,7 @@ class MailFactory
             ->setOrganisation($this->pageTSConfiguration['organisation'] ?? '')
             ->setAuthCodeFields($this->pageTSConfiguration['authCodeFields'] ?? '')
             ->setSendOptions(new SendFormat($this->pageTSConfiguration['sendOptions'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['send_options']['config']['default']))
+            ->setSendingPriority((int)($this->userTSConfiguration['defaultSendingPriority'] ?? $this->pageTSConfiguration['defaultSendingPriority'] ?? $GLOBALS['TCA']['tx_mail_domain_model_mail']['columns']['sending_priority']['config']['default']))
             ->setIncludeMedia((bool)($this->pageTSConfiguration['includeMedia'] ?? false))
             ->setPid($this->storageFolder);
 
@@ -335,14 +337,14 @@ class MailFactory
     }
 
     /**
-     * @param string $htmlUrl
+     * @param string $htmlContentUrl
      * @return bool|string
      */
-    protected function fetchHtmlContent(string $htmlUrl): bool|string
+    protected function fetchHtmlContent(string $htmlContentUrl): bool|string
     {
         try {
             $htmlContent = MailerUtility::fetchContentFromUrl(
-                $htmlUrl,
+                $htmlContentUrl,
                     $this->pageTSConfiguration['httpUsername'] ?? '',
                     $this->pageTSConfiguration['httpPassword'] ?? ''
             );
@@ -353,7 +355,7 @@ class MailFactory
             if (MailerUtility::contentContainsFrameTag($htmlContent)) {
                 // content contains frame tag
                 ViewUtility::addNotificationError(
-                    sprintf(LanguageUtility::getLL('mail.wizard.notification.contentContainFrameTagsError.message'), $htmlUrl),
+                    sprintf(LanguageUtility::getLL('mail.wizard.notification.contentContainFrameTagsError.message'), $htmlContentUrl),
                     LanguageUtility::getLL('general.notification.severity.error.title'));
                 return false;
             }
@@ -368,21 +370,21 @@ class MailFactory
 
         } catch (FetchContentFailedException $exception) {
             ViewUtility::addNotificationError(
-                sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $htmlUrl, $exception->getMessage()),
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $htmlContentUrl, $exception->getMessage()),
                 LanguageUtility::getLL('general.notification.severity.error.title'));
             return false;
         }
     }
 
     /**
-     * @param string $plainTextUrl
+     * @param string $plainContentUrl
      * @return bool|string
      */
-    protected function fetchPlainTextContent(string $plainTextUrl): bool|string
+    protected function fetchPlainContent(string $plainContentUrl): bool|string
     {
         try {
             $plainContent = MailerUtility::fetchContentFromUrl(
-                $plainTextUrl,
+                $plainContentUrl,
                     $this->pageTSConfiguration['httpUsername'] ?? '',
                     $this->pageTSConfiguration['httpPassword'] ?? ''
             );
@@ -396,7 +398,7 @@ class MailFactory
 
         } catch (FetchContentFailedException $exception) {
             ViewUtility::addNotificationError(
-                sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $plainTextUrl, $exception->getMessage()),
+                sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $plainContentUrl, $exception->getMessage()),
                 LanguageUtility::getLL('general.notification.severity.error.title'));
             return false;
         }

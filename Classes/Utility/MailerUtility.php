@@ -87,7 +87,8 @@ class MailerUtility
         /** @var DOMElement $bodyElement */
         $bodyElement = $domDocument->getElementsByTagName('body');
 
-        return self::removeDoubleBrTags(str_replace('</body>', '</div>', str_replace('<body', '<div', $html->saveHTML($bodyElement))));
+        return self::removeDoubleBrTags(str_replace('</body>', '</div>',
+            str_replace('<body', '<div', $html->saveHTML($bodyElement))));
     }
 
     /**
@@ -96,8 +97,10 @@ class MailerUtility
      *
      * @return string Content of the email, which the recipient subscribed or false if no content found
      */
-    public static function getContentFromContentPartsMatchingUserCategories(array $contentParts, array $userCategories = null): string
-    {
+    public static function getContentFromContentPartsMatchingUserCategories(
+        array $contentParts,
+        array $userCategories = null
+    ): string {
         $returnContentParts = [];
         $mailHasContent = false;
         $boundaryMax = count($contentParts) - 1;
@@ -151,13 +154,11 @@ class MailerUtility
         foreach ($tags as $tag) {
             $tagNodes = $domDocument->getElementsByTagName($tag);
             $remove = [];
-            foreach($tagNodes as $node)
-            {
+            foreach ($tagNodes as $node) {
                 $remove[] = $node;
             }
 
-            foreach ($remove as $item)
-            {
+            foreach ($remove as $item) {
                 $item->parentNode->removeChild($item);
             }
         }
@@ -195,16 +196,7 @@ class MailerUtility
         /** @var DOMElement $imageNode */
         foreach ($imageNodes as $imageNode) {
             if ($imageNode->hasAttribute('src')) {
-                $src = $imageNode->getAttribute('src');
-                if (!str_starts_with($src, 'http')) {
-                    if (str_starts_with($src, '/')) {
-                        $baseUrl = parse_url($htmlUrl, PHP_URL_SCHEME) . '://' . parse_url($htmlUrl, PHP_URL_HOST);
-                        $src = $baseUrl . $src;
-                    } else {
-                        $src = rtrim($htmlUrl, '/') . '/' . $src;
-                    }
-                    $imageNode->setAttribute('src', $src);
-                }
+                $imageNode->setAttribute('src', self::getAbsoluteUrl($imageNode->getAttribute('src'), $htmlUrl));
             }
         }
 
@@ -223,20 +215,13 @@ class MailerUtility
         /** @var DOMElement $linkNode */
         foreach ($linkNodes as $linkNode) {
             if ($linkNode->hasAttribute('rel') && $linkNode->getAttribute('rel') === 'stylesheet') {
-                $href = $linkNode->getAttribute('href');
-                if (!str_starts_with($href, 'http')) {
-                    if (str_starts_with($href, '/')) {
-                        $baseUrl = parse_url($htmlUrl, PHP_URL_SCHEME) . '://' . parse_url($htmlUrl, PHP_URL_HOST);
-                        $href = $baseUrl . $href;
-                    } else {
-                        $href = rtrim($htmlUrl, '/') . '/' . $href;
-                    }
-                }
+                $href = self::getAbsoluteUrl($linkNode->getAttribute('href'), $htmlUrl);
                 try {
                     $stylesheetUrls[] = self::fetchContentFromUrl($href);
                 } catch (FetchContentFailedException $exception) {
                     ViewUtility::addNotificationError(
-                        sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'), $href, $exception->getMessage()),
+                        sprintf(LanguageUtility::getLL('mail.wizard.notification.fetchContentFromUrlError.message'),
+                            $href, $exception->getMessage()),
                         LanguageUtility::getLL('general.notification.severity.error.title'));
                 }
             }
@@ -276,14 +261,14 @@ class MailerUtility
         $baseUrl = $mail->getRedirectUrl();
         $messageWithReplacedLinks = preg_replace_callback(
             '/(http|https):\\/\\/.+(?=[].?]*([! \'"()<>]+|$))/iU',
-            function (array $matches) use ($mailUid, $lengthLimit, $baseUrl, $sourceHost) {
+            static function (array $matches) use ($mailUid, $lengthLimit, $baseUrl, $sourceHost) {
                 return $baseUrl . self::createRedirect($matches[0], $lengthLimit, $sourceHost, $mailUid);
             },
             $message
         );
 
         if ($message !== $messageWithReplacedLinks) {
-            GeneralUtility::makeInstance(RedirectCacheService::class)->rebuildForHost($sourceHost);
+            GeneralUtility::makeInstance(RedirectCacheService::class)?->rebuildForHost($sourceHost);
         }
 
         return $messageWithReplacedLinks;
@@ -297,8 +282,12 @@ class MailerUtility
     /**
      * @return string The created redirect url
      */
-    public static function createRedirect(string $targetLink, int $lengthLimit, string $sourceHost, int $mailUid): string
-    {
+    public static function createRedirect(
+        string $targetLink,
+        int $lengthLimit,
+        string $sourceHost,
+        int $mailUid
+    ): string {
         if (strlen($targetLink) <= $lengthLimit) {
             return $targetLink;
         }
@@ -347,8 +336,11 @@ class MailerUtility
      * @param int $recipientUid
      * @return string
      */
-    public static function buildMailIdentifierHeaderWithoutHash(int $mailUid, string $recipientSourceIdentifier, int $recipientUid): string
-    {
+    public static function buildMailIdentifierHeaderWithoutHash(
+        int $mailUid,
+        string $recipientSourceIdentifier,
+        int $recipientUid
+    ): string {
         return 'MID' . $mailUid . '-' . $recipientSourceIdentifier . '-' . $recipientUid;
     }
 
@@ -374,9 +366,11 @@ class MailerUtility
             // plain/csv example X-TYPO3MID: MID28-tx_mail_domain_model_group:1-1-ac70286ddd3ce390624791a5eeda870d
             [, $preSelection] = explode($header . ':', $rawHeaders, 2);
             [$finalSelection] = explode(LF, $preSelection, 2);
-            [$mailUid, $recipientSourceIdentifier, $recipientUid, $hash] = GeneralUtility::trimExplode('-', $finalSelection, true);
+            [$mailUid, $recipientSourceIdentifier, $recipientUid, $hash] = GeneralUtility::trimExplode('-',
+                $finalSelection, true);
             $mailUid = (int)ltrim($mailUid, 'MID');
-            if (md5(self::buildMailIdentifierHeaderWithoutHash($mailUid, $recipientSourceIdentifier, (int)$recipientUid)) === $hash) {
+            if (md5(self::buildMailIdentifierHeaderWithoutHash($mailUid, $recipientSourceIdentifier,
+                    (int)$recipientUid)) === $hash) {
                 return [
                     'mail' => $mailUid,
                     'recipient_source' => $recipientSourceIdentifier,
@@ -395,7 +389,8 @@ class MailerUtility
      */
     public static function getAttachments(int $uid): array
     {
-        return GeneralUtility::makeInstance(FileRepository::class)->findByRelation('tx_mail_domain_model_mail', 'attachment', $uid);
+        return GeneralUtility::makeInstance(FileRepository::class)->findByRelation('tx_mail_domain_model_mail',
+            'attachment', $uid);
     }
 
     /**
@@ -424,9 +419,9 @@ class MailerUtility
         if ($host && !str_contains($host, '.')) {
             $ip = gethostbyname($host);
             // We got an IP address
-            if ($ip != $host) {
+            if ($ip !== $host) {
                 $fqdn = gethostbyaddr($ip);
-                if ($ip != $fqdn) {
+                if ($ip !== $fqdn) {
                     $host = $fqdn;
                 }
             }
@@ -435,12 +430,12 @@ class MailerUtility
             $host = 'localhost.localdomain';
         }
 
-        if ($host == '127.0.0.1' || $host == 'localhost' || $host == 'localhost.localdomain') {
+        if ($host === '127.0.0.1' || $host === 'localhost' || $host === 'localhost.localdomain') {
             $host = ($GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] ? preg_replace('/[^A-Za-z0-9_\-]/', '_',
                     $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']) : 'localhost') . '.TYPO3';
         }
 
-        $idLeft = time() . '.' . uniqid();
+        $idLeft = uniqid(time() . '.', true);
         $idRight = $host ?: 'symfony.generated';
 
         return $idLeft . '@' . $idRight;
@@ -466,8 +461,11 @@ class MailerUtility
      * @param string $password
      * @return string The new URL with username and password
      */
-    public static function addUsernameAndPasswordToUrl(string $url, string $username = '', string $password = ''): string
-    {
+    public static function addUsernameAndPasswordToUrl(
+        string $url,
+        string $username = '',
+        string $password = ''
+    ): string {
         if (!$username || !$password) {
             return $url;
         }
@@ -478,39 +476,6 @@ class MailerUtility
         }
 
         return $url;
-    }
-
-    /**
-     * Returns the absolute address of a link
-     *
-     * @param string $ref Address to use
-     * @param string $path
-     * @return string The absolute address
-     */
-    public static function absRef(string $ref, string $path): string
-    {
-        $ref = trim($ref);
-        $info = parse_url($ref);
-        if ($info['scheme'] ?? false) {
-            return $ref;
-        }
-
-        if (preg_match('/^\//', $ref)) {
-            // if ref is an absolute link
-            $addr = parse_url($path);
-            return $addr['scheme'] . '://' . $addr['host'] . (($addr['port'] ?? false) ? ':' . $addr['port'] : '') . $ref;
-        }
-
-        // If the reference is relative, the path is added,
-        // in order for us to fetch the content
-        if (str_ends_with($path, '/')) {
-            // if the last char is a /, then prepend the ref
-            return $path . $ref;
-        }
-
-        // if the last char not a /, then assume it's an absolute
-        $addr = parse_url($path);
-        return $addr['scheme'] . '://' . $addr['host'] . (isset($addr['port']) ? ':' . $addr['port'] : '') . '/' . $ref;
     }
 
     /**
@@ -529,6 +494,32 @@ class MailerUtility
             $subArray = array_values(array_unique($subArray, SORT_REGULAR));
         }
         return $array;
+    }
+
+    /**
+     * @param string $url
+     * @param string $baseUrl
+     * @return string
+     */
+    public static function getAbsoluteUrl(string $url, string $baseUrl): string
+    {
+        // Return as-is if the URL is already absolute
+        if (($urlInfo = parse_url($url)) && ($urlInfo['scheme'] ?? false)) {
+            return $url;
+        }
+
+        if (str_starts_with($url, '/')) {
+            $baseUrlInfo = parse_url($baseUrl);
+            $base = sprintf(
+                '%s//%s%s',
+                isset($baseUrlInfo['scheme']) ? $baseUrlInfo['scheme'] . ':' : '',
+                $baseUrlInfo['host'] ?? '',
+                isset($baseUrlInfo['port']) ? ':' . $baseUrlInfo['port'] : ''
+            );
+            return $base . $url;
+        }
+
+        return rtrim($baseUrl, '/') . '/' . $url;
     }
 
 }

@@ -1,0 +1,19 @@
+3.6.0 - 4th July. 2025
+=======================
+
+
+.. contents::
+        :local:
+        :depth: 3
+
+
+
+Sending Priority Feature
+------------------------
+
+- Add sending priority to the last step of the mail wizard. Mails set to "high" will be send before other mails.
+  At the end of an already running sending cycle, triggered by the scheduler task, a currently running delivery
+  will be paused, until the mail with the higher priority was sent out.
+- New page and user TsConfig parameters (defaultSendingPriority, showSendingPriority) are available to set the
+  default priority and show/hide the priority selector. The sending priority selector is set to hidden by default!
+- hideExcludeRecipientGroups is now also available as pageTsConfig parameter (mod.web\_modules.mail.hideExcludeRecipientGroups)

@@ -844,7 +844,7 @@ class MailController extends AbstractController
 
         if (!$mail->getScheduled()) {
             $now = new DateTimeImmutable('now');
-            if ($this->typo3MajorVersion == 12) {
+            if ($this->typo3MajorVersion === 12) {
                 // converted timezone from server time zone to utc
                 $serverTimeZone = new DateTimeZone(@date_default_timezone_get());
                 $now = new DateTimeImmutable('now', $serverTimeZone);
@@ -859,7 +859,8 @@ class MailController extends AbstractController
         $assignments = [
             'groups' => $groups,
             'navigation' => $this->getNavigation($hideCategoryStep ? 4 : 5, $hideCategoryStep),
-            'hideExcludeRecipientGroups' => $this->userTSConfiguration['hideExcludeRecipientGroups'] ?? false,
+            'hideExcludeRecipientGroups' => (bool)($this->userTSConfiguration['hideExcludeRecipientGroups'] ?? $this->pageTSConfiguration['hideExcludeRecipientGroups'] ?? false),
+            'showSendingPriority' => (bool)($this->userTSConfiguration['showSendingPriority'] ?? $this->pageTSConfiguration['showSendingPriority'] ?? false),
             'mail' => $mail,
             'mailUid' => $mail->getUid(),
             'title' => $mail->getSubject(),

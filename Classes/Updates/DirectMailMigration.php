@@ -13,11 +13,14 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Install\Attribute\UpgradeWizard;
 use TYPO3\CMS\Install\Updates\DatabaseUpdatedPrerequisite;
 use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
 
+#[UpgradeWizard('mailDirectMailMigration')]
 class DirectMailMigration implements UpgradeWizardInterface
 {
     private bool $ttAddressIsLoaded;
@@ -56,8 +59,9 @@ class DirectMailMigration implements UpgradeWizardInterface
             $sysDmailRecordsToMigrate = $this->getSysDmailRecordsToMigrate();
             foreach ($sysDmailRecordsToMigrate as $record) {
                 $alreadyMigrated = $connectionMail->count('*', 'tx_mail_domain_model_mail', ['uid' => $record['uid']]);
-                if ($alreadyMigrated === 0) {
+                if (is_array($record) && $alreadyMigrated === 0) {
                     $mailContent = unserialize(base64_decode($record['mailContent'] ?? ''));
+                    if (!is_array($mailContent) || !array_key_exists('messageid', $mailContent)) { continue; }
                     $connectionMail->insert('tx_mail_domain_model_mail',
                         [
                             'uid' => $record['uid'],
@@ -127,7 +131,7 @@ class DirectMailMigration implements UpgradeWizardInterface
             $sysDmailGroupRecordsToMigrate = $this->getSysDmailGroupRecordsToMigrate();
             foreach ($sysDmailGroupRecordsToMigrate as $record) {
                 $alreadyMigrated = $connectionGroup->count('*', 'tx_mail_domain_model_group', ['uid' => $record['uid']]);
-                if ($alreadyMigrated === 0) {
+                if (is_array($record) && $alreadyMigrated === 0) {
                     $isCsv = (int)$record['type'] === RecipientGroupType::PLAIN && (int)$record['csv'] === 1;
                     $connectionGroup->insert('tx_mail_domain_model_group',
                         [
@@ -156,7 +160,7 @@ class DirectMailMigration implements UpgradeWizardInterface
             $sysDmailLogRecordsToMigrate = $this->getSysDmailLogRecordsToMigrate();
             foreach ($sysDmailLogRecordsToMigrate as $record) {
                 $alreadyMigrated = $connectionLog->count('*', 'tx_mail_domain_model_log', ['uid' => $record['uid']]);
-                if ($alreadyMigrated === 0) {
+                if (is_array($record) && $alreadyMigrated === 0) {
                     // Change plain and html format to match send options of mail table
                     $formatSent = match ($record['html_sent']) {
                         1 => SendFormat::HTML,
@@ -210,7 +214,7 @@ class DirectMailMigration implements UpgradeWizardInterface
             foreach ($sysDmailCategoryRecordsToMigrate as $record) {
                 $sysCategoryUid = $directMailCategorySysCategoryMappings[$record['uid']] ?? 0;
                 $sysCategoryExists = $connectionCategory->count('*', 'sys_category', ['uid' => $sysCategoryUid]);
-                if ($sysCategoryExists === 0) {
+                if (is_array($record) && $sysCategoryExists === 0) {
                     // Add sys_category
                     $connectionCategory->insert('sys_category', [
                         'uid' => $sysCategoryUid,
@@ -501,9 +505,16 @@ class DirectMailMigration implements UpgradeWizardInterface
      */
     protected function tableExists(string $table): bool
     {
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            return $this->getConnectionPool()
+                ->getConnectionForTable($table)
+                ->getSchemaManager()
+                ->tablesExist([$table]);
+        }
+
         return $this->getConnectionPool()
             ->getConnectionForTable($table)
-            ->getSchemaManager()
+            ->createSchemaManager()
             ->tablesExist([$table]);
     }
 

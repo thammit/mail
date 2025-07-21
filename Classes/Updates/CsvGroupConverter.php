@@ -6,10 +6,13 @@ use MEDIAESSENZ\Mail\Type\Enumeration\CsvType;
 use MEDIAESSENZ\Mail\Type\Enumeration\RecipientGroupType;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Install\Attribute\UpgradeWizard;
 use TYPO3\CMS\Install\Updates\DatabaseUpdatedPrerequisite;
 use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
 
+#[UpgradeWizard('mailCsvGroupConverter')]
 class CsvGroupConverter implements UpgradeWizardInterface
 {
     public function getIdentifier(): string
@@ -97,9 +100,16 @@ class CsvGroupConverter implements UpgradeWizardInterface
      */
     protected function tableExists(string $table): bool
     {
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            return $this->getConnectionPool()
+                ->getConnectionForTable($table)
+                ->getSchemaManager()
+                ->tablesExist([$table]);
+        }
+
         return $this->getConnectionPool()
             ->getConnectionForTable($table)
-            ->getSchemaManager()
+            ->createSchemaManager()
             ->tablesExist([$table]);
     }
 
@@ -108,11 +118,18 @@ class CsvGroupConverter implements UpgradeWizardInterface
      */
     protected function tableColumnExists(string $table, string $column): bool
     {
-        return $this->getConnectionPool()
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            return $this->getConnectionPool()
+                ->getConnectionForTable($table)
+                ->getSchemaManager()
+                ->listTableDetails($table)
+                ->hasColumn($column);
+        }
+
+        return in_array($column, $this->getConnectionPool()
             ->getConnectionForTable($table)
-            ->getSchemaManager()
-            ->listTableDetails($table)
-            ->hasColumn($column);
+            ->createSchemaManager()
+            ->listTableColumns($table));
     }
 
     protected function getConnectionPool(): ConnectionPool

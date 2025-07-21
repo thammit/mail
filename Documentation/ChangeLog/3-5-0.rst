@@ -1,0 +1,14 @@
+3.5.0 - 5th June. 2025
+=======================
+
+
+.. contents::
+        :local:
+        :depth: 3
+
+
+
+Bug Fixes & Changes
+-------------------
+
+- Add missing link to change log of manual. List of changes can be found under 3.4.0 - 5th June. 2025
