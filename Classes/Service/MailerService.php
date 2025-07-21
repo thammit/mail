@@ -267,6 +267,7 @@ class MailerService implements LoggerAwareInterface
                 );
             } else {
                 // todo: no mail to user -> log for report
+                $this->logger->error('[sendPersonalizedMail] not sent, neither plain nor html format available for "' . $recipientData['email'] . '"');
             }
         }
 
@@ -347,10 +348,12 @@ class MailerService implements LoggerAwareInterface
     {
         $recipientSourceIdentifier = '';
         $recipients = $mail->getRecipients();
+        $this->logger->debug('[massSend] #recipients lists=' . count($recipients));
         $recipientsHandled = $mail->getRecipientsHandled();
         $numberOfSentMails = 0;
         foreach ($recipients as $recipientSourceIdentifier => $recipientIds) {
             if (!$recipientIds) {
+                $this->logger->debug('[massSend] skipping list with no ids: '. $recipientSourceIdentifier);
                 continue;
             }
 
@@ -364,6 +367,7 @@ class MailerService implements LoggerAwareInterface
             $recipientIds = array_slice($recipientIds, 0, $this->sendPerCycle);
 
             $numberOfRecipients = count($recipientIds);
+            $this->logger->debug('[massSend] number of remaining recipients for '. $recipientSourceIdentifier .': '. $numberOfRecipients);
             $recipientIdsOfRecipientSourceHandled = [];
 
             switch (true) {
@@ -461,6 +465,7 @@ class MailerService implements LoggerAwareInterface
     protected function sendSingleMailAndAddLogEntry(Mail $mail, array $recipientData, string $recipientSourceIdentifier): void
     {
         if ($this->logRepository->findOneByRecipientUidAndRecipientSourceIdentifierAndMailUid((int)$recipientData['uid'], $recipientSourceIdentifier, $mail->getUid()) === false) {
+            $this->logger->debug('[sendSingleMailAndAddLogEntry] try sending mail uid=' . $mail->getUid() . ' for ' . $recipientData['uid'] . ' ' . $recipientSourceIdentifier);
             $parseTime = MailerUtility::getMilliseconds();
 
             // PSR-14 event dispatcher to manipulate recipient data
@@ -487,6 +492,8 @@ class MailerService implements LoggerAwareInterface
             $log->setParseTime(MailerUtility::getMilliseconds() - $parseTime);
             $this->logRepository->update($log);
             $this->logRepository->persist();
+        } else {
+            $this->logger->debug('[sendSingleMailAndAddLogEntry] not (re)trying sending mail uid=' . $mail->getUid() . ' for ' . $recipientData['uid'] . ' ' . $recipientSourceIdentifier);
         }
     }
 
@@ -590,7 +597,7 @@ class MailerService implements LoggerAwareInterface
         $this->logger->debug('Invoked at ' . date('h:i:s d-m-Y'));
         $mail = $this->mailRepository->findMailToSend();
         if ($mail instanceof Mail) {
-            $this->logger->debug(LanguageUtility::getLL('tx_mail_domain_model_mail') . ' ' . $mail->getUid() . ', \'' . $mail->getSubject() . '\' processed...');
+            $this->logger->debug('Mail uid=' . $mail->getUid() . ', \'' . $mail->getSubject() . '\' processing...');
             $this->prepare($mail);
 
             if (!$mail->getScheduledBegin()) {
@@ -599,6 +606,7 @@ class MailerService implements LoggerAwareInterface
                     new ScheduledSendBegunEvent($mail)
                 );
                 $this->setJobBegin($mail);
+                $this->logger->info('Begin of sending mail='.$mail->getUid());
             }
 
             $this->massSend($mail);
@@ -609,6 +617,7 @@ class MailerService implements LoggerAwareInterface
                     new ScheduledSendFinishedEvent($mail)
                 );
                 $this->setJobEnd($mail);
+                $this->logger->info('End of sending mail='.$mail->getUid().'completed.');
             }
         } else {
             $this->logger->debug('Nothing to do.');
@@ -667,7 +676,10 @@ class MailerService implements LoggerAwareInterface
         )->getHeaders();
 
 
-        $mailMessage->send();
+        $mailSent = $mailMessage->send();
+        if ($mailSent === false) {
+            $this->logger->error('[sendMailToRecipient] mail not sent ', ['recipient' => $recipient, 'mailUid' => $mail->getUid()]);
+        }
         unset($mailMessage);
     }
 
